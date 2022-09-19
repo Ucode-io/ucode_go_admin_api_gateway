@@ -1,0 +1,88 @@
+package models
+
+import "ucode/ucode_go_admin_api_gateway/genproto/object_builder_service"
+
+type Field struct {
+	ID            string                 `json:"id"`
+	Default       string                 `json:"default"`
+	Type          string                 `json:"type"`
+	Index         string                 `json:"index"`
+	Label         string                 `json:"label"`
+	Slug          string                 `json:"slug"`
+	TableID       string                 `json:"table_id"`
+	Required      bool                   `json:"required"`
+	Attributes    map[string]interface{} `json:"attributes"`
+	IsVisible     bool                   `json:"is_visible"`
+	AutoFillField string                 `json:"autofill_field"`
+	AutoFillTable string                 `json:"autofill_table"`
+}
+
+type CreateFieldsRequest struct {
+	ID         string                 `json:"id"`
+	Default    string                 `json:"default"`
+	Type       string                 `json:"type"`
+	Index      string                 `json:"index"`
+	Label      string                 `json:"label"`
+	Slug       string                 `json:"slug"`
+	Required   bool                   `json:"required"`
+	Attributes map[string]interface{} `json:"attributes"`
+	IsVisible  bool                   `json:"is_visible"`
+}
+
+type CreateFieldRequest struct {
+	ID            string                 `json:"id"`
+	Default       string                 `json:"default"`
+	Type          string                 `json:"type"`
+	Index         string                 `json:"index"`
+	Label         string                 `json:"label"`
+	Slug          string                 `json:"slug"`
+	TableID       string                 `json:"table_id"`
+	Required      bool                   `json:"required"`
+	Attributes    map[string]interface{} `json:"attributes"`
+	IsVisible     bool                   `json:"is_visible"`
+	AutoFillField string                 `json:"autofill_field"`
+	AutoFillTable string                 `json:"autofill_table"`
+}
+
+type GetAllFieldsResponse struct {
+	Fields []Field                `json:"fields"`
+	Count  int32                  `json:"count"`
+	Data   map[string]interface{} `json:"data"`
+}
+
+type CreateTableRequest struct {
+	Label             string                            `json:"label"`
+	Description       string                            `json:"description"`
+	Slug              string                            `json:"slug"`
+	Fields            []CreateFieldsRequest             `json:"fields"`
+	ShowInMeny        bool                              `json:"show_in_menu"`
+	Icon              string                            `json:"icon"`
+	SubtitleFieldSlug string                            `json:"subtitle_field_slug"`
+	Sections          []*object_builder_service.Section `json:"sections"`
+	AppID             string                            `json:"app_id"`
+	IncrementID       IncrementId                       `json:"increment_id"`
+}
+
+type IncrementId struct {
+	WithIncrementID bool   `json:"with_increment_id"`
+	DigitNumber     int32  `json:"digit_number"`
+	Prefix          string `json:"prefix"`
+}
+type CreateTableResponse struct {
+	ID                string                `json:"id"`
+	Label             string                `json:"label"`
+	Description       string                `json:"description"`
+	Slug              string                `json:"slug"`
+	Fields            []CreateFieldsRequest `json:"fields"`
+	ShowInMeny        bool                  `json:"show_in_menu"`
+	Icon              string                `json:"icon"`
+	SubtitleFieldSlug string                `json:"subtitle_field_slug"`
+}
+
+type Section struct {
+	ID     string                                 `json:"id"`
+	Order  int32                                  `json:"order"`
+	Column string                                 `json:"column"`
+	Label  string                                 `json:"label"`
+	Fields object_builder_service.FieldForSection `json:"fields"`
+}

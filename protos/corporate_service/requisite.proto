@@ -1,0 +1,73 @@
+syntax="proto3";
+
+package corporate_service;
+option go_package="genproto/corporate_service";
+
+import "google/protobuf/empty.proto";
+
+service RequisiteService {
+  rpc Create(CreateRequisiteRequest) returns (Requisite) {}
+  rpc GetByID(RequisitePrimaryKey) returns (Requisite) {}
+  rpc GetAll(GetAllRequisitesRequest) returns (GetAllRequisitesResponse) {}
+  rpc Update(Requisite) returns (google.protobuf.Empty) {}
+  rpc Delete(RequisitePrimaryKey) returns (google.protobuf.Empty) {}
+}
+
+message CreateRequisiteRequest {
+  string name = 1;
+  string code = 2;
+  string address = 3;
+  string contact = 4;
+  string inn = 5;
+  string account_number = 6;
+  string director = 7;
+  string mfo = 8;
+  string accountant = 9;
+  string oked = 10;
+  string code_okpo = 11;
+  string code_nds = 12;
+  string region = 13;
+  string comments = 14;
+  string account_name = 15;
+  string type_operation = 16;
+  string account = 17;
+  string company_id = 18;
+}
+
+message GetAllRequisitesResponse {
+  repeated Requisite requisites = 1;
+  int32 count = 2;
+}
+
+message RequisitePrimaryKey {
+  string id = 1;
+}
+
+message Requisite {
+  string id = 1;
+  string name = 2;
+  string code = 3;
+  string address = 4;
+  string contact = 5;
+  string inn = 6;
+  string account_number = 7;
+  string director = 8;
+  string mfo = 9;
+  string accountant = 10;
+  string oked = 11;
+  string code_okpo = 12;
+  string code_nds = 13;
+  string region = 14;
+  string comments = 15;
+  string account_name = 16;
+  string type_operation = 17;
+  string account = 18;
+  string company_id = 19;
+}
+
+message GetAllRequisitesRequest {
+  string company_id = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+  string search = 4;
+}

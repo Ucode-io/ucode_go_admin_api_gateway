@@ -1,0 +1,100 @@
+syntax="proto3";
+
+package object_builder_service;
+option go_package="genproto/object_builder_service";
+
+import "google/protobuf/empty.proto";
+import "field.proto";
+import "table.proto";
+import "view.proto";
+
+service RelationService {
+    rpc Create(CreateRelationRequest) returns (CreateRelationRequest) {}
+    rpc GetAll(GetAllRelationsRequest) returns (GetAllRelationsResponse) {}
+    rpc Update(UpdateRelationRequest) returns (google.protobuf.Empty) {}
+    rpc Delete(RelationPrimaryKey) returns (google.protobuf.Empty) {}
+}
+
+message CreateRelationRequest {
+    string table_from = 1; 
+    string table_to = 2;
+    string type = 3;
+    repeated string view_fields = 4;
+    repeated Summary summaries = 5;
+    bool editable = 6;
+    bool is_editable = 7;
+    string title = 8;
+    string view_type = 9;
+    repeated string columns = 10;
+    repeated QuickFilter quick_filters = 11;
+    repeated string group_fields = 12;
+    string relation_table_slug = 13;
+    repeated DynamicTable dynamic_tables = 14;
+    string relation_field_slug = 15;
+}
+
+message DynamicTable {
+    string table_slug = 1;
+    repeated string view_fields = 2;
+}
+
+message UpdateRelationRequest {
+    string id = 1;
+    string table_from = 2; 
+    string table_to = 3;
+    string type = 4;
+    repeated string view_fields = 5;
+    repeated Summary summaries = 6;
+    bool editable = 7;
+    bool is_editable = 8;
+    string title = 9;
+    repeated string columns = 10;
+    repeated QuickFilter quick_filters = 11;
+    repeated string group_fields = 12;
+    string relation_table_slug = 13;
+    string view_type = 14;
+    repeated DynamicTable dynamic_tables = 15;
+    string relation_field_slug = 16;
+}
+
+
+message RelationForGetAll {
+    string id = 1;
+    Table table_from = 2; 
+    Table table_to = 3;
+    string type = 4;
+    repeated Field view_fields = 5;
+    repeated Summary summaries = 6;
+    bool editable = 7;
+    bool is_editable = 8;
+    string title = 9;
+    repeated string columns = 10;
+    repeated QuickFilter quick_filters = 11;
+    repeated string group_fields = 12;
+    string relation_table_slug = 13;
+    string view_type = 14;
+    repeated DynamicTable dynamic_tables = 15;
+    string relation_field_slug = 16;
+}
+
+message GetAllRelationsResponse {
+    repeated RelationForGetAll relations = 1;
+    int32 count = 2;
+}
+
+message GetAllRelationsRequest {
+    string table_slug = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+    string table_id = 4;
+    string relation_table_slug = 5;
+}
+
+message RelationPrimaryKey {
+    string id = 1;
+}
+
+message Summary {
+    string field_name = 1;
+    string formula_name = 2;
+}

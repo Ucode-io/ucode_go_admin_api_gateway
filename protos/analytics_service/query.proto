@@ -1,0 +1,19 @@
+syntax="proto3";
+
+package analytics_service;
+option go_package="genproto/analytics_service";
+
+import "google/protobuf/struct.proto";
+
+service QueryService {
+    rpc GetQueryRows(CommonInput) returns (QueryOutput) {}
+}
+
+message CommonInput {
+    string query = 1;
+    google.protobuf.Struct data = 2;
+}
+
+message QueryOutput {
+    repeated google.protobuf.Struct rows = 1;
+}

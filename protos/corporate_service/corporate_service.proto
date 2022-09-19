@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package corporate_service;
+
+option go_package="genproto/corporate_service";
+
+import "company_service.proto";
+import "branch.proto";
+import "requisite.proto";
+import "category.proto";
+import "subcategory.proto";
+import "product.proto";

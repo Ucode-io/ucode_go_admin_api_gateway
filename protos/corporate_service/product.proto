@@ -1,0 +1,75 @@
+syntax="proto3";
+
+package corporate_service;
+option go_package="genproto/corporate_service";
+
+import "google/protobuf/empty.proto";
+import "helper.proto";
+
+service ProductService {
+    rpc Create(CreateProductRequest) returns (Product) {}
+    rpc GetByID(ProductPrimaryKey) returns (Product) {}
+    rpc GetAll(GetAllProductsRequest) returns (GetAllProductsResponse) {}
+    rpc Update(Product) returns (google.protobuf.Empty) {}
+    rpc Delete(ProductPrimaryKey) returns (google.protobuf.Empty) {}
+}
+
+message CreateProductRequest {
+    Language name = 1;
+    Language description = 2;
+    string category = 3;
+    string branch = 4;
+    int32 price_arrival = 5;
+    int32 price_sale = 6;
+    int32 percent_doctor = 7;
+    int32 expendature = 8;
+    repeated string doctor_ids = 9;
+    repeated string photos = 10;
+    string company_id = 11;
+}
+
+message GetAllProductsResponse {
+    repeated ProductForGetAll products = 1;
+    int32 count = 2;
+}
+
+message ProductPrimaryKey {
+    string id = 1;
+}
+
+message Product {
+    string id = 1;
+    Language name = 2;
+    Language description = 3;
+    string category = 4;
+    string branch = 5;
+    int32 price_arrival = 6;
+    int32 price_sale = 7;
+    int32 percent_doctor = 8;
+    int32 expendature = 9;
+    repeated string doctor_ids = 10;
+    repeated string photos = 11;
+    string company_id = 12;
+}
+
+message ProductForGetAll {
+    string id = 1;
+    Language name = 2;
+    Language description = 3;
+    string category = 4;
+    string branch = 5;
+    int32 price_arrival = 6;
+    int32 price_sale = 7;
+    int32 percent_doctor = 8;
+    int32 expendature = 9;
+    repeated string doctor_ids = 10;
+    repeated string photos = 11;
+    string company_id = 12;
+}
+
+message GetAllProductsRequest {
+    string company_id = 1;
+    int32 offset = 2;
+    int32 limit = 3;
+    string search = 4;
+}

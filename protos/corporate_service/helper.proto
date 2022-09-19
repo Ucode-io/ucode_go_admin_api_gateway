@@ -1,0 +1,10 @@
+syntax="proto3";
+
+package corporate_service;
+option go_package="genproto/corporate_service";
+
+message Language {
+    string ru = 1;
+    string uz = 2;
+    string en = 3;
+}
