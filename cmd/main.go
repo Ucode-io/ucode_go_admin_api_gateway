@@ -33,7 +33,7 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	log := logger.NewLogger("medion_go_api_gateway", *loggerLevel)
+	log := logger.NewLogger("ucode_go_api_gateway", *loggerLevel)
 	defer func() {
 		err := logger.Cleanup(log)
 		if err != nil {
