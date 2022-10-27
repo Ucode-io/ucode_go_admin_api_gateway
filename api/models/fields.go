@@ -1,6 +1,6 @@
 package models
 
-import "medion/medion_go_api_gateway/genproto/object_builder_service"
+import "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 type Field struct {
 	ID            string                 `json:"id"`

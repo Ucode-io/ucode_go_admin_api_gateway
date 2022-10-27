@@ -1,11 +1,11 @@
 package main
 
 import (
-	"medion/medion_go_api_gateway/api"
-	"medion/medion_go_api_gateway/api/handlers"
-	"medion/medion_go_api_gateway/config"
-	"medion/medion_go_api_gateway/pkg/logger"
-	"medion/medion_go_api_gateway/services"
+	"ucode/ucode_go_api_gateway/api"
+	"ucode/ucode_go_api_gateway/api/handlers"
+	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/pkg/logger"
+	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/gin-gonic/gin"
 )

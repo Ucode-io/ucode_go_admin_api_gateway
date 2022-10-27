@@ -3,11 +3,11 @@ package handlers
 import (
 	"context"
 	"errors"
-	"medion/medion_go_api_gateway/api/http"
-	"medion/medion_go_api_gateway/api/models"
-	authPb "medion/medion_go_api_gateway/genproto/auth_service"
-	obs "medion/medion_go_api_gateway/genproto/object_builder_service"
-	"medion/medion_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/api/http"
+	"ucode/ucode_go_api_gateway/api/models"
+	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 
 	"github.com/gin-gonic/gin"
 )
@@ -69,7 +69,6 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
-
 // GetAllPermissionByRoleId godoc
 // @Security ApiKeyAuth
 // @ID get_all_permission_by_role_id
@@ -119,7 +118,7 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 	resp, err := h.services.PermissionService().GetFieldPermissions(
 		context.Background(),
 		&obs.GetFieldPermissionRequest{
-			RoleId: c.Param("role_id"),
+			RoleId:    c.Param("role_id"),
 			TableSlug: c.Param(("table_slug")),
 		},
 	)

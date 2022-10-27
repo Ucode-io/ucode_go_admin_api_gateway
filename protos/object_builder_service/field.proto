@@ -71,6 +71,7 @@ message GetAllFieldsRequest {
     string table_slug = 5;
     bool with_many_relation = 6;
     bool with_one_relation = 7;
+    string role_id = 8;
 }
 
 message FieldPrimaryKey {

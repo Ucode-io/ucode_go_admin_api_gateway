@@ -3,12 +3,12 @@ package handlers
 import (
 	"context"
 	"errors"
-	"medion/medion_go_api_gateway/api/http"
-	"medion/medion_go_api_gateway/api/models"
-	authPb "medion/medion_go_api_gateway/genproto/auth_service"
-	obs "medion/medion_go_api_gateway/genproto/object_builder_service"
-	"medion/medion_go_api_gateway/pkg/helper"
-	"medion/medion_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/api/http"
+	"ucode/ucode_go_api_gateway/api/models"
+	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -584,8 +584,8 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 	resp, err := h.services.ObjectBuilderService().MultipleUpdate(
 		context.Background(),
 		&obs.CommonMessage{
-			TableSlug:     c.Param("table_slug"),
-			Data:          structData,
+			TableSlug: c.Param("table_slug"),
+			Data:      structData,
 		},
 	)
 

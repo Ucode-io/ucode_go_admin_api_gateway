@@ -3,10 +3,10 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"medion/medion_go_api_gateway/api/http"
-	obs "medion/medion_go_api_gateway/genproto/object_builder_service"
-	"medion/medion_go_api_gateway/pkg/util"
 	"strconv"
+	"ucode/ucode_go_api_gateway/api/http"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )

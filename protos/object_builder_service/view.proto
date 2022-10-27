@@ -39,6 +39,7 @@ message CreateViewRequest {
     string relation_id = 18;
     string multiple_insert_field = 19;
     repeated string updated_fields = 20;
+    string app_id = 21;
 }
 
 message QuickFilter {
@@ -68,6 +69,7 @@ message View {
     string relation_id = 19;
     string multiple_insert_field = 20;
     repeated string updated_fields = 21;
+    string app_id = 22;
 }
 
 message GetAllViewsResponse {
@@ -77,6 +79,7 @@ message GetAllViewsResponse {
 
 message GetAllViewsRequest {
     string table_slug = 1;
+    string app_id = 2;
 }
 
 message ViewPrimaryKey {

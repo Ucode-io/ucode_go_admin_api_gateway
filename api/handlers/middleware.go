@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"medion/medion_go_api_gateway/api/http"
-	"medion/medion_go_api_gateway/genproto/auth_service"
-	"medion/medion_go_api_gateway/pkg/helper"
 	"strings"
+	"ucode/ucode_go_api_gateway/api/http"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
@@ -26,7 +26,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 }
 
 func (h *Handler) hasAccess(c *gin.Context) (*auth_service.HasAccessResponse, bool) {
-		bearerToken := c.GetHeader("Authorization")
+	bearerToken := c.GetHeader("Authorization")
 	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
@@ -61,7 +61,6 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.HasAccessResponse, bo
 
 	return resp, true
 }
-
 
 func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.HasAccessResponse) {
 	data, ok := c.Get("Auth")

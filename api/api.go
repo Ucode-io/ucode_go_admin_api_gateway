@@ -1,9 +1,9 @@
 package api
 
 import (
-	"medion/medion_go_api_gateway/api/docs"
-	"medion/medion_go_api_gateway/api/handlers"
-	"medion/medion_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/api/docs"
+	"ucode/ucode_go_api_gateway/api/handlers"
+	"ucode/ucode_go_api_gateway/config"
 
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"

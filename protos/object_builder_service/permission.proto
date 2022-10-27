@@ -11,6 +11,7 @@ service PermissionService {
     rpc UpsertPermissionsByAppId(UpsertPermissionsByAppIdRequest) returns (UpsertPermissionsByAppIdResponse) {}
     rpc GetAllPermissionsByRoleId (GetAllPermissionRequest) returns (CommonMessage) {}
     rpc GetFieldPermissions (GetFieldPermissionRequest) returns (CommonMessage) {}
+    rpc GetActionPermissions (GetActionPermissionRequest) returns (CommonMessage) {}
 }
 
 message GetAllPermissionRequest {
@@ -29,4 +30,9 @@ message UpsertPermissionsByAppIdResponse{
 message UpsertPermissionsByAppIdRequest {
     string app_id = 1;
     google.protobuf.Struct data = 2;
+}
+
+message GetActionPermissionRequest {
+    string role_id = 1;
+    string table_slug = 2;
 }

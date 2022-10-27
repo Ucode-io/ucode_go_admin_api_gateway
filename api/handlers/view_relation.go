@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
-	"medion/medion_go_api_gateway/api/http"
-	obs "medion/medion_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/api/http"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,7 +31,7 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
 			TableSlug: c.Query("table_slug"),
-			RoleId: tokenInfo.RoleId,
+			RoleId:    tokenInfo.RoleId,
 		},
 	)
 	if err != nil {

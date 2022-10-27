@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
-	https "medion/medion_go_api_gateway/api/http"
-	"medion/medion_go_api_gateway/genproto/object_builder_service"
+	https "ucode/ucode_go_api_gateway/api/http"
+	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	"medion/medion_go_api_gateway/pkg/helper"
-	"medion/medion_go_api_gateway/pkg/logger"
+	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

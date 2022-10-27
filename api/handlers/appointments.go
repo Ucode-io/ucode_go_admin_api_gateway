@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"context"
-	"medion/medion_go_api_gateway/api/http"
-	ps "medion/medion_go_api_gateway/genproto/pos_service"
-	"medion/medion_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/api/http"
+	ps "ucode/ucode_go_api_gateway/genproto/pos_service"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )

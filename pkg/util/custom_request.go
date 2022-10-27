@@ -9,11 +9,11 @@ import (
 	"net/http"
 	"time"
 
-	"medion/medion_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/api/models"
 )
 
 const (
-		Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
+	Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
 )
 
 func DoRequest(url string, method string, body interface{}) (responseModel models.InvokeFunctionResponse, err error) {
@@ -45,7 +45,8 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 
 	return
 }
-// DoXMLRequest function for alaflab integration 
+
+// DoXMLRequest function for alaflab integration
 func DoXMLRequest(url string, method string, body interface{}) (responseModel models.InvokeFunctionResponse, err error) {
 	data, err := xml.MarshalIndent(&body, " ", "  ")
 	if err != nil {

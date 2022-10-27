@@ -3,11 +3,11 @@ package handlers
 import (
 	"fmt"
 	"io/ioutil"
-	https "medion/medion_go_api_gateway/api/http"
-	"medion/medion_go_api_gateway/api/models"
-	"medion/medion_go_api_gateway/pkg/util"
 	"net/http"
 	"strings"
+	https "ucode/ucode_go_api_gateway/api/http"
+	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )

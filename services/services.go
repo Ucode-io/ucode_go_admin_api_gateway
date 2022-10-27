@@ -1,13 +1,13 @@
 package services
 
 import (
-	"medion/medion_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/config"
 
-	"medion/medion_go_api_gateway/genproto/analytics_service"
-	"medion/medion_go_api_gateway/genproto/auth_service"
-	"medion/medion_go_api_gateway/genproto/corporate_service"
-	"medion/medion_go_api_gateway/genproto/object_builder_service"
-	"medion/medion_go_api_gateway/genproto/pos_service"
+	"ucode/ucode_go_api_gateway/genproto/analytics_service"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/genproto/corporate_service"
+	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/genproto/pos_service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
