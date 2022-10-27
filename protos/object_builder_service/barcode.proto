@@ -1,0 +1,16 @@
+syntax="proto3";
+
+package object_builder_service;
+option go_package="genproto/object_builder_service";
+
+
+service BarcodeService {
+    rpc Generate(BarcodeGenerateReq) returns (BarcodeGenerateRes) {}
+}
+
+message BarcodeGenerateReq {
+    string table_slug = 1;
+}
+message BarcodeGenerateRes {
+    string number = 1;
+}

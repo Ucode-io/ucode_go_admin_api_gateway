@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
-	"ucode/ucode_go_admin_api_gateway/api/http"
-	obs "ucode/ucode_go_admin_api_gateway/genproto/object_builder_service"
+	"medion/medion_go_api_gateway/api/http"
+	obs "medion/medion_go_api_gateway/genproto/object_builder_service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,11 +23,13 @@ import (
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllSections(c *gin.Context) {
 
+	tokenInfo := h.GetAuthInfo
 	resp, err := h.services.SectionService().GetAll(
 		context.Background(),
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
 			TableSlug: c.Query("table_slug"),
+			RoleId: tokenInfo(c).RoleId,
 		},
 	)
 

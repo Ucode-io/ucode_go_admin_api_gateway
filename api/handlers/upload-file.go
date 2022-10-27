@@ -6,13 +6,15 @@ import (
 	"mime/multipart"
 	"os"
 	"strings"
+	"time"
 
-	https "ucode/ucode_go_admin_api_gateway/api/http"
-	"ucode/ucode_go_admin_api_gateway/genproto/object_builder_service"
+	https "medion/medion_go_api_gateway/api/http"
+	"medion/medion_go_api_gateway/genproto/object_builder_service"
 
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	"ucode/ucode_go_admin_api_gateway/pkg/logger"
+	"medion/medion_go_api_gateway/pkg/helper"
+	"medion/medion_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -23,8 +25,8 @@ type UploadResponse struct {
 	Filename string `json:"filename"`
 }
 
-const (
-	defaultBucket = "ucode"
+var (
+	defaultBucket = "medion"
 )
 
 type File struct {
@@ -36,12 +38,12 @@ type Path struct {
 	Hash     string `json:"hash"`
 }
 
-// UploadImage godoc
+// Upload godoc
 // @ID upload_image
 // @Security ApiKeyAuth
 // @Router /v1/upload [POST]
-// @Summary Upload image
-// @Description Upload image
+// @Summary Upload
+// @Description Upload
 // @Tags file
 // @Accept multipart/form-data
 // @Produce json
@@ -49,7 +51,7 @@ type Path struct {
 // @Success 200 {object} http.Response{data=Path} "Path"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
-func (h *Handler) UploadImage(c *gin.Context) {
+func (h *Handler) Upload(c *gin.Context) {
 	var (
 		file File
 	)
@@ -65,7 +67,7 @@ func (h *Handler) UploadImage(c *gin.Context) {
 
 	minioClient, err := minio.New(h.cfg.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.cfg.MinioAccessKeyID, h.cfg.MinioSecretAccessKey, ""),
-		Secure: true,
+		Secure: h.cfg.MinioProtocol,
 	})
 	h.log.Info("info", logger.String("access_key: ",
 		h.cfg.MinioAccessKeyID), logger.String("access_secret: ", h.cfg.MinioSecretAccessKey))
@@ -80,13 +82,17 @@ func (h *Handler) UploadImage(c *gin.Context) {
 		h.handleResponse(c, https.BadRequest, err.Error())
 		return
 	}
+	splitedContentType := strings.Split(file.File.Header["Content-Type"][0], "/")
+	if splitedContentType[0] != "image" && splitedContentType[0] != "video" {
+		defaultBucket = "docs"
+	}
 
 	_, err = minioClient.FPutObject(
 		context.Background(),
 		defaultBucket,
 		file.File.Filename,
 		dst+"/"+file.File.Filename,
-		minio.PutObjectOptions{ContentType: "image/jpeg"},
+		minio.PutObjectOptions{ContentType: file.File.Header["Content-Type"][0]},
 	)
 	if err != nil {
 		h.handleResponse(c, https.BadRequest, err.Error())
@@ -138,7 +144,7 @@ func (h *Handler) UploadFile(c *gin.Context) {
 
 	minioClient, err := minio.New(h.cfg.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.cfg.MinioAccessKeyID, h.cfg.MinioSecretAccessKey, ""),
-		Secure: true,
+		Secure: h.cfg.MinioProtocol,
 	})
 	h.log.Info("info", logger.String("access_key: ",
 		h.cfg.MinioAccessKeyID), logger.String("access_secret: ", h.cfg.MinioSecretAccessKey))
@@ -180,15 +186,23 @@ func (h *Handler) UploadFile(c *gin.Context) {
 	if c.Query("tags") != "" {
 		tags = strings.Split(c.Query("tags"), ",")
 	}
-
-	_, err = h.services.DocumentService().Create(context.Background(), &object_builder_service.CreateDocumentRequest{
-		ObjectId:  c.Param("object_id"),
-		TableSlug: c.Param("table_slug"),
-		Tags:      tags,
-		Size:      int32(f.Size()),
-		Type:      splitedFileName[len(splitedFileName)-1],
-		FileLink:  fileLink,
-		Name:      fileNameForObjectBuilder,
+	var requestMap = make(map[string]interface{})
+	requestMap["table_slug"] = c.Param("table_slug")
+	requestMap["object_id"] = c.Param("object_id")
+	requestMap["date"] = time.Now().Format(time.RFC3339)
+	requestMap["tags"] = tags
+	requestMap["size"] = int32(f.Size())
+	requestMap["type"] = splitedFileName[len(splitedFileName)-1]
+	requestMap["file_link"] = fileLink
+	requestMap["name"] = fileNameForObjectBuilder
+	structData, err := helper.ConvertMapToStruct(requestMap)
+	if err != nil {
+		h.handleResponse(c, https.BadRequest, err.Error())
+		return
+	}
+	_, err = h.services.ObjectBuilderService().Create(context.Background(), &object_builder_service.CommonMessage{
+		TableSlug: "file",
+		Data:      structData,
 	})
 	if err != nil {
 		h.handleResponse(c, https.InternalServerError, err.Error())

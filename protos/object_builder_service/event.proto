@@ -59,7 +59,7 @@ message GetEventsListResponse {
 
 message GetEventsListRequest {
     string table_slug = 1;
-}
+}   
 
 message EventPrimaryKey {
     string id = 1;

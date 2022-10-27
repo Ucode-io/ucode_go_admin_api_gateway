@@ -1,11 +1,11 @@
 package handlers
 
 import (
+	"medion/medion_go_api_gateway/api/http"
+	"medion/medion_go_api_gateway/config"
+	"medion/medion_go_api_gateway/pkg/logger"
+	"medion/medion_go_api_gateway/services"
 	"strconv"
-	"ucode/ucode_go_admin_api_gateway/api/http"
-	"ucode/ucode_go_admin_api_gateway/config"
-	"ucode/ucode_go_admin_api_gateway/pkg/logger"
-	"ucode/ucode_go_admin_api_gateway/services"
 
 	"github.com/gin-gonic/gin"
 )

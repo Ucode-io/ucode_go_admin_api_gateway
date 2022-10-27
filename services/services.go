@@ -1,13 +1,13 @@
 package services
 
 import (
-	"ucode/ucode_go_admin_api_gateway/config"
-	"ucode/ucode_go_admin_api_gateway/genproto/analytics_service"
-	"ucode/ucode_go_admin_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_admin_api_gateway/genproto/corporate_service"
-	"ucode/ucode_go_admin_api_gateway/genproto/pos_service"
+	"medion/medion_go_api_gateway/config"
 
-	"ucode/ucode_go_admin_api_gateway/genproto/object_builder_service"
+	"medion/medion_go_api_gateway/genproto/analytics_service"
+	"medion/medion_go_api_gateway/genproto/auth_service"
+	"medion/medion_go_api_gateway/genproto/corporate_service"
+	"medion/medion_go_api_gateway/genproto/object_builder_service"
+	"medion/medion_go_api_gateway/genproto/pos_service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -35,9 +35,16 @@ type ServiceManagerI interface {
 	OfflineAppointmentService() pos_service.OfflineAppointmentServiceClient
 	BookedAppointmentService() pos_service.BookedAppointmentServiceClient
 	QueryService() analytics_service.QueryServiceClient
+	CashboxTransactionService() object_builder_service.CashboxTransactionClient
 	HtmlTemplateService() object_builder_service.HtmlTemplateServiceClient
 	DocumentService() object_builder_service.DocumentServiceClient
 	EventService() object_builder_service.EventServiceClient
+	EventLogsService() object_builder_service.EventLogsServiceClient
+	ExcelService() object_builder_service.ExcelServiceClient
+	PermissionService() object_builder_service.PermissionServiceClient
+	CustomEventService() object_builder_service.CustomEventServiceClient
+	FunctionService() object_builder_service.FunctionServiceClient
+	BarcodeService() object_builder_service.BarcodeServiceClient
 }
 
 type grpcClients struct {
@@ -62,9 +69,16 @@ type grpcClients struct {
 	offlineAppointmentService pos_service.OfflineAppointmentServiceClient
 	bookedAppointmentService  pos_service.BookedAppointmentServiceClient
 	queryService              analytics_service.QueryServiceClient
+	cashboxTransactionService object_builder_service.CashboxTransactionClient
 	htmlTemplateService       object_builder_service.HtmlTemplateServiceClient
 	documentService           object_builder_service.DocumentServiceClient
 	eventService              object_builder_service.EventServiceClient
+	eventLogsService          object_builder_service.EventLogsServiceClient
+	excelService              object_builder_service.ExcelServiceClient
+	permissionService         object_builder_service.PermissionServiceClient
+	customEventService        object_builder_service.CustomEventServiceClient
+	functionService           object_builder_service.FunctionServiceClient
+	barcodeService            object_builder_service.BarcodeServiceClient
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
@@ -131,9 +145,16 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		offlineAppointmentService: pos_service.NewOfflineAppointmentServiceClient(connPosService),
 		bookedAppointmentService:  pos_service.NewBookedAppointmentServiceClient(connPosService),
 		queryService:              analytics_service.NewQueryServiceClient(connAnalyticsService),
+		cashboxTransactionService: object_builder_service.NewCashboxTransactionClient(connObjectBuilderService),
 		htmlTemplateService:       object_builder_service.NewHtmlTemplateServiceClient(connObjectBuilderService),
 		documentService:           object_builder_service.NewDocumentServiceClient(connObjectBuilderService),
 		eventService:              object_builder_service.NewEventServiceClient(connObjectBuilderService),
+		eventLogsService:          object_builder_service.NewEventLogsServiceClient(connObjectBuilderService),
+		excelService:              object_builder_service.NewExcelServiceClient(connObjectBuilderService),
+		permissionService:         object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
+		customEventService:        object_builder_service.NewCustomEventServiceClient(connObjectBuilderService),
+		functionService:           object_builder_service.NewFunctionServiceClient((connObjectBuilderService)),
+		barcodeService:            object_builder_service.NewBarcodeServiceClient((connObjectBuilderService)),
 	}, nil
 }
 
@@ -221,6 +242,10 @@ func (g *grpcClients) QueryService() analytics_service.QueryServiceClient {
 	return g.queryService
 }
 
+func (g *grpcClients) CashboxTransactionService() object_builder_service.CashboxTransactionClient {
+	return g.cashboxTransactionService
+}
+
 func (g *grpcClients) HtmlTemplateService() object_builder_service.HtmlTemplateServiceClient {
 	return g.htmlTemplateService
 }
@@ -231,4 +256,27 @@ func (g *grpcClients) DocumentService() object_builder_service.DocumentServiceCl
 
 func (g *grpcClients) EventService() object_builder_service.EventServiceClient {
 	return g.eventService
+}
+
+func (g *grpcClients) EventLogsService() object_builder_service.EventLogsServiceClient {
+	return g.eventLogsService
+}
+
+func (g *grpcClients) ExcelService() object_builder_service.ExcelServiceClient {
+	return g.excelService
+}
+func (g *grpcClients) PermissionService() object_builder_service.PermissionServiceClient {
+	return g.permissionService
+}
+
+func (g *grpcClients) CustomEventService() object_builder_service.CustomEventServiceClient {
+	return g.customEventService
+}
+
+func (g *grpcClients) FunctionService() object_builder_service.FunctionServiceClient {
+	return g.functionService
+}
+
+func (g *grpcClients) BarcodeService() object_builder_service.BarcodeServiceClient {
+	return g.barcodeService
 }

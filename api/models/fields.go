@@ -1,6 +1,6 @@
 package models
 
-import "ucode/ucode_go_admin_api_gateway/genproto/object_builder_service"
+import "medion/medion_go_api_gateway/genproto/object_builder_service"
 
 type Field struct {
 	ID            string                 `json:"id"`
@@ -15,6 +15,7 @@ type Field struct {
 	IsVisible     bool                   `json:"is_visible"`
 	AutoFillField string                 `json:"autofill_field"`
 	AutoFillTable string                 `json:"autofill_table"`
+	RelationId    string                 `json:"relation_id"`
 }
 
 type CreateFieldsRequest struct {

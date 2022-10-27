@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"context"
-	"ucode/ucode_go_admin_api_gateway/api/http"
-	obs "ucode/ucode_go_admin_api_gateway/genproto/object_builder_service"
-	"ucode/ucode_go_admin_api_gateway/pkg/util"
+	"medion/medion_go_api_gateway/api/http"
+	obs "medion/medion_go_api_gateway/genproto/object_builder_service"
+	"medion/medion_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -166,7 +166,7 @@ func (h *Handler) GetAllVariables(c *gin.Context) {
 	resp, err := h.services.VariableService().GetList(
 		context.Background(),
 		&obs.GetAllVariablesRequest{
-			Slug:        c.Query("slug"),
+			Slug: c.Query("slug"),
 			DashboardId: c.Query("dashboard_id"),
 		},
 	)

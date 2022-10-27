@@ -31,6 +31,13 @@ message CreateRelationRequest {
     string relation_table_slug = 13;
     repeated DynamicTable dynamic_tables = 14;
     string relation_field_slug = 15;
+    repeated AutoFilter auto_filters = 16;
+    repeated string default_values = 17;
+}
+
+message AutoFilter {
+    string field_to = 1;
+    string field_from = 2;
 }
 
 message DynamicTable {
@@ -55,6 +62,8 @@ message UpdateRelationRequest {
     string view_type = 14;
     repeated DynamicTable dynamic_tables = 15;
     string relation_field_slug = 16;
+    repeated AutoFilter auto_filters = 17;
+    repeated string default_values = 18;
 }
 
 
@@ -75,6 +84,8 @@ message RelationForGetAll {
     string view_type = 14;
     repeated DynamicTable dynamic_tables = 15;
     string relation_field_slug = 16;
+    repeated AutoFilter auto_filters = 17;
+    repeated string default_values = 18;
 }
 
 message GetAllRelationsResponse {

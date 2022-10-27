@@ -144,7 +144,8 @@ message V2LoginResponse {
     Role role = 5;
     Token token = 6;
     repeated RecordPermission permissions = 7;
-    repeated Session sessions = 8;   
+    repeated Session sessions = 8;
+    string login_table_slug = 9;
 }
 message V2LoginRequest {
     string username = 1;

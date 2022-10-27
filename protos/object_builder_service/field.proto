@@ -54,6 +54,7 @@ message Field {
     bool is_visible = 10;
     string autofill_field = 11;
     string autofill_table = 12;
+    string relation_id = 13;
 }
 
 message GetAllFieldsResponse {

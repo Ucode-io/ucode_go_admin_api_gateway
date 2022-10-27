@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"context"
-	"ucode/ucode_go_admin_api_gateway/api/http"
-	"ucode/ucode_go_admin_api_gateway/api/models"
-	obs "ucode/ucode_go_admin_api_gateway/genproto/object_builder_service"
-	"ucode/ucode_go_admin_api_gateway/pkg/helper"
-	"ucode/ucode_go_admin_api_gateway/pkg/util"
+	"medion/medion_go_api_gateway/api/http"
+	"medion/medion_go_api_gateway/api/models"
+	obs "medion/medion_go_api_gateway/genproto/object_builder_service"
+	"medion/medion_go_api_gateway/pkg/helper"
+	"medion/medion_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )

@@ -31,10 +31,10 @@ type ObjectBuilderServiceClient interface {
 	Delete(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	ManyToManyAppend(ctx context.Context, in *ManyToManyMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ManyToManyDelete(ctx context.Context, in *ManyToManyMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetTableDetails(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
+	GetObjectDetails(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetListInExcel(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	Batch(ctx context.Context, in *BatchRequest, opts ...grpc.CallOption) (*CommonMessage, error)
-	UpsertPermissionsByAppId(ctx context.Context, in *UpsertPermissionsByAppIdRequest, opts ...grpc.CallOption) (*UpsertPermissionsByAppIdResponse, error)
+	MultipleUpdate(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type objectBuilderServiceClient struct {
@@ -117,9 +117,9 @@ func (c *objectBuilderServiceClient) ManyToManyDelete(ctx context.Context, in *M
 	return out, nil
 }
 
-func (c *objectBuilderServiceClient) GetTableDetails(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
+func (c *objectBuilderServiceClient) GetObjectDetails(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
 	out := new(CommonMessage)
-	err := c.cc.Invoke(ctx, "/object_builder_service.ObjectBuilderService/GetTableDetails", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/object_builder_service.ObjectBuilderService/GetObjectDetails", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -144,9 +144,9 @@ func (c *objectBuilderServiceClient) Batch(ctx context.Context, in *BatchRequest
 	return out, nil
 }
 
-func (c *objectBuilderServiceClient) UpsertPermissionsByAppId(ctx context.Context, in *UpsertPermissionsByAppIdRequest, opts ...grpc.CallOption) (*UpsertPermissionsByAppIdResponse, error) {
-	out := new(UpsertPermissionsByAppIdResponse)
-	err := c.cc.Invoke(ctx, "/object_builder_service.ObjectBuilderService/UpsertPermissionsByAppId", in, out, opts...)
+func (c *objectBuilderServiceClient) MultipleUpdate(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/object_builder_service.ObjectBuilderService/MultipleUpdate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -165,10 +165,10 @@ type ObjectBuilderServiceServer interface {
 	Delete(context.Context, *CommonMessage) (*CommonMessage, error)
 	ManyToManyAppend(context.Context, *ManyToManyMessage) (*emptypb.Empty, error)
 	ManyToManyDelete(context.Context, *ManyToManyMessage) (*emptypb.Empty, error)
-	GetTableDetails(context.Context, *CommonMessage) (*CommonMessage, error)
+	GetObjectDetails(context.Context, *CommonMessage) (*CommonMessage, error)
 	GetListInExcel(context.Context, *CommonMessage) (*CommonMessage, error)
 	Batch(context.Context, *BatchRequest) (*CommonMessage, error)
-	UpsertPermissionsByAppId(context.Context, *UpsertPermissionsByAppIdRequest) (*UpsertPermissionsByAppIdResponse, error)
+	MultipleUpdate(context.Context, *CommonMessage) (*emptypb.Empty, error)
 	mustEmbedUnimplementedObjectBuilderServiceServer()
 }
 
@@ -200,8 +200,8 @@ func (UnimplementedObjectBuilderServiceServer) ManyToManyAppend(context.Context,
 func (UnimplementedObjectBuilderServiceServer) ManyToManyDelete(context.Context, *ManyToManyMessage) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ManyToManyDelete not implemented")
 }
-func (UnimplementedObjectBuilderServiceServer) GetTableDetails(context.Context, *CommonMessage) (*CommonMessage, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTableDetails not implemented")
+func (UnimplementedObjectBuilderServiceServer) GetObjectDetails(context.Context, *CommonMessage) (*CommonMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetObjectDetails not implemented")
 }
 func (UnimplementedObjectBuilderServiceServer) GetListInExcel(context.Context, *CommonMessage) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListInExcel not implemented")
@@ -209,8 +209,8 @@ func (UnimplementedObjectBuilderServiceServer) GetListInExcel(context.Context, *
 func (UnimplementedObjectBuilderServiceServer) Batch(context.Context, *BatchRequest) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Batch not implemented")
 }
-func (UnimplementedObjectBuilderServiceServer) UpsertPermissionsByAppId(context.Context, *UpsertPermissionsByAppIdRequest) (*UpsertPermissionsByAppIdResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpsertPermissionsByAppId not implemented")
+func (UnimplementedObjectBuilderServiceServer) MultipleUpdate(context.Context, *CommonMessage) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MultipleUpdate not implemented")
 }
 func (UnimplementedObjectBuilderServiceServer) mustEmbedUnimplementedObjectBuilderServiceServer() {}
 
@@ -369,20 +369,20 @@ func _ObjectBuilderService_ManyToManyDelete_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ObjectBuilderService_GetTableDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ObjectBuilderService_GetObjectDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CommonMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ObjectBuilderServiceServer).GetTableDetails(ctx, in)
+		return srv.(ObjectBuilderServiceServer).GetObjectDetails(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/object_builder_service.ObjectBuilderService/GetTableDetails",
+		FullMethod: "/object_builder_service.ObjectBuilderService/GetObjectDetails",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ObjectBuilderServiceServer).GetTableDetails(ctx, req.(*CommonMessage))
+		return srv.(ObjectBuilderServiceServer).GetObjectDetails(ctx, req.(*CommonMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -423,20 +423,20 @@ func _ObjectBuilderService_Batch_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ObjectBuilderService_UpsertPermissionsByAppId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpsertPermissionsByAppIdRequest)
+func _ObjectBuilderService_MultipleUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommonMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ObjectBuilderServiceServer).UpsertPermissionsByAppId(ctx, in)
+		return srv.(ObjectBuilderServiceServer).MultipleUpdate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/object_builder_service.ObjectBuilderService/UpsertPermissionsByAppId",
+		FullMethod: "/object_builder_service.ObjectBuilderService/MultipleUpdate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ObjectBuilderServiceServer).UpsertPermissionsByAppId(ctx, req.(*UpsertPermissionsByAppIdRequest))
+		return srv.(ObjectBuilderServiceServer).MultipleUpdate(ctx, req.(*CommonMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -481,8 +481,8 @@ var ObjectBuilderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ObjectBuilderService_ManyToManyDelete_Handler,
 		},
 		{
-			MethodName: "GetTableDetails",
-			Handler:    _ObjectBuilderService_GetTableDetails_Handler,
+			MethodName: "GetObjectDetails",
+			Handler:    _ObjectBuilderService_GetObjectDetails_Handler,
 		},
 		{
 			MethodName: "GetListInExcel",
@@ -493,8 +493,8 @@ var ObjectBuilderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ObjectBuilderService_Batch_Handler,
 		},
 		{
-			MethodName: "UpsertPermissionsByAppId",
-			Handler:    _ObjectBuilderService_UpsertPermissionsByAppId_Handler,
+			MethodName: "MultipleUpdate",
+			Handler:    _ObjectBuilderService_MultipleUpdate_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

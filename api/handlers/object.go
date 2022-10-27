@@ -3,13 +3,12 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
-	"ucode/ucode_go_admin_api_gateway/api/http"
-	"ucode/ucode_go_admin_api_gateway/api/models"
-	authPb "ucode/ucode_go_admin_api_gateway/genproto/auth_service"
-	obs "ucode/ucode_go_admin_api_gateway/genproto/object_builder_service"
-	"ucode/ucode_go_admin_api_gateway/pkg/helper"
-	"ucode/ucode_go_admin_api_gateway/pkg/util"
+	"medion/medion_go_api_gateway/api/http"
+	"medion/medion_go_api_gateway/api/models"
+	authPb "medion/medion_go_api_gateway/genproto/auth_service"
+	obs "medion/medion_go_api_gateway/genproto/object_builder_service"
+	"medion/medion_go_api_gateway/pkg/helper"
+	"medion/medion_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -276,9 +275,9 @@ func (h *Handler) GetList(c *gin.Context) {
 	}
 	tokenInfo := h.GetAuthInfo
 	objectRequest.Data["tables"] = tokenInfo(c).Tables
-	objectRequest.Data["user_id"] = tokenInfo(c).UserId
+	objectRequest.Data["user_id_from_token"] = tokenInfo(c).UserId
 	objectRequest.Data["role_id_from_token"] = tokenInfo(c).RoleId
-
+	objectRequest.Data["client_type_id_from_token"] = tokenInfo(c).ClientTypeId
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -417,7 +416,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 // GetObjectDetails godoc
 // @Security ApiKeyAuth
 // @ID get_object_details
-// @Router /v1/object/table-details/{table_slug} [POST]
+// @Router /v1/object/object-details/{table_slug} [POST]
 // @Summary Get object details
 // @Description object details
 // @Tags Object
@@ -443,7 +442,7 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.ObjectBuilderService().GetTableDetails(
+	resp, err := h.services.ObjectBuilderService().GetObjectDetails(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -463,7 +462,7 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 // UpsertObject godoc
 // @Security ApiKeyAuth
 // @ID upsert_object
-// @Router /v1/object-upsert/{table_slug}/ [POST]
+// @Router /v1/object-upsert/{table_slug} [POST]
 // @Summary Upsert object
 // @Description Upsert object
 // @Tags Object
@@ -514,7 +513,6 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-	fmt.Println("struct: ", structData)
 
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -534,24 +532,41 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		return
 	}
 
+	if c.Param("table_slug") == "record_permission" {
+		role_id := objectRequest.Data["objects"].([]interface{})[0].(map[string]interface{})["role_id"]
+		if role_id == nil {
+			err := errors.New("role id must be have in upsert permission")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+		_, err = h.services.SessionService().UpdateSessionsByRoleId(context.Background(), &authPb.UpdateSessionByRoleIdRequest{
+			RoleId:    objectRequest.Data["role_id"].(string),
+			IsChanged: true,
+		})
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
 	h.handleResponse(c, http.Created, resp)
 }
 
-// UpsertPermissionsByAppId godoc
+// MultipleUpdateObject godoc
 // @Security ApiKeyAuth
-// @ID upsert_permission
-// @Router /v1/permission-upsert/{app_id}/ [POST]
-// @Summary Upsert permissions
-// @Description Upsert permissions
+// @ID multipe_update_object
+// @Router /v1/object/multiple-update/{table_slug} [PUT]
+// @Summary Multiple Update object
+// @Description Multiple Update object
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param app_id path string true "app_id"
-// @Param object body models.CommonMessage true "UpsertPermissionRequestBody"
-// @Success 201 {object} http.Response{data=models.CommonMessage} "Upsert Permission data"
+// @Param table_slug path string true "table_slug"
+// @Param object body models.CommonMessage true "MultipleUpdateObjectRequestBody"
+// @Success 201 {object} http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
-func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
+func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 	var objectRequest models.CommonMessage
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -561,31 +576,19 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-
-	resp, err := h.services.ObjectBuilderService().UpsertPermissionsByAppId(
+	resp, err := h.services.ObjectBuilderService().MultipleUpdate(
 		context.Background(),
-		&obs.UpsertPermissionsByAppIdRequest{
-			AppId: c.Param("app_id"),
-			Data:  structData,
+		&obs.CommonMessage{
+			TableSlug:     c.Param("table_slug"),
+			Data:          structData,
 		},
 	)
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
-	if objectRequest.Data["role_id"] == nil {
-		err := errors.New("role id must be have in update permission")
-		h.handleResponse(c, http.BadRequest, err.Error())
-	}
-	_, err = h.services.SessionService().UpdateSessionsByRoleId(context.Background(), &authPb.UpdateSessionByRoleIdRequest{
-		RoleId:    objectRequest.Data["role_id"].(string),
-		IsChanged: true,
-	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return

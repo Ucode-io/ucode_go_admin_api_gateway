@@ -1,10 +1,9 @@
 package api
 
 import (
-	"ucode/ucode_go_admin_api_gateway/api/handlers"
-	"ucode/ucode_go_admin_api_gateway/config"
-
-	"ucode/ucode_go_admin_api_gateway/api/docs"
+	"medion/medion_go_api_gateway/api/docs"
+	"medion/medion_go_api_gateway/api/handlers"
+	"medion/medion_go_api_gateway/config"
 
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -33,7 +32,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	// @name Authorization
 	v1.Use(h.AuthMiddleware())
 	{
-		v1.POST("/upload", h.UploadImage)
+		v1.POST("/upload", h.Upload)
 		v1.POST("/upload-file/:table_slug/:object_id", h.UploadFile)
 
 		// OBJECT_BUILDER_SERVICE
@@ -70,10 +69,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/object/get-list/:table_slug", h.GetList)
 		v1.PUT("/object/:table_slug", h.UpdateObject)
 		v1.DELETE("/object/:table_slug/:object_id", h.DeleteObject)
-		v1.POST("/object/table-details/:table_slug", h.GetObjectDetails)
+		v1.POST("/object/object-details/:table_slug", h.GetObjectDetails)
 		v1.POST("/object/excel/:table_slug", h.GetListInExcel)
-		v1.POST("object-upsert/:table_slug", h.UpsertObject)
+		v1.POST("/object-upsert/:table_slug", h.UpsertObject)
+		v1.PUT("/object/multiple-update/:table_slug", h.MultipleUpdateObject)
+		// permission
 		v1.POST("/permission-upsert/:app_id", h.UpsertPermissionsByAppId)
+		v1.GET("/permission-get-all/:role_id", h.GetAllPermissionByRoleId)
+		v1.GET("/field-permission/:role_id/:table_slug", h.GetFieldPermissions)
 
 		//many-to-many
 		v1.PUT("/many-to-many", h.AppendManyToMany)
@@ -161,7 +164,36 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/event", h.GetAllEvents)
 		v1.PUT("/event", h.UpdateEvent)
 		v1.DELETE("/event/:event_id", h.DeleteEvent)
+		v1.GET("/event-log", h.GetEventLogs)
+		v1.GET("/event-log/:event_log_id", h.GetEventLogById)
 
+		// custom event
+		v1.POST("/custom-event", h.CreateCustomEvent)
+		v1.GET("/custom-event/:custom_event_id", h.GetCustomEventByID)
+		v1.GET("/custom-event", h.GetAllCustomEvents)
+		v1.PUT("/custom-event", h.UpdateCustomEvent)
+		v1.DELETE("/custom-event/:custom_event_id", h.DeleteCustomEvent)
+
+		// function
+		v1.POST("/function", h.CreateFunction)
+		v1.GET("/function/:function_id", h.GetFunctionByID)
+		v1.GET("/function", h.GetAllFunctions)
+		v1.PUT("/function", h.UpdateFunction)
+		v1.DELETE("/function/:function_id", h.DeleteFunction)
+
+		// INVOKE FUNCTION
+
+		v1.POST("/invoke_function", h.InvokeFunction)
+
+		// Excel Reader
+		v1.GET("/excel/:excel_id", h.ExcelReader)
+		v1.POST("/excel/excel_to_db/:excel_id", h.ExcelToDb)
+
+		v1.GET("/barcode-generator/:table_slug", h.GetNewGeneratedBarCode)
+
+		// Integration with AlfaLab
+		v1.POST("/alfalab/directions", h.CreateDirections)
+		v1.GET("/alfalab/referral", h.GetReferral)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

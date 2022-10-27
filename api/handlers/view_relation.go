@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
-	"ucode/ucode_go_admin_api_gateway/api/http"
-	obs "ucode/ucode_go_admin_api_gateway/genproto/object_builder_service"
+	"medion/medion_go_api_gateway/api/http"
+	obs "medion/medion_go_api_gateway/genproto/object_builder_service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,11 +25,13 @@ import (
 func (h *Handler) GetViewRelation(c *gin.Context) {
 
 	// get list view relation switch to get single view relation because for one table be one view relation
+	tokenInfo := h.GetAuthInfo(c)
 	resp, err := h.services.SectionService().GetViewRelation(
 		context.Background(),
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
 			TableSlug: c.Query("table_slug"),
+			RoleId: tokenInfo.RoleId,
 		},
 	)
 	if err != nil {

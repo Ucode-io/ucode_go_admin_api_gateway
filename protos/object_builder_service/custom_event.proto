@@ -1,0 +1,57 @@
+syntax="proto3";
+
+package object_builder_service;
+option go_package="genproto/object_builder_service";
+
+import "google/protobuf/empty.proto";
+import "function.proto";
+
+
+service CustomEventService {
+    rpc Create(CreateCustomEventRequest) returns (CustomEvent) {}
+    rpc GetList(GetCustomEventsListRequest) returns (GetCustomEventsListResponse) {}
+    rpc GetSingle(CustomEventPrimaryKey) returns (CustomEvent) {}
+    rpc Update(CustomEvent) returns (google.protobuf.Empty) {}
+    rpc Delete(CustomEventPrimaryKey) returns (google.protobuf.Empty) {}
+    rpc UpdateByFunctionId(UpdateByFunctionIdRequest) returns (google.protobuf.Empty) {}
+}
+
+
+message CreateCustomEventRequest {
+    string table_slug = 1;
+    string icon = 2;
+    string event_path = 3;
+    string label = 4;
+    string url = 5;
+    bool disable = 6;
+}
+
+message CustomEvent {
+    string id = 1;
+    string table_slug = 2;
+    string event_path = 3;
+    string label = 4;
+    string icon = 5;
+    string url = 6;
+    bool disable = 7;
+    repeated Function functions = 8;
+}
+
+message GetCustomEventsListResponse {
+    repeated CustomEvent custom_events = 1;
+    int32 count = 2;
+}
+
+message GetCustomEventsListRequest {
+    string table_slug = 1;
+}   
+
+message CustomEventPrimaryKey {
+    string id = 1;
+}
+
+message UpdateByFunctionIdRequest {
+    string function_id = 1;
+    repeated string object_ids = 2;
+    string field_slug = 3;
+}

@@ -22,6 +22,7 @@ message Section {
     string label = 4;
     repeated FieldForSection fields = 5;
     string icon = 6;
+    bool is_summary_section = 7;
 }
 
 message ViewRelationReq {
@@ -70,6 +71,7 @@ message RelationForSection {
     string relation_table_slug = 13;
     string view_type = 14;
     string relation_field_slug = 15;
+    google.protobuf.Struct field_permissions = 16;
 }
 
 message IncrementIDForSection {
@@ -126,6 +128,7 @@ message SectionResponse {
     string label = 4;
     repeated FieldResponse fields = 5;
     string icon = 6;
+    bool is_summary_section = 7;
 }
 
 message FieldResponse {
@@ -163,4 +166,5 @@ message GetAllSectionsResponse {
 message GetAllSectionsRequest {
     string table_id = 1;
     string table_slug = 2;
+    string role_id = 3;
 }

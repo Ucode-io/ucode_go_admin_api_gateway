@@ -1,0 +1,32 @@
+syntax="proto3";
+
+package object_builder_service;
+option go_package="genproto/object_builder_service";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/empty.proto";
+import "object_builder.proto";
+
+service PermissionService {
+    rpc UpsertPermissionsByAppId(UpsertPermissionsByAppIdRequest) returns (UpsertPermissionsByAppIdResponse) {}
+    rpc GetAllPermissionsByRoleId (GetAllPermissionRequest) returns (CommonMessage) {}
+    rpc GetFieldPermissions (GetFieldPermissionRequest) returns (CommonMessage) {}
+}
+
+message GetAllPermissionRequest {
+    string role_id = 1;
+}
+
+message GetFieldPermissionRequest {
+    string role_id = 1;
+    string table_slug = 2;
+}
+
+message UpsertPermissionsByAppIdResponse{
+    string app = 1;
+    google.protobuf.Struct data = 2;
+}
+message UpsertPermissionsByAppIdRequest {
+    string app_id = 1;
+    google.protobuf.Struct data = 2;
+}

@@ -3,7 +3,8 @@
     "info": {
         "description": "This is a api gateway",
         "termsOfService": "https://udevs.io",
-        "contact": {}
+        "contact": {},
+        "license": {}
     },
     "paths": {
         "/config": {
@@ -84,6 +85,143 @@
                 }
             }
         },
+        "/v1/alfalab/directions": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create Directions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AlfaLab"
+                ],
+                "summary": "Create Directions",
+                "operationId": "create_patient",
+                "parameters": [
+                    {
+                        "description": "CreatePatientRequestBody",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateDirections"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Field data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Field"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/alfalab/referral": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Query Referral Result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AlfaLab"
+                ],
+                "summary": "query referral result",
+                "operationId": "query_referral_result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "nr",
+                        "name": "nr",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Barcode",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.BarcodeGenerateRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/analytics/dashboard": {
             "get": {
                 "security": [
@@ -123,24 +261,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.GetAllDashboardsResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -215,24 +335,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -295,24 +397,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.Dashboard"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -387,24 +471,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -454,25 +520,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -534,24 +582,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.GetAllPanelsResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -626,24 +656,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -706,24 +718,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.Panel"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -800,24 +794,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -886,24 +862,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -953,25 +911,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -1038,24 +978,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/object_builder_service.GetAllVariablesResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -1130,24 +1052,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1210,24 +1114,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/object_builder_service.Variable"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -1302,24 +1188,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1369,25 +1237,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -1465,24 +1315,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1545,24 +1377,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/object_builder_service.App"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -1637,24 +1451,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1723,24 +1519,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1790,10 +1568,10 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
-                    "400": {
-                        "description": "Invalid Argument",
+                    "500": {
+                        "description": "Server Error",
                         "schema": {
                             "allOf": [
                                 {
@@ -1804,6 +1582,56 @@
                                     "properties": {
                                         "data": {
                                             "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/barcode-generator/{table_slug}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get new barcode for items",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Barcode"
+                ],
+                "summary": "get barcode",
+                "operationId": "generate_new_barcode_for_items",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "table_slug",
+                        "name": "table_slug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Barcode",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.BarcodeGenerateRes"
                                         }
                                     }
                                 }
@@ -1906,24 +1734,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1992,24 +1802,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2063,25 +1855,7 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -2142,8 +1916,8 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "Server Error",
                         "schema": {
                             "allOf": [
                                 {
@@ -2159,6 +1933,309 @@
                                 }
                             ]
                         }
+                    }
+                }
+            }
+        },
+        "/v1/custom-event": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all custom events",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomEvent"
+                ],
+                "summary": "Get all custom events",
+                "operationId": "get_all_custom_events",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "table_slug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomEventBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update custom event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomEvent"
+                ],
+                "summary": "Update Customevent",
+                "operationId": "update_Customevent",
+                "parameters": [
+                    {
+                        "description": "UpdateCustomEventRequestBody",
+                        "name": "Customevent",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CustomEvent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomEvent data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create CustomEvent",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomEvent"
+                ],
+                "summary": "Create CustomEvent",
+                "operationId": "create_custom_event",
+                "parameters": [
+                    {
+                        "description": "CreateCustomEventRequestBody",
+                        "name": "Customevent",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.CreateCustomEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CustomEvent data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/custom-event/{custom_event_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get CustomEvent by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomEvent"
+                ],
+                "summary": "Get CustomEvent by id",
+                "operationId": "get_custom_event_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "custom_event_id",
+                        "name": "custom_event_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomEventBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete CustomEvent",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomEvent"
+                ],
+                "summary": "Delete CustomEvent",
+                "operationId": "delete_custom_event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "custom_event_id",
+                        "name": "custom_event_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -2241,24 +2318,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2321,24 +2380,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/object_builder_service.Document"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -2413,24 +2454,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2499,24 +2522,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2566,25 +2571,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -2646,24 +2633,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/object_builder_service.GetEventsListResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -2738,24 +2707,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2824,8 +2775,8 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "Server Error",
                         "schema": {
                             "allOf": [
                                 {
@@ -2836,6 +2787,132 @@
                                     "properties": {
                                         "data": {
                                             "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/event-log": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get event logs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Event"
+                ],
+                "summary": "Get event logs",
+                "operationId": "get_event_logs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "table_slug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "EventLogsBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.GetEventLogListsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/event-log/{event_log_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get event log",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Event"
+                ],
+                "summary": "Get event log",
+                "operationId": "get_event_log",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "event_log_id",
+                        "name": "event_log_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "EventLogBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.EventLog"
                                         }
                                     }
                                 }
@@ -2910,24 +2987,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2979,10 +3038,10 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
-                    "400": {
-                        "description": "Invalid Argument",
+                    "500": {
+                        "description": "Server Error",
                         "schema": {
                             "allOf": [
                                 {
@@ -2993,6 +3052,133 @@
                                     "properties": {
                                         "data": {
                                             "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/excel/excel_to_db/{excel_id}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Post excel writer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Excel"
+                ],
+                "summary": "Post excel writer",
+                "operationId": "excel_to_db",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "excel_id",
+                        "name": "excel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ExcelToDbRequest",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ExcelToDbRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ExcelToDbResponse",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ExcelToDbResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/excel/{excel_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get excel writer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Excel"
+                ],
+                "summary": "Get excel writer",
+                "operationId": "excel_reader",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "excel_id",
+                        "name": "excel_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ExcelReadResponse",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.ExcelReadResponse"
                                         }
                                     }
                                 }
@@ -3095,24 +3281,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3175,24 +3343,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.Field"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -3267,8 +3417,8 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "Server Error",
                         "schema": {
                             "allOf": [
                                 {
@@ -3279,6 +3429,63 @@
                                     "properties": {
                                         "data": {
                                             "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/field-permission/{role_id}/{table_slug}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all field permissions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Permission"
+                ],
+                "summary": "Get all field permissions",
+                "operationId": "get_all_field_permission",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "role_id",
+                        "name": "role_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "table_slug",
+                        "name": "table_slug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get All Field Permission data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
                                         }
                                     }
                                 }
@@ -3336,10 +3543,10 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
-                    "400": {
-                        "description": "Invalid Argument",
+                    "500": {
+                        "description": "Server Error",
                         "schema": {
                             "allOf": [
                                 {
@@ -3355,6 +3562,314 @@
                                 }
                             ]
                         }
+                    }
+                }
+            }
+        },
+        "/v1/function": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all functions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Function"
+                ],
+                "summary": "Get all functions",
+                "operationId": "get_all_functions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FunctionBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update function",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Function"
+                ],
+                "summary": "Update function",
+                "operationId": "update_function",
+                "parameters": [
+                    {
+                        "description": "UpdateFunctionRequestBody",
+                        "name": "Function",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Function"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Function data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Function"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create Function",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Function"
+                ],
+                "summary": "Create Function",
+                "operationId": "create_function",
+                "parameters": [
+                    {
+                        "description": "CreateFunctionRequestBody",
+                        "name": "Function",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateFunctionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Function data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Function"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/function/{function_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Function by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Function"
+                ],
+                "summary": "Get Function by id",
+                "operationId": "get_function_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "function_id",
+                        "name": "function_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FunctionBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Function"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete Function",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Function"
+                ],
+                "summary": "Delete Function",
+                "operationId": "delete_function",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "function_id",
+                        "name": "function_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -3416,24 +3931,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/object_builder_service.GetAllHtmlTemplateResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -3508,24 +4005,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3588,24 +4067,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/object_builder_service.HtmlTemplate"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -3680,24 +4141,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3747,25 +4190,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -3837,8 +4262,8 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "Server Error",
                         "schema": {
                             "allOf": [
                                 {
@@ -3849,6 +4274,58 @@
                                     "properties": {
                                         "data": {
                                             "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/invoke_function": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Invoke Function",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Function"
+                ],
+                "summary": "Invoke Function",
+                "operationId": "invoke_function",
+                "parameters": [
+                    {
+                        "description": "InvokeFunctionRequest",
+                        "name": "InvokeFunctionRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.InvokeFunctionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Function data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.InvokeFunctionRequest"
                                         }
                                     }
                                 }
@@ -3925,24 +4402,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3994,25 +4453,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -4035,7 +4476,7 @@
                 }
             }
         },
-        "/v1/object-upsert/{table_slug}/": {
+        "/v1/object-upsert/{table_slug}": {
             "post": {
                 "security": [
                     {
@@ -4085,24 +4526,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.CommonMessage"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -4186,24 +4609,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4281,8 +4686,8 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
+                    "500": {
+                        "description": "Server Error",
                         "schema": {
                             "allOf": [
                                 {
@@ -4293,6 +4698,65 @@
                                     "properties": {
                                         "data": {
                                             "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/object/multiple-update/{table_slug}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Multiple Update object",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Object"
+                ],
+                "summary": "Multiple Update object",
+                "operationId": "multipe_update_object",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "table_slug",
+                        "name": "table_slug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "MultipleUpdateObjectRequestBody",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CommonMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Object data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
                                         }
                                     }
                                 }
@@ -4320,7 +4784,7 @@
                 }
             }
         },
-        "/v1/object/table-details/{table_slug}": {
+        "/v1/object/object-details/{table_slug}": {
             "post": {
                 "security": [
                     {
@@ -4370,24 +4834,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.CommonMessage"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -4471,24 +4917,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4560,24 +4988,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.CommonMessage"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -4659,24 +5069,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4742,25 +5134,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -4863,24 +5237,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4949,24 +5305,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5020,24 +5358,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/pos_service.CashboxResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -5114,8 +5434,8 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "Server Error",
                         "schema": {
                             "allOf": [
                                 {
@@ -5126,6 +5446,56 @@
                                     "properties": {
                                         "data": {
                                             "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/permission-get-all/{role_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all permissions by role id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Permission"
+                ],
+                "summary": "Get all permissions by role id",
+                "operationId": "get_all_permission_by_role_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "role_id",
+                        "name": "role_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get All Permission data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
                                         }
                                     }
                                 }
@@ -5153,7 +5523,7 @@
                 }
             }
         },
-        "/v1/permission-upsert/{app_id}/": {
+        "/v1/permission-upsert/{app_id}": {
             "post": {
                 "security": [
                     {
@@ -5168,7 +5538,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Object"
+                    "Permission"
                 ],
                 "summary": "Upsert permissions",
                 "operationId": "upsert_permission",
@@ -5203,24 +5573,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.CommonMessage"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -5291,24 +5643,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.CommonInput"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -5401,24 +5735,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5471,24 +5787,6 @@
                 "responses": {
                     "200": {
                         "description": "Relation data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -5568,24 +5866,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5637,25 +5917,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -5700,6 +5962,11 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "table_id",
                         "in": "query"
                     },
@@ -5712,24 +5979,6 @@
                 "responses": {
                     "200": {
                         "description": "FieldBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
@@ -5798,24 +6047,6 @@
                 "responses": {
                     "200": {
                         "description": "Section data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -5908,24 +6139,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5988,24 +6201,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/object_builder_service.Table"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -6080,24 +6275,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6166,24 +6343,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6233,25 +6392,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -6323,24 +6464,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6369,7 +6492,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Upload image",
+                "description": "Upload",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -6379,7 +6502,7 @@
                 "tags": [
                     "file"
                 ],
-                "summary": "Upload image",
+                "summary": "Upload",
                 "operationId": "upload_image",
                 "parameters": [
                     {
@@ -6403,24 +6526,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/handlers.Path"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -6515,24 +6620,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6593,24 +6680,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/object_builder_service.GetAllViewsResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -6685,24 +6754,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6765,24 +6816,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/object_builder_service.View"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
                                         }
                                     }
                                 }
@@ -6857,24 +6890,6 @@
                             ]
                         }
                     },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6924,25 +6939,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                        "description": ""
                     },
                     "500": {
                         "description": "Server Error",
@@ -6987,6 +6984,11 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "table_id",
                         "in": "query"
                     },
@@ -6999,24 +7001,6 @@
                 "responses": {
                     "200": {
                         "description": "ViewRelationBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
@@ -7085,24 +7069,6 @@
                 "responses": {
                     "200": {
                         "description": "View Relation data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -7225,11 +7191,47 @@
         "http.Response": {
             "type": "object",
             "properties": {
-                "data": {},
+                "data": {
+                    "type": "object"
+                },
                 "description": {
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Assays": {
+            "type": "object",
+            "properties": {
+                "item": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.AssaysItem"
+                    }
+                }
+            }
+        },
+        "models.AssaysItem": {
+            "type": "object",
+            "properties": {
+                "barcode": {
+                    "type": "string"
+                },
+                "biomaterial_code": {
+                    "type": "string"
+                },
+                "orders": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.AssaysOrders"
+                }
+            }
+        },
+        "models.AssaysOrders": {
+            "type": "object",
+            "properties": {
+                "item_code": {
                     "type": "string"
                 }
             }
@@ -7280,6 +7282,23 @@
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "models.CreateDirections": {
+            "type": "object",
+            "properties": {
+                "assays": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.Assays"
+                },
+                "patient": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.Patient"
+                },
+                "referral": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.Referral"
                 }
             }
         },
@@ -7358,6 +7377,27 @@
                 }
             }
         },
+        "models.CreateFunctionRequest": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CreatePanelRequest": {
             "type": "object",
             "properties": {
@@ -7407,6 +7447,7 @@
                     "type": "string"
                 },
                 "increment_id": {
+                    "type": "object",
                     "$ref": "#/definitions/models.IncrementId"
                 },
                 "label": {
@@ -7461,6 +7502,32 @@
                 }
             }
         },
+        "models.CustomEvent": {
+            "type": "object",
+            "properties": {
+                "disable": {
+                    "type": "boolean"
+                },
+                "event_path": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lanel": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Dashboard": {
             "type": "object",
             "properties": {
@@ -7471,6 +7538,26 @@
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ExcelToDbRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ExcelToDbResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
                     "type": "string"
                 }
             }
@@ -7503,6 +7590,9 @@
                 "label": {
                     "type": "string"
                 },
+                "relation_id": {
+                    "type": "string"
+                },
                 "required": {
                     "type": "boolean"
                 },
@@ -7513,6 +7603,38 @@
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Function": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.GetAllDashboardsRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
                     "type": "string"
                 }
             }
@@ -7563,6 +7685,20 @@
                 }
             }
         },
+        "models.GetEventLogsListRequest": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
         "models.HtmlBody": {
             "type": "object",
             "properties": {
@@ -7586,6 +7722,20 @@
                 },
                 "with_increment_id": {
                     "type": "boolean"
+                }
+            }
+        },
+        "models.InvokeFunctionRequest": {
+            "type": "object",
+            "properties": {
+                "function_id": {
+                    "type": "string"
+                },
+                "object_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -7615,6 +7765,115 @@
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Patient": {
+            "type": "object",
+            "properties": {
+                "birth_date": {
+                    "type": "string"
+                },
+                "body_temperature": {
+                    "type": "string"
+                },
+                "document_number": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "middle_name": {
+                    "type": "string"
+                },
+                "mis_id": {
+                    "type": "string"
+                },
+                "pay_category_id": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Referral": {
+            "type": "object",
+            "properties": {
+                "cito": {
+                    "type": "string"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "comment_1": {
+                    "type": "string"
+                },
+                "cycle_period": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "delivery_date": {
+                    "type": "string"
+                },
+                "department_code": {
+                    "type": "string"
+                },
+                "department_name": {
+                    "type": "string"
+                },
+                "diagnosisName": {
+                    "type": "string"
+                },
+                "diagnosis_code": {
+                    "type": "string"
+                },
+                "diuresis_ml": {
+                    "type": "string"
+                },
+                "doctor_code": {
+                    "type": "string"
+                },
+                "doctor_name": {
+                    "type": "string"
+                },
+                "ecomment": {
+                    "type": "string"
+                },
+                "height_cm": {
+                    "type": "string"
+                },
+                "last_menstruation": {
+                    "type": "string"
+                },
+                "mis_id": {
+                    "type": "string"
+                },
+                "nr": {
+                    "type": "string"
+                },
+                "pay_category_id": {
+                    "type": "string"
+                },
+                "pregnancy_week": {
+                    "type": "string"
+                },
+                "sampling_date": {
+                    "type": "string"
+                },
+                "weight_kg": {
                     "type": "string"
                 }
             }
@@ -7677,6 +7936,25 @@
                 }
             }
         },
+        "object_builder_service.AutoFilter": {
+            "type": "object",
+            "properties": {
+                "field_from": {
+                    "type": "string"
+                },
+                "field_to": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.BarcodeGenerateRes": {
+            "type": "object",
+            "properties": {
+                "number": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.Condition": {
             "type": "object",
             "properties": {
@@ -7708,6 +7986,29 @@
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "object_builder_service.CreateCustomEventRequest": {
+            "type": "object",
+            "properties": {
+                "disable": {
+                    "type": "boolean"
+                },
+                "event_path": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },
@@ -7753,6 +8054,7 @@
                     "type": "string"
                 },
                 "when": {
+                    "type": "object",
                     "$ref": "#/definitions/object_builder_service.When"
                 }
             }
@@ -7780,7 +8082,19 @@
         "object_builder_service.CreateRelationRequest": {
             "type": "object",
             "properties": {
+                "auto_filters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.AutoFilter"
+                    }
+                },
                 "columns": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "default_values": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -7893,6 +8207,7 @@
                     }
                 },
                 "disable_dates": {
+                    "type": "object",
                     "$ref": "#/definitions/object_builder_service.DisableDates"
                 },
                 "group_fields": {
@@ -8059,7 +8374,39 @@
                     "type": "string"
                 },
                 "when": {
+                    "type": "object",
                     "$ref": "#/definitions/object_builder_service.When"
+                }
+            }
+        },
+        "object_builder_service.EventLog": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "effected_table": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.ExcelReadResponse": {
+            "type": "object",
+            "properties": {
+                "rows": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -8083,6 +8430,20 @@
                 }
             }
         },
+        "object_builder_service.GetAllAppsRequest": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "search": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.GetAllAppsResponse": {
             "type": "object",
             "properties": {
@@ -8094,6 +8455,23 @@
                 },
                 "count": {
                     "type": "integer"
+                }
+            }
+        },
+        "object_builder_service.GetAllDocumentsRequest": {
+            "type": "object",
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "object_id": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "string"
                 }
             }
         },
@@ -8111,6 +8489,51 @@
                 }
             }
         },
+        "object_builder_service.GetAllFieldsRequest": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "search": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "with_many_relation": {
+                    "type": "boolean"
+                },
+                "with_one_relation": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "object_builder_service.GetAllFunctionsRequest": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "search": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.GetAllHtmlTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.GetAllHtmlTemplateResponse": {
             "type": "object",
             "properties": {
@@ -8122,6 +8545,62 @@
                     "items": {
                         "$ref": "#/definitions/object_builder_service.HtmlTemplate"
                     }
+                }
+            }
+        },
+        "object_builder_service.GetAllPanelsRequest": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.GetAllRelationsRequest": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "relation_table_slug": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.GetAllSectionsRequest": {
+            "type": "object",
+            "properties": {
+                "role_id": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.GetAllTablesRequest": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "search": {
+                    "type": "string"
                 }
             }
         },
@@ -8139,6 +8618,17 @@
                 }
             }
         },
+        "object_builder_service.GetAllVariablesRequest": {
+            "type": "object",
+            "properties": {
+                "dashboard_id": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.GetAllVariablesResponse": {
             "type": "object",
             "properties": {
@@ -8153,6 +8643,14 @@
                 }
             }
         },
+        "object_builder_service.GetAllViewsRequest": {
+            "type": "object",
+            "properties": {
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.GetAllViewsResponse": {
             "type": "object",
             "properties": {
@@ -8164,6 +8662,36 @@
                     "items": {
                         "$ref": "#/definitions/object_builder_service.View"
                     }
+                }
+            }
+        },
+        "object_builder_service.GetCustomEventsListRequest": {
+            "type": "object",
+            "properties": {
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.GetEventLogListsResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "event_logs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.EventLog"
+                    }
+                }
+            }
+        },
+        "object_builder_service.GetEventsListRequest": {
+            "type": "object",
+            "properties": {
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },
@@ -8306,6 +8834,9 @@
                 "id": {
                     "type": "string"
                 },
+                "is_summary_section": {
+                    "type": "boolean"
+                },
                 "label": {
                     "type": "string"
                 },
@@ -8338,6 +8869,7 @@
                     "type": "string"
                 },
                 "increment_id": {
+                    "type": "object",
                     "$ref": "#/definitions/object_builder_service.IncrementID"
                 },
                 "is_own_table": {
@@ -8397,7 +8929,19 @@
         "object_builder_service.UpdateRelationRequest": {
             "type": "object",
             "properties": {
+                "auto_filters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.AutoFilter"
+                    }
+                },
                 "columns": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "default_values": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -8558,6 +9102,7 @@
                     }
                 },
                 "disable_dates": {
+                    "type": "object",
                     "$ref": "#/definitions/object_builder_service.DisableDates"
                 },
                 "group_fields": {
@@ -8693,6 +9238,32 @@
                 }
             }
         },
+        "pos_service.GetAllBookedAppointmentsRequest": {
+            "type": "object",
+            "properties": {
+                "branch_id": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "patient_id": {
+                    "type": "string"
+                },
+                "payment_status": {
+                    "type": "string"
+                },
+                "search": {
+                    "type": "string"
+                }
+            }
+        },
         "pos_service.GetAllBookedAppointmentsResponse": {
             "type": "object",
             "properties": {
@@ -8704,6 +9275,35 @@
                 },
                 "count": {
                     "type": "integer"
+                }
+            }
+        },
+        "pos_service.GetAllOfflineAppointmentsRequest": {
+            "type": "object",
+            "properties": {
+                "branch_id": {
+                    "type": "string"
+                },
+                "cashbox_id": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "patient_id": {
+                    "type": "string"
+                },
+                "payment_status": {
+                    "type": "string"
+                },
+                "search": {
+                    "type": "string"
                 }
             }
         },

@@ -47,6 +47,7 @@ type Config struct {
 	MinioEndpoint        string
 	MinioAccessKeyID     string
 	MinioSecretAccessKey string
+	MinioProtocol        bool
 }
 
 // Load ...
@@ -57,7 +58,7 @@ func Load() Config {
 
 	config := Config{}
 
-	config.ServiceName = cast.ToString(getOrReturnDefaultValue("SERVICE_NAME", "ucode_go_admin_api_gateway"))
+	config.ServiceName = cast.ToString(getOrReturnDefaultValue("SERVICE_NAME", "medion_go_api_gateway"))
 	config.Environment = cast.ToString(getOrReturnDefaultValue("ENVIRONMENT", DebugMode))
 	config.Version = cast.ToString(getOrReturnDefaultValue("VERSION", "1.0"))
 
@@ -67,7 +68,8 @@ func Load() Config {
 
 	config.MinioAccessKeyID = cast.ToString(getOrReturnDefaultValue("MINIO_ACCESS_KEY", "JqEZQP7w5XJSy2K6ZQh5VJbLWZWbcESZcVkNbakGw977FCwa"))
 	config.MinioSecretAccessKey = cast.ToString(getOrReturnDefaultValue("MINIO_SECRET_KEY", "bYTX8fnBKGLhvpvQfsp63MXkBHCuEp8gScf4wUfnGANUwHxZ"))
-	config.MinioEndpoint = cast.ToString(getOrReturnDefaultValue("MINIO_ENDPOINT", "test.cdn.ucode.uz"))
+	config.MinioEndpoint = cast.ToString(getOrReturnDefaultValue("MINIO_ENDPOINT", "test.cdn.medion.uz"))
+	config.MinioProtocol = cast.ToBool(getOrReturnDefaultValue("MINIO_PROTOCOL", true))
 
 	config.DefaultOffset = cast.ToString(getOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = cast.ToString(getOrReturnDefaultValue("DEFAULT_LIMIT", "10000000"))

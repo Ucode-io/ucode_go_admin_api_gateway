@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	"medion/medion_go_api_gateway/api/http"
+	"medion/medion_go_api_gateway/genproto/auth_service"
+	"medion/medion_go_api_gateway/pkg/helper"
 	"strings"
-	"ucode/ucode_go_admin_api_gateway/api/http"
-	"ucode/ucode_go_admin_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_admin_api_gateway/pkg/helper"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
@@ -26,7 +26,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 }
 
 func (h *Handler) hasAccess(c *gin.Context) (*auth_service.HasAccessResponse, bool) {
-	bearerToken := c.GetHeader("Authorization")
+		bearerToken := c.GetHeader("Authorization")
 	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
@@ -62,36 +62,6 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.HasAccessResponse, bo
 	return resp, true
 }
 
-// func (h *Handler) V2hasAccess(c *gin.Context) (*auth_service.HasAccessResponse, bool) {
-// 	if c.Param("table_slug") == "branches" {
-// 		return nil, true
-// 	} else {
-// 		bearerToken := c.GetHeader("Authorization")
-// 		strArr := strings.Split(bearerToken, " ")
-// 		if len(strArr) != 2 || strArr[0] != "Bearer" {
-// 			h.handleResponse(c, http.Forbidden, "token error: wrong format")
-// 			return nil, false
-// 		}
-// 		accessToken := strArr[1]
-
-// 		resp, err := h.services.SessionService().V2HasAccess(
-// 			c.Request.Context(),
-// 			&auth_service.HasAccessRequest{
-// 				AccessToken:      accessToken,
-// 				ProjectId:        "80cc11d9-2ee6-494a-a09d-40150d151145",
-// 				ClientPlatformId: "3f6320a6-b6ed-4f5f-ad90-14a154c95ed3",
-// 				Path:             helper.GetURLWithTableSlug(c),
-// 				Method:           c.Request.Method,
-// 			},
-// 		)
-// 		if err != nil {
-// 			h.handleResponse(c, http.Unauthorized, err.Error())
-// 			return nil, false
-// 		}
-
-// 		return resp, true
-// 	}
-// }
 
 func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.HasAccessResponse) {
 	data, ok := c.Get("Auth")

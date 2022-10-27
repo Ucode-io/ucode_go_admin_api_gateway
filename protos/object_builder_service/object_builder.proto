@@ -15,22 +15,16 @@ service ObjectBuilderService {
     rpc Delete(CommonMessage) returns (CommonMessage) {}
     rpc ManyToManyAppend(ManyToManyMessage) returns (google.protobuf.Empty) {}
     rpc ManyToManyDelete(ManyToManyMessage) returns (google.protobuf.Empty) {}
-    rpc GetTableDetails(CommonMessage) returns (CommonMessage) {}
+    rpc GetObjectDetails(CommonMessage) returns (CommonMessage) {}
     rpc GetListInExcel(CommonMessage) returns (CommonMessage) {}
     rpc Batch(BatchRequest) returns (CommonMessage) {}
-    rpc UpsertPermissionsByAppId(UpsertPermissionsByAppIdRequest) returns (UpsertPermissionsByAppIdResponse) {}
+    rpc MultipleUpdate (CommonMessage) returns (google.protobuf.Empty) {}
 }
 
 message CommonMessage {
     string table_slug = 1;
     google.protobuf.Struct data = 2;
 }
-
-message UpsertPermissionsByAppIdResponse{
-    string app = 1;
-    google.protobuf.Struct data = 2;
-}
-
 message ManyToManyMessage {
     string table_from = 1;
     string table_to = 2;
@@ -42,9 +36,4 @@ message BatchRequest {
     string table_slug = 1;
     google.protobuf.Struct data = 2;
     repeated string updated_fields = 3;
-}
-
-message UpsertPermissionsByAppIdRequest {
-    string app_id = 1;
-    google.protobuf.Struct data = 2;
 }

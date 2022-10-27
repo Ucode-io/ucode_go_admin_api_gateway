@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"ucode/ucode_go_admin_api_gateway/api/http"
-	"ucode/ucode_go_admin_api_gateway/config"
+	"medion/medion_go_api_gateway/api/http"
+	"medion/medion_go_api_gateway/config"
 
 	"github.com/gin-gonic/gin"
 )

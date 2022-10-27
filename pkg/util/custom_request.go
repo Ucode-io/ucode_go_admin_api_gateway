@@ -1,0 +1,86 @@
+package util
+
+import (
+	"bytes"
+	"encoding/json"
+	"encoding/xml"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"time"
+
+	"medion/medion_go_api_gateway/api/models"
+)
+
+const (
+		Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
+)
+
+func DoRequest(url string, method string, body interface{}) (responseModel models.InvokeFunctionResponse, err error) {
+	data, err := json.Marshal(&body)
+	if err != nil {
+		return
+	}
+	client := &http.Client{
+		Timeout: time.Duration(5 * time.Second),
+	}
+
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
+	if err != nil {
+		return
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	respByte, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	err = json.Unmarshal(respByte, &responseModel)
+
+	return
+}
+// DoXMLRequest function for alaflab integration 
+func DoXMLRequest(url string, method string, body interface{}) (responseModel models.InvokeFunctionResponse, err error) {
+	data, err := xml.MarshalIndent(&body, " ", "  ")
+	if err != nil {
+		return
+	}
+
+	data = []byte(Header + string(data))
+	fmt.Println("Data :", string(data))
+
+	client := &http.Client{
+		Timeout: time.Duration(30 * time.Second),
+	}
+
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
+	if err != nil {
+		fmt.Println("error in NewRequest() : ", err)
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("error in Do() : ", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	respByte, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("error in ReadAll() : ", err)
+		return
+	}
+
+	err = json.Unmarshal(respByte, &responseModel)
+
+	return
+}

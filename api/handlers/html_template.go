@@ -2,10 +2,9 @@ package handlers
 
 import (
 	"context"
-	"fmt"
-	"ucode/ucode_go_admin_api_gateway/api/http"
-	obs "ucode/ucode_go_admin_api_gateway/genproto/object_builder_service"
-	"ucode/ucode_go_admin_api_gateway/pkg/util"
+	"medion/medion_go_api_gateway/api/http"
+	obs "medion/medion_go_api_gateway/genproto/object_builder_service"
+	"medion/medion_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -60,7 +59,6 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 	htmlTemplateID := c.Param("html_template_id")
-	fmt.Println(htmlTemplateID)
 	if !util.IsValidUUID(htmlTemplateID) {
 		h.handleResponse(c, http.InvalidArgument, "html template id is an invalid uuid")
 		return

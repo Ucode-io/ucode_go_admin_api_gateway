@@ -3,11 +3,9 @@ package test
 import (
 	"fmt"
 	"log"
-
+	"medion/medion_go_api_gateway/config"
+	"medion/medion_go_api_gateway/genproto/corporate_service"
 	"testing"
-
-	"ucode/ucode_go_admin_api_gateway/config"
-	"ucode/ucode_go_admin_api_gateway/genproto/corporate_service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
