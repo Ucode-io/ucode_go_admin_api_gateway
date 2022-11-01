@@ -15,8 +15,8 @@
   only:
     - $BRANCH
   variables:
-    $ENV_TAG: ddddd
-    $BRANCH: bbbbb
+    ENV_TAG: ddddd
+    BRANCH: bbbbb
 
 build-prod:
   extends: .build_template
