@@ -1,7 +1,8 @@
 include:
-  template: .gitlab/ci/build.gitlab-ci.yml
+  template: .gitlab/ci/*.gitlab-ci.yml
 
-build:
+build-prod:
+  extends: .build_template
   variables:
     ENV_TAG: Env
     BRANCH: staging

@@ -1,4 +1,4 @@
-build:
+.build_template:
   stage: build
   image: gitlab.udevs.io:5050/docker/docker:dind
   before_script:
@@ -11,3 +11,6 @@ build:
     # - make push-image TAG=$CI_PIPELINE_IID PROJECT_NAME=$CI_PROJECT_NAMESPACE REGISTRY=$CI_REGISTRY ENV_TAG=$ENV_TAG
   only:
     - $BRANCH
+  variables:
+    $ENV_TAG: ddddd
+    $BRANCH: bbbbb
