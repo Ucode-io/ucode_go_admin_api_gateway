@@ -1,21 +1,5 @@
-# include:
-#   template: .gitlab/ci/*.gitlab-ci.yml
-
-.build_template:
-  stage: build
-  image: gitlab.udevs.io:5050/docker/docker:dind
-  before_script:
-    ## docker login
-    # - docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password $CI_REGISTRY_PASSWORD
-  script:
-    - echo $ENV_TAG
-    # - make build-image TAG=$CI_PIPELINE_IID PROJECT_NAME=$CI_PROJECT_NAMESPACE REGISTRY=$CI_REGISTRY ENV_TAG=$ENV_TAG
-    # - make push-image TAG=$CI_PIPELINE_IID PROJECT_NAME=$CI_PROJECT_NAMESPACE REGISTRY=$CI_REGISTRY ENV_TAG=$ENV_TAG
-  only:
-    - $BRANCH
-  variables:
-    ENV_TAG: ddddd
-    BRANCH: bbbbb
+include:
+  - build.gitlab-ci.yml
 
 build-prod:
   extends: .build_template
