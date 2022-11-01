@@ -1,5 +1,5 @@
 include:
-  - build.gitlab-ci.yml
+  - .gitlab/ci/build.gitlab-ci.yml
 
 build-prod:
   extends: .build_template
