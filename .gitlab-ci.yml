@@ -1,6 +1,10 @@
 include:
   - .gitlab/ci/*gitlab-ci.yml
 
+before_script:
+  # docker login
+  - docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password $CI_REGISTRY_PASSWORD
+
 build-prod:
   extends: .build_template
   variables:
