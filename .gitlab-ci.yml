@@ -4,5 +4,5 @@ include:
 build-prod:
   extends: .build_template
   variables:
-    ENV_TAG: Env
+    ENV_TAG: latest
     BRANCH: staging
