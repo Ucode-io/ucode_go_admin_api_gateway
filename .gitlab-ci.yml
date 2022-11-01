@@ -6,3 +6,5 @@ build-prod:
   variables:
     ENV_TAG: latest
     BRANCH: staging
+  only:
+    - staging
