@@ -1,55 +1,32 @@
+include:
+  - .gitlab/ci/*.gitlab-ci.yml
+
 stages:
   - build
-  - migrate
   - deploy
   - rollback
 
-include:
-  - .gitlab/ci/build.gitlab-ci.yml
-  - .gitlab/ci/migrate.gitlab-ci.yml
-  - .gitlab/ci/deploy.gitlab-ci.yml
-  - .gitlab/ci/rollback.gitlab-ci.yml
-
-before_script:
-  # docker login
-  - docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password $CI_REGISTRY_PASSWORD
-
 build-staging:
+  stage: build
   extends: .build_template
   variables:
     ENV_TAG: test
-    KUBECONFIGJSON: yq r -j $PROD_MEDION_KUBECONFIG
   only:
     - staging
-
-build-prod:
-  extends: .build_template
-  variables:
-    ENV_TAG: latest
-  only:
-    - master
-
-migrate-staging:
-  extends: .migrate_template
-  variables:
-    PATH_MIGRATION: migrations
-    POSTGRES_LINK: $GITLAB_ENV_VARIABLE
-  only:
-    - staging
-
-migrate-prod:
-  extends: .migrate_template
-  variables:
-    PATH_MIGRATION: migrations
-    POSTGRES_LINK: $GITLAB_ENV_VARIABLE
-  only:
-    - master
 
 deploy-staging:
-  extends: .migrate_template
-  before_script:
+  stage: deploy
+  extends: .deploy_template
   variables:
-    KUBECONFIGJSON: yq r -j $KUBECONFIG
-    NAMESPACE: microservices
+    NAMESPACE: test
+    KUBECONFIGJSON: $KUBECONFIG
   only:
     - staging
+
+rollback-staging:
+  stage: rollback
+  extends: .rollback_template
+  variables:
+    NAMESPACE: test
+    KUBECONFIGJSON: $KUBECONFIG
+  when: manual
