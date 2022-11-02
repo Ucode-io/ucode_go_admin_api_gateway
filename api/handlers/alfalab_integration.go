@@ -160,3 +160,6 @@ func (h *Handler) GetReferral(c *gin.Context) {
 	}
 	fmt.Println(string(body))
 }
+
+
+// Need to delete
