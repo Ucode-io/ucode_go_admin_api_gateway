@@ -158,7 +158,7 @@ affinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
         - matchExpressions:
-            - key: kubernetes.io/env-staging
+            - key: kubernetes.io/env-test
               operator: In
               values:
                 - "true"
