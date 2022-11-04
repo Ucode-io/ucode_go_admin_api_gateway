@@ -7,5 +7,7 @@
     - cat /root/.kube/config && export KUBECONFIG="/root/.kube/config"
     - DEPLOYMENT=$(echo $CI_PROJECT_NAME | sed s/_/-/g | sed s/$CI_PROJECT_NAMESPACE-//g)
     - echo $DEPLOYMENT
+    - kubectl config view
+    - helm init --kubeconfig="/root/.kube/config"
     - helm repo add --username $HELM_REGISTRY_USERNAME --password $HELM_REGISTRY_PASSWORD $HELM_REPO_NAME $HELM_REGISTRY_PATH
     - helm upgrade --install $DEPLOYMENT $HELM_REPO_NAME/$HELM_CHART_NAME --set=image.tag=$CI_PIPELINE_IID --values .helm/values-prod.yml -n $NAMESPACE
