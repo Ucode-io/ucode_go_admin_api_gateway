@@ -3,6 +3,7 @@
   image: gitlab.udevs.io:5050/docker/docker:dind
   script:
     - echo "$KUBECONFIGJSON" > tmp
+    - file tmp
     - yq -P tmp > ~/.kube/config
     - DEPLOYMENT=$(echo $CI_PROJECT_NAME | sed s/_/-/g | sed s/$CI_PROJECT_NAMESPACE-//g)
     - helm repo add --username $HELM_REGISTRY_USERNAME --password $HELM_REGISTRY_PASSWORD $HELM_REPO_NAME $HELM_REGISTRY_PATH
