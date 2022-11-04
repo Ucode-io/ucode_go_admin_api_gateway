@@ -3,7 +3,7 @@ include:
 
 stages:
   - build
-  # - deploy
+  - deploy
   # - rollback
 
 build-staging:
@@ -13,15 +13,15 @@ build-staging:
     ENV_TAG: test
   only:
     - staging
-# deploy-staging:
-#   stage: deploy
-#   extends: .deploy_template
-#   variables:
-#     NAMESPACE: test
-#     KUBECONFIGJSON: $KUBECONFIG
-#   only:
-#     - staging
 
+deploy-staging:
+  stage: deploy
+  extends: .deploy_template
+  variables:
+    NAMESPACE: test
+    KUBECONFIGJSON: $KUBECONFIG
+  only:
+    - staging
 # rollback-staging:
 #   stage: rollback
 #   extends: .rollback_template
