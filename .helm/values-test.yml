@@ -35,7 +35,7 @@ serviceAccount:
 
 podAnnotations:
   vault.hashicorp.com/agent-inject: "true"
-  vault.hashicorp.com/auth-path: "auth/kubernetes"
+  vault.hashicorp.com/auth-path: "auth/kubernetes-ucode"
   vault.hashicorp.com/agent-inject-secret-.env: "secret/data/k8s/ucode-test/go-admin-api-gateway"
   vault.hashicorp.com/secret-volume-path-.env: "/app"
   vault.hashicorp.com/role: "ucode-test"
@@ -105,13 +105,13 @@ ingress:
         cert-manager.io/cluster-issuer: letsencrypt-prod
       type: web
       hosts:
-        - host: "test.admin.api.ucode.udevs.io"
+        - host: "test.admin.api.u-code.io"
           path: /
           servicePort: 8080
       tls:
         - secretName: api-tls
           hosts:
-            - "test.admin.api.ucode.udevs.io"
+            - "test.admin.api.u-code.io"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -126,13 +126,13 @@ ingress:
         cert-manager.io/cluster-issuer: letsencrypt-prod
       type: auth
       hosts:
-        - host: "test.admin.api.ucode.udevs.io"
+        - host: "test.admin.api.u-code.io"
           path: /swagger
           servicePort: 8080
       tls:
         - secretName: api-tls
           hosts:
-            - "test.admin.api.ucode.udevs.io"
+            - "test.admin.api.u-code.io"
 
 # resources:
 #    limits:
