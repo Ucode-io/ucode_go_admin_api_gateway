@@ -2,17 +2,17 @@ include:
   - .gitlab/ci/*.gitlab-ci.yml
 
 stages:
-  - build
+  # - build
   - deploy
   # - rollback
 
-build-staging:
-  stage: build
-  extends: .build_template
-  variables:
-    ENV_TAG: test
-  only:
-    - staging
+# build-staging:
+#   stage: build
+#   extends: .build_template
+#   variables:
+#     ENV_TAG: test
+#   only:
+#     - staging
 
 deploy-staging:
   stage: deploy
