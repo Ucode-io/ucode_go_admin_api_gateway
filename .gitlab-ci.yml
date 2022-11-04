@@ -19,7 +19,7 @@ deploy-staging:
   extends: .deploy_template
   variables:
     NAMESPACE: test
-    KUBECONFIGJSON: $KUBECONFIG
+    K8SCONFIGJSON: $UCODE_KUBECONFIG
   only:
     - staging
 # rollback-staging:

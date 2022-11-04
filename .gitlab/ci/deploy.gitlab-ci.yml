@@ -2,7 +2,7 @@
   stage: deploy
   image: gitlab.udevs.io:5050/docker/docker:dind
   script:
-    - echo $KUBECONFIGJSON > tmp
+    - echo $K8SCONFIGJSON > tmp
     - yq -P tmp > ~/.kube/config
     - cat ~/.kube/config
     - DEPLOYMENT=$(echo $CI_PROJECT_NAME | sed s/_/-/g | sed s/$CI_PROJECT_NAMESPACE-//g)
