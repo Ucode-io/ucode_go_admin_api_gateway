@@ -28,5 +28,5 @@ rollback-staging:
   extends: .rollback_template
   variables:
     NAMESPACE: test
-    KUBECONFIGJSON: $KUBECONFIG
+    K8SCONFIGJSON: $UCODE_KUBECONFIG
   when: manual
