@@ -45,6 +45,11 @@ podAnnotations:
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
+    {{- with secret "secret/data/k8s/ucode-test/services" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
     {{- with secret "secret/data/k8s/ucode-test/go-admin-api-gateway" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
@@ -109,7 +114,7 @@ ingress:
           path: /
           servicePort: 8080
       tls:
-        - secretName: api-tls
+        - secretName: admin-api-tls
           hosts:
             - "test.admin.api.u-code.io"
     - annotations:
@@ -118,7 +123,7 @@ ingress:
         # name of the secret that contains the user/password definitions
         nginx.ingress.kubernetes.io/auth-secret: basic-auth
         # message to display with an appropriate context why the authentication is required
-        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - invan"
+        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - u-code"
         nginx.ingress.kubernetes.io/proxy-body-size: "0"
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
@@ -130,7 +135,7 @@ ingress:
           path: /swagger
           servicePort: 8080
       tls:
-        - secretName: api-tls
+        - secretName: admin-api-tls
           hosts:
             - "test.admin.api.u-code.io"
 
