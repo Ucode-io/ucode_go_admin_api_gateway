@@ -2,17 +2,17 @@ include:
   - .gitlab/ci/*.gitlab-ci.yml
 
 stages:
-  # - build
+  - build
   - deploy
-  # - rollback
+  - rollback
 
-# build-staging:
-#   stage: build
-#   extends: .build_template
-#   variables:
-#     ENV_TAG: test
-#   only:
-#     - staging
+build-staging:
+  stage: build
+  extends: .build_template
+  variables:
+    ENV_TAG: test
+  only:
+    - staging
 
 deploy-staging:
   stage: deploy
@@ -22,10 +22,11 @@ deploy-staging:
     K8SCONFIGJSON: $UCODE_KUBECONFIG
   only:
     - staging
-# rollback-staging:
-#   stage: rollback
-#   extends: .rollback_template
-#   variables:
-#     NAMESPACE: test
-#     KUBECONFIGJSON: $KUBECONFIG
-#   when: manual
+
+rollback-staging:
+  stage: rollback
+  extends: .rollback_template
+  variables:
+    NAMESPACE: test
+    KUBECONFIGJSON: $KUBECONFIG
+  when: manual
