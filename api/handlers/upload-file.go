@@ -26,7 +26,7 @@ type UploadResponse struct {
 }
 
 var (
-	defaultBucket = "medion"
+	defaultBucket = "ucode"
 )
 
 type File struct {
