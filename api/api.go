@@ -194,6 +194,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// Integration with AlfaLab
 		v1.POST("/alfalab/directions", h.CreateDirections)
 		v1.GET("/alfalab/referral", h.GetReferral)
+
+		// profile settings
+		// v1.POST("profile/settings", h.CreateProfileSettings)
+		// v1.PUT("profile/settings")
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

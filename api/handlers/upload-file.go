@@ -64,7 +64,7 @@ func (h *Handler) Upload(c *gin.Context) {
 	file.File.Filename = strings.ReplaceAll(file.File.Filename, " ", "")
 	file.File.Filename = fmt.Sprintf("%s_%s", fName.String(), file.File.Filename)
 	dst, _ := os.Getwd()
-
+	fmt.Println("dst, _", dst)
 	minioClient, err := minio.New(h.cfg.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.cfg.MinioAccessKeyID, h.cfg.MinioSecretAccessKey, ""),
 		Secure: h.cfg.MinioProtocol,
