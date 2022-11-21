@@ -1,6 +1,8 @@
 package services
 
 import (
+	"errors"
+	"sync"
 	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/genproto/analytics_service"
@@ -79,6 +81,31 @@ type grpcClients struct {
 	customEventService        object_builder_service.CustomEventServiceClient
 	functionService           object_builder_service.FunctionServiceClient
 	barcodeService            object_builder_service.BarcodeServiceClient
+}
+
+type ProjectServices struct {
+	Services map[string]ServiceManagerI
+	Mu       sync.Mutex
+}
+
+func NewProjectGrpcsClient(p *ProjectServices, s ServiceManagerI, namespace string) (*ProjectServices, error) {
+	if p == nil {
+		p = &ProjectServices{}
+	}
+	if s == nil {
+		return nil, errors.New("s cannot be nil (nil argument of ServiceManagerI)")
+	}
+
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+
+	_, ok := p.Services[namespace]
+	if ok {
+		return nil, errors.New("namespace already exists with this name")
+	}
+
+	p.Services[namespace] = s
+	return p, nil
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {

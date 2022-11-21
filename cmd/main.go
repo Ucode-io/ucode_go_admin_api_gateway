@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sync"
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
@@ -37,6 +38,35 @@ func main() {
 	defer func() {
 		err := logger.Cleanup(log)
 		if err != nil {
+			return
+		}
+	}()
+
+	projectServices, err := services.NewProjectGrpcsClient(
+		&services.ProjectServices{
+			Services: map[string]services.ServiceManagerI{},
+			Mu:       sync.Mutex{}},
+		grpcSvcs,
+		"medion",
+	)
+	if err != nil {
+		log.Error("projectServices", logger.Error(err))
+		return
+	}
+
+	go func() {
+		// projects
+		rProjects := gin.New()
+
+		rProjects.Use(gin.Logger(), gin.Recovery())
+		rProjects.UseH2C = true
+
+		hProjects := handlers.NewProjectsHandler(cfg, log, projectServices)
+
+		api.SetUpProjectAPIs(rProjects, hProjects, cfg)
+
+		if err := rProjects.Run("8081"); err != nil {
+			log.Error("error while running", logger.Error(err))
 			return
 		}
 	}()

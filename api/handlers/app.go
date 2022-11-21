@@ -191,3 +191,46 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 
 	h.handleResponse(c, http.NoContent, resp)
 }
+
+// CreateApp godoc
+// @Security ApiKeyAuth
+// @ID create_app
+// @Router /v1/app [POST]
+// @Summary Create app
+// @Description Create app
+// @Tags App
+// @Accept json
+// @Produce json
+// @Param app body object_builder_service.AppRequest true "CreateAppRequestBody"
+// @Success 201 {object} http.Response{data=object_builder_service.CreateAppResponse} "App data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *ProjectsHandler) CreateApp(c *gin.Context) {
+	var app obs.AppRequest
+
+	err := c.ShouldBindJSON(&app)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.services.Mu.Lock()
+	services, ok := h.services.Services["medion"]
+	if !ok {
+		h.handleResponse(c, http.Forbidden, "nil service")
+		return
+	}
+	h.services.Mu.Unlock()
+
+	resp, err := services.AppService().Create(
+		context.Background(),
+		&app,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, resp)
+}
