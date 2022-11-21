@@ -206,6 +206,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *ProjectsHandler) CreateApp(c *gin.Context) {
+	h.log.Info("create app requested...")
 	var app obs.AppRequest
 
 	err := c.ShouldBindJSON(&app)
