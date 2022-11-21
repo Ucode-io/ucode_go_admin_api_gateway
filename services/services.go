@@ -90,7 +90,7 @@ type ProjectServices struct {
 
 func NewProjectGrpcsClient(p *ProjectServices, s ServiceManagerI, namespace string) (*ProjectServices, error) {
 	if p == nil {
-		p = &ProjectServices{}
+		return nil, errors.New("p cannot be nil (nil argument of *ProjectServices)")
 	}
 	if s == nil {
 		return nil, errors.New("s cannot be nil (nil argument of ServiceManagerI)")

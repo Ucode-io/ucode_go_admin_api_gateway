@@ -64,12 +64,11 @@ func main() {
 
 	api.SetUpProjectAPIs(rProjects, hProjects, cfg)
 
+	log.Info("server is running...")
 	if err := rProjects.Run(cfg.HTTPPort); err != nil {
 		log.Error("error while running", logger.Error(err))
 		return
 	}
-
-	log.Info("server is running...")
 
 	// r := gin.New()
 
