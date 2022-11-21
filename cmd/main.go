@@ -65,7 +65,7 @@ func main() {
 
 		api.SetUpProjectAPIs(rProjects, hProjects, cfg)
 
-		if err := rProjects.Run("8081"); err != nil {
+		if err := rProjects.Run(cfg.HTTPPort); err != nil {
 			log.Error("error while running", logger.Error(err))
 			return
 		}
@@ -79,7 +79,7 @@ func main() {
 
 	api.SetUpAPI(r, h, cfg)
 
-	if err := r.Run(cfg.HTTPPort); err != nil {
+	if err := r.Run("8081"); err != nil {
 		return
 	}
 }
