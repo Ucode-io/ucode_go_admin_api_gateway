@@ -54,32 +54,32 @@ func main() {
 		return
 	}
 
-	go func() {
-		// projects
-		rProjects := gin.New()
+	// projects
+	rProjects := gin.New()
 
-		rProjects.Use(gin.Logger(), gin.Recovery())
-		rProjects.UseH2C = true
+	rProjects.Use(gin.Logger(), gin.Recovery())
+	rProjects.UseH2C = true
 
-		hProjects := handlers.NewProjectsHandler(cfg, log, projectServices)
+	hProjects := handlers.NewProjectsHandler(cfg, log, projectServices)
 
-		api.SetUpProjectAPIs(rProjects, hProjects, cfg)
+	api.SetUpProjectAPIs(rProjects, hProjects, cfg)
 
-		if err := rProjects.Run(cfg.HTTPPort); err != nil {
-			log.Error("error while running", logger.Error(err))
-			return
-		}
-	}()
-
-	r := gin.New()
-
-	r.Use(gin.Logger(), gin.Recovery())
-
-	h := handlers.NewHandler(cfg, log, grpcSvcs)
-
-	api.SetUpAPI(r, h, cfg)
-
-	if err := r.Run("8081"); err != nil {
+	if err := rProjects.Run(cfg.HTTPPort); err != nil {
+		log.Error("error while running", logger.Error(err))
 		return
 	}
+
+	log.Info("server is running...")
+
+	// r := gin.New()
+
+	// r.Use(gin.Logger(), gin.Recovery())
+
+	// h := handlers.NewHandler(cfg, log, grpcSvcs)
+
+	// api.SetUpAPI(r, h, cfg)
+
+	// if err := r.Run("8081"); err != nil {
+	// 	return
+	// }
 }
