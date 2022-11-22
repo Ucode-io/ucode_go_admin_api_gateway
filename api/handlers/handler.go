@@ -6,6 +6,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
+	"ucode/ucode_go_api_gateway/storage"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,6 +21,7 @@ type ProjectsHandler struct {
 	cfg      config.Config
 	log      logger.LoggerI
 	services *services.ProjectServices
+	storage  storage.StorageI
 }
 
 func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceManagerI) Handler {
@@ -30,11 +32,12 @@ func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceMana
 	}
 }
 
-func NewProjectsHandler(cfg config.Config, log logger.LoggerI, svcs *services.ProjectServices) ProjectsHandler {
+func NewProjectsHandler(cfg config.Config, log logger.LoggerI, svcs *services.ProjectServices, strg storage.StorageI) ProjectsHandler {
 	return ProjectsHandler{
 		cfg:      cfg,
 		log:      log,
 		services: svcs,
+		storage:  strg,
 	}
 }
 
