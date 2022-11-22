@@ -259,6 +259,9 @@ func SetUpProjectAPIs(r *gin.Engine, h handlers.ProjectsHandler, cfg config.Conf
 	r.Use(customCORSMiddleware())
 	r.Use(MaxAllowed(5000))
 
+	// Project
+	r.POST("/v1/project", h.CreateProject)
+
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
@@ -272,6 +275,7 @@ func SetUpProjectAPIs(r *gin.Engine, h handlers.ProjectsHandler, cfg config.Conf
 		// App
 		v1.POST("/app", h.CreateApp)
 		v1.GET("/app", h.GetAllApps)
+
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
