@@ -1,11 +1,16 @@
 package main
 
 import (
+	"context"
+	"sync"
+	"time"
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/project_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
+	"ucode/ucode_go_api_gateway/storage/postgres"
 
 	"github.com/gin-gonic/gin"
 )
@@ -41,43 +46,80 @@ func main() {
 		}
 	}()
 
-	// projectServices, err := services.NewProjectGrpcsClient(
-	// 	&services.ProjectServices{
-	// 		Services: map[string]services.ServiceManagerI{},
-	// 		Mu:       sync.Mutex{}},
-	// 	grpcSvcs,
-	// 	"medion",
-	// )
-	// if err != nil {
-	// 	log.Error("projectServices", logger.Error(err))
-	// 	return
-	// }
-
-	// projects
-	// rProjects := gin.New()
-
-	// rProjects.Use(gin.Logger(), gin.Recovery())
-	// rProjects.UseH2C = true
-
-	// hProjects := handlers.NewProjectsHandler(cfg, log, projectServices)
-
-	// api.SetUpProjectAPIs(rProjects, hProjects, cfg)
-
-	// log.Info("server is running...")
-	// if err := rProjects.Run(cfg.HTTPPort); err != nil {
-	// 	log.Error("error while running", logger.Error(err))
-	// 	return
-	// }
-
-	r := gin.New()
-
-	r.Use(gin.Logger(), gin.Recovery())
-
-	h := handlers.NewHandler(cfg, log, grpcSvcs)
-
-	api.SetUpAPI(r, h, cfg)
-
-	if err := r.Run(cfg.HTTPPort); err != nil {
+	projectsService, err := services.NewProjectGrpcsClient(
+		&services.ProjectServices{
+			Services: map[string]services.ServiceManagerI{},
+			Mu:       sync.Mutex{}},
+		grpcSvcs,
+		"ucode",
+	)
+	if err != nil {
+		log.Error("error while establishing grpc conn to ucode", logger.Error(err))
 		return
 	}
+
+	pgStore, err := postgres.NewPostgres(context.Background(), cfg)
+	if err != nil {
+		log.Panic("postgres.NewPostgres", logger.Error(err))
+	}
+	defer pgStore.CloseDB()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancel()
+
+	projects, err := pgStore.Project().GetList(ctx, &project_service.GetAllProjectsRequest{})
+	if err != nil {
+		log.Error("error while getting projects", logger.Error(err))
+		return
+	}
+
+	for _, project := range projects.GetProjects() {
+		conf := config.Config{}
+
+		conf.ObjectBuilderServiceHost = project.ObjectBuilderServiceHost
+		conf.ObjectBuilderGRPCPort = project.ObjectBuilderServicePort
+
+		conf.AuthServiceHost = project.AuthServiceHost
+		conf.AuthGRPCPort = project.AuthServicePort
+
+		conf.AnalyticsServiceHost = project.AnalyticsServiceHost
+		conf.AnalyticsGRPCPort = project.AnalyticsServicePort
+
+		grpcServices, err := services.NewGrpcClients(conf)
+		if err != nil {
+			log.Error("error while establishing grpc conn to "+project.Namespace, logger.Error(err))
+		}
+
+		_, err = services.NewProjectGrpcsClient(projectsService, grpcServices, project.Namespace)
+		if err != nil {
+			log.Error("error while adding grpc client "+project.Namespace, logger.Error(err))
+		}
+	}
+
+	rProjects := gin.New()
+
+	rProjects.Use(gin.Logger(), gin.Recovery())
+	rProjects.UseH2C = true
+
+	hProjects := handlers.NewProjectsHandler(cfg, log, projectsService, pgStore)
+
+	api.SetUpProjectAPIs(rProjects, hProjects, cfg)
+
+	log.Info("server is running...")
+	if err := rProjects.Run(cfg.HTTPPort); err != nil {
+		log.Error("error while running", logger.Error(err))
+		return
+	}
+
+	// r := gin.New()
+
+	// r.Use(gin.Logger(), gin.Recovery())
+
+	// h := handlers.NewHandler(cfg, log, grpcSvcs)
+
+	// api.SetUpAPI(r, h, cfg)
+
+	// if err := r.Run(cfg.HTTPPort); err != nil {
+	// 	return
+	// }
 }
