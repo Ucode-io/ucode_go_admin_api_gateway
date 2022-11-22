@@ -96,18 +96,18 @@ func main() {
 		}
 	}
 
-	r := gin.New()
+	// r := gin.New()
 
-	r.Use(gin.Logger(), gin.Recovery())
+	// r.Use(gin.Logger(), gin.Recovery())
 
-	h := handlers.NewHandler(cfg, log, grpcSvcs)
+	// h := handlers.NewHandler(cfg, log, grpcSvcs)
 
-	api.SetUpAPI(r, h, cfg)
+	// api.SetUpAPI(r, h, cfg)
 
-	log.Info("server is running...")
-	if err := r.Run(cfg.HTTPPort); err != nil {
-		return
-	}
+	// log.Info("server is running...")
+	// if err := r.Run(cfg.HTTPPort); err != nil {
+	// 	return
+	// }
 
 	rProjects := gin.New()
 
