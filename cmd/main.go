@@ -53,7 +53,7 @@ func main() {
 			Services: map[string]services.ServiceManagerI{},
 			Mu:       sync.Mutex{}},
 		grpcSvcs,
-		"ucode",
+		"test.admin.u-code.io",
 	)
 	if err != nil {
 		log.Error("[ucode] error while adding grpc client", logger.Error(err))

@@ -82,13 +82,24 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.HasAccessRes
 
 func (h *Handler) ProjectsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		namespace := c.GetHeader("namespace")
+		origin := c.GetHeader("Origin")
+		host := strings.Split(origin, "://")
+		var namespace string
 
-		if len(namespace) == 0 {
-			h.handleResponse(c, http.Forbidden, "namespace required")
+		if len(host) != 2 {
+			h.handleResponse(c, http.BadRequest, "wrong Origin format")
 			c.Abort()
 			return
 		}
+
+		namespace = host[1]
+		// namespace := c.GetHeader("namespace")
+
+		// if len(namespace) == 0 {
+		// 	h.handleResponse(c, http.Forbidden, "namespace required")
+		// 	c.Abort()
+		// 	return
+		// }
 		ok := h.IsServiceExists(namespace)
 		if !ok {
 			h.handleResponse(c, http.Forbidden, "namespace not existing")
