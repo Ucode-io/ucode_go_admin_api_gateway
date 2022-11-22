@@ -19,5 +19,5 @@ type ProjectRepoI interface {
 	GetList(ctx context.Context, queryParam *pb.GetAllProjectsRequest) (res *pb.GetAllProjectsResponse, err error)
 	GetByPK(ctx context.Context, pKey *pb.ProjectPrimaryKey) (res *pb.Project, err error)
 	Update(ctx context.Context, entity *pb.UpdateProjectRequest) (rowsAffected int64, err error)
-	Delete(ctx context.Context, pKey *pb.ProjectPrimaryKey) (rowsAffected int64, err error)
+	Delete(ctx context.Context, pKey *pb.ProjectPrimaryKey) (namespace string, rowsAffected int64, err error)
 }

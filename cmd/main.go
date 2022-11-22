@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 	"ucode/ucode_go_api_gateway/api"
@@ -74,6 +76,9 @@ func main() {
 	}
 
 	for _, project := range projects.GetProjects() {
+		if bytes, err := json.Marshal(project); err == nil {
+			fmt.Println("project", string(bytes))
+		}
 		conf := config.Config{}
 
 		conf.ObjectBuilderServiceHost = project.ObjectBuilderServiceHost
@@ -96,31 +101,31 @@ func main() {
 		}
 	}
 
-	// r := gin.New()
+	r := gin.New()
 
-	// r.Use(gin.Logger(), gin.Recovery())
+	r.Use(gin.Logger(), gin.Recovery())
 
-	// h := handlers.NewHandler(cfg, log, grpcSvcs)
+	h := handlers.NewHandler(cfg, log, projectsService, pgStore)
 
-	// api.SetUpAPI(r, h, cfg)
-
-	// log.Info("server is running...")
-	// if err := r.Run(cfg.HTTPPort); err != nil {
-	// 	return
-	// }
-
-	rProjects := gin.New()
-
-	rProjects.Use(gin.Logger(), gin.Recovery())
-	rProjects.UseH2C = true
-
-	hProjects := handlers.NewProjectsHandler(cfg, log, projectsService, pgStore)
-
-	api.SetUpProjectAPIs(rProjects, hProjects, cfg)
+	api.SetUpAPI(r, h, cfg)
 
 	log.Info("server is running...")
-	if err := rProjects.Run(cfg.HTTPPort); err != nil {
-		log.Error("error while running", logger.Error(err))
+	if err := r.Run(cfg.HTTPPort); err != nil {
 		return
 	}
+
+	// rProjects := gin.New()
+
+	// rProjects.Use(gin.Logger(), gin.Recovery())
+	// rProjects.UseH2C = true
+
+	// hProjects := handlers.NewProjectsHandler(cfg, log, projectsService, pgStore)
+
+	// api.SetUpProjectAPIs(rProjects, hProjects, cfg)
+
+	// log.Info("server is running...")
+	// if err := rProjects.Run(cfg.HTTPPort); err != nil {
+	// 	log.Error("error while running", logger.Error(err))
+	// 	return
+	// }
 }

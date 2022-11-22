@@ -38,7 +38,14 @@ func (h *Handler) GetQueryRows(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.QueryService().GetQueryRows(
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.QueryService().GetQueryRows(
 		context.Background(),
 		&as.CommonInput{
 			Data:  structData,

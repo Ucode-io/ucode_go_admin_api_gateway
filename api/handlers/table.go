@@ -70,7 +70,14 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		},
 	}
 
-	resp, err := h.services.TableService().Create(
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.TableService().Create(
 		context.Background(),
 		&table,
 	)
@@ -104,7 +111,14 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.TableService().GetByID(
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.TableService().GetByID(
 		context.Background(),
 		&obs.TablePrimaryKey{
 			Id: tableID,
@@ -145,7 +159,14 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.TableService().GetAll(
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.TableService().GetAll(
 		context.Background(),
 		&obs.GetAllTablesRequest{
 			Limit:  int32(limit),
@@ -183,7 +204,15 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.TableService().Update(
+
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.TableService().Update(
 		context.Background(),
 		&table,
 	)
@@ -217,7 +246,14 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.TableService().Delete(
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.TableService().Delete(
 		context.Background(),
 		&obs.TablePrimaryKey{
 			Id: tableID,

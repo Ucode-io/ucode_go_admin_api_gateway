@@ -5,7 +5,7 @@ import (
 	"ucode/ucode_go_api_gateway/services"
 )
 
-func (h *ProjectsHandler) GetService(namespace string) (services.ServiceManagerI, error) {
+func (h *Handler) GetService(namespace string) (services.ServiceManagerI, error) {
 	h.services.Mu.Lock()
 	defer h.services.Mu.Unlock()
 
@@ -16,7 +16,14 @@ func (h *ProjectsHandler) GetService(namespace string) (services.ServiceManagerI
 	return services, nil
 }
 
-func (h *ProjectsHandler) IsServiceExists(namespace string) bool {
+func (h *Handler) RemoveService(namespace string) {
+	h.services.Mu.Lock()
+	defer h.services.Mu.Unlock()
+
+	delete(h.services.Services, namespace)
+}
+
+func (h *Handler) IsServiceExists(namespace string) bool {
 	h.services.Mu.Lock()
 	defer h.services.Mu.Unlock()
 

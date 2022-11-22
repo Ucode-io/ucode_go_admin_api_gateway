@@ -24,7 +24,14 @@ import (
 func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 	tableSlug := c.Param("table_slug")
 
-	resp, err := h.services.BarcodeService().Generate(
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.BarcodeService().Generate(
 		context.Background(),
 		&obs.BarcodeGenerateReq{
 			TableSlug: tableSlug,

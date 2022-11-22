@@ -40,7 +40,14 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.FunctionService().Create(
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.FunctionService().Create(
 		context.Background(),
 		&obs.CreateFunctionRequest{
 			Path:        function.Path,
@@ -79,7 +86,14 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.FunctionService().GetSingle(
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.FunctionService().GetSingle(
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id: functionID,
@@ -114,7 +128,14 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.FunctionService().GetList(
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.FunctionService().GetList(
 		context.Background(),
 		&obs.GetAllFunctionsRequest{
 			Search: c.DefaultQuery("search", ""),
@@ -156,7 +177,15 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.FunctionService().Update(
+
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.FunctionService().Update(
 		context.Background(),
 		&obs.Function{
 			Id:          function.ID,
@@ -196,7 +225,14 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.FunctionService().Delete(
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.FunctionService().Delete(
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id: functionID,
@@ -233,7 +269,14 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	function, err := h.services.FunctionService().GetSingle(
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	function, err := services.FunctionService().GetSingle(
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id: invokeFunction.FunctionID,
@@ -249,7 +292,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-	_, err = h.services.CustomEventService().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
+	_, err = services.CustomEventService().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
 		FunctionId: invokeFunction.FunctionID,
 		ObjectIds:  invokeFunction.ObjectIDs,
 		FieldSlug:  function.Path + "_disable",

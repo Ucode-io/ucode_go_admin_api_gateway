@@ -91,11 +91,11 @@ func TestDelete(t *testing.T) {
 
 	defer pg.CloseDB()
 
-	rows, err := pg.Project().Delete(ctx, &project_service.ProjectPrimaryKey{Id: "71fda691-82db-4eda-a07f-187cdc34007f"})
+	name, rows, err := pg.Project().Delete(ctx, &project_service.ProjectPrimaryKey{Id: "71fda691-82db-4eda-a07f-187cdc34007f"})
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
 	}
 
-	fmt.Println(rows)
+	fmt.Println(name, rows)
 }

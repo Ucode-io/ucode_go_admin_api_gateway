@@ -198,12 +198,18 @@ func (r *projectRepo) Update(ctx context.Context, entity *pb.UpdateProjectReques
 	return 0, errors.New("error: not implemented")
 }
 
-func (r *projectRepo) Delete(ctx context.Context, pKey *pb.ProjectPrimaryKey) (rowsAffected int64, err error) {
+func (r *projectRepo) Delete(ctx context.Context, pKey *pb.ProjectPrimaryKey) (namespace string, rowsAffected int64, err error) {
+	namespace = ""
+	selectQuery := `SELECT namespace from "project" where id = $1`
+	err = r.db.QueryRow(ctx, selectQuery, pKey.Id).Scan(&namespace)
+	if err != nil {
+		return namespace, 0, err
+	}
 	query := `UPDATE "project" SET deleted_at = now() WHERE id = $1`
 	result, err := r.db.Exec(ctx, query, pKey.Id)
 	if err != nil {
-		return result.RowsAffected(), err
+		return namespace, result.RowsAffected(), err
 	}
 
-	return result.RowsAffected(), nil
+	return namespace, result.RowsAffected(), nil
 }
