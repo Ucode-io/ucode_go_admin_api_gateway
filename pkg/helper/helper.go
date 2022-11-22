@@ -2,6 +2,7 @@ package helper
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -42,4 +43,25 @@ func GetURLWithTableSlug(c *gin.Context) string {
 	}
 
 	return url
+}
+
+func ReplaceQueryParams(namedQuery string, params map[string]interface{}) (string, []interface{}) {
+	var (
+		i    int = 1
+		args     = make([]interface{}, 0, len(params))
+	)
+
+	for k, v := range params {
+		if k != "" {
+			oldsize := len(namedQuery)
+			namedQuery = strings.ReplaceAll(namedQuery, ":"+k, "$"+strconv.Itoa(i))
+
+			if oldsize != len(namedQuery) {
+				args = append(args, v)
+				i++
+			}
+		}
+	}
+
+	return namedQuery, args
 }
