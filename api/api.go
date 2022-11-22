@@ -271,6 +271,7 @@ func SetUpProjectAPIs(r *gin.Engine, h handlers.ProjectsHandler, cfg config.Conf
 	{
 		// App
 		v1.POST("/app", h.CreateApp)
+		v1.GET("/app", h.GetAllApps)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
