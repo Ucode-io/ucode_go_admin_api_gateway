@@ -23,10 +23,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 	r.GET("/ping", h.Ping)
 	r.GET("/config", h.GetConfig)
+
 	// Project
 	r.POST("/v1/project", h.CreateProject)
-
-	//upload
+	r.GET("/v1/project", h.GetAllProjects)
+	r.DELETE("/v1/project/:project_id", h.DeleteProject)
 
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth

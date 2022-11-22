@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -19,11 +18,6 @@ import (
 
 func main() {
 	cfg := config.Load()
-
-	grpcSvcs, err := services.NewGrpcClients(cfg)
-	if err != nil {
-		panic(err)
-	}
 
 	var loggerLevel = new(string)
 	*loggerLevel = logger.LevelDebug
@@ -48,6 +42,12 @@ func main() {
 		}
 	}()
 
+	grpcSvcs, err := services.NewGrpcClients(cfg)
+	if err != nil {
+		log.Error("[ucode] error while establishing grpc conn", logger.Error(err))
+		return
+	}
+
 	projectsService, err := services.NewProjectGrpcsClient(
 		&services.ProjectServices{
 			Services: map[string]services.ServiceManagerI{},
@@ -56,13 +56,16 @@ func main() {
 		"ucode",
 	)
 	if err != nil {
-		log.Error("error while establishing grpc conn to ucode", logger.Error(err))
+		log.Error("[ucode] error while adding grpc client", logger.Error(err))
 		return
 	}
+
+	log.Info("success established grpc conn to ucode")
 
 	pgStore, err := postgres.NewPostgres(context.Background(), cfg)
 	if err != nil {
 		log.Panic("postgres.NewPostgres", logger.Error(err))
+		return
 	}
 	defer pgStore.CloseDB()
 
@@ -76,9 +79,7 @@ func main() {
 	}
 
 	for _, project := range projects.GetProjects() {
-		if bytes, err := json.Marshal(project); err == nil {
-			fmt.Println("project", string(bytes))
-		}
+
 		conf := config.Config{}
 
 		conf.ObjectBuilderServiceHost = project.ObjectBuilderServiceHost
@@ -92,13 +93,15 @@ func main() {
 
 		grpcServices, err := services.NewGrpcClients(conf)
 		if err != nil {
-			log.Error("error while establishing grpc conn to "+project.Namespace, logger.Error(err))
+			log.Error(fmt.Sprintf("[%s] error while establishing grpc conn", project.Namespace), logger.Error(err))
 		}
 
 		_, err = services.NewProjectGrpcsClient(projectsService, grpcServices, project.Namespace)
 		if err != nil {
-			log.Error("error while adding grpc client "+project.Namespace, logger.Error(err))
+			log.Error(fmt.Sprintf("[%s] error while adding grpc client", project.Namespace), logger.Error(err))
 		}
+
+		log.Info("success established grpc conn to" + project.Namespace)
 	}
 
 	r := gin.New()
