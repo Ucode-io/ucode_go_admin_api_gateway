@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -82,7 +83,10 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.HasAccessRes
 
 func (h *Handler) ProjectsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		origin := c.GetHeader("Origin")
+		fmt.Println("request from", origin)
+
 		host := strings.Split(origin, "://")
 		var namespace string
 
@@ -95,11 +99,11 @@ func (h *Handler) ProjectsMiddleware() gin.HandlerFunc {
 		namespace = host[1]
 		// namespace := c.GetHeader("namespace")
 
-		// if len(namespace) == 0 {
-		// 	h.handleResponse(c, http.Forbidden, "namespace required")
-		// 	c.Abort()
-		// 	return
-		// }
+		if len(namespace) == 0 {
+			h.handleResponse(c, http.Forbidden, "namespace required")
+			c.Abort()
+			return
+		}
 		ok := h.IsServiceExists(namespace)
 		if !ok {
 			h.handleResponse(c, http.Forbidden, "namespace not existing")
@@ -108,6 +112,7 @@ func (h *Handler) ProjectsMiddleware() gin.HandlerFunc {
 		}
 
 		c.Set("namespace", namespace)
+		fmt.Println("namespace==", namespace)
 		c.Next()
 	}
 }
