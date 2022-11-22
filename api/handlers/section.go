@@ -25,7 +25,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 
 	tokenInfo := h.GetAuthInfo
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -71,7 +71,7 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)

@@ -35,7 +35,7 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.HasAccessResponse, bo
 	}
 	accessToken := strArr[1]
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -97,7 +97,7 @@ func (h *Handler) ProjectsMiddleware() gin.HandlerFunc {
 		}
 
 		namespace = host[1]
-		// namespace := c.GetHeader("namespace")
+		// namespace := c.GetString("namespace")
 
 		if len(namespace) == 0 {
 			h.handleResponse(c, http.Forbidden, "namespace required")
@@ -139,7 +139,7 @@ func (h *Handler) ProjectsMiddleware() gin.HandlerFunc {
 // 		return nil, false
 // 	}
 // 	accessToken := strArr[1]
-// 	namespace := c.GetHeader("namespace")
+// 	namespace := c.GetString("namespace")
 
 // 	h.services.Mu.Lock()
 // 	services, ok := h.services.Services[namespace]

@@ -202,7 +202,7 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)

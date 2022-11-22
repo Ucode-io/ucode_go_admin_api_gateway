@@ -52,7 +52,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 				return
 			}
 
-			namespace := c.GetHeader("namespace")
+			namespace := c.GetString("namespace")
 			services, err := h.GetService(namespace)
 			if err != nil {
 				h.handleResponse(c, http.Forbidden, err)
@@ -83,7 +83,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -136,7 +136,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -189,7 +189,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -264,7 +264,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -320,7 +320,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -372,7 +372,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -416,7 +416,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -457,7 +457,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -506,7 +506,7 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -590,7 +590,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -661,7 +661,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)

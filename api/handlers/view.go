@@ -33,7 +33,7 @@ func (h *Handler) CreateView(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -74,7 +74,7 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -117,7 +117,7 @@ func (h *Handler) UpdateView(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -158,7 +158,7 @@ func (h *Handler) DeleteView(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -195,7 +195,7 @@ func (h *Handler) DeleteView(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetViewList(c *gin.Context) {
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -245,7 +245,7 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -297,7 +297,7 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)

@@ -25,7 +25,7 @@ import (
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) ExcelReader(c *gin.Context) {
 	excelId := c.Param("excel_id")
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -69,7 +69,7 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)

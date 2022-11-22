@@ -30,7 +30,7 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -76,7 +76,7 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -123,7 +123,7 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -164,7 +164,7 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)

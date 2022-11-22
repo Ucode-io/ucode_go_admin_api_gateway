@@ -34,7 +34,7 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 		return
 	}
 	offset := (pageInt - 1) * limit
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -75,7 +75,7 @@ func (h *Handler) GetEventLogById(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "event_log_id is an invalid uuid")
 		return
 	}
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)

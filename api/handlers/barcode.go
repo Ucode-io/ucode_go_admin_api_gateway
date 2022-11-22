@@ -24,7 +24,7 @@ import (
 func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 	tableSlug := c.Param("table_slug")
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)

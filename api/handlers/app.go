@@ -31,7 +31,7 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -72,7 +72,7 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -118,7 +118,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -164,7 +164,7 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -205,7 +205,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -251,7 +251,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 // 		return
 // 	}
 
-// namespace := c.GetHeader("namespace")
+// namespace := c.GetString("namespace")
 // services, err := h.GetService(namespace)
 // if err != nil {
 // 	h.handleResponse(c, http.Forbidden, err)
@@ -298,7 +298,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 // 		return
 // 	}
 
-// 	namespace := c.GetHeader("namespace")
+// 	namespace := c.GetString("namespace")
 // 	services, err := h.GetService(namespace)
 // 	if err != nil {
 // 		h.handleResponse(c, http.Forbidden, err)

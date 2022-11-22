@@ -46,7 +46,7 @@ func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -99,7 +99,7 @@ func (h *Handler) GetAllBookedAppointments(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -146,7 +146,7 @@ func (h *Handler) GetSingleOfflineAppointment(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -188,7 +188,7 @@ func (h *Handler) GetSingleBookedAppointment(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -242,7 +242,7 @@ func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 		paymentBody.CashboxId = "d20c4fcc-0f6b-408c-bc4c-2566344c3e58"
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -288,7 +288,7 @@ func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 		cashbox.CashboxId = "d20c4fcc-0f6b-408c-bc4c-2566344c3e58"
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -333,7 +333,7 @@ func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
 		cashbox.CashboxId = "d20c4fcc-0f6b-408c-bc4c-2566344c3e58"
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -387,7 +387,7 @@ func (h *Handler) CashboxTransaction(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)

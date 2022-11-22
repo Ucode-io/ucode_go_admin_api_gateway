@@ -27,7 +27,7 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 	// get list view relation switch to get single view relation because for one table be one view relation
 	tokenInfo := h.GetAuthInfo(c)
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -72,7 +72,7 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)

@@ -37,7 +37,7 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 		Name: dashboardRequest.Name,
 		Icon: dashboardRequest.Icon,
 	}
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -77,7 +77,7 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "dashboard id is an invalid uuid")
 		return
 	}
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -120,7 +120,7 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -160,7 +160,7 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "dashboard id is an invalid uuid")
 		return
 	}
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
@@ -196,7 +196,7 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllDashboards(c *gin.Context) {
-	namespace := c.GetHeader("namespace")
+	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
