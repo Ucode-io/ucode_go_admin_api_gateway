@@ -28,6 +28,8 @@ definitions:
         type: string
       minioEndpoint:
         type: string
+      minioProtocol:
+        type: boolean
       minioSecretAccessKey:
         type: string
       objectBuilderGRPCPort:
@@ -38,6 +40,19 @@ definitions:
         type: string
       posServiceHost:
         type: string
+      postgres:
+        properties:
+          database:
+            type: string
+          host:
+            type: string
+          password:
+            type: string
+          port:
+            type: integer
+          username:
+            type: string
+        type: object
       serviceHost:
         type: string
       serviceName:
@@ -54,8 +69,7 @@ definitions:
     type: object
   http.Response:
     properties:
-      data:
-        type: object
+      data: {}
       description:
         type: string
       status:
@@ -76,7 +90,6 @@ definitions:
         type: string
       orders:
         $ref: '#/definitions/models.AssaysOrders'
-        type: object
     type: object
   models.AssaysOrders:
     properties:
@@ -119,13 +132,10 @@ definitions:
     properties:
       assays:
         $ref: '#/definitions/models.Assays'
-        type: object
       patient:
         $ref: '#/definitions/models.Patient'
-        type: object
       referral:
         $ref: '#/definitions/models.Referral'
-        type: object
     type: object
   models.CreateFieldRequest:
     properties:
@@ -211,6 +221,105 @@ definitions:
       title:
         type: string
     type: object
+  models.CreateProjectRequest:
+    properties:
+      analyticsService:
+        properties:
+          host:
+            type: string
+          port:
+            type: string
+        type: object
+      authService:
+        properties:
+          host:
+            type: string
+          port:
+            type: string
+        type: object
+      clickhouseCredentials:
+        properties:
+          database:
+            type: string
+          host:
+            type: string
+          password:
+            type: string
+          port:
+            type: string
+          user:
+            type: string
+        type: object
+      corporateService:
+        properties:
+          host:
+            type: string
+          port:
+            type: string
+        type: object
+      minioCredentials:
+        properties:
+          access_key:
+            type: string
+          endpoint:
+            type: string
+          secret_key:
+            type: string
+          use_secure:
+            type: boolean
+        type: object
+      mongoDBCredentials:
+        properties:
+          database:
+            type: string
+          host:
+            type: string
+          password:
+            type: string
+          port:
+            type: string
+          user:
+            type: string
+        type: object
+      objectBuilderService:
+        properties:
+          host:
+            type: string
+          port:
+            type: string
+        type: object
+      posService:
+        properties:
+          host:
+            type: string
+          port:
+            type: string
+        type: object
+      postgresqlCredentials:
+        properties:
+          database:
+            type: string
+          host:
+            type: string
+          password:
+            type: string
+          port:
+            type: string
+          user:
+            type: string
+        type: object
+      project_name:
+        type: string
+      project_namespace:
+        type: string
+    type: object
+  models.CreateProjectResponse:
+    properties:
+      project_name:
+        type: string
+      project_namespace:
+        type: string
+    type: object
   models.CreateTableRequest:
     properties:
       app_id:
@@ -225,7 +334,6 @@ definitions:
         type: string
       increment_id:
         $ref: '#/definitions/models.IncrementId'
-        type: object
       label:
         type: string
       sections:
@@ -345,11 +453,6 @@ definitions:
       url:
         type: string
     type: object
-  models.GetAllDashboardsRequest:
-    properties:
-      name:
-        type: string
-    type: object
   models.GetAllDashboardsResponse:
     properties:
       count:
@@ -379,15 +482,6 @@ definitions:
         items:
           $ref: '#/definitions/models.Panel'
         type: array
-    type: object
-  models.GetEventLogsListRequest:
-    properties:
-      limit:
-        type: string
-      page:
-        type: string
-      table_slug:
-        type: string
     type: object
   models.HtmlBody:
     properties:
@@ -623,7 +717,6 @@ definitions:
         type: string
       when:
         $ref: '#/definitions/object_builder_service.When'
-        type: object
     type: object
   object_builder_service.CreateHtmlTemplateRequest:
     properties:
@@ -714,6 +807,8 @@ definitions:
     type: object
   object_builder_service.CreateViewRequest:
     properties:
+      app_id:
+        type: string
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -724,7 +819,6 @@ definitions:
         type: array
       disable_dates:
         $ref: '#/definitions/object_builder_service.DisableDates'
-        type: object
       group_fields:
         items:
           type: string
@@ -834,7 +928,6 @@ definitions:
         type: string
       when:
         $ref: '#/definitions/object_builder_service.When'
-        type: object
     type: object
   object_builder_service.EventLog:
     properties:
@@ -869,15 +962,6 @@ definitions:
       relation_type:
         type: string
     type: object
-  object_builder_service.GetAllAppsRequest:
-    properties:
-      limit:
-        type: integer
-      offset:
-        type: integer
-      search:
-        type: string
-    type: object
   object_builder_service.GetAllAppsResponse:
     properties:
       apps:
@@ -886,17 +970,6 @@ definitions:
         type: array
       count:
         type: integer
-    type: object
-  object_builder_service.GetAllDocumentsRequest:
-    properties:
-      end_date:
-        type: string
-      object_id:
-        type: string
-      start_date:
-        type: string
-      tags:
-        type: string
     type: object
   object_builder_service.GetAllDocumentsResponse:
     properties:
@@ -907,35 +980,6 @@ definitions:
           $ref: '#/definitions/object_builder_service.Document'
         type: array
     type: object
-  object_builder_service.GetAllFieldsRequest:
-    properties:
-      limit:
-        type: integer
-      offset:
-        type: integer
-      search:
-        type: string
-      table_id:
-        type: string
-      table_slug:
-        type: string
-      with_many_relation:
-        type: boolean
-      with_one_relation:
-        type: boolean
-    type: object
-  object_builder_service.GetAllFunctionsRequest:
-    properties:
-      limit:
-        type: integer
-      search:
-        type: string
-    type: object
-  object_builder_service.GetAllHtmlTemplateRequest:
-    properties:
-      table_slug:
-        type: string
-    type: object
   object_builder_service.GetAllHtmlTemplateResponse:
     properties:
       count:
@@ -944,42 +988,6 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.HtmlTemplate'
         type: array
-    type: object
-  object_builder_service.GetAllPanelsRequest:
-    properties:
-      title:
-        type: string
-    type: object
-  object_builder_service.GetAllRelationsRequest:
-    properties:
-      limit:
-        type: integer
-      offset:
-        type: integer
-      relation_table_slug:
-        type: string
-      table_id:
-        type: string
-      table_slug:
-        type: string
-    type: object
-  object_builder_service.GetAllSectionsRequest:
-    properties:
-      role_id:
-        type: string
-      table_id:
-        type: string
-      table_slug:
-        type: string
-    type: object
-  object_builder_service.GetAllTablesRequest:
-    properties:
-      limit:
-        type: integer
-      offset:
-        type: integer
-      search:
-        type: string
     type: object
   object_builder_service.GetAllTablesResponse:
     properties:
@@ -990,13 +998,6 @@ definitions:
           $ref: '#/definitions/object_builder_service.Table'
         type: array
     type: object
-  object_builder_service.GetAllVariablesRequest:
-    properties:
-      dashboard_id:
-        type: string
-      slug:
-        type: string
-    type: object
   object_builder_service.GetAllVariablesResponse:
     properties:
       count:
@@ -1005,11 +1006,6 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.Variable'
         type: array
-    type: object
-  object_builder_service.GetAllViewsRequest:
-    properties:
-      table_slug:
-        type: string
     type: object
   object_builder_service.GetAllViewsResponse:
     properties:
@@ -1020,11 +1016,6 @@ definitions:
           $ref: '#/definitions/object_builder_service.View'
         type: array
     type: object
-  object_builder_service.GetCustomEventsListRequest:
-    properties:
-      table_slug:
-        type: string
-    type: object
   object_builder_service.GetEventLogListsResponse:
     properties:
       count:
@@ -1033,11 +1024,6 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.EventLog'
         type: array
-    type: object
-  object_builder_service.GetEventsListRequest:
-    properties:
-      table_slug:
-        type: string
     type: object
   object_builder_service.GetEventsListResponse:
     properties:
@@ -1153,7 +1139,6 @@ definitions:
         type: string
       increment_id:
         $ref: '#/definitions/object_builder_service.IncrementID'
-        type: object
       is_own_table:
         type: boolean
       is_visible:
@@ -1296,6 +1281,8 @@ definitions:
     type: object
   object_builder_service.View:
     properties:
+      app_id:
+        type: string
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -1306,7 +1293,6 @@ definitions:
         type: array
       disable_dates:
         $ref: '#/definitions/object_builder_service.DisableDates'
-        type: object
       group_fields:
         items:
           type: string
@@ -1394,23 +1380,6 @@ definitions:
           $ref: '#/definitions/pos_service.OverallPayment'
         type: array
     type: object
-  pos_service.GetAllBookedAppointmentsRequest:
-    properties:
-      branch_id:
-        type: string
-      date:
-        type: string
-      limit:
-        type: integer
-      offset:
-        type: integer
-      patient_id:
-        type: string
-      payment_status:
-        type: string
-      search:
-        type: string
-    type: object
   pos_service.GetAllBookedAppointmentsResponse:
     properties:
       booked_appointments:
@@ -1419,25 +1388,6 @@ definitions:
         type: array
       count:
         type: integer
-    type: object
-  pos_service.GetAllOfflineAppointmentsRequest:
-    properties:
-      branch_id:
-        type: string
-      cashbox_id:
-        type: string
-      date:
-        type: string
-      limit:
-        type: integer
-      offset:
-        type: integer
-      patient_id:
-        type: string
-      payment_status:
-        type: string
-      search:
-        type: string
     type: object
   pos_service.GetAllOfflineAppointmentsResponse:
     properties:
@@ -1541,7 +1491,6 @@ definitions:
 info:
   contact: {}
   description: This is a api gateway
-  license: {}
   termsOfService: https://udevs.io
 paths:
   /config:
@@ -1616,6 +1565,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.Field'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -1653,6 +1611,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.BarcodeGenerateRes'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -1688,6 +1655,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.GetAllDashboardsResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -1727,6 +1703,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.Dashboard'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -1765,6 +1750,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.Dashboard'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -1796,6 +1790,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -1833,6 +1836,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.Dashboard'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -1868,6 +1880,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.GetAllPanelsResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -1907,6 +1928,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.Panel'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -1945,6 +1975,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.Panel'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -1976,6 +2015,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2012,6 +2060,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.Panel'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -2052,6 +2109,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.PanelCoordinates'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2091,6 +2157,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.GetAllVariablesResponse'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2128,6 +2203,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Variable'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -2167,6 +2251,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.Variable'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2198,6 +2291,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2235,6 +2337,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.Variable'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2256,6 +2367,11 @@ paths:
       description: Get all apps
       operationId: get_all_apps
       parameters:
+      - description: namespace
+        in: header
+        name: namespace
+        required: true
+        type: string
       - in: query
         name: limit
         type: integer
@@ -2277,6 +2393,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.GetAllAppsResponse'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2297,6 +2422,11 @@ paths:
       description: Create app
       operationId: create_app
       parameters:
+      - description: namespace
+        in: header
+        name: namespace
+        required: true
+        type: string
       - description: CreateAppRequestBody
         in: body
         name: app
@@ -2314,6 +2444,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.CreateAppResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -2353,6 +2492,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.App'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2384,6 +2532,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2420,6 +2577,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.App'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -2458,6 +2624,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.BarcodeGenerateRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -2513,6 +2688,15 @@ paths:
                 data:
                   $ref: '#/definitions/pos_service.GetAllBookedAppointmentsResponse'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2551,6 +2735,15 @@ paths:
                 data:
                   $ref: '#/definitions/pos_service.GetSingleBookedAppointmentResponse'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2583,6 +2776,15 @@ paths:
       responses:
         "201":
           description: ""
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2615,6 +2817,15 @@ paths:
                 data:
                   $ref: '#/definitions/pos_service.CashboxResponse'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2644,6 +2855,15 @@ paths:
       responses:
         "200":
           description: CustomEventBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
@@ -2689,6 +2909,15 @@ paths:
                 data:
                   type: string
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2727,6 +2956,15 @@ paths:
                 data:
                   type: string
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2758,6 +2996,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2788,6 +3035,15 @@ paths:
       responses:
         "200":
           description: CustomEventBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
@@ -2840,6 +3096,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.GetAllDocumentsResponse'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2877,6 +3142,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Document'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -2916,6 +3190,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.Document'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2947,6 +3230,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -2984,6 +3276,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.Document'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3019,6 +3320,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.GetEventsListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -3058,6 +3368,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.Event'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3095,6 +3414,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Event'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -3138,6 +3466,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.GetEventLogListsResponse'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3175,6 +3512,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.EventLog'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -3214,6 +3560,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.Event'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3245,6 +3600,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3282,6 +3646,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.ExcelReadResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -3327,6 +3700,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.ExcelToDbResponse'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3355,6 +3737,9 @@ paths:
         name: offset
         type: integer
       - in: query
+        name: role_id
+        type: string
+      - in: query
         name: search
         type: string
       - in: query
@@ -3380,6 +3765,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.GetAllFieldsResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -3419,6 +3813,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.Field'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3456,6 +3859,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.Field'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -3500,6 +3912,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3531,6 +3952,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3563,6 +3993,15 @@ paths:
       responses:
         "200":
           description: FunctionBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
@@ -3608,6 +4047,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.Function'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3646,6 +4094,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.Function'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3677,6 +4134,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3714,6 +4180,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.Function'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3749,6 +4224,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.GetAllHtmlTemplateResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -3788,6 +4272,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.HtmlTemplate'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3826,6 +4319,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.HtmlTemplate'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3857,6 +4359,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3893,6 +4404,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.HtmlTemplate'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -3933,6 +4453,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.PdfBody'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -3972,6 +4501,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.InvokeFunctionRequest'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4004,6 +4542,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4035,6 +4582,15 @@ paths:
       responses:
         "200":
           description: Object data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
@@ -4086,6 +4642,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4129,6 +4694,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -4174,6 +4748,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4216,6 +4799,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4257,6 +4849,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -4302,6 +4903,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4345,6 +4955,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -4390,6 +5009,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4433,6 +5061,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -4491,6 +5128,15 @@ paths:
                 data:
                   $ref: '#/definitions/pos_service.GetAllOfflineAppointmentsResponse'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4529,6 +5175,15 @@ paths:
                 data:
                   $ref: '#/definitions/pos_service.GetSingleOfflineAppointmentResponse'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4560,6 +5215,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/pos_service.CashboxResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -4600,6 +5264,15 @@ paths:
                 data:
                   $ref: '#/definitions/pos_service.OfflineAppointment'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4637,6 +5310,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -4682,6 +5364,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4696,6 +5387,54 @@ paths:
       summary: Upsert permissions
       tags:
       - Permission
+  /v1/project:
+    post:
+      consumes:
+      - application/json
+      description: Create project
+      operationId: create_project
+      parameters:
+      - description: CreateProjectRequestBody
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CreateProjectResponseBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CreateProjectResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create project
+      tags:
+      - Project
   /v1/query:
     post:
       consumes:
@@ -4720,6 +5459,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonInput'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -4769,6 +5517,15 @@ paths:
                 data:
                   type: string
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4800,6 +5557,15 @@ paths:
       responses:
         "201":
           description: Relation data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
@@ -4843,6 +5609,15 @@ paths:
                 data:
                   type: string
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4874,6 +5649,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4916,6 +5700,15 @@ paths:
                 data:
                   type: string
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -4947,6 +5740,15 @@ paths:
       responses:
         "200":
           description: Section data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
@@ -4996,6 +5798,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.GetAllTablesResponse'
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -5033,6 +5844,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Table'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -5072,6 +5892,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.Table'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -5103,6 +5932,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -5139,6 +5977,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.CreateTableResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -5179,6 +6026,15 @@ paths:
                 data:
                   $ref: '#/definitions/models.HtmlBody'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -5216,6 +6072,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/handlers.Path'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -5269,6 +6134,15 @@ paths:
                 data:
                   $ref: '#/definitions/handlers.Path'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -5291,6 +6165,9 @@ paths:
       operationId: get_view_list
       parameters:
       - in: query
+        name: app_id
+        type: string
+      - in: query
         name: table_slug
         type: string
       produces:
@@ -5304,6 +6181,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.GetAllViewsResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -5343,6 +6229,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.View'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -5381,6 +6276,15 @@ paths:
                 data:
                   $ref: '#/definitions/object_builder_service.View'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -5412,6 +6316,15 @@ paths:
       responses:
         "204":
           description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -5448,6 +6361,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.View'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
@@ -5493,6 +6415,15 @@ paths:
                 data:
                   type: string
               type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "500":
           description: Server Error
           schema:
@@ -5524,6 +6455,15 @@ paths:
       responses:
         "200":
           description: View Relation data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
