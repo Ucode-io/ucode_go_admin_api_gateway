@@ -31,7 +31,7 @@ type Config struct {
 
 	Postgres struct {
 		Host     string
-		Port     string
+		Port     int
 		Username string
 		Password string
 		Database string
@@ -62,6 +62,7 @@ type Config struct {
 func Load() Config {
 	if err := godotenv.Load("/app/.env"); err != nil {
 		fmt.Println("No .env file found")
+		godotenv.Load(".env")
 	}
 
 	config := Config{}
@@ -83,7 +84,7 @@ func Load() Config {
 	config.DefaultLimit = cast.ToString(GetOrReturnDefaultValue("DEFAULT_LIMIT", "10000000"))
 
 	config.Postgres.Host = cast.ToString(GetOrReturnDefaultValue("POSTGRES_HOST", "0.0.0.0"))
-	config.Postgres.Port = cast.ToString(GetOrReturnDefaultValue("POSTGRES_PORT", "5432"))
+	config.Postgres.Port = cast.ToInt(GetOrReturnDefaultValue("POSTGRES_PORT", 5432))
 	config.Postgres.Username = cast.ToString(GetOrReturnDefaultValue("POSTGRES_USERNAME", "admin"))
 	config.Postgres.Password = cast.ToString(GetOrReturnDefaultValue("POSTGRES_PASSWORD", "admin"))
 	config.Postgres.Database = cast.ToString(GetOrReturnDefaultValue("POSTGRES_DATABASE", "ucode_go_admin_api_gateway"))
