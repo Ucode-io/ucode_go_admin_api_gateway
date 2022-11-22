@@ -116,9 +116,10 @@ func (h *ProjectsHandler) hasAccess(c *gin.Context) (*auth_service.HasAccessResp
 		return nil, false
 	}
 	accessToken := strArr[1]
+	namespace := c.GetHeader("namespace")
 
 	h.services.Mu.Lock()
-	services, ok := h.services.Services["medion"]
+	services, ok := h.services.Services[namespace]
 	if !ok {
 		h.handleResponse(c, http.Forbidden, "nil service")
 		return nil, false

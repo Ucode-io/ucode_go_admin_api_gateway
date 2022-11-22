@@ -263,8 +263,11 @@ func SetUpProjectAPIs(r *gin.Engine, h handlers.ProjectsHandler, cfg config.Conf
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	v1.Use(h.AuthMiddleware())
+
+	// MUST be executed before AuthMiddleware
 	v1.Use(h.ProjectsMiddleware())
+	v1.Use(h.AuthMiddleware())
+
 	{
 		// App
 		v1.POST("/app", h.CreateApp)

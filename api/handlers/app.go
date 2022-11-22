@@ -201,6 +201,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 // @Tags App
 // @Accept json
 // @Produce json
+// @Param namespace header string true "namespace"
 // @Param app body object_builder_service.AppRequest true "CreateAppRequestBody"
 // @Success 201 {object} http.Response{data=object_builder_service.CreateAppResponse} "App data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
@@ -215,7 +216,8 @@ func (h *ProjectsHandler) CreateApp(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetService("medion")
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
 		return
@@ -232,4 +234,55 @@ func (h *ProjectsHandler) CreateApp(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.Created, resp)
+}
+
+// GetAllApps godoc
+// @Security ApiKeyAuth
+// @ID get_all_apps
+// @Router /v1/app [GET]
+// @Summary Get all apps
+// @Description Get all apps
+// @Tags App
+// @Accept json
+// @Produce json
+// @Param namespace header string true "namespace"
+// @Param filters query object_builder_service.GetAllAppsRequest true "filters"
+// @Success 200 {object} http.Response{data=object_builder_service.GetAllAppsResponse} "AppBody"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *ProjectsHandler) GetAllApps(c *gin.Context) {
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	namespace := c.GetHeader("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.AppService().GetAll(
+		context.Background(),
+		&obs.GetAllAppsRequest{
+			Limit:  int32(limit),
+			Offset: int32(offset),
+			Search: c.DefaultQuery("search", ""),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
 }
