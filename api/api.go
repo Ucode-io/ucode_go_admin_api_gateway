@@ -264,6 +264,7 @@ func SetUpProjectAPIs(r *gin.Engine, h handlers.ProjectsHandler, cfg config.Conf
 	// @in header
 	// @name Authorization
 	v1.Use(h.AuthMiddleware())
+	v1.Use(h.ProjectsMiddleware())
 	{
 		// App
 		v1.POST("/app", h.CreateApp)

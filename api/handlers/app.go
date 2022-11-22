@@ -215,13 +215,11 @@ func (h *ProjectsHandler) CreateApp(c *gin.Context) {
 		return
 	}
 
-	h.services.Mu.Lock()
-	services, ok := h.services.Services["medion"]
-	if !ok {
-		h.handleResponse(c, http.Forbidden, "nil service")
+	services, err := h.GetService("medion")
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
-	h.services.Mu.Unlock()
 
 	resp, err := services.AppService().Create(
 		context.Background(),

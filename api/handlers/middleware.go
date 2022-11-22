@@ -87,6 +87,27 @@ func (h *ProjectsHandler) AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
+func (h *ProjectsHandler) ProjectsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		namespace := c.GetHeader("namespace")
+
+		if len(namespace) == 0 {
+			h.handleResponse(c, http.Forbidden, "namespace required")
+			c.Abort()
+			return
+		}
+		ok := h.IsServiceExists(namespace)
+		if !ok {
+			h.handleResponse(c, http.Forbidden, "namespace not existing")
+			c.Abort()
+			return
+		}
+
+		c.Set("namespace", namespace)
+		c.Next()
+	}
+}
+
 func (h *ProjectsHandler) hasAccess(c *gin.Context) (*auth_service.HasAccessResponse, bool) {
 	bearerToken := c.GetHeader("Authorization")
 	strArr := strings.Split(bearerToken, " ")
