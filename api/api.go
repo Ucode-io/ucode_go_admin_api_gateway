@@ -204,6 +204,64 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// v1.POST("profile/settings", h.CreateProfileSettings)
 		// v1.PUT("profile/settings")
 	}
+	v2 := r.Group("/v2")
+	{
+		v2.POST("/client-platform", h.V2CreateClientPlatform)
+		v2.GET("/client-platform", h.V2GetClientPlatformList)
+		v2.GET("/client-platform/:client-platform-id", h.V2GetClientPlatformByID)
+		v2.GET("/client-platform-detailed/:client-platform-id", h.V2GetClientPlatformByIDDetailed)
+		v2.PUT("/client-platform", h.V2UpdateClientPlatform)
+		v2.DELETE("/client-platform/:client-platform-id", h.V2DeleteClientPlatform)
+
+		// admin, dev, hr, ceo
+		v2.POST("/client-type", h.V2CreateClientType)
+		v2.GET("/client-type", h.V2GetClientTypeList)
+		v2.GET("/client-type/:client-type-id", h.V2GetClientTypeByID)
+		v2.PUT("/client-type", h.V2UpdateClientType)
+		v2.DELETE("/client-type/:client-type-id", h.V2DeleteClientType)
+
+		v2.POST("/client", h.V2AddClient)
+		v2.GET("/client/:project-id", h.V2GetClientMatrix)
+		v2.PUT("/client", h.V2UpdateClient)
+		v2.DELETE("/client", h.V2RemoveClient)
+
+		v2.POST("/user-info-field", h.V2AddUserInfoField)
+		v2.PUT("/user-info-field", h.V2UpdateUserInfoField)
+		v2.DELETE("/user-info-field/:user-info-field-id", h.V2RemoveUserInfoField)
+
+		// PERMISSION SERVICE
+		v2.GET("/role/:role-id", h.V2GetRoleByID)
+		v2.GET("/role", h.V2GetRolesList)
+		v2.POST("/role", h.V2AddRole)
+		v2.PUT("/role", h.V2UpdateRole)
+		v2.DELETE("/role/:role-id", h.V2RemoveRole)
+
+		v2.POST("/permission", h.V2CreatePermission)
+		v2.GET("/permission", h.V2GetPermissionList)
+		v2.GET("/permission/:permission-id", h.V2GetPermissionByID)
+		v2.PUT("/permission", h.V2UpdatePermission)
+		v2.DELETE("/permission/:permission-id", h.V2DeletePermission)
+
+		v2.POST("/permission-scope", h.V2AddPermissionScope)
+		v2.DELETE("/permission-scope", h.V2RemovePermissionScope)
+
+		v2.POST("/role-permission", h.V2AddRolePermission)
+		v2.DELETE("/role-permission", h.V2RemoveRolePermission)
+
+		v2.POST("/user", h.V2CreateUser)
+		v2.GET("/user", h.V2GetUserList)
+		v2.GET("/user/:user-id", h.V2GetUserByID)
+		v2.PUT("/user", h.V2UpdateUser)
+		v2.DELETE("/user/:user-id", h.V2DeleteUser)
+		v2.POST("/login", h.V2Login)
+		v2.PUT("/refresh", h.V2RefreshToken)
+	}
+	r.POST("/send-code", h.SendCode)
+	r.POST("/verify/:sms_id/:otp", h.Verify)
+	r.POST("/register-otp/:table_slug", h.RegisterOtp)
+	r.POST("/send-message", h.SendMessageToEmail)
+	r.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
+	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

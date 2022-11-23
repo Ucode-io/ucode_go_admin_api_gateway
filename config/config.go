@@ -52,6 +52,9 @@ type Config struct {
 	AnalyticsServiceHost string
 	AnalyticsGRPCPort    string
 
+	SmsServiceHost string
+	SmsGRPCPort    string
+
 	MinioEndpoint        string
 	MinioAccessKeyID     string
 	MinioSecretAccessKey string
@@ -66,7 +69,7 @@ func Load() Config {
 
 	config := Config{}
 
-	config.ServiceName = cast.ToString(GetOrReturnDefaultValue("SERVICE_NAME", "ucode_go_api_gateway"))
+	config.ServiceName = cast.ToString(GetOrReturnDefaultValue("SERVICE_NAME", "ucode/ucode_go_api_gateway"))
 	config.Environment = cast.ToString(GetOrReturnDefaultValue("ENVIRONMENT", DebugMode))
 	config.Version = cast.ToString(GetOrReturnDefaultValue("VERSION", "1.0"))
 
@@ -82,11 +85,11 @@ func Load() Config {
 	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = cast.ToString(GetOrReturnDefaultValue("DEFAULT_LIMIT", "10000000"))
 
-	config.Postgres.Host = cast.ToString(GetOrReturnDefaultValue("POSTGRES_HOST", "0.0.0.0"))
-	config.Postgres.Port = cast.ToInt(GetOrReturnDefaultValue("POSTGRES_PORT", 5432))
-	config.Postgres.Username = cast.ToString(GetOrReturnDefaultValue("POSTGRES_USERNAME", "admin"))
-	config.Postgres.Password = cast.ToString(GetOrReturnDefaultValue("POSTGRES_PASSWORD", "admin"))
-	config.Postgres.Database = cast.ToString(GetOrReturnDefaultValue("POSTGRES_DATABASE", "ucode_go_admin_api_gateway"))
+	config.Postgres.Host = cast.ToString(GetOrReturnDefaultValue("POSTGRES_HOST", "161.35.26.178"))
+	config.Postgres.Port = cast.ToInt(GetOrReturnDefaultValue("POSTGRES_PORT", 30032))
+	config.Postgres.Username = cast.ToString(GetOrReturnDefaultValue("POSTGRES_USERNAME", "admin_api_gateway"))
+	config.Postgres.Password = cast.ToString(GetOrReturnDefaultValue("POSTGRES_PASSWORD", "aoM0zohB"))
+	config.Postgres.Database = cast.ToString(GetOrReturnDefaultValue("POSTGRES_DATABASE", "admin_api_gateway"))
 
 	config.CorporateServiceHost = cast.ToString(GetOrReturnDefaultValue("CORPORATE_SERVICE_HOST", "localhost"))
 	config.CorporateGRPCPort = cast.ToString(GetOrReturnDefaultValue("CORPORATE_GRPC_PORT", ":9101"))
@@ -102,6 +105,9 @@ func Load() Config {
 
 	config.AnalyticsServiceHost = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_SERVICE_HOST", "localhost"))
 	config.AnalyticsGRPCPort = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_SERVICE_GRPC_PORT", ":9175"))
+
+	config.SmsServiceHost = cast.ToString(GetOrReturnDefaultValue("SMS_SERVICE_HOST", "go-sms-service"))
+	config.SmsGRPCPort = cast.ToString(GetOrReturnDefaultValue("SMS_GRPC_PORT", ":80"))
 
 	return config
 }

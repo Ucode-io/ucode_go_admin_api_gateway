@@ -63,6 +63,11 @@ var (
 		Status:      "GRPC_ERROR",
 		Description: "The gRPC request failed",
 	}
+	NotFound = Status{
+		Code:        404,
+		Status:      "NOT_FOUND",
+		Description: "The user not found",
+	}
 )
 
 // Can be added as many as need like belove examples

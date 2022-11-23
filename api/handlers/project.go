@@ -104,8 +104,8 @@ func (h *Handler) CreateProject(c *gin.Context) {
 // @Tags Project
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetAllProjectsRequest true "filters"
-// @Success 200 {object} http.Response{data=object_builder_service.GetAllProjectsResponse} "ProjectBody"
+// @Param filters query project_service.GetAllProjectsRequest true "filters"
+// @Success 200 {object} http.Response{data=project_service.GetAllProjectsResponse} "ProjectBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllProjects(c *gin.Context) {
