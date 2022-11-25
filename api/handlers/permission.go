@@ -41,7 +41,14 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.PermissionService().UpsertPermissionsByAppId(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.PermissionService().UpsertPermissionsByAppId(
 		context.Background(),
 		&obs.UpsertPermissionsByAppIdRequest{
 			AppId: c.Param("app_id"),
@@ -57,7 +64,7 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 		err := errors.New("role id must be have in update permission")
 		h.handleResponse(c, http.BadRequest, err.Error())
 	}
-	_, err = h.services.SessionService().UpdateSessionsByRoleId(context.Background(), &authPb.UpdateSessionByRoleIdRequest{
+	_, err = services.SessionService().UpdateSessionsByRoleId(context.Background(), &authPb.UpdateSessionByRoleIdRequest{
 		RoleId:    objectRequest.Data["role_id"].(string),
 		IsChanged: true,
 	})
@@ -84,7 +91,14 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 
-	resp, err := h.services.PermissionService().GetAllPermissionsByRoleId(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.PermissionService().GetAllPermissionsByRoleId(
 		context.Background(),
 		&obs.GetAllPermissionRequest{
 			RoleId: c.Param("role_id"),
@@ -115,7 +129,14 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetFieldPermissions(c *gin.Context) {
 
-	resp, err := h.services.PermissionService().GetFieldPermissions(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.PermissionService().GetFieldPermissions(
 		context.Background(),
 		&obs.GetFieldPermissionRequest{
 			RoleId:    c.Param("role_id"),

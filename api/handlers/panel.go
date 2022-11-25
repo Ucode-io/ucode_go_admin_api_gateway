@@ -33,7 +33,14 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.PanelService().UpdateCoordinates(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.PanelService().UpdateCoordinates(
 		context.Background(),
 		&panel_coordinates,
 	)
@@ -66,7 +73,15 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "panel id is an invalid uuid")
 		return
 	}
-	resp, err := h.services.PanelService().GetSingle(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.PanelService().GetSingle(
 		context.Background(),
 		&obs.PanelPrimaryKey{
 			Id: panelID,
@@ -117,7 +132,14 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 		HasPagination: panelRequest.HasPagination,
 	}
 
-	resp, err := h.services.PanelService().Create(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.PanelService().Create(
 		context.Background(),
 		&panel,
 	)
@@ -145,7 +167,14 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllPanels(c *gin.Context) {
 
-	resp, err := h.services.PanelService().GetList(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.PanelService().GetList(
 		context.Background(),
 		&obs.GetAllPanelsRequest{
 			Title: c.DefaultQuery("title", ""),
@@ -199,7 +228,14 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 		HasPagination: panelRequest.HasPagination,
 	}
 
-	resp, err := h.services.PanelService().Update(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.PanelService().Update(
 		context.Background(),
 		&panel,
 	)
@@ -233,7 +269,14 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.PanelService().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.PanelService().Delete(
 		context.Background(),
 		&obs.PanelPrimaryKey{
 			Id: panelID,

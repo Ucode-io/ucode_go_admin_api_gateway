@@ -31,7 +31,14 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.HtmlTemplateService().Create(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.HtmlTemplateService().Create(
 		context.Background(),
 		&htmlTemplate,
 	)
@@ -63,7 +70,15 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "html template id is an invalid uuid")
 		return
 	}
-	resp, err := h.services.HtmlTemplateService().GetSingle(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.HtmlTemplateService().GetSingle(
 		context.Background(),
 		&obs.HtmlTemplatePrimaryKey{
 			Id: htmlTemplateID,
@@ -98,7 +113,15 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.HtmlTemplateService().Update(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.HtmlTemplateService().Update(
 		context.Background(),
 		&htmlTemplate,
 	)
@@ -132,7 +155,14 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.HtmlTemplateService().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.HtmlTemplateService().Delete(
 		context.Background(),
 		&obs.HtmlTemplatePrimaryKey{
 			Id: htmlTemplateID,
@@ -162,7 +192,14 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetHtmlTemplateList(c *gin.Context) {
 
-	resp, err := h.services.HtmlTemplateService().GetList(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.HtmlTemplateService().GetList(
 		context.Background(),
 		&obs.GetAllHtmlTemplateRequest{
 			TableSlug: c.Query("table_slug"),

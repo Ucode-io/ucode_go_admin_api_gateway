@@ -30,7 +30,14 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.RelationService().Create(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.RelationService().Create(
 		context.Background(),
 		&relation,
 	)
@@ -69,7 +76,14 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.RelationService().GetAll(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.RelationService().GetAll(
 		context.Background(),
 		&obs.GetAllRelationsRequest{
 			Limit:     int32(limit),
@@ -109,7 +123,14 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.RelationService().Update(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.RelationService().Update(
 		context.Background(),
 		&relation,
 	)
@@ -143,7 +164,14 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.RelationService().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.RelationService().Delete(
 		context.Background(),
 		&obs.RelationPrimaryKey{
 			Id: relationID,

@@ -26,7 +26,15 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 
 	// get list view relation switch to get single view relation because for one table be one view relation
 	tokenInfo := h.GetAuthInfo(c)
-	resp, err := h.services.SectionService().GetViewRelation(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.SectionService().GetViewRelation(
 		context.Background(),
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
@@ -64,7 +72,14 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.SectionService().UpsertViewRelations(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.SectionService().UpsertViewRelations(
 		context.Background(),
 		&viewRelation,
 	)

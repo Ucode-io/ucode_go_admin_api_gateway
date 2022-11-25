@@ -32,7 +32,14 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.CustomEventService().Create(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.CustomEventService().Create(
 		context.Background(),
 		&Customevent,
 	)
@@ -66,7 +73,14 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.CustomEventService().GetSingle(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.CustomEventService().GetSingle(
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
 			Id: CustomeventID,
@@ -94,8 +108,14 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllCustomEvents(c *gin.Context) {
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
 
-	resp, err := h.services.CustomEventService().GetList(
+	resp, err := services.CustomEventService().GetList(
 		context.Background(),
 		&obs.GetCustomEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
@@ -131,7 +151,14 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.CustomEventService().Update(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.CustomEventService().Update(
 		context.Background(),
 		&obs.CustomEvent{
 			Id:        customevent.Id,
@@ -172,8 +199,14 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "Customevent id is an invalid uuid")
 		return
 	}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
 
-	resp, err := h.services.CustomEventService().Delete(
+	resp, err := services.CustomEventService().Delete(
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
 			Id: CustomeventID,

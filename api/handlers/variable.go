@@ -31,7 +31,14 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.VariableService().Create(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VariableService().Create(
 		context.Background(),
 		&variable,
 	)
@@ -64,7 +71,15 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "variable id is an invalid uuid")
 		return
 	}
-	resp, err := h.services.VariableService().GetSingle(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VariableService().GetSingle(
 		context.Background(),
 		&obs.VariablePrimaryKey{
 			Id: variableID,
@@ -99,7 +114,15 @@ func (h *Handler) UpdateVariable(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.VariableService().Update(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VariableService().Update(
 		context.Background(),
 		&variable,
 	)
@@ -133,7 +156,14 @@ func (h *Handler) DeleteVariable(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.VariableService().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VariableService().Delete(
 		context.Background(),
 		&obs.VariablePrimaryKey{
 			Id: variableID,
@@ -163,7 +193,14 @@ func (h *Handler) DeleteVariable(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllVariables(c *gin.Context) {
 
-	resp, err := h.services.VariableService().GetList(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.VariableService().GetList(
 		context.Background(),
 		&obs.GetAllVariablesRequest{
 			Slug:        c.Query("slug"),

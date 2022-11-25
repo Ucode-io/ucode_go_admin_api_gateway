@@ -53,7 +53,14 @@ func (h *Handler) CreateField(c *gin.Context) {
 		AutofillField: fieldRequest.AutoFillField,
 	}
 
-	resp, err := h.services.FieldService().Create(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.FieldService().Create(
 		context.Background(),
 		&field,
 	)
@@ -99,7 +106,14 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		withOneRelation = true
 	}
 
-	resp, err := h.services.FieldService().GetAll(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.FieldService().GetAll(
 		context.Background(),
 		&obs.GetAllFieldsRequest{
 			Limit:            int32(limit),
@@ -164,7 +178,14 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		RelationId:    fieldRequest.RelationId,
 	}
 
-	resp, err := h.services.FieldService().Update(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.FieldService().Update(
 		context.Background(),
 		&field,
 	)
@@ -198,7 +219,14 @@ func (h *Handler) DeleteField(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.FieldService().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.FieldService().Delete(
 		context.Background(),
 		&obs.FieldPrimaryKey{
 			Id: fieldID,

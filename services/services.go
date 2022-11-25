@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/corporate_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/genproto/pos_service"
+	"ucode/ucode_go_api_gateway/genproto/sms_service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -47,6 +48,15 @@ type ServiceManagerI interface {
 	CustomEventService() object_builder_service.CustomEventServiceClient
 	FunctionService() object_builder_service.FunctionServiceClient
 	BarcodeService() object_builder_service.BarcodeServiceClient
+	IntegrationService() auth_service.IntegrationServiceClient
+	ClientServiceAuth() auth_service.ClientServiceClient
+	PermissionServiceAuth() auth_service.PermissionServiceClient
+	UserService() auth_service.UserServiceClient
+	SessionServiceAuth() auth_service.SessionServiceClient
+	ObjectBuilderServiceAuth() object_builder_service.ObjectBuilderServiceClient
+	SmsService() sms_service.SmsServiceClient
+	LoginService() object_builder_service.LoginServiceClient
+	EmailServie() auth_service.EmailOtpServiceClient
 }
 
 type grpcClients struct {
@@ -81,6 +91,15 @@ type grpcClients struct {
 	customEventService        object_builder_service.CustomEventServiceClient
 	functionService           object_builder_service.FunctionServiceClient
 	barcodeService            object_builder_service.BarcodeServiceClient
+	integrationService        auth_service.IntegrationServiceClient
+	clientServiceAuth         auth_service.ClientServiceClient
+	permissionServiceAuth     auth_service.PermissionServiceClient
+	userService               auth_service.UserServiceClient
+	sessionServiceAuth        auth_service.SessionServiceClient
+	objectBuilderServiceAuth  object_builder_service.ObjectBuilderServiceClient
+	smsService                sms_service.SmsServiceClient
+	loginService              object_builder_service.LoginServiceClient
+	emailServie               auth_service.EmailOtpServiceClient
 }
 
 type ProjectServices struct {
@@ -146,6 +165,10 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		cfg.AnalyticsServiceHost+cfg.AnalyticsGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
+	connSmsService, err := grpc.Dial(
+		cfg.SmsServiceHost+cfg.SmsGRPCPort,
+		grpc.WithInsecure(),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -182,6 +205,15 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		customEventService:        object_builder_service.NewCustomEventServiceClient(connObjectBuilderService),
 		functionService:           object_builder_service.NewFunctionServiceClient((connObjectBuilderService)),
 		barcodeService:            object_builder_service.NewBarcodeServiceClient((connObjectBuilderService)),
+		clientServiceAuth:         auth_service.NewClientServiceClient(connAuthService),
+		permissionServiceAuth:     auth_service.NewPermissionServiceClient(connAuthService),
+		userService:               auth_service.NewUserServiceClient(connAuthService),
+		sessionServiceAuth:        auth_service.NewSessionServiceClient(connAuthService),
+		integrationService:        auth_service.NewIntegrationServiceClient(connAuthService),
+		objectBuilderServiceAuth:  object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
+		smsService:                sms_service.NewSmsServiceClient(connSmsService),
+		loginService:              object_builder_service.NewLoginServiceClient(connObjectBuilderService),
+		emailServie:               auth_service.NewEmailOtpServiceClient(connAuthService),
 	}, nil
 }
 
@@ -306,4 +338,42 @@ func (g *grpcClients) FunctionService() object_builder_service.FunctionServiceCl
 
 func (g *grpcClients) BarcodeService() object_builder_service.BarcodeServiceClient {
 	return g.barcodeService
+}
+
+// auth functions
+
+func (g *grpcClients) ClientServiceAuth() auth_service.ClientServiceClient {
+	return g.clientServiceAuth
+}
+
+func (g *grpcClients) PermissionServiceAuth() auth_service.PermissionServiceClient {
+	return g.permissionServiceAuth
+}
+
+func (g *grpcClients) UserService() auth_service.UserServiceClient {
+	return g.userService
+}
+
+func (g *grpcClients) SessionServiceAuth() auth_service.SessionServiceClient {
+	return g.sessionServiceAuth
+}
+
+func (g *grpcClients) IntegrationService() auth_service.IntegrationServiceClient {
+	return g.integrationService
+}
+
+func (g *grpcClients) ObjectBuilderServiceAuth() object_builder_service.ObjectBuilderServiceClient {
+	return g.objectBuilderServiceAuth
+}
+
+func (g *grpcClients) SmsService() sms_service.SmsServiceClient {
+	return g.smsService
+}
+
+func (g *grpcClients) LoginService() object_builder_service.LoginServiceClient {
+	return g.loginService
+}
+
+func (g *grpcClients) EmailServie() auth_service.EmailOtpServiceClient {
+	return g.emailServie
 }

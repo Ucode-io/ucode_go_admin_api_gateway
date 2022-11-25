@@ -31,7 +31,14 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.AppService().Create(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.AppService().Create(
 		context.Background(),
 		&app,
 	)
@@ -65,7 +72,14 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.AppService().GetByID(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.AppService().GetByID(
 		context.Background(),
 		&obs.AppPrimaryKey{
 			Id: appID,
@@ -104,8 +118,14 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
 
-	resp, err := h.services.AppService().GetAll(
+	resp, err := services.AppService().GetAll(
 		context.Background(),
 		&obs.GetAllAppsRequest{
 			Limit:  int32(limit),
@@ -143,7 +163,15 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.AppService().Update(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.AppService().Update(
 		context.Background(),
 		&app,
 	)
@@ -177,7 +205,14 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.AppService().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.AppService().Delete(
 		context.Background(),
 		&obs.AppPrimaryKey{
 			Id: appID,
@@ -192,46 +227,97 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 	h.handleResponse(c, http.NoContent, resp)
 }
 
-// CreateApp godoc
-// @Security ApiKeyAuth
-// @ID create_app
-// @Router /v1/app [POST]
-// @Summary Create app
-// @Description Create app
-// @Tags App
-// @Accept json
-// @Produce json
-// @Param app body object_builder_service.AppRequest true "CreateAppRequestBody"
-// @Success 201 {object} http.Response{data=object_builder_service.CreateAppResponse} "App data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
-func (h *ProjectsHandler) CreateApp(c *gin.Context) {
-	h.log.Info("create app requested...")
-	var app obs.AppRequest
+// // CreateApp godoc
+// // @Security ApiKeyAuth
+// // @ID create_app
+// // @Router /v1/app [POST]
+// // @Summary Create app
+// // @Description Create app
+// // @Tags App
+// // @Accept json
+// // @Produce json
+// // @Param namespace header string true "namespace"
+// // @Param app body object_builder_service.AppRequest true "CreateAppRequestBody"
+// // @Success 201 {object} http.Response{data=object_builder_service.CreateAppResponse} "App data"
+// // @Response 400 {object} http.Response{data=string} "Bad Request"
+// // @Failure 500 {object} http.Response{data=string} "Server Error"
+// func (h *ProjectsHandler) CreateApp(c *gin.Context) {
+// 	h.log.Info("create app requested...")
+// 	var app obs.AppRequest
 
-	err := c.ShouldBindJSON(&app)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+// 	err := c.ShouldBindJSON(&app)
+// 	if err != nil {
+// 		h.handleResponse(c, http.BadRequest, err.Error())
+// 		return
+// 	}
 
-	h.services.Mu.Lock()
-	services, ok := h.services.Services["medion"]
-	if !ok {
-		h.handleResponse(c, http.Forbidden, "nil service")
-		return
-	}
-	h.services.Mu.Unlock()
+// namespace := c.GetString("namespace")
+// services, err := h.GetService(namespace)
+// if err != nil {
+// 	h.handleResponse(c, http.Forbidden, err)
+// 	return
+// }
 
-	resp, err := services.AppService().Create(
-		context.Background(),
-		&app,
-	)
+// 	resp, err := services.AppService().Create(
+// 		context.Background(),
+// 		&app,
+// 	)
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+// 	if err != nil {
+// 		h.handleResponse(c, http.GRPCError, err.Error())
+// 		return
+// 	}
 
-	h.handleResponse(c, http.Created, resp)
-}
+// 	h.handleResponse(c, http.Created, resp)
+// }
+
+// // GetAllApps godoc
+// // @Security ApiKeyAuth
+// // @ID get_all_apps
+// // @Router /v1/app [GET]
+// // @Summary Get all apps
+// // @Description Get all apps
+// // @Tags App
+// // @Accept json
+// // @Produce json
+// // @Param namespace header string true "namespace"
+// // @Param filters query object_builder_service.GetAllAppsRequest true "filters"
+// // @Success 200 {object} http.Response{data=object_builder_service.GetAllAppsResponse} "AppBody"
+// // @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// // @Failure 500 {object} http.Response{data=string} "Server Error"
+// func (h *ProjectsHandler) GetAllApps(c *gin.Context) {
+// 	offset, err := h.getOffsetParam(c)
+// 	if err != nil {
+// 		h.handleResponse(c, http.InvalidArgument, err.Error())
+// 		return
+// 	}
+
+// 	limit, err := h.getLimitParam(c)
+// 	if err != nil {
+// 		h.handleResponse(c, http.InvalidArgument, err.Error())
+// 		return
+// 	}
+
+// 	namespace := c.GetString("namespace")
+// 	services, err := h.GetService(namespace)
+// 	if err != nil {
+// 		h.handleResponse(c, http.Forbidden, err)
+// 		return
+// 	}
+
+// 	resp, err := services.AppService().GetAll(
+// 		context.Background(),
+// 		&obs.GetAllAppsRequest{
+// 			Limit:  int32(limit),
+// 			Offset: int32(offset),
+// 			Search: c.DefaultQuery("search", ""),
+// 		},
+// 	)
+
+// 	if err != nil {
+// 		h.handleResponse(c, http.GRPCError, err.Error())
+// 		return
+// 	}
+
+// 	h.handleResponse(c, http.OK, resp)
+// }

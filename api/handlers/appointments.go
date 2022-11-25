@@ -46,7 +46,14 @@ func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.OfflineAppointmentService().GetList(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.OfflineAppointmentService().GetList(
 		context.Background(),
 		&ps.GetAllOfflineAppointmentsRequest{
 			Limit:         int32(limit),
@@ -91,7 +98,15 @@ func (h *Handler) GetAllBookedAppointments(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-	resp, err := h.services.BookedAppointmentService().GetList(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.BookedAppointmentService().GetList(
 		context.Background(),
 		&ps.GetAllBookedAppointmentsRequest{
 			Limit:         int32(limit),
@@ -130,7 +145,15 @@ func (h *Handler) GetSingleOfflineAppointment(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "offline_appointment_id id is an invalid uuid")
 		return
 	}
-	resp, err := h.services.OfflineAppointmentService().GetSingle(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.OfflineAppointmentService().GetSingle(
 		context.Background(),
 		&ps.OfflineAppointmentPrimaryKey{
 			Id: offlineAppointmentID,
@@ -164,7 +187,15 @@ func (h *Handler) GetSingleBookedAppointment(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "booked_appointment_id id is an invalid uuid")
 		return
 	}
-	resp, err := h.services.BookedAppointmentService().GetSingle(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.BookedAppointmentService().GetSingle(
 		context.Background(),
 		&ps.BookedAppointmentPrimaryKey{
 			Id: bookedAppointmentID,
@@ -211,7 +242,14 @@ func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 		paymentBody.CashboxId = "d20c4fcc-0f6b-408c-bc4c-2566344c3e58"
 	}
 
-	resp, err := h.services.OfflineAppointmentService().UpdatePaymentStatus(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.OfflineAppointmentService().UpdatePaymentStatus(
 		context.Background(),
 		&paymentBody,
 	)
@@ -250,7 +288,14 @@ func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 		cashbox.CashboxId = "d20c4fcc-0f6b-408c-bc4c-2566344c3e58"
 	}
 
-	resp, err := h.services.OfflineAppointmentService().GetCloseCashboxInfo(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.OfflineAppointmentService().GetCloseCashboxInfo(
 		context.Background(),
 		&cashbox,
 	)
@@ -288,7 +333,14 @@ func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
 		cashbox.CashboxId = "d20c4fcc-0f6b-408c-bc4c-2566344c3e58"
 	}
 
-	resp, err := h.services.OfflineAppointmentService().GetOpenCashboxInfo(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.OfflineAppointmentService().GetOpenCashboxInfo(
 		context.Background(),
 		&cashbox,
 	)
@@ -335,7 +387,14 @@ func (h *Handler) CashboxTransaction(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	_, err = h.services.OfflineAppointmentService().CreateCashboxTransaction(context.Background(), &ps.CreateCashboxTransactionRequest{
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	_, err = services.OfflineAppointmentService().CreateCashboxTransaction(context.Background(), &ps.CreateCashboxTransactionRequest{
 		CashboxId:     cashboxId,
 		AmountOfMoney: cashboxTransactionRequest.AmountOfMoney,
 		Comment:       cashboxTransactionRequest.Comment,

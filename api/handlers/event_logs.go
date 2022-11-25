@@ -34,7 +34,14 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 		return
 	}
 	offset := (pageInt - 1) * limit
-	res, err := h.services.EventLogsService().GetList(context.Background(), &obs.GetEventLogsListRequest{
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	res, err := services.EventLogsService().GetList(context.Background(), &obs.GetEventLogsListRequest{
 		TableSlug: c.Query("table_slug"),
 		Offset:    int32(offset),
 		Limit:     int32(limit),
@@ -68,8 +75,14 @@ func (h *Handler) GetEventLogById(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "event_log_id is an invalid uuid")
 		return
 	}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
 
-	resp, err := h.services.EventLogsService().GetSingle(
+	resp, err := services.EventLogsService().GetSingle(
 		context.Background(),
 		&obs.GetEventLogById{
 			Id: eventLogID,
