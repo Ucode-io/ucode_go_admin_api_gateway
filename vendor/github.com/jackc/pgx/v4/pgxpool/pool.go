@@ -640,7 +640,6 @@ func (p *Pool) QueryRow(ctx context.Context, sql string, args ...interface{}) pg
 	}
 
 	row := c.QueryRow(ctx, sql, args...)
-
 	return c.getPoolRow(row)
 }
 

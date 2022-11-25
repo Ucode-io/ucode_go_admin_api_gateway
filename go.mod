@@ -3,13 +3,11 @@ module ucode/ucode_go_api_gateway
 go 1.17
 
 require (
-	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-openapi/spec v0.20.7 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-playground/validator/v10 v10.11.1 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.4.0
 	github.com/mattn/go-isatty v0.0.16 // indirect
@@ -19,12 +17,18 @@ require (
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.7
 	go.uber.org/zap v1.23.0
-	golang.org/x/tools v0.2.0 // indirect
+	golang.org/x/tools v0.3.0 // indirect
 	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1
 )
 
-require github.com/jackc/pgx/v4 v4.17.2
+require (
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+	github.com/golang/protobuf v1.5.2
+	github.com/jackc/pgx/v4 v4.17.2
+	github.com/pkg/errors v0.9.1
+	github.com/saidamir98/udevs_pkg v0.0.0-20220413125729-5342e90c08a3
+)
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
@@ -58,8 +62,8 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
-	golang.org/x/net v0.1.0 // indirect
-	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/net v0.2.0 // indirect
+	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 	gopkg.in/ini.v1 v1.66.6 // indirect
