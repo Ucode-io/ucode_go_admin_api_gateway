@@ -34,7 +34,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	// @in header
 	// @name Authorization
 	// MUST be executed before AuthMiddleware
-	//v1.Use(h.ProjectsMiddleware())
+	v1.Use(h.ProjectsMiddleware())
 	v1.Use(h.AuthMiddleware())
 	{
 		v1.POST("/upload", h.Upload)
