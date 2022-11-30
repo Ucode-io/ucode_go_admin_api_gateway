@@ -1,11 +1,9 @@
 package test
 
 import (
-	"fmt"
 	"log"
 	"testing"
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/corporate_service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -28,11 +26,11 @@ func TestMain(m *testing.M) {
 
 	defer connCorporateService.Close()
 
-	branchClient := corporate_service.NewBranchServiceClient(connCorporateService)
+	//branchClient := corporate_service.NewBranchServiceClient(connCorporateService)
 
 	// run downstream
-	branchChannel := make(chan interface{})
+	//branchChannel := make(chan interface{})
 
-	fmt.Println(branchClient, branchChannel)
+	//fmt.Println(branchClient, branchChannel)
 
 }

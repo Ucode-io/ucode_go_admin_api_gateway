@@ -12,18 +12,20 @@ import (
 )
 
 type Handler struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	services *services.ProjectServices
-	storage  storage.StorageI
+	cfg             config.Config
+	log             logger.LoggerI
+	services        *services.ProjectServices
+	storage         storage.StorageI
+	companyServices services.ServiceManagerI
 }
 
-func NewHandler(cfg config.Config, log logger.LoggerI, svcs *services.ProjectServices, strg storage.StorageI) Handler {
+func NewHandler(cfg config.Config, log logger.LoggerI, svcs *services.ProjectServices, strg storage.StorageI, cmpServ services.ServiceManagerI) Handler {
 	return Handler{
 		cfg:      cfg,
 		log:      log,
 		services: svcs,
 		storage:  strg,
+		companyServices: cmpServ,
 	}
 }
 

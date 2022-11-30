@@ -1,0 +1,56 @@
+syntax="proto3";
+
+package company_service;
+option go_package="genproto/company_service";
+
+
+service ProjectService {
+    rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse) {}
+    rpc GetProjectList(GetProjectListRequest) returns (GetProjectListResponse) {}
+    rpc GetProjectById(GetProjectByIdRequest) returns (Project) {}
+    rpc UpdateProject(Project) returns (Project) {}
+    rpc DeleteProject(DeleteProjectRequest) returns (EmptyProto) {}
+}
+
+message Project {
+    string project_id = 1;
+    string company_id = 2;
+    string k8s_namespace = 3;
+    string title = 4;
+}
+
+message CreateProjectRequest {
+    string company_id = 1;
+    string k8s_namespace = 2;
+    string title = 3;
+}
+
+message CreateProjectResponse {
+    string project_id = 1;
+}
+
+message GetProjectListRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+    string company_id = 3;
+    string search = 4;
+}
+
+message GetProjectListResponse {
+    int32 count = 1;
+    repeated Project projects = 2;
+}
+
+message GetProjectByIdRequest {
+    string project_id = 1;
+    string company_id = 2;
+}
+
+message DeleteProjectRequest {
+    string project_id = 1;
+    string company_id = 2;
+}
+
+message EmptyProto {
+    
+}

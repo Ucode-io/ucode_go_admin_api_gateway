@@ -112,7 +112,6 @@ func (h *Handler) ProjectsMiddleware() gin.HandlerFunc {
 		}
 
 		c.Set("namespace", namespace)
-		fmt.Println("namespace==", namespace)
 		c.Next()
 	}
 }

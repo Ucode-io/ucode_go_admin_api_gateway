@@ -55,6 +55,9 @@ type Config struct {
 	SmsServiceHost string
 	SmsGRPCPort    string
 
+	CompanyServiceHost string
+	CompanyServicePort string
+
 	MinioEndpoint        string
 	MinioAccessKeyID     string
 	MinioSecretAccessKey string
@@ -99,6 +102,9 @@ func Load() Config {
 
 	config.AuthServiceHost = cast.ToString(GetOrReturnDefaultValue("AUTH_SERVICE_HOST", "0.0.0.0"))
 	config.AuthGRPCPort = cast.ToString(GetOrReturnDefaultValue("AUTH_GRPC_PORT", ":9103"))
+
+	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", "localhost"))
+	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_PORT", ":9106"))
 
 	config.PosServiceHost = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_HOST", "localhost"))
 	config.PosGRPCPort = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_GRPC_PORT", ":8000"))

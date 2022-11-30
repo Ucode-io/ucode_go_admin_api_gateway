@@ -108,7 +108,7 @@ func main() {
 
 	r.Use(gin.Logger(), gin.Recovery())
 
-	h := handlers.NewHandler(cfg, log, projectsService, pgStore)
+	h := handlers.NewHandler(cfg, log, projectsService, pgStore, grpcSvcs)
 
 	api.SetUpAPI(r, h, cfg)
 

@@ -7,8 +7,9 @@ import (
 
 	"ucode/ucode_go_api_gateway/genproto/analytics_service"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/corporate_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+
 	"ucode/ucode_go_api_gateway/genproto/pos_service"
 	"ucode/ucode_go_api_gateway/genproto/sms_service"
 
@@ -17,12 +18,6 @@ import (
 )
 
 type ServiceManagerI interface {
-	CompanyService() corporate_service.CompanyServiceClient
-	BranchService() corporate_service.BranchServiceClient
-	RequisiteService() corporate_service.RequisiteServiceClient
-	CategoryService() corporate_service.CategoryServiceClient
-	SubcategoryService() corporate_service.SubcategoryServiceClient
-	ProductService() corporate_service.ProductServiceClient
 	TableService() object_builder_service.TableServiceClient
 	FieldService() object_builder_service.FieldServiceClient
 	ObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
@@ -38,7 +33,6 @@ type ServiceManagerI interface {
 	OfflineAppointmentService() pos_service.OfflineAppointmentServiceClient
 	BookedAppointmentService() pos_service.BookedAppointmentServiceClient
 	QueryService() analytics_service.QueryServiceClient
-	CashboxTransactionService() object_builder_service.CashboxTransactionClient
 	HtmlTemplateService() object_builder_service.HtmlTemplateServiceClient
 	DocumentService() object_builder_service.DocumentServiceClient
 	EventService() object_builder_service.EventServiceClient
@@ -57,15 +51,11 @@ type ServiceManagerI interface {
 	SmsService() sms_service.SmsServiceClient
 	LoginService() object_builder_service.LoginServiceClient
 	EmailServie() auth_service.EmailOtpServiceClient
+	CompanyService() company_service.CompanyServiceClient
+	ProjectService() company_service.ProjectServiceClient
 }
 
 type grpcClients struct {
-	companyService            corporate_service.CompanyServiceClient
-	branchService             corporate_service.BranchServiceClient
-	requisiteService          corporate_service.RequisiteServiceClient
-	categoryService           corporate_service.CategoryServiceClient
-	subcategoryService        corporate_service.SubcategoryServiceClient
-	productService            corporate_service.ProductServiceClient
 	tableService              object_builder_service.TableServiceClient
 	fieldService              object_builder_service.FieldServiceClient
 	objectBuilderService      object_builder_service.ObjectBuilderServiceClient
@@ -81,7 +71,6 @@ type grpcClients struct {
 	offlineAppointmentService pos_service.OfflineAppointmentServiceClient
 	bookedAppointmentService  pos_service.BookedAppointmentServiceClient
 	queryService              analytics_service.QueryServiceClient
-	cashboxTransactionService object_builder_service.CashboxTransactionClient
 	htmlTemplateService       object_builder_service.HtmlTemplateServiceClient
 	documentService           object_builder_service.DocumentServiceClient
 	eventService              object_builder_service.EventServiceClient
@@ -100,6 +89,8 @@ type grpcClients struct {
 	smsService                sms_service.SmsServiceClient
 	loginService              object_builder_service.LoginServiceClient
 	emailServie               auth_service.EmailOtpServiceClient
+	companyService            company_service.CompanyServiceClient
+	projectService            company_service.ProjectServiceClient
 }
 
 type ProjectServices struct {
@@ -122,20 +113,11 @@ func NewProjectGrpcsClient(p *ProjectServices, s ServiceManagerI, namespace stri
 	if ok {
 		return nil, errors.New("namespace already exists with this name")
 	}
-
 	p.Services[namespace] = s
 	return p, nil
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
-
-	connCorporateService, err := grpc.Dial(
-		cfg.CorporateServiceHost+cfg.CorporateGRPCPort,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		return nil, err
-	}
 
 	connObjectBuilderService, err := grpc.Dial(
 		cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
@@ -173,13 +155,16 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		return nil, err
 	}
 
+	connCompanyService, err := grpc.Dial(
+		cfg.CompanyServiceHost+cfg.CompanyServicePort,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &grpcClients{
-		companyService:            corporate_service.NewCompanyServiceClient(connCorporateService),
-		branchService:             corporate_service.NewBranchServiceClient(connCorporateService),
-		requisiteService:          corporate_service.NewRequisiteServiceClient(connCorporateService),
-		categoryService:           corporate_service.NewCategoryServiceClient(connCorporateService),
-		subcategoryService:        corporate_service.NewSubcategoryServiceClient(connCorporateService),
-		productService:            corporate_service.NewProductServiceClient(connCorporateService),
 		tableService:              object_builder_service.NewTableServiceClient(connObjectBuilderService),
 		fieldService:              object_builder_service.NewFieldServiceClient(connObjectBuilderService),
 		objectBuilderService:      object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
@@ -195,7 +180,6 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		offlineAppointmentService: pos_service.NewOfflineAppointmentServiceClient(connPosService),
 		bookedAppointmentService:  pos_service.NewBookedAppointmentServiceClient(connPosService),
 		queryService:              analytics_service.NewQueryServiceClient(connAnalyticsService),
-		cashboxTransactionService: object_builder_service.NewCashboxTransactionClient(connObjectBuilderService),
 		htmlTemplateService:       object_builder_service.NewHtmlTemplateServiceClient(connObjectBuilderService),
 		documentService:           object_builder_service.NewDocumentServiceClient(connObjectBuilderService),
 		eventService:              object_builder_service.NewEventServiceClient(connObjectBuilderService),
@@ -214,31 +198,9 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		smsService:                sms_service.NewSmsServiceClient(connSmsService),
 		loginService:              object_builder_service.NewLoginServiceClient(connObjectBuilderService),
 		emailServie:               auth_service.NewEmailOtpServiceClient(connAuthService),
+		companyService:            company_service.NewCompanyServiceClient(connCompanyService),
+		projectService:            company_service.NewProjectServiceClient(connCompanyService),
 	}, nil
-}
-
-func (g *grpcClients) CompanyService() corporate_service.CompanyServiceClient {
-	return g.companyService
-}
-
-func (g *grpcClients) BranchService() corporate_service.BranchServiceClient {
-	return g.branchService
-}
-
-func (g *grpcClients) RequisiteService() corporate_service.RequisiteServiceClient {
-	return g.requisiteService
-}
-
-func (g *grpcClients) CategoryService() corporate_service.CategoryServiceClient {
-	return g.categoryService
-}
-
-func (g *grpcClients) SubcategoryService() corporate_service.SubcategoryServiceClient {
-	return g.subcategoryService
-}
-
-func (g *grpcClients) ProductService() corporate_service.ProductServiceClient {
-	return g.productService
 }
 
 func (g *grpcClients) TableService() object_builder_service.TableServiceClient {
@@ -299,10 +261,6 @@ func (g *grpcClients) BookedAppointmentService() pos_service.BookedAppointmentSe
 
 func (g *grpcClients) QueryService() analytics_service.QueryServiceClient {
 	return g.queryService
-}
-
-func (g *grpcClients) CashboxTransactionService() object_builder_service.CashboxTransactionClient {
-	return g.cashboxTransactionService
 }
 
 func (g *grpcClients) HtmlTemplateService() object_builder_service.HtmlTemplateServiceClient {
@@ -376,4 +334,12 @@ func (g *grpcClients) LoginService() object_builder_service.LoginServiceClient {
 
 func (g *grpcClients) EmailServie() auth_service.EmailOtpServiceClient {
 	return g.emailServie
+}
+
+func (g *grpcClients) CompanyService() company_service.CompanyServiceClient {
+	return g.companyService
+}
+
+func (g *grpcClients) ProjectService() company_service.ProjectServiceClient {
+	return g.projectService
 }

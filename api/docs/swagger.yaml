@@ -570,6 +570,17 @@ definitions:
         $ref: '#/definitions/auth_service.Token'
         type: object
     type: object
+  company_service.GetProjectListRequest:
+    properties:
+      company_id:
+        type: string
+      limit:
+        type: integer
+      offset:
+        type: integer
+      search:
+        type: string
+    type: object
   config.Config:
     properties:
       analyticsGRPCPort:
@@ -579,6 +590,10 @@ definitions:
       authGRPCPort:
         type: string
       authServiceHost:
+        type: string
+      companyServiceHost:
+        type: string
+      companyServicePort:
         type: string
       corporateGRPCPort:
         type: string
@@ -686,6 +701,56 @@ definitions:
       data:
         additionalProperties: true
         type: object
+    type: object
+  models.Company:
+    properties:
+      company_id:
+        type: string
+      description:
+        type: string
+      logo:
+        type: string
+      title:
+        type: string
+    type: object
+  models.CompanyCreateRequest:
+    properties:
+      description:
+        type: string
+      logo:
+        type: string
+      title:
+        type: string
+    type: object
+  models.CompanyCreateResponse:
+    properties:
+      company_id:
+        type: string
+    type: object
+  models.CompanyProject:
+    properties:
+      company_id:
+        type: string
+      k8s_namespace:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+    type: object
+  models.CompanyProjectCreateRequest:
+    properties:
+      company_id:
+        type: string
+      k8s_namespace:
+        type: string
+      title:
+        type: string
+    type: object
+  models.CompanyProjectCreateResponse:
+    properties:
+      company_id:
+        type: string
     type: object
   models.CreateCashboxTransactionRequest:
     properties:
@@ -4032,6 +4097,398 @@ paths:
       summary: Get close cashbox
       tags:
       - Appointment
+  /v1/company:
+    get:
+      consumes:
+      - application/json
+      description: Get all companies
+      operationId: get_company_list
+      parameters:
+      - in: query
+        name: company_id
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all companies
+      tags:
+      - Company
+    post:
+      consumes:
+      - application/json
+      description: Create Company
+      operationId: create_company
+      parameters:
+      - description: CompanyCreateRequest
+        in: body
+        name: Company
+        required: true
+        schema:
+          $ref: '#/definitions/models.CompanyCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CompanyCreateResponse'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Company
+      tags:
+      - Company
+  /v1/company-project:
+    get:
+      consumes:
+      - application/json
+      description: Get all projects
+      operationId: get_project_list
+      parameters:
+      - in: query
+        name: company_id
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all projects
+      tags:
+      - Company Project
+    post:
+      consumes:
+      - application/json
+      description: Create Company
+      operationId: create_project
+      parameters:
+      - description: CompanyProjectCreateRequest
+        in: body
+        name: Project
+        required: true
+        schema:
+          $ref: '#/definitions/models.CompanyProjectCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Project data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CompanyProjectCreateResponse'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Company
+      tags:
+      - Company Project
+  /v1/company-project/{project_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Project
+      operationId: delete_project
+      parameters:
+      - description: project_id
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Project
+      tags:
+      - Company Project
+    get:
+      consumes:
+      - application/json
+      description: Get Project By Id
+      operationId: get_company_project_id
+      parameters:
+      - description: project_id
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: company_id
+        in: query
+        name: company_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CompanyProject'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Project By Id
+      tags:
+      - Company Project
+    put:
+      consumes:
+      - application/json
+      description: Update Project
+      operationId: update_project
+      parameters:
+      - description: project_id
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: CompanyProjectCreateRequest
+        in: body
+        name: Company
+        required: true
+        schema:
+          $ref: '#/definitions/models.CompanyProjectCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Company'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Project
+      tags:
+      - Company Project
+  /v1/company/{company_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Company
+      operationId: delete_company
+      parameters:
+      - description: company_id
+        in: path
+        name: company_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Company
+      tags:
+      - Company
+    get:
+      consumes:
+      - application/json
+      description: Get Company by id
+      operationId: get_company_by_id
+      parameters:
+      - description: company_id
+        in: path
+        name: company_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Company'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Company by id
+      tags:
+      - Company
+    put:
+      consumes:
+      - application/json
+      description: Update company
+      operationId: update_company
+      parameters:
+      - description: company_id
+        in: path
+        name: company_id
+        required: true
+        type: string
+      - description: CompanyCreateRequest
+        in: body
+        name: Company
+        required: true
+        schema:
+          $ref: '#/definitions/models.CompanyCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Company'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update company
+      tags:
+      - Company
   /v1/custom-event:
     get:
       consumes:
