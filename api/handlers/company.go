@@ -295,13 +295,13 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().GetCompanyList(
+	resp, err := h.companyServices.ProjectService().GetProjectList(
 		context.Background(),
-		&company_service.GetCompanyListRequest{
+		&company_service.GetProjectListRequest{
 			Limit:    int32(limit),
 			Offset:   int32(offset),
 			Search:   c.DefaultQuery("search", ""),
-			ComanyId: c.DefaultQuery("company_id", ""),
+			CompanyId: c.DefaultQuery("company_id", ""),
 		},
 	)
 

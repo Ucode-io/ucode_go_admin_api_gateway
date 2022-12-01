@@ -33,7 +33,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	// MUST be executed before AuthMiddleware
+	//MUST be executed before AuthMiddleware
 	v1.Use(h.ProjectsMiddleware())
 	v1.Use(h.AuthMiddleware())
 	{
