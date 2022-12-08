@@ -25,14 +25,14 @@ migrate-staging:
   only:
     - staging
 
-migrate-demo:
-  stage: migrate
-  extends: .migrate_template
-  variables:
-    PATH_MIGRATION: migrations/postgres
-    POSTGRES_LINK: $UCODE_ADMIN_API_DEMODB
-  only:
-    - staging
+# migrate-demo:
+#   stage: migrate
+#   extends: .migrate_template
+#   variables:
+#     PATH_MIGRATION: migrations/postgres
+#     POSTGRES_LINK: $UCODE_ADMIN_API_DEMODB
+#   only:
+#     - staging
 
 deploy-staging:
   stage: deploy
@@ -44,15 +44,15 @@ deploy-staging:
   only:
     - staging
 
-deploy-demo:
-  stage: deploy
-  extends: .deploy_template
-  variables:
-    NAMESPACE: ucode-demo
-    VALUES_FILE: .helm/values-demo.yml
-    K8SCONFIGJSON: $UCODE_KUBECONFIG
-  only:
-    - staging
+# deploy-demo:
+#   stage: deploy
+#   extends: .deploy_template
+#   variables:
+#     NAMESPACE: ucode-demo
+#     VALUES_FILE: .helm/values-demo.yml
+#     K8SCONFIGJSON: $UCODE_KUBECONFIG
+#   only:
+#     - staging
 
 rollback-staging:
   stage: rollback
