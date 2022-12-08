@@ -45,11 +45,14 @@ func (h *Handler) GetQueryRows(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.QueryService().GetQueryRows(
 		context.Background(),
 		&as.CommonInput{
-			Data:  structData,
-			Query: queryReq.Query,
+			Data:      structData,
+			Query:     queryReq.Query,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {

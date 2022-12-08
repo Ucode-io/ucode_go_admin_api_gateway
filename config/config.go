@@ -62,6 +62,10 @@ type Config struct {
 	MinioAccessKeyID     string
 	MinioSecretAccessKey string
 	MinioProtocol        bool
+
+	UcodeNamespace string
+
+	SecretKey string
 }
 
 // Load ...
@@ -114,6 +118,9 @@ func Load() Config {
 
 	config.SmsServiceHost = cast.ToString(GetOrReturnDefaultValue("SMS_SERVICE_HOST", "go-sms-service"))
 	config.SmsGRPCPort = cast.ToString(GetOrReturnDefaultValue("SMS_GRPC_PORT", ":80"))
+
+	config.UcodeNamespace = "cp-region-type-id"
+	config.SecretKey = "Here$houldBe$ome$ecretKey"
 
 	return config
 }

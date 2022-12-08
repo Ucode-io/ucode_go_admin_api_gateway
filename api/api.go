@@ -24,17 +24,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.GET("/ping", h.Ping)
 	r.GET("/config", h.GetConfig)
 
-	// Project
-	r.POST("/v1/project", h.CreateProject)
-	r.GET("/v1/project", h.GetAllProjects)
-	r.DELETE("/v1/project/:project_id", h.DeleteProject)
-
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	//MUST be executed before AuthMiddleware
-	v1.Use(h.ProjectsMiddleware())
 	v1.Use(h.AuthMiddleware())
 	{
 		v1.POST("/upload", h.Upload)
@@ -209,7 +202,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		// project service
 		v1.POST("company-project", h.CreateCompanyProject)
-	    v1.GET("company-project", h.GetCompanyProjectList)
+		v1.GET("company-project", h.GetCompanyProjectList)
 		v1.GET("company-project/:project_id", h.GetCompanyProjectById)
 		v1.PUT("company-project/:project_id", h.UpdateCompanyProject)
 		v1.DELETE("company-project/:project_id", h.DeleteCompanyProject)
@@ -289,7 +282,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v3.GET("/web_pages", h.GetWebPagesList)
 		v3.PUT("/web_pages/:guid", h.UpdateWebPage)
 		v3.DELETE("/web_pages/:guid", h.DeleteWebPage)
-		
+
 	}
 	r.POST("/send-code", h.SendCode)
 	r.POST("/verify/:sms_id/:otp", h.Verify)

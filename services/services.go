@@ -1,8 +1,7 @@
 package services
 
 import (
-	"errors"
-	"sync"
+	"context"
 	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/genproto/analytics_service"
@@ -99,33 +98,10 @@ type grpcClients struct {
 	webPageService            object_builder_service.WebPageServiceClient
 }
 
-type ProjectServices struct {
-	Services map[string]ServiceManagerI
-	Mu       sync.Mutex
-}
+func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
 
-func NewProjectGrpcsClient(p *ProjectServices, s ServiceManagerI, namespace string) (*ProjectServices, error) {
-	if p == nil {
-		return nil, errors.New("p cannot be nil (nil argument of *ProjectServices)")
-	}
-	if s == nil {
-		return nil, errors.New("s cannot be nil (nil argument of ServiceManagerI)")
-	}
-
-	p.Mu.Lock()
-	defer p.Mu.Unlock()
-
-	_, ok := p.Services[namespace]
-	if ok {
-		return nil, errors.New("namespace already exists with this name")
-	}
-	p.Services[namespace] = s
-	return p, nil
-}
-
-func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
-
-	connObjectBuilderService, err := grpc.Dial(
+	connObjectBuilderService, err := grpc.DialContext(
+		ctx,
 		cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -133,7 +109,8 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		return nil, err
 	}
 
-	connAuthService, err := grpc.Dial(
+	connAuthService, err := grpc.DialContext(
+		ctx,
 		cfg.AuthServiceHost+cfg.AuthGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -141,7 +118,8 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		return nil, err
 	}
 
-	connPosService, err := grpc.Dial(
+	connPosService, err := grpc.DialContext(
+		ctx,
 		cfg.PosServiceHost+cfg.PosGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -149,19 +127,26 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		return nil, err
 	}
 
-	connAnalyticsService, err := grpc.Dial(
+	connAnalyticsService, err := grpc.DialContext(
+		ctx,
 		cfg.AnalyticsServiceHost+cfg.AnalyticsGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	connSmsService, err := grpc.Dial(
-		cfg.SmsServiceHost+cfg.SmsGRPCPort,
-		grpc.WithInsecure(),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	connCompanyService, err := grpc.Dial(
+	connSmsService, err := grpc.DialContext(
+		ctx,
+		cfg.SmsServiceHost+cfg.SmsGRPCPort,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	connCompanyService, err := grpc.DialContext(
+		ctx,
 		cfg.CompanyServiceHost+cfg.CompanyServicePort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
