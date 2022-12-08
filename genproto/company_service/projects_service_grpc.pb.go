@@ -27,6 +27,8 @@ type ProjectServiceClient interface {
 	GetProjectById(ctx context.Context, in *GetProjectByIdRequest, opts ...grpc.CallOption) (*Project, error)
 	UpdateProject(ctx context.Context, in *Project, opts ...grpc.CallOption) (*Project, error)
 	DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*EmptyProto, error)
+	AddResource(ctx context.Context, in *AddResourceRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
+	RemoveResource(ctx context.Context, in *RemoveResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error)
 }
 
 type projectServiceClient struct {
@@ -82,6 +84,24 @@ func (c *projectServiceClient) DeleteProject(ctx context.Context, in *DeleteProj
 	return out, nil
 }
 
+func (c *projectServiceClient) AddResource(ctx context.Context, in *AddResourceRequest, opts ...grpc.CallOption) (*AddResourceResponse, error) {
+	out := new(AddResourceResponse)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/AddResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) RemoveResource(ctx context.Context, in *RemoveResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error) {
+	out := new(EmptyProto)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/RemoveResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProjectServiceServer is the server API for ProjectService service.
 // All implementations must embed UnimplementedProjectServiceServer
 // for forward compatibility
@@ -91,6 +111,8 @@ type ProjectServiceServer interface {
 	GetProjectById(context.Context, *GetProjectByIdRequest) (*Project, error)
 	UpdateProject(context.Context, *Project) (*Project, error)
 	DeleteProject(context.Context, *DeleteProjectRequest) (*EmptyProto, error)
+	AddResource(context.Context, *AddResourceRequest) (*AddResourceResponse, error)
+	RemoveResource(context.Context, *RemoveResourceRequest) (*EmptyProto, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -112,6 +134,12 @@ func (UnimplementedProjectServiceServer) UpdateProject(context.Context, *Project
 }
 func (UnimplementedProjectServiceServer) DeleteProject(context.Context, *DeleteProjectRequest) (*EmptyProto, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProject not implemented")
+}
+func (UnimplementedProjectServiceServer) AddResource(context.Context, *AddResourceRequest) (*AddResourceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddResource not implemented")
+}
+func (UnimplementedProjectServiceServer) RemoveResource(context.Context, *RemoveResourceRequest) (*EmptyProto, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveResource not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
 
@@ -216,6 +244,42 @@ func _ProjectService_DeleteProject_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_AddResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddResourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).AddResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/AddResource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).AddResource(ctx, req.(*AddResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_RemoveResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveResourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).RemoveResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/RemoveResource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).RemoveResource(ctx, req.(*RemoveResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProjectService_ServiceDesc is the grpc.ServiceDesc for ProjectService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -242,6 +306,14 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteProject",
 			Handler:    _ProjectService_DeleteProject_Handler,
+		},
+		{
+			MethodName: "AddResource",
+			Handler:    _ProjectService_AddResource_Handler,
+		},
+		{
+			MethodName: "RemoveResource",
+			Handler:    _ProjectService_RemoveResource_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

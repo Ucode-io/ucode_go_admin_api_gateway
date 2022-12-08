@@ -10,19 +10,61 @@ service ProjectService {
     rpc GetProjectById(GetProjectByIdRequest) returns (Project) {}
     rpc UpdateProject(Project) returns (Project) {}
     rpc DeleteProject(DeleteProjectRequest) returns (EmptyProto) {}
+    rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
+    rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
+}
+
+enum ServiceType {
+    NOT_SPECIFIED = 0;
+    BUILDER_SERVICE = 1;
+    ANALYTICS_SERVICE = 2;
+}
+
+enum ResourceType {
+    NOT_DECIDED = 0;
+    MONGODB = 1;
+    CLICKHOUSE = 2;
+    POSTGRESQL = 3;
+}
+
+message Resource {
+    message Credentials {
+        string host = 1;
+        string port = 2;
+        string username = 3;
+        string password = 4;
+        string database = 5;
+    }
+    ServiceType service_type = 1;
+    ResourceType resource_type = 2;
+    Credentials credentials = 3;
 }
 
 message Project {
+    message Resource {
+        message Credentials {
+            string host = 1;
+            string port = 2;
+            string username = 3;
+            string database = 4;
+        }
+        ServiceType service_type = 1;
+        ResourceType resource_type = 2;
+        Credentials credentials = 3;
+    }
+
     string project_id = 1;
     string company_id = 2;
     string k8s_namespace = 3;
     string title = 4;
+    repeated Project.Resource resources = 5;
 }
 
 message CreateProjectRequest {
     string company_id = 1;
     string k8s_namespace = 2;
     string title = 3;
+    repeated Resource resources = 4;
 }
 
 message CreateProjectResponse {
@@ -53,4 +95,21 @@ message DeleteProjectRequest {
 
 message EmptyProto {
     
+}
+
+message AddResourceRequest {
+    string project_id = 1;
+    repeated Resource resources = 2;
+}
+
+message AddResourceResponse {
+    string project_id = 1;
+    ServiceType service_type = 2;
+    ResourceType resource_type = 3;
+}
+
+message RemoveResourceRequest {
+    string project_id = 1;
+    ServiceType service_type = 2;
+    ResourceType resource_type = 3;
 }

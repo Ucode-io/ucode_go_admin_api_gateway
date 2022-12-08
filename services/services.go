@@ -53,6 +53,9 @@ type ServiceManagerI interface {
 	EmailServie() auth_service.EmailOtpServiceClient
 	CompanyService() company_service.CompanyServiceClient
 	ProjectService() company_service.ProjectServiceClient
+	QueryFolderService() object_builder_service.QueryFolderServiceClient
+	QueriesService() object_builder_service.QueryServiceClient
+	WebPageService() object_builder_service.WebPageServiceClient
 }
 
 type grpcClients struct {
@@ -91,6 +94,9 @@ type grpcClients struct {
 	emailServie               auth_service.EmailOtpServiceClient
 	companyService            company_service.CompanyServiceClient
 	projectService            company_service.ProjectServiceClient
+	queryFolderService        object_builder_service.QueryFolderServiceClient
+	queriesService            object_builder_service.QueryServiceClient
+	webPageService            object_builder_service.WebPageServiceClient
 }
 
 type ProjectServices struct {
@@ -200,6 +206,9 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		emailServie:               auth_service.NewEmailOtpServiceClient(connAuthService),
 		companyService:            company_service.NewCompanyServiceClient(connCompanyService),
 		projectService:            company_service.NewProjectServiceClient(connCompanyService),
+		queryFolderService:        object_builder_service.NewQueryFolderServiceClient(connObjectBuilderService),
+		queriesService:            object_builder_service.NewQueryServiceClient(connObjectBuilderService),
+		webPageService:            object_builder_service.NewWebPageServiceClient(connObjectBuilderService),
 	}, nil
 }
 
@@ -336,10 +345,26 @@ func (g *grpcClients) EmailServie() auth_service.EmailOtpServiceClient {
 	return g.emailServie
 }
 
+// this functions for multi company logic
+
 func (g *grpcClients) CompanyService() company_service.CompanyServiceClient {
 	return g.companyService
 }
 
 func (g *grpcClients) ProjectService() company_service.ProjectServiceClient {
 	return g.projectService
+}
+
+// for ucode version 2
+
+func (g *grpcClients) QueryFolderService() object_builder_service.QueryFolderServiceClient {
+	return g.queryFolderService
+}
+
+func (g *grpcClients) QueriesService() object_builder_service.QueryServiceClient {
+	return g.queriesService
+}
+
+func (g *grpcClients) WebPageService() object_builder_service.WebPageServiceClient {
+	return g.webPageService
 }

@@ -146,6 +146,7 @@ message V2LoginResponse {
     repeated RecordPermission permissions = 7;
     repeated Session sessions = 8;
     string login_table_slug = 9;
+    repeated RecordPermission app_permissions = 10; 
 }
 message V2LoginRequest {
     string username = 1;

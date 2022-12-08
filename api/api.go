@@ -266,6 +266,31 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2.POST("/login", h.V2Login)
 		v2.PUT("/refresh", h.V2RefreshToken)
 	}
+
+	// v3 for ucode version 2
+	v3 := r.Group("/v3")
+	{
+		// query folder
+		v3.POST("/query_folder", h.CreateQueryFolder)
+		v3.GET("/query_folder/:guid", h.GetQueryFolderByID)
+		v3.GET("/query_folder", h.GetQueryFolderList)
+		v3.PUT("/query_folder/:guid", h.UpdateQueryFolder)
+		v3.DELETE("/query_folder/:guid", h.DeleteQueryFolder)
+
+		// // query
+		v3.POST("/query", h.CreateQuery)
+		v3.GET("/query/:guid", h.GetQueryByID)
+		v3.GET("/query", h.GetQueryList)
+		v3.PUT("/query/:guid", h.UpdateQuery)
+		v3.DELETE("/query/:guid", h.DeleteQuery)
+		// // web pages
+		v3.POST("/web_pages", h.CreateWebPage)
+		v3.GET("/web_pages/:guid", h.GetWebPagesById)
+		v3.GET("/web_pages", h.GetWebPagesList)
+		v3.PUT("/web_pages/:guid", h.UpdateWebPage)
+		v3.DELETE("/web_pages/:guid", h.DeleteWebPage)
+		
+	}
 	r.POST("/send-code", h.SendCode)
 	r.POST("/verify/:sms_id/:otp", h.Verify)
 	r.POST("/register-otp/:table_slug", h.RegisterOtp)

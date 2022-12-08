@@ -112,4 +112,5 @@ message V2LoginResponse {
     Role role = 5;
     repeated RecordPermission permissions = 6;
     string login_table_slug = 7;
+    repeated RecordPermission app_permissions = 8;
 }

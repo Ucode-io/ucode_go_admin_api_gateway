@@ -533,6 +533,10 @@ definitions:
     type: object
   auth_service.V2LoginResponse:
     properties:
+      app_permissions:
+        items:
+          $ref: '#/definitions/auth_service.RecordPermission'
+        type: array
       client_platform:
         $ref: '#/definitions/auth_service.ClientPlatform'
         type: object
@@ -982,6 +986,23 @@ definitions:
       project_namespace:
         type: string
     type: object
+  models.CreateQueryFolderRequest:
+    properties:
+      project_id:
+        type: string
+      title:
+        type: string
+    type: object
+  models.CreateQueryRequest:
+    properties:
+      attributes:
+        additionalProperties: true
+        type: object
+      query_folder_id:
+        type: string
+      title:
+        type: string
+    type: object
   models.CreateTableRequest:
     properties:
       app_id:
@@ -1029,6 +1050,14 @@ definitions:
       slug:
         type: string
       subtitle_field_slug:
+        type: string
+    type: object
+  models.CreateWebPageRequest:
+    properties:
+      components:
+        additionalProperties: true
+        type: object
+      title:
         type: string
     type: object
   models.CustomEvent:
@@ -1238,6 +1267,25 @@ definitions:
       phone:
         type: string
     type: object
+  models.Queries:
+    properties:
+      attributes:
+        additionalProperties: true
+        type: object
+      guid:
+        type: string
+      query_folder_id:
+        type: string
+    type: object
+  models.QueryFolder:
+    properties:
+      guid:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+    type: object
   models.Referral:
     properties:
       cito:
@@ -1374,6 +1422,16 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  models.WebPage:
+    properties:
+      components:
+        additionalProperties: true
+        type: object
+      guid:
+        type: string
+      title:
+        type: string
     type: object
   object_builder_service.App:
     properties:
@@ -1842,6 +1900,28 @@ definitions:
       title:
         type: string
     type: object
+  object_builder_service.GetAllQueriesRequest:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
+      query_folder_id:
+        type: string
+      search:
+        type: string
+    type: object
+  object_builder_service.GetAllQueryFolderRequest:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
+      parent_id:
+        type: string
+      search:
+        type: string
+    type: object
   object_builder_service.GetAllRelationsRequest:
     properties:
       limit:
@@ -1913,6 +1993,13 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.View'
         type: array
+    type: object
+  object_builder_service.GetAllWebPagesRequest:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
     type: object
   object_builder_service.GetCustomEventsListRequest:
     properties:
@@ -2214,6 +2301,10 @@ definitions:
     type: object
   object_builder_service.V2LoginResponse:
     properties:
+      app_permissions:
+        items:
+          $ref: '#/definitions/object_builder_service.RecordPermission'
+        type: array
       client_platform:
         $ref: '#/definitions/object_builder_service.ClientPlatform'
         type: object
@@ -9073,6 +9164,582 @@ paths:
       summary: Get User By ID
       tags:
       - V2_User
+  /v3/query:
+    get:
+      consumes:
+      - application/json
+      description: Get Query Folder Lit
+      operationId: get_query_list
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: query_folder_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FieldBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetAllFieldsResponse'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Query Folder List
+      tags:
+      - Queries
+    post:
+      consumes:
+      - application/json
+      description: Create Query
+      operationId: create_query
+      parameters:
+      - description: CreateQueryRequest
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Queries data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Queries'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Query
+      tags:
+      - Queries
+  /v3/query/{guid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Query
+      operationId: delete_query_folder
+      parameters:
+      - description: guid
+        in: path
+        name: guid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Query
+      tags:
+      - Queries
+    get:
+      consumes:
+      - application/json
+      description: Get Query By Id
+      operationId: get_query_list
+      parameters:
+      - description: guid
+        in: path
+        name: guid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FieldBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetAllFieldsResponse'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Query By Id
+      tags:
+      - Queries
+    put:
+      consumes:
+      - application/json
+      description: Update Query
+      operationId: update_field
+      parameters:
+      - description: guid
+        in: path
+        name: guid
+        required: true
+        type: string
+      - description: UpdateQueryRequestBody
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Queries data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Queries'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Query
+      tags:
+      - Queries
+  /v3/query_folder:
+    get:
+      consumes:
+      - application/json
+      description: Get Query Folder Lit
+      operationId: get_query_folder_list
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: parent_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FieldBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetAllFieldsResponse'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Query Folder List
+      tags:
+      - Query Folder
+    post:
+      consumes:
+      - application/json
+      description: Create Query Folder
+      operationId: create_query_folder
+      parameters:
+      - description: CreateQueryFolderRequest
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateQueryFolderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: QueryFolder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.QueryFolder'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Query Folder
+      tags:
+      - Query Folder
+  /v3/query_folder/{guid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Query Folder
+      operationId: delete_query_folder
+      parameters:
+      - description: guid
+        in: path
+        name: guid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Query Folder
+      tags:
+      - Query Folder
+    get:
+      consumes:
+      - application/json
+      description: Get Query Folder By Id
+      operationId: get_query_folder_list
+      parameters:
+      - description: guid
+        in: path
+        name: guid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FieldBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetAllFieldsResponse'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Query Folder By Id
+      tags:
+      - Query Folder
+    put:
+      consumes:
+      - application/json
+      description: Update Query Folder
+      operationId: update_query_folder
+      parameters:
+      - description: guid
+        in: path
+        name: guid
+        required: true
+        type: string
+      - description: UpdateQueryFolderRequestBody
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateQueryFolderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: QueryFolder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.QueryFolder'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Query Folder
+      tags:
+      - Query Folder
+  /v3/web_pages:
+    get:
+      consumes:
+      - application/json
+      description: Get Web Page List
+      operationId: get_web_page_list
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: WebPageBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetAllFieldsResponse'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Web Page List
+      tags:
+      - Web Page
+    post:
+      consumes:
+      - application/json
+      description: Create Web Page
+      operationId: create_web_page
+      parameters:
+      - description: CreateWebPageRequest
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateWebPageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: QueryFolder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.QueryFolder'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Web Page
+      tags:
+      - Web Page
+  /v3/web_pages/{guid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Web Page
+      operationId: delete_web_page
+      parameters:
+      - description: guid
+        in: path
+        name: guid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Query Folder
+      tags:
+      - Web Page
+    get:
+      consumes:
+      - application/json
+      description: Get Web Page By Id
+      operationId: get_web_page_by_id
+      parameters:
+      - description: guid
+        in: path
+        name: guid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FieldBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetAllFieldsResponse'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Web Page By Id
+      tags:
+      - Web Page
+    put:
+      consumes:
+      - application/json
+      description: Update Web Page
+      operationId: update_web_page
+      parameters:
+      - description: guid
+        in: path
+        name: guid
+        required: true
+        type: string
+      - description: UpdateWebPageRequestBody
+        in: body
+        name: page
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateWebPageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: WebPage data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.WebPage'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Web Page
+      tags:
+      - Web Page
   /verify-email/{sms_id}/{otp}:
     post:
       consumes:
