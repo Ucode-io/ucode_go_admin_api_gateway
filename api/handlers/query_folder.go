@@ -50,7 +50,7 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 
 // GetQueryFolderById godoc
 // @Security ApiKeyAuth
-// @ID get_query_folder_list
+// @ID get_query_folder
 // @Router /v3/query_folder/{guid} [GET]
 // @Summary Get Query Folder By Id
 // @Description Get Query Folder By Id

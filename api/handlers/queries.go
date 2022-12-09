@@ -58,7 +58,7 @@ func (h *Handler) CreateQuery(c *gin.Context) {
 
 // GetQueryById godoc
 // @Security ApiKeyAuth
-// @ID get_query_list
+// @ID get_query_item
 // @Router /v3/query/{guid} [GET]
 // @Summary Get Query By Id
 // @Description Get Query By Id

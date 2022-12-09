@@ -75,7 +75,6 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	
 	resp, err := services.EmailServie().Create(c.Request.Context(), &pb.Email{
 		Id:        id.String(),
 		Email:     request.Email,
@@ -102,7 +101,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 }
 
 // Verify godoc
-// @ID verify
+// @ID verify_email
 // @Router /verify-email/{sms_id}/{otp} [POST]
 // @Summary Verify
 // @Description Verify
