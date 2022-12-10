@@ -194,7 +194,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/alfalab/referral", h.GetReferral)
 
 		// company service
-		v1.POST("/company", h.CreateCompany)
+		// v1.POST("/company", h.CreateCompany)
 		v1.GET("company/:company_id", h.GetCompanyByID)
 		v1.GET("company", h.GetCompanyList)
 		v1.PUT("company/:company_id", h.UpdateCompany)

@@ -4,49 +4,50 @@ import (
 	"context"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 
 	"github.com/gin-gonic/gin"
 )
 
-// CreateCompany godoc
-// @Security ApiKeyAuth
-// @ID create_company
-// @Router /v1/company [POST]
-// @Summary Create Company
-// @Description Create Company
-// @Tags Company
-// @Accept json
-// @Produce json
-// @Param Company body company_service.CreateCompanyRequest true "CompanyCreateRequest"
-// @Success 201 {object} http.Response{data=company_service.CreateCompanyResponse} "Company data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
-func (h *Handler) CreateCompany(c *gin.Context) {
-	var company company_service.CreateCompanyRequest
+// // CreateCompany godoc
+// // @Security ApiKeyAuth
+// // @ID create_company
+// // @Router /v1/company [POST]
+// // @Summary Create Company
+// // @Description Create Company
+// // @Tags Company
+// // @Accept json
+// // @Produce json
+// // @Param Company body company_service.CreateCompanyRequest true "CompanyCreateRequest"
+// // @Success 201 {object} http.Response{data=company_service.CreateCompanyResponse} "Company data"
+// // @Response 400 {object} http.Response{data=string} "Bad Request"
+// // @Failure 500 {object} http.Response{data=string} "Server Error"
+// func (h *Handler) CreateCompany(c *gin.Context) {
+// 	var company company_service.CreateCompanyRequest
 
-	err := c.ShouldBindJSON(&company)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+// 	err := c.ShouldBindJSON(&company)
+// 	if err != nil {
+// 		h.handleResponse(c, http.BadRequest, err.Error())
+// 		return
+// 	}
 
-	resp, err := h.companyServices.CompanyService().CreateCompany(
-		context.Background(),
-		&company_service.CreateCompanyRequest{
-			Title:       company.Title,
-			Logo:        company.Logo,
-			Description: company.Description,
-		},
-	)
+// 	resp, err := h.companyServices.CompanyService().CreateCompany(
+// 		context.Background(),
+// 		&company_service.CreateCompanyRequest{
+// 			Title:       company.Title,
+// 			Logo:        company.Logo,
+// 			Description: company.Description,
+// 		},
+// 	)
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+// 	if err != nil {
+// 		h.handleResponse(c, http.GRPCError, err.Error())
+// 		return
+// 	}
 
-	h.handleResponse(c, http.Created, resp)
-}
+// 	h.handleResponse(c, http.Created, resp)
+// }
 
 // GetCompanyById godoc
 // @Security ApiKeyAuth
@@ -147,6 +148,17 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 		return
 	}
 
+	_, err = h.authService.CompanyService().Update(
+		c.Request.Context(),
+		&auth_service.UpdateCompanyRequest{
+			Id:   company_id,
+			Name: company.Title,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
 	resp, err := h.companyServices.CompanyService().UpdateCompany(
 		context.Background(),
 		&company_service.Company{
@@ -180,6 +192,15 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteCompany(c *gin.Context) {
 	company_id := c.Param("company_id")
+
+	_, err := h.authService.CompanyService().Remove(
+		c.Request.Context(),
+		&auth_service.CompanyPrimaryKey{Id: company_id},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := h.companyServices.CompanyService().DeleteCompany(
 		context.Background(),
