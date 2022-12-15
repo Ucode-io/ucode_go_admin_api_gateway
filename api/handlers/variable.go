@@ -31,6 +31,9 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+	variable.ProjectId = authInfo.GetProjectId()
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -79,10 +82,13 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.VariableService().GetSingle(
 		context.Background(),
 		&obs.VariablePrimaryKey{
-			Id: variableID,
+			Id:        variableID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -114,6 +120,9 @@ func (h *Handler) UpdateVariable(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+	variable.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -163,10 +172,13 @@ func (h *Handler) DeleteVariable(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.VariableService().Delete(
 		context.Background(),
 		&obs.VariablePrimaryKey{
-			Id: variableID,
+			Id:        variableID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -200,11 +212,14 @@ func (h *Handler) GetAllVariables(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.VariableService().GetList(
 		context.Background(),
 		&obs.GetAllVariablesRequest{
 			Slug:        c.Query("slug"),
 			DashboardId: c.Query("dashboard_id"),
+			ProjectId:   authInfo.GetProjectId(),
 		},
 	)
 

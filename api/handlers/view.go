@@ -33,6 +33,9 @@ func (h *Handler) CreateView(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+	view.ProjectId = authInfo.GetProjectId()
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -81,10 +84,13 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.ViewService().GetSingle(
 		context.Background(),
 		&obs.ViewPrimaryKey{
-			Id: viewID,
+			Id:        viewID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -116,6 +122,9 @@ func (h *Handler) UpdateView(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+	view.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -165,10 +174,13 @@ func (h *Handler) DeleteView(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.ViewService().Delete(
 		context.Background(),
 		&obs.ViewPrimaryKey{
-			Id: viewID,
+			Id:        viewID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -202,10 +214,13 @@ func (h *Handler) GetViewList(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.ViewService().GetList(
 		context.Background(),
 		&obs.GetAllViewsRequest{
 			TableSlug: c.Query("table_slug"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -252,11 +267,14 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.ViewService().ConvertHtmlToPdf(
 		context.Background(),
 		&obs.HtmlBody{
-			Data: structData,
-			Html: html.Html,
+			Data:      structData,
+			Html:      html.Html,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -304,11 +322,14 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.ViewService().ConvertTemplateToHtml(
 		context.Background(),
 		&obs.HtmlBody{
-			Data: structData,
-			Html: html.Html,
+			Data:      structData,
+			Html:      html.Html,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

@@ -32,11 +32,15 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	var dashboard = obs.CreateDashboardRequest{
 		// Id:         dashboardRequest.ID,
-		Name: dashboardRequest.Name,
-		Icon: dashboardRequest.Icon,
+		Name:      dashboardRequest.Name,
+		Icon:      dashboardRequest.Icon,
+		ProjectId: authInfo.GetProjectId(),
 	}
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -77,6 +81,7 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "dashboard id is an invalid uuid")
 		return
 	}
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -84,10 +89,13 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.DashboardService().GetSingle(
 		context.Background(),
 		&obs.DashboardPrimaryKey{
-			Id: dashboardID,
+			Id:        dashboardID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -119,6 +127,9 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+	dashboard.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -160,6 +171,7 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "dashboard id is an invalid uuid")
 		return
 	}
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -167,10 +179,13 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.DashboardService().Delete(
 		context.Background(),
 		&obs.DashboardPrimaryKey{
-			Id: dashboardID,
+			Id:        dashboardID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -203,10 +218,13 @@ func (h *Handler) GetAllDashboards(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.DashboardService().GetList(
 		context.Background(),
 		&obs.GetAllDashboardsRequest{
-			Name: c.Query("name"),
+			Name:      c.Query("name"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

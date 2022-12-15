@@ -20,6 +20,7 @@ message CreateHtmlTemplateRequest {
     string html = 2;
     string title = 3;
     repeated string size = 4;
+    string project_id = 5;
 }
 
 
@@ -29,7 +30,7 @@ message HtmlTemplate {
     string html = 3;
     string title = 4;
     repeated string size = 5;
-  
+    string project_id = 6;
 }
 
 message GetAllHtmlTemplateResponse {
@@ -39,8 +40,10 @@ message GetAllHtmlTemplateResponse {
 
 message GetAllHtmlTemplateRequest {
     string table_slug = 1;
+    string project_id = 2;
 }
 
 message HtmlTemplatePrimaryKey {
     string id = 1;
+    string project_id = 2;
 }

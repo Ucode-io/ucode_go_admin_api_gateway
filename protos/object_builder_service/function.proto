@@ -20,6 +20,7 @@ message CreateFunctionRequest {
     string name = 2;
     string description = 3;
     google.protobuf.Struct body = 4;
+    string project_id = 5;
 }
 
 message Function {
@@ -28,11 +29,13 @@ message Function {
     string name = 3;
     string description = 4;
     google.protobuf.Struct body = 5;
+    string project_id = 6;
 }
 
 message GetAllFunctionsRequest {
     string search = 1;
     int32 limit = 2;
+    string project_id = 3;
 }
 
 message GetAllFunctionsResponse {
@@ -42,4 +45,5 @@ message GetAllFunctionsResponse {
 
 message FunctionPrimaryKey {
     string id = 1;
+    string project_id = 2;
 }

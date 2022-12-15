@@ -33,6 +33,7 @@ message LoginResponse {
     Token token = 6;
     repeated Permission permissions = 7;
     repeated Session sessions = 8;   
+    repeated Company companies = 9;
 }
 
 message LogoutRequest {
@@ -154,14 +155,30 @@ message V2LoginRequest {
     repeated Object tables = 3;
     string client_type = 4;
     string login_strategy = 5;
+    string project_id = 6;
 }
 
 message SessionAndTokenRequest  {
     V2LoginResponse login_data = 1;
     repeated Object tables = 2;
+    string project_id = 3;
 }
 
 message UpdateSessionByRoleIdRequest {
     string role_id = 1;
     bool is_changed = 2;
+}
+
+message V2SuperAdminLoginResponse {
+    bool user_found = 1;
+    ClientPlatform client_platform = 2;
+    ClientType client_type = 3;
+    string user_id = 4;
+    Role role = 5;
+    Token token = 6;
+    repeated RecordPermission permissions = 7;
+    repeated Session sessions = 8;
+    string login_table_slug = 9;
+    repeated RecordPermission app_permissions = 10; 
+    repeated Company companies = 11;
 }

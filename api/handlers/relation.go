@@ -30,6 +30,9 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+	relation.ProjectId = authInfo.GetProjectId()
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -83,6 +86,8 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.RelationService().GetAll(
 		context.Background(),
 		&obs.GetAllRelationsRequest{
@@ -90,6 +95,7 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 			Offset:    int32(offset),
 			TableSlug: c.DefaultQuery("table_slug", ""),
 			TableId:   c.DefaultQuery("table_id", ""),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -122,6 +128,9 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+	relation.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -171,10 +180,13 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.RelationService().Delete(
 		context.Background(),
 		&obs.RelationPrimaryKey{
-			Id: relationID,
+			Id:        relationID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

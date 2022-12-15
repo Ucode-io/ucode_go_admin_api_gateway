@@ -10,6 +10,7 @@ service BarcodeService {
 
 message BarcodeGenerateReq {
     string table_slug = 1;
+    string project_id = 2;
 }
 message BarcodeGenerateRes {
     string number = 1;

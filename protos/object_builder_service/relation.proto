@@ -33,6 +33,7 @@ message CreateRelationRequest {
     string relation_field_slug = 15;
     repeated AutoFilter auto_filters = 16;
     repeated string default_values = 17;
+    string project_id = 18;
 }
 
 message AutoFilter {
@@ -64,6 +65,7 @@ message UpdateRelationRequest {
     string relation_field_slug = 16;
     repeated AutoFilter auto_filters = 17;
     repeated string default_values = 18;
+    string project_id = 19;
 }
 
 
@@ -99,10 +101,12 @@ message GetAllRelationsRequest {
     int32 offset = 3;
     string table_id = 4;
     string relation_table_slug = 5;
+    string project_id = 6;
 }
 
 message RelationPrimaryKey {
     string id = 1;
+    string project_id = 2;
 }
 
 message Summary {

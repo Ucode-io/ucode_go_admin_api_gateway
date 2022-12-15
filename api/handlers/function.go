@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -33,8 +32,8 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
 	structData, err := helper.ConvertMapToStruct(function.Body)
-	fmt.Println("err", err)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -47,6 +46,8 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.FunctionService().Create(
 		context.Background(),
 		&obs.CreateFunctionRequest{
@@ -54,6 +55,7 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 			Name:        function.Name,
 			Description: function.Description,
 			Body:        structData,
+			ProjectId:   authInfo.GetProjectId(),
 		},
 	)
 
@@ -93,10 +95,13 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.FunctionService().GetSingle(
 		context.Background(),
 		&obs.FunctionPrimaryKey{
-			Id: functionID,
+			Id:        functionID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -135,11 +140,14 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.FunctionService().GetList(
 		context.Background(),
 		&obs.GetAllFunctionsRequest{
-			Search: c.DefaultQuery("search", ""),
-			Limit:  int32(limit),
+			Search:    c.DefaultQuery("search", ""),
+			Limit:     int32(limit),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -172,6 +180,7 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
 	structData, err := helper.ConvertMapToStruct(function.Body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -185,6 +194,8 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.FunctionService().Update(
 		context.Background(),
 		&obs.Function{
@@ -193,6 +204,7 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 			Name:        function.Name,
 			Path:        function.Path,
 			Body:        structData,
+			ProjectId:   authInfo.GetProjectId(),
 		},
 	)
 
@@ -232,10 +244,13 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.FunctionService().Delete(
 		context.Background(),
 		&obs.FunctionPrimaryKey{
-			Id: functionID,
+			Id:        functionID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -276,10 +291,13 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	function, err := services.FunctionService().GetSingle(
 		context.Background(),
 		&obs.FunctionPrimaryKey{
-			Id: invokeFunction.FunctionID,
+			Id:        invokeFunction.FunctionID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -292,11 +310,15 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-	_, err = services.CustomEventService().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
-		FunctionId: invokeFunction.FunctionID,
-		ObjectIds:  invokeFunction.ObjectIDs,
-		FieldSlug:  function.Path + "_disable",
-	})
+	_, err = services.CustomEventService().UpdateByFunctionId(
+		context.Background(),
+		&obs.UpdateByFunctionIdRequest{
+			FunctionId: invokeFunction.FunctionID,
+			ObjectIds:  invokeFunction.ObjectIDs,
+			FieldSlug:  function.Path + "_disable",
+			ProjectId:  authInfo.GetProjectId(),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return

@@ -5,11 +5,11 @@ option go_package="genproto/company_service";
 
 
 service ProjectService {
-    rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse) {}
-    rpc GetProjectList(GetProjectListRequest) returns (GetProjectListResponse) {}
-    rpc GetProjectById(GetProjectByIdRequest) returns (Project) {}
-    rpc UpdateProject(Project) returns (Project) {}
-    rpc DeleteProject(DeleteProjectRequest) returns (EmptyProto) {}
+    rpc Create(CreateProjectRequest) returns (CreateProjectResponse) {}
+    rpc GetList(GetProjectListRequest) returns (GetProjectListResponse) {}
+    rpc GetById(GetProjectByIdRequest) returns (Project) {}
+    rpc Update(Project) returns (Project) {}
+    rpc Delete(DeleteProjectRequest) returns (EmptyProto) {}
     rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
     rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
 }
@@ -100,16 +100,19 @@ message EmptyProto {
 message AddResourceRequest {
     string project_id = 1;
     repeated Resource resources = 2;
+    string company_id = 3;
 }
 
 message AddResourceResponse {
     string project_id = 1;
     ServiceType service_type = 2;
     ResourceType resource_type = 3;
+    string company_id = 4;
 }
 
 message RemoveResourceRequest {
     string project_id = 1;
     ServiceType service_type = 2;
     ResourceType resource_type = 3;
+    string company_id = 4;
 }

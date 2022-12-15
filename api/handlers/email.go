@@ -36,11 +36,13 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
 	id, err := uuid.NewRandom()
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
+
 	valid := util.IsValidEmail(request.Email)
 	if !valid {
 		h.handleResponse(c, http.BadRequest, "Неверная почта")
@@ -61,10 +63,16 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
-	respObject, err := services.LoginService().LoginWithEmailOtp(c.Request.Context(), &pbObject.EmailOtpRequest{
-		Email:      request.Email,
-		ClientType: request.ClientType,
-	})
+
+	authInfo := h.GetAuthInfo(c)
+
+	respObject, err := services.LoginService().LoginWithEmailOtp(
+		c.Request.Context(),
+		&pbObject.EmailOtpRequest{
+			Email:      request.Email,
+			ClientType: request.ClientType,
+			ProjectId:  authInfo.GetProjectId(),
+		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -75,12 +83,15 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.EmailServie().Create(c.Request.Context(), &pb.Email{
-		Id:        id.String(),
-		Email:     request.Email,
-		Otp:       code,
-		ExpiresAt: expire.String()[:19],
-	})
+	resp, err := services.EmailServie().Create(
+		c.Request.Context(),
+		&pb.Email{
+			Id:        id.String(),
+			Email:     request.Email,
+			Otp:       code,
+			ExpiresAt: expire.String()[:19],
+			// ProjectId: authInfo.GetProjectId(),
+		})
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -116,22 +127,28 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) VerifyEmail(c *gin.Context) {
 	var body models.Verify
+
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+
 	if c.Param("otp") != "1212" {
 		resp, err := services.EmailServie().GetEmailByID(
 			c.Request.Context(),
 			&pb.EmailOtpPrimaryKey{
 				Id: c.Param("sms_id"),
+				// ProjectId: authInfo.GetProjectId(),
 			},
 		)
 		if err != nil {
@@ -148,10 +165,13 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		return
 	}
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
-	res, err := services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
-		LoginData: convertedToAuthPb,
-		Tables:    body.Tables,
-	})
+	res, err := services.SessionService().SessionAndTokenGenerator(
+		context.Background(),
+		&pb.SessionAndTokenRequest{
+			LoginData: convertedToAuthPb,
+			Tables:    body.Tables,
+			ProjectId: authInfo.GetProjectId(),
+		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -189,6 +209,8 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	structData, err := helper.ConvertMapToStruct(body.Data)
 
 	if err != nil {
@@ -200,6 +222,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -207,20 +230,26 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
-		Email:      body.Data["email"].(string),
-		ClientType: "PATIENT",
-	})
+	resp, err := services.LoginService().LoginWithEmailOtp(
+		context.Background(),
+		&pbObject.EmailOtpRequest{
+			Email:      body.Data["email"].(string),
+			ClientType: "PATIENT",
+			ProjectId:  authInfo.GetProjectId(),
+		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
-	res, err := services.SessionServiceAuth().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
-		LoginData: convertedToAuthPb,
-		Tables:    []*pb.Object{},
-	})
+	res, err := services.SessionServiceAuth().SessionAndTokenGenerator(
+		context.Background(),
+		&pb.SessionAndTokenRequest{
+			LoginData: convertedToAuthPb,
+			Tables:    []*pb.Object{},
+			ProjectId: authInfo.GetProjectId(),
+		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return

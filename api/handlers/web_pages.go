@@ -39,11 +39,14 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.WebPageService().Create(
 		context.Background(),
 		&obs.CreateWebPageRequest{
 			Title:      webPage.Title,
 			Components: components,
+			ProjectId:  authInfo.GetProjectId(),
 		},
 	)
 
@@ -69,11 +72,14 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetWebPagesById(c *gin.Context) {
-	guid := c.Param("guid")
+
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.WebPageService().GetById(
 		context.Background(),
 		&obs.WebPageId{
-			Id: guid,
+			Id:        c.Param("guid"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -111,11 +117,14 @@ func (h *Handler) GetWebPagesList(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.WebPageService().GetAll(
 		context.Background(),
 		&obs.GetAllWebPagesRequest{
-			Limit:    int32(limit),
-			Offset:   int32(offset),
+			Limit:     int32(limit),
+			Offset:    int32(offset),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -157,12 +166,15 @@ func (h *Handler) UpdateWebPage(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.WebPageService().Update(
 		context.Background(),
 		&obs.WebPage{
-			Id:       guid,
-			Title:    updateWebPage.Title,
+			Id:         guid,
+			Title:      updateWebPage.Title,
 			Components: components,
+			ProjectId:  authInfo.GetProjectId(),
 		},
 	)
 
@@ -195,10 +207,13 @@ func (h *Handler) DeleteWebPage(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.WebPageService().Delete(
 		context.Background(),
 		&obs.WebPageId{
-			Id: webPageId,
+			Id:        webPageId,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

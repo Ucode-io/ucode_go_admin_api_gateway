@@ -7,28 +7,30 @@ option go_package="genproto/company_service";
 
 
 service CompanyService {
-    rpc CreateCompany(CreateCompanyRequest) returns (CreateCompanyResponse) {}
-    rpc GetCompanyList(GetCompanyListRequest) returns (GetComanyListResponse) {}
-    rpc GetCompanyById(GetCompanyByIdRequest) returns (GetCompanyByIdResponse) {}
-    rpc UpdateCompany(Company) returns (Company) {}
-    rpc DeleteCompany(DeleteCompanyRequest) returns (Empty) {}
+    rpc Create(CreateCompanyRequest) returns (CreateCompanyResponse) {}
+    rpc GetList(GetCompanyListRequest) returns (GetComanyListResponse) {}
+    rpc GetById(GetCompanyByIdRequest) returns (GetCompanyByIdResponse) {}
+    rpc Update(Company) returns (Company) {}
+    rpc Delete(DeleteCompanyRequest) returns (Empty) {}
 }
 
 message CreateCompanyRequest {
     string title = 1;
     string logo = 2;
     string description = 3;
+    string owner_id = 4;
 }
 
 message Company {
-    string company_id = 1;
+    string id = 1;
     string name = 2;
     string logo = 3;
     string description = 4;
+    string owner_id = 5;
 }
 
 message CreateCompanyResponse {
-    string company_id = 1;
+    string id = 1;
 }
 
 message GetCompanyListRequest {
@@ -36,6 +38,7 @@ message GetCompanyListRequest {
     int32 offset = 2;
     string search = 3;
     string comany_id = 4;
+    string owner_id = 5;
 }
 
 message GetComanyListResponse {
@@ -44,7 +47,7 @@ message GetComanyListResponse {
 }
 
 message GetCompanyByIdRequest {
-    string company_id = 1;
+    string id = 1;
 }
 
 message GetCompanyByIdResponse {
@@ -52,7 +55,7 @@ message GetCompanyByIdResponse {
 }
 
 message DeleteCompanyRequest {
-    string company_id = 1;
+    string id = 1;
 }
 
 message Empty {

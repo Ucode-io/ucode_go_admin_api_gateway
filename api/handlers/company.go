@@ -64,10 +64,10 @@ import (
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetCompanyByID(c *gin.Context) {
 	companyId := c.Param("company_id")
-	resp, err := h.companyServices.CompanyService().GetCompanyById(
+	resp, err := h.companyServices.CompanyService().GetById(
 		context.Background(),
 		&company_service.GetCompanyByIdRequest{
-			CompanyId: companyId,
+			Id: companyId,
 		},
 	)
 
@@ -106,7 +106,7 @@ func (h *Handler) GetCompanyList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().GetCompanyList(
+	resp, err := h.companyServices.CompanyService().GetList(
 		context.Background(),
 		&company_service.GetCompanyListRequest{
 			Limit:    int32(limit),
@@ -159,10 +159,10 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.companyServices.CompanyService().UpdateCompany(
+	resp, err := h.companyServices.CompanyService().Update(
 		context.Background(),
 		&company_service.Company{
-			CompanyId:   company_id,
+			Id:          company_id,
 			Name:        company.Title,
 			Logo:        company.Logo,
 			Description: company.Description,
@@ -202,10 +202,10 @@ func (h *Handler) DeleteCompany(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().DeleteCompany(
+	resp, err := h.companyServices.CompanyService().Delete(
 		context.Background(),
 		&company_service.DeleteCompanyRequest{
-			CompanyId: company_id,
+			Id: company_id,
 		},
 	)
 
@@ -239,7 +239,7 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ProjectService().CreateProject(
+	resp, err := h.companyServices.ProjectService().Create(
 		context.Background(),
 		&company_service.CreateProjectRequest{
 			Title:        project.Title,
@@ -273,7 +273,7 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 func (h *Handler) GetCompanyProjectById(c *gin.Context) {
 	projectId := c.Param("project_id")
 
-	resp, err := h.companyServices.ProjectService().GetProjectById(
+	resp, err := h.companyServices.ProjectService().GetById(
 		context.Background(),
 		&company_service.GetProjectByIdRequest{
 			ProjectId: projectId,
@@ -316,7 +316,7 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ProjectService().GetProjectList(
+	resp, err := h.companyServices.ProjectService().GetList(
 		context.Background(),
 		&company_service.GetProjectListRequest{
 			Limit:     int32(limit),
@@ -358,7 +358,7 @@ func (h *Handler) UpdateCompanyProject(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ProjectService().UpdateProject(
+	resp, err := h.companyServices.ProjectService().Update(
 		context.Background(),
 		&company_service.Project{
 			ProjectId:    project_id,
@@ -386,13 +386,13 @@ func (h *Handler) UpdateCompanyProject(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project_id path string true "project_id"
-// @Success 204
+// @Success 204 {object} http.Response{data=string} "Data"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteCompanyProject(c *gin.Context) {
 	project_id := c.Param("project_id")
 
-	resp, err := h.companyServices.ProjectService().DeleteProject(
+	resp, err := h.companyServices.ProjectService().Delete(
 		context.Background(),
 		&company_service.DeleteProjectRequest{
 			ProjectId: project_id,
@@ -405,4 +405,74 @@ func (h *Handler) DeleteCompanyProject(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.NoContent, resp)
+}
+
+// AddProjectResource godoc
+// @Security ApiKeyAuth
+// @ID add_project_resource
+// @Router /v1/company/project/resource [POST]
+// @Summary Add ProjectResource
+// @Description Add ProjectResource
+// @Tags Company Project
+// @Accept json
+// @Produce json
+// @Param ProjectResource body company_service.AddResourceRequest true "ProjectResourceAddRequest"
+// @Success 201 {object} http.Response{data=company_service.AddResourceResponse} "ProjectResource data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) AddProjectResource(c *gin.Context) {
+	var company company_service.AddResourceRequest
+
+	err := c.ShouldBindJSON(&company)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.ProjectService().AddResource(
+		c.Request.Context(),
+		&company,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, resp)
+}
+
+// RemoveProjectResource godoc
+// @Security ApiKeyAuth
+// @ID remove_project_resource
+// @Router /v1/company/project/resource [DELETE]
+// @Summary Remove ProjectResource
+// @Description Remove ProjectResource
+// @Tags Company Project
+// @Accept json
+// @Produce json
+// @Param ProjectResource body company_service.RemoveResourceRequest true "ProjectResourceRemoveRequest"
+// @Success 201 {object} http.Response{data=company_service.EmptyProto} "ProjectResource data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) RemoveProjectResource(c *gin.Context) {
+	var company company_service.RemoveResourceRequest
+
+	err := c.ShouldBindJSON(&company)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.ProjectService().RemoveResource(
+		c.Request.Context(),
+		&company,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, resp)
 }

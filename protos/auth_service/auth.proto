@@ -200,3 +200,13 @@ message Project {
     string created_at = 5;
     string updated_at = 6;
 }
+
+message Company {
+    string id = 1;
+    string name = 2;
+    string logo = 3;
+    string description = 4;
+    string created_at = 5;
+    string updated_at = 6;
+    string owner_id = 7;
+}

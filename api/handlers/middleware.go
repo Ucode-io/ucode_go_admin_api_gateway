@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -44,6 +45,16 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.HasAccessResponse, bo
 			Method: c.Request.Method,
 		},
 	)
+
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println("PROJECT ID", resp.GetProjectId())
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 	if err != nil {
 		errr := status.Error(codes.PermissionDenied, "Permission denied")
 		if errr.Error() == err.Error() {

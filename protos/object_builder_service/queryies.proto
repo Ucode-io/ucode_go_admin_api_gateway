@@ -21,6 +21,7 @@ message CreateQueryRequest {
     string title = 1;
     string query_folder_id = 2;
     google.protobuf.Struct attributes = 3;
+    string project_id = 4;
 }
 
 message Query {
@@ -28,17 +29,20 @@ message Query {
     string title = 2;
     string query_folder_id = 3;
     google.protobuf.Struct attributes = 4;
+    string project_id = 5;
 
 }
 
 message QueryId {
     string id = 1;
+    string project_id = 2;
 }
 message GetAllQueriesRequest {
     string query_folder_id = 1;
     int32 limit = 2;
     int32 offset = 3;
     string search = 4;
+    string project_id = 5;
 }
 
 message GetAllQueriesResponse {
