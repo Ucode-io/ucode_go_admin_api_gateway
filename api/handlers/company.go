@@ -471,7 +471,7 @@ func (h *Handler) DeleteCompanyProject(c *gin.Context) {
 // @Router /v1/company/project/resource [POST]
 // @Summary Add ProjectResource
 // @Description Add ProjectResource
-// @Tags Company Project
+// @Tags Company Resource
 // @Accept json
 // @Produce json
 // @Param ProjectResource body company_service.AddResourceRequest true "ProjectResourceAddRequest"
@@ -506,7 +506,7 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 // @Router /v1/company/project/resource [DELETE]
 // @Summary Remove ProjectResource
 // @Description Remove ProjectResource
-// @Tags Company Project
+// @Tags Company Resource
 // @Accept json
 // @Produce json
 // @Param ProjectResource body company_service.RemoveResourceRequest true "ProjectResourceRemoveRequest"
@@ -533,4 +533,79 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.Created, resp)
+}
+
+// GetResourceById godoc
+// @Security ApiKeyAuth
+// @ID get_resource_id
+// @Router /v1/resource/{resource_id} [GET]
+// @Summary Get Resource by id
+// @Description Get Resource by id
+// @Tags Company Resource
+// @Accept json
+// @Produce json
+// @Param resource_id path string true "resource_id"
+// @Success 200 {object} http.Response{data=company_service.ResourceWithoutPassword} "Resource data"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetResource(c *gin.Context) {
+
+	resp, err := h.companyServices.ProjectService().GetResource(
+		context.Background(),
+		&company_service.GetResourceRequest{
+			Id: c.Param("resource_id"),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
+
+// GetResourceList godoc
+// @Security ApiKeyAuth
+// @ID get_resource_list
+// @Router /v1/resource [GET]
+// @Summary Get all companies
+// @Description Get all companies
+// @Tags Company Resource
+// @Accept json
+// @Produce json
+// @Param filters query company_service.GetReourceListRequest true "filters"
+// @Success 200 {object} http.Response{data=company_service.GetReourceListResponse} "Resource data"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetResourceList(c *gin.Context) {
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.ProjectService().GetReourceList(
+		context.Background(),
+		&company_service.GetReourceListRequest{
+			Limit:     int32(limit),
+			Offset:    int32(offset),
+			Search:    c.DefaultQuery("search", ""),
+			ProjectId: c.DefaultQuery("project_id", ""),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
 }

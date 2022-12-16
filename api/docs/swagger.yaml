@@ -268,6 +268,23 @@ definitions:
       owner_id:
         type: string
     type: object
+  company_service.CompanyWithProjects:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/company_service.ProjectWithoutResource'
+        type: array
+    type: object
   company_service.CreateProjectRequest:
     properties:
       company_id:
@@ -297,6 +314,15 @@ definitions:
       company:
         $ref: '#/definitions/company_service.Company'
     type: object
+  company_service.GetListWithProjectsResponse:
+    properties:
+      companies:
+        items:
+          $ref: '#/definitions/company_service.CompanyWithProjects'
+        type: array
+      count:
+        type: integer
+    type: object
   company_service.GetProjectListResponse:
     properties:
       count:
@@ -304,6 +330,15 @@ definitions:
       projects:
         items:
           $ref: '#/definitions/company_service.Project'
+        type: array
+    type: object
+  company_service.GetReourceListResponse:
+    properties:
+      count:
+        type: integer
+      resources:
+        items:
+          $ref: '#/definitions/company_service.ResourceWithoutPassword'
         type: array
     type: object
   company_service.Project:
@@ -316,34 +351,27 @@ definitions:
         type: string
       resources:
         items:
-          $ref: '#/definitions/company_service.Project_Resource'
+          $ref: '#/definitions/company_service.ResourceWithoutPassword'
         type: array
       title:
         type: string
     type: object
-  company_service.Project_Resource:
+  company_service.ProjectWithoutResource:
     properties:
-      credentials:
-        $ref: '#/definitions/company_service.Project_Resource_Credentials'
-      resource_type:
-        type: integer
-      service_type:
-        type: integer
-    type: object
-  company_service.Project_Resource_Credentials:
-    properties:
-      database:
+      company_id:
         type: string
-      host:
+      id:
         type: string
-      port:
+      k8s_namespace:
         type: string
-      username:
+      title:
         type: string
     type: object
   company_service.RemoveResourceRequest:
     properties:
       company_id:
+        type: string
+      id:
         type: string
       project_id:
         type: string
@@ -356,6 +384,8 @@ definitions:
     properties:
       credentials:
         $ref: '#/definitions/company_service.Resource_Credentials'
+      id:
+        type: string
       resource_type:
         type: integer
       service_type:
@@ -368,6 +398,30 @@ definitions:
       host:
         type: string
       password:
+        type: string
+      port:
+        type: string
+      username:
+        type: string
+    type: object
+  company_service.ResourceWithoutPassword:
+    properties:
+      credentials:
+        $ref: '#/definitions/company_service.ResourceWithoutPassword_Credentials'
+      id:
+        type: string
+      project_id:
+        type: string
+      resource_type:
+        type: integer
+      service_type:
+        type: integer
+    type: object
+  company_service.ResourceWithoutPassword_Credentials:
+    properties:
+      database:
+        type: string
+      host:
         type: string
       port:
         type: string
@@ -503,7 +557,7 @@ definitions:
         type: string
       logo:
         type: string
-      title:
+      name:
         type: string
     type: object
   models.CompanyProjectCreateResponse:
@@ -3964,13 +4018,11 @@ paths:
       - Appointment
   /v1/company:
     get:
-      consumes:
-      - application/json
       description: Get all companies
       operationId: get_company_list
       parameters:
       - in: query
-        name: company_id
+        name: comany_id
         type: string
       - in: query
         name: limit
@@ -3979,19 +4031,22 @@ paths:
         name: offset
         type: integer
       - in: query
+        name: owner_id
+        type: string
+      - in: query
         name: search
         type: string
       produces:
       - application/json
       responses:
         "200":
-          description: Company data
+          description: Company datWithProjectsa
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.GetComanyListResponse'
+                  $ref: '#/definitions/company_service.GetListWithProjectsResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -4451,7 +4506,7 @@ paths:
       - ApiKeyAuth: []
       summary: Remove ProjectResource
       tags:
-      - Company Project
+      - Company Resource
     post:
       consumes:
       - application/json
@@ -4498,7 +4553,7 @@ paths:
       - ApiKeyAuth: []
       summary: Add ProjectResource
       tags:
-      - Company Project
+      - Company Resource
   /v1/custom-event:
     get:
       consumes:
@@ -7304,6 +7359,107 @@ paths:
       summary: Delete Relation
       tags:
       - Relation
+  /v1/resource:
+    get:
+      consumes:
+      - application/json
+      description: Get all companies
+      operationId: get_resource_list
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetReourceListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all companies
+      tags:
+      - Company Resource
+  /v1/resource/{resource_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Resource by id
+      operationId: get_resource_id
+      parameters:
+      - description: resource_id
+        in: path
+        name: resource_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ResourceWithoutPassword'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Resource by id
+      tags:
+      - Company Resource
   /v1/section:
     get:
       consumes:

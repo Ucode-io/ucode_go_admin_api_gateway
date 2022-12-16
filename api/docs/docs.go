@@ -3491,9 +3491,6 @@ var doc = `{
                     }
                 ],
                 "description": "Get all companies",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -3505,7 +3502,7 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "name": "company_id",
+                        "name": "comany_id",
                         "in": "query"
                     },
                     {
@@ -3520,13 +3517,18 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "name": "owner_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "search",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Company data",
+                        "description": "Company datWithProjectsa",
                         "schema": {
                             "allOf": [
                                 {
@@ -3536,7 +3538,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetComanyListResponse"
+                                            "$ref": "#/definitions/company_service.GetListWithProjectsResponse"
                                         }
                                     }
                                 }
@@ -4051,7 +4053,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Company Project"
+                    "Company Resource"
                 ],
                 "summary": "Add ProjectResource",
                 "operationId": "add_project_resource",
@@ -4137,7 +4139,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Company Project"
+                    "Company Resource"
                 ],
                 "summary": "Remove ProjectResource",
                 "operationId": "remove_project_resource",
@@ -9545,6 +9547,191 @@ var doc = `{
                 }
             }
         },
+        "/v1/resource": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all companies",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Resource"
+                ],
+                "summary": "Get all companies",
+                "operationId": "get_resource_list",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resource data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.GetReourceListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/resource/{resource_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Resource by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Resource"
+                ],
+                "summary": "Get Resource by id",
+                "operationId": "get_resource_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resource data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.ResourceWithoutPassword"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/section": {
             "get": {
                 "security": [
@@ -12954,6 +13141,32 @@ var doc = `{
                 }
             }
         },
+        "company_service.CompanyWithProjects": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.ProjectWithoutResource"
+                    }
+                }
+            }
+        },
         "company_service.CreateProjectRequest": {
             "type": "object",
             "properties": {
@@ -12999,6 +13212,20 @@ var doc = `{
                 }
             }
         },
+        "company_service.GetListWithProjectsResponse": {
+            "type": "object",
+            "properties": {
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.CompanyWithProjects"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
         "company_service.GetProjectListResponse": {
             "type": "object",
             "properties": {
@@ -13009,6 +13236,20 @@ var doc = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/company_service.Project"
+                    }
+                }
+            }
+        },
+        "company_service.GetReourceListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.ResourceWithoutPassword"
                     }
                 }
             }
@@ -13028,7 +13269,7 @@ var doc = `{
                 "resources": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/company_service.Project_Resource"
+                        "$ref": "#/definitions/company_service.ResourceWithoutPassword"
                     }
                 },
                 "title": {
@@ -13036,33 +13277,19 @@ var doc = `{
                 }
             }
         },
-        "company_service.Project_Resource": {
+        "company_service.ProjectWithoutResource": {
             "type": "object",
             "properties": {
-                "credentials": {
-                    "$ref": "#/definitions/company_service.Project_Resource_Credentials"
-                },
-                "resource_type": {
-                    "type": "integer"
-                },
-                "service_type": {
-                    "type": "integer"
-                }
-            }
-        },
-        "company_service.Project_Resource_Credentials": {
-            "type": "object",
-            "properties": {
-                "database": {
+                "company_id": {
                     "type": "string"
                 },
-                "host": {
+                "id": {
                     "type": "string"
                 },
-                "port": {
+                "k8s_namespace": {
                     "type": "string"
                 },
-                "username": {
+                "title": {
                     "type": "string"
                 }
             }
@@ -13071,6 +13298,9 @@ var doc = `{
             "type": "object",
             "properties": {
                 "company_id": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "project_id": {
@@ -13090,11 +13320,51 @@ var doc = `{
                 "credentials": {
                     "$ref": "#/definitions/company_service.Resource_Credentials"
                 },
+                "id": {
+                    "type": "string"
+                },
                 "resource_type": {
                     "type": "integer"
                 },
                 "service_type": {
                     "type": "integer"
+                }
+            }
+        },
+        "company_service.ResourceWithoutPassword": {
+            "type": "object",
+            "properties": {
+                "credentials": {
+                    "$ref": "#/definitions/company_service.ResourceWithoutPassword_Credentials"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
+                },
+                "service_type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "company_service.ResourceWithoutPassword_Credentials": {
+            "type": "object",
+            "properties": {
+                "database": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
@@ -13314,7 +13584,7 @@ var doc = `{
                 "logo": {
                     "type": "string"
                 },
-                "title": {
+                "name": {
                     "type": "string"
                 }
             }

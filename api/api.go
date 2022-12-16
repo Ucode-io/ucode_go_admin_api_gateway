@@ -202,20 +202,22 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		// company service
 		// v1.POST("/company", h.CreateCompany)
-		v1.GET("company/:company_id", h.GetCompanyByID)
-		v1.GET("company", h.GetCompanyList)
+		v1.GET("/company/:company_id", h.GetCompanyByID)
+		v1.GET("/company", h.GetCompanyList)
 		v1.PUT("company/:company_id", h.UpdateCompany)
-		v1.DELETE("company/:company_id", h.DeleteCompany)
+		v1.DELETE("/company/:company_id", h.DeleteCompany)
 
 		// project service
-		v1.POST("company-project", h.CreateCompanyProject)
-		v1.GET("company-project", h.GetCompanyProjectList)
-		v1.GET("company-project/:project_id", h.GetCompanyProjectById)
-		v1.PUT("company-project/:project_id", h.UpdateCompanyProject)
-		v1.DELETE("company-project/:project_id", h.DeleteCompanyProject)
+		v1.POST("/company-project", h.CreateCompanyProject)
+		v1.GET("/company-project", h.GetCompanyProjectList)
+		v1.GET("/company-project/:project_id", h.GetCompanyProjectById)
+		v1.PUT("/company-project/:project_id", h.UpdateCompanyProject)
+		v1.DELETE("/company-project/:project_id", h.DeleteCompanyProject)
 
-		v1.POST("company/project/resource", h.AddProjectResource)
-		v1.DELETE("company/project/resource", h.RemoveProjectResource)
+		v1.POST("/company/project/resource", h.AddProjectResource)
+		v1.DELETE("/company/project/resource", h.RemoveProjectResource)
+		v1.GET("/resource/:resource_id", h.GetResource)
+		v1.GET("/resource", h.GetResourceList)
 	}
 
 	// v3 for ucode version 2

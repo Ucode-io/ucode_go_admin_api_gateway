@@ -29,6 +29,8 @@ type ProjectServiceClient interface {
 	Delete(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*EmptyProto, error)
 	AddResource(ctx context.Context, in *AddResourceRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
 	RemoveResource(ctx context.Context, in *RemoveResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error)
+	GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error)
+	GetReourceList(ctx context.Context, in *GetReourceListRequest, opts ...grpc.CallOption) (*GetReourceListResponse, error)
 }
 
 type projectServiceClient struct {
@@ -102,6 +104,24 @@ func (c *projectServiceClient) RemoveResource(ctx context.Context, in *RemoveRes
 	return out, nil
 }
 
+func (c *projectServiceClient) GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error) {
+	out := new(ResourceWithoutPassword)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/GetResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) GetReourceList(ctx context.Context, in *GetReourceListRequest, opts ...grpc.CallOption) (*GetReourceListResponse, error) {
+	out := new(GetReourceListResponse)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/GetReourceList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProjectServiceServer is the server API for ProjectService service.
 // All implementations must embed UnimplementedProjectServiceServer
 // for forward compatibility
@@ -113,6 +133,8 @@ type ProjectServiceServer interface {
 	Delete(context.Context, *DeleteProjectRequest) (*EmptyProto, error)
 	AddResource(context.Context, *AddResourceRequest) (*AddResourceResponse, error)
 	RemoveResource(context.Context, *RemoveResourceRequest) (*EmptyProto, error)
+	GetResource(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error)
+	GetReourceList(context.Context, *GetReourceListRequest) (*GetReourceListResponse, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -140,6 +162,12 @@ func (UnimplementedProjectServiceServer) AddResource(context.Context, *AddResour
 }
 func (UnimplementedProjectServiceServer) RemoveResource(context.Context, *RemoveResourceRequest) (*EmptyProto, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveResource not implemented")
+}
+func (UnimplementedProjectServiceServer) GetResource(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetResource not implemented")
+}
+func (UnimplementedProjectServiceServer) GetReourceList(context.Context, *GetReourceListRequest) (*GetReourceListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetReourceList not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
 
@@ -280,6 +308,42 @@ func _ProjectService_RemoveResource_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_GetResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetResourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).GetResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/GetResource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).GetResource(ctx, req.(*GetResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_GetReourceList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetReourceListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).GetReourceList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/GetReourceList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).GetReourceList(ctx, req.(*GetReourceListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProjectService_ServiceDesc is the grpc.ServiceDesc for ProjectService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -314,6 +378,14 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveResource",
 			Handler:    _ProjectService_RemoveResource_Handler,
+		},
+		{
+			MethodName: "GetResource",
+			Handler:    _ProjectService_GetResource_Handler,
+		},
+		{
+			MethodName: "GetReourceList",
+			Handler:    _ProjectService_GetReourceList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

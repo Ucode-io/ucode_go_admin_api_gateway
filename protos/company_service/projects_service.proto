@@ -12,6 +12,8 @@ service ProjectService {
     rpc Delete(DeleteProjectRequest) returns (EmptyProto) {}
     rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
     rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
+    rpc GetResource(GetResourceRequest) returns (ResourceWithoutPassword) {}
+    rpc GetReourceList(GetReourceListRequest) returns (GetReourceListResponse) {}
 }
 
 enum ServiceType {
@@ -38,6 +40,7 @@ message Resource {
     ServiceType service_type = 1;
     ResourceType resource_type = 2;
     Credentials credentials = 3;
+    string id = 4;
 }
 
 message ProjectWithoutResource {
@@ -47,24 +50,26 @@ message ProjectWithoutResource {
     string title = 4;
 }
 
-message Project {
-    message Resource {
-        message Credentials {
-            string host = 1;
-            string port = 2;
-            string username = 3;
-            string database = 4;
-        }
-        ServiceType service_type = 1;
-        ResourceType resource_type = 2;
-        Credentials credentials = 3;
+message ResourceWithoutPassword {
+    message Credentials {
+        string host = 1;
+        string port = 2;
+        string username = 3;
+        string database = 4;
     }
+    ServiceType service_type = 1;
+    ResourceType resource_type = 2;
+    Credentials credentials = 3;
+    string id = 4;
+    string project_id = 5;
+}
 
+message Project {
     string project_id = 1;
     string company_id = 2;
     string k8s_namespace = 3;
     string title = 4;
-    repeated Project.Resource resources = 5;
+    repeated ResourceWithoutPassword resources = 5;
 }
 
 message CreateProjectRequest {
@@ -122,4 +127,21 @@ message RemoveResourceRequest {
     ServiceType service_type = 2;
     ResourceType resource_type = 3;
     string company_id = 4;
+    string id = 5;
+}
+
+message GetReourceListRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+    string project_id = 3;
+    string search = 4;
+}
+
+message GetReourceListResponse {
+    int32 count = 1;
+    repeated ResourceWithoutPassword resources = 2;
+}
+
+message GetResourceRequest {
+    string id = 1;
 }
