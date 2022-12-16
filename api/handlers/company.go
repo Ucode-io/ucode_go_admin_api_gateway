@@ -538,7 +538,7 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 // GetResourceById godoc
 // @Security ApiKeyAuth
 // @ID get_resource_id
-// @Router /v1/resource/{resource_id} [GET]
+// @Router /v1/company/project/resource/{resource_id} [GET]
 // @Summary Get Resource by id
 // @Description Get Resource by id
 // @Tags Company Resource
@@ -568,7 +568,7 @@ func (h *Handler) GetResource(c *gin.Context) {
 // GetResourceList godoc
 // @Security ApiKeyAuth
 // @ID get_resource_list
-// @Router /v1/resource [GET]
+// @Router /v1/company/project/resource [GET]
 // @Summary Get all companies
 // @Description Get all companies
 // @Tags Company Resource
@@ -608,4 +608,39 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.OK, resp)
+}
+
+// ReconnectProjectResource godoc
+// @Security ApiKeyAuth
+// @ID reconnect_project_resource
+// @Router /v1/company/project/resource/reconnect [POST]
+// @Summary Reconnect ProjectResource
+// @Description Reconnect ProjectResource
+// @Tags Company Resource
+// @Accept json
+// @Produce json
+// @Param ProjectResource body company_service.ReconnectResourceRequest true "ProjectResourceReconnectRequest"
+// @Success 201 {object} http.Response{data=company_service.EmptyProto} "ProjectResource data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) ReconnectProjectResource(c *gin.Context) {
+	var company company_service.ReconnectResourceRequest
+
+	err := c.ShouldBindJSON(&company)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.ProjectService().ReconnectResource(
+		c.Request.Context(),
+		&company,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, resp)
 }

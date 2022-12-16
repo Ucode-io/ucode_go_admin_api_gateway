@@ -364,7 +364,12 @@ definitions:
         type: string
       k8s_namespace:
         type: string
-      title:
+      name:
+        type: string
+    type: object
+  company_service.ReconnectResourceRequest:
+    properties:
+      id:
         type: string
     type: object
   company_service.RemoveResourceRequest:
@@ -4507,6 +4512,59 @@ paths:
       summary: Remove ProjectResource
       tags:
       - Company Resource
+    get:
+      consumes:
+      - application/json
+      description: Get all companies
+      operationId: get_resource_list
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetReourceListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all companies
+      tags:
+      - Company Resource
     post:
       consumes:
       - application/json
@@ -4552,6 +4610,101 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Add ProjectResource
+      tags:
+      - Company Resource
+  /v1/company/project/resource/{resource_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Resource by id
+      operationId: get_resource_id
+      parameters:
+      - description: resource_id
+        in: path
+        name: resource_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ResourceWithoutPassword'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Resource by id
+      tags:
+      - Company Resource
+  /v1/company/project/resource/reconnect:
+    post:
+      consumes:
+      - application/json
+      description: Reconnect ProjectResource
+      operationId: reconnect_project_resource
+      parameters:
+      - description: ProjectResourceReconnectRequest
+        in: body
+        name: ProjectResource
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.ReconnectResourceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ProjectResource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.EmptyProto'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Reconnect ProjectResource
       tags:
       - Company Resource
   /v1/custom-event:
@@ -7359,107 +7512,6 @@ paths:
       summary: Delete Relation
       tags:
       - Relation
-  /v1/resource:
-    get:
-      consumes:
-      - application/json
-      description: Get all companies
-      operationId: get_resource_list
-      parameters:
-      - in: query
-        name: limit
-        type: integer
-      - in: query
-        name: offset
-        type: integer
-      - in: query
-        name: project_id
-        type: string
-      - in: query
-        name: search
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Resource data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.GetReourceListResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all companies
-      tags:
-      - Company Resource
-  /v1/resource/{resource_id}:
-    get:
-      consumes:
-      - application/json
-      description: Get Resource by id
-      operationId: get_resource_id
-      parameters:
-      - description: resource_id
-        in: path
-        name: resource_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Resource data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.ResourceWithoutPassword'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get Resource by id
-      tags:
-      - Company Resource
   /v1/section:
     get:
       consumes:

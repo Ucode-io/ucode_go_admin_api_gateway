@@ -25,6 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type BuilderProjectServiceClient interface {
 	Register(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Deregister(ctx context.Context, in *DeregisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Reconnect(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	RegisterMany(ctx context.Context, in *RegisterManyProjectsRequest, opts ...grpc.CallOption) (*RegisterManyProjectsResponse, error)
 	DeregisterMany(ctx context.Context, in *DeregisterManyProjectsRequest, opts ...grpc.CallOption) (*DeregisterManyProjectsResponse, error)
 }
@@ -55,6 +56,15 @@ func (c *builderProjectServiceClient) Deregister(ctx context.Context, in *Deregi
 	return out, nil
 }
 
+func (c *builderProjectServiceClient) Reconnect(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/object_builder_service.BuilderProjectService/Reconnect", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *builderProjectServiceClient) RegisterMany(ctx context.Context, in *RegisterManyProjectsRequest, opts ...grpc.CallOption) (*RegisterManyProjectsResponse, error) {
 	out := new(RegisterManyProjectsResponse)
 	err := c.cc.Invoke(ctx, "/object_builder_service.BuilderProjectService/RegisterMany", in, out, opts...)
@@ -79,6 +89,7 @@ func (c *builderProjectServiceClient) DeregisterMany(ctx context.Context, in *De
 type BuilderProjectServiceServer interface {
 	Register(context.Context, *RegisterProjectRequest) (*emptypb.Empty, error)
 	Deregister(context.Context, *DeregisterProjectRequest) (*emptypb.Empty, error)
+	Reconnect(context.Context, *RegisterProjectRequest) (*emptypb.Empty, error)
 	RegisterMany(context.Context, *RegisterManyProjectsRequest) (*RegisterManyProjectsResponse, error)
 	DeregisterMany(context.Context, *DeregisterManyProjectsRequest) (*DeregisterManyProjectsResponse, error)
 	mustEmbedUnimplementedBuilderProjectServiceServer()
@@ -93,6 +104,9 @@ func (UnimplementedBuilderProjectServiceServer) Register(context.Context, *Regis
 }
 func (UnimplementedBuilderProjectServiceServer) Deregister(context.Context, *DeregisterProjectRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deregister not implemented")
+}
+func (UnimplementedBuilderProjectServiceServer) Reconnect(context.Context, *RegisterProjectRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Reconnect not implemented")
 }
 func (UnimplementedBuilderProjectServiceServer) RegisterMany(context.Context, *RegisterManyProjectsRequest) (*RegisterManyProjectsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterMany not implemented")
@@ -149,6 +163,24 @@ func _BuilderProjectService_Deregister_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BuilderProjectService_Reconnect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BuilderProjectServiceServer).Reconnect(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.BuilderProjectService/Reconnect",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BuilderProjectServiceServer).Reconnect(ctx, req.(*RegisterProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BuilderProjectService_RegisterMany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RegisterManyProjectsRequest)
 	if err := dec(in); err != nil {
@@ -199,6 +231,10 @@ var BuilderProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Deregister",
 			Handler:    _BuilderProjectService_Deregister_Handler,
+		},
+		{
+			MethodName: "Reconnect",
+			Handler:    _BuilderProjectService_Reconnect_Handler,
 		},
 		{
 			MethodName: "RegisterMany",

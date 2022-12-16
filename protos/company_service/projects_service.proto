@@ -3,6 +3,7 @@ syntax="proto3";
 package company_service;
 option go_package="genproto/company_service";
 
+import "company.proto";
 
 service ProjectService {
     rpc Create(CreateProjectRequest) returns (CreateProjectResponse) {}
@@ -14,40 +15,15 @@ service ProjectService {
     rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
     rpc GetResource(GetResourceRequest) returns (ResourceWithoutPassword) {}
     rpc GetReourceList(GetReourceListRequest) returns (GetReourceListResponse) {}
-}
-
-enum ServiceType {
-    NOT_SPECIFIED = 0;
-    BUILDER_SERVICE = 1;
-    ANALYTICS_SERVICE = 2;
-}
-
-enum ResourceType {
-    NOT_DECIDED = 0;
-    MONGODB = 1;
-    CLICKHOUSE = 2;
-    POSTGRESQL = 3;
-}
-
-message Resource {
-    message Credentials {
-        string host = 1;
-        string port = 2;
-        string username = 3;
-        string password = 4;
-        string database = 5;
-    }
-    ServiceType service_type = 1;
-    ResourceType resource_type = 2;
-    Credentials credentials = 3;
-    string id = 4;
+    rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
+    rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
 }
 
 message ProjectWithoutResource {
     string id = 1;
     string company_id = 2;
     string k8s_namespace = 3;
-    string title = 4;
+    string name = 4;
 }
 
 message ResourceWithoutPassword {
@@ -144,4 +120,23 @@ message GetReourceListResponse {
 
 message GetResourceRequest {
     string id = 1;
+}
+
+message ReconnectResourceRequest {
+    string id = 1;
+}
+
+message GetResourceWithPathResponse {
+    message Credentials {
+        string host = 1;
+        string port = 2;
+        string username = 3;
+        string database = 4;
+    }
+    ServiceType service_type = 1;
+    ResourceType resource_type = 2;
+    Credentials credentials = 3;
+    string id = 4;
+    string project_id = 5;
+    string path = 6;
 }

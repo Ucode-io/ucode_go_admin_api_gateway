@@ -25,6 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ProjectServiceClient interface {
 	Register(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Deregister(ctx context.Context, in *DeregisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Reconnect(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	RegisterMany(ctx context.Context, in *RegisterManyProjectsRequest, opts ...grpc.CallOption) (*RegisterManyProjectsResponse, error)
 	DeregisterMany(ctx context.Context, in *DeregisterManyProjectsRequest, opts ...grpc.CallOption) (*DeregisterManyProjectsResponse, error)
 }
@@ -55,6 +56,15 @@ func (c *projectServiceClient) Deregister(ctx context.Context, in *DeregisterPro
 	return out, nil
 }
 
+func (c *projectServiceClient) Reconnect(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/analytics_service.ProjectService/Reconnect", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *projectServiceClient) RegisterMany(ctx context.Context, in *RegisterManyProjectsRequest, opts ...grpc.CallOption) (*RegisterManyProjectsResponse, error) {
 	out := new(RegisterManyProjectsResponse)
 	err := c.cc.Invoke(ctx, "/analytics_service.ProjectService/RegisterMany", in, out, opts...)
@@ -79,6 +89,7 @@ func (c *projectServiceClient) DeregisterMany(ctx context.Context, in *Deregiste
 type ProjectServiceServer interface {
 	Register(context.Context, *RegisterProjectRequest) (*emptypb.Empty, error)
 	Deregister(context.Context, *DeregisterProjectRequest) (*emptypb.Empty, error)
+	Reconnect(context.Context, *RegisterProjectRequest) (*emptypb.Empty, error)
 	RegisterMany(context.Context, *RegisterManyProjectsRequest) (*RegisterManyProjectsResponse, error)
 	DeregisterMany(context.Context, *DeregisterManyProjectsRequest) (*DeregisterManyProjectsResponse, error)
 	mustEmbedUnimplementedProjectServiceServer()
@@ -93,6 +104,9 @@ func (UnimplementedProjectServiceServer) Register(context.Context, *RegisterProj
 }
 func (UnimplementedProjectServiceServer) Deregister(context.Context, *DeregisterProjectRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deregister not implemented")
+}
+func (UnimplementedProjectServiceServer) Reconnect(context.Context, *RegisterProjectRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Reconnect not implemented")
 }
 func (UnimplementedProjectServiceServer) RegisterMany(context.Context, *RegisterManyProjectsRequest) (*RegisterManyProjectsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterMany not implemented")
@@ -149,6 +163,24 @@ func _ProjectService_Deregister_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_Reconnect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).Reconnect(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/analytics_service.ProjectService/Reconnect",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).Reconnect(ctx, req.(*RegisterProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ProjectService_RegisterMany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RegisterManyProjectsRequest)
 	if err := dec(in); err != nil {
@@ -199,6 +231,10 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Deregister",
 			Handler:    _ProjectService_Deregister_Handler,
+		},
+		{
+			MethodName: "Reconnect",
+			Handler:    _ProjectService_Reconnect_Handler,
 		},
 		{
 			MethodName: "RegisterMany",
