@@ -613,7 +613,7 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 // ReconnectProjectResource godoc
 // @Security ApiKeyAuth
 // @ID reconnect_project_resource
-// @Router /v1/company/project/reconnect/resource/ [POST]
+// @Router /v1/company/project/resource/reconnect [POST]
 // @Summary Reconnect ProjectResource
 // @Description Reconnect ProjectResource
 // @Tags Company Resource
