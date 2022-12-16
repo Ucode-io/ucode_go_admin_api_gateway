@@ -613,7 +613,7 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 // ReconnectProjectResource godoc
 // @Security ApiKeyAuth
 // @ID reconnect_project_resource
-// @Router /v1/company/project/resource/reconnect [POST]
+// @Router /v1/company/project/reconnect/resource/ [POST]
 // @Summary Reconnect ProjectResource
 // @Description Reconnect ProjectResource
 // @Tags Company Resource
@@ -626,6 +626,7 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 	var company company_service.ReconnectResourceRequest
 
+	fmt.Println("REQUEST HERE")
 	err := c.ShouldBindJSON(&company)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -641,6 +642,8 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	fmt.Println("REQUEST PASSED")
 
 	h.handleResponse(c, http.Created, resp)
 }
