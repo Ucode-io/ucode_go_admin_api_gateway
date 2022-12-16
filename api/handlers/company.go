@@ -2,12 +2,15 @@ package handlers
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // // CreateCompany godoc
@@ -124,6 +127,51 @@ func (h *Handler) GetCompanyList(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
+// GetCompanyListWithProjects godoc
+// @Security ApiKeyAuth
+// @ID get_company_list
+// @Router /v1/company [GET]
+// @Summary Get all companies
+// @Description Get all companies
+// @Tags Company
+// WithProjects@Accept json
+// @Produce json
+// @Param filters query company_service.GetListWithProjectsRequest true "filters"
+// @Success 200 {object} http.Response{data=company_service.GetListWithProjectsResponse} "Company datWithProjectsa"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetCompanyListWithProjects(c *gin.Context) {
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.CompanyService().GetListWithProjects(
+		context.Background(),
+		&company_service.GetListWithProjectsRequest{
+			Limit:    int32(limit),
+			Offset:   int32(offset),
+			Search:   c.DefaultQuery("search", ""),
+			ComanyId: c.DefaultQuery("company_id", ""),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
+
 // UpdateCompany godoc
 // @Security ApiKeyAuth
 // @ID update_company
@@ -140,9 +188,18 @@ func (h *Handler) GetCompanyList(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateCompany(c *gin.Context) {
 	company_id := c.Param("company_id")
+
+	fmt.Println("company_id", company_id)
+
+	_, err := uuid.Parse(company_id)
+	if err != nil {
+
+		h.handleResponse(c, http.BadRequest, errors.New("uuid invalid!!! : "+company_id))
+		return
+	}
 	var company models.CompanyCreateRequest
 
-	err := c.ShouldBindJSON(&company)
+	err = c.ShouldBindJSON(&company)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -152,18 +209,19 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 		c.Request.Context(),
 		&auth_service.UpdateCompanyRequest{
 			Id:   company_id,
-			Name: company.Title,
+			Name: company.Name,
 		},
 	)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
 	resp, err := h.companyServices.CompanyService().Update(
 		context.Background(),
 		&company_service.Company{
 			Id:          company_id,
-			Name:        company.Title,
+			Name:        company.Name,
 			Logo:        company.Logo,
 			Description: company.Description,
 		},

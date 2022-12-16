@@ -40,6 +40,13 @@ message Resource {
     Credentials credentials = 3;
 }
 
+message ProjectWithoutResource {
+    string id = 1;
+    string company_id = 2;
+    string k8s_namespace = 3;
+    string title = 4;
+}
+
 message Project {
     message Resource {
         message Credentials {

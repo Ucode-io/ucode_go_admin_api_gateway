@@ -10,7 +10,7 @@ import (
 
 func TestCompanyCreate(t *testing.T) {
 	company := models.CompanyCreateRequest{
-		Title:       "Parfume Gallery",
+		Name:        "Parfume Gallery",
 		Logo:        "Logo",
 		Description: "Description",
 	}
@@ -18,7 +18,7 @@ func TestCompanyCreate(t *testing.T) {
 	resp, err := companyClient.Create(
 		context.Background(),
 		&company_service.CreateCompanyRequest{
-			Title:       company.Title,
+			Title:       company.Name,
 			Logo:        company.Logo,
 			Description: company.Description,
 		},
