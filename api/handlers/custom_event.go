@@ -24,17 +24,27 @@ import (
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) CreateCustomEvent(c *gin.Context) {
-	var Customevent obs.CreateCustomEventRequest
+	var customevent obs.CreateCustomEventRequest
 
-	err := c.ShouldBindJSON(&Customevent)
+	err := c.ShouldBindJSON(&customevent)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	resp, err := h.services.CustomEventService().Create(
+	authInfo := h.GetAuthInfo(c)
+	customevent.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.CustomEventService().Create(
 		context.Background(),
-		&Customevent,
+		&customevent,
 	)
 
 	if err != nil {
@@ -59,17 +69,27 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetCustomEventByID(c *gin.Context) {
-	CustomeventID := c.Param("custom_event_id")
+	customeventID := c.Param("custom_event_id")
 
-	if !util.IsValidUUID(CustomeventID) {
+	if !util.IsValidUUID(customeventID) {
 		h.handleResponse(c, http.InvalidArgument, "Customevent id is an invalid uuid")
 		return
 	}
 
-	resp, err := h.services.CustomEventService().GetSingle(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.CustomEventService().GetSingle(
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
-			Id: CustomeventID,
+			Id:        customeventID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -94,11 +114,20 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllCustomEvents(c *gin.Context) {
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
 
-	resp, err := h.services.CustomEventService().GetList(
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.CustomEventService().GetList(
 		context.Background(),
 		&obs.GetCustomEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -131,7 +160,17 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.CustomEventService().Update(
+
+	authInfo := h.GetAuthInfo(c)
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.CustomEventService().Update(
 		context.Background(),
 		&obs.CustomEvent{
 			Id:        customevent.Id,
@@ -141,6 +180,7 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 			TableSlug: customevent.TableSlug,
 			Url:       customevent.Url,
 			Label:     customevent.Label,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -166,17 +206,26 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteCustomEvent(c *gin.Context) {
-	CustomeventID := c.Param("custom_event_id")
+	customeventID := c.Param("custom_event_id")
 
-	if !util.IsValidUUID(CustomeventID) {
+	if !util.IsValidUUID(customeventID) {
 		h.handleResponse(c, http.InvalidArgument, "Customevent id is an invalid uuid")
 		return
 	}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
 
-	resp, err := h.services.CustomEventService().Delete(
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.CustomEventService().Delete(
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
-			Id: CustomeventID,
+			Id:        customeventID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

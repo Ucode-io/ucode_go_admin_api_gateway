@@ -1,0 +1,142 @@
+syntax="proto3";
+
+package company_service;
+option go_package="genproto/company_service";
+
+import "company.proto";
+
+service ProjectService {
+    rpc Create(CreateProjectRequest) returns (CreateProjectResponse) {}
+    rpc GetList(GetProjectListRequest) returns (GetProjectListResponse) {}
+    rpc GetById(GetProjectByIdRequest) returns (Project) {}
+    rpc Update(Project) returns (Project) {}
+    rpc Delete(DeleteProjectRequest) returns (EmptyProto) {}
+    rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
+    rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
+    rpc GetResource(GetResourceRequest) returns (ResourceWithoutPassword) {}
+    rpc GetReourceList(GetReourceListRequest) returns (GetReourceListResponse) {}
+    rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
+    rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
+}
+
+message ProjectWithoutResource {
+    string id = 1;
+    string company_id = 2;
+    string k8s_namespace = 3;
+    string name = 4;
+}
+
+message ResourceWithoutPassword {
+    message Credentials {
+        string host = 1;
+        string port = 2;
+        string username = 3;
+        string database = 4;
+    }
+    ServiceType service_type = 1;
+    ResourceType resource_type = 2;
+    Credentials credentials = 3;
+    string id = 4;
+    string project_id = 5;
+}
+
+message Project {
+    string project_id = 1;
+    string company_id = 2;
+    string k8s_namespace = 3;
+    string title = 4;
+    repeated ResourceWithoutPassword resources = 5;
+}
+
+message CreateProjectRequest {
+    string company_id = 1;
+    string k8s_namespace = 2;
+    string title = 3;
+    repeated Resource resources = 4;
+}
+
+message CreateProjectResponse {
+    string project_id = 1;
+}
+
+message GetProjectListRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+    string company_id = 3;
+    string search = 4;
+}
+
+message GetProjectListResponse {
+    int32 count = 1;
+    repeated Project projects = 2;
+}
+
+message GetProjectByIdRequest {
+    string project_id = 1;
+    string company_id = 2;
+}
+
+message DeleteProjectRequest {
+    string project_id = 1;
+    string company_id = 2;
+}
+
+message EmptyProto {
+    
+}
+
+message AddResourceRequest {
+    string project_id = 1;
+    repeated Resource resources = 2;
+    string company_id = 3;
+}
+
+message AddResourceResponse {
+    string project_id = 1;
+    ServiceType service_type = 2;
+    ResourceType resource_type = 3;
+    string company_id = 4;
+}
+
+message RemoveResourceRequest {
+    string project_id = 1;
+    ServiceType service_type = 2;
+    ResourceType resource_type = 3;
+    string company_id = 4;
+    string id = 5;
+}
+
+message GetReourceListRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+    string project_id = 3;
+    string search = 4;
+}
+
+message GetReourceListResponse {
+    int32 count = 1;
+    repeated ResourceWithoutPassword resources = 2;
+}
+
+message GetResourceRequest {
+    string id = 1;
+}
+
+message ReconnectResourceRequest {
+    string id = 1;
+}
+
+message GetResourceWithPathResponse {
+    message Credentials {
+        string host = 1;
+        string port = 2;
+        string username = 3;
+        string database = 4;
+    }
+    ServiceType service_type = 1;
+    ResourceType resource_type = 2;
+    Credentials credentials = 3;
+    string id = 4;
+    string project_id = 5;
+    string path = 6;
+}

@@ -1,25 +1,22 @@
 package services
 
 import (
+	"context"
 	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/genproto/analytics_service"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/corporate_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
+
 	"ucode/ucode_go_api_gateway/genproto/pos_service"
+	"ucode/ucode_go_api_gateway/genproto/sms_service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type ServiceManagerI interface {
-	CompanyService() corporate_service.CompanyServiceClient
-	BranchService() corporate_service.BranchServiceClient
-	RequisiteService() corporate_service.RequisiteServiceClient
-	CategoryService() corporate_service.CategoryServiceClient
-	SubcategoryService() corporate_service.SubcategoryServiceClient
-	ProductService() corporate_service.ProductServiceClient
 	TableService() object_builder_service.TableServiceClient
 	FieldService() object_builder_service.FieldServiceClient
 	ObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
@@ -35,7 +32,6 @@ type ServiceManagerI interface {
 	OfflineAppointmentService() pos_service.OfflineAppointmentServiceClient
 	BookedAppointmentService() pos_service.BookedAppointmentServiceClient
 	QueryService() analytics_service.QueryServiceClient
-	CashboxTransactionService() object_builder_service.CashboxTransactionClient
 	HtmlTemplateService() object_builder_service.HtmlTemplateServiceClient
 	DocumentService() object_builder_service.DocumentServiceClient
 	EventService() object_builder_service.EventServiceClient
@@ -45,15 +41,23 @@ type ServiceManagerI interface {
 	CustomEventService() object_builder_service.CustomEventServiceClient
 	FunctionService() object_builder_service.FunctionServiceClient
 	BarcodeService() object_builder_service.BarcodeServiceClient
+	IntegrationService() auth_service.IntegrationServiceClient
+	ClientServiceAuth() auth_service.ClientServiceClient
+	PermissionServiceAuth() auth_service.PermissionServiceClient
+	UserService() auth_service.UserServiceClient
+	SessionServiceAuth() auth_service.SessionServiceClient
+	ObjectBuilderServiceAuth() object_builder_service.ObjectBuilderServiceClient
+	SmsService() sms_service.SmsServiceClient
+	LoginService() object_builder_service.LoginServiceClient
+	EmailServie() auth_service.EmailOtpServiceClient
+	CompanyService() company_service.CompanyServiceClient
+	ProjectService() company_service.ProjectServiceClient
+	QueryFolderService() object_builder_service.QueryFolderServiceClient
+	QueriesService() object_builder_service.QueryServiceClient
+	WebPageService() object_builder_service.WebPageServiceClient
 }
 
 type grpcClients struct {
-	companyService            corporate_service.CompanyServiceClient
-	branchService             corporate_service.BranchServiceClient
-	requisiteService          corporate_service.RequisiteServiceClient
-	categoryService           corporate_service.CategoryServiceClient
-	subcategoryService        corporate_service.SubcategoryServiceClient
-	productService            corporate_service.ProductServiceClient
 	tableService              object_builder_service.TableServiceClient
 	fieldService              object_builder_service.FieldServiceClient
 	objectBuilderService      object_builder_service.ObjectBuilderServiceClient
@@ -69,7 +73,6 @@ type grpcClients struct {
 	offlineAppointmentService pos_service.OfflineAppointmentServiceClient
 	bookedAppointmentService  pos_service.BookedAppointmentServiceClient
 	queryService              analytics_service.QueryServiceClient
-	cashboxTransactionService object_builder_service.CashboxTransactionClient
 	htmlTemplateService       object_builder_service.HtmlTemplateServiceClient
 	documentService           object_builder_service.DocumentServiceClient
 	eventService              object_builder_service.EventServiceClient
@@ -79,19 +82,26 @@ type grpcClients struct {
 	customEventService        object_builder_service.CustomEventServiceClient
 	functionService           object_builder_service.FunctionServiceClient
 	barcodeService            object_builder_service.BarcodeServiceClient
+	integrationService        auth_service.IntegrationServiceClient
+	clientServiceAuth         auth_service.ClientServiceClient
+	permissionServiceAuth     auth_service.PermissionServiceClient
+	userService               auth_service.UserServiceClient
+	sessionServiceAuth        auth_service.SessionServiceClient
+	objectBuilderServiceAuth  object_builder_service.ObjectBuilderServiceClient
+	smsService                sms_service.SmsServiceClient
+	loginService              object_builder_service.LoginServiceClient
+	emailServie               auth_service.EmailOtpServiceClient
+	companyService            company_service.CompanyServiceClient
+	projectService            company_service.ProjectServiceClient
+	queryFolderService        object_builder_service.QueryFolderServiceClient
+	queriesService            object_builder_service.QueryServiceClient
+	webPageService            object_builder_service.WebPageServiceClient
 }
 
-func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
+func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
 
-	connCorporateService, err := grpc.Dial(
-		cfg.CorporateServiceHost+cfg.CorporateGRPCPort,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	connObjectBuilderService, err := grpc.Dial(
+	connObjectBuilderService, err := grpc.DialContext(
+		ctx,
 		cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -99,7 +109,8 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		return nil, err
 	}
 
-	connAuthService, err := grpc.Dial(
+	connAuthService, err := grpc.DialContext(
+		ctx,
 		cfg.AuthServiceHost+cfg.AuthGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -107,7 +118,8 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		return nil, err
 	}
 
-	connPosService, err := grpc.Dial(
+	connPosService, err := grpc.DialContext(
+		ctx,
 		cfg.PosServiceHost+cfg.PosGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -115,7 +127,8 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		return nil, err
 	}
 
-	connAnalyticsService, err := grpc.Dial(
+	connAnalyticsService, err := grpc.DialContext(
+		ctx,
 		cfg.AnalyticsServiceHost+cfg.AnalyticsGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -123,13 +136,26 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		return nil, err
 	}
 
+	connSmsService, err := grpc.DialContext(
+		ctx,
+		cfg.SmsServiceHost+cfg.SmsGRPCPort,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	connCompanyService, err := grpc.DialContext(
+		ctx,
+		cfg.CompanyServiceHost+cfg.CompanyServicePort,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &grpcClients{
-		companyService:            corporate_service.NewCompanyServiceClient(connCorporateService),
-		branchService:             corporate_service.NewBranchServiceClient(connCorporateService),
-		requisiteService:          corporate_service.NewRequisiteServiceClient(connCorporateService),
-		categoryService:           corporate_service.NewCategoryServiceClient(connCorporateService),
-		subcategoryService:        corporate_service.NewSubcategoryServiceClient(connCorporateService),
-		productService:            corporate_service.NewProductServiceClient(connCorporateService),
 		tableService:              object_builder_service.NewTableServiceClient(connObjectBuilderService),
 		fieldService:              object_builder_service.NewFieldServiceClient(connObjectBuilderService),
 		objectBuilderService:      object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
@@ -145,7 +171,6 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		offlineAppointmentService: pos_service.NewOfflineAppointmentServiceClient(connPosService),
 		bookedAppointmentService:  pos_service.NewBookedAppointmentServiceClient(connPosService),
 		queryService:              analytics_service.NewQueryServiceClient(connAnalyticsService),
-		cashboxTransactionService: object_builder_service.NewCashboxTransactionClient(connObjectBuilderService),
 		htmlTemplateService:       object_builder_service.NewHtmlTemplateServiceClient(connObjectBuilderService),
 		documentService:           object_builder_service.NewDocumentServiceClient(connObjectBuilderService),
 		eventService:              object_builder_service.NewEventServiceClient(connObjectBuilderService),
@@ -155,31 +180,21 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		customEventService:        object_builder_service.NewCustomEventServiceClient(connObjectBuilderService),
 		functionService:           object_builder_service.NewFunctionServiceClient((connObjectBuilderService)),
 		barcodeService:            object_builder_service.NewBarcodeServiceClient((connObjectBuilderService)),
+		clientServiceAuth:         auth_service.NewClientServiceClient(connAuthService),
+		permissionServiceAuth:     auth_service.NewPermissionServiceClient(connAuthService),
+		userService:               auth_service.NewUserServiceClient(connAuthService),
+		sessionServiceAuth:        auth_service.NewSessionServiceClient(connAuthService),
+		integrationService:        auth_service.NewIntegrationServiceClient(connAuthService),
+		objectBuilderServiceAuth:  object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
+		smsService:                sms_service.NewSmsServiceClient(connSmsService),
+		loginService:              object_builder_service.NewLoginServiceClient(connObjectBuilderService),
+		emailServie:               auth_service.NewEmailOtpServiceClient(connAuthService),
+		companyService:            company_service.NewCompanyServiceClient(connCompanyService),
+		projectService:            company_service.NewProjectServiceClient(connCompanyService),
+		queryFolderService:        object_builder_service.NewQueryFolderServiceClient(connObjectBuilderService),
+		queriesService:            object_builder_service.NewQueryServiceClient(connObjectBuilderService),
+		webPageService:            object_builder_service.NewWebPageServiceClient(connObjectBuilderService),
 	}, nil
-}
-
-func (g *grpcClients) CompanyService() corporate_service.CompanyServiceClient {
-	return g.companyService
-}
-
-func (g *grpcClients) BranchService() corporate_service.BranchServiceClient {
-	return g.branchService
-}
-
-func (g *grpcClients) RequisiteService() corporate_service.RequisiteServiceClient {
-	return g.requisiteService
-}
-
-func (g *grpcClients) CategoryService() corporate_service.CategoryServiceClient {
-	return g.categoryService
-}
-
-func (g *grpcClients) SubcategoryService() corporate_service.SubcategoryServiceClient {
-	return g.subcategoryService
-}
-
-func (g *grpcClients) ProductService() corporate_service.ProductServiceClient {
-	return g.productService
 }
 
 func (g *grpcClients) TableService() object_builder_service.TableServiceClient {
@@ -242,10 +257,6 @@ func (g *grpcClients) QueryService() analytics_service.QueryServiceClient {
 	return g.queryService
 }
 
-func (g *grpcClients) CashboxTransactionService() object_builder_service.CashboxTransactionClient {
-	return g.cashboxTransactionService
-}
-
 func (g *grpcClients) HtmlTemplateService() object_builder_service.HtmlTemplateServiceClient {
 	return g.htmlTemplateService
 }
@@ -279,4 +290,66 @@ func (g *grpcClients) FunctionService() object_builder_service.FunctionServiceCl
 
 func (g *grpcClients) BarcodeService() object_builder_service.BarcodeServiceClient {
 	return g.barcodeService
+}
+
+// auth functions
+
+func (g *grpcClients) ClientServiceAuth() auth_service.ClientServiceClient {
+	return g.clientServiceAuth
+}
+
+func (g *grpcClients) PermissionServiceAuth() auth_service.PermissionServiceClient {
+	return g.permissionServiceAuth
+}
+
+func (g *grpcClients) UserService() auth_service.UserServiceClient {
+	return g.userService
+}
+
+func (g *grpcClients) SessionServiceAuth() auth_service.SessionServiceClient {
+	return g.sessionServiceAuth
+}
+
+func (g *grpcClients) IntegrationService() auth_service.IntegrationServiceClient {
+	return g.integrationService
+}
+
+func (g *grpcClients) ObjectBuilderServiceAuth() object_builder_service.ObjectBuilderServiceClient {
+	return g.objectBuilderServiceAuth
+}
+
+func (g *grpcClients) SmsService() sms_service.SmsServiceClient {
+	return g.smsService
+}
+
+func (g *grpcClients) LoginService() object_builder_service.LoginServiceClient {
+	return g.loginService
+}
+
+func (g *grpcClients) EmailServie() auth_service.EmailOtpServiceClient {
+	return g.emailServie
+}
+
+// this functions for multi company logic
+
+func (g *grpcClients) CompanyService() company_service.CompanyServiceClient {
+	return g.companyService
+}
+
+func (g *grpcClients) ProjectService() company_service.ProjectServiceClient {
+	return g.projectService
+}
+
+// for ucode version 2
+
+func (g *grpcClients) QueryFolderService() object_builder_service.QueryFolderServiceClient {
+	return g.queryFolderService
+}
+
+func (g *grpcClients) QueriesService() object_builder_service.QueryServiceClient {
+	return g.queriesService
+}
+
+func (g *grpcClients) WebPageService() object_builder_service.WebPageServiceClient {
+	return g.webPageService
 }

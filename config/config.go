@@ -29,6 +29,14 @@ type Config struct {
 	DefaultOffset string
 	DefaultLimit  string
 
+	Postgres struct {
+		Host     string
+		Port     int
+		Username string
+		Password string
+		Database string
+	}
+
 	CorporateServiceHost string
 	CorporateGRPCPort    string
 
@@ -44,55 +52,83 @@ type Config struct {
 	AnalyticsServiceHost string
 	AnalyticsGRPCPort    string
 
+	SmsServiceHost string
+	SmsGRPCPort    string
+
+	CompanyServiceHost string
+	CompanyServicePort string
+
 	MinioEndpoint        string
 	MinioAccessKeyID     string
 	MinioSecretAccessKey string
 	MinioProtocol        bool
+
+	UcodeNamespace string
+
+	SecretKey string
 }
 
 // Load ...
 func Load() Config {
 	if err := godotenv.Load("/app/.env"); err != nil {
-		fmt.Println("No .env file found")
+		if err := godotenv.Load(".env"); err != nil {
+			fmt.Println("No .env file found")
+		}
+		fmt.Println("No /app/.env file found")
 	}
 
 	config := Config{}
 
-	config.ServiceName = cast.ToString(getOrReturnDefaultValue("SERVICE_NAME", "medion_go_api_gateway"))
-	config.Environment = cast.ToString(getOrReturnDefaultValue("ENVIRONMENT", DebugMode))
-	config.Version = cast.ToString(getOrReturnDefaultValue("VERSION", "1.0"))
+	config.ServiceName = cast.ToString(GetOrReturnDefaultValue("SERVICE_NAME", "ucode/ucode_go_api_gateway"))
+	config.Environment = cast.ToString(GetOrReturnDefaultValue("ENVIRONMENT", DebugMode))
+	config.Version = cast.ToString(GetOrReturnDefaultValue("VERSION", "1.0"))
 
-	config.ServiceHost = cast.ToString(getOrReturnDefaultValue("SERVICE_HOST", "localhost"))
-	config.HTTPPort = cast.ToString(getOrReturnDefaultValue("HTTP_PORT", ":8001"))
-	config.HTTPScheme = cast.ToString(getOrReturnDefaultValue("HTTP_SCHEME", "http"))
+	config.ServiceHost = cast.ToString(GetOrReturnDefaultValue("SERVICE_HOST", "localhost"))
+	config.HTTPPort = cast.ToString(GetOrReturnDefaultValue("HTTP_PORT", ":8001"))
+	config.HTTPScheme = cast.ToString(GetOrReturnDefaultValue("HTTP_SCHEME", "http"))
 
-	config.MinioAccessKeyID = cast.ToString(getOrReturnDefaultValue("MINIO_ACCESS_KEY", "JqEZQP7w5XJSy2K6ZQh5VJbLWZWbcESZcVkNbakGw977FCwa"))
-	config.MinioSecretAccessKey = cast.ToString(getOrReturnDefaultValue("MINIO_SECRET_KEY", "bYTX8fnBKGLhvpvQfsp63MXkBHCuEp8gScf4wUfnGANUwHxZ"))
-	config.MinioEndpoint = cast.ToString(getOrReturnDefaultValue("MINIO_ENDPOINT", "test.cdn.medion.uz"))
-	config.MinioProtocol = cast.ToBool(getOrReturnDefaultValue("MINIO_PROTOCOL", true))
+	config.MinioAccessKeyID = cast.ToString(GetOrReturnDefaultValue("MINIO_ACCESS_KEY", "ongei0upha4DiaThioja6aip8dolai1o"))
+	config.MinioSecretAccessKey = cast.ToString(GetOrReturnDefaultValue("MINIO_SECRET_KEY", "aew8aeheungohf7vaiphoh7Tusie2vei"))
+	config.MinioEndpoint = cast.ToString(GetOrReturnDefaultValue("MINIO_ENDPOINT", "test.cdn.u-code.io"))
+	config.MinioProtocol = cast.ToBool(GetOrReturnDefaultValue("MINIO_PROTOCOL", true))
 
-	config.DefaultOffset = cast.ToString(getOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
-	config.DefaultLimit = cast.ToString(getOrReturnDefaultValue("DEFAULT_LIMIT", "10000000"))
+	config.DefaultOffset = cast.ToString(GetOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
+	config.DefaultLimit = cast.ToString(GetOrReturnDefaultValue("DEFAULT_LIMIT", "10000000"))
 
-	config.CorporateServiceHost = cast.ToString(getOrReturnDefaultValue("CORPORATE_SERVICE_HOST", "localhost"))
-	config.CorporateGRPCPort = cast.ToString(getOrReturnDefaultValue("CORPORATE_GRPC_PORT", ":9101"))
+	config.Postgres.Host = cast.ToString(GetOrReturnDefaultValue("POSTGRES_HOST", "161.35.26.178"))
+	config.Postgres.Port = cast.ToInt(GetOrReturnDefaultValue("POSTGRES_PORT", 30032))
+	config.Postgres.Username = cast.ToString(GetOrReturnDefaultValue("POSTGRES_USERNAME", "admin_api_gateway"))
+	config.Postgres.Password = cast.ToString(GetOrReturnDefaultValue("POSTGRES_PASSWORD", "aoM0zohB"))
+	config.Postgres.Database = cast.ToString(GetOrReturnDefaultValue("POSTGRES_DATABASE", "admin_api_gateway"))
 
-	config.ObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HOST", "localhost"))
-	config.ObjectBuilderGRPCPort = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_GRPC_PORT", ":9102"))
+	config.CorporateServiceHost = cast.ToString(GetOrReturnDefaultValue("CORPORATE_SERVICE_HOST", "localhost"))
+	config.CorporateGRPCPort = cast.ToString(GetOrReturnDefaultValue("CORPORATE_GRPC_PORT", ":9101"))
 
-	config.AuthServiceHost = cast.ToString(getOrReturnDefaultValue("AUTH_SERVICE_HOST", "0.0.0.0"))
-	config.AuthGRPCPort = cast.ToString(getOrReturnDefaultValue("AUTH_GRPC_PORT", ":9103"))
+	config.ObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HOST", "localhost"))
+	config.ObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_GRPC_PORT", ":9102"))
 
-	config.PosServiceHost = cast.ToString(getOrReturnDefaultValue("POS_SERVICE_HOST", "localhost"))
-	config.PosGRPCPort = cast.ToString(getOrReturnDefaultValue("POS_SERVICE_GRPC_PORT", ":8000"))
+	config.AuthServiceHost = cast.ToString(GetOrReturnDefaultValue("AUTH_SERVICE_HOST", "0.0.0.0"))
+	config.AuthGRPCPort = cast.ToString(GetOrReturnDefaultValue("AUTH_GRPC_PORT", ":9103"))
 
-	config.AnalyticsServiceHost = cast.ToString(getOrReturnDefaultValue("ANALYTICS_SERVICE_HOST", "localhost"))
-	config.AnalyticsGRPCPort = cast.ToString(getOrReturnDefaultValue("ANALYTICS_SERVICE_GRPC_PORT", ":9175"))
+	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", "localhost"))
+	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", ":9106"))
+
+	config.PosServiceHost = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_HOST", "localhost"))
+	config.PosGRPCPort = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_GRPC_PORT", ":8000"))
+
+	config.AnalyticsServiceHost = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_SERVICE_HOST", "localhost"))
+	config.AnalyticsGRPCPort = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_GRPC_PORT", ":9175"))
+
+	config.SmsServiceHost = cast.ToString(GetOrReturnDefaultValue("SMS_SERVICE_HOST", "go-sms-service"))
+	config.SmsGRPCPort = cast.ToString(GetOrReturnDefaultValue("SMS_GRPC_PORT", ":80"))
+
+	config.UcodeNamespace = "cp-region-type-id"
+	config.SecretKey = "Here$houldBe$ome$ecretKey"
 
 	return config
 }
 
-func getOrReturnDefaultValue(key string, defaultValue interface{}) interface{} {
+func GetOrReturnDefaultValue(key string, defaultValue interface{}) interface{} {
 	val, exists := os.LookupEnv(key)
 
 	if exists {

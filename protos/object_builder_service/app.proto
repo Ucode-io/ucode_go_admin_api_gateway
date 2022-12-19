@@ -19,6 +19,7 @@ message AppRequest {
     string description = 2;
     repeated string table_ids = 3;
     string icon = 4;
+    string project_id = 5;
 }
 
 message CreateAppResponse {
@@ -43,6 +44,7 @@ message UpdateAppRequest {
     string description = 3;
     repeated UpdateTable tables = 4;
     string icon = 5;
+    string project_id = 6;
 }
 
 message GetAllAppsResponse {
@@ -52,12 +54,14 @@ message GetAllAppsResponse {
 
 message AppPrimaryKey {
     string id = 1;
+    string project_id = 2;
 }
 
 message GetAllAppsRequest {
     int32 offset = 1;
     int32 limit = 2;
     string search = 3;
+    string project_id = 4;
 }
 
 message UpdateTable {

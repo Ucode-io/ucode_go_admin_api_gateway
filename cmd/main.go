@@ -1,22 +1,19 @@
 package main
 
 import (
+	"context"
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
+	"ucode/ucode_go_api_gateway/storage/postgres"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	cfg := config.Load()
-
-	grpcSvcs, err := services.NewGrpcClients(cfg)
-	if err != nil {
-		panic(err)
-	}
 
 	var loggerLevel = new(string)
 	*loggerLevel = logger.LevelDebug
@@ -33,7 +30,7 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	log := logger.NewLogger("medion_go_api_gateway", *loggerLevel)
+	log := logger.NewLogger("ucode/ucode_go_api_gateway", *loggerLevel)
 	defer func() {
 		err := logger.Cleanup(log)
 		if err != nil {
@@ -41,14 +38,40 @@ func main() {
 		}
 	}()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	authSrvc, err := services.NewAuthGrpcClient(ctx, cfg)
+	if err != nil {
+		log.Error("[ucode] error while establishing auth grpc conn", logger.Error(err))
+		return
+	}
+
+	grpcSvcs, err := services.NewGrpcClients(ctx, cfg)
+	if err != nil {
+		log.Error("[ucode] error while establishing grpc conn", logger.Error(err))
+		return
+	}
+
+	serviceNodes := services.NewServiceNodes()
+	serviceNodes.Add(grpcSvcs, cfg.UcodeNamespace)
+
+	pgStore, err := postgres.NewPostgres(ctx, cfg)
+	if err != nil {
+		log.Panic("postgres.NewPostgres", logger.Error(err))
+		return
+	}
+	defer pgStore.CloseDB()
+
 	r := gin.New()
 
 	r.Use(gin.Logger(), gin.Recovery())
 
-	h := handlers.NewHandler(cfg, log, grpcSvcs)
+	h := handlers.NewHandler(cfg, log, serviceNodes, pgStore, grpcSvcs, authSrvc)
 
 	api.SetUpAPI(r, h, cfg)
 
+	log.Info("server is running...")
 	if err := r.Run(cfg.HTTPPort); err != nil {
 		return
 	}

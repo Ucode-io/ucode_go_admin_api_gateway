@@ -33,7 +33,17 @@ func (h *Handler) CreateView(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.ViewService().Create(
+	authInfo := h.GetAuthInfo(c)
+	view.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.ViewService().Create(
 		context.Background(),
 		&view,
 	)
@@ -66,10 +76,21 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "view id is an invalid uuid")
 		return
 	}
-	resp, err := h.services.ViewService().GetSingle(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.ViewService().GetSingle(
 		context.Background(),
 		&obs.ViewPrimaryKey{
-			Id: viewID,
+			Id:        viewID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -101,7 +122,18 @@ func (h *Handler) UpdateView(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.ViewService().Update(
+
+	authInfo := h.GetAuthInfo(c)
+	view.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.ViewService().Update(
 		context.Background(),
 		&view,
 	)
@@ -135,10 +167,20 @@ func (h *Handler) DeleteView(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.ViewService().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.ViewService().Delete(
 		context.Background(),
 		&obs.ViewPrimaryKey{
-			Id: viewID,
+			Id:        viewID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -165,10 +207,20 @@ func (h *Handler) DeleteView(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetViewList(c *gin.Context) {
 
-	resp, err := h.services.ViewService().GetList(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.ViewService().GetList(
 		context.Background(),
 		&obs.GetAllViewsRequest{
 			TableSlug: c.Query("table_slug"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -208,11 +260,21 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.ViewService().ConvertHtmlToPdf(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.ViewService().ConvertHtmlToPdf(
 		context.Background(),
 		&obs.HtmlBody{
-			Data: structData,
-			Html: html.Html,
+			Data:      structData,
+			Html:      html.Html,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -253,11 +315,21 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.ViewService().ConvertTemplateToHtml(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.ViewService().ConvertTemplateToHtml(
 		context.Background(),
 		&obs.HtmlBody{
-			Data: structData,
-			Html: html.Html,
+			Data:      structData,
+			Html:      html.Html,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

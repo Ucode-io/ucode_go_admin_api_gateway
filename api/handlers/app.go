@@ -31,7 +31,17 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.AppService().Create(
+	authInfo := h.GetAuthInfo(c)
+	app.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.AppService().Create(
 		context.Background(),
 		&app,
 	)
@@ -65,10 +75,20 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.AppService().GetByID(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.AppService().GetByID(
 		context.Background(),
 		&obs.AppPrimaryKey{
-			Id: appID,
+			Id:        appID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -104,13 +124,22 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
 
-	resp, err := h.services.AppService().GetAll(
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.AppService().GetAll(
 		context.Background(),
 		&obs.GetAllAppsRequest{
-			Limit:  int32(limit),
-			Offset: int32(offset),
-			Search: c.DefaultQuery("search", ""),
+			Limit:     int32(limit),
+			Offset:    int32(offset),
+			Search:    c.DefaultQuery("search", ""),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -143,7 +172,18 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.AppService().Update(
+
+	authInfo := h.GetAuthInfo(c)
+	app.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.AppService().Update(
 		context.Background(),
 		&app,
 	)
@@ -177,10 +217,20 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.AppService().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.AppService().Delete(
 		context.Background(),
 		&obs.AppPrimaryKey{
-			Id: appID,
+			Id:        appID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

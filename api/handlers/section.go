@@ -24,12 +24,23 @@ import (
 func (h *Handler) GetAllSections(c *gin.Context) {
 
 	tokenInfo := h.GetAuthInfo
-	resp, err := h.services.SectionService().GetAll(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.SectionService().GetAll(
 		context.Background(),
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
 			TableSlug: c.Query("table_slug"),
 			RoleId:    tokenInfo(c).RoleId,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -63,7 +74,17 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.SectionService().Update(
+	authInfo := h.GetAuthInfo(c)
+	sections.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.SectionService().Update(
 		context.Background(),
 		&sections,
 	)

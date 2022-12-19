@@ -19,12 +19,14 @@ message CreateEventRequest {
     string table_slug = 1;
     When when = 2;
     repeated Do does = 3;
+    string project_id = 4;
 }
 
 message When {
     string app_slug = 1;
     string action = 2;
     repeated Condition conditions = 3;
+    string project_id = 4;
 }
 
 message Condition {
@@ -50,6 +52,7 @@ message Event {
     string table_slug = 2;
     When when = 3;
     repeated Do does = 4;
+    string project_id = 5;
 }
 
 message GetEventsListResponse {
@@ -59,8 +62,10 @@ message GetEventsListResponse {
 
 message GetEventsListRequest {
     string table_slug = 1;
+    string project_id = 2;
 }   
 
 message EventPrimaryKey {
     string id = 1;
+    string project_id = 2;
 }

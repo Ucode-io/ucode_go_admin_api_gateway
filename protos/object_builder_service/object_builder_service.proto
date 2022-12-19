@@ -23,3 +23,7 @@ import "permission.proto";
 import "custom_event.proto";
 import "barcode.proto";
 import "function.proto";
+import "query_folder.proto";
+import "queryies.proto";
+import "web_pages.proto";
+import "builder_project.proto";

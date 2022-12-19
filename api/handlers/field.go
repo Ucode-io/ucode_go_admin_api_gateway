@@ -53,7 +53,17 @@ func (h *Handler) CreateField(c *gin.Context) {
 		AutofillField: fieldRequest.AutoFillField,
 	}
 
-	resp, err := h.services.FieldService().Create(
+	authInfo := h.GetAuthInfo(c)
+	field.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.FieldService().Create(
 		context.Background(),
 		&field,
 	)
@@ -91,15 +101,26 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
+
 	var withManyRelation, withOneRelation = false, false
 	if c.Query("with_many_relation") == "true" {
 		withManyRelation = true
 	}
+
 	if c.Query("with_one_relation") == "true" {
 		withOneRelation = true
 	}
 
-	resp, err := h.services.FieldService().GetAll(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.FieldService().GetAll(
 		context.Background(),
 		&obs.GetAllFieldsRequest{
 			Limit:            int32(limit),
@@ -109,6 +130,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 			TableSlug:        c.DefaultQuery("table_slug", ""),
 			WithManyRelation: withManyRelation,
 			WithOneRelation:  withOneRelation,
+			ProjectId:        authInfo.GetProjectId(),
 		},
 	)
 
@@ -164,7 +186,17 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		RelationId:    fieldRequest.RelationId,
 	}
 
-	resp, err := h.services.FieldService().Update(
+	authInfo := h.GetAuthInfo(c)
+	field.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.FieldService().Update(
 		context.Background(),
 		&field,
 	)
@@ -198,10 +230,20 @@ func (h *Handler) DeleteField(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.FieldService().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.FieldService().Delete(
 		context.Background(),
 		&obs.FieldPrimaryKey{
-			Id: fieldID,
+			Id:        fieldID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

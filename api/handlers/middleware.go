@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -20,7 +21,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		}
 
 		c.Set("Auth", res)
-
+		c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
 	}
 }
@@ -34,16 +35,26 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.HasAccessResponse, bo
 	}
 	accessToken := strArr[1]
 
-	resp, err := h.services.SessionService().V2HasAccess(
+	resp, err := h.authService.SessionService().V2HasAccess(
 		c.Request.Context(),
 		&auth_service.HasAccessRequest{
-			AccessToken:      accessToken,
-			ProjectId:        "80cc11d9-2ee6-494a-a09d-40150d151145",
-			ClientPlatformId: "3f6320a6-b6ed-4f5f-ad90-14a154c95ed3",
-			Path:             helper.GetURLWithTableSlug(c),
-			Method:           c.Request.Method,
+			AccessToken: accessToken,
+			// ProjectId:        "80cc11d9-2ee6-494a-a09d-40150d151145",
+			// ClientPlatformId: "3f6320a6-b6ed-4f5f-ad90-14a154c95ed3",
+			Path:   helper.GetURLWithTableSlug(c),
+			Method: c.Request.Method,
 		},
 	)
+
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println("PROJECT ID", resp.GetProjectId())
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 	if err != nil {
 		errr := status.Error(codes.PermissionDenied, "Permission denied")
 		if errr.Error() == err.Error() {
@@ -70,5 +81,12 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.HasAccessRes
 		c.Abort()
 		return
 	}
-	return data.(*auth_service.HasAccessResponse)
+	accessResponse, ok := data.(*auth_service.HasAccessResponse)
+	if !ok {
+		h.handleResponse(c, http.Forbidden, "token error: wrong format")
+		c.Abort()
+		return
+	}
+
+	return accessResponse
 }

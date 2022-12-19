@@ -24,6 +24,7 @@ message CreateCustomEventRequest {
     string label = 4;
     string url = 5;
     bool disable = 6;
+    string project_id = 7;
 }
 
 message CustomEvent {
@@ -35,6 +36,7 @@ message CustomEvent {
     string url = 6;
     bool disable = 7;
     repeated Function functions = 8;
+    string project_id = 9;
 }
 
 message GetCustomEventsListResponse {
@@ -44,14 +46,17 @@ message GetCustomEventsListResponse {
 
 message GetCustomEventsListRequest {
     string table_slug = 1;
+    string project_id = 2;
 }   
 
 message CustomEventPrimaryKey {
     string id = 1;
+    string project_id = 2;
 }
 
 message UpdateByFunctionIdRequest {
     string function_id = 1;
     repeated string object_ids = 2;
     string field_slug = 3;
+    string project_id = 4;
 }

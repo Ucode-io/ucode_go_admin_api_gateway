@@ -191,3 +191,22 @@ message Table {
     string icon = 5;
     string view_label = 6;
 }
+
+message Project {
+    string id = 1;
+    string company_id = 2;
+    string name = 3;
+    string domain = 4;
+    string created_at = 5;
+    string updated_at = 6;
+}
+
+message Company {
+    string id = 1;
+    string name = 2;
+    string logo = 3;
+    string description = 4;
+    string created_at = 5;
+    string updated_at = 6;
+    string owner_id = 7;
+}

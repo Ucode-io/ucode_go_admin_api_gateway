@@ -16,11 +16,13 @@ service PermissionService {
 
 message GetAllPermissionRequest {
     string role_id = 1;
+    string project_id = 2;
 }
 
 message GetFieldPermissionRequest {
     string role_id = 1;
     string table_slug = 2;
+    string project_id = 3;
 }
 
 message UpsertPermissionsByAppIdResponse{
@@ -30,9 +32,11 @@ message UpsertPermissionsByAppIdResponse{
 message UpsertPermissionsByAppIdRequest {
     string app_id = 1;
     google.protobuf.Struct data = 2;
+    string project_id = 3;
 }
 
 message GetActionPermissionRequest {
     string role_id = 1;
     string table_slug = 2;
+    string project_id = 3;
 }

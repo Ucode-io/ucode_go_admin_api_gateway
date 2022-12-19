@@ -12,6 +12,7 @@ service QueryService {
 message CommonInput {
     string query = 1;
     google.protobuf.Struct data = 2;
+    string project_id = 3;
 }
 
 message QueryOutput {

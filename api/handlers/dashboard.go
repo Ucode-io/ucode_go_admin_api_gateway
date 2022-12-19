@@ -32,13 +32,23 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	var dashboard = obs.CreateDashboardRequest{
 		// Id:         dashboardRequest.ID,
-		Name: dashboardRequest.Name,
-		Icon: dashboardRequest.Icon,
+		Name:      dashboardRequest.Name,
+		Icon:      dashboardRequest.Icon,
+		ProjectId: authInfo.GetProjectId(),
 	}
 
-	resp, err := h.services.DashboardService().Create(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.DashboardService().Create(
 		context.Background(),
 		&dashboard,
 	)
@@ -71,10 +81,21 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "dashboard id is an invalid uuid")
 		return
 	}
-	resp, err := h.services.DashboardService().GetSingle(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.DashboardService().GetSingle(
 		context.Background(),
 		&obs.DashboardPrimaryKey{
-			Id: dashboardID,
+			Id:        dashboardID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -106,7 +127,18 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.DashboardService().Update(
+
+	authInfo := h.GetAuthInfo(c)
+	dashboard.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.DashboardService().Update(
 		context.Background(),
 		&dashboard,
 	)
@@ -140,10 +172,20 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.DashboardService().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.DashboardService().Delete(
 		context.Background(),
 		&obs.DashboardPrimaryKey{
-			Id: dashboardID,
+			Id:        dashboardID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -169,11 +211,20 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllDashboards(c *gin.Context) {
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
 
-	resp, err := h.services.DashboardService().GetList(
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.DashboardService().GetList(
 		context.Background(),
 		&obs.GetAllDashboardsRequest{
-			Name: c.Query("name"),
+			Name:      c.Query("name"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

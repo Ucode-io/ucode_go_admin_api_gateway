@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"ucode/ucode_go_api_gateway/api/http"
 	https "ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
@@ -26,7 +27,7 @@ type UploadResponse struct {
 }
 
 var (
-	defaultBucket = "medion"
+	defaultBucket = "ucode"
 )
 
 type File struct {
@@ -60,6 +61,7 @@ func (h *Handler) Upload(c *gin.Context) {
 		h.handleResponse(c, https.BadRequest, err.Error())
 		return
 	}
+
 	fName, _ := uuid.NewRandom()
 	file.File.Filename = strings.ReplaceAll(file.File.Filename, " ", "")
 	file.File.Filename = fmt.Sprintf("%s_%s", fName.String(), file.File.Filename)
@@ -200,10 +202,24 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		h.handleResponse(c, https.BadRequest, err.Error())
 		return
 	}
-	_, err = h.services.ObjectBuilderService().Create(context.Background(), &object_builder_service.CommonMessage{
-		TableSlug: "file",
-		Data:      structData,
-	})
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	_, err = services.ObjectBuilderService().Create(
+		context.Background(),
+		&object_builder_service.CommonMessage{
+			TableSlug: "file",
+			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, https.InternalServerError, err.Error())
 		return

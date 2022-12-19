@@ -32,7 +32,17 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.DocumentService().Create(
+	authInfo := h.GetAuthInfo(c)
+	document.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.DocumentService().Create(
 		context.Background(),
 		&document,
 	)
@@ -65,10 +75,21 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "Document id is an invalid uuid")
 		return
 	}
-	resp, err := h.services.DocumentService().GetSingle(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.DocumentService().GetSingle(
 		context.Background(),
 		&obs.DocumentPrimaryKey{
-			Id: documentID,
+			Id:        documentID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if resp == nil {
@@ -105,7 +126,18 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.DocumentService().Update(
+
+	authInfo := h.GetAuthInfo(c)
+	document.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.DocumentService().Update(
 		context.Background(),
 		&document,
 	)
@@ -138,11 +170,20 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "Document id is an invalid uuid")
 		return
 	}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
 
-	resp, err := h.services.DocumentService().Delete(
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.DocumentService().Delete(
 		context.Background(),
 		&obs.DocumentPrimaryKey{
-			Id: documentID,
+			Id:        documentID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -174,13 +215,23 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.DocumentService().GetList(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.DocumentService().GetList(
 		context.Background(),
 		&obs.GetAllDocumentsRequest{
 			ObjectId:  c.Query("object_id"),
 			Tags:      c.Query("tags"),
 			StartDate: c.Query("start_date"),
 			EndDate:   c.Query("end_date"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

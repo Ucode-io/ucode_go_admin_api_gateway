@@ -24,7 +24,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.GET("/ping", h.Ping)
 	r.GET("/config", h.GetConfig)
 
-	//upload
+	r.POST("/send-code", h.SendCode)
+	r.POST("/verify/:sms_id/:otp", h.Verify)
+	r.POST("/register-otp/:table_slug", h.RegisterOtp)
+	r.POST("/send-message", h.SendMessageToEmail)
+	r.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
+	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
@@ -194,6 +199,51 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// Integration with AlfaLab
 		v1.POST("/alfalab/directions", h.CreateDirections)
 		v1.GET("/alfalab/referral", h.GetReferral)
+
+		// company service
+		// v1.POST("/company", h.CreateCompany)
+		v1.GET("/company/:company_id", h.GetCompanyByID)
+		v1.GET("/company", h.GetCompanyList)
+		v1.PUT("company/:company_id", h.UpdateCompany)
+		v1.DELETE("/company/:company_id", h.DeleteCompany)
+
+		// project service
+		v1.POST("/company-project", h.CreateCompanyProject)
+		v1.GET("/company-project", h.GetCompanyProjectList)
+		v1.GET("/company-project/:project_id", h.GetCompanyProjectById)
+		v1.PUT("/company-project/:project_id", h.UpdateCompanyProject)
+		v1.DELETE("/company-project/:project_id", h.DeleteCompanyProject)
+
+		v1.POST("/company/project/resource", h.AddProjectResource)
+		v1.DELETE("/company/project/resource", h.RemoveProjectResource)
+		v1.GET("/company/project/resource/:resource_id", h.GetResource)
+		v1.GET("/company/project/resource", h.GetResourceList)
+		v1.POST("/company/project/resource/reconnect", h.ReconnectProjectResource)
+	}
+
+	// v3 for ucode version 2
+	v3 := r.Group("/v3")
+	{
+		// query folder
+		v3.POST("/query_folder", h.CreateQueryFolder)
+		v3.GET("/query_folder/:guid", h.GetQueryFolderByID)
+		v3.GET("/query_folder", h.GetQueryFolderList)
+		v3.PUT("/query_folder/:guid", h.UpdateQueryFolder)
+		v3.DELETE("/query_folder/:guid", h.DeleteQueryFolder)
+
+		// // query
+		v3.POST("/query", h.CreateQuery)
+		v3.GET("/query/:guid", h.GetQueryByID)
+		v3.GET("/query", h.GetQueryList)
+		v3.PUT("/query/:guid", h.UpdateQuery)
+		v3.DELETE("/query/:guid", h.DeleteQuery)
+		// // web pages
+		v3.POST("/web_pages", h.CreateWebPage)
+		v3.GET("/web_pages/:guid", h.GetWebPagesById)
+		v3.GET("/web_pages", h.GetWebPagesList)
+		v3.PUT("/web_pages/:guid", h.UpdateWebPage)
+		v3.DELETE("/web_pages/:guid", h.DeleteWebPage)
+
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -243,3 +293,37 @@ func MaxAllowed(n int) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// // @description This is a api gateway
+// // @termsOfService https://udevs.io
+// func SetUpProjectAPIs(r *gin.Engine, h handlers.ProjectsHandler, cfg config.Config) {
+// 	docs.SwaggerInfo.Title = cfg.ServiceName
+// 	docs.SwaggerInfo.Version = cfg.Version
+// 	// docs.SwaggerInfo.Host = cfg.ServiceHost + cfg.HTTPPort
+// 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}
+
+// 	r.Use(customCORSMiddleware())
+// 	r.Use(MaxAllowed(5000))
+
+// // Project
+// r.POST("/v1/project", h.CreateProject)
+
+// 	v1 := r.Group("/v1")
+// 	// @securityDefinitions.apikey ApiKeyAuth
+// 	// @in header
+// 	// @name Authorization
+
+// // MUST be executed before AuthMiddleware
+// v1.Use(h.ProjectsMiddleware())
+// 	v1.Use(h.AuthMiddleware())
+
+// 	{
+// 		// App
+// 		v1.POST("/app", h.CreateApp)
+// 		v1.GET("/app", h.GetAllApps)
+
+// 	}
+
+// 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+// }

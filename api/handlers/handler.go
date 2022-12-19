@@ -6,21 +6,28 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
+	"ucode/ucode_go_api_gateway/storage"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	services services.ServiceManagerI
+	cfg             config.Config
+	log             logger.LoggerI
+	services        services.ServiceNodesI
+	storage         storage.StorageI
+	companyServices services.ServiceManagerI
+	authService     services.AuthServiceManagerI
 }
 
-func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceManagerI) Handler {
+func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNodesI, strg storage.StorageI, cmpServ services.ServiceManagerI, authService services.AuthServiceManagerI) Handler {
 	return Handler{
-		cfg:      cfg,
-		log:      log,
-		services: svcs,
+		cfg:             cfg,
+		log:             log,
+		services:        svcs,
+		storage:         strg,
+		companyServices: cmpServ,
+		authService:     authService,
 	}
 }
 

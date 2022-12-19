@@ -23,6 +23,7 @@ message CreateDocumentRequest {
     string table_slug = 5;
     string name = 6;
     repeated string tags = 7;
+    string project_id = 8;
 }
 
 message Document {
@@ -35,6 +36,7 @@ message Document {
     string name = 7;
     string created_at = 8;
     repeated string tags = 9;
+    string project_id = 10;
 }
 
 message GetAllDocumentsResponse {
@@ -47,8 +49,10 @@ message GetAllDocumentsRequest {
     string tags = 2;
     string start_date = 3;
     string end_date = 4;
+    string project_id = 5;
 }
 
 message DocumentPrimaryKey {
     string id = 1;
+    string project_id = 2;
 }

@@ -31,7 +31,17 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.EventService().Create(
+	authInfo := h.GetAuthInfo(c)
+	event.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.EventService().Create(
 		context.Background(),
 		&event,
 	)
@@ -65,10 +75,20 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.EventService().GetSingle(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.EventService().GetSingle(
 		context.Background(),
 		&obs.EventPrimaryKey{
-			Id: eventID,
+			Id:        eventID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -93,11 +113,20 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllEvents(c *gin.Context) {
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
 
-	resp, err := h.services.EventService().GetList(
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.EventService().GetList(
 		context.Background(),
 		&obs.GetEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -130,7 +159,18 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	resp, err := h.services.EventService().Update(
+
+	authInfo := h.GetAuthInfo(c)
+	event.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.EventService().Update(
 		context.Background(),
 		&event,
 	)
@@ -164,10 +204,20 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.EventService().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.EventService().Delete(
 		context.Background(),
 		&obs.EventPrimaryKey{
-			Id: eventID,
+			Id:        eventID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

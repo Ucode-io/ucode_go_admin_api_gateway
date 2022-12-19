@@ -33,7 +33,17 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.PanelService().UpdateCoordinates(
+	authInfo := h.GetAuthInfo(c)
+	panel_coordinates.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.PanelService().UpdateCoordinates(
 		context.Background(),
 		&panel_coordinates,
 	)
@@ -66,10 +76,21 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "panel id is an invalid uuid")
 		return
 	}
-	resp, err := h.services.PanelService().GetSingle(
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.PanelService().GetSingle(
 		context.Background(),
 		&obs.PanelPrimaryKey{
-			Id: panelID,
+			Id:        panelID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -117,7 +138,17 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 		HasPagination: panelRequest.HasPagination,
 	}
 
-	resp, err := h.services.PanelService().Create(
+	authInfo := h.GetAuthInfo(c)
+	panel.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.PanelService().Create(
 		context.Background(),
 		&panel,
 	)
@@ -145,10 +176,20 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllPanels(c *gin.Context) {
 
-	resp, err := h.services.PanelService().GetList(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.PanelService().GetList(
 		context.Background(),
 		&obs.GetAllPanelsRequest{
-			Title: c.DefaultQuery("title", ""),
+			Title:     c.DefaultQuery("title", ""),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -199,7 +240,17 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 		HasPagination: panelRequest.HasPagination,
 	}
 
-	resp, err := h.services.PanelService().Update(
+	authInfo := h.GetAuthInfo(c)
+	panel.ProjectId = authInfo.GetProjectId()
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	resp, err := services.PanelService().Update(
 		context.Background(),
 		&panel,
 	)
@@ -233,10 +284,20 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.PanelService().Delete(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.PanelService().Delete(
 		context.Background(),
 		&obs.PanelPrimaryKey{
-			Id: panelID,
+			Id:        panelID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

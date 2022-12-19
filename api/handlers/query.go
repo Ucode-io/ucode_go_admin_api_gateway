@@ -38,11 +38,21 @@ func (h *Handler) GetQueryRows(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.QueryService().GetQueryRows(
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	resp, err := services.QueryService().GetQueryRows(
 		context.Background(),
 		&as.CommonInput{
-			Data:  structData,
-			Query: queryReq.Query,
+			Data:      structData,
+			Query:     queryReq.Query,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {

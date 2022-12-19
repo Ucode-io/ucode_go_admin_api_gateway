@@ -25,7 +25,23 @@ import (
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) ExcelReader(c *gin.Context) {
 	excelId := c.Param("excel_id")
-	res, err := h.services.ExcelService().ExcelRead(context.Background(), &object_builder_service.ExcelReadRequest{Id: excelId})
+	namespace := c.GetString("namespace")
+
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	res, err := services.ExcelService().ExcelRead(
+		context.Background(),
+		&object_builder_service.ExcelReadRequest{
+			Id:        excelId,
+			ProjectId: authInfo.GetProjectId(),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
@@ -63,11 +79,24 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 		return
 	}
 
-	_, err = h.services.ExcelService().ExcelToDb(context.Background(), &object_builder_service.ExcelToDbRequest{
-		Id:        c.Param("excel_id"),
-		TableSlug: excelRequest.TableSlug,
-		Data:      data,
-	})
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	_, err = services.ExcelService().ExcelToDb(
+		context.Background(),
+		&object_builder_service.ExcelToDbRequest{
+			Id:        c.Param("excel_id"),
+			TableSlug: excelRequest.TableSlug,
+			Data:      data,
+			ProjectId: authInfo.GetProjectId(),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return

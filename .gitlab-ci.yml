@@ -1,0 +1,63 @@
+include:
+  - .gitlab/ci/*.gitlab-ci.yml
+
+stages:
+  - build
+  - migrate
+  - deploy
+  - rollback
+
+build-staging:
+  stage: build
+  extends: .build_template
+  variables:
+    DOCKERFILE: Dockerfile
+    ENV_TAG: test
+  only:
+    - staging
+
+migrate-staging:
+  stage: migrate
+  extends: .migrate_template
+  variables:
+    PATH_MIGRATION: migrations/postgres
+    POSTGRES_LINK: $UCODE_ADMIN_API_TESTDB
+  only:
+    - staging
+
+# migrate-demo:
+#   stage: migrate
+#   extends: .migrate_template
+#   variables:
+#     PATH_MIGRATION: migrations/postgres
+#     POSTGRES_LINK: $UCODE_ADMIN_API_DEMODB
+#   only:
+#     - staging
+
+deploy-staging:
+  stage: deploy
+  extends: .deploy_template
+  variables:
+    NAMESPACE: test
+    VALUES_FILE: .helm/values-test.yml
+    K8SCONFIGJSON: $UCODE_KUBECONFIG
+  only:
+    - staging
+
+# deploy-demo:
+#   stage: deploy
+#   extends: .deploy_template
+#   variables:
+#     NAMESPACE: ucode-demo
+#     VALUES_FILE: .helm/values-demo.yml
+#     K8SCONFIGJSON: $UCODE_KUBECONFIG
+#   only:
+#     - staging
+
+rollback-staging:
+  stage: rollback
+  extends: .rollback_template
+  variables:
+    NAMESPACE: test
+    K8SCONFIGJSON: $UCODE_KUBECONFIG
+  when: manual
