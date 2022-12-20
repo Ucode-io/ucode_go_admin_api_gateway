@@ -2,13 +2,13 @@ package models
 
 type Company struct {
 	CompanyId   string `json:"company_id"`
-	Title       string `json:"title"`
+	Name        string `json:"name"`
 	Logo        string `json:"logo"`
 	Description string `json:"description"`
 }
 
 type CompanyCreateRequest struct {
-	Title       string `json:"title"`
+	Name        string `json:"name"`
 	Logo        string `json:"logo"`
 	Description string `json:"description"`
 }

@@ -32,6 +32,9 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+
 	var fields []*obs.CreateFieldsRequest
 	for _, field := range tableRequest.Fields {
 		attributes, err := helper.ConvertMapToStruct(field.Attributes)
@@ -49,6 +52,8 @@ func (h *Handler) CreateTable(c *gin.Context) {
 			Attributes: attributes,
 			IsVisible:  field.IsVisible,
 		}
+
+		tempField.ProjectId = authInfo.GetProjectId()
 
 		fields = append(fields, &tempField)
 	}
@@ -69,6 +74,8 @@ func (h *Handler) CreateTable(c *gin.Context) {
 			Prefix:          tableRequest.IncrementID.Prefix,
 		},
 	}
+
+	table.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -118,10 +125,13 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.TableService().GetByID(
 		context.Background(),
 		&obs.TablePrimaryKey{
-			Id: tableID,
+			Id:        tableID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -166,12 +176,15 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.TableService().GetAll(
 		context.Background(),
 		&obs.GetAllTablesRequest{
-			Limit:  int32(limit),
-			Offset: int32(offset),
-			Search: c.DefaultQuery("search", ""),
+			Limit:     int32(limit),
+			Offset:    int32(offset),
+			Search:    c.DefaultQuery("search", ""),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -204,6 +217,9 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+	table.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -253,10 +269,13 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.TableService().Delete(
 		context.Background(),
 		&obs.TablePrimaryKey{
-			Id: tableID,
+			Id:        tableID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

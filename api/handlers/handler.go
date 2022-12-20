@@ -14,18 +14,20 @@ import (
 type Handler struct {
 	cfg             config.Config
 	log             logger.LoggerI
-	services        *services.ProjectServices
+	services        services.ServiceNodesI
 	storage         storage.StorageI
 	companyServices services.ServiceManagerI
+	authService     services.AuthServiceManagerI
 }
 
-func NewHandler(cfg config.Config, log logger.LoggerI, svcs *services.ProjectServices, strg storage.StorageI, cmpServ services.ServiceManagerI) Handler {
+func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNodesI, strg storage.StorageI, cmpServ services.ServiceManagerI, authService services.AuthServiceManagerI) Handler {
 	return Handler{
-		cfg:      cfg,
-		log:      log,
-		services: svcs,
-		storage:  strg,
+		cfg:             cfg,
+		log:             log,
+		services:        svcs,
+		storage:         strg,
 		companyServices: cmpServ,
+		authService:     authService,
 	}
 }
 

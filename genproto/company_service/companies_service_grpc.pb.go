@@ -22,11 +22,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CompanyServiceClient interface {
-	CreateCompany(ctx context.Context, in *CreateCompanyRequest, opts ...grpc.CallOption) (*CreateCompanyResponse, error)
-	GetCompanyList(ctx context.Context, in *GetCompanyListRequest, opts ...grpc.CallOption) (*GetComanyListResponse, error)
-	GetCompanyById(ctx context.Context, in *GetCompanyByIdRequest, opts ...grpc.CallOption) (*GetCompanyByIdResponse, error)
-	UpdateCompany(ctx context.Context, in *Company, opts ...grpc.CallOption) (*Company, error)
-	DeleteCompany(ctx context.Context, in *DeleteCompanyRequest, opts ...grpc.CallOption) (*Empty, error)
+	Create(ctx context.Context, in *CreateCompanyRequest, opts ...grpc.CallOption) (*CreateCompanyResponse, error)
+	GetList(ctx context.Context, in *GetCompanyListRequest, opts ...grpc.CallOption) (*GetComanyListResponse, error)
+	GetById(ctx context.Context, in *GetCompanyByIdRequest, opts ...grpc.CallOption) (*GetCompanyByIdResponse, error)
+	Update(ctx context.Context, in *Company, opts ...grpc.CallOption) (*Company, error)
+	Delete(ctx context.Context, in *DeleteCompanyRequest, opts ...grpc.CallOption) (*Empty, error)
+	GetListWithProjects(ctx context.Context, in *GetListWithProjectsRequest, opts ...grpc.CallOption) (*GetListWithProjectsResponse, error)
 }
 
 type companyServiceClient struct {
@@ -37,45 +38,54 @@ func NewCompanyServiceClient(cc grpc.ClientConnInterface) CompanyServiceClient {
 	return &companyServiceClient{cc}
 }
 
-func (c *companyServiceClient) CreateCompany(ctx context.Context, in *CreateCompanyRequest, opts ...grpc.CallOption) (*CreateCompanyResponse, error) {
+func (c *companyServiceClient) Create(ctx context.Context, in *CreateCompanyRequest, opts ...grpc.CallOption) (*CreateCompanyResponse, error) {
 	out := new(CreateCompanyResponse)
-	err := c.cc.Invoke(ctx, "/company_service.CompanyService/CreateCompany", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/company_service.CompanyService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *companyServiceClient) GetCompanyList(ctx context.Context, in *GetCompanyListRequest, opts ...grpc.CallOption) (*GetComanyListResponse, error) {
+func (c *companyServiceClient) GetList(ctx context.Context, in *GetCompanyListRequest, opts ...grpc.CallOption) (*GetComanyListResponse, error) {
 	out := new(GetComanyListResponse)
-	err := c.cc.Invoke(ctx, "/company_service.CompanyService/GetCompanyList", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/company_service.CompanyService/GetList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *companyServiceClient) GetCompanyById(ctx context.Context, in *GetCompanyByIdRequest, opts ...grpc.CallOption) (*GetCompanyByIdResponse, error) {
+func (c *companyServiceClient) GetById(ctx context.Context, in *GetCompanyByIdRequest, opts ...grpc.CallOption) (*GetCompanyByIdResponse, error) {
 	out := new(GetCompanyByIdResponse)
-	err := c.cc.Invoke(ctx, "/company_service.CompanyService/GetCompanyById", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/company_service.CompanyService/GetById", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *companyServiceClient) UpdateCompany(ctx context.Context, in *Company, opts ...grpc.CallOption) (*Company, error) {
+func (c *companyServiceClient) Update(ctx context.Context, in *Company, opts ...grpc.CallOption) (*Company, error) {
 	out := new(Company)
-	err := c.cc.Invoke(ctx, "/company_service.CompanyService/UpdateCompany", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/company_service.CompanyService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *companyServiceClient) DeleteCompany(ctx context.Context, in *DeleteCompanyRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *companyServiceClient) Delete(ctx context.Context, in *DeleteCompanyRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/company_service.CompanyService/DeleteCompany", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/company_service.CompanyService/Delete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *companyServiceClient) GetListWithProjects(ctx context.Context, in *GetListWithProjectsRequest, opts ...grpc.CallOption) (*GetListWithProjectsResponse, error) {
+	out := new(GetListWithProjectsResponse)
+	err := c.cc.Invoke(ctx, "/company_service.CompanyService/GetListWithProjects", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -86,11 +96,12 @@ func (c *companyServiceClient) DeleteCompany(ctx context.Context, in *DeleteComp
 // All implementations must embed UnimplementedCompanyServiceServer
 // for forward compatibility
 type CompanyServiceServer interface {
-	CreateCompany(context.Context, *CreateCompanyRequest) (*CreateCompanyResponse, error)
-	GetCompanyList(context.Context, *GetCompanyListRequest) (*GetComanyListResponse, error)
-	GetCompanyById(context.Context, *GetCompanyByIdRequest) (*GetCompanyByIdResponse, error)
-	UpdateCompany(context.Context, *Company) (*Company, error)
-	DeleteCompany(context.Context, *DeleteCompanyRequest) (*Empty, error)
+	Create(context.Context, *CreateCompanyRequest) (*CreateCompanyResponse, error)
+	GetList(context.Context, *GetCompanyListRequest) (*GetComanyListResponse, error)
+	GetById(context.Context, *GetCompanyByIdRequest) (*GetCompanyByIdResponse, error)
+	Update(context.Context, *Company) (*Company, error)
+	Delete(context.Context, *DeleteCompanyRequest) (*Empty, error)
+	GetListWithProjects(context.Context, *GetListWithProjectsRequest) (*GetListWithProjectsResponse, error)
 	mustEmbedUnimplementedCompanyServiceServer()
 }
 
@@ -98,20 +109,23 @@ type CompanyServiceServer interface {
 type UnimplementedCompanyServiceServer struct {
 }
 
-func (UnimplementedCompanyServiceServer) CreateCompany(context.Context, *CreateCompanyRequest) (*CreateCompanyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateCompany not implemented")
+func (UnimplementedCompanyServiceServer) Create(context.Context, *CreateCompanyRequest) (*CreateCompanyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedCompanyServiceServer) GetCompanyList(context.Context, *GetCompanyListRequest) (*GetComanyListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCompanyList not implemented")
+func (UnimplementedCompanyServiceServer) GetList(context.Context, *GetCompanyListRequest) (*GetComanyListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetList not implemented")
 }
-func (UnimplementedCompanyServiceServer) GetCompanyById(context.Context, *GetCompanyByIdRequest) (*GetCompanyByIdResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCompanyById not implemented")
+func (UnimplementedCompanyServiceServer) GetById(context.Context, *GetCompanyByIdRequest) (*GetCompanyByIdResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetById not implemented")
 }
-func (UnimplementedCompanyServiceServer) UpdateCompany(context.Context, *Company) (*Company, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateCompany not implemented")
+func (UnimplementedCompanyServiceServer) Update(context.Context, *Company) (*Company, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedCompanyServiceServer) DeleteCompany(context.Context, *DeleteCompanyRequest) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteCompany not implemented")
+func (UnimplementedCompanyServiceServer) Delete(context.Context, *DeleteCompanyRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedCompanyServiceServer) GetListWithProjects(context.Context, *GetListWithProjectsRequest) (*GetListWithProjectsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetListWithProjects not implemented")
 }
 func (UnimplementedCompanyServiceServer) mustEmbedUnimplementedCompanyServiceServer() {}
 
@@ -126,92 +140,110 @@ func RegisterCompanyServiceServer(s grpc.ServiceRegistrar, srv CompanyServiceSer
 	s.RegisterService(&CompanyService_ServiceDesc, srv)
 }
 
-func _CompanyService_CreateCompany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CompanyService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateCompanyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CompanyServiceServer).CreateCompany(ctx, in)
+		return srv.(CompanyServiceServer).Create(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.CompanyService/CreateCompany",
+		FullMethod: "/company_service.CompanyService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CompanyServiceServer).CreateCompany(ctx, req.(*CreateCompanyRequest))
+		return srv.(CompanyServiceServer).Create(ctx, req.(*CreateCompanyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CompanyService_GetCompanyList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CompanyService_GetList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetCompanyListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CompanyServiceServer).GetCompanyList(ctx, in)
+		return srv.(CompanyServiceServer).GetList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.CompanyService/GetCompanyList",
+		FullMethod: "/company_service.CompanyService/GetList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CompanyServiceServer).GetCompanyList(ctx, req.(*GetCompanyListRequest))
+		return srv.(CompanyServiceServer).GetList(ctx, req.(*GetCompanyListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CompanyService_GetCompanyById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CompanyService_GetById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetCompanyByIdRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CompanyServiceServer).GetCompanyById(ctx, in)
+		return srv.(CompanyServiceServer).GetById(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.CompanyService/GetCompanyById",
+		FullMethod: "/company_service.CompanyService/GetById",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CompanyServiceServer).GetCompanyById(ctx, req.(*GetCompanyByIdRequest))
+		return srv.(CompanyServiceServer).GetById(ctx, req.(*GetCompanyByIdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CompanyService_UpdateCompany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CompanyService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Company)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CompanyServiceServer).UpdateCompany(ctx, in)
+		return srv.(CompanyServiceServer).Update(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.CompanyService/UpdateCompany",
+		FullMethod: "/company_service.CompanyService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CompanyServiceServer).UpdateCompany(ctx, req.(*Company))
+		return srv.(CompanyServiceServer).Update(ctx, req.(*Company))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CompanyService_DeleteCompany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CompanyService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteCompanyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CompanyServiceServer).DeleteCompany(ctx, in)
+		return srv.(CompanyServiceServer).Delete(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.CompanyService/DeleteCompany",
+		FullMethod: "/company_service.CompanyService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CompanyServiceServer).DeleteCompany(ctx, req.(*DeleteCompanyRequest))
+		return srv.(CompanyServiceServer).Delete(ctx, req.(*DeleteCompanyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CompanyService_GetListWithProjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetListWithProjectsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CompanyServiceServer).GetListWithProjects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.CompanyService/GetListWithProjects",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CompanyServiceServer).GetListWithProjects(ctx, req.(*GetListWithProjectsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -224,24 +256,28 @@ var CompanyService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CompanyServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateCompany",
-			Handler:    _CompanyService_CreateCompany_Handler,
+			MethodName: "Create",
+			Handler:    _CompanyService_Create_Handler,
 		},
 		{
-			MethodName: "GetCompanyList",
-			Handler:    _CompanyService_GetCompanyList_Handler,
+			MethodName: "GetList",
+			Handler:    _CompanyService_GetList_Handler,
 		},
 		{
-			MethodName: "GetCompanyById",
-			Handler:    _CompanyService_GetCompanyById_Handler,
+			MethodName: "GetById",
+			Handler:    _CompanyService_GetById_Handler,
 		},
 		{
-			MethodName: "UpdateCompany",
-			Handler:    _CompanyService_UpdateCompany_Handler,
+			MethodName: "Update",
+			Handler:    _CompanyService_Update_Handler,
 		},
 		{
-			MethodName: "DeleteCompany",
-			Handler:    _CompanyService_DeleteCompany_Handler,
+			MethodName: "Delete",
+			Handler:    _CompanyService_Delete_Handler,
+		},
+		{
+			MethodName: "GetListWithProjects",
+			Handler:    _CompanyService_GetListWithProjects_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

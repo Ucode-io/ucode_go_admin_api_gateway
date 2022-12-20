@@ -4,4 +4,4 @@ package analytics_service;
 option go_package="genproto/analytics_service";
 
 import "query.proto";
-import "project.proto";
+import "analytics_project.proto";

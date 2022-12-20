@@ -10,15 +10,15 @@ import (
 
 func TestCompanyCreate(t *testing.T) {
 	company := models.CompanyCreateRequest{
-		Title:       "Parfume Gallery",
+		Name:        "Parfume Gallery",
 		Logo:        "Logo",
 		Description: "Description",
 	}
 
-	resp, err := companyClient.CreateCompany(
+	resp, err := companyClient.Create(
 		context.Background(),
 		&company_service.CreateCompanyRequest{
-			Title:       company.Title,
+			Title:       company.Name,
 			Logo:        company.Logo,
 			Description: company.Description,
 		},
@@ -34,10 +34,10 @@ func TestCompanyCreate(t *testing.T) {
 func TestCompanyGetByID(t *testing.T) {
 	companyID := "51753b96-2f2d-4bdd-aba0-2c3d005aebf6"
 
-	resp, err := companyClient.GetCompanyById(
+	resp, err := companyClient.GetById(
 		context.Background(),
 		&company_service.GetCompanyByIdRequest{
-			CompanyId: companyID,
+			Id: companyID,
 		},
 	)
 
@@ -50,7 +50,7 @@ func TestCompanyGetByID(t *testing.T) {
 
 func TestCompanyList(t *testing.T) {
 
-	resp, err := companyClient.GetCompanyList(
+	resp, err := companyClient.GetList(
 		context.Background(),
 		&company_service.GetCompanyListRequest{
 			Limit:  2,
@@ -69,10 +69,10 @@ func TestCompanyList(t *testing.T) {
 
 func TestUpdateCompany(t *testing.T) {
 
-	resp, err := companyClient.UpdateCompany(
+	resp, err := companyClient.Update(
 		context.Background(),
 		&company_service.Company{
-			CompanyId:   "7cf0cec4-0753-415c-a026-d658a7cd3fb6",
+			Id:          "7cf0cec4-0753-415c-a026-d658a7cd3fb6",
 			Name:        "Albatta Warehouse Management System",
 			Logo:        "https://www.company.com/logo.png",
 			Description: "This is the company description",
@@ -88,10 +88,10 @@ func TestUpdateCompany(t *testing.T) {
 
 func TestDeleteCompany(t *testing.T) {
 	companyId := "7cf0cec4-0753-415c-a026-d658a7cd3fb6"
-	_, err := companyClient.DeleteCompany(
-        context.Background(),
+	_, err := companyClient.Delete(
+		context.Background(),
 		&company_service.DeleteCompanyRequest{
-			CompanyId: companyId,
+			Id: companyId,
 		},
 	)
 

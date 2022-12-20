@@ -1,0 +1,31 @@
+syntax="proto3";
+
+package company_service;
+option go_package="genproto/company_service";
+
+enum ServiceType {
+    NOT_SPECIFIED = 0;
+    BUILDER_SERVICE = 1;
+    ANALYTICS_SERVICE = 2;
+}
+
+enum ResourceType {
+    NOT_DECIDED = 0;
+    MONGODB = 1;
+    CLICKHOUSE = 2;
+    POSTGRESQL = 3;
+}
+
+message Resource {
+    message Credentials {
+        string host = 1;
+        string port = 2;
+        string username = 3;
+        string password = 4;
+        string database = 5;
+    }
+    ServiceType service_type = 1;
+    ResourceType resource_type = 2;
+    Credentials credentials = 3;
+    string id = 4;
+}

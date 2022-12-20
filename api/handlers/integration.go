@@ -22,13 +22,16 @@ import (
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) CreateIntegration(c *gin.Context) {
-	var Integration auth_service.CreateIntegrationRequest
+	var integration auth_service.CreateIntegrationRequest
 
-	err := c.ShouldBindJSON(&Integration)
+	err := c.ShouldBindJSON(&integration)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+	integration.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -36,9 +39,10 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
+
 	resp, err := services.IntegrationService().CreateIntegration(
 		c.Request.Context(),
-		&Integration,
+		&integration,
 	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -85,6 +89,7 @@ func (h *Handler) GetIntegrationList(c *gin.Context) {
 		return
 	}
 
+	//@TODO::protobuff already has project_id field
 	resp, err := services.IntegrationService().GetIntegrationList(
 		c.Request.Context(),
 		&auth_service.GetIntegrationListRequest{
@@ -123,6 +128,8 @@ func (h *Handler) GetIntegrationSessions(c *gin.Context) {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
+
+	//@TODO:: no project_id field
 	resp, err := services.IntegrationService().GetIntegrationSessions(
 		c.Request.Context(),
 		&auth_service.IntegrationPrimaryKey{
@@ -172,7 +179,8 @@ func (h *Handler) AddSessionToIntegration(c *gin.Context) {
 		return
 	}
 	login.IntegrationId = integrationID
-	
+
+	//@TODO:: no project_id field
 	resp, err := services.IntegrationService().AddSessionToIntegration(
 		c.Request.Context(),
 		&login,
@@ -212,6 +220,7 @@ func (h *Handler) GetIntegrationByID(c *gin.Context) {
 		return
 	}
 
+	//@TODO:: no project id field
 	resp, err := services.IntegrationService().GetIntegrationByID(
 		c.Request.Context(),
 		&auth_service.IntegrationPrimaryKey{
@@ -253,6 +262,7 @@ func (h *Handler) DeleteIntegration(c *gin.Context) {
 		return
 	}
 
+	//@TODO:: no project id field
 	resp, err := services.IntegrationService().DeleteIntegration(
 		c.Request.Context(),
 		&auth_service.IntegrationPrimaryKey{
@@ -301,6 +311,7 @@ func (h *Handler) GetIntegrationToken(c *gin.Context) {
 		return
 	}
 
+	//@TODO:: no project id field
 	resp, err := services.IntegrationService().GetIntegrationToken(
 		c.Request.Context(),
 		&auth_service.GetIntegrationTokenRequest{

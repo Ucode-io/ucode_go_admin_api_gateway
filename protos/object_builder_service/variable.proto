@@ -24,6 +24,7 @@ message CreateVariableRequest {
     repeated string options = 6;
     string view_field_slug = 7;
     string query = 8;
+    string project_id = 9;
 }
 
 
@@ -37,6 +38,7 @@ message Variable {
     repeated string options = 7;
     string view_field_slug = 8;
     string query = 9;
+    string project_id = 10;
 }
 
 message GetAllVariablesResponse {
@@ -47,8 +49,10 @@ message GetAllVariablesResponse {
 message GetAllVariablesRequest {
     string slug = 1;
     string dashboard_id = 2;
+    string project_id = 3;
 }
 
 message VariablePrimaryKey {
     string id = 1;
+    string project_id = 2;
 }

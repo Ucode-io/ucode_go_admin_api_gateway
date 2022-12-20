@@ -16,16 +16,19 @@ service QueryFolderService {
 message CreateQueryFolderRequest {
     string title = 1;
     string parent_id = 2;
+    string project_id = 3;
 }
 
 message QueryFolder {
     string id = 1;
     string title = 2;
     string parent_id = 3;
+    string project_id = 4;
 }
 
 message QueryFolderId {
     string id = 1;
+    string project_id = 2;
 }
 
 message GetAllQueryFolderRequest {
@@ -33,6 +36,7 @@ message GetAllQueryFolderRequest {
     int32 limit = 2;
     int32 offset = 3;
     string search = 4;
+    string project_id = 5;
 }
 
 message GetAllQueryFolderResponse {

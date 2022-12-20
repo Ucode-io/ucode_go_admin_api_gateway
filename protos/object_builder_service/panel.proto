@@ -23,6 +23,7 @@ message CreatePanelRequest {
     string title = 4;
     string dashboard_id = 5;
     bool has_pagination = 6;
+    string project_id = 7;
 }
 
 
@@ -34,6 +35,7 @@ message Panel {
     string title = 5;
     string dashboard_id = 6;
     bool has_pagination = 7;
+    string project_id = 8;
 }
 
 message GetAllPanelsResponse {
@@ -43,10 +45,12 @@ message GetAllPanelsResponse {
 
 message GetAllPanelsRequest {
     string title = 1;
+    string project_id = 2;
 }
 
 message PanelPrimaryKey {
     string id = 1;
+    string project_id = 2;
 }
 
 message PanelCoordinates {
@@ -56,4 +60,5 @@ message PanelCoordinates {
 
 message UpdatePanelCoordinatesRequest {
     repeated PanelCoordinates panel_coordinates = 1;
+    string project_id = 2;
 }

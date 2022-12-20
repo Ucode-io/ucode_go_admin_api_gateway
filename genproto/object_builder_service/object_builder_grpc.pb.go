@@ -35,6 +35,8 @@ type ObjectBuilderServiceClient interface {
 	GetListInExcel(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	Batch(ctx context.Context, in *BatchRequest, opts ...grpc.CallOption) (*CommonMessage, error)
 	MultipleUpdate(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*empty.Empty, error)
+	MultipleInsert(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*empty.Empty, error)
+	GetFinancialAnalytics(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 }
 
 type objectBuilderServiceClient struct {
@@ -153,6 +155,24 @@ func (c *objectBuilderServiceClient) MultipleUpdate(ctx context.Context, in *Com
 	return out, nil
 }
 
+func (c *objectBuilderServiceClient) MultipleInsert(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/object_builder_service.ObjectBuilderService/MultipleInsert", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *objectBuilderServiceClient) GetFinancialAnalytics(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
+	out := new(CommonMessage)
+	err := c.cc.Invoke(ctx, "/object_builder_service.ObjectBuilderService/GetFinancialAnalytics", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ObjectBuilderServiceServer is the server API for ObjectBuilderService service.
 // All implementations must embed UnimplementedObjectBuilderServiceServer
 // for forward compatibility
@@ -169,6 +189,8 @@ type ObjectBuilderServiceServer interface {
 	GetListInExcel(context.Context, *CommonMessage) (*CommonMessage, error)
 	Batch(context.Context, *BatchRequest) (*CommonMessage, error)
 	MultipleUpdate(context.Context, *CommonMessage) (*empty.Empty, error)
+	MultipleInsert(context.Context, *CommonMessage) (*empty.Empty, error)
+	GetFinancialAnalytics(context.Context, *CommonMessage) (*CommonMessage, error)
 	mustEmbedUnimplementedObjectBuilderServiceServer()
 }
 
@@ -211,6 +233,12 @@ func (UnimplementedObjectBuilderServiceServer) Batch(context.Context, *BatchRequ
 }
 func (UnimplementedObjectBuilderServiceServer) MultipleUpdate(context.Context, *CommonMessage) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MultipleUpdate not implemented")
+}
+func (UnimplementedObjectBuilderServiceServer) MultipleInsert(context.Context, *CommonMessage) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MultipleInsert not implemented")
+}
+func (UnimplementedObjectBuilderServiceServer) GetFinancialAnalytics(context.Context, *CommonMessage) (*CommonMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFinancialAnalytics not implemented")
 }
 func (UnimplementedObjectBuilderServiceServer) mustEmbedUnimplementedObjectBuilderServiceServer() {}
 
@@ -441,6 +469,42 @@ func _ObjectBuilderService_MultipleUpdate_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ObjectBuilderService_MultipleInsert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommonMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ObjectBuilderServiceServer).MultipleInsert(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.ObjectBuilderService/MultipleInsert",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ObjectBuilderServiceServer).MultipleInsert(ctx, req.(*CommonMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ObjectBuilderService_GetFinancialAnalytics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommonMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ObjectBuilderServiceServer).GetFinancialAnalytics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.ObjectBuilderService/GetFinancialAnalytics",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ObjectBuilderServiceServer).GetFinancialAnalytics(ctx, req.(*CommonMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ObjectBuilderService_ServiceDesc is the grpc.ServiceDesc for ObjectBuilderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -495,6 +559,14 @@ var ObjectBuilderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MultipleUpdate",
 			Handler:    _ObjectBuilderService_MultipleUpdate_Handler,
+		},
+		{
+			MethodName: "MultipleInsert",
+			Handler:    _ObjectBuilderService_MultipleInsert_Handler,
+		},
+		{
+			MethodName: "GetFinancialAnalytics",
+			Handler:    _ObjectBuilderService_GetFinancialAnalytics_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

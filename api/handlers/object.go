@@ -37,6 +37,8 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
 	for key, value := range objectRequest.Data {
 		if key[0] == '$' {
@@ -64,6 +66,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 				&obs.CommonMessage{
 					TableSlug: key[1:],
 					Data:      mapToStruct,
+					ProjectId: authInfo.GetProjectId(),
 				},
 			)
 
@@ -95,6 +98,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -122,12 +126,15 @@ func (h *Handler) CreateObject(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetSingle(c *gin.Context) {
 	var object models.CommonMessage
+
 	object.Data = make(map[string]interface{})
+
 	objectID := c.Param("object_id")
 	if !util.IsValidUUID(objectID) {
 		h.handleResponse(c, http.InvalidArgument, "object_id is an invalid uuid")
 		return
 	}
+
 	object.Data["id"] = objectID
 
 	structData, err := helper.ConvertMapToStruct(object.Data)
@@ -143,11 +150,14 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.ObjectBuilderService().GetSingle(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -196,11 +206,14 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.ObjectBuilderService().Update(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -214,10 +227,14 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, err.Error())
 			return
 		}
-		_, err = services.SessionService().UpdateSessionsByRoleId(context.Background(), &authPb.UpdateSessionByRoleIdRequest{
-			RoleId:    objectRequest.Data["role_id"].(string),
-			IsChanged: true,
-		})
+
+		_, err = services.SessionService().UpdateSessionsByRoleId(
+			context.Background(),
+			&authPb.UpdateSessionByRoleIdRequest{
+				RoleId:    objectRequest.Data["role_id"].(string),
+				IsChanged: true,
+			},
+		)
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
@@ -271,11 +288,14 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.ObjectBuilderService().Delete(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -327,11 +347,14 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.ObjectBuilderService().GetList(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -379,11 +402,14 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.ObjectBuilderService().GetListInExcel(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -415,6 +441,9 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 	}
+
+	authInfo := h.GetAuthInfo(c)
+	m2mMessage.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -456,6 +485,9 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 	}
+
+	authInfo := h.GetAuthInfo(c)
+	m2mMessage.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -513,11 +545,14 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.ObjectBuilderService().GetObjectDetails(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -552,6 +587,9 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
 	for key, value := range objectRequest.Data {
 		if key[0] == '$' {
@@ -603,6 +641,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 			TableSlug:     c.Param("table_slug"),
 			Data:          structData,
 			UpdatedFields: objectRequest.UpdatedFields,
+			ProjectId:     authInfo.GetProjectId(),
 		},
 	)
 
@@ -618,10 +657,13 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, err.Error())
 			return
 		}
-		_, err = services.SessionService().UpdateSessionsByRoleId(context.Background(), &authPb.UpdateSessionByRoleIdRequest{
-			RoleId:    objectRequest.Data["role_id"].(string),
-			IsChanged: true,
-		})
+		_, err = services.SessionService().UpdateSessionsByRoleId(
+			context.Background(),
+			&authPb.UpdateSessionByRoleIdRequest{
+				RoleId:    objectRequest.Data["role_id"].(string),
+				IsChanged: true,
+			},
+		)
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
@@ -668,11 +710,14 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.ObjectBuilderService().MultipleUpdate(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -683,3 +728,64 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 
 	h.handleResponse(c, http.Created, resp)
 }
+
+// GetFinancialAnalytics godoc
+// @Security ApiKeyAuth
+// @ID get_financial_analytics
+// @Router /v1/object/get-financial-analytics/{table_slug} [POST]
+// @Summary Get financial analytics
+// @Description Get financial analytics
+// @Tags Object
+// @Accept json
+// @Produce json
+// @Param table_slug path string true "table_slug"
+// @Param object body models.CommonMessage true "GetFinancialAnalyticsRequestBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "ObjectBody"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
+	var objectRequest models.CommonMessage
+
+	err := c.ShouldBindJSON(&objectRequest)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo := h.GetAuthInfo(c)
+
+	tokenInfo := h.GetAuthInfo
+	objectRequest.Data["tables"] = tokenInfo(c).Tables
+	objectRequest.Data["user_id_from_token"] = tokenInfo(c).UserId
+	objectRequest.Data["role_id_from_token"] = tokenInfo(c).RoleId
+	objectRequest.Data["client_type_id_from_token"] = tokenInfo(c).ClientTypeId
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	resp, err := services.ObjectBuilderService().GetFinancialAnalytics(
+		context.Background(),
+		&obs.CommonMessage{
+			TableSlug: c.Param("table_slug"),
+			Data:      structData,
+			ProjectId: authInfo.ProjectId,
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
+

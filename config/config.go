@@ -62,12 +62,19 @@ type Config struct {
 	MinioAccessKeyID     string
 	MinioSecretAccessKey string
 	MinioProtocol        bool
+
+	UcodeNamespace string
+
+	SecretKey string
 }
 
 // Load ...
 func Load() Config {
 	if err := godotenv.Load("/app/.env"); err != nil {
-		fmt.Println("No .env file found")
+		if err := godotenv.Load(".env"); err != nil {
+			fmt.Println("No .env file found")
+		}
+		fmt.Println("No /app/.env file found")
 	}
 
 	config := Config{}
@@ -104,16 +111,19 @@ func Load() Config {
 	config.AuthGRPCPort = cast.ToString(GetOrReturnDefaultValue("AUTH_GRPC_PORT", ":9103"))
 
 	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", "localhost"))
-	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_PORT", ":9106"))
+	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", ":9106"))
 
 	config.PosServiceHost = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_HOST", "localhost"))
 	config.PosGRPCPort = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_GRPC_PORT", ":8000"))
 
 	config.AnalyticsServiceHost = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_SERVICE_HOST", "localhost"))
-	config.AnalyticsGRPCPort = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_SERVICE_GRPC_PORT", ":9175"))
+	config.AnalyticsGRPCPort = cast.ToString(GetOrReturnDefaultValue("ANALYTICS_GRPC_PORT", ":9175"))
 
 	config.SmsServiceHost = cast.ToString(GetOrReturnDefaultValue("SMS_SERVICE_HOST", "go-sms-service"))
 	config.SmsGRPCPort = cast.ToString(GetOrReturnDefaultValue("SMS_GRPC_PORT", ":80"))
+
+	config.UcodeNamespace = "cp-region-type-id"
+	config.SecretKey = "Here$houldBe$ome$ecretKey"
 
 	return config
 }

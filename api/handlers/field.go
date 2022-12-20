@@ -53,6 +53,9 @@ func (h *Handler) CreateField(c *gin.Context) {
 		AutofillField: fieldRequest.AutoFillField,
 	}
 
+	authInfo := h.GetAuthInfo(c)
+	field.ProjectId = authInfo.GetProjectId()
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -98,10 +101,12 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
+
 	var withManyRelation, withOneRelation = false, false
 	if c.Query("with_many_relation") == "true" {
 		withManyRelation = true
 	}
+
 	if c.Query("with_one_relation") == "true" {
 		withOneRelation = true
 	}
@@ -113,6 +118,8 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.FieldService().GetAll(
 		context.Background(),
 		&obs.GetAllFieldsRequest{
@@ -123,6 +130,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 			TableSlug:        c.DefaultQuery("table_slug", ""),
 			WithManyRelation: withManyRelation,
 			WithOneRelation:  withOneRelation,
+			ProjectId:        authInfo.GetProjectId(),
 		},
 	)
 
@@ -178,6 +186,9 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		RelationId:    fieldRequest.RelationId,
 	}
 
+	authInfo := h.GetAuthInfo(c)
+	field.ProjectId = authInfo.GetProjectId()
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -226,10 +237,13 @@ func (h *Handler) DeleteField(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.FieldService().Delete(
 		context.Background(),
 		&obs.FieldPrimaryKey{
-			Id: fieldID,
+			Id:        fieldID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

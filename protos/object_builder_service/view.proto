@@ -40,6 +40,10 @@ message CreateViewRequest {
     string multiple_insert_field = 19;
     repeated string updated_fields = 20;
     string app_id = 21;
+    string table_label = 22;
+    string default_limit = 23;
+    google.protobuf.Struct attributes = 24;
+    string project_id = 25;
 }
 
 message QuickFilter {
@@ -70,6 +74,10 @@ message View {
     string multiple_insert_field = 20;
     repeated string updated_fields = 21;
     string app_id = 22;
+    string table_label = 23;
+    string default_limit = 24;
+    google.protobuf.Struct attributes = 25;
+    string project_id = 26;
 }
 
 message GetAllViewsResponse {
@@ -80,10 +88,12 @@ message GetAllViewsResponse {
 message GetAllViewsRequest {
     string table_slug = 1;
     string app_id = 2;
+    string project_id = 3;
 }
 
 message ViewPrimaryKey {
     string id = 1;
+    string project_id = 2;
 }
 
 message DisableDates {
@@ -96,6 +106,7 @@ message DisableDates {
 message HtmlBody {
     string html = 1;
     google.protobuf.Struct data = 2;
+    string project_id = 3;
 }
 
 message PdfBody {

@@ -31,6 +31,9 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+	htmlTemplate.ProjectId = authInfo.GetProjectId()
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -78,10 +81,13 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.HtmlTemplateService().GetSingle(
 		context.Background(),
 		&obs.HtmlTemplatePrimaryKey{
-			Id: htmlTemplateID,
+			Id:        htmlTemplateID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -113,6 +119,9 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+	htmlTemplate.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -162,10 +171,13 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.HtmlTemplateService().Delete(
 		context.Background(),
 		&obs.HtmlTemplatePrimaryKey{
-			Id: htmlTemplateID,
+			Id:        htmlTemplateID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -199,10 +211,13 @@ func (h *Handler) GetHtmlTemplateList(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.HtmlTemplateService().GetList(
 		context.Background(),
 		&obs.GetAllHtmlTemplateRequest{
 			TableSlug: c.Query("table_slug"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

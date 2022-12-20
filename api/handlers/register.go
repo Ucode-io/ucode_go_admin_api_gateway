@@ -66,10 +66,16 @@ func (h *Handler) SendCode(c *gin.Context) {
 
 	phone := helper.ConverPhoneNumberToMongoPhoneFormat(request.Recipient)
 
-	respObject, err := services.LoginService().LoginWithOtp(c.Request.Context(), &pbObject.PhoneOtpRequst{
-		PhoneNumber: phone,
-		ClientType:  request.ClientType,
-	})
+	authInfo := h.GetAuthInfo(c)
+
+	respObject, err := services.LoginService().LoginWithOtp(
+		c.Request.Context(),
+		&pbObject.PhoneOtpRequst{
+			PhoneNumber: phone,
+			ClientType:  request.ClientType,
+			ProjectId:   authInfo.GetProjectId(),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -80,6 +86,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
 	}
+
 	resp, err := services.SmsService().Send(
 		c.Request.Context(),
 		&pbSms.Sms{
@@ -99,6 +106,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
 	res := models.SendCodeResponse{
 		SmsId: resp.SmsId,
 		Data:  respObject,
@@ -154,10 +162,17 @@ func (h *Handler) Verify(c *gin.Context) {
 		return
 	}
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
-	res, err := services.SessionServiceAuth().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
-		LoginData: convertedToAuthPb,
-		Tables:    body.Tables,
-	})
+
+	authInfo := h.GetAuthInfo(c)
+
+	res, err := services.SessionServiceAuth().SessionAndTokenGenerator(
+		context.Background(),
+		&pb.SessionAndTokenRequest{
+			LoginData: convertedToAuthPb,
+			Tables:    body.Tables,
+			ProjectId: authInfo.GetProjectId(),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -202,11 +217,14 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	_, err = services.ObjectBuilderServiceAuth().Create(
 		context.Background(),
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -214,20 +232,28 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.LoginService().LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
-		PhoneNumber: body.Data["phone"].(string),
-		ClientType:  "PATIENT",
-	})
+	resp, err := services.LoginService().LoginWithOtp(
+		context.Background(),
+		&pbObject.PhoneOtpRequst{
+			PhoneNumber: body.Data["phone"].(string),
+			ClientType:  "PATIENT",
+			ProjectId:   authInfo.GetProjectId(),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
-	res, err := services.SessionServiceAuth().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
-		LoginData: convertedToAuthPb,
-		Tables:    []*pb.Object{},
-	})
+	res, err := services.SessionServiceAuth().SessionAndTokenGenerator(
+		context.Background(),
+		&pb.SessionAndTokenRequest{
+			LoginData: convertedToAuthPb,
+			Tables:    []*pb.Object{},
+			ProjectId: authInfo.GetProjectId(),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return

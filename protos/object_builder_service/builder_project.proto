@@ -1,22 +1,31 @@
 syntax="proto3";
 
-package analytics_service;
-option go_package="genproto/analytics_service";
+package object_builder_service;
+option go_package="genproto/object_builder_service";
 
 import "google/protobuf/empty.proto";
 
-service ProjectService {
+service BuilderProjectService {
     rpc Register(RegisterProjectRequest) returns (google.protobuf.Empty) {}
     rpc Deregister(DeregisterProjectRequest) returns (google.protobuf.Empty) {}
+    rpc Reconnect(RegisterProjectRequest) returns (google.protobuf.Empty) {}
 
     rpc RegisterMany(RegisterManyProjectsRequest) returns (RegisterManyProjectsResponse) {}
     rpc DeregisterMany(DeregisterManyProjectsRequest) returns (DeregisterManyProjectsResponse) {}
 }
 
 message RegisterProjectRequest {
+    message Credentials {
+        string host = 1;
+        string port = 2;
+        string username = 3;
+        string password = 4;
+        string database = 5;
+    }
     string k8s_namespace = 1;
     string project_id = 2;
     string secret_path = 3;
+    Credentials credentials = 4;
 }
 
 message DeregisterProjectRequest {

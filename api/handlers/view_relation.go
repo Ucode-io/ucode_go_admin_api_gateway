@@ -34,12 +34,15 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.SectionService().GetViewRelation(
 		context.Background(),
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
 			TableSlug: c.Query("table_slug"),
 			RoleId:    tokenInfo.RoleId,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -71,6 +74,9 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+	viewRelation.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)

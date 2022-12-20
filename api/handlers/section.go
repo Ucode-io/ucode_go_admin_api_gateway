@@ -32,12 +32,15 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.SectionService().GetAll(
 		context.Background(),
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
 			TableSlug: c.Query("table_slug"),
 			RoleId:    tokenInfo(c).RoleId,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -70,6 +73,9 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+	sections.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)

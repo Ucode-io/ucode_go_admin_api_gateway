@@ -32,11 +32,14 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.QueryFolderService().Create(
 		context.Background(),
 		&obs.CreateQueryFolderRequest{
-			Title:    queryfolder.Title,
-			ParentId: queryfolder.ParentId,
+			Title:     queryfolder.Title,
+			ParentId:  queryfolder.ParentId,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -50,7 +53,7 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 
 // GetQueryFolderById godoc
 // @Security ApiKeyAuth
-// @ID get_query_folder_list
+// @ID get_query_folder
 // @Router /v3/query_folder/{guid} [GET]
 // @Summary Get Query Folder By Id
 // @Description Get Query Folder By Id
@@ -62,11 +65,14 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetQueryFolderByID(c *gin.Context) {
-	guid := c.Param("guid")
+
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.QueryFolderService().GetById(
 		context.Background(),
 		&obs.QueryFolderId{
-			Id: guid,
+			Id:        c.Param("guid"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -104,13 +110,16 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.QueryFolderService().GetAll(
 		context.Background(),
 		&obs.GetAllQueryFolderRequest{
-			Limit:    int32(limit),
-			Offset:   int32(offset),
-			Search:   c.DefaultQuery("search", ""),
-			ParentId: c.DefaultQuery("parent_id", ""),
+			Limit:     int32(limit),
+			Offset:    int32(offset),
+			Search:    c.DefaultQuery("search", ""),
+			ParentId:  c.DefaultQuery("parent_id", ""),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -146,12 +155,15 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.QueryFolderService().Update(
 		context.Background(),
 		&obs.QueryFolder{
-			Id:       guid,
-			Title:    queryFolder.Title,
-			ParentId: queryFolder.ParentId,
+			Id:        guid,
+			Title:     queryFolder.Title,
+			ParentId:  queryFolder.ParentId,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -184,10 +196,13 @@ func (h *Handler) DeleteQueryFolder(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.QueryFolderService().Delete(
 		context.Background(),
 		&obs.QueryFolderId{
-			Id: queryFolderId,
+			Id:        queryFolderId,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

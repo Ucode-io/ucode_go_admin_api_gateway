@@ -24,17 +24,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.GET("/ping", h.Ping)
 	r.GET("/config", h.GetConfig)
 
-	// Project
-	r.POST("/v1/project", h.CreateProject)
-	r.GET("/v1/project", h.GetAllProjects)
-	r.DELETE("/v1/project/:project_id", h.DeleteProject)
+	r.POST("/send-code", h.SendCode)
+	r.POST("/verify/:sms_id/:otp", h.Verify)
+	r.POST("/register-otp/:table_slug", h.RegisterOtp)
+	r.POST("/send-message", h.SendMessageToEmail)
+	r.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
+	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	//MUST be executed before AuthMiddleware
-	v1.Use(h.ProjectsMiddleware())
 	v1.Use(h.AuthMiddleware())
 	{
 		v1.POST("/upload", h.Upload)
@@ -59,6 +59,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/relation", h.GetAllRelations)
 		v1.PUT("/relation", h.UpdateRelation)
 		v1.DELETE("/relation/:relation_id", h.DeleteRelation)
+		v1.GET("/get-relation-cascading/:table_slug", h.GetRelationCascaders)
+
 
 		//section
 		v1.GET("/section", h.GetAllSections)
@@ -78,6 +80,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/object/excel/:table_slug", h.GetListInExcel)
 		v1.POST("/object-upsert/:table_slug", h.UpsertObject)
 		v1.PUT("/object/multiple-update/:table_slug", h.MultipleUpdateObject)
+		v1.POST("/object/get-financial-analytics/:table_slug", h.GetFinancialAnalytics)
+
 		// permission
 		v1.POST("/permission-upsert/:app_id", h.UpsertPermissionsByAppId)
 		v1.GET("/permission-get-all/:role_id", h.GetAllPermissionByRoleId)
@@ -201,70 +205,24 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/alfalab/referral", h.GetReferral)
 
 		// company service
-		v1.POST("/company", h.CreateCompany)
-		v1.GET("company/:company_id", h.GetCompanyByID)
-		v1.GET("company", h.GetCompanyList)
+		// v1.POST("/company", h.CreateCompany)
+		v1.GET("/company/:company_id", h.GetCompanyByID)
+		v1.GET("/company", h.GetCompanyList)
 		v1.PUT("company/:company_id", h.UpdateCompany)
-		v1.DELETE("company/:company_id", h.DeleteCompany)
+		v1.DELETE("/company/:company_id", h.DeleteCompany)
 
 		// project service
-		v1.POST("company-project", h.CreateCompanyProject)
-	    v1.GET("company-project", h.GetCompanyProjectList)
-		v1.GET("company-project/:project_id", h.GetCompanyProjectById)
-		v1.PUT("company-project/:project_id", h.UpdateCompanyProject)
-		v1.DELETE("company-project/:project_id", h.DeleteCompanyProject)
-	}
-	v2 := r.Group("/v2")
-	{
-		v2.POST("/client-platform", h.V2CreateClientPlatform)
-		v2.GET("/client-platform", h.V2GetClientPlatformList)
-		v2.GET("/client-platform/:client-platform-id", h.V2GetClientPlatformByID)
-		v2.GET("/client-platform-detailed/:client-platform-id", h.V2GetClientPlatformByIDDetailed)
-		v2.PUT("/client-platform", h.V2UpdateClientPlatform)
-		v2.DELETE("/client-platform/:client-platform-id", h.V2DeleteClientPlatform)
+		v1.POST("/company-project", h.CreateCompanyProject)
+		v1.GET("/company-project", h.GetCompanyProjectList)
+		v1.GET("/company-project/:project_id", h.GetCompanyProjectById)
+		v1.PUT("/company-project/:project_id", h.UpdateCompanyProject)
+		v1.DELETE("/company-project/:project_id", h.DeleteCompanyProject)
 
-		// admin, dev, hr, ceo
-		v2.POST("/client-type", h.V2CreateClientType)
-		v2.GET("/client-type", h.V2GetClientTypeList)
-		v2.GET("/client-type/:client-type-id", h.V2GetClientTypeByID)
-		v2.PUT("/client-type", h.V2UpdateClientType)
-		v2.DELETE("/client-type/:client-type-id", h.V2DeleteClientType)
-
-		v2.POST("/client", h.V2AddClient)
-		v2.GET("/client/:project-id", h.V2GetClientMatrix)
-		v2.PUT("/client", h.V2UpdateClient)
-		v2.DELETE("/client", h.V2RemoveClient)
-
-		v2.POST("/user-info-field", h.V2AddUserInfoField)
-		v2.PUT("/user-info-field", h.V2UpdateUserInfoField)
-		v2.DELETE("/user-info-field/:user-info-field-id", h.V2RemoveUserInfoField)
-
-		// PERMISSION SERVICE
-		v2.GET("/role/:role-id", h.V2GetRoleByID)
-		v2.GET("/role", h.V2GetRolesList)
-		v2.POST("/role", h.V2AddRole)
-		v2.PUT("/role", h.V2UpdateRole)
-		v2.DELETE("/role/:role-id", h.V2RemoveRole)
-
-		v2.POST("/permission", h.V2CreatePermission)
-		v2.GET("/permission", h.V2GetPermissionList)
-		v2.GET("/permission/:permission-id", h.V2GetPermissionByID)
-		v2.PUT("/permission", h.V2UpdatePermission)
-		v2.DELETE("/permission/:permission-id", h.V2DeletePermission)
-
-		v2.POST("/permission-scope", h.V2AddPermissionScope)
-		v2.DELETE("/permission-scope", h.V2RemovePermissionScope)
-
-		v2.POST("/role-permission", h.V2AddRolePermission)
-		v2.DELETE("/role-permission", h.V2RemoveRolePermission)
-
-		v2.POST("/user", h.V2CreateUser)
-		v2.GET("/user", h.V2GetUserList)
-		v2.GET("/user/:user-id", h.V2GetUserByID)
-		v2.PUT("/user", h.V2UpdateUser)
-		v2.DELETE("/user/:user-id", h.V2DeleteUser)
-		v2.POST("/login", h.V2Login)
-		v2.PUT("/refresh", h.V2RefreshToken)
+		v1.POST("/company/project/resource", h.AddProjectResource)
+		v1.DELETE("/company/project/resource", h.RemoveProjectResource)
+		v1.GET("/company/project/resource/:resource_id", h.GetResource)
+		v1.GET("/company/project/resource", h.GetResourceList)
+		v1.POST("/company/project/resource/reconnect", h.ReconnectProjectResource)
 	}
 
 	// v3 for ucode version 2
@@ -289,14 +247,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v3.GET("/web_pages", h.GetWebPagesList)
 		v3.PUT("/web_pages/:guid", h.UpdateWebPage)
 		v3.DELETE("/web_pages/:guid", h.DeleteWebPage)
-		
+
 	}
-	r.POST("/send-code", h.SendCode)
-	r.POST("/verify/:sms_id/:otp", h.Verify)
-	r.POST("/register-otp/:table_slug", h.RegisterOtp)
-	r.POST("/send-message", h.SendMessageToEmail)
-	r.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
-	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

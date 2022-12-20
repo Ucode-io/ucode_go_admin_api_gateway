@@ -34,6 +34,7 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 		return
 	}
 	offset := (pageInt - 1) * limit
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -41,11 +42,16 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 		return
 	}
 
-	res, err := services.EventLogsService().GetList(context.Background(), &obs.GetEventLogsListRequest{
-		TableSlug: c.Query("table_slug"),
-		Offset:    int32(offset),
-		Limit:     int32(limit),
-	})
+	authInfo := h.GetAuthInfo(c)
+
+	res, err := services.EventLogsService().GetList(
+		context.Background(),
+		&obs.GetEventLogsListRequest{
+			TableSlug: c.Query("table_slug"),
+			Offset:    int32(offset),
+			Limit:     int32(limit),
+			ProjectId: authInfo.GetProjectId(),
+		})
 
 	if err != nil {
 		fmt.Println("Error while get event logs, err: ", err)
@@ -75,6 +81,7 @@ func (h *Handler) GetEventLogById(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "event_log_id is an invalid uuid")
 		return
 	}
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -82,10 +89,12 @@ func (h *Handler) GetEventLogById(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
 	resp, err := services.EventLogsService().GetSingle(
 		context.Background(),
 		&obs.GetEventLogById{
-			Id: eventLogID,
+			Id:        eventLogID,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {

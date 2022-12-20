@@ -61,11 +61,12 @@ func (h *Handler) Upload(c *gin.Context) {
 		h.handleResponse(c, https.BadRequest, err.Error())
 		return
 	}
+
 	fName, _ := uuid.NewRandom()
 	file.File.Filename = strings.ReplaceAll(file.File.Filename, " ", "")
 	file.File.Filename = fmt.Sprintf("%s_%s", fName.String(), file.File.Filename)
 	dst, _ := os.Getwd()
-	fmt.Println("dst, _", dst)
+
 	minioClient, err := minio.New(h.cfg.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.cfg.MinioAccessKeyID, h.cfg.MinioSecretAccessKey, ""),
 		Secure: h.cfg.MinioProtocol,
@@ -209,10 +210,16 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	_, err = services.ObjectBuilderService().Create(context.Background(), &object_builder_service.CommonMessage{
-		TableSlug: "file",
-		Data:      structData,
-	})
+	authInfo := h.GetAuthInfo(c)
+
+	_, err = services.ObjectBuilderService().Create(
+		context.Background(),
+		&object_builder_service.CommonMessage{
+			TableSlug: "file",
+			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, https.InternalServerError, err.Error())
 		return

@@ -20,21 +20,25 @@ service WebPageService {
 message CreateWebPageRequest {
     string title = 1;
     google.protobuf.Struct components = 2;
+    string project_id = 3;
 }
 
 message WebPage {
     string id = 1;
     string title = 2;
     google.protobuf.Struct components = 3;
+    string project_id = 4;
 }
 
 message WebPageId {
     string id = 1;
+    string project_id = 2;
 }
 
 message GetAllWebPagesRequest {
     int32 limit = 1;
     int32 offset = 2;
+    string project_id = 3;
 }
 
 message GetAllWebPagesResponse {

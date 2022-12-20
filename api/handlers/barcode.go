@@ -31,10 +31,13 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.BarcodeService().Generate(
 		context.Background(),
 		&obs.BarcodeGenerateReq{
 			TableSlug: tableSlug,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 	if err != nil {

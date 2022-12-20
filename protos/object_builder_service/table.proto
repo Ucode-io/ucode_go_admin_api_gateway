@@ -27,6 +27,7 @@ message CreateTableRequest {
     repeated Section sections = 8;
     string app_id = 9;
     IncrementID increment_id = 10;
+    string project_id = 11;
 }
 
 message IncrementID {
@@ -59,6 +60,7 @@ message Table {
     bool is_visible = 8;
     bool is_own_table = 9;
     IncrementID increment_id = 10;
+    string project_id = 11;
 }
 
 message GetAllTablesResponse {
@@ -68,10 +70,12 @@ message GetAllTablesResponse {
 
 message TablePrimaryKey {
     string id = 1;
+    string project_id = 2;
 }
 
 message GetAllTablesRequest {
     int32 offset = 1;
     int32 limit = 2;
     string search = 3;
+    string project_id = 4;
 }

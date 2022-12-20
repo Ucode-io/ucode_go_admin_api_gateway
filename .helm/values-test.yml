@@ -7,7 +7,7 @@ global:
   # list of key: value
   # GLOBAL1: value
 labels:
-  app: go-admin-api-gateway
+  app: ucode-go-admin-api-gateway
 replicaCount: 1
 
 image:
@@ -62,7 +62,7 @@ podAnnotations:
     {{ end -}}
 
 podLabels:
-  app: go-admin-api-gateway
+  app: ucode-go-admin-api-gateway
 
 podSecurityContext:
   {}

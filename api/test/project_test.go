@@ -14,7 +14,7 @@ func TestProjectCreate(t *testing.T) {
 		CompanyId:    "7cf0cec4-0753-415c-a026-d658a7cd3fb6",
 	}
 
-	resp, err := projectClient.CreateProject(
+	resp, err := projectClient.Create(
 		context.Background(),
 		&company_service.CreateProjectRequest{
 			Title:        project.Title,
@@ -34,7 +34,7 @@ func TestGetProjectById(t *testing.T) {
 	companyID := "7cf0cec4-0753-415c-a026-d658a7cd3fb6"
 	projectID := "255496e5-924e-48e5-bbfc-9228914bd407"
 
-	resp, err := projectClient.GetProjectById(
+	resp, err := projectClient.GetById(
 		context.Background(),
 		&company_service.GetProjectByIdRequest{
 			ProjectId: projectID,
@@ -51,7 +51,7 @@ func TestGetProjectById(t *testing.T) {
 
 func TestGetProjectList(t *testing.T) {
 
-	resp, err := projectClient.GetProjectList(
+	resp, err := projectClient.GetList(
 		context.Background(),
 		&company_service.GetProjectListRequest{
 			Limit:     2,
@@ -71,7 +71,7 @@ func TestGetProjectList(t *testing.T) {
 
 func TestUpdateProject(t *testing.T) {
 
-	resp, err := projectClient.UpdateProject(
+	resp, err := projectClient.Update(
 		context.Background(),
 		&company_service.Project{
 			CompanyId:    "7cf0cec4-0753-415c-a026-d658a7cd3fb6",
@@ -91,7 +91,7 @@ func TestUpdateProject(t *testing.T) {
 func TestDeleteProject(t *testing.T) {
 	companyId := "7cf0cec4-0753-415c-a026-d658a7cd3fb6"
 	projectID := "46f70f6d-950a-4f09-a256-c56cd733bc9f"
-	_, err := projectClient.DeleteProject(
+	_, err := projectClient.Delete(
 		context.Background(),
 		&company_service.DeleteProjectRequest{
 			CompanyId: companyId,

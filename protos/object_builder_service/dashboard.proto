@@ -20,6 +20,7 @@ service DashboardService {
 message CreateDashboardRequest {
     string name = 1;
     string icon = 2;
+    string project_id = 3;
 }
 
 
@@ -29,6 +30,7 @@ message Dashboard {
     string icon = 3;
     repeated Panel panels = 4;
     repeated Variable variables = 5;
+    string project_id = 6;
 }
 
 message GetAllDashboadsResponse {
@@ -38,8 +40,10 @@ message GetAllDashboadsResponse {
 
 message GetAllDashboardsRequest {
     string name = 1;
+    string project_id = 2;
 }
 
 message DashboardPrimaryKey {
     string id = 1;
+    string project_id = 2;
 }

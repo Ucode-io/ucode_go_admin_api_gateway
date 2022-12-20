@@ -58,7 +58,7 @@ func (h *Handler) CreateQuery(c *gin.Context) {
 
 // GetQueryById godoc
 // @Security ApiKeyAuth
-// @ID get_query_list
+// @ID get_query_item
 // @Router /v3/query/{guid} [GET]
 // @Summary Get Query By Id
 // @Description Get Query By Id
@@ -112,6 +112,8 @@ func (h *Handler) GetQueryList(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.QueriesService().GetAll(
 		context.Background(),
 		&obs.GetAllQueriesRequest{
@@ -119,6 +121,7 @@ func (h *Handler) GetQueryList(c *gin.Context) {
 			Offset:        int32(offset),
 			Search:        c.DefaultQuery("search", ""),
 			QueryFolderId: c.DefaultQuery("query_folder_id", ""),
+			ProjectId:     authInfo.GetProjectId(),
 		},
 	)
 
@@ -160,6 +163,8 @@ func (h *Handler) UpdateQuery(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.QueriesService().Update(
 		context.Background(),
 		&obs.Query{
@@ -167,6 +172,7 @@ func (h *Handler) UpdateQuery(c *gin.Context) {
 			Title:         query.Title,
 			QueryFolderId: query.QueryFolderId,
 			Attributes:    attributes,
+			ProjectId:     authInfo.GetProjectId(),
 		},
 	)
 
@@ -180,7 +186,7 @@ func (h *Handler) UpdateQuery(c *gin.Context) {
 
 // DeleteQuery godoc
 // @Security ApiKeyAuth
-// @ID delete_query_folder
+// @ID delete_query
 // @Router /v3/query/{guid} [DELETE]
 // @Summary Delete Query
 // @Description Delete Query
@@ -199,10 +205,13 @@ func (h *Handler) DeleteQuery(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := h.companyServices.QueryFolderService().Delete(
 		context.Background(),
 		&obs.QueryFolderId{
-			Id: queryId,
+			Id:        queryId,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
