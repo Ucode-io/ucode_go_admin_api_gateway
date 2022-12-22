@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type QueryServiceClient interface {
 	GetQueryRows(ctx context.Context, in *CommonInput, opts ...grpc.CallOption) (*QueryOutput, error)
+	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
 }
 
 type queryServiceClient struct {
@@ -42,11 +43,21 @@ func (c *queryServiceClient) GetQueryRows(ctx context.Context, in *CommonInput, 
 	return out, nil
 }
 
+func (c *queryServiceClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error) {
+	out := new(PingResponse)
+	err := c.cc.Invoke(ctx, "/analytics_service.QueryService/Ping", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServiceServer is the server API for QueryService service.
 // All implementations must embed UnimplementedQueryServiceServer
 // for forward compatibility
 type QueryServiceServer interface {
 	GetQueryRows(context.Context, *CommonInput) (*QueryOutput, error)
+	Ping(context.Context, *PingRequest) (*PingResponse, error)
 	mustEmbedUnimplementedQueryServiceServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedQueryServiceServer struct {
 
 func (UnimplementedQueryServiceServer) GetQueryRows(context.Context, *CommonInput) (*QueryOutput, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetQueryRows not implemented")
+}
+func (UnimplementedQueryServiceServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
 func (UnimplementedQueryServiceServer) mustEmbedUnimplementedQueryServiceServer() {}
 
@@ -88,6 +102,24 @@ func _QueryService_GetQueryRows_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _QueryService_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServiceServer).Ping(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/analytics_service.QueryService/Ping",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServiceServer).Ping(ctx, req.(*PingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // QueryService_ServiceDesc is the grpc.ServiceDesc for QueryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var QueryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetQueryRows",
 			Handler:    _QueryService_GetQueryRows_Handler,
+		},
+		{
+			MethodName: "Ping",
+			Handler:    _QueryService_Ping_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

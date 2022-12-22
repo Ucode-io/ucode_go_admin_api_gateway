@@ -151,3 +151,79 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, resp)
 }
+
+// GetActionPermissions godoc
+// @Security ApiKeyAuth
+// @ID get_all_action_permission
+// @Router /v1/action-permission/{role_id}/{table_slug} [GET]
+// @Summary Get all action permissions
+// @Description Get all action permissions
+// @Tags Permission
+// @Accept json
+// @Produce json
+// @Param role_id path string true "role_id"
+// @Param table_slug path string true "table_slug"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "Get All Action Permission data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetActionPermissions(c *gin.Context) {
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+	resp, err := services.PermissionService().GetActionPermissions(
+		context.Background(),
+		&obs.GetActionPermissionRequest{
+			RoleId: c.Param("role_id"),
+			TableSlug: c.Param("table_slug"),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
+
+// GetViewRelationPermissions godoc
+// @Security ApiKeyAuth
+// @ID get_all_view_relation_permission
+// @Router /v1/view-relation-permission/{role_id}/{table_slug} [GET]
+// @Summary Get all view relation permissions
+// @Description Get all view relation permissions
+// @Tags Permission
+// @Accept json
+// @Produce json
+// @Param role_id path string true "role_id"
+// @Param table_slug path string true "table_slug"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "Get All View Relation Permission data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetViewRelationPermissions(c *gin.Context) {
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+	resp, err := services.PermissionService().GetViewRelationPermissions(
+		context.Background(),
+		&obs.GetActionPermissionRequest{
+			RoleId: c.Param("role_id"),
+			TableSlug: c.Param("table_slug"),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}

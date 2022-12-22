@@ -86,6 +86,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/permission-upsert/:app_id", h.UpsertPermissionsByAppId)
 		v1.GET("/permission-get-all/:role_id", h.GetAllPermissionByRoleId)
 		v1.GET("/field-permission/:role_id/:table_slug", h.GetFieldPermissions)
+		v1.GET("/action-permission/:role_id/:table_slug", h.GetActionPermissions)
+		v1.GET("/view-relation-permission/:role_id/:table_slug", h.GetViewRelationPermissions)
 
 		//many-to-many
 		v1.PUT("/many-to-many", h.AppendManyToMany)

@@ -23,11 +23,11 @@ service UserService {
 
     rpc UpsertUserInfo(UpsertUserInfoRequest) returns (UserInfo) {}
 
-    rpc V2CreateUser(CreateUserRequest) returns (CommonMessage) {}
-    rpc V2GetUserByID(UserPrimaryKey) returns (CommonMessage) {}
-    rpc V2GetUserListByIDs(UserPrimaryKeyList) returns (CommonMessage) {}
-    rpc V2GetUserList(GetUserListRequest) returns (CommonMessage) {}
-    rpc V2UpdateUser(UpdateUserRequest) returns (CommonMessage) {}
+    rpc V2CreateUser(CreateUserRequest) returns (User) {}
+    rpc V2GetUserByID(UserPrimaryKey) returns (User) {}
+    rpc V2GetUserListByIDs(UserPrimaryKeyList) returns (GetUserListResponse) {}
+    rpc V2GetUserList(GetUserListRequest) returns (GetUserListResponse) {}
+    rpc V2UpdateUser(UpdateUserRequest) returns (User) {}
     rpc V2DeleteUser(UserPrimaryKey) returns (google.protobuf.Empty) {}
 }
 

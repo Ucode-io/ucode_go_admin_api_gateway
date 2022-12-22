@@ -12,6 +12,8 @@ service PermissionService {
     rpc GetAllPermissionsByRoleId (GetAllPermissionRequest) returns (CommonMessage) {}
     rpc GetFieldPermissions (GetFieldPermissionRequest) returns (CommonMessage) {}
     rpc GetActionPermissions (GetActionPermissionRequest) returns (CommonMessage) {}
+    rpc GetViewRelationPermissions (GetActionPermissionRequest) returns (CommonMessage) {}
+
 }
 
 message GetAllPermissionRequest {

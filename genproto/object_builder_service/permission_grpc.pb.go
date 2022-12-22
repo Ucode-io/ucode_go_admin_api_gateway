@@ -26,6 +26,7 @@ type PermissionServiceClient interface {
 	GetAllPermissionsByRoleId(ctx context.Context, in *GetAllPermissionRequest, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetFieldPermissions(ctx context.Context, in *GetFieldPermissionRequest, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetActionPermissions(ctx context.Context, in *GetActionPermissionRequest, opts ...grpc.CallOption) (*CommonMessage, error)
+	GetViewRelationPermissions(ctx context.Context, in *GetActionPermissionRequest, opts ...grpc.CallOption) (*CommonMessage, error)
 }
 
 type permissionServiceClient struct {
@@ -72,6 +73,15 @@ func (c *permissionServiceClient) GetActionPermissions(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *permissionServiceClient) GetViewRelationPermissions(ctx context.Context, in *GetActionPermissionRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
+	out := new(CommonMessage)
+	err := c.cc.Invoke(ctx, "/object_builder_service.PermissionService/GetViewRelationPermissions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PermissionServiceServer is the server API for PermissionService service.
 // All implementations must embed UnimplementedPermissionServiceServer
 // for forward compatibility
@@ -80,6 +90,7 @@ type PermissionServiceServer interface {
 	GetAllPermissionsByRoleId(context.Context, *GetAllPermissionRequest) (*CommonMessage, error)
 	GetFieldPermissions(context.Context, *GetFieldPermissionRequest) (*CommonMessage, error)
 	GetActionPermissions(context.Context, *GetActionPermissionRequest) (*CommonMessage, error)
+	GetViewRelationPermissions(context.Context, *GetActionPermissionRequest) (*CommonMessage, error)
 	mustEmbedUnimplementedPermissionServiceServer()
 }
 
@@ -98,6 +109,9 @@ func (UnimplementedPermissionServiceServer) GetFieldPermissions(context.Context,
 }
 func (UnimplementedPermissionServiceServer) GetActionPermissions(context.Context, *GetActionPermissionRequest) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetActionPermissions not implemented")
+}
+func (UnimplementedPermissionServiceServer) GetViewRelationPermissions(context.Context, *GetActionPermissionRequest) (*CommonMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetViewRelationPermissions not implemented")
 }
 func (UnimplementedPermissionServiceServer) mustEmbedUnimplementedPermissionServiceServer() {}
 
@@ -184,6 +198,24 @@ func _PermissionService_GetActionPermissions_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PermissionService_GetViewRelationPermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetActionPermissionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PermissionServiceServer).GetViewRelationPermissions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.PermissionService/GetViewRelationPermissions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PermissionServiceServer).GetViewRelationPermissions(ctx, req.(*GetActionPermissionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PermissionService_ServiceDesc is the grpc.ServiceDesc for PermissionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -206,6 +238,10 @@ var PermissionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetActionPermissions",
 			Handler:    _PermissionService_GetActionPermissions_Handler,
+		},
+		{
+			MethodName: "GetViewRelationPermissions",
+			Handler:    _PermissionService_GetViewRelationPermissions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
