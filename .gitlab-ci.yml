@@ -40,7 +40,7 @@ migrate-prod:
   extends: .migrate_template
   variables:
     PATH_MIGRATION: migrations/postgres
-    POSTGRES_LINK: $UCODE_ADMIN_API_TESTDB
+    POSTGRES_LINK: $UCODE_ADMIN_API_PRODDB
   only:
     - master
 
