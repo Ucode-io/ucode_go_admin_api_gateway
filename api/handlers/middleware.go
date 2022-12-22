@@ -38,8 +38,8 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.HasAccessResponse, bo
 		c.Request.Context(),
 		&auth_service.HasAccessRequest{
 			AccessToken:      accessToken,
-			ProjectId:        "80cc11d9-2ee6-494a-a09d-40150d151145",
-			ClientPlatformId: "3f6320a6-b6ed-4f5f-ad90-14a154c95ed3",
+			// ProjectId:        "80cc11d9-2ee6-494a-a09d-40150d151145",
+			// ClientPlatformId: "3f6320a6-b6ed-4f5f-ad90-14a154c95ed3",
 			Path:             helper.GetURLWithTableSlug(c),
 			Method:           c.Request.Method,
 		},
