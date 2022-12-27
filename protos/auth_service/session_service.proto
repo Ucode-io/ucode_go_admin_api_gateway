@@ -15,12 +15,32 @@ service SessionService {
     rpc V2Login(V2LoginRequest) returns (V2LoginResponse) {}
     rpc V2LoginSuperAdmin(V2LoginSuperAdminReq) returns (V2LoginSuperAdminRes) {}
     rpc V2HasAccess(HasAccessRequest) returns (HasAccessResponse) {}
+    rpc V2HasAccessUser(V2HasAccessUserReq) returns (V2HasAccessUserRes) {}
     rpc V2RefreshToken(RefreshTokenRequest) returns (V2RefreshTokenResponse) {}
     rpc V2RefreshTokenSuperAdmin(RefreshTokenRequest) returns (V2RefreshTokenSuperAdminResponse) {}
     rpc SessionAndTokenGenerator (SessionAndTokenRequest) returns (V2LoginResponse) {}
     rpc UpdateSessionsByRoleId (UpdateSessionByRoleIdRequest) returns (google.protobuf.Empty) {}
     rpc MultiCompanyLogin(MultiCompanyLoginRequest) returns (MultiCompanyLoginResponse) {}
     rpc V2MultiCompanyLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyLoginRes) {}
+}
+
+message V2HasAccessUserReq {
+    string access_token = 1;
+    string project_id = 2;
+    string path = 3;
+    string method = 4;
+}
+
+message V2HasAccessUserRes {
+    string id = 1;
+    string project_id = 2;
+    string user_id = 3;
+    string ip = 4;
+    string data = 5;
+    string expires_at = 6;
+    string created_at = 7;
+    string updated_at = 8;
+    repeated TableBody tables = 9;
 }
 
 message LoginRequest {

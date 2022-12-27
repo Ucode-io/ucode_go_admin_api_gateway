@@ -30,6 +30,15 @@ service UserService {
     rpc V2UpdateUser(UpdateUserRequest) returns (User) {}
     rpc V2DeleteUser(UserPrimaryKey) returns (google.protobuf.Empty) {}
     rpc AddUserToProject(AddUserToProjectReq) returns (AddUserToProjectRes) {}
+    rpc GetProjectsByUserId(GetProjectsByUserIdReq) returns (GetProjectsByUserIdRes) {}
+}
+
+message GetProjectsByUserIdReq {
+    string user_id = 1;
+}
+
+message GetProjectsByUserIdRes {
+    repeated string project_ids = 1;
 }
 
 message AddUserToProjectReq {

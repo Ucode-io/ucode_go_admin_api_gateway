@@ -10,7 +10,6 @@ service BuilderProjectService {
     rpc RegisterProjects(RegisterProjectRequest) returns (google.protobuf.Empty) {}
     rpc Deregister(DeregisterProjectRequest) returns (google.protobuf.Empty) {}
     rpc Reconnect(RegisterProjectRequest) returns (google.protobuf.Empty) {}
-
     rpc RegisterMany(RegisterManyProjectsRequest) returns (RegisterManyProjectsResponse) {}
     rpc DeregisterMany(DeregisterManyProjectsRequest) returns (DeregisterManyProjectsResponse) {}
 }
