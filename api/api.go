@@ -61,7 +61,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.DELETE("/relation/:relation_id", h.DeleteRelation)
 		v1.GET("/get-relation-cascading/:table_slug", h.GetRelationCascaders)
 
-
 		//section
 		v1.GET("/section", h.GetAllSections)
 		v1.PUT("/section", h.UpdateSection)
@@ -206,25 +205,29 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/alfalab/directions", h.CreateDirections)
 		v1.GET("/alfalab/referral", h.GetReferral)
 
+	}
+
+	v1Admin := r.Group("/v1")
+	{
 		// company service
 		// v1.POST("/company", h.CreateCompany)
-		v1.GET("/company/:company_id", h.GetCompanyByID)
-		v1.GET("/company", h.GetCompanyList)
-		v1.PUT("company/:company_id", h.UpdateCompany)
-		v1.DELETE("/company/:company_id", h.DeleteCompany)
+		v1Admin.GET("/company/:company_id", h.GetCompanyByID)
+		v1Admin.GET("/company", h.GetCompanyList)
+		v1Admin.PUT("company/:company_id", h.UpdateCompany)
+		v1Admin.DELETE("/company/:company_id", h.DeleteCompany)
 
 		// project service
-		v1.POST("/company-project", h.CreateCompanyProject)
-		v1.GET("/company-project", h.GetCompanyProjectList)
-		v1.GET("/company-project/:project_id", h.GetCompanyProjectById)
-		v1.PUT("/company-project/:project_id", h.UpdateCompanyProject)
-		v1.DELETE("/company-project/:project_id", h.DeleteCompanyProject)
+		v1Admin.POST("/company-project", h.CreateCompanyProject)
+		v1Admin.GET("/company-project", h.GetCompanyProjectList)
+		v1Admin.GET("/company-project/:project_id", h.GetCompanyProjectById)
+		v1Admin.PUT("/company-project/:project_id", h.UpdateCompanyProject)
+		v1Admin.DELETE("/company-project/:project_id", h.DeleteCompanyProject)
 
-		v1.POST("/company/project/resource", h.AddProjectResource)
-		v1.DELETE("/company/project/resource", h.RemoveProjectResource)
-		v1.GET("/company/project/resource/:resource_id", h.GetResource)
-		v1.GET("/company/project/resource", h.GetResourceList)
-		v1.POST("/company/project/resource/reconnect", h.ReconnectProjectResource)
+		v1Admin.POST("/company/project/resource", h.AddProjectResource)
+		v1Admin.DELETE("/company/project/resource", h.RemoveProjectResource)
+		v1Admin.GET("/company/project/resource/:resource_id", h.GetResource)
+		v1Admin.GET("/company/project/resource", h.GetResourceList)
+		v1Admin.POST("/company/project/resource/reconnect", h.ReconnectProjectResource)
 	}
 
 	// v3 for ucode version 2
