@@ -10860,6 +10860,9 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/company_service.Resource"
                     }
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },

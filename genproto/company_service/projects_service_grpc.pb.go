@@ -35,6 +35,7 @@ type ProjectServiceClient interface {
 	GetResourceWithPath(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*GetResourceWithPathResponse, error)
 	GetProjects(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*GetProjectsResponse, error)
 	AutoConnect(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*EmptyProto, error)
+	GetProjectsByCompanyId(ctx context.Context, in *GetProjectsByCompanyIdReq, opts ...grpc.CallOption) (*GetProjectsByCompanyIdRes, error)
 }
 
 type projectServiceClient struct {
@@ -162,6 +163,15 @@ func (c *projectServiceClient) AutoConnect(ctx context.Context, in *GetProjectsR
 	return out, nil
 }
 
+func (c *projectServiceClient) GetProjectsByCompanyId(ctx context.Context, in *GetProjectsByCompanyIdReq, opts ...grpc.CallOption) (*GetProjectsByCompanyIdRes, error) {
+	out := new(GetProjectsByCompanyIdRes)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/GetProjectsByCompanyId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProjectServiceServer is the server API for ProjectService service.
 // All implementations must embed UnimplementedProjectServiceServer
 // for forward compatibility
@@ -179,6 +189,7 @@ type ProjectServiceServer interface {
 	GetResourceWithPath(context.Context, *GetResourceRequest) (*GetResourceWithPathResponse, error)
 	GetProjects(context.Context, *GetProjectsRequest) (*GetProjectsResponse, error)
 	AutoConnect(context.Context, *GetProjectsRequest) (*EmptyProto, error)
+	GetProjectsByCompanyId(context.Context, *GetProjectsByCompanyIdReq) (*GetProjectsByCompanyIdRes, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -224,6 +235,9 @@ func (UnimplementedProjectServiceServer) GetProjects(context.Context, *GetProjec
 }
 func (UnimplementedProjectServiceServer) AutoConnect(context.Context, *GetProjectsRequest) (*EmptyProto, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AutoConnect not implemented")
+}
+func (UnimplementedProjectServiceServer) GetProjectsByCompanyId(context.Context, *GetProjectsByCompanyIdReq) (*GetProjectsByCompanyIdRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProjectsByCompanyId not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
 
@@ -472,6 +486,24 @@ func _ProjectService_AutoConnect_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_GetProjectsByCompanyId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProjectsByCompanyIdReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).GetProjectsByCompanyId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/GetProjectsByCompanyId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).GetProjectsByCompanyId(ctx, req.(*GetProjectsByCompanyIdReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProjectService_ServiceDesc is the grpc.ServiceDesc for ProjectService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -530,6 +562,10 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AutoConnect",
 			Handler:    _ProjectService_AutoConnect_Handler,
+		},
+		{
+			MethodName: "GetProjectsByCompanyId",
+			Handler:    _ProjectService_GetProjectsByCompanyId_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

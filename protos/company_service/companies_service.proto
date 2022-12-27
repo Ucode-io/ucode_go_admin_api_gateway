@@ -13,8 +13,16 @@ service CompanyService {
     rpc Update(Company) returns (Company) {}
     rpc Delete(DeleteCompanyRequest) returns (Empty) {}
     rpc GetListWithProjects(GetListWithProjectsRequest) returns (GetListWithProjectsResponse) {}
+    rpc GetCompaniesByOwnerId(GetCompaniesByOwnerIdReq) returns (GetCompaniesByOwnerIdRes) {}
 }
 
+message GetCompaniesByOwnerIdReq {
+    string id = 1;
+}
+
+message GetCompaniesByOwnerIdRes {
+    repeated Company companies = 1;
+}
 
 message CreateCompanyRequest {
     string title = 1;

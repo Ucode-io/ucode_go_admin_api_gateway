@@ -19,6 +19,33 @@ service ProjectService {
     rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
     rpc GetProjects(GetProjectsRequest) returns (GetProjectsResponse) {}
     rpc AutoConnect(GetProjectsRequest) returns (EmptyProto) {}
+    rpc GetProjectsByCompanyId(GetProjectsByCompanyIdReq) returns (GetProjectsByCompanyIdRes) {}
+}
+message GetProjectsByCompanyIdReq {
+    string company_id = 1;
+}
+
+message GetProjectsByCompanyIdRes {
+    message Company {
+        message Project {
+            string id = 1;
+            string company_id = 2;
+            string name = 3;
+            string domain = 4;
+            string created_at = 5;
+            string updated_at = 6;
+        }
+        string id = 1;
+        string name = 2;
+        string logo = 3;
+        string description = 4;
+        string created_at = 5;
+        string updated_at = 6;
+        string owner_id = 7;
+        repeated Project projects = 8;
+    }
+
+    Company company = 1;
 }
 
 message GetProjectsRequest {
@@ -103,6 +130,7 @@ message AddResourceRequest {
     string project_id = 1;
     repeated Resource resources = 2;
     string company_id = 3;
+    string user_id = 4;
 }
 
 message AddResourceResponse {

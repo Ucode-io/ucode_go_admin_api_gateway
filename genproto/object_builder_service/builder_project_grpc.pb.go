@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BuilderProjectServiceClient interface {
 	Register(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	RegisterProjects(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Deregister(ctx context.Context, in *DeregisterProjectRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Reconnect(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	RegisterMany(ctx context.Context, in *RegisterManyProjectsRequest, opts ...grpc.CallOption) (*RegisterManyProjectsResponse, error)
@@ -41,6 +42,15 @@ func NewBuilderProjectServiceClient(cc grpc.ClientConnInterface) BuilderProjectS
 func (c *builderProjectServiceClient) Register(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/object_builder_service.BuilderProjectService/Register", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *builderProjectServiceClient) RegisterProjects(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/object_builder_service.BuilderProjectService/RegisterProjects", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,6 +98,7 @@ func (c *builderProjectServiceClient) DeregisterMany(ctx context.Context, in *De
 // for forward compatibility
 type BuilderProjectServiceServer interface {
 	Register(context.Context, *RegisterProjectRequest) (*empty.Empty, error)
+	RegisterProjects(context.Context, *RegisterProjectRequest) (*empty.Empty, error)
 	Deregister(context.Context, *DeregisterProjectRequest) (*empty.Empty, error)
 	Reconnect(context.Context, *RegisterProjectRequest) (*empty.Empty, error)
 	RegisterMany(context.Context, *RegisterManyProjectsRequest) (*RegisterManyProjectsResponse, error)
@@ -101,6 +112,9 @@ type UnimplementedBuilderProjectServiceServer struct {
 
 func (UnimplementedBuilderProjectServiceServer) Register(context.Context, *RegisterProjectRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedBuilderProjectServiceServer) RegisterProjects(context.Context, *RegisterProjectRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterProjects not implemented")
 }
 func (UnimplementedBuilderProjectServiceServer) Deregister(context.Context, *DeregisterProjectRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deregister not implemented")
@@ -141,6 +155,24 @@ func _BuilderProjectService_Register_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BuilderProjectServiceServer).Register(ctx, req.(*RegisterProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BuilderProjectService_RegisterProjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BuilderProjectServiceServer).RegisterProjects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.BuilderProjectService/RegisterProjects",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BuilderProjectServiceServer).RegisterProjects(ctx, req.(*RegisterProjectRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -227,6 +259,10 @@ var BuilderProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Register",
 			Handler:    _BuilderProjectService_Register_Handler,
+		},
+		{
+			MethodName: "RegisterProjects",
+			Handler:    _BuilderProjectService_RegisterProjects_Handler,
 		},
 		{
 			MethodName: "Deregister",

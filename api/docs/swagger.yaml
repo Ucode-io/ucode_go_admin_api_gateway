@@ -247,6 +247,8 @@ definitions:
         items:
           $ref: '#/definitions/company_service.Resource'
         type: array
+      user_id:
+        type: string
     type: object
   company_service.AddResourceResponse:
     properties:

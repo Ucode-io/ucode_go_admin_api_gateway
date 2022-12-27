@@ -40,6 +40,7 @@ type UserServiceClient interface {
 	V2GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error)
 	V2UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 	V2DeleteUser(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*empty.Empty, error)
+	AddUserToProject(ctx context.Context, in *AddUserToProjectReq, opts ...grpc.CallOption) (*AddUserToProjectRes, error)
 }
 
 type userServiceClient struct {
@@ -203,6 +204,15 @@ func (c *userServiceClient) V2DeleteUser(ctx context.Context, in *UserPrimaryKey
 	return out, nil
 }
 
+func (c *userServiceClient) AddUserToProject(ctx context.Context, in *AddUserToProjectReq, opts ...grpc.CallOption) (*AddUserToProjectRes, error) {
+	out := new(AddUserToProjectRes)
+	err := c.cc.Invoke(ctx, "/auth_service.UserService/AddUserToProject", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -224,6 +234,7 @@ type UserServiceServer interface {
 	V2GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error)
 	V2UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
 	V2DeleteUser(context.Context, *UserPrimaryKey) (*empty.Empty, error)
+	AddUserToProject(context.Context, *AddUserToProjectReq) (*AddUserToProjectRes, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -281,6 +292,9 @@ func (UnimplementedUserServiceServer) V2UpdateUser(context.Context, *UpdateUserR
 }
 func (UnimplementedUserServiceServer) V2DeleteUser(context.Context, *UserPrimaryKey) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2DeleteUser not implemented")
+}
+func (UnimplementedUserServiceServer) AddUserToProject(context.Context, *AddUserToProjectReq) (*AddUserToProjectRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUserToProject not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -601,6 +615,24 @@ func _UserService_V2DeleteUser_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_AddUserToProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddUserToProjectReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).AddUserToProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.UserService/AddUserToProject",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).AddUserToProject(ctx, req.(*AddUserToProjectReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -675,6 +707,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "V2DeleteUser",
 			Handler:    _UserService_V2DeleteUser_Handler,
+		},
+		{
+			MethodName: "AddUserToProject",
+			Handler:    _UserService_AddUserToProject_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

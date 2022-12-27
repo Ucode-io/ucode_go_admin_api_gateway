@@ -8,6 +8,7 @@ package object_builder_service
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -27,6 +28,8 @@ type PermissionServiceClient interface {
 	GetFieldPermissions(ctx context.Context, in *GetFieldPermissionRequest, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetActionPermissions(ctx context.Context, in *GetActionPermissionRequest, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetViewRelationPermissions(ctx context.Context, in *GetActionPermissionRequest, opts ...grpc.CallOption) (*CommonMessage, error)
+	GetListWithRoleAppTablePermissions(ctx context.Context, in *GetListWithRoleAppTablePermissionsRequest, opts ...grpc.CallOption) (*GetListWithRoleAppTablePermissionsResponse, error)
+	UpdateRoleAppTablePermissions(ctx context.Context, in *UpdateRoleAppTablePermissionsRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type permissionServiceClient struct {
@@ -82,6 +85,24 @@ func (c *permissionServiceClient) GetViewRelationPermissions(ctx context.Context
 	return out, nil
 }
 
+func (c *permissionServiceClient) GetListWithRoleAppTablePermissions(ctx context.Context, in *GetListWithRoleAppTablePermissionsRequest, opts ...grpc.CallOption) (*GetListWithRoleAppTablePermissionsResponse, error) {
+	out := new(GetListWithRoleAppTablePermissionsResponse)
+	err := c.cc.Invoke(ctx, "/object_builder_service.PermissionService/GetListWithRoleAppTablePermissions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *permissionServiceClient) UpdateRoleAppTablePermissions(ctx context.Context, in *UpdateRoleAppTablePermissionsRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/object_builder_service.PermissionService/UpdateRoleAppTablePermissions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PermissionServiceServer is the server API for PermissionService service.
 // All implementations must embed UnimplementedPermissionServiceServer
 // for forward compatibility
@@ -91,6 +112,8 @@ type PermissionServiceServer interface {
 	GetFieldPermissions(context.Context, *GetFieldPermissionRequest) (*CommonMessage, error)
 	GetActionPermissions(context.Context, *GetActionPermissionRequest) (*CommonMessage, error)
 	GetViewRelationPermissions(context.Context, *GetActionPermissionRequest) (*CommonMessage, error)
+	GetListWithRoleAppTablePermissions(context.Context, *GetListWithRoleAppTablePermissionsRequest) (*GetListWithRoleAppTablePermissionsResponse, error)
+	UpdateRoleAppTablePermissions(context.Context, *UpdateRoleAppTablePermissionsRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedPermissionServiceServer()
 }
 
@@ -112,6 +135,12 @@ func (UnimplementedPermissionServiceServer) GetActionPermissions(context.Context
 }
 func (UnimplementedPermissionServiceServer) GetViewRelationPermissions(context.Context, *GetActionPermissionRequest) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetViewRelationPermissions not implemented")
+}
+func (UnimplementedPermissionServiceServer) GetListWithRoleAppTablePermissions(context.Context, *GetListWithRoleAppTablePermissionsRequest) (*GetListWithRoleAppTablePermissionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetListWithRoleAppTablePermissions not implemented")
+}
+func (UnimplementedPermissionServiceServer) UpdateRoleAppTablePermissions(context.Context, *UpdateRoleAppTablePermissionsRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateRoleAppTablePermissions not implemented")
 }
 func (UnimplementedPermissionServiceServer) mustEmbedUnimplementedPermissionServiceServer() {}
 
@@ -216,6 +245,42 @@ func _PermissionService_GetViewRelationPermissions_Handler(srv interface{}, ctx 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PermissionService_GetListWithRoleAppTablePermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetListWithRoleAppTablePermissionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PermissionServiceServer).GetListWithRoleAppTablePermissions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.PermissionService/GetListWithRoleAppTablePermissions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PermissionServiceServer).GetListWithRoleAppTablePermissions(ctx, req.(*GetListWithRoleAppTablePermissionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PermissionService_UpdateRoleAppTablePermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRoleAppTablePermissionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PermissionServiceServer).UpdateRoleAppTablePermissions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.PermissionService/UpdateRoleAppTablePermissions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PermissionServiceServer).UpdateRoleAppTablePermissions(ctx, req.(*UpdateRoleAppTablePermissionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PermissionService_ServiceDesc is the grpc.ServiceDesc for PermissionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -242,6 +307,14 @@ var PermissionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetViewRelationPermissions",
 			Handler:    _PermissionService_GetViewRelationPermissions_Handler,
+		},
+		{
+			MethodName: "GetListWithRoleAppTablePermissions",
+			Handler:    _PermissionService_GetListWithRoleAppTablePermissions_Handler,
+		},
+		{
+			MethodName: "UpdateRoleAppTablePermissions",
+			Handler:    _PermissionService_UpdateRoleAppTablePermissions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

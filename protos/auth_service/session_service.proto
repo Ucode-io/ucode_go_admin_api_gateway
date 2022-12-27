@@ -11,12 +11,16 @@ service SessionService {
     rpc Logout(LogoutRequest) returns (google.protobuf.Empty) {}
     rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
     rpc HasAccess(HasAccessRequest) returns (HasAccessResponse) {}
+    rpc HasAccessSuperAdmin(HasAccessSuperAdminReq) returns (HasAccessSuperAdminRes) {}
     rpc V2Login(V2LoginRequest) returns (V2LoginResponse) {}
+    rpc V2LoginSuperAdmin(V2LoginSuperAdminReq) returns (V2LoginSuperAdminRes) {}
     rpc V2HasAccess(HasAccessRequest) returns (HasAccessResponse) {}
     rpc V2RefreshToken(RefreshTokenRequest) returns (V2RefreshTokenResponse) {}
+    rpc V2RefreshTokenSuperAdmin(RefreshTokenRequest) returns (V2RefreshTokenSuperAdminResponse) {}
     rpc SessionAndTokenGenerator (SessionAndTokenRequest) returns (V2LoginResponse) {}
     rpc UpdateSessionsByRoleId (UpdateSessionByRoleIdRequest) returns (google.protobuf.Empty) {}
     rpc MultiCompanyLogin(MultiCompanyLoginRequest) returns (MultiCompanyLoginResponse) {}
+    rpc V2MultiCompanyLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyLoginRes) {}
 }
 
 message LoginRequest {
@@ -54,6 +58,10 @@ message V2RefreshTokenResponse {
     repeated RecordPermission permissions = 2;
 }
 
+message V2RefreshTokenSuperAdminResponse {
+    Token token = 1;
+}
+
 message HasAccessRequest {
     string access_token = 1;
     string project_id = 2;
@@ -69,6 +77,25 @@ message HasAccessResponse {
     string client_type_id = 4;
     string user_id = 5;
     string role_id = 6;
+    string ip = 7;
+    string data = 8;
+    string expires_at = 9;
+    string created_at = 10;
+    string updated_at = 11;
+    repeated TableBody tables = 12;
+}
+
+message HasAccessSuperAdminReq {
+    string access_token = 1;
+    string project_id = 2;
+    string path = 3;
+    string method = 4;
+}
+
+message HasAccessSuperAdminRes {
+    string id = 1;
+    string project_id = 2;
+    string user_id = 5;
     string ip = 7;
     string data = 8;
     string expires_at = 9;
@@ -159,6 +186,19 @@ message V2LoginRequest {
     string project_id = 6;
 }
 
+message V2LoginSuperAdminRes {
+    bool user_found = 1;
+    string user_id = 2;
+    Token token = 3;
+    repeated Session sessions = 4;
+    repeated Company companies = 5;
+}
+
+message V2LoginSuperAdminReq {
+    string username = 1;
+    string password = 2;
+}
+
 message SessionAndTokenRequest  {
     V2LoginResponse login_data = 1;
     repeated Object tables = 2;
@@ -167,6 +207,11 @@ message SessionAndTokenRequest  {
 
 message UpdateSessionByRoleIdRequest {
     string role_id = 1;
+    bool is_changed = 2;
+}
+
+message UpdateSessionBySessionIdRequest {
+    string id = 1;
     bool is_changed = 2;
 }
 
@@ -187,6 +232,34 @@ message V2SuperAdminLoginResponse {
 message MultiCompanyLoginRequest {
     string username = 1;
     string password = 2;
+}
+
+message V2MultiCompanyLoginReq {
+    string username = 1;
+    string password = 2;
+}
+
+message V2MultiCompanyLoginRes {
+    message Company {
+        message Project {
+            string id = 1;
+            string company_id = 2;
+            string name = 3;
+            string domain = 4;
+            string created_at = 5;
+            string updated_at = 6;
+        }
+        string id = 1;
+        string name = 2;
+        string logo = 3;
+        string description = 4;
+        string created_at = 5;
+        string updated_at = 6;
+        string owner_id = 7;
+        repeated Project projects = 8;
+    }
+
+    repeated Company companies = 1;
 }
 
 message MultiCompanyLoginResponse {
