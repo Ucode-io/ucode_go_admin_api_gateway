@@ -112,7 +112,10 @@ func (h *Handler) GetQueryList(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := h.companyServices.QueriesService().GetAll(
 		context.Background(),
@@ -163,7 +166,10 @@ func (h *Handler) UpdateQuery(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := h.companyServices.QueriesService().Update(
 		context.Background(),
@@ -205,7 +211,10 @@ func (h *Handler) DeleteQuery(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := h.companyServices.QueryFolderService().Delete(
 		context.Background(),

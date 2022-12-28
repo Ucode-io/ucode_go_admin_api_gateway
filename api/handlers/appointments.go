@@ -23,7 +23,10 @@ import (
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
-	authBody := h.GetAuthInfo(c)
+	authBody, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	cashboxId := ""
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
@@ -223,10 +226,13 @@ func (h *Handler) GetSingleBookedAppointment(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
-	authBody := h.GetAuthInfo(c)
+	authBody, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	var paymentBody ps.UpdatePaymentStatusBody
 
-	err := c.ShouldBindJSON(&paymentBody)
+	err = c.ShouldBindJSON(&paymentBody)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -275,7 +281,10 @@ func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
-	authBody := h.GetAuthInfo(c)
+	authBody, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	var cashbox ps.CashboxRequestBody
 
 	if authBody.Tables != nil {
@@ -320,7 +329,10 @@ func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
-	authBody := h.GetAuthInfo(c)
+	authBody, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	var cashbox ps.CashboxRequestBody
 
 	if authBody.Tables != nil {
@@ -368,7 +380,10 @@ func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) CashboxTransaction(c *gin.Context) {
-	authBody := h.GetAuthInfo(c)
+	authBody, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	var cashboxTransactionRequest ps.CreateCashboxTransactionRequest
 	cashboxId := ""
 
@@ -382,7 +397,7 @@ func (h *Handler) CashboxTransaction(c *gin.Context) {
 		cashboxId = "d20c4fcc-0f6b-408c-bc4c-2566344c3e58"
 	}
 
-	err := c.ShouldBindJSON(&cashboxTransactionRequest)
+	err = c.ShouldBindJSON(&cashboxTransactionRequest)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

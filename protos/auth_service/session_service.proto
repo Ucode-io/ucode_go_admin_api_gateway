@@ -41,6 +41,9 @@ message V2HasAccessUserRes {
     string created_at = 7;
     string updated_at = 8;
     repeated TableBody tables = 9;
+    string client_platform_id = 10;
+    string client_type_id = 11;
+    string role_id = 12;
 }
 
 message LoginRequest {

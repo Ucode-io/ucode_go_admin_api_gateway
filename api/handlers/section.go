@@ -23,7 +23,7 @@ import (
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllSections(c *gin.Context) {
 
-	tokenInfo := h.GetAuthInfo
+	//tokenInfo := h.GetAuthInfo
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -32,14 +32,17 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.SectionService().GetAll(
 		context.Background(),
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
 			TableSlug: c.Query("table_slug"),
-			RoleId:    tokenInfo(c).RoleId,
+			RoleId:    authInfo.GetRoleId(),
 			ProjectId: authInfo.GetProjectId(),
 		},
 	)
@@ -74,7 +77,10 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	sections.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")

@@ -31,7 +31,10 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	app.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -82,7 +85,10 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.AppService().GetByID(
 		context.Background(),
@@ -131,7 +137,10 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.AppService().GetAll(
 		context.Background(),
@@ -173,7 +182,10 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	app.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -224,7 +236,10 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.AppService().Delete(
 		context.Background(),

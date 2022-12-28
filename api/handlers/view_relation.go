@@ -25,7 +25,10 @@ import (
 func (h *Handler) GetViewRelation(c *gin.Context) {
 
 	// get list view relation switch to get single view relation because for one table be one view relation
-	tokenInfo := h.GetAuthInfo(c)
+	tokenInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -34,7 +37,10 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.SectionService().GetViewRelation(
 		context.Background(),
@@ -75,7 +81,10 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	viewRelation.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")

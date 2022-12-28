@@ -32,7 +32,10 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := h.companyServices.QueryFolderService().Create(
 		context.Background(),
@@ -66,7 +69,10 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetQueryFolderByID(c *gin.Context) {
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := h.companyServices.QueryFolderService().GetById(
 		context.Background(),
@@ -110,7 +116,10 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := h.companyServices.QueryFolderService().GetAll(
 		context.Background(),
@@ -155,7 +164,10 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := h.companyServices.QueryFolderService().Update(
 		context.Background(),
@@ -196,7 +208,10 @@ func (h *Handler) DeleteQueryFolder(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := h.companyServices.QueryFolderService().Delete(
 		context.Background(),
