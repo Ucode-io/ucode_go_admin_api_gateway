@@ -45,6 +45,9 @@ message AddUserToProjectReq {
     string user_id = 1;
     string company_id = 2;
     string project_id = 3;
+    string role_id = 4;
+    string client_type_id = 5;
+    string client_platform_id = 6;
 }
 
 message AddUserToProjectRes {
