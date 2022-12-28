@@ -48,11 +48,14 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.PermissionService().UpsertPermissionsByAppId(
 		context.Background(),
 		&obs.UpsertPermissionsByAppIdRequest{
-			AppId: c.Param("app_id"),
-			Data:  structData,
+			AppId:     c.Param("app_id"),
+			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -98,10 +101,13 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.PermissionService().GetAllPermissionsByRoleId(
 		context.Background(),
 		&obs.GetAllPermissionRequest{
-			RoleId: c.Param("role_id"),
+			RoleId:    c.Param("role_id"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -136,11 +142,14 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 		return
 	}
 
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.PermissionService().GetFieldPermissions(
 		context.Background(),
 		&obs.GetFieldPermissionRequest{
 			RoleId:    c.Param("role_id"),
 			TableSlug: c.Param(("table_slug")),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -174,11 +183,15 @@ func (h *Handler) GetActionPermissions(c *gin.Context) {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.PermissionService().GetActionPermissions(
 		context.Background(),
 		&obs.GetActionPermissionRequest{
-			RoleId: c.Param("role_id"),
+			RoleId:    c.Param("role_id"),
 			TableSlug: c.Param("table_slug"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -212,11 +225,15 @@ func (h *Handler) GetViewRelationPermissions(c *gin.Context) {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
+
+	authInfo := h.GetAuthInfo(c)
+
 	resp, err := services.PermissionService().GetViewRelationPermissions(
 		context.Background(),
 		&obs.GetActionPermissionRequest{
-			RoleId: c.Param("role_id"),
+			RoleId:    c.Param("role_id"),
 			TableSlug: c.Param("table_slug"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
