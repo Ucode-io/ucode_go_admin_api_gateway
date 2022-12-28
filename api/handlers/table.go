@@ -35,6 +35,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -130,6 +131,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -184,6 +186,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -229,6 +232,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	table.ProjectId = authInfo.GetProjectId()
@@ -283,6 +287,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 

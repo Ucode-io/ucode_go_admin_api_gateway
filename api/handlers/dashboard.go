@@ -34,6 +34,7 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -94,6 +95,7 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -136,6 +138,7 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	dashboard.ProjectId = authInfo.GetProjectId()
@@ -190,6 +193,7 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -232,6 +236,7 @@ func (h *Handler) GetAllDashboards(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 

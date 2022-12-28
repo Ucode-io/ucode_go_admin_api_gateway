@@ -32,6 +32,7 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	relation.ProjectId = authInfo.GetProjectId()
@@ -91,6 +92,7 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -137,6 +139,7 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	relation.ProjectId = authInfo.GetProjectId()
@@ -191,6 +194,7 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -234,6 +238,7 @@ func (h *Handler) GetRelationCascaders(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 

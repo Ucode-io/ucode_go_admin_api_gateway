@@ -34,6 +34,7 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	document.ProjectId = authInfo.GetProjectId()
@@ -88,6 +89,7 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -135,6 +137,7 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	document.ProjectId = authInfo.GetProjectId()
@@ -188,6 +191,7 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -236,6 +240,7 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 

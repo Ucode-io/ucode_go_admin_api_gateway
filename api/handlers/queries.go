@@ -114,6 +114,7 @@ func (h *Handler) GetQueryList(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -168,6 +169,7 @@ func (h *Handler) UpdateQuery(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -213,6 +215,7 @@ func (h *Handler) DeleteQuery(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 

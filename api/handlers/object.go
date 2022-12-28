@@ -39,6 +39,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -155,6 +156,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -214,6 +216,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -299,6 +302,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -343,6 +347,7 @@ func (h *Handler) GetList(c *gin.Context) {
 	}
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	objectRequest.Data["tables"] = tokenInfo.GetTables()
@@ -364,6 +369,7 @@ func (h *Handler) GetList(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -422,6 +428,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -465,6 +472,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	m2mMessage.ProjectId = authInfo.GetProjectId()
@@ -512,6 +520,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	m2mMessage.ProjectId = authInfo.GetProjectId()
@@ -574,6 +583,7 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -620,6 +630,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -745,6 +756,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -797,6 +809,7 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 

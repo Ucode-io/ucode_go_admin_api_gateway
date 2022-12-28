@@ -32,6 +32,7 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	integration.ProjectId = authInfo.GetProjectId()

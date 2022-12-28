@@ -44,6 +44,7 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -94,6 +95,7 @@ func (h *Handler) GetEventLogById(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	resp, err := services.EventLogsService().GetSingle(

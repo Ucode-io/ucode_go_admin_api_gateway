@@ -27,6 +27,7 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 	// get list view relation switch to get single view relation because for one table be one view relation
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -39,6 +40,7 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -83,6 +85,7 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	viewRelation.ProjectId = authInfo.GetProjectId()

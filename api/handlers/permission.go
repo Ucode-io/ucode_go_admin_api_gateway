@@ -48,7 +48,11 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.PermissionService().UpsertPermissionsByAppId(
 		context.Background(),
@@ -101,7 +105,11 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.PermissionService().GetAllPermissionsByRoleId(
 		context.Background(),
@@ -142,7 +150,11 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.PermissionService().GetFieldPermissions(
 		context.Background(),
@@ -184,7 +196,11 @@ func (h *Handler) GetActionPermissions(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.PermissionService().GetActionPermissions(
 		context.Background(),
@@ -226,7 +242,11 @@ func (h *Handler) GetViewRelationPermissions(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.PermissionService().GetViewRelationPermissions(
 		context.Background(),

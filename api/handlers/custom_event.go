@@ -34,6 +34,7 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	customevent.ProjectId = authInfo.GetProjectId()
@@ -88,6 +89,7 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -129,6 +131,7 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -172,6 +175,7 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -233,6 +237,7 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 

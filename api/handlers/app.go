@@ -33,6 +33,7 @@ func (h *Handler) CreateApp(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	app.ProjectId = authInfo.GetProjectId()
@@ -87,6 +88,7 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -139,6 +141,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -184,6 +187,7 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	app.ProjectId = authInfo.GetProjectId()
@@ -238,6 +242,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 

@@ -25,6 +25,7 @@ import (
 func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
 	authBody, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	cashboxId := ""
@@ -228,6 +229,7 @@ func (h *Handler) GetSingleBookedAppointment(c *gin.Context) {
 func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 	authBody, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	var paymentBody ps.UpdatePaymentStatusBody
@@ -283,6 +285,7 @@ func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 	authBody, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	var cashbox ps.CashboxRequestBody
@@ -331,6 +334,7 @@ func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
 	authBody, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	var cashbox ps.CashboxRequestBody
@@ -382,6 +386,7 @@ func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
 func (h *Handler) CashboxTransaction(c *gin.Context) {
 	authBody, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	var cashboxTransactionRequest ps.CreateCashboxTransactionRequest

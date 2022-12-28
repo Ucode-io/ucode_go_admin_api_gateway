@@ -55,6 +55,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	field.ProjectId = authInfo.GetProjectId()
@@ -123,6 +124,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -194,6 +196,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	field.ProjectId = authInfo.GetProjectId()
@@ -248,6 +251,7 @@ func (h *Handler) DeleteField(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 

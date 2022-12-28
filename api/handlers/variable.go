@@ -33,6 +33,7 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	variable.ProjectId = authInfo.GetProjectId()
@@ -87,6 +88,7 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -129,6 +131,7 @@ func (h *Handler) UpdateVariable(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	variable.ProjectId = authInfo.GetProjectId()

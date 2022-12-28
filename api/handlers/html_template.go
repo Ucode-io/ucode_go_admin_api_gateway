@@ -33,6 +33,7 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	htmlTemplate.ProjectId = authInfo.GetProjectId()
@@ -86,6 +87,7 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -128,6 +130,7 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 	htmlTemplate.ProjectId = authInfo.GetProjectId()
@@ -182,6 +185,7 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
@@ -225,6 +229,7 @@ func (h *Handler) GetHtmlTemplateList(c *gin.Context) {
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
 
