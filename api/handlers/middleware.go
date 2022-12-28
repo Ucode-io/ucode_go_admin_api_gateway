@@ -33,7 +33,6 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 		return nil, false
 	}
 	accessToken := strArr[1]
-
 	resp, err := h.authService.SessionService().V2HasAccessUser(
 		c.Request.Context(),
 		&auth_service.V2HasAccessUserReq{
@@ -43,7 +42,6 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 			Method: c.Request.Method,
 		},
 	)
-
 	if err != nil {
 		errr := status.Error(codes.PermissionDenied, "Permission denied")
 		if errr.Error() == err.Error() {
@@ -62,20 +60,20 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 	return resp, true
 }
 
-func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.HasAccessResponse) {
+func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessUserRes, err error) {
 	data, ok := c.Get("Auth")
 
 	if !ok {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return
+		return nil, err
 	}
-	accessResponse, ok := data.(*auth_service.HasAccessResponse)
+	accessResponse, ok := data.(*auth_service.V2HasAccessUserRes)
 	if !ok {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return
+		return nil, err
 	}
 
-	return accessResponse
+	return accessResponse, nil
 }

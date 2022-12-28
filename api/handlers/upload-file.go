@@ -210,7 +210,10 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	_, err = services.ObjectBuilderService().Create(
 		context.Background(),

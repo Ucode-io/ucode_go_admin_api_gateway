@@ -33,7 +33,10 @@ func (h *Handler) CreateView(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	view.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -84,7 +87,10 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.ViewService().GetSingle(
 		context.Background(),
@@ -123,7 +129,10 @@ func (h *Handler) UpdateView(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	view.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -174,7 +183,10 @@ func (h *Handler) DeleteView(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.ViewService().Delete(
 		context.Background(),
@@ -214,7 +226,10 @@ func (h *Handler) GetViewList(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.ViewService().GetList(
 		context.Background(),
@@ -267,7 +282,10 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.ViewService().ConvertHtmlToPdf(
 		context.Background(),
@@ -322,7 +340,10 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.ViewService().ConvertTemplateToHtml(
 		context.Background(),

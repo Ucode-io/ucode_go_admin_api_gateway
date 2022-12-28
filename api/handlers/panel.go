@@ -33,7 +33,10 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	panel_coordinates.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -84,7 +87,10 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.PanelService().GetSingle(
 		context.Background(),
@@ -138,7 +144,10 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 		HasPagination: panelRequest.HasPagination,
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	panel.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -183,7 +192,10 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.PanelService().GetList(
 		context.Background(),
@@ -240,7 +252,10 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 		HasPagination: panelRequest.HasPagination,
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	panel.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -291,7 +306,10 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.PanelService().Delete(
 		context.Background(),

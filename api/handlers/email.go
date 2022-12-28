@@ -64,7 +64,10 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	respObject, err := services.LoginService().LoginWithEmailOtp(
 		c.Request.Context(),
@@ -141,7 +144,10 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	if c.Param("otp") != "1212" {
 		resp, err := services.EmailServie().GetEmailByID(
@@ -209,7 +215,10 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	structData, err := helper.ConvertMapToStruct(body.Data)
 

@@ -30,7 +30,10 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	relation.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -86,7 +89,10 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.RelationService().GetAll(
 		context.Background(),
@@ -129,7 +135,10 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	relation.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -180,7 +189,10 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.RelationService().Delete(
 		context.Background(),
@@ -220,7 +232,10 @@ func (h *Handler) GetRelationCascaders(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.CascadingService().GetCascadings(
 		context.Background(),

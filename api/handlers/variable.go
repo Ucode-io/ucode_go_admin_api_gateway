@@ -31,7 +31,10 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	variable.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -82,7 +85,10 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	resp, err := services.VariableService().GetSingle(
 		context.Background(),
@@ -121,7 +127,10 @@ func (h *Handler) UpdateVariable(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 	variable.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -172,7 +181,7 @@ func (h *Handler) DeleteVariable(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
 
 	resp, err := services.VariableService().Delete(
 		context.Background(),
@@ -212,7 +221,7 @@ func (h *Handler) GetAllVariables(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
 
 	resp, err := services.VariableService().GetList(
 		context.Background(),

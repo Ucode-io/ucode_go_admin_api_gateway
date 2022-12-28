@@ -33,7 +33,10 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	res, err := services.ExcelService().ExcelRead(
 		context.Background(),
@@ -86,7 +89,10 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return
+	}
 
 	_, err = services.ExcelService().ExcelToDb(
 		context.Background(),
