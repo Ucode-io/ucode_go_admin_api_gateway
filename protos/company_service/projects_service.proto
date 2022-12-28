@@ -12,6 +12,7 @@ service ProjectService {
     rpc Update(Project) returns (Project) {}
     rpc Delete(DeleteProjectRequest) returns (EmptyProto) {}
     rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
+    rpc AddResourceInUcode(AddResourceInUcodeRequest) returns (AddResourceResponse) {}
     rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
     rpc GetResource(GetResourceRequest) returns (ResourceWithoutPassword) {}
     rpc GetReourceList(GetReourceListRequest) returns (GetReourceListResponse) {}
@@ -131,6 +132,13 @@ message AddResourceRequest {
     repeated Resource resources = 2;
     string company_id = 3;
     string user_id = 4;
+}
+
+message AddResourceInUcodeRequest {
+    string project_id = 1;
+    string company_id = 2;
+    string user_id = 3;
+    string project_title = 4;
 }
 
 message AddResourceResponse {

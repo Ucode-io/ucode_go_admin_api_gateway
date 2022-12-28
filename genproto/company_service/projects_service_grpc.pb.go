@@ -28,6 +28,7 @@ type ProjectServiceClient interface {
 	Update(ctx context.Context, in *Project, opts ...grpc.CallOption) (*Project, error)
 	Delete(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*EmptyProto, error)
 	AddResource(ctx context.Context, in *AddResourceRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
+	AddResourceInUcode(ctx context.Context, in *AddResourceInUcodeRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
 	RemoveResource(ctx context.Context, in *RemoveResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error)
 	GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error)
 	GetReourceList(ctx context.Context, in *GetReourceListRequest, opts ...grpc.CallOption) (*GetReourceListResponse, error)
@@ -94,6 +95,15 @@ func (c *projectServiceClient) Delete(ctx context.Context, in *DeleteProjectRequ
 func (c *projectServiceClient) AddResource(ctx context.Context, in *AddResourceRequest, opts ...grpc.CallOption) (*AddResourceResponse, error) {
 	out := new(AddResourceResponse)
 	err := c.cc.Invoke(ctx, "/company_service.ProjectService/AddResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) AddResourceInUcode(ctx context.Context, in *AddResourceInUcodeRequest, opts ...grpc.CallOption) (*AddResourceResponse, error) {
+	out := new(AddResourceResponse)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/AddResourceInUcode", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -182,6 +192,7 @@ type ProjectServiceServer interface {
 	Update(context.Context, *Project) (*Project, error)
 	Delete(context.Context, *DeleteProjectRequest) (*EmptyProto, error)
 	AddResource(context.Context, *AddResourceRequest) (*AddResourceResponse, error)
+	AddResourceInUcode(context.Context, *AddResourceInUcodeRequest) (*AddResourceResponse, error)
 	RemoveResource(context.Context, *RemoveResourceRequest) (*EmptyProto, error)
 	GetResource(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error)
 	GetReourceList(context.Context, *GetReourceListRequest) (*GetReourceListResponse, error)
@@ -214,6 +225,9 @@ func (UnimplementedProjectServiceServer) Delete(context.Context, *DeleteProjectR
 }
 func (UnimplementedProjectServiceServer) AddResource(context.Context, *AddResourceRequest) (*AddResourceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddResource not implemented")
+}
+func (UnimplementedProjectServiceServer) AddResourceInUcode(context.Context, *AddResourceInUcodeRequest) (*AddResourceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddResourceInUcode not implemented")
 }
 func (UnimplementedProjectServiceServer) RemoveResource(context.Context, *RemoveResourceRequest) (*EmptyProto, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveResource not implemented")
@@ -356,6 +370,24 @@ func _ProjectService_AddResource_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProjectServiceServer).AddResource(ctx, req.(*AddResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_AddResourceInUcode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddResourceInUcodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).AddResourceInUcode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/AddResourceInUcode",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).AddResourceInUcode(ctx, req.(*AddResourceInUcodeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -534,6 +566,10 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddResource",
 			Handler:    _ProjectService_AddResource_Handler,
+		},
+		{
+			MethodName: "AddResourceInUcode",
+			Handler:    _ProjectService_AddResourceInUcode_Handler,
 		},
 		{
 			MethodName: "RemoveResource",
