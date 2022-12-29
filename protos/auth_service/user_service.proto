@@ -43,11 +43,10 @@ message GetProjectsByUserIdRes {
 
 message AddUserToProjectReq {
     string user_id = 1;
-    string company_id = 2;
-    string project_id = 3;
-    string role_id = 4;
-    string client_type_id = 5;
-    string client_platform_id = 6;
+    string project_id = 2;
+    string role_id = 3;
+    int32 active = 4;
+    string company_id = 5;
 }
 
 message AddUserToProjectRes {
@@ -62,22 +61,30 @@ message UpsertUserInfoRequest {
 }
 
 message CreateUserRequest {
-    string phone = 1;
-    string email = 2;
-    string login = 3;
-    string password = 4;
-    int32 active = 5;
-    string expires_at = 6;
-    string name = 7;
-    string photo_url = 8;
+    string login = 1;
+    string password = 2;
+    string email = 3;
+    string phone = 4;
+    string name = 5;
+    string photo_url = 6;
+
+    string company_id = 7;
+    string project_id = 8;
+    string role_id = 9;
+    string client_type_id = 10;
+    string client_platform_id = 11;
+    int32 active = 12;
+    string expires_at = 13;
 }
 
 message UserPrimaryKey {
     string id = 1;
+    string project_id = 2;
 }
 
 message UserPrimaryKeyList {
     repeated string ids = 1;
+    string project_id = 2;
 }
 
 message GetUserListRequest {
@@ -96,17 +103,19 @@ message GetUserListResponse {
 
 message UpdateUserRequest {
     string id = 1;
-    string project_id = 2;
-    string client_platform_id = 3;
-    string client_type_id = 4;
-    string role_id = 5;
-    string phone = 6;
-    string email = 7;
-    string login = 8;
-    int32 active = 10;
-    string expires_at = 11;
-    string name = 14;
-    string photo_url = 15;
+    string login = 2;
+    string email = 3;
+    string phone = 4;
+    string name = 5;
+    string photo_url = 6;
+
+    string company_id = 7;
+    string project_id = 8;
+    string role_id = 9;
+    string client_type_id = 10;
+    string client_platform_id = 11;
+    int32 active = 12;
+    string expires_at = 13;
 }
 
 message AddUserRelationRequest {
