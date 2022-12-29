@@ -13,7 +13,7 @@ import (
 
 func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		res, ok := h.hasAccess(c)
+		res, ok := h.adminHasAccess(c)
 		if !ok {
 			c.Abort()
 			return
