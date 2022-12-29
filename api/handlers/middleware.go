@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -66,13 +67,13 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessU
 	if !ok {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return nil, err
+		return nil, errors.New("token error: wrong format")
 	}
 	accessResponse, ok := data.(*auth_service.V2HasAccessUserRes)
 	if !ok {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return nil, err
+		return nil, errors.New("token error: wrong format")
 	}
 
 	return accessResponse, nil

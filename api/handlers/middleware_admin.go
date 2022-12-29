@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -60,19 +61,19 @@ func (h *Handler) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuperAd
 	return resp, true
 }
 
-func (h *Handler) adminAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessUserRes, err error) {
+func (h *Handler) adminAuthInfo(c *gin.Context) (result *auth_service.HasAccessSuperAdminRes, err error) {
 	data, ok := c.Get("Auth")
 
 	if !ok {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return nil, err
+		return nil, errors.New("token error: wrong format")
 	}
-	accessResponse, ok := data.(*auth_service.V2HasAccessUserRes)
+	accessResponse, ok := data.(*auth_service.HasAccessSuperAdminRes)
 	if !ok {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return nil, err
+		return nil, errors.New("token error: wrong format")
 	}
 
 	return accessResponse, nil
