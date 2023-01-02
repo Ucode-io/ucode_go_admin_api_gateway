@@ -71,7 +71,7 @@ message RoleWithAppTablePermissions {
                 bool view_permission = 3;
                 bool edit_permission = 4;
                 string role_id = 5;
-                string field_label = 6;
+                string label = 6;
                 string guid = 7;
             }
             message ViewPermission {

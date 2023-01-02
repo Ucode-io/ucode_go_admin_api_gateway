@@ -8,9 +8,27 @@ import "google/protobuf/struct.proto";
 
 service LoginService {
     rpc Login (LoginRequest) returns (V2LoginResponse) {}
+    rpc LoginData (LoginDataReq) returns (LoginDataRes) {}
     rpc LoginWithOtp (PhoneOtpRequst) returns (V2LoginResponse) {}
     rpc LoginWithEmailOtp (EmailOtpRequest) returns (V2LoginResponse) {}
     rpc GetUserUpdatedPermission (GetUserUpdatedPermissionRequest) returns(V2LoginResponse) {}
+}
+
+message LoginDataReq {
+    string user_id = 1;
+    string client_type = 2;
+    string project_id = 3;
+}
+
+message LoginDataRes {
+    bool user_found = 1;
+    ClientPlatform client_platform = 2;
+    ClientType client_type = 3;
+    string user_id = 4;
+    Role role = 5;
+    repeated RecordPermission permissions = 6;
+    string login_table_slug = 7;
+    repeated RecordPermission app_permissions = 8;
 }
 
 enum ConfirmStrategies {

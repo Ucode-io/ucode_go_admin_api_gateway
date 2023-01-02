@@ -31,6 +31,7 @@ type SessionServiceClient interface {
 	V2Login(ctx context.Context, in *V2LoginRequest, opts ...grpc.CallOption) (*V2LoginResponse, error)
 	V2LoginSuperAdmin(ctx context.Context, in *V2LoginSuperAdminReq, opts ...grpc.CallOption) (*V2LoginSuperAdminRes, error)
 	V2HasAccess(ctx context.Context, in *HasAccessRequest, opts ...grpc.CallOption) (*HasAccessResponse, error)
+	V2HasAccessUser(ctx context.Context, in *V2HasAccessUserReq, opts ...grpc.CallOption) (*V2HasAccessUserRes, error)
 	V2RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*V2RefreshTokenResponse, error)
 	V2RefreshTokenSuperAdmin(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*V2RefreshTokenSuperAdminResponse, error)
 	SessionAndTokenGenerator(ctx context.Context, in *SessionAndTokenRequest, opts ...grpc.CallOption) (*V2LoginResponse, error)
@@ -119,6 +120,15 @@ func (c *sessionServiceClient) V2HasAccess(ctx context.Context, in *HasAccessReq
 	return out, nil
 }
 
+func (c *sessionServiceClient) V2HasAccessUser(ctx context.Context, in *V2HasAccessUserReq, opts ...grpc.CallOption) (*V2HasAccessUserRes, error) {
+	out := new(V2HasAccessUserRes)
+	err := c.cc.Invoke(ctx, "/auth_service.SessionService/V2HasAccessUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *sessionServiceClient) V2RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*V2RefreshTokenResponse, error) {
 	out := new(V2RefreshTokenResponse)
 	err := c.cc.Invoke(ctx, "/auth_service.SessionService/V2RefreshToken", in, out, opts...)
@@ -185,6 +195,7 @@ type SessionServiceServer interface {
 	V2Login(context.Context, *V2LoginRequest) (*V2LoginResponse, error)
 	V2LoginSuperAdmin(context.Context, *V2LoginSuperAdminReq) (*V2LoginSuperAdminRes, error)
 	V2HasAccess(context.Context, *HasAccessRequest) (*HasAccessResponse, error)
+	V2HasAccessUser(context.Context, *V2HasAccessUserReq) (*V2HasAccessUserRes, error)
 	V2RefreshToken(context.Context, *RefreshTokenRequest) (*V2RefreshTokenResponse, error)
 	V2RefreshTokenSuperAdmin(context.Context, *RefreshTokenRequest) (*V2RefreshTokenSuperAdminResponse, error)
 	SessionAndTokenGenerator(context.Context, *SessionAndTokenRequest) (*V2LoginResponse, error)
@@ -221,6 +232,9 @@ func (UnimplementedSessionServiceServer) V2LoginSuperAdmin(context.Context, *V2L
 }
 func (UnimplementedSessionServiceServer) V2HasAccess(context.Context, *HasAccessRequest) (*HasAccessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2HasAccess not implemented")
+}
+func (UnimplementedSessionServiceServer) V2HasAccessUser(context.Context, *V2HasAccessUserReq) (*V2HasAccessUserRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method V2HasAccessUser not implemented")
 }
 func (UnimplementedSessionServiceServer) V2RefreshToken(context.Context, *RefreshTokenRequest) (*V2RefreshTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2RefreshToken not implemented")
@@ -397,6 +411,24 @@ func _SessionService_V2HasAccess_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SessionService_V2HasAccessUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(V2HasAccessUserReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).V2HasAccessUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.SessionService/V2HasAccessUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).V2HasAccessUser(ctx, req.(*V2HasAccessUserReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SessionService_V2RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RefreshTokenRequest)
 	if err := dec(in); err != nil {
@@ -543,6 +575,10 @@ var SessionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "V2HasAccess",
 			Handler:    _SessionService_V2HasAccess_Handler,
+		},
+		{
+			MethodName: "V2HasAccessUser",
+			Handler:    _SessionService_V2HasAccessUser_Handler,
 		},
 		{
 			MethodName: "V2RefreshToken",

@@ -21,7 +21,22 @@ service ProjectService {
     rpc GetProjects(GetProjectsRequest) returns (GetProjectsResponse) {}
     rpc AutoConnect(GetProjectsRequest) returns (EmptyProto) {}
     rpc GetProjectsByCompanyId(GetProjectsByCompanyIdReq) returns (GetProjectsByCompanyIdRes) {}
+    rpc UpdateProjectUserData (UpdateProjectUserDataReq) returns (UpdateProjectUserDataRes) {}
 }
+
+message UpdateProjectUserDataReq {
+    string user_id = 1;
+    string project_id = 2;
+    string client_type_id = 3;
+    string client_platform_id = 4;
+    string role_id = 5;
+}
+
+message UpdateProjectUserDataRes {
+
+}
+
+
 message GetProjectsByCompanyIdReq {
     string company_id = 1;
 }
