@@ -45,7 +45,11 @@ func (h *Handler) GetQueryRows(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.QueryService().GetQueryRows(
 		context.Background(),

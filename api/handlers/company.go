@@ -311,6 +311,25 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 		return
 	}
 
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	_, err = h.authService.UserService().AddUserToProject(
+		c.Request.Context(),
+		&auth_service.AddUserToProjectReq{
+			UserId:    authInfo.GetUserId(),
+			ProjectId: resp.GetProjectId(),
+			CompanyId: project.GetCompanyId(),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	h.handleResponse(c, http.Created, resp)
 }
 

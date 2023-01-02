@@ -38,7 +38,11 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
 	for key, value := range objectRequest.Data {
@@ -151,7 +155,11 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.ObjectBuilderService().GetSingle(
 		context.Background(),
@@ -207,7 +215,11 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.ObjectBuilderService().Update(
 		context.Background(),
@@ -289,7 +301,11 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.ObjectBuilderService().Delete(
 		context.Background(),
@@ -330,11 +346,15 @@ func (h *Handler) GetList(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	tokenInfo := h.GetAuthInfo
-	objectRequest.Data["tables"] = tokenInfo(c).Tables
-	objectRequest.Data["user_id_from_token"] = tokenInfo(c).UserId
-	objectRequest.Data["role_id_from_token"] = tokenInfo(c).RoleId
-	objectRequest.Data["client_type_id_from_token"] = tokenInfo(c).ClientTypeId
+	tokenInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
+	objectRequest.Data["tables"] = tokenInfo.GetTables()
+	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
+	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+	objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -348,7 +368,11 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.ObjectBuilderService().GetList(
 		context.Background(),
@@ -403,7 +427,11 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.ObjectBuilderService().GetListInExcel(
 		context.Background(),
@@ -443,7 +471,11 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 	m2mMessage.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -487,7 +519,11 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 	m2mMessage.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -546,7 +582,11 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.ObjectBuilderService().GetObjectDetails(
 		context.Background(),
@@ -589,7 +629,11 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
 	for key, value := range objectRequest.Data {
@@ -711,7 +755,11 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.ObjectBuilderService().MultipleUpdate(
 		context.Background(),
@@ -760,13 +808,17 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
-	tokenInfo := h.GetAuthInfo
-	objectRequest.Data["tables"] = tokenInfo(c).Tables
-	objectRequest.Data["user_id_from_token"] = tokenInfo(c).UserId
-	objectRequest.Data["role_id_from_token"] = tokenInfo(c).RoleId
-	objectRequest.Data["client_type_id_from_token"] = tokenInfo(c).ClientTypeId
+	//tokenInfo := h.GetAuthInfo
+	objectRequest.Data["tables"] = authInfo.GetTables()
+	objectRequest.Data["user_id_from_token"] = authInfo.GetUserId()
+	objectRequest.Data["role_id_from_token"] = authInfo.GetRoleId()
+	objectRequest.Data["client_type_id_from_token"] = authInfo.GetClientTypeId()
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -789,4 +841,3 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, resp)
 }
-

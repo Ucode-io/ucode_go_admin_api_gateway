@@ -66,7 +66,11 @@ func (h *Handler) SendCode(c *gin.Context) {
 
 	phone := helper.ConverPhoneNumberToMongoPhoneFormat(request.Recipient)
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	respObject, err := services.LoginService().LoginWithOtp(
 		c.Request.Context(),
@@ -163,7 +167,11 @@ func (h *Handler) Verify(c *gin.Context) {
 	}
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	res, err := services.SessionServiceAuth().SessionAndTokenGenerator(
 		context.Background(),
@@ -217,7 +225,11 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	_, err = services.ObjectBuilderServiceAuth().Create(
 		context.Background(),

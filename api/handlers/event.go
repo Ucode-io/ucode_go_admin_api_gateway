@@ -31,7 +31,11 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 	event.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -82,7 +86,11 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.EventService().GetSingle(
 		context.Background(),
@@ -120,7 +128,11 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.EventService().GetList(
 		context.Background(),
@@ -160,7 +172,11 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 	event.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -211,7 +227,11 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.EventService().Delete(
 		context.Background(),

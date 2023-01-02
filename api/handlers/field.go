@@ -53,7 +53,11 @@ func (h *Handler) CreateField(c *gin.Context) {
 		AutofillField: fieldRequest.AutoFillField,
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 	field.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -118,7 +122,11 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.FieldService().GetAll(
 		context.Background(),
@@ -186,7 +194,11 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		RelationId:    fieldRequest.RelationId,
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 	field.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -237,7 +249,11 @@ func (h *Handler) DeleteField(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.FieldService().Delete(
 		context.Background(),

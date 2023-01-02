@@ -12,9 +12,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (h *Handler) AuthMiddleware() gin.HandlerFunc {
+func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		res, ok := h.hasAccess(c)
+		res, ok := h.adminHasAccess(c)
 		if !ok {
 			c.Abort()
 			return
@@ -26,20 +26,18 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
+func (h *Handler) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuperAdminRes, bool) {
 	bearerToken := c.GetHeader("Authorization")
-	projectId := c.DefaultQuery("project_id", "")
 	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
 		return nil, false
 	}
 	accessToken := strArr[1]
-	resp, err := h.authService.SessionService().V2HasAccessUser(
+	resp, err := h.authService.SessionService().HasAccessSuperAdmin(
 		c.Request.Context(),
-		&auth_service.V2HasAccessUserReq{
+		&auth_service.HasAccessSuperAdminReq{
 			AccessToken: accessToken,
-			ProjectId:   projectId,
 			// ClientPlatformId: "3f6320a6-b6ed-4f5f-ad90-14a154c95ed3",
 			Path:   helper.GetURLWithTableSlug(c),
 			Method: c.Request.Method,
@@ -63,7 +61,7 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 	return resp, true
 }
 
-func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessUserRes, err error) {
+func (h *Handler) adminAuthInfo(c *gin.Context) (result *auth_service.HasAccessSuperAdminRes, err error) {
 	data, ok := c.Get("Auth")
 
 	if !ok {
@@ -71,7 +69,7 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessU
 		c.Abort()
 		return nil, errors.New("token error: wrong format")
 	}
-	accessResponse, ok := data.(*auth_service.V2HasAccessUserRes)
+	accessResponse, ok := data.(*auth_service.HasAccessSuperAdminRes)
 	if !ok {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
 		c.Abort()

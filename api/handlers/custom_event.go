@@ -32,7 +32,11 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 	customevent.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -83,7 +87,11 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.CustomEventService().GetSingle(
 		context.Background(),
@@ -121,7 +129,11 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.CustomEventService().GetList(
 		context.Background(),
@@ -161,7 +173,11 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -219,7 +235,11 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.CustomEventService().Delete(
 		context.Background(),

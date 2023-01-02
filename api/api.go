@@ -61,7 +61,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.DELETE("/relation/:relation_id", h.DeleteRelation)
 		v1.GET("/get-relation-cascading/:table_slug", h.GetRelationCascaders)
 
-
 		//section
 		v1.GET("/section", h.GetAllSections)
 		v1.PUT("/section", h.UpdateSection)
@@ -206,12 +205,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/alfalab/directions", h.CreateDirections)
 		v1.GET("/alfalab/referral", h.GetReferral)
 
+	}
+
+	v1Admin := r.Group("/v1")
+	v1Admin.Use(h.AdminAuthMiddleware())
+	{
 		// company service
 		// v1.POST("/company", h.CreateCompany)
-		v1.GET("/company/:company_id", h.GetCompanyByID)
-		v1.GET("/company", h.GetCompanyList)
-		v1.PUT("company/:company_id", h.UpdateCompany)
-		v1.DELETE("/company/:company_id", h.DeleteCompany)
+		v1Admin.GET("/company/:company_id", h.GetCompanyByID)
+		v1Admin.GET("/company", h.GetCompanyList)
+		v1Admin.PUT("company/:company_id", h.UpdateCompany)
+		v1Admin.DELETE("/company/:company_id", h.DeleteCompany)
 
 		// project service
 		v1.POST("/company-project", h.CreateCompanyProject)
