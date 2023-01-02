@@ -20,12 +20,11 @@ type Handler struct {
 	authService     services.AuthServiceManagerI
 }
 
-func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNodesI, strg storage.StorageI, cmpServ services.ServiceManagerI, authService services.AuthServiceManagerI) Handler {
+func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.ServiceManagerI, authService services.AuthServiceManagerI) Handler {
 	return Handler{
 		cfg:             cfg,
 		log:             log,
 		services:        svcs,
-		storage:         strg,
 		companyServices: cmpServ,
 		authService:     authService,
 	}
