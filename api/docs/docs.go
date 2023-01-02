@@ -4576,6 +4576,76 @@ var doc = `{
                 }
             }
         },
+        "/v1/company/project/ucode-resource": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Add ProjectResource In Ucode Cluster",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Resource"
+                ],
+                "summary": "Add ProjectResource In Ucode Cluster",
+                "operationId": "add_project_resource_in_ucode",
+                "parameters": [
+                    {
+                        "description": "ProjectResourceAddRequest",
+                        "name": "ProjectResource",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.AddResourceInUcodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ProjectResource data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.AddResourceResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/company/{company_id}": {
             "get": {
                 "security": [
@@ -13534,6 +13604,20 @@ var doc = `{
                 },
                 "user_found": {
                     "type": "boolean"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.AddResourceInUcodeRequest": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
                 },
                 "user_id": {
                     "type": "string"

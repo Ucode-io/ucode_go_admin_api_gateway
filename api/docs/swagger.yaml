@@ -233,6 +233,15 @@ definitions:
       user_id:
         type: string
     type: object
+  company_service.AddResourceInUcodeRequest:
+    properties:
+      company_id:
+        type: string
+      project_id:
+        type: string
+      user_id:
+        type: string
+    type: object
   company_service.AddResourceRequest:
     properties:
       company_id:
@@ -4841,6 +4850,45 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Reconnect ProjectResource
+      tags:
+      - Company Resource
+  /v1/company/project/ucode-resource:
+    post:
+      consumes:
+      - application/json
+      description: Add ProjectResource In Ucode Cluster
+      operationId: add_project_resource_in_ucode
+      parameters:
+      - description: ProjectResourceAddRequest
+        in: body
+        name: ProjectResource
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.AddResourceInUcodeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ProjectResource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.AddResourceResponse'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add ProjectResource In Ucode Cluster
       tags:
       - Company Resource
   /v1/custom-event:

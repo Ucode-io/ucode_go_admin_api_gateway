@@ -113,6 +113,7 @@ message UpdateRoleRequest {
 
 message RolePrimaryKey {
     string id = 1;
+    string project_id = 2;
 }
 
 message CreatePermissionRequest {
@@ -180,6 +181,7 @@ message GetRolesListRequest {
     uint32 limit = 2;
     string client_platform_id = 3;
     string client_type_id = 4;
+    string project_id = 5;
 }
 
 message GetRolesResponse {
