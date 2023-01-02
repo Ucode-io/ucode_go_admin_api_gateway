@@ -71,7 +71,17 @@ message RelationForSection {
     string relation_table_slug = 13;
     string view_type = 14;
     string relation_field_slug = 15;
-    google.protobuf.Struct field_permissions = 16;
+    google.protobuf.Struct permission = 16;
+    repeated ActionRelationForSection action_relations = 17;
+    string default_limit = 18;
+    bool multiple_insert = 19;
+    repeated string updated_fields = 20;
+    string multiple_insert_field = 21;
+}
+
+message ActionRelationForSection {
+    string key = 1;
+    string value = 2;
 }
 
 message IncrementIDForSection {

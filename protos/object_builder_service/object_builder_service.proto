@@ -26,4 +26,6 @@ import "function.proto";
 import "query_folder.proto";
 import "queryies.proto";
 import "web_pages.proto";
+import "cascading.proto";
 import "builder_project.proto";
+import "ping_service.proto";

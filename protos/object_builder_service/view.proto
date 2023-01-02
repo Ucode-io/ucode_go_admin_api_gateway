@@ -40,7 +40,10 @@ message CreateViewRequest {
     string multiple_insert_field = 19;
     repeated string updated_fields = 20;
     string app_id = 21;
-    string project_id = 22;
+    string table_label = 22;
+    string default_limit = 23;
+    google.protobuf.Struct attributes = 24;
+    string project_id = 25;
 }
 
 message QuickFilter {
@@ -71,7 +74,10 @@ message View {
     string multiple_insert_field = 20;
     repeated string updated_fields = 21;
     string app_id = 22;
-    string project_id = 23;
+    string table_label = 23;
+    string default_limit = 24;
+    google.protobuf.Struct attributes = 25;
+    string project_id = 26;
 }
 
 message GetAllViewsResponse {

@@ -7,9 +7,9 @@ import "google/protobuf/empty.proto";
 
 service BuilderProjectService {
     rpc Register(RegisterProjectRequest) returns (google.protobuf.Empty) {}
+    rpc RegisterProjects(RegisterProjectRequest) returns (google.protobuf.Empty) {}
     rpc Deregister(DeregisterProjectRequest) returns (google.protobuf.Empty) {}
     rpc Reconnect(RegisterProjectRequest) returns (google.protobuf.Empty) {}
-
     rpc RegisterMany(RegisterManyProjectsRequest) returns (RegisterManyProjectsResponse) {}
     rpc DeregisterMany(DeregisterManyProjectsRequest) returns (DeregisterManyProjectsResponse) {}
 }
@@ -26,6 +26,7 @@ message RegisterProjectRequest {
     string project_id = 2;
     string secret_path = 3;
     Credentials credentials = 4;
+    string user_id = 5;
 }
 
 message DeregisterProjectRequest {

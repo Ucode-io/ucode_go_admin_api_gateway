@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"errors"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -26,35 +26,25 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func (h *Handler) hasAccess(c *gin.Context) (*auth_service.HasAccessResponse, bool) {
+func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
 	bearerToken := c.GetHeader("Authorization")
+	projectId := c.DefaultQuery("project_id", "")
 	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
 		return nil, false
 	}
 	accessToken := strArr[1]
-
-	resp, err := h.authService.SessionService().V2HasAccess(
+	resp, err := h.authService.SessionService().V2HasAccessUser(
 		c.Request.Context(),
-		&auth_service.HasAccessRequest{
+		&auth_service.V2HasAccessUserReq{
 			AccessToken: accessToken,
-			// ProjectId:        "80cc11d9-2ee6-494a-a09d-40150d151145",
+			ProjectId:   projectId,
 			// ClientPlatformId: "3f6320a6-b6ed-4f5f-ad90-14a154c95ed3",
 			Path:   helper.GetURLWithTableSlug(c),
 			Method: c.Request.Method,
 		},
 	)
-
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Println("PROJECT ID", resp.GetProjectId())
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
 	if err != nil {
 		errr := status.Error(codes.PermissionDenied, "Permission denied")
 		if errr.Error() == err.Error() {
@@ -73,20 +63,20 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.HasAccessResponse, bo
 	return resp, true
 }
 
-func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.HasAccessResponse) {
+func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessUserRes, err error) {
 	data, ok := c.Get("Auth")
 
 	if !ok {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return
+		return nil, errors.New("token error: wrong format")
 	}
-	accessResponse, ok := data.(*auth_service.HasAccessResponse)
+	accessResponse, ok := data.(*auth_service.V2HasAccessUserRes)
 	if !ok {
 		h.handleResponse(c, http.Forbidden, "token error: wrong format")
 		c.Abort()
-		return
+		return nil, errors.New("token error: wrong format")
 	}
 
-	return accessResponse
+	return accessResponse, nil
 }

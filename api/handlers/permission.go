@@ -48,11 +48,18 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 		return
 	}
 
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
+
 	resp, err := services.PermissionService().UpsertPermissionsByAppId(
 		context.Background(),
 		&obs.UpsertPermissionsByAppIdRequest{
-			AppId: c.Param("app_id"),
-			Data:  structData,
+			AppId:     c.Param("app_id"),
+			Data:      structData,
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -98,10 +105,17 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 		return
 	}
 
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
+
 	resp, err := services.PermissionService().GetAllPermissionsByRoleId(
 		context.Background(),
 		&obs.GetAllPermissionRequest{
-			RoleId: c.Param("role_id"),
+			RoleId:    c.Param("role_id"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 
@@ -136,11 +150,110 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 		return
 	}
 
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
+
 	resp, err := services.PermissionService().GetFieldPermissions(
 		context.Background(),
 		&obs.GetFieldPermissionRequest{
 			RoleId:    c.Param("role_id"),
 			TableSlug: c.Param(("table_slug")),
+			ProjectId: authInfo.GetProjectId(),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
+
+// GetActionPermissions godoc
+// @Security ApiKeyAuth
+// @ID get_all_action_permission
+// @Router /v1/action-permission/{role_id}/{table_slug} [GET]
+// @Summary Get all action permissions
+// @Description Get all action permissions
+// @Tags Permission
+// @Accept json
+// @Produce json
+// @Param role_id path string true "role_id"
+// @Param table_slug path string true "table_slug"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "Get All Action Permission data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetActionPermissions(c *gin.Context) {
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
+
+	resp, err := services.PermissionService().GetActionPermissions(
+		context.Background(),
+		&obs.GetActionPermissionRequest{
+			RoleId:    c.Param("role_id"),
+			TableSlug: c.Param("table_slug"),
+			ProjectId: authInfo.GetProjectId(),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
+
+// GetViewRelationPermissions godoc
+// @Security ApiKeyAuth
+// @ID get_all_view_relation_permission
+// @Router /v1/view-relation-permission/{role_id}/{table_slug} [GET]
+// @Summary Get all view relation permissions
+// @Description Get all view relation permissions
+// @Tags Permission
+// @Accept json
+// @Produce json
+// @Param role_id path string true "role_id"
+// @Param table_slug path string true "table_slug"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "Get All View Relation Permission data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetViewRelationPermissions(c *gin.Context) {
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
+
+	resp, err := services.PermissionService().GetViewRelationPermissions(
+		context.Background(),
+		&obs.GetActionPermissionRequest{
+			RoleId:    c.Param("role_id"),
+			TableSlug: c.Param("table_slug"),
+			ProjectId: authInfo.GetProjectId(),
 		},
 	)
 

@@ -32,7 +32,11 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	var dashboard = obs.CreateDashboardRequest{
 		// Id:         dashboardRequest.ID,
@@ -89,7 +93,11 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.DashboardService().GetSingle(
 		context.Background(),
@@ -128,7 +136,11 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 	dashboard.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -179,7 +191,11 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.DashboardService().Delete(
 		context.Background(),
@@ -218,7 +234,11 @@ func (h *Handler) GetAllDashboards(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.DashboardService().GetList(
 		context.Background(),

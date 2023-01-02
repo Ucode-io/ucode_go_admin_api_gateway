@@ -311,6 +311,25 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 		return
 	}
 
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	_, err = h.authService.UserService().AddUserToProject(
+		c.Request.Context(),
+		&auth_service.AddUserToProjectReq{
+			UserId:    authInfo.GetUserId(),
+			ProjectId: resp.GetProjectId(),
+			CompanyId: project.GetCompanyId(),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	h.handleResponse(c, http.Created, resp)
 }
 
@@ -644,6 +663,42 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 	}
 
 	fmt.Println("REQUEST PASSED")
+
+	h.handleResponse(c, http.Created, resp)
+}
+
+
+// AddProjectResource godoc
+// @Security ApiKeyAuth
+// @ID add_project_resource_in_ucode
+// @Router /v1/company/project/ucode-resource [POST]
+// @Summary Add ProjectResource In Ucode Cluster
+// @Description Add ProjectResource In Ucode Cluster
+// @Tags Company Resource
+// @Accept json
+// @Produce json
+// @Param ProjectResource body company_service.AddResourceInUcodeRequest true "ProjectResourceAddRequest"
+// @Success 201 {object} http.Response{data=company_service.AddResourceResponse} "ProjectResource data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) AddProjectResourceInUcodeCluster(c *gin.Context) {
+	var resource company_service.AddResourceInUcodeRequest
+
+	err := c.ShouldBindJSON(&resource)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.ProjectService().AddResourceInUcode(
+		c.Request.Context(),
+		&resource,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, http.Created, resp)
 }

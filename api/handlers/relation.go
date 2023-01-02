@@ -30,7 +30,11 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 	relation.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -86,7 +90,11 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.RelationService().GetAll(
 		context.Background(),
@@ -129,7 +137,11 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 	relation.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -180,7 +192,11 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.RelationService().Delete(
 		context.Background(),
@@ -196,4 +212,48 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.NoContent, resp)
+}
+
+// GetRelationCascaders godoc
+// @Security ApiKeyAuth
+// @ID get_relation_cascaders
+// @Router /v1/get-relation-cascading/{table_slug} [GET]
+// @Summary Get all relations
+// @Description Get all relations
+// @Tags Relation
+// @Accept json
+// @Produce json
+// @Param table_slug path string true "table_slug"
+// @Success 200 {object} http.Response{data=string} "CascaderBody"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetRelationCascaders(c *gin.Context) {
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
+
+	resp, err := services.CascadingService().GetCascadings(
+		context.Background(),
+		&obs.GetCascadingRequest{
+			TableSlug: c.Param("table_slug"),
+			ProjectId: authInfo.ProjectId,
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
 }

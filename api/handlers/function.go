@@ -46,7 +46,11 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().Create(
 		context.Background(),
@@ -95,7 +99,11 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().GetSingle(
 		context.Background(),
@@ -140,7 +148,11 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().GetList(
 		context.Background(),
@@ -194,7 +206,11 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().Update(
 		context.Background(),
@@ -244,7 +260,11 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.FunctionService().Delete(
 		context.Background(),
@@ -291,7 +311,11 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	function, err := services.FunctionService().GetSingle(
 		context.Background(),

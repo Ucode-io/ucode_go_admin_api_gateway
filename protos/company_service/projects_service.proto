@@ -12,11 +12,68 @@ service ProjectService {
     rpc Update(Project) returns (Project) {}
     rpc Delete(DeleteProjectRequest) returns (EmptyProto) {}
     rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
+    rpc AddResourceInUcode(AddResourceInUcodeRequest) returns (AddResourceResponse) {}
     rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
     rpc GetResource(GetResourceRequest) returns (ResourceWithoutPassword) {}
     rpc GetReourceList(GetReourceListRequest) returns (GetReourceListResponse) {}
     rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
     rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
+    rpc GetProjects(GetProjectsRequest) returns (GetProjectsResponse) {}
+    rpc AutoConnect(GetProjectsRequest) returns (EmptyProto) {}
+    rpc GetProjectsByCompanyId(GetProjectsByCompanyIdReq) returns (GetProjectsByCompanyIdRes) {}
+    rpc UpdateProjectUserData (UpdateProjectUserDataReq) returns (UpdateProjectUserDataRes) {}
+}
+
+message UpdateProjectUserDataReq {
+    string user_id = 1;
+    string project_id = 2;
+    string client_type_id = 3;
+    string client_platform_id = 4;
+    string role_id = 5;
+}
+
+message UpdateProjectUserDataRes {
+
+}
+
+
+message GetProjectsByCompanyIdReq {
+    string company_id = 1;
+}
+
+message GetProjectsByCompanyIdRes {
+    message Company {
+        message Project {
+            string id = 1;
+            string company_id = 2;
+            string name = 3;
+            string domain = 4;
+            string created_at = 5;
+            string updated_at = 6;
+        }
+        string id = 1;
+        string name = 2;
+        string logo = 3;
+        string description = 4;
+        string created_at = 5;
+        string updated_at = 6;
+        string owner_id = 7;
+        repeated Project projects = 8;
+    }
+
+    Company company = 1;
+}
+
+message GetProjectsRequest {
+    string k8s_namespace = 1;
+}
+
+message GetProjectsResponse {
+    string id = 1;
+    string title = 2;
+    string created_at = 3;
+    string updated_at = 4;
+    string company_id = 5;
 }
 
 message ProjectWithoutResource {
@@ -89,6 +146,14 @@ message AddResourceRequest {
     string project_id = 1;
     repeated Resource resources = 2;
     string company_id = 3;
+    string user_id = 4;
+}
+
+message AddResourceInUcodeRequest {
+    string project_id = 1;
+    string company_id = 2;
+    string user_id = 3;
+    string project_title = 4;
 }
 
 message AddResourceResponse {

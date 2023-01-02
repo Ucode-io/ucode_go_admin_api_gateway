@@ -55,6 +55,8 @@ type ServiceManagerI interface {
 	QueryFolderService() object_builder_service.QueryFolderServiceClient
 	QueriesService() object_builder_service.QueryServiceClient
 	WebPageService() object_builder_service.WebPageServiceClient
+	CascadingService() object_builder_service.CascadingServiceClient
+
 }
 
 type grpcClients struct {
@@ -96,6 +98,8 @@ type grpcClients struct {
 	queryFolderService        object_builder_service.QueryFolderServiceClient
 	queriesService            object_builder_service.QueryServiceClient
 	webPageService            object_builder_service.WebPageServiceClient
+	cascadingService          object_builder_service.CascadingServiceClient
+
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -194,6 +198,8 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		queryFolderService:        object_builder_service.NewQueryFolderServiceClient(connObjectBuilderService),
 		queriesService:            object_builder_service.NewQueryServiceClient(connObjectBuilderService),
 		webPageService:            object_builder_service.NewWebPageServiceClient(connObjectBuilderService),
+		cascadingService:          object_builder_service.NewCascadingServiceClient(connObjectBuilderService),
+
 	}, nil
 }
 
@@ -352,4 +358,8 @@ func (g *grpcClients) QueriesService() object_builder_service.QueryServiceClient
 
 func (g *grpcClients) WebPageService() object_builder_service.WebPageServiceClient {
 	return g.webPageService
+}
+
+func (g *grpcClients) CascadingService() object_builder_service.CascadingServiceClient {
+	return g.cascadingService
 }

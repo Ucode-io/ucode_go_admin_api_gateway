@@ -19,6 +19,8 @@ service ObjectBuilderService {
     rpc GetListInExcel(CommonMessage) returns (CommonMessage) {}
     rpc Batch(BatchRequest) returns (CommonMessage) {}
     rpc MultipleUpdate (CommonMessage) returns (google.protobuf.Empty) {}
+    rpc MultipleInsert (CommonMessage) returns (google.protobuf.Empty) {}
+    rpc GetFinancialAnalytics(CommonMessage) returns (CommonMessage) {}
 }
 
 message CommonMessage {

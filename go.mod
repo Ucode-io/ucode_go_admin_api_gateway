@@ -23,7 +23,9 @@ require (
 )
 
 require (
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/golang/protobuf v1.5.2
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/pkg/errors v0.9.1
 	github.com/saidamir98/udevs_pkg v0.0.0-20220413125729-5342e90c08a3
@@ -37,7 +39,6 @@ require (
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.13.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect

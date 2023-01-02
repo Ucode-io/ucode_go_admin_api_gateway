@@ -39,7 +39,11 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := h.companyServices.WebPageService().Create(
 		context.Background(),
@@ -73,7 +77,11 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetWebPagesById(c *gin.Context) {
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := h.companyServices.WebPageService().GetById(
 		context.Background(),
@@ -117,7 +125,11 @@ func (h *Handler) GetWebPagesList(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := h.companyServices.WebPageService().GetAll(
 		context.Background(),
@@ -166,7 +178,11 @@ func (h *Handler) UpdateWebPage(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := h.companyServices.WebPageService().Update(
 		context.Background(),
@@ -207,7 +223,11 @@ func (h *Handler) DeleteWebPage(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := h.companyServices.WebPageService().Delete(
 		context.Background(),

@@ -33,7 +33,11 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	var fields []*obs.CreateFieldsRequest
 	for _, field := range tableRequest.Fields {
@@ -125,7 +129,11 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.TableService().GetByID(
 		context.Background(),
@@ -176,7 +184,11 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.TableService().GetAll(
 		context.Background(),
@@ -218,7 +230,11 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 	table.ProjectId = authInfo.GetProjectId()
 
 	namespace := c.GetString("namespace")
@@ -269,7 +285,11 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		return
 	}
 
-	authInfo := h.GetAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
 
 	resp, err := services.TableService().Delete(
 		context.Background(),
