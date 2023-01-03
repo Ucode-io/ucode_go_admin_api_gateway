@@ -52,7 +52,7 @@ import (
 // 	h.handleResponse(c, http.Created, resp)
 // }
 
-// GetCompanyById godoc
+// GetCompanyByID godoc
 // @Security ApiKeyAuth
 // @ID get_company_by_id
 // @Router /v1/company/{company_id} [GET]
@@ -187,14 +187,14 @@ func (h *Handler) GetCompanyListWithProjects(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateCompany(c *gin.Context) {
-	company_id := c.Param("company_id")
+	companyId := c.Param("company_id")
 
-	fmt.Println("company_id", company_id)
+	fmt.Println("company_id", companyId)
 
-	_, err := uuid.Parse(company_id)
+	_, err := uuid.Parse(companyId)
 	if err != nil {
 
-		h.handleResponse(c, http.BadRequest, errors.New("uuid invalid!!! : "+company_id))
+		h.handleResponse(c, http.BadRequest, errors.New("uuid invalid!!! : "+companyId))
 		return
 	}
 	var company models.CompanyCreateRequest
@@ -208,7 +208,7 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 	_, err = h.authService.CompanyService().Update(
 		c.Request.Context(),
 		&auth_service.UpdateCompanyRequest{
-			Id:   company_id,
+			Id:   companyId,
 			Name: company.Name,
 		},
 	)
@@ -220,7 +220,7 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 	resp, err := h.companyServices.CompanyService().Update(
 		context.Background(),
 		&company_service.Company{
-			Id:          company_id,
+			Id:          companyId,
 			Name:        company.Name,
 			Logo:        company.Logo,
 			Description: company.Description,
@@ -249,11 +249,11 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteCompany(c *gin.Context) {
-	company_id := c.Param("company_id")
+	companyId := c.Param("company_id")
 
 	_, err := h.authService.CompanyService().Remove(
 		c.Request.Context(),
-		&auth_service.CompanyPrimaryKey{Id: company_id},
+		&auth_service.CompanyPrimaryKey{Id: companyId},
 	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -263,7 +263,7 @@ func (h *Handler) DeleteCompany(c *gin.Context) {
 	resp, err := h.companyServices.CompanyService().Delete(
 		context.Background(),
 		&company_service.DeleteCompanyRequest{
-			Id: company_id,
+			Id: companyId,
 		},
 	)
 
@@ -333,7 +333,7 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
-// GetPorjectById godoc
+// GetCompanyProjectById godoc
 // @Security ApiKeyAuth
 // @ID get_company_project_id
 // @Router /v1/company-project/{project_id} [GET]
@@ -366,7 +366,7 @@ func (h *Handler) GetCompanyProjectById(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
-// GetProjectList godoc
+// GetCompanyProjectList godoc
 // @Security ApiKeyAuth
 // @ID get_project_list
 // @Router /v1/company-project [GET]
@@ -411,7 +411,7 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
-// UpdateProject godoc
+// UpdateCompanyProject godoc
 // @Security ApiKeyAuth
 // @ID update_project
 // @Router /v1/company-project/{project_id} [PUT]
@@ -426,7 +426,7 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateCompanyProject(c *gin.Context) {
-	project_id := c.Param("project_id")
+	projectId := c.Param("project_id")
 	var project company_service.Project
 
 	err := c.ShouldBindJSON(&project)
@@ -438,7 +438,7 @@ func (h *Handler) UpdateCompanyProject(c *gin.Context) {
 	resp, err := h.companyServices.ProjectService().Update(
 		context.Background(),
 		&company_service.Project{
-			ProjectId:    project_id,
+			ProjectId:    projectId,
 			CompanyId:    project.CompanyId,
 			Title:        project.Title,
 			K8SNamespace: project.K8SNamespace,
@@ -467,12 +467,12 @@ func (h *Handler) UpdateCompanyProject(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteCompanyProject(c *gin.Context) {
-	project_id := c.Param("project_id")
+	projectId := c.Param("project_id")
 
 	resp, err := h.companyServices.ProjectService().Delete(
 		context.Background(),
 		&company_service.DeleteProjectRequest{
-			ProjectId: project_id,
+			ProjectId: projectId,
 		},
 	)
 
@@ -507,6 +507,41 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 	}
 
 	resp, err := h.companyServices.ProjectService().AddResource(
+		c.Request.Context(),
+		&company,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, resp)
+}
+
+// CreateProjectResource godoc
+// @Security ApiKeyAuth
+// @ID create_project_resource
+// @Router /v1/company/project/create-resource [POST]
+// @Summary Create ProjectResource
+// @Description Create ProjectResource
+// @Tags Company Resource
+// @Accept json
+// @Produce json
+// @Param ProjectResource body company_service.CreateResourceReq true "ProjectResourceCreateRequest"
+// @Success 201 {object} http.Response{data=company_service.CreateResourceRes} "ProjectResource data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) CreateProjectResource(c *gin.Context) {
+	var company company_service.CreateResourceReq
+
+	err := c.ShouldBindJSON(&company)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.ProjectService().CreateResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -554,7 +589,7 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
-// GetResourceById godoc
+// GetResource godoc
 // @Security ApiKeyAuth
 // @ID get_resource_id
 // @Router /v1/company/project/resource/{resource_id} [GET]
@@ -667,8 +702,7 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
-
-// AddProjectResource godoc
+// AddProjectResourceInUcodeCluster godoc
 // @Security ApiKeyAuth
 // @ID add_project_resource_in_ucode
 // @Router /v1/company/project/ucode-resource [POST]
