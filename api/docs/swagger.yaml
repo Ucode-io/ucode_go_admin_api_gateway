@@ -239,6 +239,8 @@ definitions:
         type: string
       project_id:
         type: string
+      project_title:
+        type: string
       user_id:
         type: string
     type: object
@@ -308,6 +310,30 @@ definitions:
         type: array
       title:
         type: string
+    type: object
+  company_service.CreateResourceReq:
+    properties:
+      company_id:
+        type: string
+      project_id:
+        type: string
+      project_title:
+        type: string
+      resource:
+        $ref: '#/definitions/company_service.Resource'
+      user_id:
+        type: string
+    type: object
+  company_service.CreateResourceRes:
+    properties:
+      company_id:
+        type: string
+      project_id:
+        type: string
+      resource_type:
+        type: integer
+      service_type:
+        type: integer
     type: object
   company_service.EmptyProto:
     type: object
@@ -4609,6 +4635,54 @@ paths:
       summary: Update company
       tags:
       - Company
+  /v1/company/project/create-resource:
+    post:
+      consumes:
+      - application/json
+      description: Create ProjectResource
+      operationId: create_project_resource
+      parameters:
+      - description: ProjectResourceCreateRequest
+        in: body
+        name: ProjectResource
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.CreateResourceReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ProjectResource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.CreateResourceRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create ProjectResource
+      tags:
+      - Company Resource
   /v1/company/project/resource:
     delete:
       consumes:
@@ -4876,6 +4950,15 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/company_service.AddResourceResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "500":
           description: Server Error
