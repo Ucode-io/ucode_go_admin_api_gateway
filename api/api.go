@@ -225,6 +225,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.DELETE("/company-project/:project_id", h.DeleteCompanyProject)
 
 		v1Admin.POST("/company/project/resource", h.AddProjectResource)
+		v1Admin.POST("/company/project/create-resource", h.CreateProjectResource)
 		v1Admin.POST("/company/project/ucode-resource", h.AddProjectResourceInUcodeCluster)
 		v1Admin.DELETE("/company/project/resource", h.RemoveProjectResource)
 		v1Admin.GET("/company/project/resource/:resource_id", h.GetResource)
