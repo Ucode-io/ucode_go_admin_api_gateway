@@ -115,7 +115,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	h.handleResponse(c, http.Created, res)
 }
 
-// Verify godoc
+// VerifyEmail godoc
 // @ID verify_email
 // @Router /verify-email/{sms_id}/{otp} [POST]
 // @Summary Verify

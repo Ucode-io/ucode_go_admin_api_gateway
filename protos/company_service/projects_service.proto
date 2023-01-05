@@ -12,6 +12,7 @@ service ProjectService {
     rpc Update(Project) returns (Project) {}
     rpc Delete(DeleteProjectRequest) returns (EmptyProto) {}
     rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
+    rpc CreateResource(CreateResourceReq) returns (CreateResourceRes) {}
     rpc AddResourceInUcode(AddResourceInUcodeRequest) returns (AddResourceResponse) {}
     rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
     rpc GetResource(GetResourceRequest) returns (ResourceWithoutPassword) {}
@@ -149,6 +150,14 @@ message AddResourceRequest {
     string user_id = 4;
 }
 
+message CreateResourceReq {
+    string project_id = 1;
+    Resource resource = 2;
+    string company_id = 3;
+    string user_id = 4;
+    string project_title = 5;
+}
+
 message AddResourceInUcodeRequest {
     string project_id = 1;
     string company_id = 2;
@@ -157,6 +166,13 @@ message AddResourceInUcodeRequest {
 }
 
 message AddResourceResponse {
+    string project_id = 1;
+    ServiceType service_type = 2;
+    ResourceType resource_type = 3;
+    string company_id = 4;
+}
+
+message CreateResourceRes {
     string project_id = 1;
     ServiceType service_type = 2;
     ResourceType resource_type = 3;
@@ -204,4 +220,16 @@ message GetResourceWithPathResponse {
     string id = 4;
     string project_id = 5;
     string path = 6;
+}
+
+message GetResourceManyRequest {
+    repeated GetProjectsResponse id = 1;
+}
+
+message GetResourceManyWithPathResponse {
+    repeated GetResourceWithPathResponse res = 1;
+}
+
+message GetProjectRes {
+    repeated GetProjectsResponse response = 1;
 }

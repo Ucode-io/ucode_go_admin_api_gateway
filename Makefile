@@ -39,7 +39,7 @@ push-image:
 	docker push ${REGISTRY}/${PROJECT_NAME}/${APP}:${ENV_TAG}
 
 swag-init:
-	swag init -g api/api.go -o api/docs
+	swag init -g api/api.go -o api/docs --parseDependency
 run:
 	go run cmd/main.go
 
