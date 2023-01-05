@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -184,9 +185,15 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	_, err = h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err.Error())
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
 		return
 	}
 
@@ -196,7 +203,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 			Limit:     int32(limit),
 			Offset:    int32(offset),
 			Search:    c.DefaultQuery("search", ""),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
