@@ -7,7 +7,6 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
-	"ucode/ucode_go_api_gateway/storage/postgres"
 
 	"github.com/gin-gonic/gin"
 )
