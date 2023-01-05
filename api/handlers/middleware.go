@@ -12,6 +12,14 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+func (h *Handler) NodeMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		
+		c.Set("namespace", h.cfg.UcodeNamespace)
+		c.Next()
+	}
+}
+
 func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		res, ok := h.hasAccess(c)

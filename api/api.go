@@ -20,6 +20,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 	r.Use(customCORSMiddleware())
 	r.Use(MaxAllowed(5000))
+	r.Use(h.NodeMiddleware())
 
 	r.GET("/ping", h.Ping)
 	r.GET("/config", h.GetConfig)
