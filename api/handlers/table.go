@@ -154,7 +154,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 // GetAllTables godoc
 // @Security ApiKeyAuth
 // @ID get_all_tables
-// @Router /table [GET]
+// @Router /v1/table [GET]
 // @Summary Get all tables
 // @Description Get all tables
 // @Tags Table
