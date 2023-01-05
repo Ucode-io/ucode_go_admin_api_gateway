@@ -185,11 +185,11 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		return
 	}
 
-	_, err = h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
-		return
-	}
+	//_, err = h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
 
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
