@@ -2841,6 +2841,65 @@ paths:
       summary: Send Message To Email
       tags:
       - Email
+  /table:
+    get:
+      consumes:
+      - application/json
+      description: Get all tables
+      operationId: get_all_tables
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      - description: resource_id
+        in: query
+        name: resource_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllTablesResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all tables
+      tags:
+      - Table
   /v1/action-permission/{role_id}/{table_slug}:
     get:
       consumes:
@@ -7981,64 +8040,6 @@ paths:
       tags:
       - Section
   /v1/table:
-    get:
-      consumes:
-      - application/json
-      description: Get all tables
-      operationId: get_all_tables
-      parameters:
-      - in: query
-        name: limit
-        type: integer
-      - in: query
-        name: offset
-        type: integer
-      - in: query
-        name: project_id
-        type: string
-      - in: query
-        name: search
-        type: string
-      - description: resource_id
-        in: query
-        name: resource_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: TableBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/object_builder_service.GetAllTablesResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all tables
-      tags:
-      - Table
     post:
       consumes:
       - application/json
