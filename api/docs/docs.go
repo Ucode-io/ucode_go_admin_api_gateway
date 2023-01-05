@@ -10492,6 +10492,13 @@ var doc = `{
                         "type": "string",
                         "name": "search",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {

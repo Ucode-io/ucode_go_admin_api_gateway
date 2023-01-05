@@ -161,6 +161,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query object_builder_service.GetAllTablesRequest true "filters"
+// @Param resource_id query string true "resource_id"
 // @Success 200 {object} http.Response{data=object_builder_service.GetAllTablesResponse} "TableBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -184,11 +185,17 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	_, err = h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
+
+	//resourceId, ok := c.Get("resource_id")
+	//if !ok {
+	//	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+	//	return
+	//}
 
 	resp, err := services.TableService().GetAll(
 		context.Background(),
@@ -196,7 +203,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 			Limit:     int32(limit),
 			Offset:    int32(offset),
 			Search:    c.DefaultQuery("search", ""),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: c.DefaultQuery("resource_id", ""),
 		},
 	)
 

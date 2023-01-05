@@ -20,7 +20,10 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		resourceId := c.GetHeader("resource_id")
+
 		c.Set("Auth", res)
+		c.Set("resource_id", resourceId)
 		c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
 	}

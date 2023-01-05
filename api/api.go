@@ -30,6 +30,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.POST("/send-message", h.SendMessageToEmail)
 	r.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
 	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
+	r.GET("/table", h.GetAllTables)
 
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
@@ -45,7 +46,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		//table
 		v1.POST("/table", h.CreateTable)
 		v1.GET("/table/:table_id", h.GetTableByID)
-		v1.GET("/table", h.GetAllTables)
+
 		v1.PUT("/table", h.UpdateTable)
 		v1.DELETE("/table/:table_id", h.DeleteTable)
 		//field
