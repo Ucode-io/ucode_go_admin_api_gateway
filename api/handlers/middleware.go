@@ -32,9 +32,9 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			res *auth_service.V2HasAccessUserRes
 			ok  bool
 		)
-		origin := c.GetHeader("Origin")
-		fmt.Println("origin", origin)
-		if strings.Contains(origin, CLIENT_HOST) {
+		host := c.Request.Host
+		fmt.Println("host", host)
+		if strings.Contains(host, CLIENT_HOST) {
 			res, ok = h.hasAccess(c)
 			if !ok {
 				c.Abort()
@@ -43,7 +43,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		}
 
 		resourceId := c.GetHeader("Resource-Id")
-		fmt.Println("resourceId::::", resourceId)
 
 		c.Set("Auth", res)
 		c.Set("resource_id", resourceId)
