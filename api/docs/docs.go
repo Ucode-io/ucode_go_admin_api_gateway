@@ -1133,6 +1133,13 @@ var doc = `{
                 "operationId": "get_all_tables",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -1151,13 +1158,6 @@ var doc = `{
                         "type": "string",
                         "name": "search",
                         "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -1238,6 +1238,13 @@ var doc = `{
                 "summary": "Get all action permissions",
                 "operationId": "get_all_action_permission",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "role_id",
@@ -5953,6 +5960,432 @@ var doc = `{
                 }
             }
         },
+        "/v1/environment": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get environment list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "Get environment list",
+                "operationId": "get_environment_list",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "EnvironmentBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.GetEnvironmentListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update environment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "Update environment",
+                "operationId": "update_environment",
+                "parameters": [
+                    {
+                        "description": "UpdateEnvironmentRequestBody",
+                        "name": "environment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.Environment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Environment data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.Environment"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create environment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "Create environment",
+                "operationId": "create_environment",
+                "parameters": [
+                    {
+                        "description": "CreateEnvironmentRequestBody",
+                        "name": "environment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.CreateEnvironmentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Environment data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.Environment"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/environment/{environment_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get single environment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "Get single environment",
+                "operationId": "get_environment_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "environment_id",
+                        "name": "environment_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "EnvironmentBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.Environment"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete environment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "Delete environment",
+                "operationId": "delete_environment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "environment_id",
+                        "name": "environment_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/event": {
             "get": {
                 "security": [
@@ -7071,6 +7504,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "role_id",
                         "name": "role_id",
                         "in": "path",
@@ -7646,6 +8086,9 @@ var doc = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Get all relations",
@@ -7661,6 +8104,13 @@ var doc = `{
                 "summary": "Get all relations",
                 "operationId": "get_relation_cascaders",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",
@@ -8163,6 +8613,13 @@ var doc = `{
                 "summary": "Convert html to pdf",
                 "operationId": "convert_html_to_pdf",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "HtmlBody",
                         "name": "view",
@@ -9892,6 +10349,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "role_id",
                         "name": "role_id",
                         "in": "path",
@@ -9976,6 +10440,13 @@ var doc = `{
                 "summary": "Upsert permissions",
                 "operationId": "upsert_permission",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "app_id",
@@ -10144,6 +10615,9 @@ var doc = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Get all relations",
@@ -10159,6 +10633,13 @@ var doc = `{
                 "summary": "Get all relations",
                 "operationId": "get_all_relations",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "name": "limit",
@@ -10251,6 +10732,9 @@ var doc = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Update relation",
@@ -10266,6 +10750,13 @@ var doc = `{
                 "summary": "Update relation",
                 "operationId": "update_relation",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "UpdateRelationRequestBody",
                         "name": "relation",
@@ -10334,6 +10825,11 @@ var doc = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create relation",
                 "consumes": [
                     "application/json"
@@ -10347,6 +10843,13 @@ var doc = `{
                 "summary": "Create relation",
                 "operationId": "create_relation",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateRelationRequestBody",
                         "name": "table",
@@ -10420,6 +10923,9 @@ var doc = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Delete Relation",
@@ -10435,6 +10941,13 @@ var doc = `{
                 "summary": "Delete Relation",
                 "operationId": "delete_relation",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "relation_id",
@@ -10506,6 +11019,13 @@ var doc = `{
                 "summary": "Get all sections",
                 "operationId": "get_all_sections",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "project_id",
@@ -10604,6 +11124,13 @@ var doc = `{
                 "operationId": "update_section",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateSectionRequestBody",
                         "name": "table",
                         "in": "body",
@@ -10692,6 +11219,13 @@ var doc = `{
                 "operationId": "update_table",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateTableRequestBody",
                         "name": "table",
                         "in": "body",
@@ -10777,6 +11311,13 @@ var doc = `{
                 "summary": "Create table",
                 "operationId": "create_table",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateTableRequestBody",
                         "name": "table",
@@ -10867,6 +11408,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_id",
                         "name": "table_id",
                         "in": "path",
@@ -10951,6 +11499,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_id",
                         "name": "table_id",
                         "in": "path",
@@ -11020,6 +11575,13 @@ var doc = `{
                 "summary": "Convert template to html",
                 "operationId": "convert_template_to_html",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "TemplateBody",
                         "name": "view",
@@ -11302,6 +11864,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "app_id",
                         "in": "query"
                     },
@@ -11393,6 +11962,13 @@ var doc = `{
                 "operationId": "update_view",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateViewRequestBody",
                         "name": "view",
                         "in": "body",
@@ -11478,6 +12054,13 @@ var doc = `{
                 "summary": "Create view",
                 "operationId": "create_view",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateViewRequestBody",
                         "name": "view",
@@ -11566,6 +12149,13 @@ var doc = `{
                 "summary": "Get all view relation permissions",
                 "operationId": "get_all_view_relation_permission",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "role_id",
@@ -11661,6 +12251,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "view_id",
                         "name": "view_id",
                         "in": "path",
@@ -11745,6 +12342,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "view_id",
                         "name": "view_id",
                         "in": "path",
@@ -11814,6 +12418,13 @@ var doc = `{
                 "summary": "Get single view relation",
                 "operationId": "get_single_view_relation",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "project_id",
@@ -11911,6 +12522,13 @@ var doc = `{
                 "summary": "Upsert view relation",
                 "operationId": "upsert_view_relation",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "UpsertViewRelationsBody",
                         "name": "table",
@@ -13937,6 +14555,23 @@ var doc = `{
                 }
             }
         },
+        "company_service.CreateEnvironmentRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
         "company_service.CreateProjectRequest": {
             "type": "object",
             "properties": {
@@ -13994,6 +14629,63 @@ var doc = `{
         "company_service.EmptyProto": {
             "type": "object"
         },
+        "company_service.Environment": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.EnvironmentWithResources": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resources": {
+                    "$ref": "#/definitions/company_service.EnvironmentWithResources_Resources"
+                }
+            }
+        },
+        "company_service.EnvironmentWithResources_Resources": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Resource"
+                    }
+                }
+            }
+        },
         "company_service.GetComanyListResponse": {
             "type": "object",
             "properties": {
@@ -14013,6 +14705,20 @@ var doc = `{
             "properties": {
                 "company": {
                     "$ref": "#/definitions/company_service.Company"
+                }
+            }
+        },
+        "company_service.GetEnvironmentListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.EnvironmentWithResources"
+                    }
                 }
             }
         },
