@@ -56,7 +56,7 @@ type ServiceManagerI interface {
 	QueriesService() object_builder_service.QueryServiceClient
 	WebPageService() object_builder_service.WebPageServiceClient
 	CascadingService() object_builder_service.CascadingServiceClient
-
+	EnvironmentService() company_service.EnvironmentServiceClient
 }
 
 type grpcClients struct {
@@ -99,7 +99,7 @@ type grpcClients struct {
 	queriesService            object_builder_service.QueryServiceClient
 	webPageService            object_builder_service.WebPageServiceClient
 	cascadingService          object_builder_service.CascadingServiceClient
-
+	environmentService        company_service.EnvironmentServiceClient
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -199,7 +199,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		queriesService:            object_builder_service.NewQueryServiceClient(connObjectBuilderService),
 		webPageService:            object_builder_service.NewWebPageServiceClient(connObjectBuilderService),
 		cascadingService:          object_builder_service.NewCascadingServiceClient(connObjectBuilderService),
-
+		environmentService:        company_service.NewEnvironmentServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -344,6 +344,10 @@ func (g *grpcClients) CompanyService() company_service.CompanyServiceClient {
 
 func (g *grpcClients) ProjectService() company_service.ProjectServiceClient {
 	return g.projectService
+}
+
+func (g *grpcClients) EnvironmentService() company_service.EnvironmentServiceClient {
+	return g.environmentService
 }
 
 // for ucode version 2
