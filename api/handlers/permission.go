@@ -14,7 +14,7 @@ import (
 
 // UpsertPermissionsByAppId godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID upsert_permission
 // @Router /v1/permission-upsert/{app_id} [POST]
 // @Summary Upsert permissions
@@ -92,7 +92,7 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 
 // GetAllPermissionByRoleId godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_all_permission_by_role_id
 // @Router /v1/permission-get-all/{role_id} [GET]
 // @Summary Get all permissions by role id
@@ -143,7 +143,7 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 
 // GetFieldPermissions godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_all_field_permission
 // @Router /v1/field-permission/{role_id}/{table_slug} [GET]
 // @Summary Get all field permissions
@@ -196,7 +196,7 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 
 // GetActionPermissions godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_all_action_permission
 // @Router /v1/action-permission/{role_id}/{table_slug} [GET]
 // @Summary Get all action permissions
@@ -249,7 +249,7 @@ func (h *Handler) GetActionPermissions(c *gin.Context) {
 
 // GetViewRelationPermissions godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_all_view_relation_permission
 // @Router /v1/view-relation-permission/{role_id}/{table_slug} [GET]
 // @Summary Get all view relation permissions

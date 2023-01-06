@@ -2907,9 +2907,9 @@ paths:
       description: Get all action permissions
       operationId: get_all_action_permission
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: role_id
@@ -6171,9 +6171,9 @@ paths:
       description: Get all fields
       operationId: get_all_fields
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - in: query
@@ -6244,9 +6244,9 @@ paths:
       description: Create field
       operationId: create_field
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: CreateFieldRequestBody
@@ -6296,9 +6296,9 @@ paths:
       description: Update field
       operationId: update_field
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: UpdateFieldRequestBody
@@ -6349,9 +6349,9 @@ paths:
       description: Get all field permissions
       operationId: get_all_field_permission
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: role_id
@@ -6406,9 +6406,9 @@ paths:
       description: Delete Field
       operationId: delete_field
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: field_id
@@ -6682,9 +6682,9 @@ paths:
       description: Get all relations
       operationId: get_relation_cascaders
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_slug
@@ -6963,9 +6963,9 @@ paths:
       description: Convert html to pdf
       operationId: convert_html_to_pdf
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: HtmlBody
@@ -7064,9 +7064,9 @@ paths:
       description: Delete Many2Many
       operationId: delete_many2many
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: DeleteManyToManyBody
@@ -7109,9 +7109,9 @@ paths:
       description: Update many-to-many
       operationId: append_many2many
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: UpdateMany2ManyRequestBody
@@ -7162,9 +7162,9 @@ paths:
       description: Upsert object
       operationId: upsert_object
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_slug
@@ -7220,9 +7220,9 @@ paths:
       description: Update object
       operationId: update_object
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_slug
@@ -7278,9 +7278,9 @@ paths:
       description: Create object
       operationId: create_object
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_slug
@@ -7336,9 +7336,9 @@ paths:
       description: Delete object
       operationId: delete_object
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_slug
@@ -7391,9 +7391,9 @@ paths:
       description: Get object by id
       operationId: get_object_by_id
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_slug
@@ -7448,9 +7448,9 @@ paths:
       description: Get all objects in excel
       operationId: get_list_objects_in_excel
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_slug
@@ -7506,9 +7506,9 @@ paths:
       description: Get financial analytics
       operationId: get_financial_analytics
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_slug
@@ -7564,9 +7564,9 @@ paths:
       description: Get all objects
       operationId: get_list_objects
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_slug
@@ -7627,9 +7627,9 @@ paths:
       description: Multiple Update object
       operationId: multiple_update_object
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_slug
@@ -7685,9 +7685,9 @@ paths:
       description: object details
       operationId: get_object_details
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_slug
@@ -7945,9 +7945,9 @@ paths:
       description: Get all permissions by role id
       operationId: get_all_permission_by_role_id
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: role_id
@@ -7997,9 +7997,9 @@ paths:
       description: Upsert permissions
       operationId: upsert_permission
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: app_id
@@ -8103,9 +8103,9 @@ paths:
       description: Get all relations
       operationId: get_all_relations
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - in: query
@@ -8168,9 +8168,9 @@ paths:
       description: Create relation
       operationId: create_relation
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: CreateRelationRequestBody
@@ -8220,9 +8220,9 @@ paths:
       description: Update relation
       operationId: update_relation
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: UpdateRelationRequestBody
@@ -8274,9 +8274,9 @@ paths:
       description: Delete Relation
       operationId: delete_relation
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: relation_id
@@ -8320,9 +8320,9 @@ paths:
       description: Get all sections
       operationId: get_all_sections
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - in: query
@@ -8378,9 +8378,9 @@ paths:
       description: Update section
       operationId: update_section
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: UpdateSectionRequestBody
@@ -8431,9 +8431,9 @@ paths:
       description: Get all tables
       operationId: get_all_tables
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: resource_Id
@@ -8494,9 +8494,9 @@ paths:
       description: Create table
       operationId: create_table
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: CreateTableRequestBody
@@ -8546,9 +8546,9 @@ paths:
       description: Update table
       operationId: update_table
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: UpdateTableRequestBody
@@ -8599,9 +8599,9 @@ paths:
       description: Delete Table
       operationId: delete_table
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_id
@@ -8643,9 +8643,9 @@ paths:
       description: Get table by id
       operationId: get_table_by_id
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: table_id
@@ -8695,9 +8695,9 @@ paths:
       description: Convert template to html
       operationId: convert_template_to_html
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: TemplateBody
@@ -8856,9 +8856,9 @@ paths:
       description: Get view list
       operationId: get_view_list
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - in: query
@@ -8911,9 +8911,9 @@ paths:
       description: Create view
       operationId: create_view
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: CreateViewRequestBody
@@ -8963,9 +8963,9 @@ paths:
       description: Update view
       operationId: update_view
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: UpdateViewRequestBody
@@ -9016,9 +9016,9 @@ paths:
       description: Get all view relation permissions
       operationId: get_all_view_relation_permission
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: role_id
@@ -9073,9 +9073,9 @@ paths:
       description: Delete view
       operationId: delete_view
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: view_id
@@ -9117,9 +9117,9 @@ paths:
       description: Get single view
       operationId: get_view_by_id
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: view_id
@@ -9171,9 +9171,9 @@ paths:
         get list view relation switch to get single view relation because for one table be one view relation
       operationId: get_single_view_relation
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - in: query
@@ -9229,9 +9229,9 @@ paths:
       description: Upsert view relation
       operationId: upsert_view_relation
       parameters:
-      - description: resource_id
+      - description: Resource-Id
         in: header
-        name: resource_id
+        name: Resource-Id
         required: true
         type: string
       - description: UpsertViewRelationsBody

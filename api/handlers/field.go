@@ -14,7 +14,7 @@ import (
 
 // CreateField godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_field
 // @Router /v1/field [POST]
 // @Summary Create field
@@ -91,7 +91,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 
 // GetAllFields godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_all_fields
 // @Router /v1/field [GET]
 // @Summary Get all fields
@@ -169,7 +169,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 
 // UpdateField godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_field
 // @Router /v1/field [PUT]
 // @Summary Update field
@@ -248,7 +248,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 
 // DeleteField godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_field
 // @Router /v1/field/{field_id} [DELETE]
 // @Summary Delete Field

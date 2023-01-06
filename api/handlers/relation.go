@@ -14,7 +14,7 @@ import (
 // @ID create_relation
 // @Router /v1/relation [POST]
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @Summary Create relation
 // @Description Create relation
 // @Tags Relation
@@ -72,7 +72,7 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 // @ID get_all_relations
 // @Router /v1/relation [GET]
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @Summary Get all relations
 // @Description Get all relations
 // @Tags Relation
@@ -138,7 +138,7 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 // @ID update_relation
 // @Router /v1/relation [PUT]
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @Summary Update relation
 // @Description Update relation
 // @Tags Relation
@@ -195,7 +195,7 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 // @ID delete_relation
 // @Router /v1/relation/{relation_id} [DELETE]
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @Summary Delete Relation
 // @Description Delete Relation
 // @Tags Relation
@@ -253,7 +253,7 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 // @ID get_relation_cascaders
 // @Router /v1/get-relation-cascading/{table_slug} [GET]
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @Summary Get all relations
 // @Description Get all relations
 // @Tags Relation

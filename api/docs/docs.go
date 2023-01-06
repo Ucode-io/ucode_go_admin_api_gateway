@@ -1134,8 +1134,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7081,8 +7081,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7210,8 +7210,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7303,8 +7303,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7398,8 +7398,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7498,8 +7498,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -8000,8 +8000,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -8509,8 +8509,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -8692,8 +8692,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -8785,8 +8785,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -8865,8 +8865,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -8967,8 +8967,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9069,8 +9069,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9171,8 +9171,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9280,8 +9280,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9382,8 +9382,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9484,8 +9484,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9586,8 +9586,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9688,8 +9688,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9786,8 +9786,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10250,8 +10250,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10343,8 +10343,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10536,8 +10536,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10653,8 +10653,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10746,8 +10746,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10844,8 +10844,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10922,8 +10922,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11026,8 +11026,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11121,8 +11121,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11232,8 +11232,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11325,8 +11325,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11420,8 +11420,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11511,8 +11511,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11589,8 +11589,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11876,8 +11876,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11975,8 +11975,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -12068,8 +12068,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -12163,8 +12163,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -12263,8 +12263,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -12354,8 +12354,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -12432,8 +12432,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },
@@ -12536,8 +12536,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "resource_id",
-                        "name": "resource_id",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
                         "in": "header",
                         "required": true
                     },

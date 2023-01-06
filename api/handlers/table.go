@@ -14,7 +14,7 @@ import (
 
 // CreateTable godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_table
 // @Router /v1/table [POST]
 // @Summary Create table
@@ -112,7 +112,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 
 // GetTableByID godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_table_by_id
 // @Router /v1/table/{table_id} [GET]
 // @Summary Get table by id
@@ -170,7 +170,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 
 // GetAllTables godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_all_tables
 // @Router /v1/table [GET]
 // @Summary Get all tables
@@ -236,7 +236,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 
 // UpdateTable godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_table
 // @Router /v1/table [PUT]
 // @Summary Update table
@@ -292,7 +292,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 
 // DeleteTable godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_table
 // @Router /v1/table/{table_id} [DELETE]
 // @Summary Delete Table

@@ -17,7 +17,7 @@ import (
 
 // CreateObject godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_object
 // @Router /v1/object/{table_slug}/ [POST]
 // @Summary Create object
@@ -125,7 +125,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 
 // GetSingle godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_object_by_id
 // @Router /v1/object/{table_slug}/{object_id} [GET]
 // @Summary Get object by id
@@ -196,7 +196,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 
 // UpdateObject godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_object
 // @Router /v1/object/{table_slug} [PUT]
 // @Summary Update object
@@ -283,7 +283,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 
 // DeleteObject godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_object
 // @Router /v1/object/{table_slug}/{object_id} [DELETE]
 // @Summary Delete object
@@ -358,7 +358,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 
 // GetList godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_list_objects
 // @Router /v1/object/get-list/{table_slug} [POST]
 // @Summary Get all objects
@@ -434,7 +434,7 @@ func (h *Handler) GetList(c *gin.Context) {
 
 // GetListInExcel godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_list_objects_in_excel
 // @Router /v1/object/excel/{table_slug} [POST]
 // @Summary Get all objects in excel
@@ -501,7 +501,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 
 // DeleteManyToMany godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_many2many
 // @Router /v1/many-to-many [DELETE]
 // @Summary Delete Many2Many
@@ -556,7 +556,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 
 // AppendManyToMany godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID append_many2many
 // @Router /v1/many-to-many [PUT]
 // @Summary Update many-to-many
@@ -611,7 +611,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 
 // GetObjectDetails godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_object_details
 // @Router /v1/object/object-details/{table_slug} [POST]
 // @Summary Get object details
@@ -679,7 +679,7 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 
 // UpsertObject godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID upsert_object
 // @Router /v1/object-upsert/{table_slug} [POST]
 // @Summary Upsert object
@@ -799,7 +799,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 
 // MultipleUpdateObject godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID multiple_update_object
 // @Router /v1/object/multiple-update/{table_slug} [PUT]
 // @Summary Multiple Update object
@@ -866,7 +866,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 
 // GetFinancialAnalytics godoc
 // @Security ApiKeyAuth
-// @Param resource_id header string true "resource_id"
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_financial_analytics
 // @Router /v1/object/get-financial-analytics/{table_slug} [POST]
 // @Summary Get financial analytics
