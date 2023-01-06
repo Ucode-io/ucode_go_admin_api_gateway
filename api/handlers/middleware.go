@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -41,6 +42,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		}
 
 		resourceId := c.GetHeader("resource_id")
+		fmt.Println("resourceId::::", resourceId)
 
 		c.Set("Auth", res)
 		c.Set("resource_id", resourceId)
