@@ -367,6 +367,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
+// @Param resource_Id query string true "resource_Id"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
@@ -407,7 +408,7 @@ func (h *Handler) GetList(c *gin.Context) {
 	//	return
 	//}
 
-	resourceId, ok := c.Get("resource_id")
+	_, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -419,7 +420,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: resourceId.(string),
+			ProjectId: c.DefaultQuery("resource_Id", ""),
 		},
 	)
 

@@ -178,7 +178,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// Param resource_Id query string true "resource_Id"
+// @Param resource_Id query string true "resource_Id"
 // @Param filters query object_builder_service.GetAllTablesRequest true "filters"
 // @Success 200 {object} http.Response{data=object_builder_service.GetAllTablesResponse} "TableBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"

@@ -9184,6 +9184,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "resource_Id",
+                        "name": "resource_Id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "GetListObjectRequestBody",
                         "name": "object",
                         "in": "body",
@@ -11117,6 +11124,13 @@ var doc = `{
                         "description": "resource_id",
                         "name": "resource_id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "resource_Id",
+                        "name": "resource_Id",
+                        "in": "query",
                         "required": true
                     },
                     {
