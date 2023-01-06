@@ -14051,6 +14051,9 @@ var doc = `{
                 },
                 "service_type": {
                     "type": "integer"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },

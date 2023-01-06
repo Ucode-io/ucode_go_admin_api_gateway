@@ -458,6 +458,8 @@ definitions:
         type: integer
       service_type:
         type: integer
+      title:
+        type: string
     type: object
   company_service.ResourceWithoutPassword_Credentials:
     properties:
