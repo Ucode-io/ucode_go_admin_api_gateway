@@ -233,6 +233,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/company/project/resource/:resource_id", h.GetResource)
 		v1Admin.GET("/company/project/resource", h.GetResourceList)
 		v1Admin.POST("/company/project/resource/reconnect", h.ReconnectProjectResource)
+
+		// environment service
+		v1Admin.POST("/environment", h.CreateEnvironment)
+		v1Admin.GET("/environment/:environment_id", h.GetSingleEnvironment)
+		v1Admin.GET("/environment", h.GetAllEnvironments)
+		v1Admin.PUT("/environment", h.UpdateEnvironment)
+		v1Admin.DELETE("/environment/:environment_id", h.DeleteEnvironment)
 	}
 
 	// v3 for ucode version 2
