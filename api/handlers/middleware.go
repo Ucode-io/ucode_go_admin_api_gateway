@@ -3,7 +3,6 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"net/http/httputil"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -42,14 +41,8 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			}
 		}
 
-		resourceId := c.GetHeader("ResourceId")
+		resourceId := c.GetHeader("Resource-Id")
 		fmt.Println("resourceId::::", resourceId)
-
-		requestDump, err := httputil.DumpRequest(c.Request, true)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println("requestDump:::", string(requestDump))
 
 		c.Set("Auth", res)
 		c.Set("resource_id", resourceId)
