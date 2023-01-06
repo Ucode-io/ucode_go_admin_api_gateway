@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -13,6 +14,7 @@ import (
 
 // CreateTable godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID create_table
 // @Router /v1/table [POST]
 // @Summary Create table
@@ -33,9 +35,16 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -57,7 +66,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 			IsVisible:  field.IsVisible,
 		}
 
-		tempField.ProjectId = authInfo.GetProjectId()
+		tempField.ProjectId = resourceId.(string)
 
 		fields = append(fields, &tempField)
 	}
@@ -79,7 +88,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		},
 	}
 
-	table.ProjectId = authInfo.GetProjectId()
+	table.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -103,6 +112,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 
 // GetTableByID godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID get_table_by_id
 // @Router /v1/table/{table_id} [GET]
 // @Summary Get table by id
@@ -129,9 +139,16 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -139,7 +156,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		context.Background(),
 		&obs.TablePrimaryKey{
 			Id:        tableID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -153,6 +170,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 
 // GetAllTables godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID get_all_tables
 // @Router /table [GET]
 // @Summary Get all tables
@@ -161,7 +179,6 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query object_builder_service.GetAllTablesRequest true "filters"
-// @Param resource_id query string true "resource_id"
 // @Success 200 {object} http.Response{data=object_builder_service.GetAllTablesResponse} "TableBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -191,11 +208,11 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 	//	return
 	//}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
 
 	resp, err := services.TableService().GetAll(
 		context.Background(),
@@ -203,7 +220,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 			Limit:     int32(limit),
 			Offset:    int32(offset),
 			Search:    c.DefaultQuery("search", ""),
-			ProjectId: c.DefaultQuery("resource_id", ""),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -217,6 +234,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 
 // UpdateTable godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID update_table
 // @Router /v1/table [PUT]
 // @Summary Update table
@@ -237,12 +255,18 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	table.ProjectId = authInfo.GetProjectId()
+	table.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -266,6 +290,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 
 // DeleteTable godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID delete_table
 // @Router /v1/table/{table_id} [DELETE]
 // @Summary Delete Table
@@ -292,9 +317,16 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -302,7 +334,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		context.Background(),
 		&obs.TablePrimaryKey{
 			Id:        tableID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 

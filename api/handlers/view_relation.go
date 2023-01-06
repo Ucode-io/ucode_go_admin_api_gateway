@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
@@ -10,6 +11,7 @@ import (
 
 // GetViewRelation godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID get_single_view_relation
 // @Router /v1/view_relation [GET]
 // @Summary Get single view relation
@@ -38,19 +40,25 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
 	resp, err := services.SectionService().GetViewRelation(
 		context.Background(),
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
 			TableSlug: c.Query("table_slug"),
 			RoleId:    tokenInfo.RoleId,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -61,8 +69,9 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
-// UpsertViewRelation godoc
+// UpsertViewRelations godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID upsert_view_relation
 // @Router /v1/view_relation [PUT]
 // @Summary Upsert view relation
@@ -83,12 +92,18 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	viewRelation.ProjectId = authInfo.GetProjectId()
+	viewRelation.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)

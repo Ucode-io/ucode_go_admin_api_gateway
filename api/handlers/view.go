@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -13,6 +14,7 @@ import (
 
 // CreateView godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID create_view
 // @Router /v1/view [POST]
 // @Summary Create view
@@ -33,12 +35,18 @@ func (h *Handler) CreateView(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	view.ProjectId = authInfo.GetProjectId()
+	view.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -62,6 +70,7 @@ func (h *Handler) CreateView(c *gin.Context) {
 
 // GetSingleView godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID get_view_by_id
 // @Router /v1/view/{view_id} [GET]
 // @Summary Get single view
@@ -88,9 +97,15 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -98,7 +113,7 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 		context.Background(),
 		&obs.ViewPrimaryKey{
 			Id:        viewID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -111,6 +126,7 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 
 // UpdateView godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID update_view
 // @Router /v1/view [PUT]
 // @Summary Update view
@@ -131,12 +147,18 @@ func (h *Handler) UpdateView(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	view.ProjectId = authInfo.GetProjectId()
+	view.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -160,6 +182,7 @@ func (h *Handler) UpdateView(c *gin.Context) {
 
 // DeleteView godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID delete_view
 // @Router /v1/view/{view_id} [DELETE]
 // @Summary Delete view
@@ -186,9 +209,15 @@ func (h *Handler) DeleteView(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -196,7 +225,7 @@ func (h *Handler) DeleteView(c *gin.Context) {
 		context.Background(),
 		&obs.ViewPrimaryKey{
 			Id:        viewID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -208,8 +237,9 @@ func (h *Handler) DeleteView(c *gin.Context) {
 	h.handleResponse(c, http.NoContent, resp)
 }
 
-// GetViewLists godoc
+// GetViewList godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID get_view_list
 // @Router /v1/view [GET]
 // @Summary Get view list
@@ -230,9 +260,15 @@ func (h *Handler) GetViewList(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -240,7 +276,7 @@ func (h *Handler) GetViewList(c *gin.Context) {
 		context.Background(),
 		&obs.GetAllViewsRequest{
 			TableSlug: c.Query("table_slug"),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -254,6 +290,7 @@ func (h *Handler) GetViewList(c *gin.Context) {
 
 // ConvertHtmlToPdf godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID convert_html_to_pdf
 // @Router /v1/html-to-pdf [POST]
 // @Summary Convert html to pdf
@@ -287,9 +324,15 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -298,7 +341,7 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		&obs.HtmlBody{
 			Data:      structData,
 			Html:      html.Html,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -312,6 +355,7 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 
 // ConvertTemplateToHtml godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID convert_template_to_html
 // @Router /v1/template-to-html [POST]
 // @Summary Convert template to html
@@ -346,9 +390,15 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -357,7 +407,7 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		&obs.HtmlBody{
 			Data:      structData,
 			Html:      html.Html,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
@@ -10,6 +11,7 @@ import (
 
 // GetAllSections godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID get_all_sections
 // @Router /v1/section [GET]
 // @Summary Get all sections
@@ -37,6 +39,12 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
 
 	resp, err := services.SectionService().GetAll(
 		context.Background(),
@@ -44,7 +52,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 			TableId:   c.Query("table_id"),
 			TableSlug: c.Query("table_slug"),
 			RoleId:    authInfo.GetRoleId(),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -58,6 +66,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 
 // UpdateSection godoc
 // @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @ID update_section
 // @Router /v1/section [PUT]
 // @Summary Update section
@@ -78,12 +87,18 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	sections.ProjectId = authInfo.GetProjectId()
+	sections.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)

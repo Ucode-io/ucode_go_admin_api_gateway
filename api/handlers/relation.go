@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -12,6 +13,8 @@ import (
 // CreateRelation godoc
 // @ID create_relation
 // @Router /v1/relation [POST]
+// @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @Summary Create relation
 // @Description Create relation
 // @Tags Relation
@@ -30,12 +33,19 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	relation.ProjectId = authInfo.GetProjectId()
+	relation.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -57,10 +67,12 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
-// GetAllRelationss godoc
+// GetAllRelations godoc
 // @Security ApiKeyAuth
 // @ID get_all_relations
 // @Router /v1/relation [GET]
+// @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @Summary Get all relations
 // @Description Get all relations
 // @Tags Relation
@@ -90,9 +102,15 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -103,7 +121,7 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 			Offset:    int32(offset),
 			TableSlug: c.DefaultQuery("table_slug", ""),
 			TableId:   c.DefaultQuery("table_id", ""),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -119,6 +137,8 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 // @Security ApiKeyAuth
 // @ID update_relation
 // @Router /v1/relation [PUT]
+// @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @Summary Update relation
 // @Description Update relation
 // @Tags Relation
@@ -137,12 +157,18 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	relation.ProjectId = authInfo.GetProjectId()
+	relation.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -168,6 +194,8 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 // @Security ApiKeyAuth
 // @ID delete_relation
 // @Router /v1/relation/{relation_id} [DELETE]
+// @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @Summary Delete Relation
 // @Description Delete Relation
 // @Tags Relation
@@ -192,9 +220,15 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -202,7 +236,7 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 		context.Background(),
 		&obs.RelationPrimaryKey{
 			Id:        relationID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -218,6 +252,8 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 // @Security ApiKeyAuth
 // @ID get_relation_cascaders
 // @Router /v1/get-relation-cascading/{table_slug} [GET]
+// @Security ApiKeyAuth
+// @Param resource_id header string true "resource_id"
 // @Summary Get all relations
 // @Description Get all relations
 // @Tags Relation
@@ -236,9 +272,15 @@ func (h *Handler) GetRelationCascaders(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -246,7 +288,7 @@ func (h *Handler) GetRelationCascaders(c *gin.Context) {
 		context.Background(),
 		&obs.GetCascadingRequest{
 			TableSlug: c.Param("table_slug"),
-			ProjectId: authInfo.ProjectId,
+			ProjectId: resourceId.(string),
 		},
 	)
 
