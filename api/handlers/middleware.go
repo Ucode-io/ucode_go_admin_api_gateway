@@ -33,6 +33,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			ok  bool
 		)
 		origin := c.GetHeader("origin")
+		fmt.Println("origin", origin)
 		if strings.Contains(origin, CLIENT_HOST) {
 			res, ok = h.hasAccess(c)
 			if !ok {
