@@ -42,7 +42,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			}
 		}
 
-		resourceId := c.GetHeader("resource_id")
+		resourceId := c.GetHeader("ResourceId")
 		fmt.Println("resourceId::::", resourceId)
 
 		requestDump, err := httputil.DumpRequest(c.Request, true)
