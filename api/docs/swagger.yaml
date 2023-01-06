@@ -317,8 +317,6 @@ definitions:
         type: string
       project_id:
         type: string
-      project_title:
-        type: string
       resource:
         $ref: '#/definitions/company_service.Resource'
       user_id:
@@ -432,6 +430,8 @@ definitions:
         type: integer
       service_type:
         type: integer
+      title:
+        type: string
     type: object
   company_service.Resource_Credentials:
     properties:

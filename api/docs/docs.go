@@ -13854,9 +13854,6 @@ var doc = `{
                 "project_id": {
                     "type": "string"
                 },
-                "project_title": {
-                    "type": "string"
-                },
                 "resource": {
                     "$ref": "#/definitions/company_service.Resource"
                 },
@@ -14031,6 +14028,9 @@ var doc = `{
                 },
                 "service_type": {
                     "type": "integer"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },

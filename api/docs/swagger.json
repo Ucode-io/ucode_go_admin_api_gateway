@@ -13836,9 +13836,6 @@
                 "project_id": {
                     "type": "string"
                 },
-                "project_title": {
-                    "type": "string"
-                },
                 "resource": {
                     "$ref": "#/definitions/company_service.Resource"
                 },
@@ -14013,6 +14010,9 @@
                 },
                 "service_type": {
                     "type": "integer"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
