@@ -7,7 +7,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
-	
+
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -15,7 +15,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Create godoc
+// CreateObject godoc
 // @Security ApiKeyAuth
 // @ID create_object
 // @Router /v1/object/{table_slug}/ [POST]
@@ -38,9 +38,16 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -71,7 +78,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 				&obs.CommonMessage{
 					TableSlug: key[1:],
 					Data:      mapToStruct,
-					ProjectId: authInfo.GetProjectId(),
+					ProjectId: resourceId.(string),
 				},
 			)
 
@@ -103,7 +110,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -115,7 +122,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
-// GetObjectByID godoc
+// GetSingle godoc
 // @Security ApiKeyAuth
 // @ID get_object_by_id
 // @Router /v1/object/{table_slug}/{object_id} [GET]
@@ -155,9 +162,16 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -166,7 +180,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -215,9 +229,16 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -226,7 +247,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -301,9 +322,16 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -312,7 +340,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -324,7 +352,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 	h.handleResponse(c, http.NoContent, resp)
 }
 
-// GetAllObjects godoc
+// GetList godoc
 // @Security ApiKeyAuth
 // @ID get_list_objects
 // @Router /v1/object/get-list/{table_slug} [POST]
@@ -368,9 +396,16 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -379,7 +414,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -391,7 +426,7 @@ func (h *Handler) GetList(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
-// GetAllObjects godoc
+// GetListInExcel godoc
 // @Security ApiKeyAuth
 // @ID get_list_objects_in_excel
 // @Router /v1/object/excel/{table_slug} [POST]
@@ -427,9 +462,16 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -438,7 +480,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -471,12 +513,18 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	m2mMessage.ProjectId = authInfo.GetProjectId()
+	m2mMessage.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -498,7 +546,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	h.handleResponse(c, http.NoContent, resp)
 }
 
-// UpdateMany2Many godoc
+// AppendManyToMany godoc
 // @Security ApiKeyAuth
 // @ID append_many2many
 // @Router /v1/many-to-many [PUT]
@@ -519,12 +567,18 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	m2mMessage.ProjectId = authInfo.GetProjectId()
+	m2mMessage.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -582,9 +636,16 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -593,7 +654,7 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -629,9 +690,16 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -686,7 +754,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 			TableSlug:     c.Param("table_slug"),
 			Data:          structData,
 			UpdatedFields: objectRequest.UpdatedFields,
-			ProjectId:     authInfo.GetProjectId(),
+			ProjectId:     resourceId.(string),
 		},
 	)
 
@@ -720,7 +788,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 
 // MultipleUpdateObject godoc
 // @Security ApiKeyAuth
-// @ID multipe_update_object
+// @ID multiple_update_object
 // @Router /v1/object/multiple-update/{table_slug} [PUT]
 // @Summary Multiple Update object
 // @Description Multiple Update object
@@ -755,9 +823,15 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -766,7 +840,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -814,6 +888,13 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
 	//tokenInfo := h.GetAuthInfo
 	objectRequest.Data["tables"] = authInfo.GetTables()
 	objectRequest.Data["user_id_from_token"] = authInfo.GetUserId()
@@ -830,7 +911,7 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: authInfo.ProjectId,
+			ProjectId: resourceId.(string),
 		},
 	)
 
