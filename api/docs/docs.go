@@ -6753,6 +6753,13 @@ var doc = `{
                 "operationId": "get_all_fields",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -6875,6 +6882,13 @@ var doc = `{
                 "operationId": "update_field",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateFieldRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -6960,6 +6974,13 @@ var doc = `{
                 "summary": "Create field",
                 "operationId": "create_field",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateFieldRequestBody",
                         "name": "table",
@@ -7141,6 +7162,13 @@ var doc = `{
                 "summary": "Delete Field",
                 "operationId": "delete_field",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "field_id",
@@ -8312,6 +8340,13 @@ var doc = `{
                 "operationId": "append_many2many",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateMany2ManyRequestBody",
                         "name": "object",
                         "in": "body",
@@ -8398,6 +8433,13 @@ var doc = `{
                 "operationId": "delete_many2many",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "DeleteManyToManyBody",
                         "name": "object",
                         "in": "body",
@@ -8470,6 +8512,13 @@ var doc = `{
                 "summary": "Upsert object",
                 "operationId": "upsert_object",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",
@@ -8567,6 +8616,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -8660,6 +8716,13 @@ var doc = `{
                 "summary": "Get financial analytics",
                 "operationId": "get_financial_analytics",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",
@@ -8757,6 +8820,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -8850,6 +8920,13 @@ var doc = `{
                 "summary": "Multiple Update object",
                 "operationId": "multiple_update_object",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",
@@ -8947,6 +9024,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -9040,6 +9124,13 @@ var doc = `{
                 "summary": "Update object",
                 "operationId": "update_object",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",
@@ -9137,6 +9228,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -9232,6 +9330,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -9321,6 +9426,13 @@ var doc = `{
                 "summary": "Delete object",
                 "operationId": "delete_object",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",

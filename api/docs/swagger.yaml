@@ -5934,6 +5934,11 @@ paths:
       description: Get all fields
       operationId: get_all_fields
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - in: query
         name: limit
         type: integer
@@ -6002,6 +6007,11 @@ paths:
       description: Create field
       operationId: create_field
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: CreateFieldRequestBody
         in: body
         name: table
@@ -6049,6 +6059,11 @@ paths:
       description: Update field
       operationId: update_field
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: UpdateFieldRequestBody
         in: body
         name: relation
@@ -6149,6 +6164,11 @@ paths:
       description: Delete Field
       operationId: delete_field
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: field_id
         in: path
         name: field_id
@@ -6791,6 +6811,11 @@ paths:
       description: Delete Many2Many
       operationId: delete_many2many
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: DeleteManyToManyBody
         in: body
         name: object
@@ -6831,6 +6856,11 @@ paths:
       description: Update many-to-many
       operationId: append_many2many
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: UpdateMany2ManyRequestBody
         in: body
         name: object
@@ -6879,6 +6909,11 @@ paths:
       description: Upsert object
       operationId: upsert_object
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -6932,6 +6967,11 @@ paths:
       description: Update object
       operationId: update_object
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -6985,6 +7025,11 @@ paths:
       description: Create object
       operationId: create_object
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -7038,6 +7083,11 @@ paths:
       description: Delete object
       operationId: delete_object
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -7088,6 +7138,11 @@ paths:
       description: Get object by id
       operationId: get_object_by_id
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -7140,6 +7195,11 @@ paths:
       description: Get all objects in excel
       operationId: get_list_objects_in_excel
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -7193,6 +7253,11 @@ paths:
       description: Get financial analytics
       operationId: get_financial_analytics
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -7246,6 +7311,11 @@ paths:
       description: Get all objects
       operationId: get_list_objects
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -7299,6 +7369,11 @@ paths:
       description: Multiple Update object
       operationId: multiple_update_object
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -7352,6 +7427,11 @@ paths:
       description: object details
       operationId: get_object_details
       parameters:
+      - description: resource_id
+        in: header
+        name: resource_id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug

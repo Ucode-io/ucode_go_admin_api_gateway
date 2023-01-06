@@ -6735,6 +6735,13 @@
                 "operationId": "get_all_fields",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -6857,6 +6864,13 @@
                 "operationId": "update_field",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateFieldRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -6942,6 +6956,13 @@
                 "summary": "Create field",
                 "operationId": "create_field",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateFieldRequestBody",
                         "name": "table",
@@ -7123,6 +7144,13 @@
                 "summary": "Delete Field",
                 "operationId": "delete_field",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "field_id",
@@ -8294,6 +8322,13 @@
                 "operationId": "append_many2many",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateMany2ManyRequestBody",
                         "name": "object",
                         "in": "body",
@@ -8380,6 +8415,13 @@
                 "operationId": "delete_many2many",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "DeleteManyToManyBody",
                         "name": "object",
                         "in": "body",
@@ -8452,6 +8494,13 @@
                 "summary": "Upsert object",
                 "operationId": "upsert_object",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",
@@ -8549,6 +8598,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -8642,6 +8698,13 @@
                 "summary": "Get financial analytics",
                 "operationId": "get_financial_analytics",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",
@@ -8739,6 +8802,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -8832,6 +8902,13 @@
                 "summary": "Multiple Update object",
                 "operationId": "multiple_update_object",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",
@@ -8929,6 +9006,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -9022,6 +9106,13 @@
                 "summary": "Update object",
                 "operationId": "update_object",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",
@@ -9119,6 +9210,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -9214,6 +9312,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -9303,6 +9408,13 @@
                 "summary": "Delete object",
                 "operationId": "delete_object",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",
