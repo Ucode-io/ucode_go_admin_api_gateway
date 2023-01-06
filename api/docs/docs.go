@@ -8848,7 +8848,7 @@ var doc = `{
                     "Object"
                 ],
                 "summary": "Multiple Update object",
-                "operationId": "multipe_update_object",
+                "operationId": "multiple_update_object",
                 "parameters": [
                     {
                         "type": "string",

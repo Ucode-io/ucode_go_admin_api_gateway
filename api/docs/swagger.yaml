@@ -7297,7 +7297,7 @@ paths:
       consumes:
       - application/json
       description: Multiple Update object
-      operationId: multipe_update_object
+      operationId: multiple_update_object
       parameters:
       - description: table_slug
         in: path

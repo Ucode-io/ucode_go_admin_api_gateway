@@ -30,3 +30,25 @@ message Resource {
     string id = 4;
     string title = 5;
 }
+
+message Environment {
+    string id = 1;
+    string project_id = 2;
+    string name = 3;
+    string display_color = 4;
+    string description = 5;
+}
+
+message EnvironmentWithResources {
+    message Resources {
+        int32 count = 1;
+        repeated Resource resources = 2;
+    }
+
+    string id = 1;
+    string project_id = 2;
+    string name = 3;
+    string display_color = 4;
+    string description = 5;
+    Resources resources = 6;
+}
