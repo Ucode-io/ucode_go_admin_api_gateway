@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -213,6 +214,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
 		return
 	}
+	fmt.Println("resourceID:::::::", resourceId.(string))
 
 	resp, err := services.TableService().GetAll(
 		context.Background(),
