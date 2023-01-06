@@ -12,9 +12,14 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const (
+	SUPERADMIN_HOST string = "admin.u-code.io"
+	CLIENT_HOST     string = "app.u-code.io"
+)
+
 func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		
+
 		c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
 	}
@@ -22,10 +27,17 @@ func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 
 func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		res, ok := h.hasAccess(c)
-		if !ok {
-			c.Abort()
-			return
+		var (
+			res *auth_service.V2HasAccessUserRes
+			ok  bool
+		)
+		origin := c.GetHeader("origin")
+		if strings.Contains(origin, CLIENT_HOST) {
+			res, ok = h.hasAccess(c)
+			if !ok {
+				c.Abort()
+				return
+			}
 		}
 
 		resourceId := c.GetHeader("resource_id")
