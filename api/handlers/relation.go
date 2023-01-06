@@ -69,6 +69,7 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 
 // GetAllRelations godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_all_relations
 // @Router /v1/relation [GET]
 // @Security ApiKeyAuth
@@ -135,6 +136,7 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 
 // UpdateRelation godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_relation
 // @Router /v1/relation [PUT]
 // @Security ApiKeyAuth
@@ -192,6 +194,7 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 
 // DeleteRelation godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_relation
 // @Router /v1/relation/{relation_id} [DELETE]
 // @Security ApiKeyAuth
@@ -250,6 +253,7 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 
 // GetRelationCascaders godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_relation_cascaders
 // @Router /v1/get-relation-cascading/{table_slug} [GET]
 // @Security ApiKeyAuth

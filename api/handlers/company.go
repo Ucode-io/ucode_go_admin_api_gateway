@@ -15,6 +15,7 @@ import (
 
 // // CreateCompany godoc
 // // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // // @ID create_company
 // // @Router /v1/company [POST]
 // // @Summary Create Company
@@ -54,6 +55,7 @@ import (
 
 // GetCompanyByID godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_company_by_id
 // @Router /v1/company/{company_id} [GET]
 // @Summary Get Company by id
@@ -84,6 +86,7 @@ func (h *Handler) GetCompanyByID(c *gin.Context) {
 
 // GetCompanyList godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_company_list
 // @Router /v1/company [GET]
 // @Summary Get all companies
@@ -129,6 +132,7 @@ func (h *Handler) GetCompanyList(c *gin.Context) {
 
 // GetCompanyListWithProjects godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_company_list
 // @Router /v1/company [GET]
 // @Summary Get all companies
@@ -174,6 +178,7 @@ func (h *Handler) GetCompanyListWithProjects(c *gin.Context) {
 
 // UpdateCompany godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_company
 // @Router /v1/company/{company_id} [PUT]
 // @Summary Update company
@@ -237,6 +242,7 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 
 // DeleteCompany godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_company
 // @Router /v1/company/{company_id} [DELETE]
 // @Summary Delete Company
@@ -277,6 +283,7 @@ func (h *Handler) DeleteCompany(c *gin.Context) {
 
 // CreateCompanyProject godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_project
 // @Router /v1/company-project [POST]
 // @Summary Create Company
@@ -335,6 +342,7 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 
 // GetCompanyProjectById godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_company_project_id
 // @Router /v1/company-project/{project_id} [GET]
 // @Summary Get Project By Id
@@ -368,6 +376,7 @@ func (h *Handler) GetCompanyProjectById(c *gin.Context) {
 
 // GetCompanyProjectList godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_project_list
 // @Router /v1/company-project [GET]
 // @Summary Get all projects
@@ -413,6 +422,7 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 
 // UpdateCompanyProject godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_project
 // @Router /v1/company-project/{project_id} [PUT]
 // @Summary Update Project
@@ -455,6 +465,7 @@ func (h *Handler) UpdateCompanyProject(c *gin.Context) {
 
 // DeleteCompanyProject godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_project
 // @Router /v1/company-project/{project_id} [DELETE]
 // @Summary Delete Project
@@ -486,6 +497,7 @@ func (h *Handler) DeleteCompanyProject(c *gin.Context) {
 
 // AddProjectResource godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID add_project_resource
 // @Router /v1/company/project/resource [POST]
 // @Summary Add ProjectResource
@@ -521,6 +533,7 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 
 // CreateProjectResource godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_project_resource
 // @Router /v1/company/project/create-resource [POST]
 // @Summary Create ProjectResource
@@ -556,6 +569,7 @@ func (h *Handler) CreateProjectResource(c *gin.Context) {
 
 // RemoveProjectResource godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID remove_project_resource
 // @Router /v1/company/project/resource [DELETE]
 // @Summary Remove ProjectResource
@@ -591,6 +605,7 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 
 // GetResource godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_resource_id
 // @Router /v1/company/project/resource/{resource_id} [GET]
 // @Summary Get Resource by id
@@ -621,6 +636,7 @@ func (h *Handler) GetResource(c *gin.Context) {
 
 // GetResourceList godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_resource_list
 // @Router /v1/company/project/resource [GET]
 // @Summary Get all companies
@@ -666,6 +682,7 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 
 // ReconnectProjectResource godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID reconnect_project_resource
 // @Router /v1/company/project/resource/reconnect [POST]
 // @Summary Reconnect ProjectResource
@@ -704,6 +721,7 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 
 // AddProjectResourceInUcodeCluster godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID add_project_resource_in_ucode
 // @Router /v1/company/project/ucode-resource [POST]
 // @Summary Add ProjectResource In Ucode Cluster

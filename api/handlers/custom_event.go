@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -12,6 +13,7 @@ import (
 
 // CreateCustomEvent godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_custom_event
 // @Router /v1/custom-event [POST]
 // @Summary Create CustomEvent
@@ -32,12 +34,19 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	customevent.ProjectId = authInfo.GetProjectId()
+	customevent.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -61,6 +70,7 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 
 // GetCustomEventByID godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_custom_event_by_id
 // @Router /v1/custom-event/{custom_event_id} [GET]
 // @Summary Get CustomEvent by id
@@ -87,9 +97,16 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -97,7 +114,7 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
 			Id:        customeventID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -110,6 +127,7 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 
 // GetAllCustomEvents godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_all_custom_events
 // @Router /v1/custom-event [GET]
 // @Summary Get all custom events
@@ -129,9 +147,16 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -139,7 +164,7 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		context.Background(),
 		&obs.GetCustomEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -153,6 +178,7 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 
 // UpdateCustomEvent godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_Customevent
 // @Router /v1/custom-event [PUT]
 // @Summary Update Customevent
@@ -173,9 +199,16 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -196,7 +229,7 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 			TableSlug: customevent.TableSlug,
 			Url:       customevent.Url,
 			Label:     customevent.Label,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -210,6 +243,7 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 
 // DeleteCustomEvent godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_custom_event
 // @Router /v1/custom-event/{custom_event_id} [DELETE]
 // @Summary Delete CustomEvent
@@ -235,9 +269,16 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -245,7 +286,7 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
 			Id:        customeventID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 

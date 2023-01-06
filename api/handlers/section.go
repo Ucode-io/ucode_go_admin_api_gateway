@@ -39,6 +39,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 		h.handleResponse(c, http.Forbidden, err.Error())
 		return
 	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")

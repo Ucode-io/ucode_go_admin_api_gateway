@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -11,8 +12,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Create Web Page godoc
+// CreateWebPage godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_web_page
 // @Router /v3/web_pages [POST]
 // @Summary Create Web Page
@@ -39,9 +41,16 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -50,7 +59,7 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 		&obs.CreateWebPageRequest{
 			Title:      webPage.Title,
 			Components: components,
-			ProjectId:  authInfo.GetProjectId(),
+			ProjectId:  resourceId.(string),
 		},
 	)
 
@@ -62,8 +71,9 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
-// GetWebPageById godoc
+// GetWebPagesById godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_web_page_by_id
 // @Router /v3/web_pages/{guid} [GET]
 // @Summary Get Web Page By Id
@@ -77,9 +87,16 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetWebPagesById(c *gin.Context) {
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err := errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -87,7 +104,7 @@ func (h *Handler) GetWebPagesById(c *gin.Context) {
 		context.Background(),
 		&obs.WebPageId{
 			Id:        c.Param("guid"),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -99,8 +116,9 @@ func (h *Handler) GetWebPagesById(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
-// GetWebPage godoc
+// GetWebPagesList godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_web_page_list
 // @Router /v3/web_pages [GET]
 // @Summary Get Web Page List
@@ -125,9 +143,16 @@ func (h *Handler) GetWebPagesList(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -136,7 +161,7 @@ func (h *Handler) GetWebPagesList(c *gin.Context) {
 		&obs.GetAllWebPagesRequest{
 			Limit:     int32(limit),
 			Offset:    int32(offset),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -150,6 +175,7 @@ func (h *Handler) GetWebPagesList(c *gin.Context) {
 
 // UpdateWebPage godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_web_page
 // @Router /v3/web_pages/{guid} [PUT]
 // @Summary Update Web Page
@@ -178,9 +204,16 @@ func (h *Handler) UpdateWebPage(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -190,7 +223,7 @@ func (h *Handler) UpdateWebPage(c *gin.Context) {
 			Id:         guid,
 			Title:      updateWebPage.Title,
 			Components: components,
-			ProjectId:  authInfo.GetProjectId(),
+			ProjectId:  resourceId.(string),
 		},
 	)
 
@@ -204,6 +237,7 @@ func (h *Handler) UpdateWebPage(c *gin.Context) {
 
 // DeleteWebPage godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_web_page
 // @Router /v3/web_pages/{guid} [DELETE]
 // @Summary Delete Query Folder
@@ -223,9 +257,16 @@ func (h *Handler) DeleteWebPage(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err := errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -233,7 +274,7 @@ func (h *Handler) DeleteWebPage(c *gin.Context) {
 		context.Background(),
 		&obs.WebPageId{
 			Id:        webPageId,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 

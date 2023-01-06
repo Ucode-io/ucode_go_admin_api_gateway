@@ -12,8 +12,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreatePatient godoc
+// CreateDirections godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_patient
 // @Router /v1/alfalab/directions [POST]
 // @Summary Create Directions
@@ -106,8 +107,9 @@ func (h *Handler) CreateDirections(c *gin.Context) {
 	h.handleResponse(c, https.Created, resp)
 }
 
-// GetSingleDocument godoc
+// GetReferral godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID query_referral_result
 // @Router /v1/alfalab/referral [GET]
 // @Summary query referral result

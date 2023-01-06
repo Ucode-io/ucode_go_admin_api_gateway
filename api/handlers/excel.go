@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -12,6 +13,7 @@ import (
 
 // ExcelReader godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID excel_reader
 // @Router /v1/excel/{excel_id} [GET]
 // @Summary Get excel writer
@@ -33,9 +35,16 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -43,7 +52,7 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 		context.Background(),
 		&object_builder_service.ExcelReadRequest{
 			Id:        excelId,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -56,6 +65,7 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 
 // ExcelReader godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID excel_to_db
 // @Router /v1/excel/excel_to_db/{excel_id} [POST]
 // @Summary Post excel writer
@@ -90,9 +100,16 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -102,7 +119,7 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 			Id:        c.Param("excel_id"),
 			TableSlug: excelRequest.TableSlug,
 			Data:      data,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {

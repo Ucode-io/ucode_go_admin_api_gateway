@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/http"
@@ -13,6 +14,7 @@ import (
 
 // GetEventLogs godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_event_logs
 // @Router /v1/event-log [GET]
 // @Summary Get event logs
@@ -42,9 +44,16 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -54,7 +63,7 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 			TableSlug: c.Query("table_slug"),
 			Offset:    int32(offset),
 			Limit:     int32(limit),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		})
 
 	if err != nil {
@@ -67,6 +76,7 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 
 // GetEventLogById godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_event_log
 // @Router /v1/event-log/{event_log_id} [GET]
 // @Summary Get event log
@@ -93,16 +103,23 @@ func (h *Handler) GetEventLogById(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 	resp, err := services.EventLogsService().GetSingle(
 		context.Background(),
 		&obs.GetEventLogById{
 			Id:        eventLogID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {

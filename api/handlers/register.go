@@ -66,9 +66,16 @@ func (h *Handler) SendCode(c *gin.Context) {
 
 	phone := helper.ConverPhoneNumberToMongoPhoneFormat(request.Recipient)
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -77,7 +84,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 		&pbObject.PhoneOtpRequst{
 			PhoneNumber: phone,
 			ClientType:  request.ClientType,
-			ProjectId:   authInfo.GetProjectId(),
+			ProjectId:   resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -167,9 +174,16 @@ func (h *Handler) Verify(c *gin.Context) {
 	}
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -178,7 +192,7 @@ func (h *Handler) Verify(c *gin.Context) {
 		&pb.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
 			Tables:    body.Tables,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -225,9 +239,16 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -236,7 +257,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -249,7 +270,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		&pbObject.PhoneOtpRequst{
 			PhoneNumber: body.Data["phone"].(string),
 			ClientType:  "PATIENT",
-			ProjectId:   authInfo.GetProjectId(),
+			ProjectId:   resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -263,7 +284,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		&pb.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
 			Tables:    []*pb.Object{},
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {

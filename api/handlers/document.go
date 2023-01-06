@@ -12,6 +12,7 @@ import (
 
 // CreateDocument godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_document
 // @Router /v1/document [POST]
 // @Summary Create Document
@@ -32,12 +33,19 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	document.ProjectId = authInfo.GetProjectId()
+	document.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -61,6 +69,7 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 
 // GetSingleDocument godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_document_by_id
 // @Router /v1/document/{document_id} [GET]
 // @Summary Get single document
@@ -87,9 +96,16 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -97,7 +113,7 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 		context.Background(),
 		&obs.DocumentPrimaryKey{
 			Id:        documentID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if resp == nil {
@@ -115,6 +131,7 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 
 // UpdateDocument godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_document
 // @Router /v1/document [PUT]
 // @Summary Update Document
@@ -135,12 +152,19 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	document.ProjectId = authInfo.GetProjectId()
+	document.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -164,6 +188,7 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 
 // DeleteDocument godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_document
 // @Router /v1/document/{document_id} [DELETE]
 // @Summary Delete Document
@@ -189,9 +214,16 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -199,7 +231,7 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 		context.Background(),
 		&obs.DocumentPrimaryKey{
 			Id:        documentID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -213,6 +245,7 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 
 // GetDocumentLists godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_document_list
 // @Router /v1/document [GET]
 // @Summary Get Document list
@@ -238,9 +271,16 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -251,7 +291,7 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 			Tags:      c.Query("tags"),
 			StartDate: c.Query("start_date"),
 			EndDate:   c.Query("end_date"),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 

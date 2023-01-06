@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -13,6 +14,7 @@ import (
 
 // UpdateCoordinates godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID panel_coordinates
 // @Router /v1/analytics/panel/updateCoordinates [POST]
 // @Summary Update panel coordinates
@@ -33,12 +35,19 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	panel_coordinates.ProjectId = authInfo.GetProjectId()
+	panel_coordinates.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -62,6 +71,7 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 
 // GetSinglePanel godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_panel_by_id
 // @Router /v1/analytics/panel/{panel_id} [GET]
 // @Summary Get single panel
@@ -88,9 +98,16 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -98,7 +115,7 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 		context.Background(),
 		&obs.PanelPrimaryKey{
 			Id:        panelID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -111,6 +128,7 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 
 // CreatePanel godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_panel
 // @Router /v1/analytics/panel [POST]
 // @Summary Create panel
@@ -146,12 +164,19 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 		HasPagination: panelRequest.HasPagination,
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	panel.ProjectId = authInfo.GetProjectId()
+	panel.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -175,6 +200,7 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 
 // GetAllPanels godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_all_panels
 // @Router /v1/analytics/panel [GET]
 // @Summary Get all panels
@@ -195,9 +221,16 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -205,7 +238,7 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 		context.Background(),
 		&obs.GetAllPanelsRequest{
 			Title:     c.DefaultQuery("title", ""),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -220,6 +253,7 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 
 // UpdatePanel godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_panel
 // @Router /v1/analytics/panel [PUT]
 // @Summary Update panel
@@ -256,12 +290,19 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 		HasPagination: panelRequest.HasPagination,
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	panel.ProjectId = authInfo.GetProjectId()
+	panel.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -285,6 +326,7 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 
 // DeletePanel godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_panel
 // @Router /v1/analytics/panel/{panel_id} [DELETE]
 // @Summary Delete Panel
@@ -311,9 +353,16 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -321,7 +370,7 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 		context.Background(),
 		&obs.PanelPrimaryKey{
 			Id:        panelID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 

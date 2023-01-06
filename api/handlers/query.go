@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	as "ucode/ucode_go_api_gateway/genproto/analytics_service"
@@ -10,8 +11,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetAllQueryRows godoc
+// GetQueryRows godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_list_query_rows
 // @Router /v1/query [POST]
 // @Summary Get all query rows
@@ -45,9 +47,16 @@ func (h *Handler) GetQueryRows(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -56,7 +65,7 @@ func (h *Handler) GetQueryRows(c *gin.Context) {
 		&as.CommonInput{
 			Data:      structData,
 			Query:     queryReq.Query,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {

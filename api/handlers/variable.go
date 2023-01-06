@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -11,6 +12,7 @@ import (
 
 // CreateVariable godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_variable
 // @Router /v1/analytics/variable [POST]
 // @Summary Create variable
@@ -31,12 +33,19 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	variable.ProjectId = authInfo.GetProjectId()
+	variable.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -60,6 +69,7 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 
 // GetSingleVariable godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_variable_by_id
 // @Router /v1/analytics/variable/{variable_id} [GET]
 // @Summary Get single variable
@@ -86,9 +96,16 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -96,7 +113,7 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 		context.Background(),
 		&obs.VariablePrimaryKey{
 			Id:        variableID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -109,6 +126,7 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 
 // UpdateVariable godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_variable
 // @Router /v1/analytics/variable [PUT]
 // @Summary Update variable
@@ -129,12 +147,19 @@ func (h *Handler) UpdateVariable(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	variable.ProjectId = authInfo.GetProjectId()
+	variable.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -158,6 +183,7 @@ func (h *Handler) UpdateVariable(c *gin.Context) {
 
 // DeleteVariable godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_variable
 // @Router /v1/analytics/variable/{variable_id} [DELETE]
 // @Summary Delete variable
@@ -184,13 +210,19 @@ func (h *Handler) DeleteVariable(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	//authInfo, err := h.GetAuthInfo(c)
 
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
 	resp, err := services.VariableService().Delete(
 		context.Background(),
 		&obs.VariablePrimaryKey{
 			Id:        variableID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -204,6 +236,7 @@ func (h *Handler) DeleteVariable(c *gin.Context) {
 
 // GetAllVariables godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_variable_list
 // @Router /v1/analytics/variable [GET]
 // @Summary Get variable list
@@ -224,14 +257,20 @@ func (h *Handler) GetAllVariables(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	//authInfo, err := h.GetAuthInfo(c)
 
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
 	resp, err := services.VariableService().GetList(
 		context.Background(),
 		&obs.GetAllVariablesRequest{
 			Slug:        c.Query("slug"),
 			DashboardId: c.Query("dashboard_id"),
-			ProjectId:   authInfo.GetProjectId(),
+			ProjectId:   resourceId.(string),
 		},
 	)
 

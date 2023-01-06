@@ -10,6 +10,7 @@ import (
 
 // CreateEnvironment godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_environment
 // @Router /v1/environment [POST]
 // @Summary Create environment
@@ -45,6 +46,7 @@ func (h *Handler) CreateEnvironment(c *gin.Context) {
 
 // GetSingleEnvironment godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_environment_by_id
 // @Router /v1/environment/{environment_id} [GET]
 // @Summary Get single environment
@@ -81,6 +83,7 @@ func (h *Handler) GetSingleEnvironment(c *gin.Context) {
 
 // UpdateEnvironment godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_environment
 // @Router /v1/environment [PUT]
 // @Summary Update environment
@@ -116,6 +119,7 @@ func (h *Handler) UpdateEnvironment(c *gin.Context) {
 
 // DeleteEnvironment godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_environment
 // @Router /v1/environment/{environment_id} [DELETE]
 // @Summary Delete environment
@@ -150,6 +154,7 @@ func (h *Handler) DeleteEnvironment(c *gin.Context) {
 
 // GetAllEnvironments godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_environment_list
 // @Router /v1/environment [GET]
 // @Summary Get environment list

@@ -2,14 +2,16 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"github.com/gin-gonic/gin"
 )
 
-// GetSingleDocument godoc
+// GetNewGeneratedBarCode godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID generate_new_barcode_for_items
 // @Router /v1/barcode-generator/{table_slug} [GET]
 // @Summary get barcode
@@ -31,9 +33,16 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -41,7 +50,7 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 		context.Background(),
 		&obs.BarcodeGenerateReq{
 			TableSlug: tableSlug,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {

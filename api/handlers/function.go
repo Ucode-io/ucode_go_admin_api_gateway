@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -13,6 +14,7 @@ import (
 
 // CreateFunction godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_function
 // @Router /v1/function [POST]
 // @Summary Create Function
@@ -46,9 +48,16 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -59,7 +68,7 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 			Name:        function.Name,
 			Description: function.Description,
 			Body:        structData,
-			ProjectId:   authInfo.GetProjectId(),
+			ProjectId:   resourceId.(string),
 		},
 	)
 
@@ -73,6 +82,7 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 
 // GetFunctionByID godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_function_by_id
 // @Router /v1/function/{function_id} [GET]
 // @Summary Get Function by id
@@ -99,9 +109,16 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -109,7 +126,7 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id:        functionID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -122,6 +139,7 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 
 // GetAllFunctions godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_all_functions
 // @Router /v1/function [GET]
 // @Summary Get all functions
@@ -148,9 +166,16 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -159,7 +184,7 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		&obs.GetAllFunctionsRequest{
 			Search:    c.DefaultQuery("search", ""),
 			Limit:     int32(limit),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -173,6 +198,7 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 
 // UpdateFunction godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_function
 // @Router /v1/function [PUT]
 // @Summary Update function
@@ -206,9 +232,16 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -220,7 +253,7 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 			Name:        function.Name,
 			Path:        function.Path,
 			Body:        structData,
-			ProjectId:   authInfo.GetProjectId(),
+			ProjectId:   resourceId.(string),
 		},
 	)
 
@@ -234,6 +267,7 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 
 // DeleteFunction godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_function
 // @Router /v1/function/{function_id} [DELETE]
 // @Summary Delete Function
@@ -260,9 +294,16 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -270,7 +311,7 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id:        functionID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -284,6 +325,7 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 
 // InvokeFunction godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID invoke_function
 // @Router /v1/invoke_function [POST]
 // @Summary Invoke Function
@@ -311,9 +353,16 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -321,7 +370,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id:        invokeFunction.FunctionID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -340,7 +389,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 			FunctionId: invokeFunction.FunctionID,
 			ObjectIds:  invokeFunction.ObjectIDs,
 			FieldSlug:  function.Path + "_disable",
-			ProjectId:  authInfo.GetProjectId(),
+			ProjectId:  resourceId.(string),
 		},
 	)
 	if err != nil {

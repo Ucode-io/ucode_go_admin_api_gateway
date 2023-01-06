@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -33,7 +32,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			ok  bool
 		)
 		host := c.Request.Host
-		fmt.Println("host", host)
+
 		if strings.Contains(host, CLIENT_HOST) {
 			res, ok = h.hasAccess(c)
 			if !ok {

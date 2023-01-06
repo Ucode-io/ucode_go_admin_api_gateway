@@ -64,9 +64,16 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -75,7 +82,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		&pbObject.EmailOtpRequest{
 			Email:      request.Email,
 			ClientType: request.ClientType,
-			ProjectId:  authInfo.GetProjectId(),
+			ProjectId:  resourceId.(string),
 		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -94,7 +101,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 			Email:     request.Email,
 			Otp:       code,
 			ExpiresAt: expire.String()[:19],
-			// ProjectId: authInfo.GetProjectId(),
+			// ProjectId: resourceId.(string),
 		})
 
 	if err != nil {
@@ -145,9 +152,16 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -156,7 +170,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 			c.Request.Context(),
 			&pb.EmailOtpPrimaryKey{
 				Id: c.Param("sms_id"),
-				// ProjectId: authInfo.GetProjectId(),
+				// ProjectId: resourceId.(string),
 			},
 		)
 		if err != nil {
@@ -178,7 +192,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		&pb.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
 			Tables:    body.Tables,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -217,9 +231,16 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -234,7 +255,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -247,7 +268,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		&pbObject.EmailOtpRequest{
 			Email:      body.Data["email"].(string),
 			ClientType: "PATIENT",
-			ProjectId:  authInfo.GetProjectId(),
+			ProjectId:  resourceId.(string),
 		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -260,7 +281,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		&pb.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
 			Tables:    []*pb.Object{},
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())

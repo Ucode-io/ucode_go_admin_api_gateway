@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -12,6 +13,7 @@ import (
 
 // Create Query Folder godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_query_folder
 // @Router /v3/query_folder [POST]
 // @Summary Create Query Folder
@@ -32,9 +34,16 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -43,7 +52,7 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 		&obs.CreateQueryFolderRequest{
 			Title:     queryfolder.Title,
 			ParentId:  queryfolder.ParentId,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -57,6 +66,7 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 
 // GetQueryFolderById godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_query_folder
 // @Router /v3/query_folder/{guid} [GET]
 // @Summary Get Query Folder By Id
@@ -70,9 +80,16 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetQueryFolderByID(c *gin.Context) {
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err := errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -80,7 +97,7 @@ func (h *Handler) GetQueryFolderByID(c *gin.Context) {
 		context.Background(),
 		&obs.QueryFolderId{
 			Id:        c.Param("guid"),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -94,6 +111,7 @@ func (h *Handler) GetQueryFolderByID(c *gin.Context) {
 
 // GetQueryFolderList godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_query_folder_list
 // @Router /v3/query_folder [GET]
 // @Summary Get Query Folder List
@@ -118,9 +136,16 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -131,7 +156,7 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 			Offset:    int32(offset),
 			Search:    c.DefaultQuery("search", ""),
 			ParentId:  c.DefaultQuery("parent_id", ""),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -145,6 +170,7 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 
 // UpdateQueryFolder godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_query_folder
 // @Router /v3/query_folder/{guid} [PUT]
 // @Summary Update Query Folder
@@ -167,9 +193,16 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -179,7 +212,7 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 			Id:        guid,
 			Title:     queryFolder.Title,
 			ParentId:  queryFolder.ParentId,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -193,6 +226,7 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 
 // DeleteQueryFolder godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_query_folder
 // @Router /v3/query_folder/{guid} [DELETE]
 // @Summary Delete Query Folder
@@ -212,9 +246,16 @@ func (h *Handler) DeleteQueryFolder(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err := errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -222,7 +263,7 @@ func (h *Handler) DeleteQueryFolder(c *gin.Context) {
 		context.Background(),
 		&obs.QueryFolderId{
 			Id:        queryFolderId,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 

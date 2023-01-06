@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -12,6 +13,7 @@ import (
 
 // CreateDashboard godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID create_dashboard
 // @Router /v1/analytics/dashboard [POST]
 // @Summary Create dashboard
@@ -32,9 +34,16 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -42,7 +51,7 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 		// Id:         dashboardRequest.ID,
 		Name:      dashboardRequest.Name,
 		Icon:      dashboardRequest.Icon,
-		ProjectId: authInfo.GetProjectId(),
+		ProjectId: resourceId.(string),
 	}
 
 	namespace := c.GetString("namespace")
@@ -67,6 +76,7 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 
 // GetSingleDashboard godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_dashboard_by_id
 // @Router /v1/analytics/dashboard/{dashboard_id} [GET]
 // @Summary Get single dashboard
@@ -93,9 +103,16 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -103,7 +120,7 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 		context.Background(),
 		&obs.DashboardPrimaryKey{
 			Id:        dashboardID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -116,6 +133,7 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 
 // UpdateDashboard godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID update_dashboard
 // @Router /v1/analytics/dashboard [PUT]
 // @Summary Update dashboard
@@ -136,12 +154,19 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	dashboard.ProjectId = authInfo.GetProjectId()
+	dashboard.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -165,6 +190,7 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 
 // DeleteDashboard godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID delete_dashboard
 // @Router /v1/analytics/dashboard/{dashboard_id} [DELETE]
 // @Summary Delete dashboard
@@ -191,9 +217,16 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -201,7 +234,7 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 		context.Background(),
 		&obs.DashboardPrimaryKey{
 			Id:        dashboardID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 
@@ -215,6 +248,7 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 
 // GetAllDashboards godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID get_dashboard_list
 // @Router /v1/analytics/dashboard [GET]
 // @Summary Get dashboard list
@@ -234,9 +268,16 @@ func (h *Handler) GetAllDashboards(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -244,7 +285,7 @@ func (h *Handler) GetAllDashboards(c *gin.Context) {
 		context.Background(),
 		&obs.GetAllDashboardsRequest{
 			Name:      c.Query("name"),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceId.(string),
 		},
 	)
 

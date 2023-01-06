@@ -43,6 +43,7 @@ type Path struct {
 // Upload godoc
 // @ID upload_image
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @Router /v1/upload [POST]
 // @Summary Upload
 // @Description Upload
@@ -114,6 +115,7 @@ func (h *Handler) Upload(c *gin.Context) {
 
 // UploadFile godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
 // @ID upload_file
 // @Router /v1/upload-file/{table_slug}/{object_id} [POST]
 // @Summary Upload file
