@@ -26,10 +26,10 @@ type CreateEventRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	When      *When  `protobuf:"bytes,2,opt,name=when,proto3" json:"when,omitempty"`
-	Does      []*Do  `protobuf:"bytes,3,rep,name=does,proto3" json:"does,omitempty"`
-	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	When      *When  `protobuf:"bytes,2,opt,name=when,proto3" json:"when"`
+	Does      []*Do  `protobuf:"bytes,3,rep,name=does,proto3" json:"does"`
+	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *CreateEventRequest) Reset() {
@@ -97,10 +97,10 @@ type When struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AppSlug    string       `protobuf:"bytes,1,opt,name=app_slug,json=appSlug,proto3" json:"app_slug,omitempty"`
-	Action     string       `protobuf:"bytes,2,opt,name=action,proto3" json:"action,omitempty"`
-	Conditions []*Condition `protobuf:"bytes,3,rep,name=conditions,proto3" json:"conditions,omitempty"`
-	ProjectId  string       `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	AppSlug    string       `protobuf:"bytes,1,opt,name=app_slug,json=appSlug,proto3" json:"app_slug"`
+	Action     string       `protobuf:"bytes,2,opt,name=action,proto3" json:"action"`
+	Conditions []*Condition `protobuf:"bytes,3,rep,name=conditions,proto3" json:"conditions"`
+	ProjectId  string       `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *When) Reset() {
@@ -168,7 +168,7 @@ type Condition struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MatchFields []*MatchField `protobuf:"bytes,1,rep,name=match_fields,json=matchFields,proto3" json:"match_fields,omitempty"`
+	MatchFields []*MatchField `protobuf:"bytes,1,rep,name=match_fields,json=matchFields,proto3" json:"match_fields"`
 }
 
 func (x *Condition) Reset() {
@@ -215,10 +215,10 @@ type MatchField struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	LeftField        string `protobuf:"bytes,1,opt,name=left_field,json=leftField,proto3" json:"left_field,omitempty"`
-	ComparisonSymbol string `protobuf:"bytes,2,opt,name=comparison_symbol,json=comparisonSymbol,proto3" json:"comparison_symbol,omitempty"`
-	RightFieldType   string `protobuf:"bytes,3,opt,name=right_field_type,json=rightFieldType,proto3" json:"right_field_type,omitempty"`
-	RightField       string `protobuf:"bytes,4,opt,name=right_field,json=rightField,proto3" json:"right_field,omitempty"`
+	LeftField        string `protobuf:"bytes,1,opt,name=left_field,json=leftField,proto3" json:"left_field"`
+	ComparisonSymbol string `protobuf:"bytes,2,opt,name=comparison_symbol,json=comparisonSymbol,proto3" json:"comparison_symbol"`
+	RightFieldType   string `protobuf:"bytes,3,opt,name=right_field_type,json=rightFieldType,proto3" json:"right_field_type"`
+	RightField       string `protobuf:"bytes,4,opt,name=right_field,json=rightField,proto3" json:"right_field"`
 }
 
 func (x *MatchField) Reset() {
@@ -286,9 +286,9 @@ type Do struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	OpperationType string        `protobuf:"bytes,1,opt,name=opperation_type,json=opperationType,proto3" json:"opperation_type,omitempty"`
-	TableSlug      string        `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	Fields         []*MatchField `protobuf:"bytes,3,rep,name=fields,proto3" json:"fields,omitempty"`
+	OpperationType string        `protobuf:"bytes,1,opt,name=opperation_type,json=opperationType,proto3" json:"opperation_type"`
+	TableSlug      string        `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	Fields         []*MatchField `protobuf:"bytes,3,rep,name=fields,proto3" json:"fields"`
 }
 
 func (x *Do) Reset() {
@@ -349,11 +349,11 @@ type Event struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	TableSlug string `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	When      *When  `protobuf:"bytes,3,opt,name=when,proto3" json:"when,omitempty"`
-	Does      []*Do  `protobuf:"bytes,4,rep,name=does,proto3" json:"does,omitempty"`
-	ProjectId string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	TableSlug string `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	When      *When  `protobuf:"bytes,3,opt,name=when,proto3" json:"when"`
+	Does      []*Do  `protobuf:"bytes,4,rep,name=does,proto3" json:"does"`
+	ProjectId string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *Event) Reset() {
@@ -428,8 +428,8 @@ type GetEventsListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Events []*Event `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
-	Count  int32    `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Events []*Event `protobuf:"bytes,1,rep,name=events,proto3" json:"events"`
+	Count  int32    `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetEventsListResponse) Reset() {
@@ -483,8 +483,8 @@ type GetEventsListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetEventsListRequest) Reset() {
@@ -538,8 +538,8 @@ type EventPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *EventPrimaryKey) Reset() {
