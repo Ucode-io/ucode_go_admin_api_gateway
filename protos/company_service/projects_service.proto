@@ -11,16 +11,7 @@ service ProjectService {
     rpc GetById(GetProjectByIdRequest) returns (Project) {}
     rpc Update(Project) returns (Project) {}
     rpc Delete(DeleteProjectRequest) returns (EmptyProto) {}
-    rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
-    rpc CreateResource(CreateResourceReq) returns (CreateResourceRes) {}
-    rpc AddResourceInUcode(AddResourceInUcodeRequest) returns (AddResourceResponse) {}
-    rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
-    rpc GetResource(GetResourceRequest) returns (ResourceWithoutPassword) {}
-    rpc GetReourceList(GetReourceListRequest) returns (GetReourceListResponse) {}
-    rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
-    rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
     rpc GetProjects(GetProjectsRequest) returns (GetProjectsResponse) {}
-    rpc AutoConnect(GetProjectsRequest) returns (EmptyProto) {}
     rpc GetProjectsByCompanyId(GetProjectsByCompanyIdReq) returns (GetProjectsByCompanyIdRes) {}
     rpc UpdateProjectUserData (UpdateProjectUserDataReq) returns (UpdateProjectUserDataRes) {}
 }
@@ -91,12 +82,21 @@ message ResourceWithoutPassword {
         string username = 3;
         string database = 4;
     }
+    message Environment {
+        string id = 1;
+        string project_id = 2;
+        string name = 3;
+        string display_color = 4;
+        string description = 5;
+    }
+    
     ServiceType service_type = 1;
     ResourceType resource_type = 2;
     Credentials credentials = 3;
     string id = 4;
     string project_id = 5;
     string title = 6;
+    repeated Environment environments = 7;
 }
 
 message Project {

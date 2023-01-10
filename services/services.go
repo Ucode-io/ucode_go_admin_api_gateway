@@ -57,6 +57,7 @@ type ServiceManagerI interface {
 	WebPageService() object_builder_service.WebPageServiceClient
 	CascadingService() object_builder_service.CascadingServiceClient
 	EnvironmentService() company_service.EnvironmentServiceClient
+	ResourceService() company_service.ResourceServiceClient
 }
 
 type grpcClients struct {
@@ -100,6 +101,7 @@ type grpcClients struct {
 	webPageService            object_builder_service.WebPageServiceClient
 	cascadingService          object_builder_service.CascadingServiceClient
 	environmentService        company_service.EnvironmentServiceClient
+	resourceService           company_service.ResourceServiceClient
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -200,6 +202,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		webPageService:            object_builder_service.NewWebPageServiceClient(connObjectBuilderService),
 		cascadingService:          object_builder_service.NewCascadingServiceClient(connObjectBuilderService),
 		environmentService:        company_service.NewEnvironmentServiceClient(connCompanyService),
+		resourceService:           company_service.NewResourceServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -366,4 +369,8 @@ func (g *grpcClients) WebPageService() object_builder_service.WebPageServiceClie
 
 func (g *grpcClients) CascadingService() object_builder_service.CascadingServiceClient {
 	return g.cascadingService
+}
+
+func (g *grpcClients) ResourceService() company_service.ResourceServiceClient {
+	return g.resourceService
 }

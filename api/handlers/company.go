@@ -518,7 +518,7 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ProjectService().AddResource(
+	resp, err := h.companyServices.ResourceService().AddResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -554,7 +554,7 @@ func (h *Handler) CreateProjectResource(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ProjectService().CreateResource(
+	resp, err := h.companyServices.ResourceService().CreateResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -590,7 +590,7 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ProjectService().RemoveResource(
+	resp, err := h.companyServices.ResourceService().RemoveResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -619,7 +619,7 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetResource(c *gin.Context) {
 
-	resp, err := h.companyServices.ProjectService().GetResource(
+	resp, err := h.companyServices.ResourceService().GetResource(
 		context.Background(),
 		&company_service.GetResourceRequest{
 			Id: c.Param("resource_id"),
@@ -662,7 +662,7 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ProjectService().GetReourceList(
+	resp, err := h.companyServices.ResourceService().GetReourceList(
 		context.Background(),
 		&company_service.GetReourceListRequest{
 			Limit:     int32(limit),
@@ -704,7 +704,7 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ProjectService().ReconnectResource(
+	resp, err := h.companyServices.ResourceService().ReconnectResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -742,7 +742,7 @@ func (h *Handler) AddProjectResourceInUcodeCluster(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ProjectService().AddResourceInUcode(
+	resp, err := h.companyServices.ResourceService().AddResourceInUcode(
 		c.Request.Context(),
 		&resource,
 	)

@@ -1,0 +1,32 @@
+syntax="proto3";
+
+package company_service;
+option go_package="genproto/company_service";
+
+import "company.proto";
+import "projects_service.proto";
+
+service ResourceService {
+
+    rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
+    rpc CreateResource(CreateResourceReq) returns (CreateResourceRes) {}
+    rpc AddResourceInUcode(AddResourceInUcodeRequest) returns (AddResourceResponse) {}
+    rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
+    rpc GetResource(GetResourceRequest) returns (ResourceWithoutPassword) {}
+    rpc GetReourceList(GetReourceListRequest) returns (GetReourceListResponse) {}
+    rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
+    rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
+    rpc AutoConnect(GetProjectsRequest) returns (EmptyProto) {}
+
+    // resource environment
+    rpc UpsertResourceEnvironment(UpsertResourceEnvironmentRequest) returns (UpsertResourceEnvironmentResponse) {}
+    
+}
+
+message UpsertResourceEnvironmentRequest {
+    repeated ResourceEnvironment resource_environments = 1;
+}
+
+message UpsertResourceEnvironmentResponse {
+    repeated ResourceEnvironment resource_environments = 1;
+}

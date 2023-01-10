@@ -52,3 +52,10 @@ message EnvironmentWithResources {
     string description = 5;
     Resources resources = 6;
 }
+
+message ResourceEnvironment {
+    string project_id = 1;
+    string resource_id = 2;
+    string environment_id = 3;
+    bool is_configured = 4;
+}
