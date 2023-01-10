@@ -88,6 +88,7 @@ message ResourceWithoutPassword {
         string name = 3;
         string display_color = 4;
         string description = 5;
+        bool is_configured = 6;
     }
     
     ServiceType service_type = 1;
@@ -149,6 +150,7 @@ message AddResourceRequest {
     repeated Resource resources = 2;
     string company_id = 3;
     string user_id = 4;
+    repeated ResourceEnvironment resource_environments = 5;
 }
 
 message CreateResourceReq {
@@ -170,6 +172,7 @@ message AddResourceResponse {
     ServiceType service_type = 2;
     ResourceType resource_type = 3;
     string company_id = 4;
+    repeated ResourceEnvironment resource_environments = 5;
 }
 
 message CreateResourceRes {

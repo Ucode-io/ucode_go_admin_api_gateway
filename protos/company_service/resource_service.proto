@@ -17,6 +17,7 @@ service ResourceService {
     rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
     rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
     rpc AutoConnect(GetProjectsRequest) returns (EmptyProto) {}
+    rpc UpdateResource(UpdateResourceRequest) returns (UpdateResourceResponse) {}
 
     // resource environment
     rpc UpsertResourceEnvironment(UpsertResourceEnvironmentRequest) returns (UpsertResourceEnvironmentResponse) {}
@@ -29,4 +30,20 @@ message UpsertResourceEnvironmentRequest {
 
 message UpsertResourceEnvironmentResponse {
     repeated ResourceEnvironment resource_environments = 1;
+}
+
+message UpdateResourceRequest {
+    string project_id = 1;
+    repeated Resource resources = 2;
+    string company_id = 3;
+    string user_id = 4;
+    repeated ResourceEnvironment resource_environments = 5;
+}
+
+message UpdateResourceResponse {
+    string project_id = 1;
+    repeated Resource resources = 2;
+    string company_id = 3;
+    string user_id = 4;
+    repeated ResourceEnvironment resource_environments = 5;
 }

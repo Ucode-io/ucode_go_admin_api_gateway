@@ -58,4 +58,5 @@ message ResourceEnvironment {
     string resource_id = 2;
     string environment_id = 3;
     bool is_configured = 4;
+    string databasename = 5;
 }
