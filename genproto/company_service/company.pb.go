@@ -126,11 +126,11 @@ type Resource struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ServiceType  ServiceType           `protobuf:"varint,1,opt,name=service_type,json=serviceType,proto3,enum=company_service.ServiceType" json:"service_type"`
-	ResourceType ResourceType          `protobuf:"varint,2,opt,name=resource_type,json=resourceType,proto3,enum=company_service.ResourceType" json:"resource_type"`
-	Credentials  *Resource_Credentials `protobuf:"bytes,3,opt,name=credentials,proto3" json:"credentials"`
-	Id           string                `protobuf:"bytes,4,opt,name=id,proto3" json:"id"`
-	Title        string                `protobuf:"bytes,5,opt,name=title,proto3" json:"title"`
+	ServiceType  ServiceType           `protobuf:"varint,1,opt,name=service_type,json=serviceType,proto3,enum=company_service.ServiceType" json:"service_type,omitempty"`
+	ResourceType ResourceType          `protobuf:"varint,2,opt,name=resource_type,json=resourceType,proto3,enum=company_service.ResourceType" json:"resource_type,omitempty"`
+	Credentials  *Resource_Credentials `protobuf:"bytes,3,opt,name=credentials,proto3" json:"credentials,omitempty"`
+	Id           string                `protobuf:"bytes,4,opt,name=id,proto3" json:"id,omitempty"`
+	Title        string                `protobuf:"bytes,5,opt,name=title,proto3" json:"title,omitempty"`
 }
 
 func (x *Resource) Reset() {
@@ -205,11 +205,11 @@ type Environment struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId    string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Name         string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
-	DisplayColor string `protobuf:"bytes,4,opt,name=display_color,json=displayColor,proto3" json:"display_color"`
-	Description  string `protobuf:"bytes,5,opt,name=description,proto3" json:"description"`
+	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId    string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Name         string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	DisplayColor string `protobuf:"bytes,4,opt,name=display_color,json=displayColor,proto3" json:"display_color,omitempty"`
+	Description  string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
 }
 
 func (x *Environment) Reset() {
@@ -284,12 +284,12 @@ type EnvironmentWithResources struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id           string                              `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId    string                              `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Name         string                              `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
-	DisplayColor string                              `protobuf:"bytes,4,opt,name=display_color,json=displayColor,proto3" json:"display_color"`
-	Description  string                              `protobuf:"bytes,5,opt,name=description,proto3" json:"description"`
-	Resources    *EnvironmentWithResources_Resources `protobuf:"bytes,6,opt,name=resources,proto3" json:"resources"`
+	Id           string                              `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId    string                              `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Name         string                              `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	DisplayColor string                              `protobuf:"bytes,4,opt,name=display_color,json=displayColor,proto3" json:"display_color,omitempty"`
+	Description  string                              `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	Resources    *EnvironmentWithResources_Resources `protobuf:"bytes,6,opt,name=resources,proto3" json:"resources,omitempty"`
 }
 
 func (x *EnvironmentWithResources) Reset() {
@@ -371,11 +371,11 @@ type ResourceEnvironment struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ResourceId    string `protobuf:"bytes,2,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
-	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	IsConfigured  bool   `protobuf:"varint,4,opt,name=is_configured,json=isConfigured,proto3" json:"is_configured"`
-	Databasename  string `protobuf:"bytes,5,opt,name=databasename,proto3" json:"databasename"`
+	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ResourceId    string `protobuf:"bytes,2,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	IsConfigured  bool   `protobuf:"varint,4,opt,name=is_configured,json=isConfigured,proto3" json:"is_configured,omitempty"`
+	Databasename  string `protobuf:"bytes,5,opt,name=databasename,proto3" json:"databasename,omitempty"`
 }
 
 func (x *ResourceEnvironment) Reset() {
@@ -450,11 +450,11 @@ type Resource_Credentials struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Host     string `protobuf:"bytes,1,opt,name=host,proto3" json:"host"`
-	Port     string `protobuf:"bytes,2,opt,name=port,proto3" json:"port"`
-	Username string `protobuf:"bytes,3,opt,name=username,proto3" json:"username"`
-	Password string `protobuf:"bytes,4,opt,name=password,proto3" json:"password"`
-	Database string `protobuf:"bytes,5,opt,name=database,proto3" json:"database"`
+	Host     string `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	Port     string `protobuf:"bytes,2,opt,name=port,proto3" json:"port,omitempty"`
+	Username string `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
+	Password string `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
+	Database string `protobuf:"bytes,5,opt,name=database,proto3" json:"database,omitempty"`
 }
 
 func (x *Resource_Credentials) Reset() {
@@ -529,8 +529,8 @@ type EnvironmentWithResources_Resources struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count     int32       `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
-	Resources []*Resource `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources"`
+	Count     int32       `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	Resources []*Resource `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources,omitempty"`
 }
 
 func (x *EnvironmentWithResources_Resources) Reset() {

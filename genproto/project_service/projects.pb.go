@@ -26,14 +26,14 @@ type CreateProjectRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name                     string `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`
-	Namespace                string `protobuf:"bytes,2,opt,name=namespace,proto3" json:"namespace"`
-	ObjectBuilderServiceHost string `protobuf:"bytes,3,opt,name=object_builder_service_host,json=objectBuilderServiceHost,proto3" json:"object_builder_service_host"`
-	ObjectBuilderServicePort string `protobuf:"bytes,4,opt,name=object_builder_service_port,json=objectBuilderServicePort,proto3" json:"object_builder_service_port"`
-	AuthServiceHost          string `protobuf:"bytes,5,opt,name=auth_service_host,json=authServiceHost,proto3" json:"auth_service_host"`
-	AuthServicePort          string `protobuf:"bytes,6,opt,name=auth_service_port,json=authServicePort,proto3" json:"auth_service_port"`
-	AnalyticsServiceHost     string `protobuf:"bytes,7,opt,name=analytics_service_host,json=analyticsServiceHost,proto3" json:"analytics_service_host"`
-	AnalyticsServicePort     string `protobuf:"bytes,8,opt,name=analytics_service_port,json=analyticsServicePort,proto3" json:"analytics_service_port"`
+	Name                     string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Namespace                string `protobuf:"bytes,2,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	ObjectBuilderServiceHost string `protobuf:"bytes,3,opt,name=object_builder_service_host,json=objectBuilderServiceHost,proto3" json:"object_builder_service_host,omitempty"`
+	ObjectBuilderServicePort string `protobuf:"bytes,4,opt,name=object_builder_service_port,json=objectBuilderServicePort,proto3" json:"object_builder_service_port,omitempty"`
+	AuthServiceHost          string `protobuf:"bytes,5,opt,name=auth_service_host,json=authServiceHost,proto3" json:"auth_service_host,omitempty"`
+	AuthServicePort          string `protobuf:"bytes,6,opt,name=auth_service_port,json=authServicePort,proto3" json:"auth_service_port,omitempty"`
+	AnalyticsServiceHost     string `protobuf:"bytes,7,opt,name=analytics_service_host,json=analyticsServiceHost,proto3" json:"analytics_service_host,omitempty"`
+	AnalyticsServicePort     string `protobuf:"bytes,8,opt,name=analytics_service_port,json=analyticsServicePort,proto3" json:"analytics_service_port,omitempty"`
 }
 
 func (x *CreateProjectRequest) Reset() {
@@ -129,15 +129,15 @@ type CreateProjectResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                       string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Name                     string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
-	Namespace                string `protobuf:"bytes,3,opt,name=namespace,proto3" json:"namespace"`
-	ObjectBuilderServiceHost string `protobuf:"bytes,4,opt,name=object_builder_service_host,json=objectBuilderServiceHost,proto3" json:"object_builder_service_host"`
-	ObjectBuilderServicePort string `protobuf:"bytes,5,opt,name=object_builder_service_port,json=objectBuilderServicePort,proto3" json:"object_builder_service_port"`
-	AuthServiceHost          string `protobuf:"bytes,6,opt,name=auth_service_host,json=authServiceHost,proto3" json:"auth_service_host"`
-	AuthServicePort          string `protobuf:"bytes,7,opt,name=auth_service_port,json=authServicePort,proto3" json:"auth_service_port"`
-	AnalyticsServiceHost     string `protobuf:"bytes,8,opt,name=analytics_service_host,json=analyticsServiceHost,proto3" json:"analytics_service_host"`
-	AnalyticsServicePort     string `protobuf:"bytes,9,opt,name=analytics_service_port,json=analyticsServicePort,proto3" json:"analytics_service_port"`
+	Id                       string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                     string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Namespace                string `protobuf:"bytes,3,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	ObjectBuilderServiceHost string `protobuf:"bytes,4,opt,name=object_builder_service_host,json=objectBuilderServiceHost,proto3" json:"object_builder_service_host,omitempty"`
+	ObjectBuilderServicePort string `protobuf:"bytes,5,opt,name=object_builder_service_port,json=objectBuilderServicePort,proto3" json:"object_builder_service_port,omitempty"`
+	AuthServiceHost          string `protobuf:"bytes,6,opt,name=auth_service_host,json=authServiceHost,proto3" json:"auth_service_host,omitempty"`
+	AuthServicePort          string `protobuf:"bytes,7,opt,name=auth_service_port,json=authServicePort,proto3" json:"auth_service_port,omitempty"`
+	AnalyticsServiceHost     string `protobuf:"bytes,8,opt,name=analytics_service_host,json=analyticsServiceHost,proto3" json:"analytics_service_host,omitempty"`
+	AnalyticsServicePort     string `protobuf:"bytes,9,opt,name=analytics_service_port,json=analyticsServicePort,proto3" json:"analytics_service_port,omitempty"`
 }
 
 func (x *CreateProjectResponse) Reset() {
@@ -240,15 +240,15 @@ type Project struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                       string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Name                     string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
-	Namespace                string `protobuf:"bytes,3,opt,name=namespace,proto3" json:"namespace"`
-	ObjectBuilderServiceHost string `protobuf:"bytes,4,opt,name=object_builder_service_host,json=objectBuilderServiceHost,proto3" json:"object_builder_service_host"`
-	ObjectBuilderServicePort string `protobuf:"bytes,5,opt,name=object_builder_service_port,json=objectBuilderServicePort,proto3" json:"object_builder_service_port"`
-	AuthServiceHost          string `protobuf:"bytes,6,opt,name=auth_service_host,json=authServiceHost,proto3" json:"auth_service_host"`
-	AuthServicePort          string `protobuf:"bytes,7,opt,name=auth_service_port,json=authServicePort,proto3" json:"auth_service_port"`
-	AnalyticsServiceHost     string `protobuf:"bytes,8,opt,name=analytics_service_host,json=analyticsServiceHost,proto3" json:"analytics_service_host"`
-	AnalyticsServicePort     string `protobuf:"bytes,9,opt,name=analytics_service_port,json=analyticsServicePort,proto3" json:"analytics_service_port"`
+	Id                       string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                     string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Namespace                string `protobuf:"bytes,3,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	ObjectBuilderServiceHost string `protobuf:"bytes,4,opt,name=object_builder_service_host,json=objectBuilderServiceHost,proto3" json:"object_builder_service_host,omitempty"`
+	ObjectBuilderServicePort string `protobuf:"bytes,5,opt,name=object_builder_service_port,json=objectBuilderServicePort,proto3" json:"object_builder_service_port,omitempty"`
+	AuthServiceHost          string `protobuf:"bytes,6,opt,name=auth_service_host,json=authServiceHost,proto3" json:"auth_service_host,omitempty"`
+	AuthServicePort          string `protobuf:"bytes,7,opt,name=auth_service_port,json=authServicePort,proto3" json:"auth_service_port,omitempty"`
+	AnalyticsServiceHost     string `protobuf:"bytes,8,opt,name=analytics_service_host,json=analyticsServiceHost,proto3" json:"analytics_service_host,omitempty"`
+	AnalyticsServicePort     string `protobuf:"bytes,9,opt,name=analytics_service_port,json=analyticsServicePort,proto3" json:"analytics_service_port,omitempty"`
 }
 
 func (x *Project) Reset() {
@@ -351,15 +351,15 @@ type UpdateProjectRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                       string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Name                     string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
-	Namespace                string `protobuf:"bytes,3,opt,name=namespace,proto3" json:"namespace"`
-	ObjectBuilderServiceHost string `protobuf:"bytes,4,opt,name=object_builder_service_host,json=objectBuilderServiceHost,proto3" json:"object_builder_service_host"`
-	ObjectBuilderServicePort string `protobuf:"bytes,5,opt,name=object_builder_service_port,json=objectBuilderServicePort,proto3" json:"object_builder_service_port"`
-	AuthServiceHost          string `protobuf:"bytes,6,opt,name=auth_service_host,json=authServiceHost,proto3" json:"auth_service_host"`
-	AuthServicePort          string `protobuf:"bytes,7,opt,name=auth_service_port,json=authServicePort,proto3" json:"auth_service_port"`
-	AnalyticsServiceHost     string `protobuf:"bytes,8,opt,name=analytics_service_host,json=analyticsServiceHost,proto3" json:"analytics_service_host"`
-	AnalyticsServicePort     string `protobuf:"bytes,9,opt,name=analytics_service_port,json=analyticsServicePort,proto3" json:"analytics_service_port"`
+	Id                       string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                     string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Namespace                string `protobuf:"bytes,3,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	ObjectBuilderServiceHost string `protobuf:"bytes,4,opt,name=object_builder_service_host,json=objectBuilderServiceHost,proto3" json:"object_builder_service_host,omitempty"`
+	ObjectBuilderServicePort string `protobuf:"bytes,5,opt,name=object_builder_service_port,json=objectBuilderServicePort,proto3" json:"object_builder_service_port,omitempty"`
+	AuthServiceHost          string `protobuf:"bytes,6,opt,name=auth_service_host,json=authServiceHost,proto3" json:"auth_service_host,omitempty"`
+	AuthServicePort          string `protobuf:"bytes,7,opt,name=auth_service_port,json=authServicePort,proto3" json:"auth_service_port,omitempty"`
+	AnalyticsServiceHost     string `protobuf:"bytes,8,opt,name=analytics_service_host,json=analyticsServiceHost,proto3" json:"analytics_service_host,omitempty"`
+	AnalyticsServicePort     string `protobuf:"bytes,9,opt,name=analytics_service_port,json=analyticsServicePort,proto3" json:"analytics_service_port,omitempty"`
 }
 
 func (x *UpdateProjectRequest) Reset() {
@@ -462,8 +462,8 @@ type GetAllProjectsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Projects []*Project `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects"`
-	Count    int32      `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Projects []*Project `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects,omitempty"`
+	Count    int32      `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetAllProjectsResponse) Reset() {
@@ -517,7 +517,7 @@ type ProjectPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *ProjectPrimaryKey) Reset() {
@@ -564,9 +564,9 @@ type GetAllProjectsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Offset int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset"`
-	Limit  int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
-	Search string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
+	Offset int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
+	Limit  int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Search string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
 }
 
 func (x *GetAllProjectsRequest) Reset() {

@@ -27,7 +27,7 @@ type EmailOtpPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *EmailOtpPrimaryKey) Reset() {
@@ -74,10 +74,10 @@ type Email struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Email     string `protobuf:"bytes,1,opt,name=email,proto3" json:"email"`
-	Otp       string `protobuf:"bytes,2,opt,name=otp,proto3" json:"otp"`
-	ExpiresAt string `protobuf:"bytes,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at"`
-	Id        string `protobuf:"bytes,4,opt,name=id,proto3" json:"id"`
+	Email     string `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	Otp       string `protobuf:"bytes,2,opt,name=otp,proto3" json:"otp,omitempty"`
+	ExpiresAt string `protobuf:"bytes,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	Id        string `protobuf:"bytes,4,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *Email) Reset() {
