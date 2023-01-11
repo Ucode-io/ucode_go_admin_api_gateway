@@ -151,7 +151,7 @@ func (h *Handler) GetQueryList(c *gin.Context) {
 // UpdateQuery godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
-// @ID update_field
+// @ID update_query
 // @Router /v3/query/{guid} [PUT]
 // @Summary Update Query
 // @Description Update Query

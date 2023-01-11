@@ -233,6 +233,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/company/project/resource/:resource_id", h.GetResource)
 		v1Admin.GET("/company/project/resource", h.GetResourceList)
 		v1Admin.POST("/company/project/resource/reconnect", h.ReconnectProjectResource)
+		v1Admin.PUT("/company/project/resource/:resource_id", h.UpdateResource)
 
 		// environment service
 		v1Admin.POST("/environment", h.CreateEnvironment)

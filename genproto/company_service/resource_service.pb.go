@@ -25,7 +25,7 @@ type UpsertResourceEnvironmentRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ResourceEnvironments []*ResourceEnvironment `protobuf:"bytes,1,rep,name=resource_environments,json=resourceEnvironments,proto3" json:"resource_environments,omitempty"`
+	ResourceEnvironments []*ResourceEnvironment `protobuf:"bytes,1,rep,name=resource_environments,json=resourceEnvironments,proto3" json:"resource_environments"`
 }
 
 func (x *UpsertResourceEnvironmentRequest) Reset() {
@@ -72,7 +72,7 @@ type UpsertResourceEnvironmentResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ResourceEnvironments []*ResourceEnvironment `protobuf:"bytes,1,rep,name=resource_environments,json=resourceEnvironments,proto3" json:"resource_environments,omitempty"`
+	ResourceEnvironments []*ResourceEnvironment `protobuf:"bytes,1,rep,name=resource_environments,json=resourceEnvironments,proto3" json:"resource_environments"`
 }
 
 func (x *UpsertResourceEnvironmentResponse) Reset() {
@@ -119,11 +119,11 @@ type UpdateResourceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId            string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Resources            []*Resource            `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources,omitempty"`
-	CompanyId            string                 `protobuf:"bytes,3,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"`
-	UserId               string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	ResourceEnvironments []*ResourceEnvironment `protobuf:"bytes,5,rep,name=resource_environments,json=resourceEnvironments,proto3" json:"resource_environments,omitempty"`
+	ProjectId            string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Resources            []*Resource            `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources"`
+	CompanyId            string                 `protobuf:"bytes,3,opt,name=company_id,json=companyId,proto3" json:"company_id"`
+	UserId               string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	ResourceEnvironments []*ResourceEnvironment `protobuf:"bytes,5,rep,name=resource_environments,json=resourceEnvironments,proto3" json:"resource_environments"`
 }
 
 func (x *UpdateResourceRequest) Reset() {
@@ -198,11 +198,11 @@ type UpdateResourceResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId            string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Resources            []*Resource            `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources,omitempty"`
-	CompanyId            string                 `protobuf:"bytes,3,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"`
-	UserId               string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	ResourceEnvironments []*ResourceEnvironment `protobuf:"bytes,5,rep,name=resource_environments,json=resourceEnvironments,proto3" json:"resource_environments,omitempty"`
+	ProjectId            string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Resources            []*Resource            `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources"`
+	CompanyId            string                 `protobuf:"bytes,3,opt,name=company_id,json=companyId,proto3" json:"company_id"`
+	UserId               string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	ResourceEnvironments []*ResourceEnvironment `protobuf:"bytes,5,rep,name=resource_environments,json=resourceEnvironments,proto3" json:"resource_environments"`
 }
 
 func (x *UpdateResourceResponse) Reset() {

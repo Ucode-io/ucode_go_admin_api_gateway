@@ -603,27 +603,32 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
-// GetResource godoc
+// UpdateResource godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
-// @ID get_resource_id
-// @Router /v1/company/project/resource/{resource_id} [GET]
-// @Summary Get Resource by id
-// @Description Get Resource by id
+// @ID put_resource_id
+// @Router /v1/company/project/resource/{resource_id} [PUT]
+// @Summary Update Resource by id
+// @Description Update Resource by id
 // @Tags Company Resource
 // @Accept json
 // @Produce json
-// @Param resource_id path string true "resource_id"
+// @Param UpdateResourceRequestBody body company_service.UpdateResourceRequest  true "UpdateResourceRequestBody"
 // @Success 200 {object} http.Response{data=company_service.ResourceWithoutPassword} "Resource data"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
-func (h *Handler) GetResource(c *gin.Context) {
+func (h *Handler) UpdateResource(c *gin.Context) {
+	var resource company_service.UpdateResourceRequest
 
-	resp, err := h.companyServices.ResourceService().GetResource(
-		context.Background(),
-		&company_service.GetResourceRequest{
-			Id: c.Param("resource_id"),
-		},
+	err := c.ShouldBindJSON(&resource)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.ResourceService().UpdateResource(
+		c.Request.Context(),
+		&resource,
 	)
 
 	if err != nil {
@@ -753,4 +758,35 @@ func (h *Handler) AddProjectResourceInUcodeCluster(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.Created, resp)
+}
+
+// GetResource godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @ID get_resource_id
+// @Router /v1/company/project/resource/{resource_id} [GET]
+// @Summary Get Resource by id
+// @Description Get Resource by id
+// @Tags Company Resource
+// @Accept json
+// @Produce json
+// @Param resource_id path string true "resource_id"
+// @Success 200 {object} http.Response{data=company_service.ResourceWithoutPassword} "Resource data"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetResource(c *gin.Context) {
+
+	resp, err := h.companyServices.ResourceService().GetResource(
+		context.Background(),
+		&company_service.GetResourceRequest{
+			Id: c.Param("resource_id"),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
 }

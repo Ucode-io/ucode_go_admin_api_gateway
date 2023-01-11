@@ -1233,6 +1233,13 @@ var doc = `{
                 "operationId": "create_patient",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreatePatientRequestBody",
                         "name": "table",
                         "in": "body",
@@ -1322,6 +1329,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "nr",
                         "name": "nr",
                         "in": "query"
@@ -1407,6 +1421,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "name",
                         "in": "query"
                     }
@@ -1487,6 +1508,13 @@ var doc = `{
                 "summary": "Update dashboard",
                 "operationId": "update_dashboard",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "UpdateDashboardRequestBody",
                         "name": "dashboard",
@@ -1573,6 +1601,13 @@ var doc = `{
                 "summary": "Create dashboard",
                 "operationId": "create_dashboard",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateDashboardRequestBody",
                         "name": "dashboard",
@@ -1663,6 +1698,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "dashboard_id",
                         "name": "dashboard_id",
                         "in": "path",
@@ -1747,6 +1789,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "dashboard_id",
                         "name": "dashboard_id",
                         "in": "path",
@@ -1816,6 +1865,13 @@ var doc = `{
                 "summary": "Get all panels",
                 "operationId": "get_all_panels",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "project_id",
@@ -1904,6 +1960,13 @@ var doc = `{
                 "operationId": "update_panel",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdatePanelRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -1989,6 +2052,13 @@ var doc = `{
                 "summary": "Create panel",
                 "operationId": "create_panel",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreatePanelRequestBody",
                         "name": "table",
@@ -2077,6 +2147,13 @@ var doc = `{
                 "summary": "Update panel coordinates",
                 "operationId": "panel_coordinates",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "UpdatePanelCoordinatesRequestBody",
                         "name": "panel_coordinates",
@@ -2167,6 +2244,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "panel_id",
                         "name": "panel_id",
                         "in": "path",
@@ -2251,6 +2335,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "panel_id",
                         "name": "panel_id",
                         "in": "path",
@@ -2320,6 +2411,13 @@ var doc = `{
                 "summary": "Get variable list",
                 "operationId": "get_variable_list",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "dashboard_id",
@@ -2413,6 +2511,13 @@ var doc = `{
                 "operationId": "update_variable",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateVariableRequestBody",
                         "name": "variable",
                         "in": "body",
@@ -2498,6 +2603,13 @@ var doc = `{
                 "summary": "Create variable",
                 "operationId": "create_variable",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateVariableRequestBody",
                         "name": "variable",
@@ -2588,6 +2700,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "variable_id",
                         "name": "variable_id",
                         "in": "path",
@@ -2672,6 +2791,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "variable_id",
                         "name": "variable_id",
                         "in": "path",
@@ -2741,6 +2867,13 @@ var doc = `{
                 "summary": "Get all apps",
                 "operationId": "get_all_apps",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "name": "limit",
@@ -2839,6 +2972,13 @@ var doc = `{
                 "operationId": "update_app",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateAppRequestBody",
                         "name": "app",
                         "in": "body",
@@ -2924,6 +3064,13 @@ var doc = `{
                 "summary": "Create app",
                 "operationId": "create_app",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateAppRequestBody",
                         "name": "app",
@@ -3014,6 +3161,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "app_id",
                         "name": "app_id",
                         "in": "path",
@@ -3098,6 +3252,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "app_id",
                         "name": "app_id",
                         "in": "path",
@@ -3167,6 +3328,13 @@ var doc = `{
                 "summary": "get barcode",
                 "operationId": "generate_new_barcode_for_items",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",
@@ -3253,6 +3421,13 @@ var doc = `{
                 "summary": "Get all booked appointments",
                 "operationId": "get_all_booked_appointments",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "branch_id",
@@ -3369,6 +3544,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "booked_appointment_id",
                         "name": "booked_appointment_id",
                         "in": "path",
@@ -3454,6 +3636,13 @@ var doc = `{
                 "operationId": "create_cashbox_transaction",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateTransactionBody",
                         "name": "app",
                         "in": "body",
@@ -3525,6 +3714,15 @@ var doc = `{
                 ],
                 "summary": "Get close cashbox",
                 "operationId": "close_cashbox_info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Cashbox data",
@@ -3600,6 +3798,13 @@ var doc = `{
                 "summary": "Get all companies",
                 "operationId": "get_company_list",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "comany_id",
@@ -3706,6 +3911,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "company_id",
                         "in": "query"
                     },
@@ -3802,6 +4014,13 @@ var doc = `{
                 "operationId": "create_project",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CompanyProjectCreateRequest",
                         "name": "Project",
                         "in": "body",
@@ -3889,6 +4108,13 @@ var doc = `{
                 "summary": "Get Project By Id",
                 "operationId": "get_company_project_id",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "project_id",
@@ -3979,6 +4205,13 @@ var doc = `{
                 "summary": "Update Project",
                 "operationId": "update_project",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "project_id",
@@ -4074,6 +4307,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "project_id",
                         "name": "project_id",
                         "in": "path",
@@ -4158,6 +4398,13 @@ var doc = `{
                 "summary": "Create ProjectResource",
                 "operationId": "create_project_resource",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "ProjectResourceCreateRequest",
                         "name": "ProjectResource",
@@ -4246,6 +4493,13 @@ var doc = `{
                 "summary": "Get all companies",
                 "operationId": "get_resource_list",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "name": "limit",
@@ -4344,6 +4598,13 @@ var doc = `{
                 "operationId": "add_project_resource",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "ProjectResourceAddRequest",
                         "name": "ProjectResource",
                         "in": "body",
@@ -4429,6 +4690,13 @@ var doc = `{
                 "summary": "Remove ProjectResource",
                 "operationId": "remove_project_resource",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "ProjectResourceRemoveRequest",
                         "name": "ProjectResource",
@@ -4517,6 +4785,13 @@ var doc = `{
                 "summary": "Reconnect ProjectResource",
                 "operationId": "reconnect_project_resource",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "ProjectResourceReconnectRequest",
                         "name": "ProjectResource",
@@ -4607,10 +4882,110 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "resource_id",
                         "name": "resource_id",
                         "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resource data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.ResourceWithoutPassword"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update Resource by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Resource"
+                ],
+                "summary": "Update Resource by id",
+                "operationId": "put_resource_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "UpdateResourceRequestBody",
+                        "name": "UpdateResourceRequestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.UpdateResourceRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -4691,6 +5066,13 @@ var doc = `{
                 "summary": "Add ProjectResource In Ucode Cluster",
                 "operationId": "add_project_resource_in_ucode",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "ProjectResourceAddRequest",
                         "name": "ProjectResource",
@@ -4781,6 +5163,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "company_id",
                         "name": "company_id",
                         "in": "path",
@@ -4863,6 +5252,13 @@ var doc = `{
                 "summary": "Update company",
                 "operationId": "update_company",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "company_id",
@@ -4958,6 +5354,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "company_id",
                         "name": "company_id",
                         "in": "path",
@@ -5027,6 +5430,13 @@ var doc = `{
                 "summary": "Get all custom events",
                 "operationId": "get_all_custom_events",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "project_id",
@@ -5115,6 +5525,13 @@ var doc = `{
                 "operationId": "update_Customevent",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateCustomEventRequestBody",
                         "name": "Customevent",
                         "in": "body",
@@ -5200,6 +5617,13 @@ var doc = `{
                 "summary": "Create CustomEvent",
                 "operationId": "create_custom_event",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateCustomEventRequestBody",
                         "name": "Customevent",
@@ -5290,6 +5714,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "custom_event_id",
                         "name": "custom_event_id",
                         "in": "path",
@@ -5374,6 +5805,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "custom_event_id",
                         "name": "custom_event_id",
                         "in": "path",
@@ -5443,6 +5881,13 @@ var doc = `{
                 "summary": "Get Document list",
                 "operationId": "get_document_list",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "end_date",
@@ -5546,6 +5991,13 @@ var doc = `{
                 "operationId": "update_document",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateDocumentRequestBody",
                         "name": "Document",
                         "in": "body",
@@ -5631,6 +6083,13 @@ var doc = `{
                 "summary": "Create Document",
                 "operationId": "create_document",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateDocumentRequestBody",
                         "name": "Document",
@@ -5721,6 +6180,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "document_id",
                         "name": "document_id",
                         "in": "path",
@@ -5805,6 +6271,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "document_id",
                         "name": "document_id",
                         "in": "path",
@@ -5874,6 +6347,13 @@ var doc = `{
                 "summary": "Get environment list",
                 "operationId": "get_environment_list",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "name": "limit",
@@ -5972,6 +6452,13 @@ var doc = `{
                 "operationId": "update_environment",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateEnvironmentRequestBody",
                         "name": "environment",
                         "in": "body",
@@ -6057,6 +6544,13 @@ var doc = `{
                 "summary": "Create environment",
                 "operationId": "create_environment",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateEnvironmentRequestBody",
                         "name": "environment",
@@ -6147,6 +6641,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "environment_id",
                         "name": "environment_id",
                         "in": "path",
@@ -6231,6 +6732,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "environment_id",
                         "name": "environment_id",
                         "in": "path",
@@ -6300,6 +6808,13 @@ var doc = `{
                 "summary": "Get all events",
                 "operationId": "get_all_events",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "project_id",
@@ -6388,6 +6903,13 @@ var doc = `{
                 "operationId": "update_event",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateEventRequestBody",
                         "name": "event",
                         "in": "body",
@@ -6473,6 +6995,13 @@ var doc = `{
                 "summary": "Create event",
                 "operationId": "create_event",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateEventRequestBody",
                         "name": "event",
@@ -6561,6 +7090,13 @@ var doc = `{
                 "summary": "Get event logs",
                 "operationId": "get_event_logs",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "limit",
@@ -6657,6 +7193,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "event_log_id",
                         "name": "event_log_id",
                         "in": "path",
@@ -6741,6 +7284,13 @@ var doc = `{
                 "summary": "Get event by id",
                 "operationId": "get_event_by_id",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "event_id",
@@ -6829,6 +7379,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "event_id",
                         "name": "event_id",
                         "in": "path",
@@ -6898,6 +7455,13 @@ var doc = `{
                 "summary": "Post excel writer",
                 "operationId": "excel_to_db",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "excel_id",
@@ -6993,6 +7557,13 @@ var doc = `{
                 "summary": "Get excel writer",
                 "operationId": "excel_reader",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "excel_id",
@@ -7575,6 +8146,13 @@ var doc = `{
                 "operationId": "get_all_functions",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -7667,6 +8245,13 @@ var doc = `{
                 "operationId": "update_function",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateFunctionRequestBody",
                         "name": "Function",
                         "in": "body",
@@ -7752,6 +8337,13 @@ var doc = `{
                 "summary": "Create Function",
                 "operationId": "create_function",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateFunctionRequestBody",
                         "name": "Function",
@@ -7842,6 +8434,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "function_id",
                         "name": "function_id",
                         "in": "path",
@@ -7926,6 +8525,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "function_id",
                         "name": "function_id",
                         "in": "path",
@@ -7998,6 +8604,13 @@ var doc = `{
                 "summary": "Get all relations",
                 "operationId": "get_relation_cascaders",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "Resource-Id",
@@ -8093,6 +8706,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -8179,6 +8799,13 @@ var doc = `{
                 "operationId": "update_html_template",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateHtmlTemplateRequestBody",
                         "name": "html_template",
                         "in": "body",
@@ -8264,6 +8891,13 @@ var doc = `{
                 "summary": "Create htmlTemplate",
                 "operationId": "create_html_template",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateHtmlTemplateRequestBody",
                         "name": "html_template",
@@ -8354,6 +8988,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "html_template_id",
                         "name": "html_template_id",
                         "in": "path",
@@ -8436,6 +9077,13 @@ var doc = `{
                 "summary": "Delete html template",
                 "operationId": "delete_html_template_id",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "html_template_id",
@@ -8602,6 +9250,13 @@ var doc = `{
                 "summary": "Invoke Function",
                 "operationId": "invoke_function",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "InvokeFunctionRequest",
                         "name": "InvokeFunctionRequest",
@@ -9880,6 +10535,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "branch_id",
                         "in": "query"
                     },
@@ -9999,6 +10661,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "offline_appointment_id",
                         "name": "offline_appointment_id",
                         "in": "path",
@@ -10082,6 +10751,15 @@ var doc = `{
                 ],
                 "summary": "Get open cashbox",
                 "operationId": "open_cashbox_info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Cashbox data",
@@ -10160,6 +10838,13 @@ var doc = `{
                 "summary": "Update appointment payment status",
                 "operationId": "update_appointment_payment_status",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "UpdateAppointmentStatus",
                         "name": "view",
@@ -10444,6 +11129,13 @@ var doc = `{
                 "operationId": "get_list_query_rows",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "GetAllQueryRowsRequestBody",
                         "name": "object",
                         "in": "body",
@@ -10534,6 +11226,13 @@ var doc = `{
                 "summary": "Get all relations",
                 "operationId": "get_all_relations",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "Resource-Id",
@@ -10651,6 +11350,13 @@ var doc = `{
                 "summary": "Update relation",
                 "operationId": "update_relation",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "Resource-Id",
@@ -10842,6 +11548,13 @@ var doc = `{
                 "summary": "Delete Relation",
                 "operationId": "delete_relation",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "Resource-Id",
@@ -11683,6 +12396,13 @@ var doc = `{
                 "operationId": "upload_image",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "file",
                         "description": "file",
                         "name": "file",
@@ -11768,6 +12488,13 @@ var doc = `{
                 "summary": "Upload file",
                 "operationId": "upload_file",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "file",
                         "description": "file",
@@ -12630,6 +13357,13 @@ var doc = `{
                 "operationId": "get_query_list",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -12732,6 +13466,13 @@ var doc = `{
                 "operationId": "create_query",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateQueryRequest",
                         "name": "table",
                         "in": "body",
@@ -12821,6 +13562,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -12901,8 +13649,15 @@ var doc = `{
                     "Queries"
                 ],
                 "summary": "Update Query",
-                "operationId": "update_field",
+                "operationId": "update_query",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "guid",
@@ -12998,6 +13753,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -13067,6 +13829,13 @@ var doc = `{
                 "summary": "Get Query Folder List",
                 "operationId": "get_query_folder_list",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "name": "limit",
@@ -13170,6 +13939,13 @@ var doc = `{
                 "operationId": "create_query_folder",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateQueryFolderRequest",
                         "name": "table",
                         "in": "body",
@@ -13259,6 +14035,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -13341,6 +14124,13 @@ var doc = `{
                 "summary": "Update Query Folder",
                 "operationId": "update_query_folder",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "guid",
@@ -13436,6 +14226,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -13505,6 +14302,13 @@ var doc = `{
                 "summary": "Get Web Page List",
                 "operationId": "get_web_page_list",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "name": "limit",
@@ -13598,6 +14402,13 @@ var doc = `{
                 "operationId": "create_web_page",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateWebPageRequest",
                         "name": "table",
                         "in": "body",
@@ -13687,6 +14498,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -13769,6 +14587,13 @@ var doc = `{
                 "summary": "Update Web Page",
                 "operationId": "update_web_page",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "guid",
@@ -13862,6 +14687,13 @@ var doc = `{
                 "summary": "Delete Query Folder",
                 "operationId": "delete_web_page",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "guid",
@@ -14493,6 +15325,12 @@ var doc = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.ResourceEnvironment"
+                    }
+                },
                 "resources": {
                     "type": "array",
                     "items": {
@@ -14512,6 +15350,12 @@ var doc = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "resource_environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.ResourceEnvironment"
+                    }
                 },
                 "resource_type": {
                     "type": "integer"
@@ -14864,11 +15708,37 @@ var doc = `{
                 }
             }
         },
+        "company_service.ResourceEnvironment": {
+            "type": "object",
+            "properties": {
+                "databasename": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                }
+            }
+        },
         "company_service.ResourceWithoutPassword": {
             "type": "object",
             "properties": {
                 "credentials": {
                     "$ref": "#/definitions/company_service.ResourceWithoutPassword_Credentials"
+                },
+                "environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.ResourceWithoutPassword_Environment"
+                    }
                 },
                 "id": {
                     "type": "string"
@@ -14904,6 +15774,29 @@ var doc = `{
                 }
             }
         },
+        "company_service.ResourceWithoutPassword_Environment": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
         "company_service.Resource_Credentials": {
             "type": "object",
             "properties": {
@@ -14920,6 +15813,32 @@ var doc = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.UpdateResourceRequest": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.ResourceEnvironment"
+                    }
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Resource"
+                    }
+                },
+                "user_id": {
                     "type": "string"
                 }
             }

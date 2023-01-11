@@ -250,6 +250,10 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_environments:
+        items:
+          $ref: '#/definitions/company_service.ResourceEnvironment'
+        type: array
       resources:
         items:
           $ref: '#/definitions/company_service.Resource'
@@ -263,6 +267,10 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_environments:
+        items:
+          $ref: '#/definitions/company_service.ResourceEnvironment'
+        type: array
       resource_type:
         type: integer
       service_type:
@@ -503,10 +511,27 @@ definitions:
       username:
         type: string
     type: object
+  company_service.ResourceEnvironment:
+    properties:
+      databasename:
+        type: string
+      environment_id:
+        type: string
+      is_configured:
+        type: boolean
+      project_id:
+        type: string
+      resource_id:
+        type: string
+    type: object
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
         $ref: '#/definitions/company_service.ResourceWithoutPassword_Credentials'
+      environments:
+        items:
+          $ref: '#/definitions/company_service.ResourceWithoutPassword_Environment'
+        type: array
       id:
         type: string
       project_id:
@@ -527,6 +552,38 @@ definitions:
       port:
         type: string
       username:
+        type: string
+    type: object
+  company_service.ResourceWithoutPassword_Environment:
+    properties:
+      description:
+        type: string
+      display_color:
+        type: string
+      id:
+        type: string
+      is_configured:
+        type: boolean
+      name:
+        type: string
+      project_id:
+        type: string
+    type: object
+  company_service.UpdateResourceRequest:
+    properties:
+      company_id:
+        type: string
+      project_id:
+        type: string
+      resource_environments:
+        items:
+          $ref: '#/definitions/company_service.ResourceEnvironment'
+        type: array
+      resources:
+        items:
+          $ref: '#/definitions/company_service.Resource'
+        type: array
+      user_id:
         type: string
     type: object
   config.Config:
@@ -2964,6 +3021,11 @@ paths:
       description: Create Directions
       operationId: create_patient
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreatePatientRequestBody
         in: body
         name: table
@@ -3012,6 +3074,11 @@ paths:
       description: Query Referral Result
       operationId: query_referral_result
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: nr
         in: query
         name: nr
@@ -3058,6 +3125,11 @@ paths:
       description: Get dashboard list
       operationId: get_dashboard_list
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: name
         type: string
@@ -3102,6 +3174,11 @@ paths:
       description: Create dashboard
       operationId: create_dashboard
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateDashboardRequestBody
         in: body
         name: dashboard
@@ -3149,6 +3226,11 @@ paths:
       description: Update dashboard
       operationId: update_dashboard
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateDashboardRequestBody
         in: body
         name: dashboard
@@ -3197,6 +3279,11 @@ paths:
       description: Delete dashboard
       operationId: delete_dashboard
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: dashboard_id
         in: path
         name: dashboard_id
@@ -3236,6 +3323,11 @@ paths:
       description: Get single dashboard
       operationId: get_dashboard_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: dashboard_id
         in: path
         name: dashboard_id
@@ -3283,6 +3375,11 @@ paths:
       description: Get all panels
       operationId: get_all_panels
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: project_id
         type: string
@@ -3330,6 +3427,11 @@ paths:
       description: Create panel
       operationId: create_panel
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreatePanelRequestBody
         in: body
         name: table
@@ -3377,6 +3479,11 @@ paths:
       description: Update panel
       operationId: update_panel
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdatePanelRequestBody
         in: body
         name: relation
@@ -3425,6 +3532,11 @@ paths:
       description: Delete Panel
       operationId: delete_panel
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: panel_id
         in: path
         name: panel_id
@@ -3464,6 +3576,11 @@ paths:
       description: Get single panel
       operationId: get_panel_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: panel_id
         in: path
         name: panel_id
@@ -3511,6 +3628,11 @@ paths:
       description: Update panel coordinates
       operationId: panel_coordinates
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdatePanelCoordinatesRequestBody
         in: body
         name: panel_coordinates
@@ -3559,6 +3681,11 @@ paths:
       description: Get variable list
       operationId: get_variable_list
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: dashboard_id
         type: string
@@ -3609,6 +3736,11 @@ paths:
       description: Create variable
       operationId: create_variable
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateVariableRequestBody
         in: body
         name: variable
@@ -3656,6 +3788,11 @@ paths:
       description: Update variable
       operationId: update_variable
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateVariableRequestBody
         in: body
         name: variable
@@ -3704,6 +3841,11 @@ paths:
       description: Delete variable
       operationId: delete_variable
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: variable_id
         in: path
         name: variable_id
@@ -3743,6 +3885,11 @@ paths:
       description: Get single variable
       operationId: get_variable_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: variable_id
         in: path
         name: variable_id
@@ -3790,6 +3937,11 @@ paths:
       description: Get all apps
       operationId: get_all_apps
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: limit
         type: integer
@@ -3843,6 +3995,11 @@ paths:
       description: Create app
       operationId: create_app
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateAppRequestBody
         in: body
         name: app
@@ -3890,6 +4047,11 @@ paths:
       description: Update app
       operationId: update_app
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateAppRequestBody
         in: body
         name: app
@@ -3938,6 +4100,11 @@ paths:
       description: Delete App
       operationId: delete_app
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: app_id
         in: path
         name: app_id
@@ -3977,6 +4144,11 @@ paths:
       description: Get app by id
       operationId: get_app_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: app_id
         in: path
         name: app_id
@@ -4024,6 +4196,11 @@ paths:
       description: Get new barcode for items
       operationId: generate_new_barcode_for_items
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -4071,6 +4248,11 @@ paths:
       description: Get all booked appointments
       operationId: get_all_booked_appointments
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: branch_id
         type: string
@@ -4134,6 +4316,11 @@ paths:
       description: Get single booked appointment
       operationId: get_booked_appointment_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: booked_appointment_id
         in: path
         name: booked_appointment_id
@@ -4181,6 +4368,11 @@ paths:
       description: Create cashbox transaction
       operationId: create_cashbox_transaction
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateTransactionBody
         in: body
         name: app
@@ -4221,6 +4413,12 @@ paths:
       - application/json
       description: Get close cashbox
       operationId: close_cashbox_info
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -4261,6 +4459,11 @@ paths:
       description: Get all companies
       operationId: get_company_list
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: comany_id
         type: string
@@ -4318,6 +4521,11 @@ paths:
       description: Get all projects
       operationId: get_project_list
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: company_id
         type: string
@@ -4371,6 +4579,11 @@ paths:
       description: Create Company
       operationId: create_project
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CompanyProjectCreateRequest
         in: body
         name: Project
@@ -4419,6 +4632,11 @@ paths:
       description: Delete Project
       operationId: delete_project
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: project_id
         in: path
         name: project_id
@@ -4465,6 +4683,11 @@ paths:
       description: Get Project By Id
       operationId: get_company_project_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: project_id
         in: path
         name: project_id
@@ -4515,6 +4738,11 @@ paths:
       description: Update Project
       operationId: update_project
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: project_id
         in: path
         name: project_id
@@ -4568,6 +4796,11 @@ paths:
       description: Delete Company
       operationId: delete_company
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: company_id
         in: path
         name: company_id
@@ -4607,6 +4840,11 @@ paths:
       description: Get Company by id
       operationId: get_company_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: company_id
         in: path
         name: company_id
@@ -4653,6 +4891,11 @@ paths:
       description: Update company
       operationId: update_company
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: company_id
         in: path
         name: company_id
@@ -4706,6 +4949,11 @@ paths:
       description: Create ProjectResource
       operationId: create_project_resource
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: ProjectResourceCreateRequest
         in: body
         name: ProjectResource
@@ -4754,6 +5002,11 @@ paths:
       description: Remove ProjectResource
       operationId: remove_project_resource
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: ProjectResourceRemoveRequest
         in: body
         name: ProjectResource
@@ -4801,6 +5054,11 @@ paths:
       description: Get all companies
       operationId: get_resource_list
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: limit
         type: integer
@@ -4854,6 +5112,11 @@ paths:
       description: Add ProjectResource
       operationId: add_project_resource
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: ProjectResourceAddRequest
         in: body
         name: ProjectResource
@@ -4902,6 +5165,11 @@ paths:
       description: Get Resource by id
       operationId: get_resource_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: resource_id
         in: path
         name: resource_id
@@ -4942,6 +5210,58 @@ paths:
       summary: Get Resource by id
       tags:
       - Company Resource
+    put:
+      consumes:
+      - application/json
+      description: Update Resource by id
+      operationId: put_resource_id
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: UpdateResourceRequestBody
+        in: body
+        name: UpdateResourceRequestBody
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.UpdateResourceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ResourceWithoutPassword'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Resource by id
+      tags:
+      - Company Resource
   /v1/company/project/resource/reconnect:
     post:
       consumes:
@@ -4949,6 +5269,11 @@ paths:
       description: Reconnect ProjectResource
       operationId: reconnect_project_resource
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: ProjectResourceReconnectRequest
         in: body
         name: ProjectResource
@@ -4997,6 +5322,11 @@ paths:
       description: Add ProjectResource In Ucode Cluster
       operationId: add_project_resource_in_ucode
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: ProjectResourceAddRequest
         in: body
         name: ProjectResource
@@ -5045,6 +5375,11 @@ paths:
       description: Get all custom events
       operationId: get_all_custom_events
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: project_id
         type: string
@@ -5092,6 +5427,11 @@ paths:
       description: Create CustomEvent
       operationId: create_custom_event
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateCustomEventRequestBody
         in: body
         name: Customevent
@@ -5139,6 +5479,11 @@ paths:
       description: Update custom event
       operationId: update_Customevent
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateCustomEventRequestBody
         in: body
         name: Customevent
@@ -5187,6 +5532,11 @@ paths:
       description: Delete CustomEvent
       operationId: delete_custom_event
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: custom_event_id
         in: path
         name: custom_event_id
@@ -5226,6 +5576,11 @@ paths:
       description: Get CustomEvent by id
       operationId: get_custom_event_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: custom_event_id
         in: path
         name: custom_event_id
@@ -5273,6 +5628,11 @@ paths:
       description: Get Document list
       operationId: get_document_list
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: end_date
         type: string
@@ -5329,6 +5689,11 @@ paths:
       description: Create Document
       operationId: create_document
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateDocumentRequestBody
         in: body
         name: Document
@@ -5376,6 +5741,11 @@ paths:
       description: Update Document
       operationId: update_document
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateDocumentRequestBody
         in: body
         name: Document
@@ -5424,6 +5794,11 @@ paths:
       description: Delete Document
       operationId: delete_document
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: document_id
         in: path
         name: document_id
@@ -5463,6 +5838,11 @@ paths:
       description: Get single document
       operationId: get_document_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: document_id
         in: path
         name: document_id
@@ -5510,6 +5890,11 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: limit
         type: integer
@@ -5563,6 +5948,11 @@ paths:
       description: Create environment
       operationId: create_environment
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateEnvironmentRequestBody
         in: body
         name: environment
@@ -5610,6 +6000,11 @@ paths:
       description: Update environment
       operationId: update_environment
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateEnvironmentRequestBody
         in: body
         name: environment
@@ -5658,6 +6053,11 @@ paths:
       description: Delete environment
       operationId: delete_environment
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: environment_id
         in: path
         name: environment_id
@@ -5697,6 +6097,11 @@ paths:
       description: Get single environment
       operationId: get_environment_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: environment_id
         in: path
         name: environment_id
@@ -5744,6 +6149,11 @@ paths:
       description: Get all events
       operationId: get_all_events
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: project_id
         type: string
@@ -5791,6 +6201,11 @@ paths:
       description: Create event
       operationId: create_event
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateEventRequestBody
         in: body
         name: event
@@ -5838,6 +6253,11 @@ paths:
       description: Update event
       operationId: update_event
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateEventRequestBody
         in: body
         name: event
@@ -5886,6 +6306,11 @@ paths:
       description: Get event logs
       operationId: get_event_logs
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: limit
         type: string
@@ -5937,6 +6362,11 @@ paths:
       description: Get event log
       operationId: get_event_log
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: event_log_id
         in: path
         name: event_log_id
@@ -5984,6 +6414,11 @@ paths:
       description: Get event by id
       operationId: get_event_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: event_id
         in: path
         name: event_id
@@ -6031,6 +6466,11 @@ paths:
       description: Delete Event
       operationId: delete_event
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: event_id
         in: path
         name: event_id
@@ -6071,6 +6511,11 @@ paths:
       description: Get excel writer
       operationId: excel_reader
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: excel_id
         in: path
         name: excel_id
@@ -6118,6 +6563,11 @@ paths:
       description: Post excel writer
       operationId: excel_to_db
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: excel_id
         in: path
         name: excel_id
@@ -6451,6 +6901,11 @@ paths:
       description: Get all functions
       operationId: get_all_functions
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: limit
         type: integer
@@ -6501,6 +6956,11 @@ paths:
       description: Create Function
       operationId: create_function
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateFunctionRequestBody
         in: body
         name: Function
@@ -6548,6 +7008,11 @@ paths:
       description: Update function
       operationId: update_function
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateFunctionRequestBody
         in: body
         name: Function
@@ -6596,6 +7061,11 @@ paths:
       description: Delete Function
       operationId: delete_function
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: function_id
         in: path
         name: function_id
@@ -6635,6 +7105,11 @@ paths:
       description: Get Function by id
       operationId: get_function_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: function_id
         in: path
         name: function_id
@@ -6682,6 +7157,11 @@ paths:
       description: Get all relations
       operationId: get_relation_cascaders
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: Resource-Id
         in: header
         name: Resource-Id
@@ -6735,6 +7215,11 @@ paths:
       description: Get html template list
       operationId: get_html_template_list
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: project_id
         type: string
@@ -6782,6 +7267,11 @@ paths:
       description: Create htmlTemplate
       operationId: create_html_template
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateHtmlTemplateRequestBody
         in: body
         name: html_template
@@ -6829,6 +7319,11 @@ paths:
       description: Update html template
       operationId: update_html_template
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateHtmlTemplateRequestBody
         in: body
         name: html_template
@@ -6877,6 +7372,11 @@ paths:
       description: Delete html template
       operationId: delete_html_template_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: html_template_id
         in: path
         name: html_template_id
@@ -6916,6 +7416,11 @@ paths:
       description: Get single html template
       operationId: get_html_template_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: html_template_id
         in: path
         name: html_template_id
@@ -7016,6 +7521,11 @@ paths:
       description: Invoke Function
       operationId: invoke_function
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: InvokeFunctionRequest
         in: body
         name: InvokeFunctionRequest
@@ -7743,6 +8253,11 @@ paths:
       description: Get all offline appointments
       operationId: get_all_offline_appointments
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: branch_id
         type: string
@@ -7809,6 +8324,11 @@ paths:
       description: Get single offline appointment
       operationId: get_offline_appointment_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: offline_appointment_id
         in: path
         name: offline_appointment_id
@@ -7855,6 +8375,12 @@ paths:
       - application/json
       description: Get open cashbox
       operationId: open_cashbox_info
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -7897,6 +8423,11 @@ paths:
       description: Update appointment payment status
       operationId: update_appointment_payment_status
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateAppointmentStatus
         in: body
         name: view
@@ -8055,6 +8586,11 @@ paths:
       description: Get all query rows
       operationId: get_list_query_rows
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: GetAllQueryRowsRequestBody
         in: body
         name: object
@@ -8103,6 +8639,11 @@ paths:
       description: Get all relations
       operationId: get_all_relations
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: Resource-Id
         in: header
         name: Resource-Id
@@ -8225,6 +8766,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateRelationRequestBody
         in: body
         name: relation
@@ -8274,6 +8820,11 @@ paths:
       description: Delete Relation
       operationId: delete_relation
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: Resource-Id
         in: header
         name: Resource-Id
@@ -8748,6 +9299,11 @@ paths:
       description: Upload
       operationId: upload_image
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: file
         in: formData
         name: file
@@ -8795,6 +9351,11 @@ paths:
       description: Upload file
       operationId: upload_file
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: file
         in: formData
         name: file
@@ -9282,6 +9843,11 @@ paths:
       description: Get Query Folder Lit
       operationId: get_query_list
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: limit
         type: integer
@@ -9338,6 +9904,11 @@ paths:
       description: Create Query
       operationId: create_query
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateQueryRequest
         in: body
         name: table
@@ -9386,6 +9957,11 @@ paths:
       description: Delete Query
       operationId: delete_query
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: guid
         in: path
         name: guid
@@ -9425,6 +10001,11 @@ paths:
       description: Get Query By Id
       operationId: get_query_item
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: guid
         in: path
         name: guid
@@ -9469,8 +10050,13 @@ paths:
       consumes:
       - application/json
       description: Update Query
-      operationId: update_field
+      operationId: update_query
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: guid
         in: path
         name: guid
@@ -9524,6 +10110,11 @@ paths:
       description: Get Query Folder Lit
       operationId: get_query_folder_list
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: limit
         type: integer
@@ -9580,6 +10171,11 @@ paths:
       description: Create Query Folder
       operationId: create_query_folder
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateQueryFolderRequest
         in: body
         name: table
@@ -9628,6 +10224,11 @@ paths:
       description: Delete Query Folder
       operationId: delete_query_folder
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: guid
         in: path
         name: guid
@@ -9667,6 +10268,11 @@ paths:
       description: Get Query Folder By Id
       operationId: get_query_folder
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: guid
         in: path
         name: guid
@@ -9713,6 +10319,11 @@ paths:
       description: Update Query Folder
       operationId: update_query_folder
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: guid
         in: path
         name: guid
@@ -9766,6 +10377,11 @@ paths:
       description: Get Web Page List
       operationId: get_web_page_list
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - in: query
         name: limit
         type: integer
@@ -9816,6 +10432,11 @@ paths:
       description: Create Web Page
       operationId: create_web_page
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateWebPageRequest
         in: body
         name: table
@@ -9864,6 +10485,11 @@ paths:
       description: Delete Web Page
       operationId: delete_web_page
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: guid
         in: path
         name: guid
@@ -9903,6 +10529,11 @@ paths:
       description: Get Web Page By Id
       operationId: get_web_page_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: guid
         in: path
         name: guid
@@ -9949,6 +10580,11 @@ paths:
       description: Update Web Page
       operationId: update_web_page
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: guid
         in: path
         name: guid
