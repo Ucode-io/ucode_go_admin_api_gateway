@@ -83,21 +83,19 @@ message ResourceWithoutPassword {
         string database = 4;
     }
     message Environment {
-        string id = 1;
-        string project_id = 2;
-        string name = 3;
-        string display_color = 4;
-        string description = 5;
-        bool is_configured = 6;
+        string resource_environment_id = 1;
+        string name = 2;
+        string display_color = 3;
+        string description = 4;
+        bool is_configured = 5;
     }
-    
-    ServiceType service_type = 1;
-    ResourceType resource_type = 2;
-    Credentials credentials = 3;
-    string id = 4;
-    string project_id = 5;
-    string title = 6;
-    repeated Environment environments = 7;
+
+    ResourceType resource_type = 1;
+    Credentials credentials = 2;
+    string id = 3;
+    string project_id = 4;
+    string title = 5;
+    repeated Environment environments = 6;
 }
 
 message Project {
@@ -147,10 +145,27 @@ message EmptyProto {
 
 message AddResourceRequest {
     string project_id = 1;
-    repeated Resource resources = 2;
-    string company_id = 3;
-    string user_id = 4;
-    repeated ResourceEnvironment resource_environments = 5;
+    string environment_id = 2;
+    ResourceType resource_type = 3;
+    string title = 4;
+    bool is_configured = 5;
+    Resource.Credentials credentials = 6;
+    ServiceType service_type = 7;
+    string company_id = 8;
+    string user_id = 9;
+}
+
+message ConfigureResourceRequest {
+    string project_id = 1;
+    string environment_id = 2;
+    ResourceType resource_type = 3;
+    string title = 4;
+    bool is_configured = 5;
+    Resource.Credentials credentials = 6;
+    ServiceType service_type = 7;
+    string company_id = 8;
+    string user_id = 9;
+    string resource_id = 10;
 }
 
 message CreateResourceReq {
@@ -168,11 +183,11 @@ message AddResourceInUcodeRequest {
 }
 
 message AddResourceResponse {
-    string project_id = 1;
-    ServiceType service_type = 2;
-    ResourceType resource_type = 3;
-    string company_id = 4;
-    repeated ResourceEnvironment resource_environments = 5;
+    string id = 1;
+}
+
+message ConfigureResourceResponse {
+    string id = 1;
 }
 
 message CreateResourceRes {
@@ -183,10 +198,6 @@ message CreateResourceRes {
 }
 
 message RemoveResourceRequest {
-    string project_id = 1;
-    ServiceType service_type = 2;
-    ResourceType resource_type = 3;
-    string company_id = 4;
     string id = 5;
 }
 
@@ -199,7 +210,7 @@ message GetReourceListRequest {
 
 message GetReourceListResponse {
     int32 count = 1;
-    repeated ResourceWithoutPassword resources = 2;
+    repeated NewResource resources = 2;
 }
 
 message GetResourceRequest {

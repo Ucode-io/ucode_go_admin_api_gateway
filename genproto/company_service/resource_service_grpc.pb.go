@@ -23,15 +23,16 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ResourceServiceClient interface {
 	AddResource(ctx context.Context, in *AddResourceRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
-	CreateResource(ctx context.Context, in *CreateResourceReq, opts ...grpc.CallOption) (*CreateResourceRes, error)
-	AddResourceInUcode(ctx context.Context, in *AddResourceInUcodeRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
+	ConfigureResource(ctx context.Context, in *ConfigureResourceRequest, opts ...grpc.CallOption) (*ConfigureResourceResponse, error)
 	RemoveResource(ctx context.Context, in *RemoveResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error)
+	UpdateResource(ctx context.Context, in *UpdateResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error)
 	GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error)
 	GetReourceList(ctx context.Context, in *GetReourceListRequest, opts ...grpc.CallOption) (*GetReourceListResponse, error)
+	CreateResource(ctx context.Context, in *CreateResourceReq, opts ...grpc.CallOption) (*CreateResourceRes, error)
+	AddResourceInUcode(ctx context.Context, in *AddResourceInUcodeRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
 	ReconnectResource(ctx context.Context, in *ReconnectResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error)
 	GetResourceWithPath(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*GetResourceWithPathResponse, error)
 	AutoConnect(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*EmptyProto, error)
-	UpdateResource(ctx context.Context, in *UpdateResourceRequest, opts ...grpc.CallOption) (*UpdateResourceResponse, error)
 	// resource environment
 	UpsertResourceEnvironment(ctx context.Context, in *UpsertResourceEnvironmentRequest, opts ...grpc.CallOption) (*UpsertResourceEnvironmentResponse, error)
 }
@@ -53,18 +54,9 @@ func (c *resourceServiceClient) AddResource(ctx context.Context, in *AddResource
 	return out, nil
 }
 
-func (c *resourceServiceClient) CreateResource(ctx context.Context, in *CreateResourceReq, opts ...grpc.CallOption) (*CreateResourceRes, error) {
-	out := new(CreateResourceRes)
-	err := c.cc.Invoke(ctx, "/company_service.ResourceService/CreateResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *resourceServiceClient) AddResourceInUcode(ctx context.Context, in *AddResourceInUcodeRequest, opts ...grpc.CallOption) (*AddResourceResponse, error) {
-	out := new(AddResourceResponse)
-	err := c.cc.Invoke(ctx, "/company_service.ResourceService/AddResourceInUcode", in, out, opts...)
+func (c *resourceServiceClient) ConfigureResource(ctx context.Context, in *ConfigureResourceRequest, opts ...grpc.CallOption) (*ConfigureResourceResponse, error) {
+	out := new(ConfigureResourceResponse)
+	err := c.cc.Invoke(ctx, "/company_service.ResourceService/ConfigureResource", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -74,6 +66,15 @@ func (c *resourceServiceClient) AddResourceInUcode(ctx context.Context, in *AddR
 func (c *resourceServiceClient) RemoveResource(ctx context.Context, in *RemoveResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error) {
 	out := new(EmptyProto)
 	err := c.cc.Invoke(ctx, "/company_service.ResourceService/RemoveResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) UpdateResource(ctx context.Context, in *UpdateResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error) {
+	out := new(ResourceWithoutPassword)
+	err := c.cc.Invoke(ctx, "/company_service.ResourceService/UpdateResource", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -92,6 +93,24 @@ func (c *resourceServiceClient) GetResource(ctx context.Context, in *GetResource
 func (c *resourceServiceClient) GetReourceList(ctx context.Context, in *GetReourceListRequest, opts ...grpc.CallOption) (*GetReourceListResponse, error) {
 	out := new(GetReourceListResponse)
 	err := c.cc.Invoke(ctx, "/company_service.ResourceService/GetReourceList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) CreateResource(ctx context.Context, in *CreateResourceReq, opts ...grpc.CallOption) (*CreateResourceRes, error) {
+	out := new(CreateResourceRes)
+	err := c.cc.Invoke(ctx, "/company_service.ResourceService/CreateResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) AddResourceInUcode(ctx context.Context, in *AddResourceInUcodeRequest, opts ...grpc.CallOption) (*AddResourceResponse, error) {
+	out := new(AddResourceResponse)
+	err := c.cc.Invoke(ctx, "/company_service.ResourceService/AddResourceInUcode", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -125,15 +144,6 @@ func (c *resourceServiceClient) AutoConnect(ctx context.Context, in *GetProjects
 	return out, nil
 }
 
-func (c *resourceServiceClient) UpdateResource(ctx context.Context, in *UpdateResourceRequest, opts ...grpc.CallOption) (*UpdateResourceResponse, error) {
-	out := new(UpdateResourceResponse)
-	err := c.cc.Invoke(ctx, "/company_service.ResourceService/UpdateResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *resourceServiceClient) UpsertResourceEnvironment(ctx context.Context, in *UpsertResourceEnvironmentRequest, opts ...grpc.CallOption) (*UpsertResourceEnvironmentResponse, error) {
 	out := new(UpsertResourceEnvironmentResponse)
 	err := c.cc.Invoke(ctx, "/company_service.ResourceService/UpsertResourceEnvironment", in, out, opts...)
@@ -148,15 +158,16 @@ func (c *resourceServiceClient) UpsertResourceEnvironment(ctx context.Context, i
 // for forward compatibility
 type ResourceServiceServer interface {
 	AddResource(context.Context, *AddResourceRequest) (*AddResourceResponse, error)
-	CreateResource(context.Context, *CreateResourceReq) (*CreateResourceRes, error)
-	AddResourceInUcode(context.Context, *AddResourceInUcodeRequest) (*AddResourceResponse, error)
+	ConfigureResource(context.Context, *ConfigureResourceRequest) (*ConfigureResourceResponse, error)
 	RemoveResource(context.Context, *RemoveResourceRequest) (*EmptyProto, error)
+	UpdateResource(context.Context, *UpdateResourceRequest) (*ResourceWithoutPassword, error)
 	GetResource(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error)
 	GetReourceList(context.Context, *GetReourceListRequest) (*GetReourceListResponse, error)
+	CreateResource(context.Context, *CreateResourceReq) (*CreateResourceRes, error)
+	AddResourceInUcode(context.Context, *AddResourceInUcodeRequest) (*AddResourceResponse, error)
 	ReconnectResource(context.Context, *ReconnectResourceRequest) (*EmptyProto, error)
 	GetResourceWithPath(context.Context, *GetResourceRequest) (*GetResourceWithPathResponse, error)
 	AutoConnect(context.Context, *GetProjectsRequest) (*EmptyProto, error)
-	UpdateResource(context.Context, *UpdateResourceRequest) (*UpdateResourceResponse, error)
 	// resource environment
 	UpsertResourceEnvironment(context.Context, *UpsertResourceEnvironmentRequest) (*UpsertResourceEnvironmentResponse, error)
 	mustEmbedUnimplementedResourceServiceServer()
@@ -169,20 +180,26 @@ type UnimplementedResourceServiceServer struct {
 func (UnimplementedResourceServiceServer) AddResource(context.Context, *AddResourceRequest) (*AddResourceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddResource not implemented")
 }
-func (UnimplementedResourceServiceServer) CreateResource(context.Context, *CreateResourceReq) (*CreateResourceRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateResource not implemented")
-}
-func (UnimplementedResourceServiceServer) AddResourceInUcode(context.Context, *AddResourceInUcodeRequest) (*AddResourceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddResourceInUcode not implemented")
+func (UnimplementedResourceServiceServer) ConfigureResource(context.Context, *ConfigureResourceRequest) (*ConfigureResourceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfigureResource not implemented")
 }
 func (UnimplementedResourceServiceServer) RemoveResource(context.Context, *RemoveResourceRequest) (*EmptyProto, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveResource not implemented")
+}
+func (UnimplementedResourceServiceServer) UpdateResource(context.Context, *UpdateResourceRequest) (*ResourceWithoutPassword, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateResource not implemented")
 }
 func (UnimplementedResourceServiceServer) GetResource(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResource not implemented")
 }
 func (UnimplementedResourceServiceServer) GetReourceList(context.Context, *GetReourceListRequest) (*GetReourceListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetReourceList not implemented")
+}
+func (UnimplementedResourceServiceServer) CreateResource(context.Context, *CreateResourceReq) (*CreateResourceRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateResource not implemented")
+}
+func (UnimplementedResourceServiceServer) AddResourceInUcode(context.Context, *AddResourceInUcodeRequest) (*AddResourceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddResourceInUcode not implemented")
 }
 func (UnimplementedResourceServiceServer) ReconnectResource(context.Context, *ReconnectResourceRequest) (*EmptyProto, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReconnectResource not implemented")
@@ -192,9 +209,6 @@ func (UnimplementedResourceServiceServer) GetResourceWithPath(context.Context, *
 }
 func (UnimplementedResourceServiceServer) AutoConnect(context.Context, *GetProjectsRequest) (*EmptyProto, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AutoConnect not implemented")
-}
-func (UnimplementedResourceServiceServer) UpdateResource(context.Context, *UpdateResourceRequest) (*UpdateResourceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateResource not implemented")
 }
 func (UnimplementedResourceServiceServer) UpsertResourceEnvironment(context.Context, *UpsertResourceEnvironmentRequest) (*UpsertResourceEnvironmentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpsertResourceEnvironment not implemented")
@@ -230,38 +244,20 @@ func _ResourceService_AddResource_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ResourceService_CreateResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateResourceReq)
+func _ResourceService_ConfigureResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfigureResourceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ResourceServiceServer).CreateResource(ctx, in)
+		return srv.(ResourceServiceServer).ConfigureResource(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.ResourceService/CreateResource",
+		FullMethod: "/company_service.ResourceService/ConfigureResource",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResourceServiceServer).CreateResource(ctx, req.(*CreateResourceReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ResourceService_AddResourceInUcode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddResourceInUcodeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ResourceServiceServer).AddResourceInUcode(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.ResourceService/AddResourceInUcode",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResourceServiceServer).AddResourceInUcode(ctx, req.(*AddResourceInUcodeRequest))
+		return srv.(ResourceServiceServer).ConfigureResource(ctx, req.(*ConfigureResourceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -280,6 +276,24 @@ func _ResourceService_RemoveResource_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ResourceServiceServer).RemoveResource(ctx, req.(*RemoveResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_UpdateResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateResourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).UpdateResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ResourceService/UpdateResource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).UpdateResource(ctx, req.(*UpdateResourceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -316,6 +330,42 @@ func _ResourceService_GetReourceList_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ResourceServiceServer).GetReourceList(ctx, req.(*GetReourceListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_CreateResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateResourceReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).CreateResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ResourceService/CreateResource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).CreateResource(ctx, req.(*CreateResourceReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_AddResourceInUcode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddResourceInUcodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).AddResourceInUcode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ResourceService/AddResourceInUcode",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).AddResourceInUcode(ctx, req.(*AddResourceInUcodeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -374,24 +424,6 @@ func _ResourceService_AutoConnect_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ResourceService_UpdateResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateResourceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ResourceServiceServer).UpdateResource(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.ResourceService/UpdateResource",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResourceServiceServer).UpdateResource(ctx, req.(*UpdateResourceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _ResourceService_UpsertResourceEnvironment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpsertResourceEnvironmentRequest)
 	if err := dec(in); err != nil {
@@ -422,16 +454,16 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ResourceService_AddResource_Handler,
 		},
 		{
-			MethodName: "CreateResource",
-			Handler:    _ResourceService_CreateResource_Handler,
-		},
-		{
-			MethodName: "AddResourceInUcode",
-			Handler:    _ResourceService_AddResourceInUcode_Handler,
+			MethodName: "ConfigureResource",
+			Handler:    _ResourceService_ConfigureResource_Handler,
 		},
 		{
 			MethodName: "RemoveResource",
 			Handler:    _ResourceService_RemoveResource_Handler,
+		},
+		{
+			MethodName: "UpdateResource",
+			Handler:    _ResourceService_UpdateResource_Handler,
 		},
 		{
 			MethodName: "GetResource",
@@ -440,6 +472,14 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetReourceList",
 			Handler:    _ResourceService_GetReourceList_Handler,
+		},
+		{
+			MethodName: "CreateResource",
+			Handler:    _ResourceService_CreateResource_Handler,
+		},
+		{
+			MethodName: "AddResourceInUcode",
+			Handler:    _ResourceService_AddResourceInUcode_Handler,
 		},
 		{
 			MethodName: "ReconnectResource",
@@ -452,10 +492,6 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AutoConnect",
 			Handler:    _ResourceService_AutoConnect_Handler,
-		},
-		{
-			MethodName: "UpdateResource",
-			Handler:    _ResourceService_UpdateResource_Handler,
 		},
 		{
 			MethodName: "UpsertResourceEnvironment",

@@ -233,48 +233,31 @@ definitions:
       user_id:
         type: string
     type: object
-  company_service.AddResourceInUcodeRequest:
-    properties:
-      company_id:
-        type: string
-      project_id:
-        type: string
-      project_title:
-        type: string
-      user_id:
-        type: string
-    type: object
   company_service.AddResourceRequest:
     properties:
       company_id:
         type: string
+      credentials:
+        $ref: '#/definitions/company_service.Resource_Credentials'
+      environment_id:
+        type: string
+      is_configured:
+        type: boolean
       project_id:
         type: string
-      resource_environments:
-        items:
-          $ref: '#/definitions/company_service.ResourceEnvironment'
-        type: array
-      resources:
-        items:
-          $ref: '#/definitions/company_service.Resource'
-        type: array
+      resource_type:
+        type: integer
+      service_type:
+        type: integer
+      title:
+        type: string
       user_id:
         type: string
     type: object
   company_service.AddResourceResponse:
     properties:
-      company_id:
+      id:
         type: string
-      project_id:
-        type: string
-      resource_environments:
-        items:
-          $ref: '#/definitions/company_service.ResourceEnvironment'
-        type: array
-      resource_type:
-        type: integer
-      service_type:
-        type: integer
     type: object
   company_service.Company:
     properties:
@@ -305,6 +288,34 @@ definitions:
         items:
           $ref: '#/definitions/company_service.ProjectWithoutResource'
         type: array
+    type: object
+  company_service.ConfigureResourceRequest:
+    properties:
+      company_id:
+        type: string
+      credentials:
+        $ref: '#/definitions/company_service.Resource_Credentials'
+      environment_id:
+        type: string
+      is_configured:
+        type: boolean
+      project_id:
+        type: string
+      resource_id:
+        type: string
+      resource_type:
+        type: integer
+      service_type:
+        type: integer
+      title:
+        type: string
+      user_id:
+        type: string
+    type: object
+  company_service.ConfigureResourceResponse:
+    properties:
+      id:
+        type: string
     type: object
   company_service.CreateEnvironmentRequest:
     properties:
@@ -438,8 +449,17 @@ definitions:
         type: integer
       resources:
         items:
-          $ref: '#/definitions/company_service.ResourceWithoutPassword'
+          $ref: '#/definitions/company_service.NewResource'
         type: array
+    type: object
+  company_service.NewResource:
+    properties:
+      id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
     type: object
   company_service.Project:
     properties:
@@ -474,16 +494,8 @@ definitions:
     type: object
   company_service.RemoveResourceRequest:
     properties:
-      company_id:
-        type: string
       id:
         type: string
-      project_id:
-        type: string
-      resource_type:
-        type: integer
-      service_type:
-        type: integer
     type: object
   company_service.Resource:
     properties:
@@ -511,19 +523,6 @@ definitions:
       username:
         type: string
     type: object
-  company_service.ResourceEnvironment:
-    properties:
-      databasename:
-        type: string
-      environment_id:
-        type: string
-      is_configured:
-        type: boolean
-      project_id:
-        type: string
-      resource_id:
-        type: string
-    type: object
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -537,8 +536,6 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
-      service_type:
         type: integer
       title:
         type: string
@@ -560,30 +557,28 @@ definitions:
         type: string
       display_color:
         type: string
-      id:
-        type: string
       is_configured:
         type: boolean
       name:
         type: string
-      project_id:
+      resource_environment_id:
         type: string
     type: object
   company_service.UpdateResourceRequest:
     properties:
-      company_id:
+      credentials:
+        $ref: '#/definitions/company_service.Resource_Credentials'
+      environment_id:
         type: string
+      id:
+        type: string
+      is_configured:
+        type: boolean
       project_id:
         type: string
-      resource_environments:
-        items:
-          $ref: '#/definitions/company_service.ResourceEnvironment'
-        type: array
-      resources:
-        items:
-          $ref: '#/definitions/company_service.Resource'
-        type: array
-      user_id:
+      resource_type:
+        type: integer
+      title:
         type: string
     type: object
   config.Config:
@@ -5109,7 +5104,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Add ProjectResource
+      description: Configure ProjectResource
       operationId: add_project_resource
       parameters:
       - description: Resource-Id
@@ -5117,12 +5112,12 @@ paths:
         name: Resource-Id
         required: true
         type: string
-      - description: ProjectResourceAddRequest
+      - description: ProjectResourceConfigureRequest
         in: body
         name: ProjectResource
         required: true
         schema:
-          $ref: '#/definitions/company_service.AddResourceRequest'
+          $ref: '#/definitions/company_service.ConfigureResourceRequest'
       produces:
       - application/json
       responses:
@@ -5133,7 +5128,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.AddResourceResponse'
+                  $ref: '#/definitions/company_service.ConfigureResourceResponse'
               type: object
         "400":
           description: Bad Request
@@ -5155,7 +5150,7 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-      summary: Add ProjectResource
+      summary: Configure ProjectResource
       tags:
       - Company Resource
   /v1/company/project/resource/{resource_id}:
@@ -5313,59 +5308,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Reconnect ProjectResource
-      tags:
-      - Company Resource
-  /v1/company/project/ucode-resource:
-    post:
-      consumes:
-      - application/json
-      description: Add ProjectResource In Ucode Cluster
-      operationId: add_project_resource_in_ucode
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: ProjectResourceAddRequest
-        in: body
-        name: ProjectResource
-        required: true
-        schema:
-          $ref: '#/definitions/company_service.AddResourceInUcodeRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: ProjectResource data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.AddResourceResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Add ProjectResource In Ucode Cluster
       tags:
       - Company Resource
   /v1/custom-event:

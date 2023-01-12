@@ -4584,7 +4584,7 @@ var doc = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Add ProjectResource",
+                "description": "Configure ProjectResource",
                 "consumes": [
                     "application/json"
                 ],
@@ -4594,7 +4594,7 @@ var doc = `{
                 "tags": [
                     "Company Resource"
                 ],
-                "summary": "Add ProjectResource",
+                "summary": "Configure ProjectResource",
                 "operationId": "add_project_resource",
                 "parameters": [
                     {
@@ -4605,12 +4605,12 @@ var doc = `{
                         "required": true
                     },
                     {
-                        "description": "ProjectResourceAddRequest",
+                        "description": "ProjectResourceConfigureRequest",
                         "name": "ProjectResource",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.AddResourceRequest"
+                            "$ref": "#/definitions/company_service.ConfigureResourceRequest"
                         }
                     }
                 ],
@@ -4626,7 +4626,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.AddResourceResponse"
+                                            "$ref": "#/definitions/company_service.ConfigureResourceResponse"
                                         }
                                     }
                                 }
@@ -5009,101 +5009,6 @@ var doc = `{
                     },
                     "400": {
                         "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/company/project/ucode-resource": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Add ProjectResource In Ucode Cluster",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Company Resource"
-                ],
-                "summary": "Add ProjectResource In Ucode Cluster",
-                "operationId": "add_project_resource_in_ucode",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "ProjectResourceAddRequest",
-                        "name": "ProjectResource",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/company_service.AddResourceInUcodeRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "ProjectResource data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/company_service.AddResourceResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -15299,43 +15204,32 @@ var doc = `{
                 }
             }
         },
-        "company_service.AddResourceInUcodeRequest": {
-            "type": "object",
-            "properties": {
-                "company_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "project_title": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
         "company_service.AddResourceRequest": {
             "type": "object",
             "properties": {
                 "company_id": {
                     "type": "string"
                 },
+                "credentials": {
+                    "$ref": "#/definitions/company_service.Resource_Credentials"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
                 "project_id": {
                     "type": "string"
                 },
-                "resource_environments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/company_service.ResourceEnvironment"
-                    }
+                "resource_type": {
+                    "type": "integer"
                 },
-                "resources": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/company_service.Resource"
-                    }
+                "service_type": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
                 },
                 "user_id": {
                     "type": "string"
@@ -15345,23 +15239,8 @@ var doc = `{
         "company_service.AddResourceResponse": {
             "type": "object",
             "properties": {
-                "company_id": {
+                "id": {
                     "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "resource_environments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/company_service.ResourceEnvironment"
-                    }
-                },
-                "resource_type": {
-                    "type": "integer"
-                },
-                "service_type": {
-                    "type": "integer"
                 }
             }
         },
@@ -15408,6 +15287,49 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/company_service.ProjectWithoutResource"
                     }
+                }
+            }
+        },
+        "company_service.ConfigureResourceRequest": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "credentials": {
+                    "$ref": "#/definitions/company_service.Resource_Credentials"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
+                },
+                "service_type": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.ConfigureResourceResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
                 }
             }
         },
@@ -15615,8 +15537,22 @@ var doc = `{
                 "resources": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/company_service.ResourceWithoutPassword"
+                        "$ref": "#/definitions/company_service.NewResource"
                     }
+                }
+            }
+        },
+        "company_service.NewResource": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -15671,20 +15607,8 @@ var doc = `{
         "company_service.RemoveResourceRequest": {
             "type": "object",
             "properties": {
-                "company_id": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "resource_type": {
-                    "type": "integer"
-                },
-                "service_type": {
-                    "type": "integer"
                 }
             }
         },
@@ -15708,26 +15632,6 @@ var doc = `{
                 }
             }
         },
-        "company_service.ResourceEnvironment": {
-            "type": "object",
-            "properties": {
-                "databasename": {
-                    "type": "string"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "is_configured": {
-                    "type": "boolean"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "resource_id": {
-                    "type": "string"
-                }
-            }
-        },
         "company_service.ResourceWithoutPassword": {
             "type": "object",
             "properties": {
@@ -15747,9 +15651,6 @@ var doc = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
-                },
-                "service_type": {
                     "type": "integer"
                 },
                 "title": {
@@ -15783,16 +15684,13 @@ var doc = `{
                 "display_color": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "is_configured": {
                     "type": "boolean"
                 },
                 "name": {
                     "type": "string"
                 },
-                "project_id": {
+                "resource_environment_id": {
                     "type": "string"
                 }
             }
@@ -15820,25 +15718,25 @@ var doc = `{
         "company_service.UpdateResourceRequest": {
             "type": "object",
             "properties": {
-                "company_id": {
+                "credentials": {
+                    "$ref": "#/definitions/company_service.Resource_Credentials"
+                },
+                "environment_id": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
                 },
                 "project_id": {
                     "type": "string"
                 },
-                "resource_environments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/company_service.ResourceEnvironment"
-                    }
+                "resource_type": {
+                    "type": "integer"
                 },
-                "resources": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/company_service.Resource"
-                    }
-                },
-                "user_id": {
+                "title": {
                     "type": "string"
                 }
             }

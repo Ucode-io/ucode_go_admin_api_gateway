@@ -210,7 +210,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	}
 
 	v1Admin := r.Group("/v1")
-	v1Admin.Use(h.AdminAuthMiddleware())
+	// v1Admin.Use(h.AdminAuthMiddleware())
 	{
 		// company service
 		// v1.POST("/company", h.CreateCompany)
@@ -228,12 +228,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		v1Admin.POST("/company/project/resource", h.AddProjectResource)
 		v1Admin.POST("/company/project/create-resource", h.CreateProjectResource)
-		v1Admin.POST("/company/project/ucode-resource", h.AddProjectResourceInUcodeCluster)
 		v1Admin.DELETE("/company/project/resource", h.RemoveProjectResource)
 		v1Admin.GET("/company/project/resource/:resource_id", h.GetResource)
 		v1Admin.GET("/company/project/resource", h.GetResourceList)
 		v1Admin.POST("/company/project/resource/reconnect", h.ReconnectProjectResource)
 		v1Admin.PUT("/company/project/resource/:resource_id", h.UpdateResource)
+		v1Admin.POST("/company/project/configure-resource", h.ConfigureProjectResource)
 
 		// environment service
 		v1Admin.POST("/environment", h.CreateEnvironment)

@@ -9,15 +9,16 @@ import "projects_service.proto";
 service ResourceService {
 
     rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
-    rpc CreateResource(CreateResourceReq) returns (CreateResourceRes) {}
-    rpc AddResourceInUcode(AddResourceInUcodeRequest) returns (AddResourceResponse) {}
+    rpc ConfigureResource(ConfigureResourceRequest) returns (ConfigureResourceResponse) {}
     rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
+    rpc UpdateResource(UpdateResourceRequest) returns (ResourceWithoutPassword) {}
     rpc GetResource(GetResourceRequest) returns (ResourceWithoutPassword) {}
     rpc GetReourceList(GetReourceListRequest) returns (GetReourceListResponse) {}
+    rpc CreateResource(CreateResourceReq) returns (CreateResourceRes) {}
+    rpc AddResourceInUcode(AddResourceInUcodeRequest) returns (AddResourceResponse) {}
     rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
     rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
     rpc AutoConnect(GetProjectsRequest) returns (EmptyProto) {}
-    rpc UpdateResource(UpdateResourceRequest) returns (UpdateResourceResponse) {}
 
     // resource environment
     rpc UpsertResourceEnvironment(UpsertResourceEnvironmentRequest) returns (UpsertResourceEnvironmentResponse) {}
@@ -33,11 +34,13 @@ message UpsertResourceEnvironmentResponse {
 }
 
 message UpdateResourceRequest {
-    string project_id = 1;
-    repeated Resource resources = 2;
-    string company_id = 3;
-    string user_id = 4;
-    repeated ResourceEnvironment resource_environments = 5;
+    string id = 1;
+    string project_id = 2;
+    string environment_id = 3;
+    ResourceType resource_type = 4;
+    string title = 5;
+    bool is_configured = 6;
+    Resource.Credentials credentials = 7;
 }
 
 message UpdateResourceResponse {

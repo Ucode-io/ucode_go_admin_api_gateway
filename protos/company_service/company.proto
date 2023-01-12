@@ -53,10 +53,23 @@ message EnvironmentWithResources {
     Resources resources = 6;
 }
 
+message NewResource {
+    string id = 1;
+    string title = 2;
+    string project_id = 3;
+}
+
 message ResourceEnvironment {
-    string project_id = 1;
-    string resource_id = 2;
-    string environment_id = 3;
-    bool is_configured = 4;
-    string databasename = 5;
+    string id = 1;
+    string project_id = 2;
+    string resource_id = 3;
+    string environment_id = 4;
+    bool is_configured = 5;
+    string vault_path = 6;
+    int32 service_type = 7;
+    int32 resource_type = 8;
+    string host = 9;
+    string port = 10;
+    string username = 11;
+    string database = 12;
 }
