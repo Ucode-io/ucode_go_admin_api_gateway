@@ -88,6 +88,7 @@ message ResourceWithoutPassword {
         string display_color = 3;
         string description = 4;
         bool is_configured = 5;
+        string id = 6;
     }
 
     ResourceType resource_type = 1;

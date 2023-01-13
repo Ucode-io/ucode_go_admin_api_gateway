@@ -26,16 +26,16 @@ type DocumentData struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	DocumentJson string `protobuf:"bytes,2,opt,name=document_json,json=documentJson,proto3" json:"document_json"`
-	HtmlUz       string `protobuf:"bytes,3,opt,name=html_uz,json=htmlUz,proto3" json:"html_uz"`
-	HtmlRu       string `protobuf:"bytes,4,opt,name=html_ru,json=htmlRu,proto3" json:"html_ru"`
-	PdfUrlUz     string `protobuf:"bytes,5,opt,name=pdf_url_uz,json=pdfUrlUz,proto3" json:"pdf_url_uz"`
-	PdfUrlRu     string `protobuf:"bytes,6,opt,name=pdf_url_ru,json=pdfUrlRu,proto3" json:"pdf_url_ru"`
-	CreatedAt    string `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UpdatedAt    string `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
-	Status       string `protobuf:"bytes,9,opt,name=status,proto3" json:"status"`
-	PageStatus   string `protobuf:"bytes,10,opt,name=page_status,json=pageStatus,proto3" json:"page_status"`
+	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	DocumentJson string `protobuf:"bytes,2,opt,name=document_json,json=documentJson,proto3" json:"document_json,omitempty"`
+	HtmlUz       string `protobuf:"bytes,3,opt,name=html_uz,json=htmlUz,proto3" json:"html_uz,omitempty"`
+	HtmlRu       string `protobuf:"bytes,4,opt,name=html_ru,json=htmlRu,proto3" json:"html_ru,omitempty"`
+	PdfUrlUz     string `protobuf:"bytes,5,opt,name=pdf_url_uz,json=pdfUrlUz,proto3" json:"pdf_url_uz,omitempty"`
+	PdfUrlRu     string `protobuf:"bytes,6,opt,name=pdf_url_ru,json=pdfUrlRu,proto3" json:"pdf_url_ru,omitempty"`
+	CreatedAt    string `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt    string `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Status       string `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
+	PageStatus   string `protobuf:"bytes,10,opt,name=page_status,json=pageStatus,proto3" json:"page_status,omitempty"`
 }
 
 func (x *DocumentData) Reset() {
@@ -145,9 +145,9 @@ type UpdateStatusReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Status string `protobuf:"bytes,1,opt,name=status,proto3" json:"status"`
-	Id     string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
-	Sign   string `protobuf:"bytes,3,opt,name=sign,proto3" json:"sign"`
+	Status string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	Id     string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	Sign   string `protobuf:"bytes,3,opt,name=sign,proto3" json:"sign,omitempty"`
 }
 
 func (x *UpdateStatusReq) Reset() {
@@ -208,8 +208,8 @@ type Ids struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	IsArchive int32    `protobuf:"varint,1,opt,name=isArchive,proto3" json:"isArchive"`
-	Ids       []string `protobuf:"bytes,2,rep,name=ids,proto3" json:"ids"`
+	IsArchive int32    `protobuf:"varint,1,opt,name=isArchive,proto3" json:"isArchive,omitempty"`
+	Ids       []string `protobuf:"bytes,2,rep,name=ids,proto3" json:"ids,omitempty"`
 }
 
 func (x *Ids) Reset() {
@@ -263,7 +263,7 @@ type ById struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *ById) Reset() {
@@ -310,9 +310,9 @@ type UpdateReadReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	IsRead      int32  `protobuf:"varint,2,opt,name=IsRead,proto3" json:"IsRead"`
-	IsReadAgent int32  `protobuf:"varint,3,opt,name=IsReadAgent,proto3" json:"IsReadAgent"`
+	Id          string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	IsRead      int32  `protobuf:"varint,2,opt,name=IsRead,proto3" json:"IsRead,omitempty"`
+	IsReadAgent int32  `protobuf:"varint,3,opt,name=IsReadAgent,proto3" json:"IsReadAgent,omitempty"`
 }
 
 func (x *UpdateReadReq) Reset() {
@@ -373,30 +373,30 @@ type ListDocumentReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Page         int32    `protobuf:"varint,1,opt,name=page,proto3" json:"page"`
-	Limit        int32    `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
-	DocType      string   `protobuf:"bytes,3,opt,name=docType,proto3" json:"docType"`
-	OwnerTin     string   `protobuf:"bytes,4,opt,name=ownerTin,proto3" json:"ownerTin"`
-	PartnerTin   string   `protobuf:"bytes,5,opt,name=partnerTin,proto3" json:"partnerTin"`
-	AgentTin     string   `protobuf:"bytes,6,opt,name=agentTin,proto3" json:"agentTin"`
-	Search       string   `protobuf:"bytes,7,opt,name=search,proto3" json:"search"`
-	FromDate     string   `protobuf:"bytes,8,opt,name=fromDate,proto3" json:"fromDate"`
-	ToDate       string   `protobuf:"bytes,9,opt,name=toDate,proto3" json:"toDate"`
-	OwnerName    string   `protobuf:"bytes,10,opt,name=ownerName,proto3" json:"ownerName"`
-	PartnerName  string   `protobuf:"bytes,11,opt,name=partnerName,proto3" json:"partnerName"`
-	AgentName    string   `protobuf:"bytes,12,opt,name=agentName,proto3" json:"agentName"`
-	DocStatus    string   `protobuf:"bytes,13,opt,name=docStatus,proto3" json:"docStatus"`
-	Commission   bool     `protobuf:"varint,14,opt,name=commission,proto3" json:"commission"`
-	Unilateral   bool     `protobuf:"varint,15,opt,name=unilateral,proto3" json:"unilateral"`
-	Marked       bool     `protobuf:"varint,16,opt,name=marked,proto3" json:"marked"`
-	Hasbenefit   bool     `protobuf:"varint,17,opt,name=hasbenefit,proto3" json:"hasbenefit"`
-	IsSave       string   `protobuf:"bytes,18,opt,name=isSave,proto3" json:"isSave"`
-	TotalSum     string   `protobuf:"bytes,19,opt,name=totalSum,proto3" json:"totalSum"`
-	AgentPinfl   string   `protobuf:"bytes,20,opt,name=agentPinfl,proto3" json:"agentPinfl"`
-	PartnerPinfl string   `protobuf:"bytes,21,opt,name=partnerPinfl,proto3" json:"partnerPinfl"`
-	All          string   `protobuf:"bytes,22,opt,name=all,proto3" json:"all"`
-	BranchCodes  []string `protobuf:"bytes,23,rep,name=branchCodes,proto3" json:"branchCodes"`
-	FacturaType  int32    `protobuf:"varint,24,opt,name=facturaType,proto3" json:"facturaType"`
+	Page         int32    `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit        int32    `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	DocType      string   `protobuf:"bytes,3,opt,name=docType,proto3" json:"docType,omitempty"`
+	OwnerTin     string   `protobuf:"bytes,4,opt,name=ownerTin,proto3" json:"ownerTin,omitempty"`
+	PartnerTin   string   `protobuf:"bytes,5,opt,name=partnerTin,proto3" json:"partnerTin,omitempty"`
+	AgentTin     string   `protobuf:"bytes,6,opt,name=agentTin,proto3" json:"agentTin,omitempty"`
+	Search       string   `protobuf:"bytes,7,opt,name=search,proto3" json:"search,omitempty"`
+	FromDate     string   `protobuf:"bytes,8,opt,name=fromDate,proto3" json:"fromDate,omitempty"`
+	ToDate       string   `protobuf:"bytes,9,opt,name=toDate,proto3" json:"toDate,omitempty"`
+	OwnerName    string   `protobuf:"bytes,10,opt,name=ownerName,proto3" json:"ownerName,omitempty"`
+	PartnerName  string   `protobuf:"bytes,11,opt,name=partnerName,proto3" json:"partnerName,omitempty"`
+	AgentName    string   `protobuf:"bytes,12,opt,name=agentName,proto3" json:"agentName,omitempty"`
+	DocStatus    string   `protobuf:"bytes,13,opt,name=docStatus,proto3" json:"docStatus,omitempty"`
+	Commission   bool     `protobuf:"varint,14,opt,name=commission,proto3" json:"commission,omitempty"`
+	Unilateral   bool     `protobuf:"varint,15,opt,name=unilateral,proto3" json:"unilateral,omitempty"`
+	Marked       bool     `protobuf:"varint,16,opt,name=marked,proto3" json:"marked,omitempty"`
+	Hasbenefit   bool     `protobuf:"varint,17,opt,name=hasbenefit,proto3" json:"hasbenefit,omitempty"`
+	IsSave       string   `protobuf:"bytes,18,opt,name=isSave,proto3" json:"isSave,omitempty"`
+	TotalSum     string   `protobuf:"bytes,19,opt,name=totalSum,proto3" json:"totalSum,omitempty"`
+	AgentPinfl   string   `protobuf:"bytes,20,opt,name=agentPinfl,proto3" json:"agentPinfl,omitempty"`
+	PartnerPinfl string   `protobuf:"bytes,21,opt,name=partnerPinfl,proto3" json:"partnerPinfl,omitempty"`
+	All          string   `protobuf:"bytes,22,opt,name=all,proto3" json:"all,omitempty"`
+	BranchCodes  []string `protobuf:"bytes,23,rep,name=branchCodes,proto3" json:"branchCodes,omitempty"`
+	FacturaType  int32    `protobuf:"varint,24,opt,name=facturaType,proto3" json:"facturaType,omitempty"`
 }
 
 func (x *ListDocumentReq) Reset() {
@@ -604,9 +604,9 @@ type ListDocumentResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Documents      []*Document    `protobuf:"bytes,1,rep,name=documents,proto3" json:"documents"`
-	Count          int32          `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
-	CountDocuments *CountDocument `protobuf:"bytes,3,opt,name=countDocuments,proto3" json:"countDocuments"`
+	Documents      []*Document    `protobuf:"bytes,1,rep,name=documents,proto3" json:"documents,omitempty"`
+	Count          int32          `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	CountDocuments *CountDocument `protobuf:"bytes,3,opt,name=countDocuments,proto3" json:"countDocuments,omitempty"`
 }
 
 func (x *ListDocumentResp) Reset() {
@@ -667,17 +667,17 @@ type CountDocument struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Act              int32 `protobuf:"varint,1,opt,name=act,proto3" json:"act"`
-	Factura          int32 `protobuf:"varint,2,opt,name=factura,proto3" json:"factura"`
-	BFactura         int32 `protobuf:"varint,3,opt,name=bFactura,proto3" json:"bFactura"`
-	Empowerment      int32 `protobuf:"varint,4,opt,name=empowerment,proto3" json:"empowerment"`
-	CalculationTable int32 `protobuf:"varint,5,opt,name=calculationTable,proto3" json:"calculationTable"`
-	VerificationAct  int32 `protobuf:"varint,6,opt,name=verificationAct,proto3" json:"verificationAct"`
-	Waybill          int32 `protobuf:"varint,7,opt,name=waybill,proto3" json:"waybill"`
-	Inbox            int32 `protobuf:"varint,8,opt,name=inbox,proto3" json:"inbox"`
-	Sends            int32 `protobuf:"varint,9,opt,name=sends,proto3" json:"sends"`
-	Agent            int32 `protobuf:"varint,10,opt,name=agent,proto3" json:"agent"`
-	Contract         int32 `protobuf:"varint,11,opt,name=contract,proto3" json:"contract"`
+	Act              int32 `protobuf:"varint,1,opt,name=act,proto3" json:"act,omitempty"`
+	Factura          int32 `protobuf:"varint,2,opt,name=factura,proto3" json:"factura,omitempty"`
+	BFactura         int32 `protobuf:"varint,3,opt,name=bFactura,proto3" json:"bFactura,omitempty"`
+	Empowerment      int32 `protobuf:"varint,4,opt,name=empowerment,proto3" json:"empowerment,omitempty"`
+	CalculationTable int32 `protobuf:"varint,5,opt,name=calculationTable,proto3" json:"calculationTable,omitempty"`
+	VerificationAct  int32 `protobuf:"varint,6,opt,name=verificationAct,proto3" json:"verificationAct,omitempty"`
+	Waybill          int32 `protobuf:"varint,7,opt,name=waybill,proto3" json:"waybill,omitempty"`
+	Inbox            int32 `protobuf:"varint,8,opt,name=inbox,proto3" json:"inbox,omitempty"`
+	Sends            int32 `protobuf:"varint,9,opt,name=sends,proto3" json:"sends,omitempty"`
+	Agent            int32 `protobuf:"varint,10,opt,name=agent,proto3" json:"agent,omitempty"`
+	Contract         int32 `protobuf:"varint,11,opt,name=contract,proto3" json:"contract,omitempty"`
 }
 
 func (x *CountDocument) Reset() {
@@ -794,37 +794,37 @@ type Document struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DocId                   string    `protobuf:"bytes,1,opt,name=docId,proto3" json:"docId"`
-	DocDate                 string    `protobuf:"bytes,2,opt,name=docDate,proto3" json:"docDate"`
-	DocNo                   string    `protobuf:"bytes,3,opt,name=docNo,proto3" json:"docNo"`
-	DocType                 string    `protobuf:"bytes,4,opt,name=docType,proto3" json:"docType"`
-	DocStatus               string    `protobuf:"bytes,5,opt,name=docStatus,proto3" json:"docStatus"`
-	ContractDocNo           string    `protobuf:"bytes,6,opt,name=contractDocNo,proto3" json:"contractDocNo"`
-	ContractDocDate         string    `protobuf:"bytes,7,opt,name=contractDocDate,proto3" json:"contractDocDate"`
-	TotalDeliverySum        float32   `protobuf:"fixed32,8,opt,name=totalDeliverySum,proto3" json:"totalDeliverySum"`
-	TotalDeliverySumWithVat float32   `protobuf:"fixed32,9,opt,name=totalDeliverySumWithVat,proto3" json:"totalDeliverySumWithVat"`
-	TotalSum                float32   `protobuf:"fixed32,10,opt,name=totalSum,proto3" json:"totalSum"`
-	TotalVatSum             float32   `protobuf:"fixed32,11,opt,name=totalVatSum,proto3" json:"totalVatSum"`
-	OwnerTin                string    `protobuf:"bytes,12,opt,name=ownerTin,proto3" json:"ownerTin"`
-	OwnerName               string    `protobuf:"bytes,13,opt,name=ownerName,proto3" json:"ownerName"`
-	OwnerBranchCode         string    `protobuf:"bytes,14,opt,name=ownerBranchCode,proto3" json:"ownerBranchCode"`
-	PartnerTin              string    `protobuf:"bytes,15,opt,name=partnerTin,proto3" json:"partnerTin"`
-	PartnerName             string    `protobuf:"bytes,16,opt,name=partnerName,proto3" json:"partnerName"`
-	PartnerBranchCode       string    `protobuf:"bytes,17,opt,name=partnerBranchCode,proto3" json:"partnerBranchCode"`
-	AgentTin                string    `protobuf:"bytes,18,opt,name=agentTin,proto3" json:"agentTin"`
-	AgentName               string    `protobuf:"bytes,19,opt,name=agentName,proto3" json:"agentName"`
-	AgentBranchCode         string    `protobuf:"bytes,20,opt,name=agentBranchCode,proto3" json:"agentBranchCode"`
-	IsSave                  string    `protobuf:"bytes,21,opt,name=isSave,proto3" json:"isSave"`
-	CreatedAt               string    `protobuf:"bytes,22,opt,name=createdAt,proto3" json:"createdAt"`
-	UpdatedAt               string    `protobuf:"bytes,23,opt,name=updatedAt,proto3" json:"updatedAt"`
-	Commission              bool      `protobuf:"varint,24,opt,name=commission,proto3" json:"commission"`
-	Unilateral              bool      `protobuf:"varint,25,opt,name=unilateral,proto3" json:"unilateral"`
-	Marked                  bool      `protobuf:"varint,26,opt,name=marked,proto3" json:"marked"`
-	Hasbenefit              bool      `protobuf:"varint,27,opt,name=hasbenefit,proto3" json:"hasbenefit"`
-	IsRead                  int32     `protobuf:"varint,28,opt,name=isRead,proto3" json:"isRead"`
-	IsReadAgent             int32     `protobuf:"varint,29,opt,name=isReadAgent,proto3" json:"isReadAgent"`
-	Clients                 []*Client `protobuf:"bytes,30,rep,name=clients,proto3" json:"clients"`
-	FacturaType             int32     `protobuf:"varint,31,opt,name=facturaType,proto3" json:"facturaType"`
+	DocId                   string    `protobuf:"bytes,1,opt,name=docId,proto3" json:"docId,omitempty"`
+	DocDate                 string    `protobuf:"bytes,2,opt,name=docDate,proto3" json:"docDate,omitempty"`
+	DocNo                   string    `protobuf:"bytes,3,opt,name=docNo,proto3" json:"docNo,omitempty"`
+	DocType                 string    `protobuf:"bytes,4,opt,name=docType,proto3" json:"docType,omitempty"`
+	DocStatus               string    `protobuf:"bytes,5,opt,name=docStatus,proto3" json:"docStatus,omitempty"`
+	ContractDocNo           string    `protobuf:"bytes,6,opt,name=contractDocNo,proto3" json:"contractDocNo,omitempty"`
+	ContractDocDate         string    `protobuf:"bytes,7,opt,name=contractDocDate,proto3" json:"contractDocDate,omitempty"`
+	TotalDeliverySum        float32   `protobuf:"fixed32,8,opt,name=totalDeliverySum,proto3" json:"totalDeliverySum,omitempty"`
+	TotalDeliverySumWithVat float32   `protobuf:"fixed32,9,opt,name=totalDeliverySumWithVat,proto3" json:"totalDeliverySumWithVat,omitempty"`
+	TotalSum                float32   `protobuf:"fixed32,10,opt,name=totalSum,proto3" json:"totalSum,omitempty"`
+	TotalVatSum             float32   `protobuf:"fixed32,11,opt,name=totalVatSum,proto3" json:"totalVatSum,omitempty"`
+	OwnerTin                string    `protobuf:"bytes,12,opt,name=ownerTin,proto3" json:"ownerTin,omitempty"`
+	OwnerName               string    `protobuf:"bytes,13,opt,name=ownerName,proto3" json:"ownerName,omitempty"`
+	OwnerBranchCode         string    `protobuf:"bytes,14,opt,name=ownerBranchCode,proto3" json:"ownerBranchCode,omitempty"`
+	PartnerTin              string    `protobuf:"bytes,15,opt,name=partnerTin,proto3" json:"partnerTin,omitempty"`
+	PartnerName             string    `protobuf:"bytes,16,opt,name=partnerName,proto3" json:"partnerName,omitempty"`
+	PartnerBranchCode       string    `protobuf:"bytes,17,opt,name=partnerBranchCode,proto3" json:"partnerBranchCode,omitempty"`
+	AgentTin                string    `protobuf:"bytes,18,opt,name=agentTin,proto3" json:"agentTin,omitempty"`
+	AgentName               string    `protobuf:"bytes,19,opt,name=agentName,proto3" json:"agentName,omitempty"`
+	AgentBranchCode         string    `protobuf:"bytes,20,opt,name=agentBranchCode,proto3" json:"agentBranchCode,omitempty"`
+	IsSave                  string    `protobuf:"bytes,21,opt,name=isSave,proto3" json:"isSave,omitempty"`
+	CreatedAt               string    `protobuf:"bytes,22,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
+	UpdatedAt               string    `protobuf:"bytes,23,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`
+	Commission              bool      `protobuf:"varint,24,opt,name=commission,proto3" json:"commission,omitempty"`
+	Unilateral              bool      `protobuf:"varint,25,opt,name=unilateral,proto3" json:"unilateral,omitempty"`
+	Marked                  bool      `protobuf:"varint,26,opt,name=marked,proto3" json:"marked,omitempty"`
+	Hasbenefit              bool      `protobuf:"varint,27,opt,name=hasbenefit,proto3" json:"hasbenefit,omitempty"`
+	IsRead                  int32     `protobuf:"varint,28,opt,name=isRead,proto3" json:"isRead,omitempty"`
+	IsReadAgent             int32     `protobuf:"varint,29,opt,name=isReadAgent,proto3" json:"isReadAgent,omitempty"`
+	Clients                 []*Client `protobuf:"bytes,30,rep,name=clients,proto3" json:"clients,omitempty"`
+	FacturaType             int32     `protobuf:"varint,31,opt,name=facturaType,proto3" json:"facturaType,omitempty"`
 }
 
 func (x *Document) Reset() {
@@ -1081,12 +1081,12 @@ type Client struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Tin        string `protobuf:"bytes,1,opt,name=tin,proto3" json:"tin"`
-	Name       string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
-	BranchCode string `protobuf:"bytes,3,opt,name=branchCode,proto3" json:"branchCode"`
-	DocId      string `protobuf:"bytes,5,opt,name=docId,proto3" json:"docId"`
-	Status     bool   `protobuf:"varint,6,opt,name=status,proto3" json:"status"`
-	IsRead     bool   `protobuf:"varint,7,opt,name=isRead,proto3" json:"isRead"`
+	Tin        string `protobuf:"bytes,1,opt,name=tin,proto3" json:"tin,omitempty"`
+	Name       string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	BranchCode string `protobuf:"bytes,3,opt,name=branchCode,proto3" json:"branchCode,omitempty"`
+	DocId      string `protobuf:"bytes,5,opt,name=docId,proto3" json:"docId,omitempty"`
+	Status     bool   `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`
+	IsRead     bool   `protobuf:"varint,7,opt,name=isRead,proto3" json:"isRead,omitempty"`
 }
 
 func (x *Client) Reset() {

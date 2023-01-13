@@ -27,13 +27,13 @@ type Mobile struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DocumentId string                  `protobuf:"bytes,1,opt,name=documentId,proto3" json:"documentId"`
-	Status     int32                   `protobuf:"varint,2,opt,name=status,proto3" json:"status"`
-	Message    *wrapperspb.StringValue `protobuf:"bytes,3,opt,name=message,proto3" json:"message"`
-	Challange  string                  `protobuf:"bytes,4,opt,name=challange,proto3" json:"challange"`
-	Sign       string                  `protobuf:"bytes,5,opt,name=sign,proto3" json:"sign"`
-	CreatedAt  string                  `protobuf:"bytes,6,opt,name=createdAt,proto3" json:"createdAt"`
-	UpdatedAt  string                  `protobuf:"bytes,7,opt,name=updatedAt,proto3" json:"updatedAt"`
+	DocumentId string                  `protobuf:"bytes,1,opt,name=documentId,proto3" json:"documentId,omitempty"`
+	Status     int32                   `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"`
+	Message    *wrapperspb.StringValue `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	Challange  string                  `protobuf:"bytes,4,opt,name=challange,proto3" json:"challange,omitempty"`
+	Sign       string                  `protobuf:"bytes,5,opt,name=sign,proto3" json:"sign,omitempty"`
+	CreatedAt  string                  `protobuf:"bytes,6,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
+	UpdatedAt  string                  `protobuf:"bytes,7,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`
 }
 
 func (x *Mobile) Reset() {
@@ -122,8 +122,8 @@ type ListMobileReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Page  int32 `protobuf:"varint,1,opt,name=page,proto3" json:"page"`
-	Limit int32 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
+	Page  int32 `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit int32 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
 }
 
 func (x *ListMobileReq) Reset() {
@@ -177,8 +177,8 @@ type ListMobileResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Mobiles []*Mobile `protobuf:"bytes,1,rep,name=mobiles,proto3" json:"mobiles"`
-	Count   int32     `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Mobiles []*Mobile `protobuf:"bytes,1,rep,name=mobiles,proto3" json:"mobiles,omitempty"`
+	Count   int32     `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *ListMobileResp) Reset() {
