@@ -19,6 +19,7 @@ service ResourceService {
     rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
     rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
     rpc AutoConnect(GetProjectsRequest) returns (EmptyProto) {}
+    rpc GetResourceByResEnvironId(GetResourceRequest) returns (ResourceWithoutPassword) {}
 
     // resource environment
     rpc UpsertResourceEnvironment(UpsertResourceEnvironmentRequest) returns (UpsertResourceEnvironmentResponse) {}

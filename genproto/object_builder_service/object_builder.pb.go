@@ -27,9 +27,9 @@ type CommonMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string           `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Data      *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
-	ProjectId string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	TableSlug string           `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Data      *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	ProjectId string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *CommonMessage) Reset() {
@@ -90,11 +90,11 @@ type ManyToManyMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableFrom string   `protobuf:"bytes,1,opt,name=table_from,json=tableFrom,proto3" json:"table_from"`
-	TableTo   string   `protobuf:"bytes,2,opt,name=table_to,json=tableTo,proto3" json:"table_to"`
-	IdFrom    string   `protobuf:"bytes,3,opt,name=id_from,json=idFrom,proto3" json:"id_from"`
-	IdTo      []string `protobuf:"bytes,4,rep,name=id_to,json=idTo,proto3" json:"id_to"`
-	ProjectId string   `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	TableFrom string   `protobuf:"bytes,1,opt,name=table_from,json=tableFrom,proto3" json:"table_from,omitempty"`
+	TableTo   string   `protobuf:"bytes,2,opt,name=table_to,json=tableTo,proto3" json:"table_to,omitempty"`
+	IdFrom    string   `protobuf:"bytes,3,opt,name=id_from,json=idFrom,proto3" json:"id_from,omitempty"`
+	IdTo      []string `protobuf:"bytes,4,rep,name=id_to,json=idTo,proto3" json:"id_to,omitempty"`
+	ProjectId string   `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *ManyToManyMessage) Reset() {
@@ -169,10 +169,10 @@ type BatchRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug     string           `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Data          *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
-	UpdatedFields []string         `protobuf:"bytes,3,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields"`
-	ProjectId     string           `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	TableSlug     string           `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Data          *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	UpdatedFields []string         `protobuf:"bytes,3,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields,omitempty"`
+	ProjectId     string           `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *BatchRequest) Reset() {

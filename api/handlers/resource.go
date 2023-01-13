@@ -300,3 +300,34 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 
 	h.handleResponse(c, http.Created, resp)
 }
+
+// GetResourceEnvironment godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @ID get_resource_environment_id
+// @Router /v1/company/project/resource-environment/{resource_id} [GET]
+// @Summary Get Resource Environment by id
+// @Description Get Resource Environment by id
+// @Tags Company Resource
+// @Accept json
+// @Produce json
+// @Param resource_id path string true "resource_id"
+// @Success 200 {object} http.Response{data=company_service.ResourceWithoutPassword} "Resource data"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetResourceEnvironment(c *gin.Context) {
+
+	resp, err := h.companyServices.ResourceService().GetResourceByResEnvironId(
+		context.Background(),
+		&company_service.GetResourceRequest{
+			Id: c.Param("resource_id"),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}

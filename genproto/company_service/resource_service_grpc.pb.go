@@ -33,6 +33,7 @@ type ResourceServiceClient interface {
 	ReconnectResource(ctx context.Context, in *ReconnectResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error)
 	GetResourceWithPath(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*GetResourceWithPathResponse, error)
 	AutoConnect(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*EmptyProto, error)
+	GetResourceByResEnvironId(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error)
 	// resource environment
 	UpsertResourceEnvironment(ctx context.Context, in *UpsertResourceEnvironmentRequest, opts ...grpc.CallOption) (*UpsertResourceEnvironmentResponse, error)
 }
@@ -144,6 +145,15 @@ func (c *resourceServiceClient) AutoConnect(ctx context.Context, in *GetProjects
 	return out, nil
 }
 
+func (c *resourceServiceClient) GetResourceByResEnvironId(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error) {
+	out := new(ResourceWithoutPassword)
+	err := c.cc.Invoke(ctx, "/company_service.ResourceService/GetResourceByResEnvironId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *resourceServiceClient) UpsertResourceEnvironment(ctx context.Context, in *UpsertResourceEnvironmentRequest, opts ...grpc.CallOption) (*UpsertResourceEnvironmentResponse, error) {
 	out := new(UpsertResourceEnvironmentResponse)
 	err := c.cc.Invoke(ctx, "/company_service.ResourceService/UpsertResourceEnvironment", in, out, opts...)
@@ -168,6 +178,7 @@ type ResourceServiceServer interface {
 	ReconnectResource(context.Context, *ReconnectResourceRequest) (*EmptyProto, error)
 	GetResourceWithPath(context.Context, *GetResourceRequest) (*GetResourceWithPathResponse, error)
 	AutoConnect(context.Context, *GetProjectsRequest) (*EmptyProto, error)
+	GetResourceByResEnvironId(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error)
 	// resource environment
 	UpsertResourceEnvironment(context.Context, *UpsertResourceEnvironmentRequest) (*UpsertResourceEnvironmentResponse, error)
 	mustEmbedUnimplementedResourceServiceServer()
@@ -209,6 +220,9 @@ func (UnimplementedResourceServiceServer) GetResourceWithPath(context.Context, *
 }
 func (UnimplementedResourceServiceServer) AutoConnect(context.Context, *GetProjectsRequest) (*EmptyProto, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AutoConnect not implemented")
+}
+func (UnimplementedResourceServiceServer) GetResourceByResEnvironId(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetResourceByResEnvironId not implemented")
 }
 func (UnimplementedResourceServiceServer) UpsertResourceEnvironment(context.Context, *UpsertResourceEnvironmentRequest) (*UpsertResourceEnvironmentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpsertResourceEnvironment not implemented")
@@ -424,6 +438,24 @@ func _ResourceService_AutoConnect_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ResourceService_GetResourceByResEnvironId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetResourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).GetResourceByResEnvironId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ResourceService/GetResourceByResEnvironId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).GetResourceByResEnvironId(ctx, req.(*GetResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ResourceService_UpsertResourceEnvironment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpsertResourceEnvironmentRequest)
 	if err := dec(in); err != nil {
@@ -492,6 +524,10 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AutoConnect",
 			Handler:    _ResourceService_AutoConnect_Handler,
+		},
+		{
+			MethodName: "GetResourceByResEnvironId",
+			Handler:    _ResourceService_GetResourceByResEnvironId_Handler,
 		},
 		{
 			MethodName: "UpsertResourceEnvironment",

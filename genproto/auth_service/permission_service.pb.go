@@ -26,7 +26,7 @@ type PermissionGenerated struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Permissions []*PermissionGenerated_Permission `protobuf:"bytes,1,rep,name=permissions,proto3" json:"permissions"`
+	Permissions []*PermissionGenerated_Permission `protobuf:"bytes,1,rep,name=permissions,proto3" json:"permissions,omitempty"`
 }
 
 func (x *PermissionGenerated) Reset() {
@@ -73,11 +73,11 @@ type GetPermissionByIDResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ClientPlatformId string             `protobuf:"bytes,2,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	ParentId         string             `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	Name             string             `protobuf:"bytes,4,opt,name=name,proto3" json:"name"`
-	PermissionScopes []*PermissionScope `protobuf:"bytes,5,rep,name=permission_scopes,json=permissionScopes,proto3" json:"permission_scopes"`
+	Id               string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ClientPlatformId string             `protobuf:"bytes,2,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	ParentId         string             `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	Name             string             `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	PermissionScopes []*PermissionScope `protobuf:"bytes,5,rep,name=permission_scopes,json=permissionScopes,proto3" json:"permission_scopes,omitempty"`
 }
 
 func (x *GetPermissionByIDResponse) Reset() {
@@ -152,11 +152,11 @@ type GetRoleByIdResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id           string        `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ClientTypeId string        `protobuf:"bytes,2,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	Name         string        `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
-	ClientType   *ClientType   `protobuf:"bytes,4,opt,name=client_type,json=clientType,proto3" json:"client_type"`
-	Permissions  []*Permission `protobuf:"bytes,5,rep,name=permissions,proto3" json:"permissions"`
+	Id           string        `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ClientTypeId string        `protobuf:"bytes,2,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	Name         string        `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	ClientType   *ClientType   `protobuf:"bytes,4,opt,name=client_type,json=clientType,proto3" json:"client_type,omitempty"`
+	Permissions  []*Permission `protobuf:"bytes,5,rep,name=permissions,proto3" json:"permissions,omitempty"`
 }
 
 func (x *GetRoleByIdResponse) Reset() {
@@ -231,9 +231,9 @@ type UpsertScopeRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClientPlatformId string `protobuf:"bytes,1,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	Path             string `protobuf:"bytes,2,opt,name=path,proto3" json:"path"`
-	Method           string `protobuf:"bytes,3,opt,name=method,proto3" json:"method"`
+	ClientPlatformId string `protobuf:"bytes,1,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	Path             string `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
+	Method           string `protobuf:"bytes,3,opt,name=method,proto3" json:"method,omitempty"`
 }
 
 func (x *UpsertScopeRequest) Reset() {
@@ -294,9 +294,9 @@ type ScopePrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClientPlatformId string `protobuf:"bytes,1,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	Path             string `protobuf:"bytes,2,opt,name=path,proto3" json:"path"`
-	Method           string `protobuf:"bytes,3,opt,name=method,proto3" json:"method"`
+	ClientPlatformId string `protobuf:"bytes,1,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	Path             string `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
+	Method           string `protobuf:"bytes,3,opt,name=method,proto3" json:"method,omitempty"`
 }
 
 func (x *ScopePrimaryKey) Reset() {
@@ -357,10 +357,10 @@ type AddRoleRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClientTypeId     string `protobuf:"bytes,2,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	Name             string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
-	ClientPlatformId string `protobuf:"bytes,4,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	ProjectId        string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	ClientTypeId     string `protobuf:"bytes,2,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	Name             string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	ClientPlatformId string `protobuf:"bytes,4,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	ProjectId        string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *AddRoleRequest) Reset() {
@@ -428,11 +428,11 @@ type UpdateRoleRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ClientTypeId     string `protobuf:"bytes,2,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	Name             string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
-	ClientPlatformId string `protobuf:"bytes,4,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	ProjectId        string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ClientTypeId     string `protobuf:"bytes,2,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	Name             string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	ClientPlatformId string `protobuf:"bytes,4,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	ProjectId        string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *UpdateRoleRequest) Reset() {
@@ -507,8 +507,8 @@ type RolePrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *RolePrimaryKey) Reset() {
@@ -562,9 +562,9 @@ type CreatePermissionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClientPlatformId string `protobuf:"bytes,2,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	ParentId         string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	Name             string `protobuf:"bytes,4,opt,name=name,proto3" json:"name"`
+	ClientPlatformId string `protobuf:"bytes,2,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	ParentId         string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	Name             string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 }
 
 func (x *CreatePermissionRequest) Reset() {
@@ -625,7 +625,7 @@ type PermissionPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *PermissionPrimaryKey) Reset() {
@@ -672,9 +672,9 @@ type GetPermissionListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit  int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
-	Offset int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
-	Search string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
+	Limit  int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Search string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
 }
 
 func (x *GetPermissionListRequest) Reset() {
@@ -735,8 +735,8 @@ type GetPermissionListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count       int32         `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
-	Permissions []*Permission `protobuf:"bytes,2,rep,name=permissions,proto3" json:"permissions"`
+	Count       int32         `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	Permissions []*Permission `protobuf:"bytes,2,rep,name=permissions,proto3" json:"permissions,omitempty"`
 }
 
 func (x *GetPermissionListResponse) Reset() {
@@ -790,10 +790,10 @@ type UpdatePermissionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ClientPlatformId string `protobuf:"bytes,2,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	ParentId         string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	Name             string `protobuf:"bytes,4,opt,name=name,proto3" json:"name"`
+	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ClientPlatformId string `protobuf:"bytes,2,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	ParentId         string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	Name             string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 }
 
 func (x *UpdatePermissionRequest) Reset() {
@@ -861,10 +861,10 @@ type AddPermissionScopeRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PermissionId     string `protobuf:"bytes,1,opt,name=permission_id,json=permissionId,proto3" json:"permission_id"`
-	ClientPlatformId string `protobuf:"bytes,2,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	Path             string `protobuf:"bytes,3,opt,name=path,proto3" json:"path"`
-	Method           string `protobuf:"bytes,4,opt,name=method,proto3" json:"method"`
+	PermissionId     string `protobuf:"bytes,1,opt,name=permission_id,json=permissionId,proto3" json:"permission_id,omitempty"`
+	ClientPlatformId string `protobuf:"bytes,2,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	Path             string `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
+	Method           string `protobuf:"bytes,4,opt,name=method,proto3" json:"method,omitempty"`
 }
 
 func (x *AddPermissionScopeRequest) Reset() {
@@ -932,10 +932,10 @@ type PermissionScopePrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PermissionId     string `protobuf:"bytes,1,opt,name=permission_id,json=permissionId,proto3" json:"permission_id"`
-	ClientPlatformId string `protobuf:"bytes,2,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	Path             string `protobuf:"bytes,3,opt,name=path,proto3" json:"path"`
-	Method           string `protobuf:"bytes,4,opt,name=method,proto3" json:"method"`
+	PermissionId     string `protobuf:"bytes,1,opt,name=permission_id,json=permissionId,proto3" json:"permission_id,omitempty"`
+	ClientPlatformId string `protobuf:"bytes,2,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	Path             string `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
+	Method           string `protobuf:"bytes,4,opt,name=method,proto3" json:"method,omitempty"`
 }
 
 func (x *PermissionScopePrimaryKey) Reset() {
@@ -1003,8 +1003,8 @@ type AddRolePermissionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RoleId       string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	PermissionId string `protobuf:"bytes,2,opt,name=permission_id,json=permissionId,proto3" json:"permission_id"`
+	RoleId       string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	PermissionId string `protobuf:"bytes,2,opt,name=permission_id,json=permissionId,proto3" json:"permission_id,omitempty"`
 }
 
 func (x *AddRolePermissionRequest) Reset() {
@@ -1058,7 +1058,7 @@ type AddRolePermissionsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Permissions []*AddRolePermissionRequest `protobuf:"bytes,1,rep,name=permissions,proto3" json:"permissions"`
+	Permissions []*AddRolePermissionRequest `protobuf:"bytes,1,rep,name=permissions,proto3" json:"permissions,omitempty"`
 }
 
 func (x *AddRolePermissionsRequest) Reset() {
@@ -1105,7 +1105,7 @@ type AddRolePermissionsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AddedRoles int64 `protobuf:"varint,1,opt,name=added_roles,json=addedRoles,proto3" json:"added_roles"`
+	AddedRoles int64 `protobuf:"varint,1,opt,name=added_roles,json=addedRoles,proto3" json:"added_roles,omitempty"`
 }
 
 func (x *AddRolePermissionsResponse) Reset() {
@@ -1152,8 +1152,8 @@ type RolePermissionPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RoleId       string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	PermissionId string `protobuf:"bytes,2,opt,name=permission_id,json=permissionId,proto3" json:"permission_id"`
+	RoleId       string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	PermissionId string `protobuf:"bytes,2,opt,name=permission_id,json=permissionId,proto3" json:"permission_id,omitempty"`
 }
 
 func (x *RolePermissionPrimaryKey) Reset() {
@@ -1207,11 +1207,11 @@ type GetRolesListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Offset           uint32 `protobuf:"varint,1,opt,name=offset,proto3" json:"offset"`
-	Limit            uint32 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
-	ClientPlatformId string `protobuf:"bytes,3,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	ClientTypeId     string `protobuf:"bytes,4,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	ProjectId        string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Offset           uint32 `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
+	Limit            uint32 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	ClientPlatformId string `protobuf:"bytes,3,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	ClientTypeId     string `protobuf:"bytes,4,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	ProjectId        string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *GetRolesListRequest) Reset() {
@@ -1286,7 +1286,7 @@ type GetRolesResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Roles []*Role `protobuf:"bytes,1,rep,name=roles,proto3" json:"roles"`
+	Roles []*Role `protobuf:"bytes,1,rep,name=roles,proto3" json:"roles,omitempty"`
 }
 
 func (x *GetRolesResponse) Reset() {
@@ -1333,12 +1333,12 @@ type GetScopeListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit            uint32 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
-	Offset           uint32 `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
-	Search           string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
-	OrderBy          string `protobuf:"bytes,4,opt,name=order_by,json=orderBy,proto3" json:"order_by"`
-	OrderType        string `protobuf:"bytes,5,opt,name=order_type,json=orderType,proto3" json:"order_type"`
-	ClientPlatformId string `protobuf:"bytes,6,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
+	Limit            uint32 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset           uint32 `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Search           string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
+	OrderBy          string `protobuf:"bytes,4,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
+	OrderType        string `protobuf:"bytes,5,opt,name=order_type,json=orderType,proto3" json:"order_type,omitempty"`
+	ClientPlatformId string `protobuf:"bytes,6,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
 }
 
 func (x *GetScopeListRequest) Reset() {
@@ -1420,8 +1420,8 @@ type GetScopesResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count  uint32   `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
-	Scopes []*Scope `protobuf:"bytes,2,rep,name=scopes,proto3" json:"scopes"`
+	Count  uint32   `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	Scopes []*Scope `protobuf:"bytes,2,rep,name=scopes,proto3" json:"scopes,omitempty"`
 }
 
 func (x *GetScopesResponse) Reset() {
@@ -1475,9 +1475,9 @@ type PermissionGenerated_Permission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Permission string                                  `protobuf:"bytes,1,opt,name=permission,proto3" json:"permission"`
-	Scopes     []*PermissionGenerated_Permission_Scope `protobuf:"bytes,2,rep,name=scopes,proto3" json:"scopes"`
-	Children   []*PermissionGenerated_Permission       `protobuf:"bytes,3,rep,name=children,proto3" json:"children"`
+	Permission string                                  `protobuf:"bytes,1,opt,name=permission,proto3" json:"permission,omitempty"`
+	Scopes     []*PermissionGenerated_Permission_Scope `protobuf:"bytes,2,rep,name=scopes,proto3" json:"scopes,omitempty"`
+	Children   []*PermissionGenerated_Permission       `protobuf:"bytes,3,rep,name=children,proto3" json:"children,omitempty"`
 }
 
 func (x *PermissionGenerated_Permission) Reset() {
@@ -1538,8 +1538,8 @@ type PermissionGenerated_Permission_Scope struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url    string `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
-	Method string `protobuf:"bytes,2,opt,name=method,proto3" json:"method"`
+	Url    string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	Method string `protobuf:"bytes,2,opt,name=method,proto3" json:"method,omitempty"`
 }
 
 func (x *PermissionGenerated_Permission_Scope) Reset() {

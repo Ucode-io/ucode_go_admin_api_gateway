@@ -26,10 +26,10 @@ type V2HasAccessUserReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token"`
-	ProjectId   string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Path        string `protobuf:"bytes,3,opt,name=path,proto3" json:"path"`
-	Method      string `protobuf:"bytes,4,opt,name=method,proto3" json:"method"`
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	ProjectId   string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Path        string `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
+	Method      string `protobuf:"bytes,4,opt,name=method,proto3" json:"method,omitempty"`
 }
 
 func (x *V2HasAccessUserReq) Reset() {
@@ -97,18 +97,18 @@ type V2HasAccessUserRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId        string       `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	UserId           string       `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	Ip               string       `protobuf:"bytes,4,opt,name=ip,proto3" json:"ip"`
-	Data             string       `protobuf:"bytes,5,opt,name=data,proto3" json:"data"`
-	ExpiresAt        string       `protobuf:"bytes,6,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at"`
-	CreatedAt        string       `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UpdatedAt        string       `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
-	Tables           []*TableBody `protobuf:"bytes,9,rep,name=tables,proto3" json:"tables"`
-	ClientPlatformId string       `protobuf:"bytes,10,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	ClientTypeId     string       `protobuf:"bytes,11,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	RoleId           string       `protobuf:"bytes,12,opt,name=role_id,json=roleId,proto3" json:"role_id"`
+	Id               string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId        string       `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	UserId           string       `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Ip               string       `protobuf:"bytes,4,opt,name=ip,proto3" json:"ip,omitempty"`
+	Data             string       `protobuf:"bytes,5,opt,name=data,proto3" json:"data,omitempty"`
+	ExpiresAt        string       `protobuf:"bytes,6,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	CreatedAt        string       `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt        string       `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Tables           []*TableBody `protobuf:"bytes,9,rep,name=tables,proto3" json:"tables,omitempty"`
+	ClientPlatformId string       `protobuf:"bytes,10,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	ClientTypeId     string       `protobuf:"bytes,11,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	RoleId           string       `protobuf:"bytes,12,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 }
 
 func (x *V2HasAccessUserRes) Reset() {
@@ -232,9 +232,9 @@ type LoginRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Username string    `protobuf:"bytes,1,opt,name=username,proto3" json:"username"`
-	Password string    `protobuf:"bytes,2,opt,name=password,proto3" json:"password"`
-	Tables   []*Object `protobuf:"bytes,3,rep,name=tables,proto3" json:"tables"`
+	Username string    `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password string    `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Tables   []*Object `protobuf:"bytes,3,rep,name=tables,proto3" json:"tables,omitempty"`
 }
 
 func (x *LoginRequest) Reset() {
@@ -295,15 +295,15 @@ type LoginResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserFound      bool            `protobuf:"varint,1,opt,name=user_found,json=userFound,proto3" json:"user_found"`
-	ClientPlatform *ClientPlatform `protobuf:"bytes,2,opt,name=client_platform,json=clientPlatform,proto3" json:"client_platform"`
-	ClientType     *ClientType     `protobuf:"bytes,3,opt,name=client_type,json=clientType,proto3" json:"client_type"`
-	User           *User           `protobuf:"bytes,4,opt,name=user,proto3" json:"user"`
-	Role           *Role           `protobuf:"bytes,5,opt,name=role,proto3" json:"role"`
-	Token          *Token          `protobuf:"bytes,6,opt,name=token,proto3" json:"token"`
-	Permissions    []*Permission   `protobuf:"bytes,7,rep,name=permissions,proto3" json:"permissions"`
-	Sessions       []*Session      `protobuf:"bytes,8,rep,name=sessions,proto3" json:"sessions"`
-	Companies      []*Company      `protobuf:"bytes,9,rep,name=companies,proto3" json:"companies"`
+	UserFound      bool            `protobuf:"varint,1,opt,name=user_found,json=userFound,proto3" json:"user_found,omitempty"`
+	ClientPlatform *ClientPlatform `protobuf:"bytes,2,opt,name=client_platform,json=clientPlatform,proto3" json:"client_platform,omitempty"`
+	ClientType     *ClientType     `protobuf:"bytes,3,opt,name=client_type,json=clientType,proto3" json:"client_type,omitempty"`
+	User           *User           `protobuf:"bytes,4,opt,name=user,proto3" json:"user,omitempty"`
+	Role           *Role           `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
+	Token          *Token          `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty"`
+	Permissions    []*Permission   `protobuf:"bytes,7,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Sessions       []*Session      `protobuf:"bytes,8,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	Companies      []*Company      `protobuf:"bytes,9,rep,name=companies,proto3" json:"companies,omitempty"`
 }
 
 func (x *LoginResponse) Reset() {
@@ -406,7 +406,7 @@ type LogoutRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token"`
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 }
 
 func (x *LogoutRequest) Reset() {
@@ -453,7 +453,7 @@ type RefreshTokenRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RefreshToken string `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token"`
+	RefreshToken string `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
 }
 
 func (x *RefreshTokenRequest) Reset() {
@@ -500,7 +500,7 @@ type RefreshTokenResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Token *Token `protobuf:"bytes,6,opt,name=token,proto3" json:"token"`
+	Token *Token `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty"`
 }
 
 func (x *RefreshTokenResponse) Reset() {
@@ -547,8 +547,8 @@ type V2RefreshTokenResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Token       *Token              `protobuf:"bytes,1,opt,name=token,proto3" json:"token"`
-	Permissions []*RecordPermission `protobuf:"bytes,2,rep,name=permissions,proto3" json:"permissions"`
+	Token       *Token              `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Permissions []*RecordPermission `protobuf:"bytes,2,rep,name=permissions,proto3" json:"permissions,omitempty"`
 }
 
 func (x *V2RefreshTokenResponse) Reset() {
@@ -602,7 +602,7 @@ type V2RefreshTokenSuperAdminResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Token *Token `protobuf:"bytes,1,opt,name=token,proto3" json:"token"`
+	Token *Token `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 }
 
 func (x *V2RefreshTokenSuperAdminResponse) Reset() {
@@ -649,11 +649,11 @@ type HasAccessRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccessToken      string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token"`
-	ProjectId        string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ClientPlatformId string `protobuf:"bytes,3,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	Path             string `protobuf:"bytes,4,opt,name=path,proto3" json:"path"`
-	Method           string `protobuf:"bytes,5,opt,name=method,proto3" json:"method"`
+	AccessToken      string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	ProjectId        string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ClientPlatformId string `protobuf:"bytes,3,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	Path             string `protobuf:"bytes,4,opt,name=path,proto3" json:"path,omitempty"`
+	Method           string `protobuf:"bytes,5,opt,name=method,proto3" json:"method,omitempty"`
 }
 
 func (x *HasAccessRequest) Reset() {
@@ -728,18 +728,18 @@ type HasAccessResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId        string       `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ClientPlatformId string       `protobuf:"bytes,3,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	ClientTypeId     string       `protobuf:"bytes,4,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	UserId           string       `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	RoleId           string       `protobuf:"bytes,6,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	Ip               string       `protobuf:"bytes,7,opt,name=ip,proto3" json:"ip"`
-	Data             string       `protobuf:"bytes,8,opt,name=data,proto3" json:"data"`
-	ExpiresAt        string       `protobuf:"bytes,9,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at"`
-	CreatedAt        string       `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UpdatedAt        string       `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
-	Tables           []*TableBody `protobuf:"bytes,12,rep,name=tables,proto3" json:"tables"`
+	Id               string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId        string       `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ClientPlatformId string       `protobuf:"bytes,3,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	ClientTypeId     string       `protobuf:"bytes,4,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	UserId           string       `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	RoleId           string       `protobuf:"bytes,6,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	Ip               string       `protobuf:"bytes,7,opt,name=ip,proto3" json:"ip,omitempty"`
+	Data             string       `protobuf:"bytes,8,opt,name=data,proto3" json:"data,omitempty"`
+	ExpiresAt        string       `protobuf:"bytes,9,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	CreatedAt        string       `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt        string       `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Tables           []*TableBody `protobuf:"bytes,12,rep,name=tables,proto3" json:"tables,omitempty"`
 }
 
 func (x *HasAccessResponse) Reset() {
@@ -863,10 +863,10 @@ type HasAccessSuperAdminReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token"`
-	ProjectId   string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Path        string `protobuf:"bytes,3,opt,name=path,proto3" json:"path"`
-	Method      string `protobuf:"bytes,4,opt,name=method,proto3" json:"method"`
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	ProjectId   string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Path        string `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
+	Method      string `protobuf:"bytes,4,opt,name=method,proto3" json:"method,omitempty"`
 }
 
 func (x *HasAccessSuperAdminReq) Reset() {
@@ -934,15 +934,15 @@ type HasAccessSuperAdminRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string       `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	UserId    string       `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	Ip        string       `protobuf:"bytes,7,opt,name=ip,proto3" json:"ip"`
-	Data      string       `protobuf:"bytes,8,opt,name=data,proto3" json:"data"`
-	ExpiresAt string       `protobuf:"bytes,9,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at"`
-	CreatedAt string       `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UpdatedAt string       `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
-	Tables    []*TableBody `protobuf:"bytes,12,rep,name=tables,proto3" json:"tables"`
+	Id        string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string       `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	UserId    string       `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Ip        string       `protobuf:"bytes,7,opt,name=ip,proto3" json:"ip,omitempty"`
+	Data      string       `protobuf:"bytes,8,opt,name=data,proto3" json:"data,omitempty"`
+	ExpiresAt string       `protobuf:"bytes,9,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	CreatedAt string       `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt string       `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Tables    []*TableBody `protobuf:"bytes,12,rep,name=tables,proto3" json:"tables,omitempty"`
 }
 
 func (x *HasAccessSuperAdminRes) Reset() {
@@ -1045,8 +1045,8 @@ type TableBody struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	ObjectId  string `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id"`
+	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	ObjectId  string `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
 }
 
 func (x *TableBody) Reset() {
@@ -1100,15 +1100,15 @@ type CreateSessionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId        string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ClientPlatformId string `protobuf:"bytes,3,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	ClientTypeId     string `protobuf:"bytes,4,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	UserId           string `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	RoleId           string `protobuf:"bytes,6,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	Ip               string `protobuf:"bytes,7,opt,name=ip,proto3" json:"ip"`
-	Data             string `protobuf:"bytes,8,opt,name=data,proto3" json:"data"`
-	ExpiresAt        string `protobuf:"bytes,9,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at"`
-	IntegrationId    string `protobuf:"bytes,10,opt,name=integration_id,json=integrationId,proto3" json:"integration_id"`
+	ProjectId        string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ClientPlatformId string `protobuf:"bytes,3,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	ClientTypeId     string `protobuf:"bytes,4,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	UserId           string `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	RoleId           string `protobuf:"bytes,6,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	Ip               string `protobuf:"bytes,7,opt,name=ip,proto3" json:"ip,omitempty"`
+	Data             string `protobuf:"bytes,8,opt,name=data,proto3" json:"data,omitempty"`
+	ExpiresAt        string `protobuf:"bytes,9,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	IntegrationId    string `protobuf:"bytes,10,opt,name=integration_id,json=integrationId,proto3" json:"integration_id,omitempty"`
 }
 
 func (x *CreateSessionRequest) Reset() {
@@ -1211,16 +1211,16 @@ type UpdateSessionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId        string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ClientPlatformId string `protobuf:"bytes,3,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	ClientTypeId     string `protobuf:"bytes,4,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	UserId           string `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	RoleId           string `protobuf:"bytes,6,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	Ip               string `protobuf:"bytes,7,opt,name=ip,proto3" json:"ip"`
-	Data             string `protobuf:"bytes,8,opt,name=data,proto3" json:"data"`
-	ExpiresAt        string `protobuf:"bytes,9,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at"`
-	IsChanged        bool   `protobuf:"varint,10,opt,name=is_changed,json=isChanged,proto3" json:"is_changed"`
+	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId        string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ClientPlatformId string `protobuf:"bytes,3,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	ClientTypeId     string `protobuf:"bytes,4,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	UserId           string `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	RoleId           string `protobuf:"bytes,6,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	Ip               string `protobuf:"bytes,7,opt,name=ip,proto3" json:"ip,omitempty"`
+	Data             string `protobuf:"bytes,8,opt,name=data,proto3" json:"data,omitempty"`
+	ExpiresAt        string `protobuf:"bytes,9,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	IsChanged        bool   `protobuf:"varint,10,opt,name=is_changed,json=isChanged,proto3" json:"is_changed,omitempty"`
 }
 
 func (x *UpdateSessionRequest) Reset() {
@@ -1330,7 +1330,7 @@ type SessionPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *SessionPrimaryKey) Reset() {
@@ -1377,9 +1377,9 @@ type GetSessionListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit  int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
-	Offset int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
-	Search string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
+	Limit  int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Search string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
 }
 
 func (x *GetSessionListRequest) Reset() {
@@ -1440,8 +1440,8 @@ type GetSessionListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count    int32      `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
-	Sessions []*Session `protobuf:"bytes,2,rep,name=sessions,proto3" json:"sessions"`
+	Count    int32      `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	Sessions []*Session `protobuf:"bytes,2,rep,name=sessions,proto3" json:"sessions,omitempty"`
 }
 
 func (x *GetSessionListResponse) Reset() {
@@ -1495,8 +1495,8 @@ type Object struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	ObjectId  string `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id"`
+	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	ObjectId  string `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
 }
 
 func (x *Object) Reset() {
@@ -1550,14 +1550,14 @@ type RecordPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ClientTypeId string `protobuf:"bytes,2,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	RoleId       string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	TableSlug    string `protobuf:"bytes,4,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Read         string `protobuf:"bytes,5,opt,name=read,proto3" json:"read"`
-	Write        string `protobuf:"bytes,6,opt,name=write,proto3" json:"write"`
-	Update       string `protobuf:"bytes,7,opt,name=update,proto3" json:"update"`
-	Delete       string `protobuf:"bytes,8,opt,name=delete,proto3" json:"delete"`
+	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ClientTypeId string `protobuf:"bytes,2,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	RoleId       string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	TableSlug    string `protobuf:"bytes,4,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Read         string `protobuf:"bytes,5,opt,name=read,proto3" json:"read,omitempty"`
+	Write        string `protobuf:"bytes,6,opt,name=write,proto3" json:"write,omitempty"`
+	Update       string `protobuf:"bytes,7,opt,name=update,proto3" json:"update,omitempty"`
+	Delete       string `protobuf:"bytes,8,opt,name=delete,proto3" json:"delete,omitempty"`
 }
 
 func (x *RecordPermission) Reset() {
@@ -1653,16 +1653,16 @@ type V2LoginResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserFound      bool                `protobuf:"varint,1,opt,name=user_found,json=userFound,proto3" json:"user_found"`
-	ClientPlatform *ClientPlatform     `protobuf:"bytes,2,opt,name=client_platform,json=clientPlatform,proto3" json:"client_platform"`
-	ClientType     *ClientType         `protobuf:"bytes,3,opt,name=client_type,json=clientType,proto3" json:"client_type"`
-	UserId         string              `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	Role           *Role               `protobuf:"bytes,5,opt,name=role,proto3" json:"role"`
-	Token          *Token              `protobuf:"bytes,6,opt,name=token,proto3" json:"token"`
-	Permissions    []*RecordPermission `protobuf:"bytes,7,rep,name=permissions,proto3" json:"permissions"`
-	Sessions       []*Session          `protobuf:"bytes,8,rep,name=sessions,proto3" json:"sessions"`
-	LoginTableSlug string              `protobuf:"bytes,9,opt,name=login_table_slug,json=loginTableSlug,proto3" json:"login_table_slug"`
-	AppPermissions []*RecordPermission `protobuf:"bytes,10,rep,name=app_permissions,json=appPermissions,proto3" json:"app_permissions"`
+	UserFound      bool                `protobuf:"varint,1,opt,name=user_found,json=userFound,proto3" json:"user_found,omitempty"`
+	ClientPlatform *ClientPlatform     `protobuf:"bytes,2,opt,name=client_platform,json=clientPlatform,proto3" json:"client_platform,omitempty"`
+	ClientType     *ClientType         `protobuf:"bytes,3,opt,name=client_type,json=clientType,proto3" json:"client_type,omitempty"`
+	UserId         string              `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Role           *Role               `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
+	Token          *Token              `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty"`
+	Permissions    []*RecordPermission `protobuf:"bytes,7,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Sessions       []*Session          `protobuf:"bytes,8,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	LoginTableSlug string              `protobuf:"bytes,9,opt,name=login_table_slug,json=loginTableSlug,proto3" json:"login_table_slug,omitempty"`
+	AppPermissions []*RecordPermission `protobuf:"bytes,10,rep,name=app_permissions,json=appPermissions,proto3" json:"app_permissions,omitempty"`
 }
 
 func (x *V2LoginResponse) Reset() {
@@ -1772,12 +1772,12 @@ type V2LoginRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Username      string    `protobuf:"bytes,1,opt,name=username,proto3" json:"username"`
-	Password      string    `protobuf:"bytes,2,opt,name=password,proto3" json:"password"`
-	Tables        []*Object `protobuf:"bytes,3,rep,name=tables,proto3" json:"tables"`
-	ClientType    string    `protobuf:"bytes,4,opt,name=client_type,json=clientType,proto3" json:"client_type"`
-	LoginStrategy string    `protobuf:"bytes,5,opt,name=login_strategy,json=loginStrategy,proto3" json:"login_strategy"`
-	ProjectId     string    `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Username      string    `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password      string    `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Tables        []*Object `protobuf:"bytes,3,rep,name=tables,proto3" json:"tables,omitempty"`
+	ClientType    string    `protobuf:"bytes,4,opt,name=client_type,json=clientType,proto3" json:"client_type,omitempty"`
+	LoginStrategy string    `protobuf:"bytes,5,opt,name=login_strategy,json=loginStrategy,proto3" json:"login_strategy,omitempty"`
+	ProjectId     string    `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *V2LoginRequest) Reset() {
@@ -1859,11 +1859,11 @@ type V2LoginSuperAdminRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserFound bool       `protobuf:"varint,1,opt,name=user_found,json=userFound,proto3" json:"user_found"`
-	UserId    string     `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	Token     *Token     `protobuf:"bytes,3,opt,name=token,proto3" json:"token"`
-	Sessions  []*Session `protobuf:"bytes,4,rep,name=sessions,proto3" json:"sessions"`
-	Companies []*Company `protobuf:"bytes,5,rep,name=companies,proto3" json:"companies"`
+	UserFound bool       `protobuf:"varint,1,opt,name=user_found,json=userFound,proto3" json:"user_found,omitempty"`
+	UserId    string     `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Token     *Token     `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
+	Sessions  []*Session `protobuf:"bytes,4,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	Companies []*Company `protobuf:"bytes,5,rep,name=companies,proto3" json:"companies,omitempty"`
 }
 
 func (x *V2LoginSuperAdminRes) Reset() {
@@ -1938,8 +1938,8 @@ type V2LoginSuperAdminReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username"`
-	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password"`
+	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 }
 
 func (x *V2LoginSuperAdminReq) Reset() {
@@ -1993,9 +1993,9 @@ type SessionAndTokenRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	LoginData *V2LoginResponse `protobuf:"bytes,1,opt,name=login_data,json=loginData,proto3" json:"login_data"`
-	Tables    []*Object        `protobuf:"bytes,2,rep,name=tables,proto3" json:"tables"`
-	ProjectId string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	LoginData *V2LoginResponse `protobuf:"bytes,1,opt,name=login_data,json=loginData,proto3" json:"login_data,omitempty"`
+	Tables    []*Object        `protobuf:"bytes,2,rep,name=tables,proto3" json:"tables,omitempty"`
+	ProjectId string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *SessionAndTokenRequest) Reset() {
@@ -2056,8 +2056,8 @@ type UpdateSessionByRoleIdRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RoleId    string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	IsChanged bool   `protobuf:"varint,2,opt,name=is_changed,json=isChanged,proto3" json:"is_changed"`
+	RoleId    string `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	IsChanged bool   `protobuf:"varint,2,opt,name=is_changed,json=isChanged,proto3" json:"is_changed,omitempty"`
 }
 
 func (x *UpdateSessionByRoleIdRequest) Reset() {
@@ -2111,8 +2111,8 @@ type UpdateSessionBySessionIdRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	IsChanged bool   `protobuf:"varint,2,opt,name=is_changed,json=isChanged,proto3" json:"is_changed"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	IsChanged bool   `protobuf:"varint,2,opt,name=is_changed,json=isChanged,proto3" json:"is_changed,omitempty"`
 }
 
 func (x *UpdateSessionBySessionIdRequest) Reset() {
@@ -2166,17 +2166,17 @@ type V2SuperAdminLoginResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserFound      bool                `protobuf:"varint,1,opt,name=user_found,json=userFound,proto3" json:"user_found"`
-	ClientPlatform *ClientPlatform     `protobuf:"bytes,2,opt,name=client_platform,json=clientPlatform,proto3" json:"client_platform"`
-	ClientType     *ClientType         `protobuf:"bytes,3,opt,name=client_type,json=clientType,proto3" json:"client_type"`
-	UserId         string              `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	Role           *Role               `protobuf:"bytes,5,opt,name=role,proto3" json:"role"`
-	Token          *Token              `protobuf:"bytes,6,opt,name=token,proto3" json:"token"`
-	Permissions    []*RecordPermission `protobuf:"bytes,7,rep,name=permissions,proto3" json:"permissions"`
-	Sessions       []*Session          `protobuf:"bytes,8,rep,name=sessions,proto3" json:"sessions"`
-	LoginTableSlug string              `protobuf:"bytes,9,opt,name=login_table_slug,json=loginTableSlug,proto3" json:"login_table_slug"`
-	AppPermissions []*RecordPermission `protobuf:"bytes,10,rep,name=app_permissions,json=appPermissions,proto3" json:"app_permissions"`
-	Companies      []*Company          `protobuf:"bytes,11,rep,name=companies,proto3" json:"companies"`
+	UserFound      bool                `protobuf:"varint,1,opt,name=user_found,json=userFound,proto3" json:"user_found,omitempty"`
+	ClientPlatform *ClientPlatform     `protobuf:"bytes,2,opt,name=client_platform,json=clientPlatform,proto3" json:"client_platform,omitempty"`
+	ClientType     *ClientType         `protobuf:"bytes,3,opt,name=client_type,json=clientType,proto3" json:"client_type,omitempty"`
+	UserId         string              `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Role           *Role               `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
+	Token          *Token              `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty"`
+	Permissions    []*RecordPermission `protobuf:"bytes,7,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Sessions       []*Session          `protobuf:"bytes,8,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	LoginTableSlug string              `protobuf:"bytes,9,opt,name=login_table_slug,json=loginTableSlug,proto3" json:"login_table_slug,omitempty"`
+	AppPermissions []*RecordPermission `protobuf:"bytes,10,rep,name=app_permissions,json=appPermissions,proto3" json:"app_permissions,omitempty"`
+	Companies      []*Company          `protobuf:"bytes,11,rep,name=companies,proto3" json:"companies,omitempty"`
 }
 
 func (x *V2SuperAdminLoginResponse) Reset() {
@@ -2293,8 +2293,8 @@ type MultiCompanyLoginRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username"`
-	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password"`
+	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 }
 
 func (x *MultiCompanyLoginRequest) Reset() {
@@ -2348,8 +2348,8 @@ type V2MultiCompanyLoginReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username"`
-	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password"`
+	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 }
 
 func (x *V2MultiCompanyLoginReq) Reset() {
@@ -2403,7 +2403,7 @@ type V2MultiCompanyLoginRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Companies []*V2MultiCompanyLoginRes_Company `protobuf:"bytes,1,rep,name=companies,proto3" json:"companies"`
+	Companies []*V2MultiCompanyLoginRes_Company `protobuf:"bytes,1,rep,name=companies,proto3" json:"companies,omitempty"`
 }
 
 func (x *V2MultiCompanyLoginRes) Reset() {
@@ -2450,8 +2450,8 @@ type MultiCompanyLoginResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Companies   []*MultiCompanyLoginResponse_Company `protobuf:"bytes,1,rep,name=companies,proto3" json:"companies"`
-	ClientTypes []*ClientType                        `protobuf:"bytes,2,rep,name=client_types,json=clientTypes,proto3" json:"client_types"`
+	Companies   []*MultiCompanyLoginResponse_Company `protobuf:"bytes,1,rep,name=companies,proto3" json:"companies,omitempty"`
+	ClientTypes []*ClientType                        `protobuf:"bytes,2,rep,name=client_types,json=clientTypes,proto3" json:"client_types,omitempty"`
 }
 
 func (x *MultiCompanyLoginResponse) Reset() {
@@ -2505,14 +2505,14 @@ type V2MultiCompanyLoginRes_Company struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string                                    `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Name        string                                    `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
-	Logo        string                                    `protobuf:"bytes,3,opt,name=logo,proto3" json:"logo"`
-	Description string                                    `protobuf:"bytes,4,opt,name=description,proto3" json:"description"`
-	CreatedAt   string                                    `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UpdatedAt   string                                    `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
-	OwnerId     string                                    `protobuf:"bytes,7,opt,name=owner_id,json=ownerId,proto3" json:"owner_id"`
-	Projects    []*V2MultiCompanyLoginRes_Company_Project `protobuf:"bytes,8,rep,name=projects,proto3" json:"projects"`
+	Id          string                                    `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name        string                                    `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Logo        string                                    `protobuf:"bytes,3,opt,name=logo,proto3" json:"logo,omitempty"`
+	Description string                                    `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	CreatedAt   string                                    `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt   string                                    `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	OwnerId     string                                    `protobuf:"bytes,7,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Projects    []*V2MultiCompanyLoginRes_Company_Project `protobuf:"bytes,8,rep,name=projects,proto3" json:"projects,omitempty"`
 }
 
 func (x *V2MultiCompanyLoginRes_Company) Reset() {
@@ -2608,12 +2608,12 @@ type V2MultiCompanyLoginRes_Company_Project struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	CompanyId string `protobuf:"bytes,2,opt,name=company_id,json=companyId,proto3" json:"company_id"`
-	Name      string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
-	Domain    string `protobuf:"bytes,4,opt,name=domain,proto3" json:"domain"`
-	CreatedAt string `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UpdatedAt string `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CompanyId string `protobuf:"bytes,2,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"`
+	Name      string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Domain    string `protobuf:"bytes,4,opt,name=domain,proto3" json:"domain,omitempty"`
+	CreatedAt string `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt string `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 }
 
 func (x *V2MultiCompanyLoginRes_Company_Project) Reset() {
@@ -2695,14 +2695,14 @@ type MultiCompanyLoginResponse_Company struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string                                       `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Name        string                                       `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
-	Logo        string                                       `protobuf:"bytes,3,opt,name=logo,proto3" json:"logo"`
-	Description string                                       `protobuf:"bytes,4,opt,name=description,proto3" json:"description"`
-	CreatedAt   string                                       `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UpdatedAt   string                                       `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
-	OwnerId     string                                       `protobuf:"bytes,7,opt,name=owner_id,json=ownerId,proto3" json:"owner_id"`
-	Projects    []*MultiCompanyLoginResponse_Company_Project `protobuf:"bytes,8,rep,name=projects,proto3" json:"projects"`
+	Id          string                                       `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name        string                                       `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Logo        string                                       `protobuf:"bytes,3,opt,name=logo,proto3" json:"logo,omitempty"`
+	Description string                                       `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	CreatedAt   string                                       `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt   string                                       `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	OwnerId     string                                       `protobuf:"bytes,7,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Projects    []*MultiCompanyLoginResponse_Company_Project `protobuf:"bytes,8,rep,name=projects,proto3" json:"projects,omitempty"`
 }
 
 func (x *MultiCompanyLoginResponse_Company) Reset() {
@@ -2798,12 +2798,12 @@ type MultiCompanyLoginResponse_Company_Project struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	CompanyId string `protobuf:"bytes,2,opt,name=company_id,json=companyId,proto3" json:"company_id"`
-	Name      string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
-	Domain    string `protobuf:"bytes,4,opt,name=domain,proto3" json:"domain"`
-	CreatedAt string `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UpdatedAt string `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CompanyId string `protobuf:"bytes,2,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"`
+	Name      string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Domain    string `protobuf:"bytes,4,opt,name=domain,proto3" json:"domain,omitempty"`
+	CreatedAt string `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt string `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 }
 
 func (x *MultiCompanyLoginResponse_Company_Project) Reset() {

@@ -26,11 +26,11 @@ type CreateHtmlTemplateRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string   `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Html      string   `protobuf:"bytes,2,opt,name=html,proto3" json:"html"`
-	Title     string   `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
-	Size      []string `protobuf:"bytes,4,rep,name=size,proto3" json:"size"`
-	ProjectId string   `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	TableSlug string   `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Html      string   `protobuf:"bytes,2,opt,name=html,proto3" json:"html,omitempty"`
+	Title     string   `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Size      []string `protobuf:"bytes,4,rep,name=size,proto3" json:"size,omitempty"`
+	ProjectId string   `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *CreateHtmlTemplateRequest) Reset() {
@@ -105,12 +105,12 @@ type HtmlTemplate struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	TableSlug string   `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	Html      string   `protobuf:"bytes,3,opt,name=html,proto3" json:"html"`
-	Title     string   `protobuf:"bytes,4,opt,name=title,proto3" json:"title"`
-	Size      []string `protobuf:"bytes,5,rep,name=size,proto3" json:"size"`
-	ProjectId string   `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TableSlug string   `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	Html      string   `protobuf:"bytes,3,opt,name=html,proto3" json:"html,omitempty"`
+	Title     string   `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	Size      []string `protobuf:"bytes,5,rep,name=size,proto3" json:"size,omitempty"`
+	ProjectId string   `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *HtmlTemplate) Reset() {
@@ -192,8 +192,8 @@ type GetAllHtmlTemplateResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	HtmlTemplates []*HtmlTemplate `protobuf:"bytes,1,rep,name=htmlTemplates,proto3" json:"htmlTemplates"`
-	Count         int32           `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	HtmlTemplates []*HtmlTemplate `protobuf:"bytes,1,rep,name=htmlTemplates,proto3" json:"htmlTemplates,omitempty"`
+	Count         int32           `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetAllHtmlTemplateResponse) Reset() {
@@ -247,8 +247,8 @@ type GetAllHtmlTemplateRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *GetAllHtmlTemplateRequest) Reset() {
@@ -302,8 +302,8 @@ type HtmlTemplatePrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *HtmlTemplatePrimaryKey) Reset() {
