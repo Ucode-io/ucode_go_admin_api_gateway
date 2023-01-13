@@ -27,13 +27,13 @@ type Section struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Order            int32              `protobuf:"varint,2,opt,name=order,proto3" json:"order,omitempty"`
-	Column           string             `protobuf:"bytes,3,opt,name=column,proto3" json:"column,omitempty"`
-	Label            string             `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
-	Fields           []*FieldForSection `protobuf:"bytes,5,rep,name=fields,proto3" json:"fields,omitempty"`
-	Icon             string             `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
-	IsSummarySection bool               `protobuf:"varint,7,opt,name=is_summary_section,json=isSummarySection,proto3" json:"is_summary_section,omitempty"`
+	Id               string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Order            int32              `protobuf:"varint,2,opt,name=order,proto3" json:"order"`
+	Column           string             `protobuf:"bytes,3,opt,name=column,proto3" json:"column"`
+	Label            string             `protobuf:"bytes,4,opt,name=label,proto3" json:"label"`
+	Fields           []*FieldForSection `protobuf:"bytes,5,rep,name=fields,proto3" json:"fields"`
+	Icon             string             `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon"`
+	IsSummarySection bool               `protobuf:"varint,7,opt,name=is_summary_section,json=isSummarySection,proto3" json:"is_summary_section"`
 }
 
 func (x *Section) Reset() {
@@ -122,9 +122,9 @@ type ViewRelationReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Order            int32  `protobuf:"varint,1,opt,name=order,proto3" json:"order,omitempty"`
-	RelationId       string `protobuf:"bytes,2,opt,name=relation_id,json=relationId,proto3" json:"relation_id,omitempty"`
-	ViewRelationType string `protobuf:"bytes,3,opt,name=view_relation_type,json=viewRelationType,proto3" json:"view_relation_type,omitempty"`
+	Order            int32  `protobuf:"varint,1,opt,name=order,proto3" json:"order"`
+	RelationId       string `protobuf:"bytes,2,opt,name=relation_id,json=relationId,proto3" json:"relation_id"`
+	ViewRelationType string `protobuf:"bytes,3,opt,name=view_relation_type,json=viewRelationType,proto3" json:"view_relation_type"`
 }
 
 func (x *ViewRelationReq) Reset() {
@@ -185,13 +185,13 @@ type RelationForTable struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string              `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	TableFrom  string              `protobuf:"bytes,2,opt,name=table_from,json=tableFrom,proto3" json:"table_from,omitempty"`
-	TableTo    string              `protobuf:"bytes,3,opt,name=table_to,json=tableTo,proto3" json:"table_to,omitempty"`
-	Type       string              `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
-	ViewFields []string            `protobuf:"bytes,5,rep,name=view_fields,json=viewFields,proto3" json:"view_fields,omitempty"`
-	Editable   bool                `protobuf:"varint,6,opt,name=editable,proto3" json:"editable,omitempty"`
-	Summaries  []*SummaryInSection `protobuf:"bytes,7,rep,name=summaries,proto3" json:"summaries,omitempty"`
+	Id         string              `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	TableFrom  string              `protobuf:"bytes,2,opt,name=table_from,json=tableFrom,proto3" json:"table_from"`
+	TableTo    string              `protobuf:"bytes,3,opt,name=table_to,json=tableTo,proto3" json:"table_to"`
+	Type       string              `protobuf:"bytes,4,opt,name=type,proto3" json:"type"`
+	ViewFields []string            `protobuf:"bytes,5,rep,name=view_fields,json=viewFields,proto3" json:"view_fields"`
+	Editable   bool                `protobuf:"varint,6,opt,name=editable,proto3" json:"editable"`
+	Summaries  []*SummaryInSection `protobuf:"bytes,7,rep,name=summaries,proto3" json:"summaries"`
 }
 
 func (x *RelationForTable) Reset() {
@@ -280,8 +280,8 @@ type SummaryInSection struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FieldName   string `protobuf:"bytes,1,opt,name=field_name,json=fieldName,proto3" json:"field_name,omitempty"`
-	FormulaName string `protobuf:"bytes,2,opt,name=formula_name,json=formulaName,proto3" json:"formula_name,omitempty"`
+	FieldName   string `protobuf:"bytes,1,opt,name=field_name,json=fieldName,proto3" json:"field_name"`
+	FormulaName string `protobuf:"bytes,2,opt,name=formula_name,json=formulaName,proto3" json:"formula_name"`
 }
 
 func (x *SummaryInSection) Reset() {
@@ -335,12 +335,12 @@ type ViewRelation struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string            `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Order      int32             `protobuf:"varint,2,opt,name=order,proto3" json:"order,omitempty"`
-	Label      string            `protobuf:"bytes,3,opt,name=label,proto3" json:"label,omitempty"`
-	Relation   *RelationForTable `protobuf:"bytes,4,opt,name=relation,proto3" json:"relation,omitempty"`
-	Icon       string            `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon,omitempty"`
-	IsEditable bool              `protobuf:"varint,6,opt,name=is_editable,json=isEditable,proto3" json:"is_editable,omitempty"`
+	Id         string            `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Order      int32             `protobuf:"varint,2,opt,name=order,proto3" json:"order"`
+	Label      string            `protobuf:"bytes,3,opt,name=label,proto3" json:"label"`
+	Relation   *RelationForTable `protobuf:"bytes,4,opt,name=relation,proto3" json:"relation"`
+	Icon       string            `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon"`
+	IsEditable bool              `protobuf:"varint,6,opt,name=is_editable,json=isEditable,proto3" json:"is_editable"`
 }
 
 func (x *ViewRelation) Reset() {
@@ -422,27 +422,27 @@ type RelationForSection struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                  string                      `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	TableFrom           *TableForSection            `protobuf:"bytes,2,opt,name=table_from,json=tableFrom,proto3" json:"table_from,omitempty"`
-	TableTo             *TableForSection            `protobuf:"bytes,3,opt,name=table_to,json=tableTo,proto3" json:"table_to,omitempty"`
-	Type                string                      `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
-	ViewFields          []*Field                    `protobuf:"bytes,5,rep,name=view_fields,json=viewFields,proto3" json:"view_fields,omitempty"`
-	Summaries           []*SummaryInSection         `protobuf:"bytes,6,rep,name=summaries,proto3" json:"summaries,omitempty"`
-	Editable            bool                        `protobuf:"varint,7,opt,name=editable,proto3" json:"editable,omitempty"`
-	IsEditable          bool                        `protobuf:"varint,8,opt,name=is_editable,json=isEditable,proto3" json:"is_editable,omitempty"`
-	Title               string                      `protobuf:"bytes,9,opt,name=title,proto3" json:"title,omitempty"`
-	Columns             []string                    `protobuf:"bytes,10,rep,name=columns,proto3" json:"columns,omitempty"`
-	QuickFilters        []*QuickFilterForSection    `protobuf:"bytes,11,rep,name=quick_filters,json=quickFilters,proto3" json:"quick_filters,omitempty"`
-	GroupFields         []string                    `protobuf:"bytes,12,rep,name=group_fields,json=groupFields,proto3" json:"group_fields,omitempty"`
-	RelationTableSlug   string                      `protobuf:"bytes,13,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug,omitempty"`
-	ViewType            string                      `protobuf:"bytes,14,opt,name=view_type,json=viewType,proto3" json:"view_type,omitempty"`
-	RelationFieldSlug   string                      `protobuf:"bytes,15,opt,name=relation_field_slug,json=relationFieldSlug,proto3" json:"relation_field_slug,omitempty"`
-	Permission          *structpb.Struct            `protobuf:"bytes,16,opt,name=permission,proto3" json:"permission,omitempty"`
-	ActionRelations     []*ActionRelationForSection `protobuf:"bytes,17,rep,name=action_relations,json=actionRelations,proto3" json:"action_relations,omitempty"`
-	DefaultLimit        string                      `protobuf:"bytes,18,opt,name=default_limit,json=defaultLimit,proto3" json:"default_limit,omitempty"`
-	MultipleInsert      bool                        `protobuf:"varint,19,opt,name=multiple_insert,json=multipleInsert,proto3" json:"multiple_insert,omitempty"`
-	UpdatedFields       []string                    `protobuf:"bytes,20,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields,omitempty"`
-	MultipleInsertField string                      `protobuf:"bytes,21,opt,name=multiple_insert_field,json=multipleInsertField,proto3" json:"multiple_insert_field,omitempty"`
+	Id                  string                      `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	TableFrom           *TableForSection            `protobuf:"bytes,2,opt,name=table_from,json=tableFrom,proto3" json:"table_from"`
+	TableTo             *TableForSection            `protobuf:"bytes,3,opt,name=table_to,json=tableTo,proto3" json:"table_to"`
+	Type                string                      `protobuf:"bytes,4,opt,name=type,proto3" json:"type"`
+	ViewFields          []*Field                    `protobuf:"bytes,5,rep,name=view_fields,json=viewFields,proto3" json:"view_fields"`
+	Summaries           []*SummaryInSection         `protobuf:"bytes,6,rep,name=summaries,proto3" json:"summaries"`
+	Editable            bool                        `protobuf:"varint,7,opt,name=editable,proto3" json:"editable"`
+	IsEditable          bool                        `protobuf:"varint,8,opt,name=is_editable,json=isEditable,proto3" json:"is_editable"`
+	Title               string                      `protobuf:"bytes,9,opt,name=title,proto3" json:"title"`
+	Columns             []string                    `protobuf:"bytes,10,rep,name=columns,proto3" json:"columns"`
+	QuickFilters        []*QuickFilterForSection    `protobuf:"bytes,11,rep,name=quick_filters,json=quickFilters,proto3" json:"quick_filters"`
+	GroupFields         []string                    `protobuf:"bytes,12,rep,name=group_fields,json=groupFields,proto3" json:"group_fields"`
+	RelationTableSlug   string                      `protobuf:"bytes,13,opt,name=relation_table_slug,json=relationTableSlug,proto3" json:"relation_table_slug"`
+	ViewType            string                      `protobuf:"bytes,14,opt,name=view_type,json=viewType,proto3" json:"view_type"`
+	RelationFieldSlug   string                      `protobuf:"bytes,15,opt,name=relation_field_slug,json=relationFieldSlug,proto3" json:"relation_field_slug"`
+	Permission          *structpb.Struct            `protobuf:"bytes,16,opt,name=permission,proto3" json:"permission"`
+	ActionRelations     []*ActionRelationForSection `protobuf:"bytes,17,rep,name=action_relations,json=actionRelations,proto3" json:"action_relations"`
+	DefaultLimit        string                      `protobuf:"bytes,18,opt,name=default_limit,json=defaultLimit,proto3" json:"default_limit"`
+	MultipleInsert      bool                        `protobuf:"varint,19,opt,name=multiple_insert,json=multipleInsert,proto3" json:"multiple_insert"`
+	UpdatedFields       []string                    `protobuf:"bytes,20,rep,name=updated_fields,json=updatedFields,proto3" json:"updated_fields"`
+	MultipleInsertField string                      `protobuf:"bytes,21,opt,name=multiple_insert_field,json=multipleInsertField,proto3" json:"multiple_insert_field"`
 }
 
 func (x *RelationForSection) Reset() {
@@ -629,8 +629,8 @@ type ActionRelationForSection struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
-	Value string `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key"`
+	Value string `protobuf:"bytes,2,opt,name=value,proto3" json:"value"`
 }
 
 func (x *ActionRelationForSection) Reset() {
@@ -684,8 +684,8 @@ type IncrementIDForSection struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	WithIncrementId bool  `protobuf:"varint,1,opt,name=with_increment_id,json=withIncrementId,proto3" json:"with_increment_id,omitempty"`
-	DigitNumber     int32 `protobuf:"varint,2,opt,name=digit_number,json=digitNumber,proto3" json:"digit_number,omitempty"`
+	WithIncrementId bool  `protobuf:"varint,1,opt,name=with_increment_id,json=withIncrementId,proto3" json:"with_increment_id"`
+	DigitNumber     int32 `protobuf:"varint,2,opt,name=digit_number,json=digitNumber,proto3" json:"digit_number"`
 }
 
 func (x *IncrementIDForSection) Reset() {
@@ -739,8 +739,8 @@ type QuickFilterForSection struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FieldId      string `protobuf:"bytes,1,opt,name=field_id,json=fieldId,proto3" json:"field_id,omitempty"`
-	DefaultValue string `protobuf:"bytes,2,opt,name=default_value,json=defaultValue,proto3" json:"default_value,omitempty"`
+	FieldId      string `protobuf:"bytes,1,opt,name=field_id,json=fieldId,proto3" json:"field_id"`
+	DefaultValue string `protobuf:"bytes,2,opt,name=default_value,json=defaultValue,proto3" json:"default_value"`
 }
 
 func (x *QuickFilterForSection) Reset() {
@@ -794,16 +794,16 @@ type TableForSection struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Label             string                 `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
-	Description       string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Slug              string                 `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug,omitempty"`
-	ShowInMenu        bool                   `protobuf:"varint,5,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu,omitempty"`
-	Icon              string                 `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
-	SubtitleFieldSlug string                 `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug,omitempty"`
-	IsEditable        bool                   `protobuf:"varint,8,opt,name=is_editable,json=isEditable,proto3" json:"is_editable,omitempty"`
-	IsOwnTable        bool                   `protobuf:"varint,9,opt,name=is_own_table,json=isOwnTable,proto3" json:"is_own_table,omitempty"`
-	IncrementId       *IncrementIDForSection `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id,omitempty"`
+	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Label             string                 `protobuf:"bytes,2,opt,name=label,proto3" json:"label"`
+	Description       string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	Slug              string                 `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug"`
+	ShowInMenu        bool                   `protobuf:"varint,5,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu"`
+	Icon              string                 `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon"`
+	SubtitleFieldSlug string                 `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug"`
+	IsEditable        bool                   `protobuf:"varint,8,opt,name=is_editable,json=isEditable,proto3" json:"is_editable"`
+	IsOwnTable        bool                   `protobuf:"varint,9,opt,name=is_own_table,json=isOwnTable,proto3" json:"is_own_table"`
+	IncrementId       *IncrementIDForSection `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id"`
 }
 
 func (x *TableForSection) Reset() {
@@ -913,9 +913,9 @@ type NewViewRelation struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Order            int32               `protobuf:"varint,1,opt,name=order,proto3" json:"order,omitempty"`
-	Relation         *RelationForSection `protobuf:"bytes,2,opt,name=relation,proto3" json:"relation,omitempty"`
-	ViewRelationType string              `protobuf:"bytes,3,opt,name=view_relation_type,json=viewRelationType,proto3" json:"view_relation_type,omitempty"`
+	Order            int32               `protobuf:"varint,1,opt,name=order,proto3" json:"order"`
+	Relation         *RelationForSection `protobuf:"bytes,2,opt,name=relation,proto3" json:"relation"`
+	ViewRelationType string              `protobuf:"bytes,3,opt,name=view_relation_type,json=viewRelationType,proto3" json:"view_relation_type"`
 }
 
 func (x *NewViewRelation) Reset() {
@@ -976,9 +976,9 @@ type GetViewRelationResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	TableSlug string             `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	Relations []*NewViewRelation `protobuf:"bytes,3,rep,name=relations,proto3" json:"relations,omitempty"`
+	Id        string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	TableSlug string             `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	Relations []*NewViewRelation `protobuf:"bytes,3,rep,name=relations,proto3" json:"relations"`
 }
 
 func (x *GetViewRelationResponse) Reset() {
@@ -1039,8 +1039,8 @@ type GetAllViewRelationsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count         int32           `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	ViewRelations []*ViewRelation `protobuf:"bytes,2,rep,name=view_relations,json=viewRelations,proto3" json:"view_relations,omitempty"`
+	Count         int32           `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
+	ViewRelations []*ViewRelation `protobuf:"bytes,2,rep,name=view_relations,json=viewRelations,proto3" json:"view_relations"`
 }
 
 func (x *GetAllViewRelationsResponse) Reset() {
@@ -1094,9 +1094,9 @@ type UpsertViewRelationsBody struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug     string             `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	ViewRelations []*ViewRelationReq `protobuf:"bytes,2,rep,name=view_relations,json=viewRelations,proto3" json:"view_relations,omitempty"`
-	ProjectId     string             `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	TableSlug     string             `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	ViewRelations []*ViewRelationReq `protobuf:"bytes,2,rep,name=view_relations,json=viewRelations,proto3" json:"view_relations"`
+	ProjectId     string             `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *UpsertViewRelationsBody) Reset() {
@@ -1157,13 +1157,13 @@ type SectionResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Order            int32            `protobuf:"varint,2,opt,name=order,proto3" json:"order,omitempty"`
-	Column           string           `protobuf:"bytes,3,opt,name=column,proto3" json:"column,omitempty"`
-	Label            string           `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
-	Fields           []*FieldResponse `protobuf:"bytes,5,rep,name=fields,proto3" json:"fields,omitempty"`
-	Icon             string           `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
-	IsSummarySection bool             `protobuf:"varint,7,opt,name=is_summary_section,json=isSummarySection,proto3" json:"is_summary_section,omitempty"`
+	Id               string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Order            int32            `protobuf:"varint,2,opt,name=order,proto3" json:"order"`
+	Column           string           `protobuf:"bytes,3,opt,name=column,proto3" json:"column"`
+	Label            string           `protobuf:"bytes,4,opt,name=label,proto3" json:"label"`
+	Fields           []*FieldResponse `protobuf:"bytes,5,rep,name=fields,proto3" json:"fields"`
+	Icon             string           `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon"`
+	IsSummarySection bool             `protobuf:"varint,7,opt,name=is_summary_section,json=isSummarySection,proto3" json:"is_summary_section"`
 }
 
 func (x *SectionResponse) Reset() {
@@ -1252,18 +1252,18 @@ type FieldResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id           string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Default      string           `protobuf:"bytes,2,opt,name=default,proto3" json:"default,omitempty"`
-	Type         string           `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
-	Index        string           `protobuf:"bytes,4,opt,name=index,proto3" json:"index,omitempty"`
-	Label        string           `protobuf:"bytes,5,opt,name=label,proto3" json:"label,omitempty"`
-	Slug         string           `protobuf:"bytes,6,opt,name=slug,proto3" json:"slug,omitempty"`
-	TableId      string           `protobuf:"bytes,7,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
-	Required     bool             `protobuf:"varint,8,opt,name=required,proto3" json:"required,omitempty"`
-	Column       int32            `protobuf:"varint,9,opt,name=column,proto3" json:"column,omitempty"`
-	Order        int32            `protobuf:"varint,10,opt,name=order,proto3" json:"order,omitempty"`
-	Attributes   *structpb.Struct `protobuf:"bytes,11,opt,name=attributes,proto3" json:"attributes,omitempty"`
-	RelationType string           `protobuf:"bytes,12,opt,name=relation_type,json=relationType,proto3" json:"relation_type,omitempty"`
+	Id           string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Default      string           `protobuf:"bytes,2,opt,name=default,proto3" json:"default"`
+	Type         string           `protobuf:"bytes,3,opt,name=type,proto3" json:"type"`
+	Index        string           `protobuf:"bytes,4,opt,name=index,proto3" json:"index"`
+	Label        string           `protobuf:"bytes,5,opt,name=label,proto3" json:"label"`
+	Slug         string           `protobuf:"bytes,6,opt,name=slug,proto3" json:"slug"`
+	TableId      string           `protobuf:"bytes,7,opt,name=table_id,json=tableId,proto3" json:"table_id"`
+	Required     bool             `protobuf:"varint,8,opt,name=required,proto3" json:"required"`
+	Column       int32            `protobuf:"varint,9,opt,name=column,proto3" json:"column"`
+	Order        int32            `protobuf:"varint,10,opt,name=order,proto3" json:"order"`
+	Attributes   *structpb.Struct `protobuf:"bytes,11,opt,name=attributes,proto3" json:"attributes"`
+	RelationType string           `protobuf:"bytes,12,opt,name=relation_type,json=relationType,proto3" json:"relation_type"`
 }
 
 func (x *FieldResponse) Reset() {
@@ -1387,11 +1387,11 @@ type FieldForSection struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Column       int32  `protobuf:"varint,2,opt,name=column,proto3" json:"column,omitempty"`
-	Order        int32  `protobuf:"varint,3,opt,name=order,proto3" json:"order,omitempty"`
-	FieldName    string `protobuf:"bytes,4,opt,name=field_name,json=fieldName,proto3" json:"field_name,omitempty"`
-	RelationType string `protobuf:"bytes,5,opt,name=relation_type,json=relationType,proto3" json:"relation_type,omitempty"`
+	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Column       int32  `protobuf:"varint,2,opt,name=column,proto3" json:"column"`
+	Order        int32  `protobuf:"varint,3,opt,name=order,proto3" json:"order"`
+	FieldName    string `protobuf:"bytes,4,opt,name=field_name,json=fieldName,proto3" json:"field_name"`
+	RelationType string `protobuf:"bytes,5,opt,name=relation_type,json=relationType,proto3" json:"relation_type"`
 }
 
 func (x *FieldForSection) Reset() {
@@ -1466,9 +1466,9 @@ type UpdateSectionsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Sections  []*Section `protobuf:"bytes,1,rep,name=sections,proto3" json:"sections,omitempty"`
-	TableId   string     `protobuf:"bytes,2,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
-	ProjectId string     `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Sections  []*Section `protobuf:"bytes,1,rep,name=sections,proto3" json:"sections"`
+	TableId   string     `protobuf:"bytes,2,opt,name=table_id,json=tableId,proto3" json:"table_id"`
+	ProjectId string     `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *UpdateSectionsRequest) Reset() {
@@ -1529,7 +1529,7 @@ type GetAllSectionsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Sections []*SectionResponse `protobuf:"bytes,1,rep,name=sections,proto3" json:"sections,omitempty"`
+	Sections []*SectionResponse `protobuf:"bytes,1,rep,name=sections,proto3" json:"sections"`
 }
 
 func (x *GetAllSectionsResponse) Reset() {
@@ -1576,10 +1576,10 @@ type GetAllSectionsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableId   string `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
-	TableSlug string `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	RoleId    string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	TableId   string `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id"`
+	TableSlug string `protobuf:"bytes,2,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	RoleId    string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id"`
+	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetAllSectionsRequest) Reset() {

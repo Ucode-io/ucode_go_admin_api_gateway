@@ -26,9 +26,9 @@ type CreateRoleReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Code int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Lang string `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang,omitempty"`
+	Code int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Lang string `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang"`
 }
 
 func (x *CreateRoleReq) Reset() {
@@ -89,7 +89,7 @@ type RoleGetReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Lang string `protobuf:"bytes,1,opt,name=lang,proto3" json:"lang,omitempty"`
+	Lang string `protobuf:"bytes,1,opt,name=lang,proto3" json:"lang"`
 }
 
 func (x *RoleGetReq) Reset() {
@@ -136,7 +136,7 @@ type RoleGetRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Roles []*CodeName `protobuf:"bytes,1,rep,name=roles,proto3" json:"roles,omitempty"`
+	Roles []*CodeName `protobuf:"bytes,1,rep,name=roles,proto3" json:"roles"`
 }
 
 func (x *RoleGetRes) Reset() {
@@ -183,8 +183,8 @@ type ReloadReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Lang     string      `protobuf:"bytes,1,opt,name=lang,proto3" json:"lang,omitempty"`
-	CodeName []*CodeName `protobuf:"bytes,2,rep,name=codeName,proto3" json:"codeName,omitempty"`
+	Lang     string      `protobuf:"bytes,1,opt,name=lang,proto3" json:"lang"`
+	CodeName []*CodeName `protobuf:"bytes,2,rep,name=codeName,proto3" json:"codeName"`
 }
 
 func (x *ReloadReq) Reset() {
@@ -238,8 +238,8 @@ type CodeName struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Code int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Code int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
 }
 
 func (x *CodeName) Reset() {
