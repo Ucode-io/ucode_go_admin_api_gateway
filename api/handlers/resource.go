@@ -78,7 +78,7 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 // ConfigureProjectResource godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
-// @ID add_project_resource
+// @ID configure_project_resource
 // @Router /v1/company/project/configure-resource [POST]
 // @Summary Configure ProjectResource
 // @Description Configure ProjectResource

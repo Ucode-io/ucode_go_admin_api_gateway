@@ -4937,6 +4937,59 @@ paths:
       summary: Update company
       tags:
       - Company
+  /v1/company/project/configure-resource:
+    post:
+      consumes:
+      - application/json
+      description: Configure ProjectResource
+      operationId: configure_project_resource
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: ProjectResourceConfigureRequest
+        in: body
+        name: ProjectResource
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.ConfigureResourceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ProjectResource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ConfigureResourceResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Configure ProjectResource
+      tags:
+      - Company Resource
   /v1/company/project/create-resource:
     post:
       consumes:
@@ -5104,7 +5157,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Configure ProjectResource
+      description: Add ProjectResource
       operationId: add_project_resource
       parameters:
       - description: Resource-Id
@@ -5112,12 +5165,12 @@ paths:
         name: Resource-Id
         required: true
         type: string
-      - description: ProjectResourceConfigureRequest
+      - description: ProjectResourceAddRequest
         in: body
         name: ProjectResource
         required: true
         schema:
-          $ref: '#/definitions/company_service.ConfigureResourceRequest'
+          $ref: '#/definitions/company_service.AddResourceRequest'
       produces:
       - application/json
       responses:
@@ -5128,7 +5181,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.ConfigureResourceResponse'
+                  $ref: '#/definitions/company_service.AddResourceResponse'
               type: object
         "400":
           description: Bad Request
@@ -5150,7 +5203,7 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-      summary: Configure ProjectResource
+      summary: Add ProjectResource
       tags:
       - Company Resource
   /v1/company/project/resource/{resource_id}:

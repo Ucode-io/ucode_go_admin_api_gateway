@@ -4378,6 +4378,101 @@ var doc = `{
                 }
             }
         },
+        "/v1/company/project/configure-resource": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Configure ProjectResource",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Resource"
+                ],
+                "summary": "Configure ProjectResource",
+                "operationId": "configure_project_resource",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "ProjectResourceConfigureRequest",
+                        "name": "ProjectResource",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.ConfigureResourceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ProjectResource data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.ConfigureResourceResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/company/project/create-resource": {
             "post": {
                 "security": [
@@ -4584,7 +4679,7 @@ var doc = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Configure ProjectResource",
+                "description": "Add ProjectResource",
                 "consumes": [
                     "application/json"
                 ],
@@ -4594,7 +4689,7 @@ var doc = `{
                 "tags": [
                     "Company Resource"
                 ],
-                "summary": "Configure ProjectResource",
+                "summary": "Add ProjectResource",
                 "operationId": "add_project_resource",
                 "parameters": [
                     {
@@ -4605,12 +4700,12 @@ var doc = `{
                         "required": true
                     },
                     {
-                        "description": "ProjectResourceConfigureRequest",
+                        "description": "ProjectResourceAddRequest",
                         "name": "ProjectResource",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.ConfigureResourceRequest"
+                            "$ref": "#/definitions/company_service.AddResourceRequest"
                         }
                     }
                 ],
@@ -4626,7 +4721,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.ConfigureResourceResponse"
+                                            "$ref": "#/definitions/company_service.AddResourceResponse"
                                         }
                                     }
                                 }
