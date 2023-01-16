@@ -114,7 +114,7 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 		return
 	}
 
-	if &company.ServiceType == nil {
+	if &company.ServiceType == nil || company.ServiceType == company_service.ServiceType_NOT_SPECIFIED {
 		fmt.Println("[company.ServiceType] nil", company.ProjectId)
 		switch company.ResourceType {
 		case company_service.ResourceType_MONGODB:
