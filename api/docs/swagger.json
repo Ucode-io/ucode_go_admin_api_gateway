@@ -11916,6 +11916,13 @@
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "resource_Id",
                         "name": "resource_Id",
                         "in": "query",
@@ -12026,6 +12033,13 @@
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateTableRequestBody",
                         "name": "table",
                         "in": "body",
@@ -12115,6 +12129,13 @@
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -12215,6 +12236,13 @@
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_id",
                         "name": "table_id",
                         "in": "path",
@@ -12301,6 +12329,13 @@
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },

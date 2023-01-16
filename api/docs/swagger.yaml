@@ -9036,6 +9036,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: resource_Id
         in: query
         name: resource_Id
@@ -9099,6 +9104,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateTableRequestBody
         in: body
         name: table
@@ -9149,6 +9159,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateTableRequestBody
@@ -9204,6 +9219,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: table_id
         in: path
         name: table_id
@@ -9246,6 +9266,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: table_id

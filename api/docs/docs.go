@@ -11934,6 +11934,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "resource_Id",
                         "name": "resource_Id",
                         "in": "query",
@@ -12044,6 +12051,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateTableRequestBody",
                         "name": "table",
                         "in": "body",
@@ -12133,6 +12147,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -12233,6 +12254,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_id",
                         "name": "table_id",
                         "in": "path",
@@ -12319,6 +12347,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
