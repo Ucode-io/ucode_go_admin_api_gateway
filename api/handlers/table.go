@@ -5,6 +5,7 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -171,6 +172,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 // GetAllTables godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_tables
 // @Router /v1/table [GET]
 // @Summary Get all tables
@@ -209,12 +211,29 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 	//	return
 	//}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
-	//fmt.Println("resourceID:::::::", resourceId.(string))
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.TableService().GetAll(
 		context.Background(),
@@ -222,7 +241,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 			Limit:     int32(limit),
 			Offset:    int32(offset),
 			Search:    c.DefaultQuery("search", ""),
-			ProjectId: c.DefaultQuery("resource_Id", ""),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 

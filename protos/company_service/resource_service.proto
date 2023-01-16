@@ -23,7 +23,21 @@ service ResourceService {
 
     // resource environment
     rpc UpsertResourceEnvironment(UpsertResourceEnvironmentRequest) returns (UpsertResourceEnvironmentResponse) {}
-    
+    rpc GetResourceEnvironment(GetResourceEnvironmentReq) returns (GetResourceEnvironmentRes) {}
+}
+
+message GetResourceEnvironmentReq {
+    string id = 1;
+    string project_id = 2;
+    string resource_id = 3;
+    string environment_id = 4;
+}
+
+message GetResourceEnvironmentRes {
+    string id = 1;
+    string project_id = 2;
+    string resource_id = 3;
+    string environment_id = 4;
 }
 
 message UpsertResourceEnvironmentRequest {
