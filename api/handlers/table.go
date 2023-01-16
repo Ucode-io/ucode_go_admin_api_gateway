@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -270,6 +271,10 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	fmt.Println("resourceId:::::::::", resourceId)
+	fmt.Println("environmentId::::::", environmentId)
+	fmt.Println("resourceEnvironment", resourceEnvironment)
 
 	resp, err := services.TableService().GetAll(
 		context.Background(),
