@@ -16,6 +16,7 @@ import (
 // CreateTable godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_table
 // @Router /v1/table [POST]
 // @Summary Create table
@@ -42,10 +43,34 @@ func (h *Handler) CreateTable(c *gin.Context) {
 	//	return
 	//}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
@@ -67,7 +92,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 			IsVisible:  field.IsVisible,
 		}
 
-		tempField.ProjectId = resourceId.(string)
+		tempField.ProjectId = resourceEnvironment.GetId()
 
 		fields = append(fields, &tempField)
 	}
@@ -89,14 +114,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		},
 	}
 
-	table.ProjectId = resourceId.(string)
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
-		return
-	}
+	table.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := services.TableService().Create(
 		context.Background(),
@@ -114,6 +132,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 // GetTableByID godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_table_by_id
 // @Router /v1/table/{table_id} [GET]
 // @Summary Get table by id
@@ -148,8 +167,25 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
@@ -157,7 +193,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		context.Background(),
 		&obs.TablePrimaryKey{
 			Id:        tableID,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -256,6 +292,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 // UpdateTable godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID update_table
 // @Router /v1/table [PUT]
 // @Summary Update table
@@ -276,6 +313,13 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		return
 	}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
 	//	h.handleResponse(c, http.Forbidden, err.Error())
@@ -283,18 +327,28 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 	//}
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
 		return
 	}
-	table.ProjectId = resourceId.(string)
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	table.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := services.TableService().Update(
 		context.Background(),
@@ -312,6 +366,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 // DeleteTable godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_table
 // @Router /v1/table/{table_id} [DELETE]
 // @Summary Delete Table
@@ -346,8 +401,25 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
@@ -355,7 +427,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		context.Background(),
 		&obs.TablePrimaryKey{
 			Id:        tableID,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
