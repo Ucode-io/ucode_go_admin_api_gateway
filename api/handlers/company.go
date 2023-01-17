@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -24,15 +24,15 @@ import (
 // // @Accept json
 // // @Produce json
 // // @Param Company body company_service.CreateCompanyRequest true "CompanyCreateRequest"
-// // @Success 201 {object} http.Response{data=company_service.CreateCompanyResponse} "Company data"
-// // @Response 400 {object} http.Response{data=string} "Bad Request"
-// // @Failure 500 {object} http.Response{data=string} "Server Error"
+// // @Success 201 {object} status_http.Response{data=company_service.CreateCompanyResponse} "Company data"
+// // @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 // func (h *Handler) CreateCompany(c *gin.Context) {
 // 	var company company_service.CreateCompanyRequest
 
 // 	err := c.ShouldBindJSON(&company)
 // 	if err != nil {
-// 		h.handleResponse(c, http.BadRequest, err.Error())
+// 		h.handleResponse(c, status_http.BadRequest, err.Error())
 // 		return
 // 	}
 
@@ -46,11 +46,11 @@ import (
 // 	)
 
 // 	if err != nil {
-// 		h.handleResponse(c, http.GRPCError, err.Error())
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
 // 		return
 // 	}
 
-// 	h.handleResponse(c, http.Created, resp)
+// 	h.handleResponse(c, status_http.Created, resp)
 // }
 
 // GetCompanyByID godoc
@@ -64,9 +64,9 @@ import (
 // @Accept json
 // @Produce json
 // @Param company_id path string true "company_id"
-// @Success 200 {object} http.Response{data=company_service.GetCompanyByIdResponse} "Company data"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=company_service.GetCompanyByIdResponse} "Company data"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetCompanyByID(c *gin.Context) {
 	companyId := c.Param("company_id")
 	resp, err := h.companyServices.CompanyService().GetById(
@@ -77,11 +77,11 @@ func (h *Handler) GetCompanyByID(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetCompanyList godoc
@@ -95,20 +95,20 @@ func (h *Handler) GetCompanyByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query company_service.GetProjectListRequest true "filters"
-// @Success 200 {object} http.Response{data=company_service.GetComanyListResponse} "Company data"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=company_service.GetComanyListResponse} "Company data"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetCompanyList(c *gin.Context) {
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
@@ -123,11 +123,11 @@ func (h *Handler) GetCompanyList(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetCompanyListWithProjects godoc
@@ -141,20 +141,20 @@ func (h *Handler) GetCompanyList(c *gin.Context) {
 // WithProjects@Accept json
 // @Produce json
 // @Param filters query company_service.GetListWithProjectsRequest true "filters"
-// @Success 200 {object} http.Response{data=company_service.GetListWithProjectsResponse} "Company datWithProjectsa"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=company_service.GetListWithProjectsResponse} "Company datWithProjectsa"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetCompanyListWithProjects(c *gin.Context) {
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
@@ -169,11 +169,11 @@ func (h *Handler) GetCompanyListWithProjects(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateCompany godoc
@@ -188,9 +188,9 @@ func (h *Handler) GetCompanyListWithProjects(c *gin.Context) {
 // @Produce json
 // @Param company_id path string true "company_id"
 // @Param Company body models.CompanyCreateRequest  true "CompanyCreateRequest"
-// @Success 200 {object} http.Response{data=company_service.Company} "Company data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=company_service.Company} "Company data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateCompany(c *gin.Context) {
 	companyId := c.Param("company_id")
 
@@ -199,14 +199,14 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 	_, err := uuid.Parse(companyId)
 	if err != nil {
 
-		h.handleResponse(c, http.BadRequest, errors.New("uuid invalid!!! : "+companyId))
+		h.handleResponse(c, status_http.BadRequest, errors.New("uuid invalid!!! : "+companyId))
 		return
 	}
 	var company models.CompanyCreateRequest
 
 	err = c.ShouldBindJSON(&company)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -218,7 +218,7 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -233,11 +233,11 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteCompany godoc
@@ -252,8 +252,8 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 // @Produce json
 // @Param company_id path string true "company_id"
 // @Success 204
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteCompany(c *gin.Context) {
 	companyId := c.Param("company_id")
 
@@ -262,7 +262,7 @@ func (h *Handler) DeleteCompany(c *gin.Context) {
 		&auth_service.CompanyPrimaryKey{Id: companyId},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -274,11 +274,11 @@ func (h *Handler) DeleteCompany(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.NoContent, resp)
+	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // CreateCompanyProject godoc
@@ -292,15 +292,15 @@ func (h *Handler) DeleteCompany(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param Project body company_service.CreateProjectRequest true "CompanyProjectCreateRequest"
-// @Success 201 {object} http.Response{data=models.CompanyProjectCreateResponse} "Project data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=models.CompanyProjectCreateResponse} "Project data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateCompanyProject(c *gin.Context) {
 	var project company_service.CreateProjectRequest
 
 	err := c.ShouldBindJSON(&project)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -314,13 +314,13 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -333,9 +333,9 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }

@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/config"
 
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,10 +14,10 @@ import (
 // @Description this returns "pong" messsage to show service is working
 // @Accept json
 // @Produce json
-// @Success 200 {object} http.Response{data=string} "Response data"
-// @Failure 500 {object} http.Response{}
+// @Success 200 {object} status_http.Response{data=string} "Response data"
+// @Failure 500 {object} status_http.Response{}
 func (h *Handler) Ping(c *gin.Context) {
-	h.handleResponse(c, http.OK, "pong")
+	h.handleResponse(c, status_http.OK, "pong")
 }
 
 // GetConfig godoc
@@ -27,20 +27,20 @@ func (h *Handler) Ping(c *gin.Context) {
 // @Description show service config data when the service environment set to debug mode
 // @Accept json
 // @Produce json
-// @Success 200 {object} http.Response{data=config.Config} "Response data"
-// @Failure 400 {object} http.Response{}
+// @Success 200 {object} status_http.Response{data=config.Config} "Response data"
+// @Failure 400 {object} status_http.Response{}
 func (h *Handler) GetConfig(c *gin.Context) {
 	switch h.cfg.Environment {
 	case config.DebugMode:
-		h.handleResponse(c, http.OK, h.cfg)
+		h.handleResponse(c, status_http.OK, h.cfg)
 		return
 	case config.TestMode:
-		h.handleResponse(c, http.OK, h.cfg.Environment)
+		h.handleResponse(c, status_http.OK, h.cfg.Environment)
 		return
 	case config.ReleaseMode:
-		h.handleResponse(c, http.OK, "private data")
+		h.handleResponse(c, status_http.OK, "private data")
 		return
 	}
 
-	h.handleResponse(c, http.BadEnvironment, "wrong environment value passed")
+	h.handleResponse(c, status_http.BadEnvironment, "wrong environment value passed")
 }

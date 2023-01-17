@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"errors"
-	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/saidamir98/udevs_pkg/util"
 
@@ -19,28 +19,28 @@ import (
 // @Accept json
 // @Produce json
 // @Param Integration body auth_service.CreateIntegrationRequest true "CreateIntegrationRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.Integration} "Integration data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=auth_service.Integration} "Integration data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateIntegration(c *gin.Context) {
 	var integration auth_service.CreateIntegrationRequest
 
 	err := c.ShouldBindJSON(&integration)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	integration.ProjectId = resourceId.(string)
@@ -48,7 +48,7 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -57,11 +57,11 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 		&integration,
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetIntegrationList godoc
@@ -78,26 +78,26 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 // @Param client-platform-id query string false "client-platform-id"
 // @Param client-type-id query string false "client-type-id"
 // @Param project-id query string false "project-id"
-// @Success 200 {object} http.Response{data=auth_service.GetIntegrationListResponse} "GetIntegrationListResponseBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=auth_service.GetIntegrationListResponse} "GetIntegrationListResponseBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetIntegrationList(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -114,11 +114,11 @@ func (h *Handler) GetIntegrationList(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetIntegrationSessions godoc
@@ -130,14 +130,14 @@ func (h *Handler) GetIntegrationList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param integration-id path string true "integration-id"
-// @Success 200 {object} http.Response{data=auth_service.GetIntegrationSessionsResponse} "GetIntegrationSessionsResponseBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=auth_service.GetIntegrationSessionsResponse} "GetIntegrationSessionsResponseBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetIntegrationSessions(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -149,11 +149,11 @@ func (h *Handler) GetIntegrationSessions(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // AddSessionToIntegration godoc
@@ -166,28 +166,28 @@ func (h *Handler) GetIntegrationSessions(c *gin.Context) {
 // @Produce json
 // @Param integration-id path string true "integration-id"
 // @Param addSessionToIntegration body auth_service.AddSessionToIntegrationRequest true "AddSessionToIntegrationRequestBody"
-// @Success 201 {object} http.Response{data=string} "Add Session To Integration Response"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=string} "Add Session To Integration Response"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) AddSessionToIntegration(c *gin.Context) {
 	var login auth_service.AddSessionToIntegrationRequest
 
 	err := c.ShouldBindJSON(&login)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	integrationID := c.Param("integration-id")
 	if !util.IsValidUUID(integrationID) {
-		h.handleResponse(c, http.InvalidArgument, "integration id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "integration id is an invalid uuid")
 		return
 	}
 	login.IntegrationId = integrationID
@@ -198,11 +198,11 @@ func (h *Handler) AddSessionToIntegration(c *gin.Context) {
 		&login,
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetIntegrationByID godoc
@@ -214,21 +214,21 @@ func (h *Handler) AddSessionToIntegration(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param integration-id path string true "integration-id"
-// @Success 200 {object} http.Response{data=auth_service.Integration} "IntegrationBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=auth_service.Integration} "IntegrationBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetIntegrationByID(c *gin.Context) {
 	IntegrationID := c.Param("integration-id")
 
 	if !util.IsValidUUID(IntegrationID) {
-		h.handleResponse(c, http.InvalidArgument, "Integration id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "Integration id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -240,11 +240,11 @@ func (h *Handler) GetIntegrationByID(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteIntegration godoc
@@ -257,20 +257,20 @@ func (h *Handler) GetIntegrationByID(c *gin.Context) {
 // @Produce json
 // @Param integration-id path string true "Integration-id"
 // @Success 204
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteIntegration(c *gin.Context) {
 	IntegrationID := c.Param("integration-id")
 
 	if !util.IsValidUUID(IntegrationID) {
-		h.handleResponse(c, http.InvalidArgument, "Integration id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "Integration id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -282,11 +282,11 @@ func (h *Handler) DeleteIntegration(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.NoContent, resp)
+	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // GetIntegrationByID godoc
@@ -299,27 +299,27 @@ func (h *Handler) DeleteIntegration(c *gin.Context) {
 // @Produce json
 // @Param integration-id path string true "integration-id"
 // @Param session-id path string true "session-id"
-// @Success 200 {object} http.Response{data=auth_service.Token} "IntegrationBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=auth_service.Token} "IntegrationBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetIntegrationToken(c *gin.Context) {
 	integrationID := c.Param("integration-id")
 	sessionID := c.Param("session-id")
 
 	if !util.IsValidUUID(integrationID) {
-		h.handleResponse(c, http.InvalidArgument, "Integration id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "Integration id is an invalid uuid")
 		return
 	}
 
 	if !util.IsValidUUID(sessionID) {
-		h.handleResponse(c, http.InvalidArgument, "Session id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "Session id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -332,11 +332,11 @@ func (h *Handler) GetIntegrationToken(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteIntegration godoc
@@ -350,26 +350,26 @@ func (h *Handler) GetIntegrationToken(c *gin.Context) {
 // @Param integration-id path string true "Integration-id"
 // @Param session-id path string true "session-id"
 // @Success 204
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) RemoveSessionFromIntegration(c *gin.Context) {
 	integrationID := c.Param("integration-id")
 	sessionID := c.Param("session-id")
 
 	if !util.IsValidUUID(integrationID) {
-		h.handleResponse(c, http.InvalidArgument, "Integration id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "Integration id is an invalid uuid")
 		return
 	}
 
 	if !util.IsValidUUID(sessionID) {
-		h.handleResponse(c, http.InvalidArgument, "Session id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "Session id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -381,9 +381,9 @@ func (h *Handler) RemoveSessionFromIntegration(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.NoContent, resp)
+	h.handleResponse(c, status_http.NoContent, resp)
 }

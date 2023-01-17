@@ -3,10 +3,10 @@ package handlers
 import (
 	"context"
 	"errors"
-	"ucode/ucode_go_api_gateway/api/http"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,28 +21,28 @@ import (
 // @Accept json
 // @Produce json
 // @Param event body object_builder_service.CreateEventRequest true "CreateEventRequestBody"
-// @Success 201 {object} http.Response{data=object_builder_service.Event} "Event data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=object_builder_service.Event} "Event data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateEvent(c *gin.Context) {
 	var event obs.CreateEventRequest
 
 	err := c.ShouldBindJSON(&event)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	event.ProjectId = resourceId.(string)
@@ -50,7 +50,7 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -60,11 +60,11 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetEventByID godoc
@@ -78,34 +78,34 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param event_id path string true "event_id"
-// @Success 200 {object} http.Response{data=object_builder_service.Event} "EventBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=object_builder_service.Event} "EventBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetEventByID(c *gin.Context) {
 	eventID := c.Param("event_id")
 
 	if !util.IsValidUUID(eventID) {
-		h.handleResponse(c, http.InvalidArgument, "event id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "event id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -117,11 +117,11 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetAllEvents godoc
@@ -135,27 +135,27 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query object_builder_service.GetEventsListRequest true "filters"
-// @Success 200 {object} http.Response{data=object_builder_service.GetEventsListResponse} "EventBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=object_builder_service.GetEventsListResponse} "EventBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllEvents(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -168,11 +168,11 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateEvent godoc
@@ -186,28 +186,28 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param event body object_builder_service.Event  true "UpdateEventRequestBody"
-// @Success 200 {object} http.Response{data=object_builder_service.Event} "Event data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=object_builder_service.Event} "Event data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateEvent(c *gin.Context) {
 	var event obs.Event
 
 	err := c.ShouldBindJSON(&event)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	event.ProjectId = resourceId.(string)
@@ -215,7 +215,7 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -225,11 +225,11 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteEvent godoc
@@ -244,33 +244,33 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 // @Produce json
 // @Param event_id path string true "event_id"
 // @Success 204
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteEvent(c *gin.Context) {
 	eventID := c.Param("event_id")
 
 	if !util.IsValidUUID(eventID) {
-		h.handleResponse(c, http.InvalidArgument, "event id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "event id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -283,9 +283,9 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.NoContent, resp)
+	h.handleResponse(c, status_http.NoContent, resp)
 }

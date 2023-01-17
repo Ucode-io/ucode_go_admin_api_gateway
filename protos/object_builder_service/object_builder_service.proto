@@ -29,3 +29,4 @@ import "web_pages.proto";
 import "cascading.proto";
 import "builder_project.proto";
 import "ping_service.proto";
+import "table_helpers.proto";

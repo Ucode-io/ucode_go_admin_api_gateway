@@ -3,12 +3,12 @@ package handlers
 import (
 	"context"
 	"errors"
-	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,28 +23,28 @@ import (
 // @Accept json
 // @Produce json
 // @Param panel_coordinates body object_builder_service.UpdatePanelCoordinatesRequest true "UpdatePanelCoordinatesRequestBody"
-// @Success 201 {object} http.Response{data=object_builder_service.PanelCoordinates} "Coordinates data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=object_builder_service.PanelCoordinates} "Coordinates data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateCoordinates(c *gin.Context) {
 	var panel_coordinates obs.UpdatePanelCoordinatesRequest
 
 	err := c.ShouldBindJSON(&panel_coordinates)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	panel_coordinates.ProjectId = resourceId.(string)
@@ -52,7 +52,7 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -62,11 +62,11 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetSinglePanel godoc
@@ -80,34 +80,34 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param panel_id path string true "panel_id"
-// @Success 200 {object} http.Response{data=models.Panel} "PanelBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=models.Panel} "PanelBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSinglePanel(c *gin.Context) {
 	panelID := c.Param("panel_id")
 
 	if !util.IsValidUUID(panelID) {
-		h.handleResponse(c, http.InvalidArgument, "panel id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "panel id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -119,11 +119,11 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // CreatePanel godoc
@@ -137,21 +137,21 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table body models.CreatePanelRequest true "CreatePanelRequestBody"
-// @Success 201 {object} http.Response{data=models.Panel} "Panel data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=models.Panel} "Panel data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreatePanel(c *gin.Context) {
 	var panelRequest models.CreatePanelRequest
 
 	err := c.ShouldBindJSON(&panelRequest)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	attributes, err := helper.ConvertMapToStruct(panelRequest.Attributes)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
@@ -166,14 +166,14 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	panel.ProjectId = resourceId.(string)
@@ -181,7 +181,7 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -191,11 +191,11 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetAllPanels godoc
@@ -209,28 +209,28 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query object_builder_service.GetAllPanelsRequest true "filters"
-// @Success 200 {object} http.Response{data=models.GetAllPanelsResponse} "PanelBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=models.GetAllPanelsResponse} "PanelBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllPanels(c *gin.Context) {
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -244,11 +244,11 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 
 	if err != nil {
 
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdatePanel godoc
@@ -262,21 +262,21 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param relation body models.Panel  true "UpdatePanelRequestBody"
-// @Success 200 {object} http.Response{data=models.Panel} "Panel data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=models.Panel} "Panel data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdatePanel(c *gin.Context) {
 	var panelRequest models.Panel
 
 	err := c.ShouldBindJSON(&panelRequest)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	attributes, err := helper.ConvertMapToStruct(panelRequest.Attributes)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
@@ -292,14 +292,14 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	panel.ProjectId = resourceId.(string)
@@ -307,7 +307,7 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -317,11 +317,11 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeletePanel godoc
@@ -336,33 +336,33 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 // @Produce json
 // @Param panel_id path string true "panel_id"
 // @Success 204
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeletePanel(c *gin.Context) {
 	panelID := c.Param("panel_id")
 
 	if !util.IsValidUUID(panelID) {
-		h.handleResponse(c, http.InvalidArgument, "panel id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "panel id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -375,9 +375,9 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.NoContent, resp)
+	h.handleResponse(c, status_http.NoContent, resp)
 }
