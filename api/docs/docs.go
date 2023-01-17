@@ -41,7 +41,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -57,7 +57,7 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/http.Response"
+                            "$ref": "#/definitions/status_http.Response"
                         }
                     }
                 }
@@ -121,7 +121,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -139,7 +139,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -157,7 +157,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -221,7 +221,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -239,7 +239,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -257,7 +257,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -302,7 +302,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -320,7 +320,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -338,7 +338,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -384,7 +384,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -402,7 +402,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -447,7 +447,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -465,7 +465,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -483,7 +483,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -535,7 +535,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -553,7 +553,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -571,7 +571,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -623,7 +623,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -641,7 +641,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -659,7 +659,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -712,7 +712,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -730,7 +730,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -763,7 +763,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -779,7 +779,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/http.Response"
+                            "$ref": "#/definitions/status_http.Response"
                         }
                     }
                 }
@@ -837,7 +837,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -855,7 +855,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -873,7 +873,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -927,7 +927,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -945,7 +945,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -963,7 +963,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1010,7 +1010,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1028,7 +1028,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1046,7 +1046,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1107,7 +1107,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1125,7 +1125,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1143,7 +1143,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1214,7 +1214,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1232,7 +1232,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1250,7 +1250,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1316,7 +1316,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1334,7 +1334,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1352,7 +1352,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1415,7 +1415,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1433,7 +1433,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1451,7 +1451,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1513,7 +1513,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1531,7 +1531,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1549,7 +1549,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1613,7 +1613,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1631,7 +1631,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1649,7 +1649,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1713,7 +1713,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1731,7 +1731,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1749,7 +1749,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1813,7 +1813,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1831,7 +1831,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1849,7 +1849,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1914,7 +1914,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1932,7 +1932,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1999,7 +1999,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2017,7 +2017,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2035,7 +2035,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2099,7 +2099,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2117,7 +2117,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2135,7 +2135,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2199,7 +2199,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2217,7 +2217,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2235,7 +2235,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2301,7 +2301,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2319,7 +2319,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2337,7 +2337,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2401,7 +2401,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2419,7 +2419,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2437,7 +2437,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2502,7 +2502,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2520,7 +2520,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2592,7 +2592,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2610,7 +2610,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2628,7 +2628,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2692,7 +2692,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2710,7 +2710,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2728,7 +2728,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2792,7 +2792,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2810,7 +2810,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2828,7 +2828,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2892,7 +2892,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2910,7 +2910,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2928,7 +2928,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2993,7 +2993,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3011,7 +3011,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3088,7 +3088,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3106,7 +3106,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3124,7 +3124,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3188,7 +3188,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3206,7 +3206,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3224,7 +3224,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3288,7 +3288,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3306,7 +3306,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3324,7 +3324,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3388,7 +3388,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3406,7 +3406,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3424,7 +3424,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3489,7 +3489,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3507,7 +3507,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3571,7 +3571,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3589,7 +3589,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3607,7 +3607,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3699,7 +3699,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3717,7 +3717,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3735,7 +3735,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3799,7 +3799,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3817,7 +3817,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3835,7 +3835,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3904,7 +3904,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3922,7 +3922,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3979,7 +3979,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3997,7 +3997,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4015,7 +4015,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4094,7 +4094,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4112,7 +4112,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4130,7 +4130,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4207,7 +4207,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4225,7 +4225,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4243,7 +4243,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4307,7 +4307,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4325,7 +4325,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4343,7 +4343,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4413,7 +4413,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4431,7 +4431,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4449,7 +4449,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4520,7 +4520,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4538,7 +4538,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4556,7 +4556,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4618,7 +4618,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4636,7 +4636,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4654,7 +4654,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4720,7 +4720,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4738,7 +4738,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4756,7 +4756,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4822,7 +4822,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4840,7 +4840,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4858,7 +4858,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4935,7 +4935,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4953,7 +4953,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4971,7 +4971,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5035,7 +5035,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5053,7 +5053,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5071,7 +5071,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5135,7 +5135,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5153,7 +5153,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5171,7 +5171,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5235,7 +5235,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5253,7 +5253,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5271,7 +5271,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5337,7 +5337,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5355,7 +5355,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5373,7 +5373,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5437,7 +5437,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5455,7 +5455,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5473,7 +5473,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5537,7 +5537,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5555,7 +5555,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5573,7 +5573,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5637,7 +5637,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5655,7 +5655,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5673,7 +5673,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5744,7 +5744,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5762,7 +5762,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5780,7 +5780,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5845,7 +5845,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5863,7 +5863,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5930,7 +5930,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5948,7 +5948,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5966,7 +5966,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6030,7 +6030,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6048,7 +6048,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6066,7 +6066,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6130,7 +6130,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6148,7 +6148,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6166,7 +6166,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6230,7 +6230,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6248,7 +6248,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6266,7 +6266,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6331,7 +6331,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6349,7 +6349,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6431,7 +6431,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6449,7 +6449,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6467,7 +6467,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6531,7 +6531,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6549,7 +6549,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6567,7 +6567,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6631,7 +6631,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6649,7 +6649,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6667,7 +6667,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6731,7 +6731,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6749,7 +6749,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6767,7 +6767,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6832,7 +6832,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6850,7 +6850,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6927,7 +6927,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6945,7 +6945,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6963,7 +6963,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7027,7 +7027,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7045,7 +7045,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7063,7 +7063,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7127,7 +7127,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7145,7 +7145,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7163,7 +7163,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7227,7 +7227,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7245,7 +7245,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7263,7 +7263,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7328,7 +7328,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7346,7 +7346,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7413,7 +7413,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7431,7 +7431,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7449,7 +7449,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7513,7 +7513,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7531,7 +7531,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7549,7 +7549,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7613,7 +7613,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7631,7 +7631,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7649,7 +7649,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7721,7 +7721,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7739,7 +7739,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7757,7 +7757,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7821,7 +7821,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7839,7 +7839,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7857,7 +7857,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7921,7 +7921,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7939,7 +7939,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7957,7 +7957,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8024,7 +8024,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8042,7 +8042,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8115,7 +8115,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8133,7 +8133,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8151,7 +8151,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8215,7 +8215,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8233,7 +8233,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8251,7 +8251,95 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/export-to-json": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "export to json",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ExportToJSON"
+                ],
+                "summary": "export to json",
+                "operationId": "export_to_json",
+                "parameters": [
+                    {
+                        "description": "ExportToJSONRequestBody",
+                        "name": "export_to_json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.ExportToJSONRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Link",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.ExportToJSONReponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8353,7 +8441,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8371,7 +8459,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8389,7 +8477,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8453,7 +8541,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8471,7 +8559,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8489,7 +8577,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8553,7 +8641,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8571,7 +8659,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8589,7 +8677,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8660,7 +8748,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8678,7 +8766,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8696,7 +8784,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8763,7 +8851,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8781,7 +8869,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8853,7 +8941,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8871,7 +8959,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8889,7 +8977,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8953,7 +9041,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8971,7 +9059,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8989,7 +9077,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9053,7 +9141,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9071,7 +9159,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9089,7 +9177,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9153,7 +9241,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9171,7 +9259,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9189,7 +9277,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9254,7 +9342,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9272,7 +9360,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9353,7 +9441,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9371,7 +9459,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9389,7 +9477,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9456,7 +9544,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9474,7 +9562,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9492,7 +9580,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9556,7 +9644,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9574,7 +9662,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9592,7 +9680,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9656,7 +9744,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9674,7 +9762,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9692,7 +9780,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9756,7 +9844,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9774,7 +9862,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9792,7 +9880,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9857,7 +9945,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9875,7 +9963,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9941,7 +10029,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9959,7 +10047,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9977,7 +10065,95 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/import-from-json": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "import from json",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ExportToJSON"
+                ],
+                "summary": "import from json",
+                "operationId": "import_from_json",
+                "parameters": [
+                    {
+                        "description": "ImportFromJSONRequestBody",
+                        "name": "export_to_json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.ImportFromJSONRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10043,7 +10219,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10061,7 +10237,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10079,7 +10255,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10145,7 +10321,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10163,7 +10339,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10181,7 +10357,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10248,7 +10424,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10266,7 +10442,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10339,7 +10515,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10357,7 +10533,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10375,7 +10551,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10448,7 +10624,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10466,7 +10642,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10484,7 +10660,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10557,7 +10733,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10575,7 +10751,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10593,7 +10769,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10666,7 +10842,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10684,7 +10860,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10702,7 +10878,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10775,7 +10951,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10793,7 +10969,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10811,7 +10987,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10884,7 +11060,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10902,7 +11078,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10920,7 +11096,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10993,7 +11169,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11011,7 +11187,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11029,7 +11205,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11102,7 +11278,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11120,7 +11296,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11138,7 +11314,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11209,7 +11385,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11227,7 +11403,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11245,7 +11421,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11326,7 +11502,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11344,7 +11520,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11441,7 +11617,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11459,7 +11635,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11477,7 +11653,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11541,7 +11717,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11559,7 +11735,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11577,7 +11753,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11634,7 +11810,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11652,7 +11828,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11670,7 +11846,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11736,7 +11912,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11754,7 +11930,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11772,7 +11948,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11836,7 +12012,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11854,7 +12030,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11872,7 +12048,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11945,7 +12121,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11963,7 +12139,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11981,7 +12157,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12047,7 +12223,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12065,7 +12241,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12083,7 +12259,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12187,7 +12363,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12205,7 +12381,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12223,7 +12399,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12304,7 +12480,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12322,7 +12498,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12340,7 +12516,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12404,7 +12580,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12422,7 +12598,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12440,7 +12616,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12524,7 +12700,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12542,7 +12718,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12619,7 +12795,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12637,7 +12813,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12655,7 +12831,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12719,7 +12895,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12737,7 +12913,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12755,7 +12931,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12832,7 +13008,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12850,7 +13026,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12868,7 +13044,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12932,7 +13108,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12950,7 +13126,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12968,7 +13144,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13032,7 +13208,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13050,7 +13226,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13068,7 +13244,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13132,7 +13308,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13150,7 +13326,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13168,7 +13344,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13233,7 +13409,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13251,7 +13427,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13317,7 +13493,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13335,7 +13511,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13353,7 +13529,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13417,7 +13593,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13435,7 +13611,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13453,7 +13629,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13537,7 +13713,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13555,7 +13731,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13573,7 +13749,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13645,7 +13821,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13663,7 +13839,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13681,7 +13857,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13745,7 +13921,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13763,7 +13939,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13781,7 +13957,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13845,7 +14021,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13863,7 +14039,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13881,7 +14057,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13952,7 +14128,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13970,7 +14146,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13988,7 +14164,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14052,7 +14228,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14070,7 +14246,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14088,7 +14264,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14153,7 +14329,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14171,7 +14347,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14248,7 +14424,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14266,7 +14442,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14284,7 +14460,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14348,7 +14524,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14366,7 +14542,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14384,7 +14560,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14466,7 +14642,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14484,7 +14660,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14502,7 +14678,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14566,7 +14742,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14584,7 +14760,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14602,7 +14778,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14666,7 +14842,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14684,7 +14860,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14702,7 +14878,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14773,7 +14949,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14791,7 +14967,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14809,7 +14985,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14874,7 +15050,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14892,7 +15068,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14974,7 +15150,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -14992,7 +15168,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15010,7 +15186,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15074,7 +15250,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15092,7 +15268,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15110,7 +15286,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15174,7 +15350,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15192,7 +15368,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15210,7 +15386,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15281,7 +15457,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15299,7 +15475,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15317,7 +15493,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15382,7 +15558,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15400,7 +15576,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15472,7 +15648,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15490,7 +15666,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15508,7 +15684,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15572,7 +15748,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15590,7 +15766,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15608,7 +15784,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15672,7 +15848,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15690,7 +15866,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15708,7 +15884,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15765,7 +15941,7 @@ var doc = `{
                     },
                     {
                         "description": "UpdateWebPageRequestBody",
-                        "name": "page",
+                        "name": "web_page",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -15779,7 +15955,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15797,7 +15973,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15815,7 +15991,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15880,7 +16056,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15898,7 +16074,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15973,7 +16149,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -15991,7 +16167,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -16009,7 +16185,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -16070,7 +16246,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -16088,7 +16264,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -16106,7 +16282,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -17143,18 +17319,6 @@ var doc = `{
                 }
             }
         },
-        "http.Response": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "description": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
         "models.Assays": {
             "type": "object",
             "properties": {
@@ -17286,6 +17450,9 @@ var doc = `{
                 "autofill_table": {
                     "type": "string"
                 },
+                "automatic": {
+                    "type": "boolean"
+                },
                 "default": {
                     "type": "string"
                 },
@@ -17312,6 +17479,9 @@ var doc = `{
                 },
                 "type": {
                     "type": "string"
+                },
+                "unique": {
+                    "type": "boolean"
                 }
             }
         },
@@ -17321,6 +17491,9 @@ var doc = `{
                 "attributes": {
                     "type": "object",
                     "additionalProperties": true
+                },
+                "automatic": {
+                    "type": "boolean"
                 },
                 "default": {
                     "type": "string"
@@ -17345,6 +17518,9 @@ var doc = `{
                 },
                 "type": {
                     "type": "string"
+                },
+                "unique": {
+                    "type": "boolean"
                 }
             }
         },
@@ -17594,6 +17770,9 @@ var doc = `{
                 "autofill_table": {
                     "type": "string"
                 },
+                "automatic": {
+                    "type": "boolean"
+                },
                 "default": {
                     "type": "string"
                 },
@@ -17623,6 +17802,9 @@ var doc = `{
                 },
                 "type": {
                     "type": "string"
+                },
+                "unique": {
+                    "type": "boolean"
                 }
             }
         },
@@ -18654,6 +18836,25 @@ var doc = `{
                 }
             }
         },
+        "object_builder_service.ExportToJSONReponse": {
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.ExportToJSONRequest": {
+            "type": "object",
+            "properties": {
+                "app_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.FieldForSection": {
             "type": "object",
             "properties": {
@@ -18808,6 +19009,20 @@ var doc = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.ImportFromJSONRequest": {
+            "type": "object",
+            "properties": {
+                "app_id": {
+                    "type": "string"
+                },
+                "file_name": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 }
             }
@@ -19668,6 +19883,18 @@ var doc = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "status_http.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "description": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         },

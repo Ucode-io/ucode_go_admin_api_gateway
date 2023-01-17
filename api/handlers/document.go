@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
-	"ucode/ucode_go_api_gateway/api/http"
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -23,42 +23,42 @@ import (
 // @Accept json
 // @Produce json
 // @Param Document body object_builder_service.CreateDocumentRequest true "CreateDocumentRequestBody"
-// @Success 201 {object} http.Response{data=object_builder_service.Document} "Document data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=object_builder_service.Document} "Document data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateDocument(c *gin.Context) {
 	var document obs.CreateDocumentRequest
 
 	err := c.ShouldBindJSON(&document)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
 
@@ -71,7 +71,7 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 	)
 	if err != nil {
 		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	document.ProjectId = resourceEnvironment.GetId()
@@ -82,11 +82,11 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetSingleDocument godoc
@@ -101,41 +101,41 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param document_id path string true "document_id"
-// @Success 200 {object} http.Response{data=object_builder_service.Document} "DocumentBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=object_builder_service.Document} "DocumentBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleDocument(c *gin.Context) {
 	documentID := c.Param("document_id")
 
 	if !util.IsValidUUID(documentID) {
-		h.handleResponse(c, http.InvalidArgument, "Document id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "Document id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
 
@@ -148,7 +148,7 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 	)
 	if err != nil {
 		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -161,15 +161,15 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 	)
 	if resp == nil {
 		err := errors.New("not Found")
-		h.handleResponse(c, http.NoContent, err.Error())
+		h.handleResponse(c, status_http.NoContent, err.Error())
 		return
 	}
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateDocument godoc
@@ -184,42 +184,42 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param Document body object_builder_service.Document true "UpdateDocumentRequestBody"
-// @Success 200 {object} http.Response{data=object_builder_service.Document} "Document data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=object_builder_service.Document} "Document data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateDocument(c *gin.Context) {
 	var document obs.Document
 
 	err := c.ShouldBindJSON(&document)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
 
@@ -232,7 +232,7 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 	)
 	if err != nil {
 		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	document.ProjectId = resourceEnvironment.GetId()
@@ -243,11 +243,11 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteDocument godoc
@@ -263,39 +263,39 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 // @Produce json
 // @Param document_id path string true "document_id"
 // @Success 204
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteDocument(c *gin.Context) {
 	documentID := c.Param("document_id")
 
 	if !util.IsValidUUID(documentID) {
-		h.handleResponse(c, http.InvalidArgument, "Document id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "Document id is an invalid uuid")
 		return
 	}
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
 
@@ -308,7 +308,7 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 	)
 	if err != nil {
 		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -321,11 +321,11 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.NoContent, resp)
+	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // GetDocumentList godoc
@@ -340,40 +340,40 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query object_builder_service.GetAllDocumentsRequest true "filters"
-// @Success 200 {object} http.Response{data=object_builder_service.GetAllDocumentsResponse} "DocumentBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=object_builder_service.GetAllDocumentsResponse} "DocumentBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetDocumentList(c *gin.Context) {
 
 	if c.Query("start_date") > c.Query("end_date") {
 		err := errors.New("end date must be bigger than start date")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
 
@@ -386,7 +386,7 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 	)
 	if err != nil {
 		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -402,9 +402,9 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }

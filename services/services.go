@@ -58,6 +58,7 @@ type ServiceManagerI interface {
 	CascadingService() object_builder_service.CascadingServiceClient
 	EnvironmentService() company_service.EnvironmentServiceClient
 	ResourceService() company_service.ResourceServiceClient
+	TableHelpersService() object_builder_service.TableHelpersServiceClient
 }
 
 type grpcClients struct {
@@ -102,6 +103,7 @@ type grpcClients struct {
 	cascadingService          object_builder_service.CascadingServiceClient
 	environmentService        company_service.EnvironmentServiceClient
 	resourceService           company_service.ResourceServiceClient
+	tableHelpersService       object_builder_service.TableHelpersServiceClient
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -203,6 +205,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		cascadingService:          object_builder_service.NewCascadingServiceClient(connObjectBuilderService),
 		environmentService:        company_service.NewEnvironmentServiceClient(connCompanyService),
 		resourceService:           company_service.NewResourceServiceClient(connCompanyService),
+		tableHelpersService:       object_builder_service.NewTableHelpersServiceClient(connObjectBuilderService),
 	}, nil
 }
 
@@ -299,6 +302,10 @@ func (g *grpcClients) FunctionService() object_builder_service.FunctionServiceCl
 
 func (g *grpcClients) BarcodeService() object_builder_service.BarcodeServiceClient {
 	return g.barcodeService
+}
+
+func (g *grpcClients) TableHelpersService() object_builder_service.TableHelpersServiceClient {
+	return g.tableHelpersService
 }
 
 // auth functions

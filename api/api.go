@@ -10,7 +10,7 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
-// @description This is a api gateway
+// SetUpAPI @description This is an api gateway
 // @termsOfService https://udevs.io
 func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	docs.SwaggerInfo.Title = cfg.ServiceName
@@ -206,6 +206,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// Integration with AlfaLab
 		v1.POST("/alfalab/directions", h.CreateDirections)
 		v1.GET("/alfalab/referral", h.GetReferral)
+
+		v1.POST("/export-to-json", h.ExportToJSON)
+		v1.POST("import-from-json", h.ImportFromJSON)
 
 	}
 

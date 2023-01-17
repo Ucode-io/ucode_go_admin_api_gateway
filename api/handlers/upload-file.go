@@ -10,8 +10,7 @@ import (
 	"time"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 
-	"ucode/ucode_go_api_gateway/api/http"
-	https "ucode/ucode_go_api_gateway/api/http"
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -53,16 +52,16 @@ type Path struct {
 // @Accept multipart/form-data
 // @Produce json
 // @Param file formData file true "file"
-// @Success 200 {object} http.Response{data=Path} "Path"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=Path} "Path"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) Upload(c *gin.Context) {
 	var (
 		file File
 	)
 	err := c.ShouldBind(&file)
 	if err != nil {
-		h.handleResponse(c, https.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -79,13 +78,13 @@ func (h *Handler) Upload(c *gin.Context) {
 		h.cfg.MinioAccessKeyID), logger.String("access_secret: ", h.cfg.MinioSecretAccessKey))
 
 	if err != nil {
-		h.handleResponse(c, https.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	err = c.SaveUploadedFile(file.File, dst+"/"+file.File.Filename)
 	if err != nil {
-		h.handleResponse(c, https.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	splitedContentType := strings.Split(file.File.Header["Content-Type"][0], "/")
@@ -101,7 +100,7 @@ func (h *Handler) Upload(c *gin.Context) {
 		minio.PutObjectOptions{ContentType: file.File.Header["Content-Type"][0]},
 	)
 	if err != nil {
-		h.handleResponse(c, https.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		err = os.Remove(dst + "/" + file.File.Filename)
 		if err != nil {
 			h.log.Error("cant remove file")
@@ -114,7 +113,7 @@ func (h *Handler) Upload(c *gin.Context) {
 		h.log.Error("cant remove file")
 	}
 
-	h.handleResponse(c, https.Created, Path{
+	h.handleResponse(c, status_http.Created, Path{
 		Filename: file.File.Filename,
 		Hash:     fName.String(),
 	})
@@ -135,16 +134,16 @@ func (h *Handler) Upload(c *gin.Context) {
 // @Param table_slug path string true "table_slug"
 // @Param object_id path string true "object_id"
 // @Param tags query string false "tags"
-// @Success 200 {object} http.Response{data=Path} "Path"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=Path} "Path"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UploadFile(c *gin.Context) {
 	var (
 		file File
 	)
 	err := c.ShouldBind(&file)
 	if err != nil {
-		h.handleResponse(c, https.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -163,19 +162,19 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		h.cfg.MinioAccessKeyID), logger.String("access_secret: ", h.cfg.MinioSecretAccessKey))
 
 	if err != nil {
-		h.handleResponse(c, https.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	err = c.SaveUploadedFile(file.File, dst+"/"+file.File.Filename)
 	if err != nil {
-		h.handleResponse(c, https.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	fileLink := "https://" + h.cfg.MinioEndpoint + "/docs/" + file.File.Filename
 	splitedFileName := strings.Split(fileNameForObjectBuilder, ".")
 	f, err := os.Stat(dst + "/" + file.File.Filename)
 	if err != nil {
-		h.handleResponse(c, https.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	ContentTypeOfFile := file.File.Header["Content-Type"][0]
@@ -188,7 +187,7 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		minio.PutObjectOptions{ContentType: ContentTypeOfFile},
 	)
 	if err != nil {
-		h.handleResponse(c, https.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		err = os.Remove(dst + "/" + file.File.Filename)
 		if err != nil {
 			h.log.Error("cant remove file")
@@ -216,34 +215,34 @@ func (h *Handler) UploadFile(c *gin.Context) {
 	requestMap["name"] = fileNameForObjectBuilder
 	structData, err := helper.ConvertMapToStruct(requestMap)
 	if err != nil {
-		h.handleResponse(c, https.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
 
@@ -256,7 +255,7 @@ func (h *Handler) UploadFile(c *gin.Context) {
 	)
 	if err != nil {
 		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -269,11 +268,11 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, https.InternalServerError, err.Error())
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, https.Created, Path{
+	h.handleResponse(c, status_http.Created, Path{
 		Filename: file.File.Filename,
 		Hash:     fName.String(),
 	})

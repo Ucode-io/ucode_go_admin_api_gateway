@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"context"
-	"ucode/ucode_go_api_gateway/api/http"
 	ps "ucode/ucode_go_api_gateway/genproto/pos_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"ucode/ucode_go_api_gateway/api/status_http"
 )
 
 // GetAllOfflineAppointments godoc
@@ -21,19 +21,19 @@ import (
 // @Accept json
 // @Produce json
 // @Param filters query pos_service.GetAllOfflineAppointmentsRequest true "filters"
-// @Success 200 {object} http.Response{data=pos_service.GetAllOfflineAppointmentsResponse} "OfflineAppointmentBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=pos_service.GetAllOfflineAppointmentsResponse} "OfflineAppointmentBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
 	authBody, err := h.GetAuthInfo(c)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 	cashboxId := ""
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 	if authBody.Tables != nil {
@@ -48,14 +48,14 @@ func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -72,11 +72,11 @@ func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetAllBookedAppointments godoc
@@ -91,26 +91,26 @@ func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query pos_service.GetAllBookedAppointmentsRequest true "filters"
-// @Success 200 {object} http.Response{data=pos_service.GetAllBookedAppointmentsResponse} "BookedAppointmentBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=pos_service.GetAllBookedAppointmentsResponse} "BookedAppointmentBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllBookedAppointments(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -126,11 +126,11 @@ func (h *Handler) GetAllBookedAppointments(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetSingleOfflineAppointment godoc
@@ -145,21 +145,21 @@ func (h *Handler) GetAllBookedAppointments(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param offline_appointment_id path string true "offline_appointment_id"
-// @Success 200 {object} http.Response{data=pos_service.GetSingleOfflineAppointmentResponse} "OfflineAppointmentBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=pos_service.GetSingleOfflineAppointmentResponse} "OfflineAppointmentBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleOfflineAppointment(c *gin.Context) {
 	offlineAppointmentID := c.Param("offline_appointment_id")
 
 	if !util.IsValidUUID(offlineAppointmentID) {
-		h.handleResponse(c, http.InvalidArgument, "offline_appointment_id id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "offline_appointment_id id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -170,11 +170,11 @@ func (h *Handler) GetSingleOfflineAppointment(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetSingleBookedAppointment godoc
@@ -189,21 +189,21 @@ func (h *Handler) GetSingleOfflineAppointment(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param booked_appointment_id path string true "booked_appointment_id"
-// @Success 200 {object} http.Response{data=pos_service.GetSingleBookedAppointmentResponse} "BookedAppointmentBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=pos_service.GetSingleBookedAppointmentResponse} "BookedAppointmentBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleBookedAppointment(c *gin.Context) {
 	bookedAppointmentID := c.Param("booked_appointment_id")
 
 	if !util.IsValidUUID(bookedAppointmentID) {
-		h.handleResponse(c, http.InvalidArgument, "booked_appointment_id id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "booked_appointment_id id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -214,11 +214,11 @@ func (h *Handler) GetSingleBookedAppointment(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateAppointmentPaymentStatus godoc
@@ -233,20 +233,20 @@ func (h *Handler) GetSingleBookedAppointment(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param view body pos_service.UpdatePaymentStatusBody true "UpdateAppointmentStatus"
-// @Success 200 {object} http.Response{data=pos_service.OfflineAppointment} "Appointment data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=pos_service.OfflineAppointment} "Appointment data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 	authBody, err := h.GetAuthInfo(c)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 	var paymentBody ps.UpdatePaymentStatusBody
 
 	err = c.ShouldBindJSON(&paymentBody)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -263,7 +263,7 @@ func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -273,14 +273,14 @@ func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
-// CloseCashbox godoc
+// GetCloseCashboxInfo godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
@@ -291,13 +291,13 @@ func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 // @Tags Appointment
 // @Accept json
 // @Produce json
-// @Success 200 {object} http.Response{data=pos_service.CashboxResponse} "Cashbox data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=pos_service.CashboxResponse} "Cashbox data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 	authBody, err := h.GetAuthInfo(c)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 	var cashbox ps.CashboxRequestBody
@@ -315,7 +315,7 @@ func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -324,14 +324,14 @@ func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 		&cashbox,
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
-// OpenCashbox godoc
+// GetOpenCashboxInfo godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
@@ -342,13 +342,13 @@ func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 // @Tags Appointment
 // @Accept json
 // @Produce json
-// @Success 200 {object} http.Response{data=pos_service.CashboxResponse} "Cashbox data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=pos_service.CashboxResponse} "Cashbox data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
 	authBody, err := h.GetAuthInfo(c)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 	var cashbox ps.CashboxRequestBody
@@ -366,7 +366,7 @@ func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -376,11 +376,11 @@ func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 
 }
 
@@ -397,12 +397,12 @@ func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
 // @Produce json
 // @Param app body models.CreateCashboxTransactionRequest true "CreateTransactionBody"
 // @Success 201
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CashboxTransaction(c *gin.Context) {
 	authBody, err := h.GetAuthInfo(c)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 	var cashboxTransactionRequest ps.CreateCashboxTransactionRequest
@@ -420,13 +420,13 @@ func (h *Handler) CashboxTransaction(c *gin.Context) {
 
 	err = c.ShouldBindJSON(&cashboxTransactionRequest)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -437,8 +437,8 @@ func (h *Handler) CashboxTransaction(c *gin.Context) {
 		Status:        cashboxTransactionRequest.Status,
 	})
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	h.handleResponse(c, http.Created, "Cashbox Transaction Created")
+	h.handleResponse(c, status_http.Created, "Cashbox Transaction Created")
 }

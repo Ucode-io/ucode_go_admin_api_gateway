@@ -1,4 +1,4 @@
-package http
+package status_http
 
 // Status ...
 type Status struct {

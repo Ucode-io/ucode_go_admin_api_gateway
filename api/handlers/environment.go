@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"ucode/ucode_go_api_gateway/api/http"
 	obs "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"ucode/ucode_go_api_gateway/api/status_http"
 )
 
 // CreateEnvironment godoc
@@ -20,15 +20,15 @@ import (
 // @Accept json
 // @Produce json
 // @Param environment body obs.CreateEnvironmentRequest true "CreateEnvironmentRequestBody"
-// @Success 201 {object} http.Response{data=obs.Environment} "Environment data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=obs.Environment} "Environment data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateEnvironment(c *gin.Context) {
 	var environmentRequest obs.CreateEnvironmentRequest
 
 	err := c.ShouldBindJSON(&environmentRequest)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -38,11 +38,11 @@ func (h *Handler) CreateEnvironment(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetSingleEnvironment godoc
@@ -57,14 +57,14 @@ func (h *Handler) CreateEnvironment(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param environment_id path string true "environment_id"
-// @Success 200 {object} http.Response{data=obs.Environment} "EnvironmentBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=obs.Environment} "EnvironmentBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleEnvironment(c *gin.Context) {
 	environmentID := c.Param("environment_id")
 
 	if !util.IsValidUUID(environmentID) {
-		h.handleResponse(c, http.InvalidArgument, "environment id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "environment id is an invalid uuid")
 		return
 	}
 
@@ -76,11 +76,11 @@ func (h *Handler) GetSingleEnvironment(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateEnvironment godoc
@@ -95,15 +95,15 @@ func (h *Handler) GetSingleEnvironment(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param environment body obs.Environment true "UpdateEnvironmentRequestBody"
-// @Success 200 {object} http.Response{data=obs.Environment} "Environment data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=obs.Environment} "Environment data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateEnvironment(c *gin.Context) {
 	var environment obs.Environment
 
 	err := c.ShouldBindJSON(&environment)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -113,11 +113,11 @@ func (h *Handler) UpdateEnvironment(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteEnvironment godoc
@@ -133,13 +133,13 @@ func (h *Handler) UpdateEnvironment(c *gin.Context) {
 // @Produce json
 // @Param environment_id path string true "environment_id"
 // @Success 204
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteEnvironment(c *gin.Context) {
 	environmentID := c.Param("environment_id")
 
 	if !util.IsValidUUID(environmentID) {
-		h.handleResponse(c, http.InvalidArgument, "environment id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "environment id is an invalid uuid")
 		return
 	}
 
@@ -149,11 +149,11 @@ func (h *Handler) DeleteEnvironment(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.NoContent, resp)
+	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // GetAllEnvironments godoc
@@ -168,20 +168,20 @@ func (h *Handler) DeleteEnvironment(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query obs.GetEnvironmentListRequest true "filters"
-// @Success 200 {object} http.Response{data=obs.GetEnvironmentListResponse} "EnvironmentBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=obs.GetEnvironmentListResponse} "EnvironmentBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllEnvironments(c *gin.Context) {
 
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
@@ -196,9 +196,9 @@ func (h *Handler) GetAllEnvironments(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }

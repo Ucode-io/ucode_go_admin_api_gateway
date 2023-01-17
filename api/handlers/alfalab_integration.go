@@ -5,11 +5,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	https "ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"ucode/ucode_go_api_gateway/api/status_http"
 )
 
 // CreateDirections godoc
@@ -24,9 +24,9 @@ import (
 // @Accept json
 // @Produce json
 // @Param table body models.CreateDirections true "CreatePatientRequestBody"
-// @Success 201 {object} http.Response{data=models.Field} "Field data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=models.Field} "Field data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateDirections(c *gin.Context) {
 	var (
 		directions  models.CreateDirections
@@ -36,7 +36,7 @@ func (h *Handler) CreateDirections(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&directions)
 	if err != nil {
-		h.handleResponse(c, https.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -101,11 +101,11 @@ func (h *Handler) CreateDirections(c *gin.Context) {
 
 	resp, err := util.DoXMLRequest("http://95.211.223.217:9901", "POST", requestBody)
 	if err != nil {
-		h.handleResponse(c, https.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
-	h.handleResponse(c, https.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetReferral godoc
@@ -120,9 +120,9 @@ func (h *Handler) CreateDirections(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param nr query string false "nr"
-// @Success 200 {object} http.Response{data=object_builder_service.BarcodeGenerateRes} "Barcode"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=object_builder_service.BarcodeGenerateRes} "Barcode"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetReferral(c *gin.Context) {
 	url := "http://95.211.223.217:9901"
 	method := "POST"

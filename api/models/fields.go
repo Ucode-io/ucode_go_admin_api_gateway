@@ -16,6 +16,8 @@ type Field struct {
 	AutoFillField string                 `json:"autofill_field"`
 	AutoFillTable string                 `json:"autofill_table"`
 	RelationId    string                 `json:"relation_id"`
+	Unique        bool                   `json:"unique"`
+	Automatic     bool                   `json:"automatic"`
 }
 
 type CreateFieldsRequest struct {
@@ -28,6 +30,8 @@ type CreateFieldsRequest struct {
 	Required   bool                   `json:"required"`
 	Attributes map[string]interface{} `json:"attributes"`
 	IsVisible  bool                   `json:"is_visible"`
+	Unique     bool                   `json:"unique"`
+	Automatic  bool                   `json:"automatic"`
 }
 
 type CreateFieldRequest struct {
@@ -43,6 +47,8 @@ type CreateFieldRequest struct {
 	IsVisible     bool                   `json:"is_visible"`
 	AutoFillField string                 `json:"autofill_field"`
 	AutoFillTable string                 `json:"autofill_table"`
+	Unique        bool                   `json:"unique"`
+	Automatic     bool                   `json:"automatic"`
 }
 
 type GetAllFieldsResponse struct {
