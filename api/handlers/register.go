@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"time"
-	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pbObject "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -12,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -25,34 +25,34 @@ import (
 // @Accept json
 // @Produce json
 // @Param login body models.Sms true "SendCode"
-// @Success 201 {object} http.Response{data=models.SendCodeResponse} "User data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=models.SendCodeResponse} "User data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) SendCode(c *gin.Context) {
 
 	var request models.Sms
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	id, err := uuid.NewRandom()
 	if err != nil {
-		h.handleResponse(c, http.InternalServerError, err.Error())
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 	valid := util.IsValidPhone(request.Recipient)
 	if !valid {
-		h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
+		h.handleResponse(c, status_http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
 		return
 	}
 
@@ -60,7 +60,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 
 	code, err := util.GenerateCode(4)
 	if err != nil {
-		h.handleResponse(c, http.InternalServerError, err.Error())
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
@@ -68,14 +68,14 @@ func (h *Handler) SendCode(c *gin.Context) {
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -88,13 +88,13 @@ func (h *Handler) SendCode(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	if (respObject == nil || !respObject.UserFound) && request.ClientType != "PATIENT" {
 		err := errors.New("Пользователь не найдено")
-		h.handleResponse(c, http.NotFound, err.Error())
+		h.handleResponse(c, status_http.NotFound, err.Error())
 		return
 	}
 
@@ -109,12 +109,12 @@ func (h *Handler) SendCode(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -123,7 +123,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 		Data:  respObject,
 	}
 
-	h.handleResponse(c, http.Created, res)
+	h.handleResponse(c, status_http.Created, res)
 
 }
 
@@ -138,16 +138,16 @@ func (h *Handler) SendCode(c *gin.Context) {
 // @Param sms_id path string true "sms_id"
 // @Param otp path string true "otp"
 // @Param verifyBody body models.Verify true "verify_body"
-// @Success 201 {object} http.Response{data=auth_service.V2LoginResponse} "User data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=auth_service.V2LoginResponse} "User data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) Verify(c *gin.Context) {
 	var body models.Verify
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -159,31 +159,31 @@ func (h *Handler) Verify(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	err = c.ShouldBindJSON(&body)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	if !body.Data.UserFound {
-		h.handleResponse(c, http.OK, "User verified but not found")
+		h.handleResponse(c, status_http.OK, "User verified but not found")
 		return
 	}
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -196,11 +196,11 @@ func (h *Handler) Verify(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, res)
+	h.handleResponse(c, status_http.Created, res)
 }
 
 // RegisterOtp godoc
@@ -213,42 +213,42 @@ func (h *Handler) Verify(c *gin.Context) {
 // @Produce json
 // @Param registerBody body models.RegisterOtp true "register_body"
 // @Param table_slug path string true "table_slug"
-// @Success 201 {object} http.Response{data=auth_service.V2LoginResponse} "User data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=auth_service.V2LoginResponse} "User data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) RegisterOtp(c *gin.Context) {
 	var body models.RegisterOtp
 
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	structData, err := helper.ConvertMapToStruct(body.Data)
 
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -261,7 +261,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -274,7 +274,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -288,9 +288,9 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, res)
+	h.handleResponse(c, status_http.Created, res)
 }

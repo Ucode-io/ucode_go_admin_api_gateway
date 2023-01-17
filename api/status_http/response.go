@@ -1,4 +1,4 @@
-package http
+package status_http
 
 // Response ...
 type Response struct {

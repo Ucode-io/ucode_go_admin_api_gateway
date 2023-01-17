@@ -3,10 +3,10 @@ package handlers
 import (
 	"errors"
 	"strings"
-	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -30,7 +30,7 @@ func (h *Handler) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuperAd
 	bearerToken := c.GetHeader("Authorization")
 	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
-		h.handleResponse(c, http.Forbidden, "token error: wrong format")
+		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		return nil, false
 	}
 	accessToken := strArr[1]
@@ -46,15 +46,15 @@ func (h *Handler) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuperAd
 	if err != nil {
 		errr := status.Error(codes.PermissionDenied, "Permission denied")
 		if errr.Error() == err.Error() {
-			h.handleResponse(c, http.BadRequest, err.Error())
+			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return nil, false
 		}
 		errr = status.Error(codes.InvalidArgument, "User has been expired")
 		if errr.Error() == err.Error() {
-			h.handleResponse(c, http.Forbidden, err.Error())
+			h.handleResponse(c, status_http.Forbidden, err.Error())
 			return nil, false
 		}
-		h.handleResponse(c, http.Unauthorized, err.Error())
+		h.handleResponse(c, status_http.Unauthorized, err.Error())
 		return nil, false
 	}
 
@@ -65,13 +65,13 @@ func (h *Handler) adminAuthInfo(c *gin.Context) (result *auth_service.HasAccessS
 	data, ok := c.Get("Auth")
 
 	if !ok {
-		h.handleResponse(c, http.Forbidden, "token error: wrong format")
+		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
 		return nil, errors.New("token error: wrong format")
 	}
 	accessResponse, ok := data.(*auth_service.HasAccessSuperAdminRes)
 	if !ok {
-		h.handleResponse(c, http.Forbidden, "token error: wrong format")
+		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
 		return nil, errors.New("token error: wrong format")
 	}

@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"strconv"
-	"ucode/ucode_go_api_gateway/api/http"
+	http "ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
 	"ucode/ucode_go_api_gateway/storage"
 
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -58,7 +59,7 @@ func (h *Handler) handleResponse(c *gin.Context, status http.Status, data interf
 		)
 	}
 
-	c.JSON(status.Code, http.Response{
+	c.JSON(status.Code, status_http.Response{
 		Status:      status.Status,
 		Description: status.Description,
 		Data:        data,

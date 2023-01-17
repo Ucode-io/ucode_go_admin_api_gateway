@@ -24,7 +24,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/auth_service.ConfirmStrategies'
       id:
         type: string
       name:
@@ -40,6 +40,16 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
+  auth_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -246,9 +256,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
       user_id:
@@ -304,9 +314,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
       user_id:
@@ -359,9 +369,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.EmptyProto:
     type: object
@@ -504,9 +514,9 @@ definitions:
       id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
     type: object
@@ -523,6 +533,18 @@ definitions:
       username:
         type: string
     type: object
+  company_service.ResourceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ResourceType_NOT_DECIDED
+    - ResourceType_MONGODB
+    - ResourceType_CLICKHOUSE
+    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -536,7 +558,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -566,6 +588,16 @@ definitions:
       resource_environment_id:
         type: string
     type: object
+  company_service.ServiceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ServiceType_NOT_SPECIFIED
+    - ServiceType_BUILDER_SERVICE
+    - ServiceType_ANALYTICS_SERVICE
   company_service.UpdateResourceRequest:
     properties:
       credentials:
@@ -579,7 +611,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -661,14 +693,6 @@ definitions:
       filename:
         type: string
       hash:
-        type: string
-    type: object
-  http.Response:
-    properties:
-      data: {}
-      description:
-        type: string
-      status:
         type: string
     type: object
   models.Assays:
@@ -756,6 +780,8 @@ definitions:
         type: string
       autofill_table:
         type: string
+      automatic:
+        type: boolean
       default:
         type: string
       id:
@@ -774,12 +800,16 @@ definitions:
         type: string
       type:
         type: string
+      unique:
+        type: boolean
     type: object
   models.CreateFieldsRequest:
     properties:
       attributes:
         additionalProperties: true
         type: object
+      automatic:
+        type: boolean
       default:
         type: string
       id:
@@ -796,6 +826,8 @@ definitions:
         type: string
       type:
         type: string
+      unique:
+        type: boolean
     type: object
   models.CreateFunctionRequest:
     properties:
@@ -959,6 +991,8 @@ definitions:
         type: string
       autofill_table:
         type: string
+      automatic:
+        type: boolean
       default:
         type: string
       id:
@@ -979,6 +1013,8 @@ definitions:
         type: string
       type:
         type: string
+      unique:
+        type: boolean
     type: object
   models.Function:
     properties:
@@ -1288,7 +1324,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
       guid:
         type: string
       name:
@@ -1311,6 +1347,16 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
+  object_builder_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -1654,6 +1700,18 @@ definitions:
           type: string
         type: array
     type: object
+  object_builder_service.ExportToJSONReponse:
+    properties:
+      link:
+        type: string
+    type: object
+  object_builder_service.ExportToJSONRequest:
+    properties:
+      app_id:
+        type: string
+      project_id:
+        type: string
+    type: object
   object_builder_service.FieldForSection:
     properties:
       column:
@@ -1754,6 +1812,15 @@ definitions:
       table_slug:
         type: string
       title:
+        type: string
+    type: object
+  object_builder_service.ImportFromJSONRequest:
+    properties:
+      app_id:
+        type: string
+      file_name:
+        type: string
+      project_id:
         type: string
     type: object
   object_builder_service.IncrementID:
@@ -2317,6 +2384,14 @@ definitions:
           type: string
         type: array
     type: object
+  status_http.Response:
+    properties:
+      data: {}
+      description:
+        type: string
+      status:
+        type: string
+    type: object
   structpb.Struct:
     properties:
       fields:
@@ -2349,7 +2424,7 @@ paths:
           description: Response data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/config.Config'
@@ -2357,7 +2432,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/http.Response'
+            $ref: '#/definitions/status_http.Response'
       summary: get config data on the debug mode
   /integration:
     get:
@@ -2397,7 +2472,7 @@ paths:
           description: GetIntegrationListResponseBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.GetIntegrationListResponse'
@@ -2406,7 +2481,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2415,7 +2490,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2442,7 +2517,7 @@ paths:
           description: Integration data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.Integration'
@@ -2451,7 +2526,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2460,7 +2535,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2484,12 +2559,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2498,7 +2573,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2524,7 +2599,7 @@ paths:
           description: IntegrationBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.Integration'
@@ -2533,7 +2608,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2542,7 +2617,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2569,7 +2644,7 @@ paths:
           description: GetIntegrationSessionsResponseBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.GetIntegrationSessionsResponse'
@@ -2578,7 +2653,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2587,7 +2662,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2619,7 +2694,7 @@ paths:
           description: Add Session To Integration Response
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2628,7 +2703,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2637,7 +2712,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2666,12 +2741,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2680,7 +2755,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2711,7 +2786,7 @@ paths:
           description: IntegrationBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.Token'
@@ -2720,7 +2795,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2729,7 +2804,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2750,7 +2825,7 @@ paths:
           description: Response data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2758,7 +2833,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/http.Response'
+            $ref: '#/definitions/status_http.Response'
       summary: returns "pong" message
   /register-email-otp/{table_slug}:
     post:
@@ -2785,7 +2860,7 @@ paths:
           description: User data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.V2LoginResponse'
@@ -2794,7 +2869,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2803,7 +2878,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2836,7 +2911,7 @@ paths:
           description: User data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.V2LoginResponse'
@@ -2845,7 +2920,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2854,7 +2929,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2882,7 +2957,7 @@ paths:
           description: User data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.SendCodeResponse'
@@ -2891,7 +2966,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2900,7 +2975,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2928,7 +3003,7 @@ paths:
           description: User data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.SendCodeResponse'
@@ -2937,7 +3012,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2946,7 +3021,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -2983,7 +3058,7 @@ paths:
           description: Get All Action Permission data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -2992,7 +3067,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3001,7 +3076,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3036,7 +3111,7 @@ paths:
           description: Field data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Field'
@@ -3045,7 +3120,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3054,7 +3129,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3087,7 +3162,7 @@ paths:
           description: Barcode
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.BarcodeGenerateRes'
@@ -3096,7 +3171,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3105,7 +3180,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3137,7 +3212,7 @@ paths:
           description: DashboardBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.GetAllDashboardsResponse'
@@ -3146,7 +3221,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3155,7 +3230,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3189,7 +3264,7 @@ paths:
           description: Dashboard data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Dashboard'
@@ -3198,7 +3273,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3207,7 +3282,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3241,7 +3316,7 @@ paths:
           description: Dashboard data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Dashboard'
@@ -3250,7 +3325,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3259,7 +3334,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3290,12 +3365,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3304,7 +3379,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3337,7 +3412,7 @@ paths:
           description: DashboardBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Dashboard'
@@ -3346,7 +3421,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3355,7 +3430,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3390,7 +3465,7 @@ paths:
           description: PanelBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.GetAllPanelsResponse'
@@ -3399,7 +3474,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3408,7 +3483,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3442,7 +3517,7 @@ paths:
           description: Panel data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Panel'
@@ -3451,7 +3526,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3460,7 +3535,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3494,7 +3569,7 @@ paths:
           description: Panel data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Panel'
@@ -3503,7 +3578,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3512,7 +3587,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3543,12 +3618,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3557,7 +3632,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3590,7 +3665,7 @@ paths:
           description: PanelBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Panel'
@@ -3599,7 +3674,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3608,7 +3683,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3643,7 +3718,7 @@ paths:
           description: Coordinates data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.PanelCoordinates'
@@ -3652,7 +3727,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3661,7 +3736,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3699,7 +3774,7 @@ paths:
           description: VariableBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.GetAllVariablesResponse'
@@ -3708,7 +3783,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3717,7 +3792,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3751,7 +3826,7 @@ paths:
           description: Variable data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Variable'
@@ -3760,7 +3835,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3769,7 +3844,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3803,7 +3878,7 @@ paths:
           description: Variable data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Variable'
@@ -3812,7 +3887,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3821,7 +3896,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3852,12 +3927,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3866,7 +3941,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3899,7 +3974,7 @@ paths:
           description: VariableBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Variable'
@@ -3908,7 +3983,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3917,7 +3992,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3958,7 +4033,7 @@ paths:
           description: AppBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.GetAllAppsResponse'
@@ -3967,7 +4042,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -3976,7 +4051,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4010,7 +4085,7 @@ paths:
           description: App data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.CreateAppResponse'
@@ -4019,7 +4094,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4028,7 +4103,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4062,7 +4137,7 @@ paths:
           description: App data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.App'
@@ -4071,7 +4146,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4080,7 +4155,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4111,12 +4186,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4125,7 +4200,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4158,7 +4233,7 @@ paths:
           description: AppBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.App'
@@ -4167,7 +4242,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4176,7 +4251,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4210,7 +4285,7 @@ paths:
           description: Barcode
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.BarcodeGenerateRes'
@@ -4219,7 +4294,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4228,7 +4303,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4278,7 +4353,7 @@ paths:
           description: BookedAppointmentBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/pos_service.GetAllBookedAppointmentsResponse'
@@ -4287,7 +4362,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4296,7 +4371,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4330,7 +4405,7 @@ paths:
           description: BookedAppointmentBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/pos_service.GetSingleBookedAppointmentResponse'
@@ -4339,7 +4414,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4348,7 +4423,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4380,12 +4455,12 @@ paths:
       - application/json
       responses:
         "201":
-          description: ""
+          description: Created
         "400":
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4394,7 +4469,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4423,7 +4498,7 @@ paths:
           description: Cashbox data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/pos_service.CashboxResponse'
@@ -4432,7 +4507,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4441,7 +4516,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4483,7 +4558,7 @@ paths:
           description: Company datWithProjectsa
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.GetListWithProjectsResponse'
@@ -4492,7 +4567,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4501,7 +4576,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4542,7 +4617,7 @@ paths:
           description: Company data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.GetProjectListResponse'
@@ -4551,7 +4626,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4560,7 +4635,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4594,7 +4669,7 @@ paths:
           description: Project data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CompanyProjectCreateResponse'
@@ -4603,7 +4678,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4612,7 +4687,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4646,7 +4721,7 @@ paths:
           description: Data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4655,7 +4730,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4664,7 +4739,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4701,7 +4776,7 @@ paths:
           description: Company data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.Project'
@@ -4710,7 +4785,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4719,7 +4794,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4758,7 +4833,7 @@ paths:
           description: Company data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.Project'
@@ -4767,7 +4842,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4776,7 +4851,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4807,12 +4882,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4821,7 +4896,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4854,7 +4929,7 @@ paths:
           description: Company data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.GetCompanyByIdResponse'
@@ -4863,7 +4938,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4872,7 +4947,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4911,7 +4986,7 @@ paths:
           description: Company data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.Company'
@@ -4920,7 +4995,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4929,7 +5004,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -4964,7 +5039,11 @@ paths:
           description: ProjectResource data
           schema:
             allOf:
+<<<<<<< HEAD
+            - $ref: '#/definitions/status_http.Response'
+=======
             - $ref: '#/definitions/http.Response'
+>>>>>>> 0eb328ad367b4d09203f87472a7eb1b60e5ae609
             - properties:
                 data:
                   $ref: '#/definitions/company_service.ConfigureResourceResponse'
@@ -4973,7 +5052,11 @@ paths:
           description: Bad Request
           schema:
             allOf:
+<<<<<<< HEAD
+            - $ref: '#/definitions/status_http.Response'
+=======
             - $ref: '#/definitions/http.Response'
+>>>>>>> 0eb328ad367b4d09203f87472a7eb1b60e5ae609
             - properties:
                 data:
                   type: string
@@ -4982,7 +5065,11 @@ paths:
           description: Server Error
           schema:
             allOf:
+<<<<<<< HEAD
+            - $ref: '#/definitions/status_http.Response'
+=======
             - $ref: '#/definitions/http.Response'
+>>>>>>> 0eb328ad367b4d09203f87472a7eb1b60e5ae609
             - properties:
                 data:
                   type: string
@@ -5017,7 +5104,7 @@ paths:
           description: ProjectResource data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.CreateResourceRes'
@@ -5026,7 +5113,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5035,7 +5122,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5070,7 +5157,7 @@ paths:
           description: ProjectResource data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.EmptyProto'
@@ -5079,7 +5166,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5088,7 +5175,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5128,7 +5215,7 @@ paths:
           description: Resource data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.GetReourceListResponse'
@@ -5137,7 +5224,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5146,7 +5233,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5180,7 +5267,7 @@ paths:
           description: ProjectResource data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.AddResourceResponse'
@@ -5189,7 +5276,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5198,7 +5285,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5206,6 +5293,8 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Add ProjectResource
+<<<<<<< HEAD
+=======
       tags:
       - Company Resource
   /v1/company/project/resource-environment/{resource_id}:
@@ -5258,6 +5347,7 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get Resource Environment by id
+>>>>>>> 0eb328ad367b4d09203f87472a7eb1b60e5ae609
       tags:
       - Company Resource
   /v1/company/project/resource/{resource_id}:
@@ -5284,7 +5374,7 @@ paths:
           description: Resource data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.ResourceWithoutPassword'
@@ -5293,7 +5383,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5302,7 +5392,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5336,7 +5426,7 @@ paths:
           description: Resource data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.ResourceWithoutPassword'
@@ -5345,7 +5435,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5354,7 +5444,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5389,7 +5479,7 @@ paths:
           description: ProjectResource data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.EmptyProto'
@@ -5398,7 +5488,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5407,7 +5497,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5442,7 +5532,7 @@ paths:
           description: CustomEventBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5451,7 +5541,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5460,7 +5550,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5494,7 +5584,7 @@ paths:
           description: CustomEvent data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5503,7 +5593,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5512,7 +5602,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5546,7 +5636,7 @@ paths:
           description: CustomEvent data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5555,7 +5645,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5564,7 +5654,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5595,12 +5685,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5609,7 +5699,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5642,7 +5732,7 @@ paths:
           description: CustomEventBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5651,7 +5741,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5660,7 +5750,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5704,7 +5794,7 @@ paths:
           description: DocumentBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.GetAllDocumentsResponse'
@@ -5713,7 +5803,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5722,7 +5812,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5756,7 +5846,7 @@ paths:
           description: Document data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Document'
@@ -5765,7 +5855,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5774,7 +5864,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5808,7 +5898,7 @@ paths:
           description: Document data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Document'
@@ -5817,7 +5907,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5826,7 +5916,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5857,12 +5947,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5871,7 +5961,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5904,7 +5994,7 @@ paths:
           description: DocumentBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Document'
@@ -5913,7 +6003,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5922,7 +6012,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5963,7 +6053,7 @@ paths:
           description: EnvironmentBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.GetEnvironmentListResponse'
@@ -5972,7 +6062,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -5981,7 +6071,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6015,7 +6105,7 @@ paths:
           description: Environment data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.Environment'
@@ -6024,7 +6114,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6033,7 +6123,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6067,7 +6157,7 @@ paths:
           description: Environment data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.Environment'
@@ -6076,7 +6166,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6085,7 +6175,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6116,12 +6206,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6130,7 +6220,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6163,7 +6253,7 @@ paths:
           description: EnvironmentBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.Environment'
@@ -6172,7 +6262,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6181,7 +6271,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6216,7 +6306,7 @@ paths:
           description: EventBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.GetEventsListResponse'
@@ -6225,7 +6315,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6234,7 +6324,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6268,7 +6358,7 @@ paths:
           description: Event data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Event'
@@ -6277,7 +6367,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6286,7 +6376,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6320,7 +6410,7 @@ paths:
           description: Event data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Event'
@@ -6329,7 +6419,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6338,7 +6428,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6376,7 +6466,7 @@ paths:
           description: EventLogsBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.GetEventLogListsResponse'
@@ -6385,7 +6475,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6394,7 +6484,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6428,7 +6518,7 @@ paths:
           description: EventLogBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.EventLog'
@@ -6437,7 +6527,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6446,7 +6536,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6480,7 +6570,7 @@ paths:
           description: EventBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Event'
@@ -6489,7 +6579,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6498,7 +6588,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6529,12 +6619,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6543,7 +6633,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6577,7 +6667,7 @@ paths:
           description: ExcelReadResponse
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.ExcelReadResponse'
@@ -6586,7 +6676,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6595,7 +6685,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6635,7 +6725,7 @@ paths:
           description: ExcelToDbResponse
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.ExcelToDbResponse'
@@ -6644,7 +6734,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6653,7 +6743,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6663,6 +6753,54 @@ paths:
       summary: Post excel writer
       tags:
       - Excel
+  /v1/export-to-json:
+    post:
+      consumes:
+      - application/json
+      description: export to json
+      operationId: export_to_json
+      parameters:
+      - description: ExportToJSONRequestBody
+        in: body
+        name: export_to_json
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.ExportToJSONRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Link
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.ExportToJSONReponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: export to json
+      tags:
+      - ExportToJSON
   /v1/field:
     get:
       consumes:
@@ -6709,7 +6847,7 @@ paths:
           description: FieldBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.GetAllFieldsResponse'
@@ -6718,7 +6856,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6727,7 +6865,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6761,7 +6899,7 @@ paths:
           description: Field data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Field'
@@ -6770,7 +6908,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6779,7 +6917,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6813,7 +6951,7 @@ paths:
           description: Field data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Field'
@@ -6822,7 +6960,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6831,7 +6969,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6870,7 +7008,7 @@ paths:
           description: Get All Field Permission data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -6879,7 +7017,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6888,7 +7026,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6919,12 +7057,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6933,7 +7071,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6971,7 +7109,7 @@ paths:
           description: FunctionBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6980,7 +7118,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6989,7 +7127,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7023,7 +7161,7 @@ paths:
           description: Function data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Function'
@@ -7032,7 +7170,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7041,7 +7179,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7075,7 +7213,7 @@ paths:
           description: Function data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Function'
@@ -7084,7 +7222,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7093,7 +7231,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7124,12 +7262,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7138,7 +7276,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7171,7 +7309,7 @@ paths:
           description: FunctionBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Function'
@@ -7180,7 +7318,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7189,7 +7327,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7228,7 +7366,7 @@ paths:
           description: CascaderBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7237,7 +7375,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7246,7 +7384,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7282,7 +7420,7 @@ paths:
           description: HtmlTemplateBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.GetAllHtmlTemplateResponse'
@@ -7291,7 +7429,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7300,7 +7438,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7334,7 +7472,7 @@ paths:
           description: Html Template data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.HtmlTemplate'
@@ -7343,7 +7481,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7352,7 +7490,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7386,7 +7524,7 @@ paths:
           description: HtmlTemplate data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.HtmlTemplate'
@@ -7395,7 +7533,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7404,7 +7542,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7435,12 +7573,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7449,7 +7587,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7482,7 +7620,7 @@ paths:
           description: HtmlTemplateBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.HtmlTemplate'
@@ -7491,7 +7629,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7500,7 +7638,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7535,7 +7673,7 @@ paths:
           description: PdfBody data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.PdfBody'
@@ -7544,7 +7682,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7553,7 +7691,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7563,6 +7701,54 @@ paths:
       summary: Convert html to pdf
       tags:
       - View
+  /v1/import-from-json:
+    post:
+      consumes:
+      - application/json
+      description: import from json
+      operationId: import_from_json
+      parameters:
+      - description: ImportFromJSONRequestBody
+        in: body
+        name: export_to_json
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.ImportFromJSONRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: import from json
+      tags:
+      - ExportToJSON
   /v1/invoke_function:
     post:
       consumes:
@@ -7588,7 +7774,7 @@ paths:
           description: Function data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.InvokeFunctionRequest'
@@ -7597,7 +7783,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7606,7 +7792,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7638,12 +7824,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7652,7 +7838,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7686,7 +7872,7 @@ paths:
           description: Object data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7695,7 +7881,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7704,7 +7890,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7744,7 +7930,7 @@ paths:
           description: Object data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -7753,7 +7939,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7762,7 +7948,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7802,7 +7988,7 @@ paths:
           description: Object data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -7811,7 +7997,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7820,7 +8006,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7860,7 +8046,7 @@ paths:
           description: Object data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -7869,7 +8055,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7878,7 +8064,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7920,12 +8106,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7934,7 +8120,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7972,7 +8158,7 @@ paths:
           description: ObjectBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -7981,7 +8167,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -7990,7 +8176,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8030,7 +8216,7 @@ paths:
           description: ObjectBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -8039,7 +8225,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8048,7 +8234,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8088,7 +8274,7 @@ paths:
           description: ObjectBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -8097,7 +8283,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8106,7 +8292,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8151,7 +8337,7 @@ paths:
           description: ObjectBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -8160,7 +8346,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8169,7 +8355,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8209,7 +8395,7 @@ paths:
           description: Object data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -8218,7 +8404,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8227,7 +8413,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8267,7 +8453,7 @@ paths:
           description: Object data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -8276,7 +8462,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8285,7 +8471,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8338,7 +8524,7 @@ paths:
           description: OfflineAppointmentBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/pos_service.GetAllOfflineAppointmentsResponse'
@@ -8347,7 +8533,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8356,7 +8542,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8390,7 +8576,7 @@ paths:
           description: OfflineAppointmentBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/pos_service.GetSingleOfflineAppointmentResponse'
@@ -8399,7 +8585,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8408,7 +8594,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8437,7 +8623,7 @@ paths:
           description: Cashbox data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/pos_service.CashboxResponse'
@@ -8446,7 +8632,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8455,7 +8641,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8490,7 +8676,7 @@ paths:
           description: Appointment data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/pos_service.OfflineAppointment'
@@ -8499,7 +8685,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8508,7 +8694,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8542,7 +8728,7 @@ paths:
           description: Get All Permission data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -8551,7 +8737,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8560,7 +8746,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8600,7 +8786,7 @@ paths:
           description: Upsert Permission data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -8609,7 +8795,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8618,7 +8804,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8653,7 +8839,7 @@ paths:
           description: QueryBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonInput'
@@ -8662,7 +8848,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8671,7 +8857,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8723,7 +8909,7 @@ paths:
           description: RelationBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8732,7 +8918,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8741,7 +8927,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8776,7 +8962,7 @@ paths:
           description: Relation data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8785,7 +8971,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8794,7 +8980,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8833,7 +9019,7 @@ paths:
           description: Relation data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8842,7 +9028,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8851,7 +9037,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8888,12 +9074,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8902,7 +9088,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8944,7 +9130,7 @@ paths:
           description: FieldBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8953,7 +9139,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8962,7 +9148,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -8996,7 +9182,7 @@ paths:
           description: Section data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9005,7 +9191,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9014,7 +9200,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9065,7 +9251,7 @@ paths:
           description: TableBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.GetAllTablesResponse'
@@ -9074,7 +9260,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9083,7 +9269,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9122,7 +9308,7 @@ paths:
           description: Table data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Table'
@@ -9131,7 +9317,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9140,7 +9326,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9179,7 +9365,7 @@ paths:
           description: Table data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.Table'
@@ -9188,7 +9374,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9197,7 +9383,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9233,12 +9419,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9247,7 +9433,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9285,7 +9471,7 @@ paths:
           description: TableBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CreateTableResponse'
@@ -9294,7 +9480,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9303,7 +9489,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9338,7 +9524,7 @@ paths:
           description: HtmlBody data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.HtmlBody'
@@ -9347,7 +9533,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9356,7 +9542,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9390,7 +9576,7 @@ paths:
           description: Path
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/handlers.Path'
@@ -9399,7 +9585,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9408,7 +9594,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9456,7 +9642,7 @@ paths:
           description: Path
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/handlers.Path'
@@ -9465,7 +9651,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9474,7 +9660,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9512,7 +9698,7 @@ paths:
           description: ViewBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.GetAllViewsResponse'
@@ -9521,7 +9707,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9530,7 +9716,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9564,7 +9750,7 @@ paths:
           description: View data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.View'
@@ -9573,7 +9759,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9582,7 +9768,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9616,7 +9802,7 @@ paths:
           description: View data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.View'
@@ -9625,7 +9811,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9634,7 +9820,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9673,7 +9859,7 @@ paths:
           description: Get All View Relation Permission data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.CommonMessage'
@@ -9682,7 +9868,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9691,7 +9877,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9722,12 +9908,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9736,7 +9922,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9769,7 +9955,7 @@ paths:
           description: ViewBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/object_builder_service.View'
@@ -9778,7 +9964,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9787,7 +9973,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9830,7 +10016,7 @@ paths:
           description: ViewRelationBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9839,7 +10025,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9848,7 +10034,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9882,7 +10068,7 @@ paths:
           description: View Relation data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9891,7 +10077,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9900,7 +10086,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9944,7 +10130,7 @@ paths:
           description: FieldBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.GetAllFieldsResponse'
@@ -9953,7 +10139,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9962,7 +10148,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -9996,7 +10182,7 @@ paths:
           description: Queries data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Queries'
@@ -10005,7 +10191,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10014,7 +10200,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10045,12 +10231,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10059,7 +10245,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10092,7 +10278,7 @@ paths:
           description: FieldBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.GetAllFieldsResponse'
@@ -10101,7 +10287,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10110,7 +10296,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10149,7 +10335,7 @@ paths:
           description: Queries data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Queries'
@@ -10158,7 +10344,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10167,7 +10353,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10211,7 +10397,7 @@ paths:
           description: FieldBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.GetAllFieldsResponse'
@@ -10220,7 +10406,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10229,7 +10415,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10263,7 +10449,7 @@ paths:
           description: QueryFolder data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.QueryFolder'
@@ -10272,7 +10458,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10281,7 +10467,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10312,12 +10498,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10326,7 +10512,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10359,7 +10545,7 @@ paths:
           description: FieldBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.GetAllFieldsResponse'
@@ -10368,7 +10554,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10377,7 +10563,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10416,7 +10602,7 @@ paths:
           description: QueryFolder data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.QueryFolder'
@@ -10425,7 +10611,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10434,7 +10620,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10472,7 +10658,7 @@ paths:
           description: WebPageBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.GetAllFieldsResponse'
@@ -10481,7 +10667,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10490,7 +10676,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10524,7 +10710,7 @@ paths:
           description: QueryFolder data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.QueryFolder'
@@ -10533,7 +10719,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10542,7 +10728,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10573,12 +10759,12 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10587,7 +10773,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10620,7 +10806,7 @@ paths:
           description: FieldBody
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.GetAllFieldsResponse'
@@ -10629,7 +10815,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10638,7 +10824,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10666,7 +10852,7 @@ paths:
         type: string
       - description: UpdateWebPageRequestBody
         in: body
-        name: page
+        name: web_page
         required: true
         schema:
           $ref: '#/definitions/models.CreateWebPageRequest'
@@ -10677,7 +10863,7 @@ paths:
           description: WebPage data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.WebPage'
@@ -10686,7 +10872,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10695,7 +10881,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10735,7 +10921,7 @@ paths:
           description: User data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.V2LoginResponse'
@@ -10744,7 +10930,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10753,7 +10939,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10791,7 +10977,7 @@ paths:
           description: User data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.V2LoginResponse'
@@ -10800,7 +10986,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -10809,7 +10995,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string

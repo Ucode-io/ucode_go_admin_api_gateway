@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
+
+	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,9 +22,9 @@ import (
 // @Accept json
 // @Produce json
 // @Param resource_id path string true "resource_id"
-// @Success 200 {object} http.Response{data=company_service.ResourceWithoutPassword} "Resource data"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=company_service.ResourceWithoutPassword} "Resource data"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetResource(c *gin.Context) {
 
 	resp, err := h.companyServices.ResourceService().GetResource(
@@ -34,11 +35,11 @@ func (h *Handler) GetResource(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // AddProjectResource godoc
@@ -52,15 +53,15 @@ func (h *Handler) GetResource(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param ProjectResource body company_service.AddResourceRequest true "ProjectResourceAddRequest"
-// @Success 201 {object} http.Response{data=company_service.AddResourceResponse} "ProjectResource data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=company_service.AddResourceResponse} "ProjectResource data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) AddProjectResource(c *gin.Context) {
 	var company company_service.AddResourceRequest
 
 	err := c.ShouldBindJSON(&company)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -73,7 +74,7 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 			company.ServiceType = company_service.ServiceType_ANALYTICS_SERVICE
 		default:
 			err := errors.New("err resource type not supported yet")
-			h.handleResponse(c, http.GRPCError, err.Error())
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
@@ -84,11 +85,11 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // ConfigureProjectResource godoc
@@ -102,15 +103,15 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param ProjectResource body company_service.ConfigureResourceRequest true "ProjectResourceConfigureRequest"
-// @Success 201 {object} http.Response{data=company_service.ConfigureResourceResponse} "ProjectResource data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=company_service.ConfigureResourceResponse} "ProjectResource data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 	var company company_service.ConfigureResourceRequest
 
 	err := c.ShouldBindJSON(&company)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -123,7 +124,7 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 			company.ServiceType = company_service.ServiceType_ANALYTICS_SERVICE
 		default:
 			err := errors.New("err resource type not supported yet")
-			h.handleResponse(c, http.GRPCError, err.Error())
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
@@ -134,11 +135,11 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // CreateProjectResource godoc
@@ -152,15 +153,15 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param ProjectResource body company_service.CreateResourceReq true "ProjectResourceCreateRequest"
-// @Success 201 {object} http.Response{data=company_service.CreateResourceRes} "ProjectResource data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=company_service.CreateResourceRes} "ProjectResource data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateProjectResource(c *gin.Context) {
 	var company company_service.CreateResourceReq
 
 	err := c.ShouldBindJSON(&company)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -170,11 +171,11 @@ func (h *Handler) CreateProjectResource(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // RemoveProjectResource godoc
@@ -188,15 +189,15 @@ func (h *Handler) CreateProjectResource(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param ProjectResource body company_service.RemoveResourceRequest true "ProjectResourceRemoveRequest"
-// @Success 201 {object} http.Response{data=company_service.EmptyProto} "ProjectResource data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=company_service.EmptyProto} "ProjectResource data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) RemoveProjectResource(c *gin.Context) {
 	var company company_service.RemoveResourceRequest
 
 	err := c.ShouldBindJSON(&company)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -206,11 +207,11 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // UpdateResource godoc
@@ -224,15 +225,15 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param UpdateResourceRequestBody body company_service.UpdateResourceRequest  true "UpdateResourceRequestBody"
-// @Success 200 {object} http.Response{data=company_service.ResourceWithoutPassword} "Resource data"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=company_service.ResourceWithoutPassword} "Resource data"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateResource(c *gin.Context) {
 	var resource company_service.UpdateResourceRequest
 
 	err := c.ShouldBindJSON(&resource)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -242,11 +243,11 @@ func (h *Handler) UpdateResource(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetResourceList godoc
@@ -260,20 +261,20 @@ func (h *Handler) UpdateResource(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query company_service.GetReourceListRequest true "filters"
-// @Success 200 {object} http.Response{data=company_service.GetReourceListResponse} "Resource data"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=company_service.GetReourceListResponse} "Resource data"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetResourceList(c *gin.Context) {
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
@@ -288,11 +289,11 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // ReconnectProjectResource godoc
@@ -306,15 +307,15 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param ProjectResource body company_service.ReconnectResourceRequest true "ProjectResourceReconnectRequest"
-// @Success 201 {object} http.Response{data=company_service.EmptyProto} "ProjectResource data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=company_service.EmptyProto} "ProjectResource data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 	var company company_service.ReconnectResourceRequest
 
 	err := c.ShouldBindJSON(&company)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -324,11 +325,11 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetResourceEnvironment godoc
@@ -355,9 +356,9 @@ func (h *Handler) GetResourceEnvironment(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }

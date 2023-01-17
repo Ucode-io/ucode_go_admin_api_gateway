@@ -207,6 +207,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/alfalab/directions", h.CreateDirections)
 		v1.GET("/alfalab/referral", h.GetReferral)
 
+		v1.POST("/export-to-json", h.ExportToJSON)
+		v1.POST("import-from-json", h.ImportFromJSON)
+
 	}
 
 	v1Admin := r.Group("/v1")

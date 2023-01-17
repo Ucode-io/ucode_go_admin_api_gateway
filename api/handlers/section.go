@@ -3,9 +3,9 @@ package handlers
 import (
 	"context"
 	"errors"
-	"ucode/ucode_go_api_gateway/api/http"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,9 +20,9 @@ import (
 // @Accept json
 // @Produce json
 // @Param filters query object_builder_service.GetAllSectionsRequest true "filters"
-// @Success 200 {object} http.Response{data=string} "FieldBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=string} "FieldBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllSections(c *gin.Context) {
 
 	//tokenInfo := h.GetAuthInfo
@@ -30,20 +30,20 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -58,11 +58,11 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateSection godoc
@@ -76,27 +76,27 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table body object_builder_service.UpdateSectionsRequest  true "UpdateSectionRequestBody"
-// @Success 200 {object} http.Response{data=string} "Section data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=string} "Section data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateSection(c *gin.Context) {
 	var sections obs.UpdateSectionsRequest
 
 	err := c.ShouldBindJSON(&sections)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
-	//	h.handleResponse(c, http.Forbidden, err.Error())
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	sections.ProjectId = resourceId.(string)
@@ -104,7 +104,7 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
@@ -114,9 +114,9 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
