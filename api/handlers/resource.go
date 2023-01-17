@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -63,6 +65,20 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 		return
 	}
 
+	if &company.ServiceType == nil {
+		fmt.Println("[company.ServiceType] nil", company.ProjectId)
+		switch company.ResourceType {
+		case company_service.ResourceType_MONGODB:
+			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE
+		case company_service.ResourceType_CLICKHOUSE:
+			company.ServiceType = company_service.ServiceType_ANALYTICS_SERVICE
+		default:
+			err := errors.New("err resource type not supported yet")
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
 	resp, err := h.companyServices.ResourceService().AddResource(
 		c.Request.Context(),
 		&company,
@@ -97,6 +113,20 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
+	}
+
+	if &company.ServiceType == nil || company.ServiceType == company_service.ServiceType_NOT_SPECIFIED {
+		fmt.Println("[company.ServiceType] nil", company.ProjectId)
+		switch company.ResourceType {
+		case company_service.ResourceType_MONGODB:
+			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE
+		case company_service.ResourceType_CLICKHOUSE:
+			company.ServiceType = company_service.ServiceType_ANALYTICS_SERVICE
+		default:
+			err := errors.New("err resource type not supported yet")
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	resp, err := h.companyServices.ResourceService().ConfigureResource(
@@ -300,4 +330,35 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
+}
+
+// GetResourceEnvironment godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @ID get_resource_environment_id
+// @Router /v1/company/project/resource-environment/{resource_id} [GET]
+// @Summary Get Resource Environment by id
+// @Description Get Resource Environment by id
+// @Tags Company Resource
+// @Accept json
+// @Produce json
+// @Param resource_id path string true "resource_id"
+// @Success 200 {object} http.Response{data=company_service.ResourceWithoutPassword} "Resource data"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetResourceEnvironment(c *gin.Context) {
+
+	resp, err := h.companyServices.ResourceService().GetResourceByResEnvironId(
+		context.Background(),
+		&company_service.GetResourceRequest{
+			Id: c.Param("resource_id"),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
 }

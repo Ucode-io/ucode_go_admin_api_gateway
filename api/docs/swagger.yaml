@@ -5039,7 +5039,11 @@ paths:
           description: ProjectResource data
           schema:
             allOf:
+<<<<<<< HEAD
             - $ref: '#/definitions/status_http.Response'
+=======
+            - $ref: '#/definitions/http.Response'
+>>>>>>> 0eb328ad367b4d09203f87472a7eb1b60e5ae609
             - properties:
                 data:
                   $ref: '#/definitions/company_service.ConfigureResourceResponse'
@@ -5048,7 +5052,11 @@ paths:
           description: Bad Request
           schema:
             allOf:
+<<<<<<< HEAD
             - $ref: '#/definitions/status_http.Response'
+=======
+            - $ref: '#/definitions/http.Response'
+>>>>>>> 0eb328ad367b4d09203f87472a7eb1b60e5ae609
             - properties:
                 data:
                   type: string
@@ -5057,7 +5065,11 @@ paths:
           description: Server Error
           schema:
             allOf:
+<<<<<<< HEAD
             - $ref: '#/definitions/status_http.Response'
+=======
+            - $ref: '#/definitions/http.Response'
+>>>>>>> 0eb328ad367b4d09203f87472a7eb1b60e5ae609
             - properties:
                 data:
                   type: string
@@ -5281,6 +5293,61 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Add ProjectResource
+<<<<<<< HEAD
+=======
+      tags:
+      - Company Resource
+  /v1/company/project/resource-environment/{resource_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Resource Environment by id
+      operationId: get_resource_environment_id
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: resource_id
+        in: path
+        name: resource_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ResourceWithoutPassword'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Resource Environment by id
+>>>>>>> 0eb328ad367b4d09203f87472a7eb1b60e5ae609
       tags:
       - Company Resource
   /v1/company/project/resource/{resource_id}:
@@ -9155,6 +9222,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: resource_Id
         in: query
         name: resource_Id
@@ -9218,6 +9290,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateTableRequestBody
         in: body
         name: table
@@ -9268,6 +9345,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateTableRequestBody
@@ -9323,6 +9405,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: table_id
         in: path
         name: table_id
@@ -9365,6 +9452,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: table_id
