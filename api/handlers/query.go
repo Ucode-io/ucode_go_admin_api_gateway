@@ -6,6 +6,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	as "ucode/ucode_go_api_gateway/genproto/analytics_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ import (
 // GetQueryRows godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_query_rows
 // @Router /v1/query [POST]
 // @Summary Get all query rows
@@ -60,12 +62,32 @@ func (h *Handler) GetQueryRows(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.QueryService().GetQueryRows(
 		context.Background(),
 		&as.CommonInput{
 			Data:      structData,
 			Query:     queryReq.Query,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {

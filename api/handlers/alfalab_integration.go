@@ -15,6 +15,7 @@ import (
 // CreateDirections godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_patient
 // @Router /v1/alfalab/directions [POST]
 // @Summary Create Directions
@@ -110,6 +111,7 @@ func (h *Handler) CreateDirections(c *gin.Context) {
 // GetReferral godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID query_referral_result
 // @Router /v1/alfalab/referral [GET]
 // @Summary query referral result

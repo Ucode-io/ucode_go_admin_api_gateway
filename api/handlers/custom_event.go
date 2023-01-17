@@ -5,6 +5,7 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -14,6 +15,7 @@ import (
 // CreateCustomEvent godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_custom_event
 // @Router /v1/custom-event [POST]
 // @Summary Create CustomEvent
@@ -40,20 +42,40 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 	//	return
 	//}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-	customevent.ProjectId = resourceId.(string)
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	customevent.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := services.CustomEventService().Create(
 		context.Background(),
@@ -71,6 +93,7 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 // GetCustomEventByID godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_custom_event_by_id
 // @Router /v1/custom-event/{custom_event_id} [GET]
 // @Summary Get CustomEvent by id
@@ -110,11 +133,31 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.CustomEventService().GetSingle(
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
 			Id:        customeventID,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
@@ -128,6 +171,7 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 // GetAllCustomEvents godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_custom_events
 // @Router /v1/custom-event [GET]
 // @Summary Get all custom events
@@ -160,11 +204,31 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.CustomEventService().GetList(
 		context.Background(),
 		&obs.GetCustomEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -179,6 +243,7 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 // UpdateCustomEvent godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID update_Customevent
 // @Router /v1/custom-event [PUT]
 // @Summary Update Customevent
@@ -205,6 +270,13 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 	//	return
 	//}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
@@ -212,10 +284,23 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
@@ -229,7 +314,7 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 			TableSlug: customevent.TableSlug,
 			Url:       customevent.Url,
 			Label:     customevent.Label,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -244,6 +329,7 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 // DeleteCustomEvent godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_custom_event
 // @Router /v1/custom-event/{custom_event_id} [DELETE]
 // @Summary Delete CustomEvent
@@ -282,11 +368,31 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.CustomEventService().Delete(
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
 			Id:        customeventID,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 

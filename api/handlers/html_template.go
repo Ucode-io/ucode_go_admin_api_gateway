@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -13,6 +14,7 @@ import (
 // CreateHtmlTemplate godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_html_template
 // @Router /v1/html-template [POST]
 // @Summary Create htmlTemplate
@@ -39,20 +41,40 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 	//	return
 	//}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-	htmlTemplate.ProjectId = resourceId.(string)
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	htmlTemplate.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := services.HtmlTemplateService().Create(
 		context.Background(),
@@ -70,6 +92,7 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 // GetSingleHtmlTemplate godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_html_template_by_id
 // @Router /v1/html-template/{html_template_id} [GET]
 // @Summary Get single html template
@@ -108,11 +131,31 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.HtmlTemplateService().GetSingle(
 		context.Background(),
 		&obs.HtmlTemplatePrimaryKey{
 			Id:        htmlTemplateID,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
@@ -126,6 +169,7 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 // UpdateHtmlTemplate godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID update_html_template
 // @Router /v1/html-template [PUT]
 // @Summary Update html template
@@ -152,20 +196,40 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 	//	return
 	//}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-	htmlTemplate.ProjectId = resourceId.(string)
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	htmlTemplate.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := services.HtmlTemplateService().Update(
 		context.Background(),
@@ -183,6 +247,7 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 // DeleteHtmlTemplate godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_html_template_id
 // @Router /v1/html-template/{html_template_id} [DELETE]
 // @Summary Delete html template
@@ -222,11 +287,31 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.HtmlTemplateService().Delete(
 		context.Background(),
 		&obs.HtmlTemplatePrimaryKey{
 			Id:        htmlTemplateID,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -241,6 +326,7 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 // GetHtmlTemplateList godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_html_template_list
 // @Router /v1/html-template [GET]
 // @Summary Get html template list
@@ -274,11 +360,31 @@ func (h *Handler) GetHtmlTemplateList(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.HtmlTemplateService().GetList(
 		context.Background(),
 		&obs.GetAllHtmlTemplateRequest{
 			TableSlug: c.Query("table_slug"),
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 

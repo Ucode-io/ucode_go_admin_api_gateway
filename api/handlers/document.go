@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/http"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -13,6 +14,7 @@ import (
 // CreateDocument godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_document
 // @Router /v1/document [POST]
 // @Summary Create Document
@@ -39,20 +41,40 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 	//	return
 	//}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-	document.ProjectId = resourceId.(string)
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	document.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := services.DocumentService().Create(
 		context.Background(),
@@ -70,6 +92,7 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 // GetSingleDocument godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_document_by_id
 // @Router /v1/document/{document_id} [GET]
 // @Summary Get single document
@@ -109,15 +132,35 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.DocumentService().GetSingle(
 		context.Background(),
 		&obs.DocumentPrimaryKey{
 			Id:        documentID,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if resp == nil {
-		err := errors.New("Not Found")
+		err := errors.New("not Found")
 		h.handleResponse(c, http.NoContent, err.Error())
 		return
 	}
@@ -132,6 +175,7 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 // UpdateDocument godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID update_document
 // @Router /v1/document [PUT]
 // @Summary Update Document
@@ -158,20 +202,40 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 	//	return
 	//}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-	document.ProjectId = resourceId.(string)
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	document.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := services.DocumentService().Update(
 		context.Background(),
@@ -189,6 +253,7 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 // DeleteDocument godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_document
 // @Router /v1/document/{document_id} [DELETE]
 // @Summary Delete Document
@@ -227,11 +292,31 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.DocumentService().Delete(
 		context.Background(),
 		&obs.DocumentPrimaryKey{
 			Id:        documentID,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -243,9 +328,10 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 	h.handleResponse(c, http.NoContent, resp)
 }
 
-// GetDocumentLists godoc
+// GetDocumentList godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_document_list
 // @Router /v1/document [GET]
 // @Summary Get Document list
@@ -284,6 +370,26 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.DocumentService().GetList(
 		context.Background(),
 		&obs.GetAllDocumentsRequest{
@@ -291,7 +397,7 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 			Tags:      c.Query("tags"),
 			StartDate: c.Query("start_date"),
 			EndDate:   c.Query("end_date"),
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 

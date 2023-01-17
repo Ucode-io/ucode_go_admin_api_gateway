@@ -6,6 +6,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -18,6 +19,7 @@ import (
 // CreateObject godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_object
 // @Router /v1/object/{table_slug}/ [POST]
 // @Summary Create object
@@ -45,10 +47,37 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	//	return
 	//}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
 		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
@@ -67,19 +96,12 @@ func (h *Handler) CreateObject(c *gin.Context) {
 				return
 			}
 
-			namespace := c.GetString("namespace")
-			services, err := h.GetService(namespace)
-			if err != nil {
-				h.handleResponse(c, http.Forbidden, err)
-				return
-			}
-
 			_, err = services.ObjectBuilderService().Create(
 				context.Background(),
 				&obs.CommonMessage{
 					TableSlug: key[1:],
 					Data:      mapToStruct,
-					ProjectId: resourceId.(string),
+					ProjectId: resourceEnvironment.GetId(),
 				},
 			)
 
@@ -96,13 +118,6 @@ func (h *Handler) CreateObject(c *gin.Context) {
 
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
 
@@ -126,6 +141,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 // GetSingle godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_object_by_id
 // @Router /v1/object/{table_slug}/{object_id} [GET]
 // @Summary Get object by id
@@ -177,12 +193,32 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.ObjectBuilderService().GetSingle(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -197,6 +233,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 // UpdateObject godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID update_object
 // @Router /v1/object/{table_slug} [PUT]
 // @Summary Update object
@@ -245,12 +282,32 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.ObjectBuilderService().Update(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
@@ -284,6 +341,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 // DeleteObject godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_object
 // @Router /v1/object/{table_slug}/{object_id} [DELETE]
 // @Summary Delete object
@@ -339,12 +397,32 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.ObjectBuilderService().Delete(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -359,6 +437,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 // GetList godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_objects
 // @Router /v1/object/get-list/{table_slug} [POST]
 // @Summary Get all objects
@@ -367,7 +446,6 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
-// @Param resource_Id query string true "resource_Id"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
@@ -408,10 +486,30 @@ func (h *Handler) GetList(c *gin.Context) {
 	//	return
 	//}
 
-	_, ok := c.Get("resource_id")
+	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
 		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
@@ -420,7 +518,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: c.DefaultQuery("resource_Id", ""),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -435,6 +533,7 @@ func (h *Handler) GetList(c *gin.Context) {
 // GetListInExcel godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_objects_in_excel
 // @Router /v1/object/excel/{table_slug} [POST]
 // @Summary Get all objects in excel
@@ -482,12 +581,32 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.ObjectBuilderService().GetListInExcel(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -502,6 +621,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 // DeleteManyToMany godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_many2many
 // @Router /v1/many-to-many [DELETE]
 // @Summary Delete Many2Many
@@ -526,13 +646,6 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	//	h.handleResponse(c, http.Forbidden, err.Error())
 	//	return
 	//}
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-	m2mMessage.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -540,6 +653,33 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	m2mMessage.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := services.ObjectBuilderService().ManyToManyDelete(
 		context.Background(),
@@ -557,6 +697,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 // AppendManyToMany godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID append_many2many
 // @Router /v1/many-to-many [PUT]
 // @Summary Update many-to-many
@@ -581,13 +722,6 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 	//	h.handleResponse(c, http.Forbidden, err.Error())
 	//	return
 	//}
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-	m2mMessage.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -595,6 +729,34 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		h.handleResponse(c, http.Forbidden, err)
 		return
 	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	m2mMessage.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := services.ObjectBuilderService().ManyToManyAppend(
 		context.Background(),
@@ -612,6 +774,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 // GetObjectDetails godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_object_details
 // @Router /v1/object/object-details/{table_slug} [POST]
 // @Summary Get object details
@@ -659,12 +822,32 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.ObjectBuilderService().GetObjectDetails(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -680,6 +863,7 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 // UpsertObject godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID upsert_object
 // @Router /v1/object-upsert/{table_slug} [POST]
 // @Summary Upsert object
@@ -707,10 +891,37 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 	//	return
 	//}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, http.Forbidden, err)
+		return
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
 		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
@@ -752,20 +963,13 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
-		return
-	}
-
 	resp, err := services.ObjectBuilderService().Batch(
 		context.Background(),
 		&obs.BatchRequest{
 			TableSlug:     c.Param("table_slug"),
 			Data:          structData,
 			UpdatedFields: objectRequest.UpdatedFields,
-			ProjectId:     resourceId.(string),
+			ProjectId:     resourceEnvironment.GetId(),
 		},
 	)
 
@@ -775,8 +979,8 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 	}
 
 	if c.Param("table_slug") == "record_permission" {
-		role_id := objectRequest.Data["objects"].([]interface{})[0].(map[string]interface{})["role_id"]
-		if role_id == nil {
+		roleId := objectRequest.Data["objects"].([]interface{})[0].(map[string]interface{})["role_id"]
+		if roleId == nil {
 			err := errors.New("role id must be have in upsert permission")
 			h.handleResponse(c, http.BadRequest, err.Error())
 			return
@@ -800,6 +1004,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 // MultipleUpdateObject godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID multiple_update_object
 // @Router /v1/object/multiple-update/{table_slug} [PUT]
 // @Summary Multiple Update object
@@ -847,12 +1052,32 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.ObjectBuilderService().MultipleUpdate(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -867,6 +1092,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 // GetFinancialAnalytics godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_financial_analytics
 // @Router /v1/object/get-financial-analytics/{table_slug} [POST]
 // @Summary Get financial analytics
@@ -908,6 +1134,26 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	//tokenInfo := h.GetAuthInfo
 	objectRequest.Data["tables"] = authInfo.GetTables()
 	objectRequest.Data["user_id_from_token"] = authInfo.GetUserId()
@@ -924,7 +1170,7 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 

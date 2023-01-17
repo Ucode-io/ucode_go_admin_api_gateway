@@ -173,6 +173,11 @@ var doc = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create Integration",
                 "consumes": [
                     "application/json"
@@ -186,6 +191,20 @@ var doc = `{
                 "summary": "Create Integration",
                 "operationId": "create_Integration",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateIntegrationRequestBody",
                         "name": "Integration",
@@ -782,6 +801,20 @@ var doc = `{
                 "operationId": "registerEmailOtp",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "register_body",
                         "name": "registerBody",
                         "in": "body",
@@ -1045,6 +1078,20 @@ var doc = `{
                 "operationId": "send_message_to_email",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "SendMessageToEmailRequestBody",
                         "name": "send_message",
                         "in": "body",
@@ -1136,6 +1183,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -1240,6 +1294,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreatePatientRequestBody",
                         "name": "table",
                         "in": "body",
@@ -1331,6 +1392,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -1428,6 +1496,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "name",
                         "in": "query"
                     }
@@ -1512,6 +1587,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -1605,6 +1687,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -1705,6 +1794,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "dashboard_id",
                         "name": "dashboard_id",
                         "in": "path",
@@ -1796,6 +1892,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "dashboard_id",
                         "name": "dashboard_id",
                         "in": "path",
@@ -1869,6 +1972,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -1967,6 +2077,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdatePanelRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -2056,6 +2173,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -2151,6 +2275,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -2251,6 +2382,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "panel_id",
                         "name": "panel_id",
                         "in": "path",
@@ -2342,6 +2480,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "panel_id",
                         "name": "panel_id",
                         "in": "path",
@@ -2415,6 +2560,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -2518,6 +2670,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateVariableRequestBody",
                         "name": "variable",
                         "in": "body",
@@ -2607,6 +2766,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -2707,6 +2873,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "variable_id",
                         "name": "variable_id",
                         "in": "path",
@@ -2798,6 +2971,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "variable_id",
                         "name": "variable_id",
                         "in": "path",
@@ -2871,6 +3051,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -2979,6 +3166,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateAppRequestBody",
                         "name": "app",
                         "in": "body",
@@ -3068,6 +3262,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -3168,6 +3369,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "app_id",
                         "name": "app_id",
                         "in": "path",
@@ -3259,6 +3467,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "app_id",
                         "name": "app_id",
                         "in": "path",
@@ -3332,6 +3547,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -3425,6 +3647,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -3551,6 +3780,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "booked_appointment_id",
                         "name": "booked_appointment_id",
                         "in": "path",
@@ -3643,6 +3879,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateTransactionBody",
                         "name": "app",
                         "in": "body",
@@ -3719,6 +3962,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     }
@@ -3802,6 +4052,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -3918,6 +4175,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "company_id",
                         "in": "query"
                     },
@@ -4021,6 +4285,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CompanyProjectCreateRequest",
                         "name": "Project",
                         "in": "body",
@@ -4112,6 +4383,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -4209,6 +4487,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -4314,6 +4599,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "project_id",
                         "name": "project_id",
                         "in": "path",
@@ -4402,6 +4694,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -4501,6 +4800,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "ProjectResourceCreateRequest",
                         "name": "ProjectResource",
                         "in": "body",
@@ -4592,6 +4898,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -4700,6 +5013,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "ProjectResourceAddRequest",
                         "name": "ProjectResource",
                         "in": "body",
@@ -4789,6 +5109,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -4889,6 +5216,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "resource_id",
                         "name": "resource_id",
                         "in": "path",
@@ -4977,6 +5311,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -5077,6 +5418,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "resource_id",
                         "name": "resource_id",
                         "in": "path",
@@ -5163,6 +5511,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -5263,6 +5618,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "company_id",
                         "name": "company_id",
                         "in": "path",
@@ -5349,6 +5711,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -5454,6 +5823,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "company_id",
                         "name": "company_id",
                         "in": "path",
@@ -5527,6 +5903,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -5625,6 +6008,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateCustomEventRequestBody",
                         "name": "Customevent",
                         "in": "body",
@@ -5714,6 +6104,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -5814,6 +6211,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "custom_event_id",
                         "name": "custom_event_id",
                         "in": "path",
@@ -5905,6 +6309,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "custom_event_id",
                         "name": "custom_event_id",
                         "in": "path",
@@ -5978,6 +6389,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -6091,6 +6509,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateDocumentRequestBody",
                         "name": "Document",
                         "in": "body",
@@ -6180,6 +6605,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -6280,6 +6712,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "document_id",
                         "name": "document_id",
                         "in": "path",
@@ -6371,6 +6810,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "document_id",
                         "name": "document_id",
                         "in": "path",
@@ -6444,6 +6890,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -6552,6 +7005,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateEnvironmentRequestBody",
                         "name": "environment",
                         "in": "body",
@@ -6641,6 +7101,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -6741,6 +7208,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "environment_id",
                         "name": "environment_id",
                         "in": "path",
@@ -6832,6 +7306,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "environment_id",
                         "name": "environment_id",
                         "in": "path",
@@ -6905,6 +7386,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7003,6 +7491,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateEventRequestBody",
                         "name": "event",
                         "in": "body",
@@ -7092,6 +7587,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7187,6 +7689,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7293,6 +7802,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "event_log_id",
                         "name": "event_log_id",
                         "in": "path",
@@ -7381,6 +7897,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7479,6 +8002,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "event_id",
                         "name": "event_id",
                         "in": "path",
@@ -7552,6 +8082,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7659,6 +8196,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "excel_id",
                         "name": "excel_id",
                         "in": "path",
@@ -7747,6 +8291,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7880,6 +8431,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateFieldRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -7969,6 +8527,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -8064,6 +8629,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -8169,6 +8741,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "field_id",
                         "name": "field_id",
                         "in": "path",
@@ -8242,6 +8821,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -8345,6 +8931,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateFunctionRequestBody",
                         "name": "Function",
                         "in": "body",
@@ -8434,6 +9027,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -8534,6 +9134,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "function_id",
                         "name": "function_id",
                         "in": "path",
@@ -8625,6 +9232,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "function_id",
                         "name": "function_id",
                         "in": "path",
@@ -8706,8 +9320,22 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -8806,6 +9434,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -8899,6 +9534,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateHtmlTemplateRequestBody",
                         "name": "html_template",
                         "in": "body",
@@ -8988,6 +9630,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9088,6 +9737,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "html_template_id",
                         "name": "html_template_id",
                         "in": "path",
@@ -9179,6 +9835,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "html_template_id",
                         "name": "html_template_id",
                         "in": "path",
@@ -9252,6 +9915,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9351,6 +10021,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "InvokeFunctionRequest",
                         "name": "InvokeFunctionRequest",
                         "in": "body",
@@ -9442,6 +10119,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9539,6 +10223,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "DeleteManyToManyBody",
                         "name": "object",
                         "in": "body",
@@ -9615,6 +10306,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9722,6 +10420,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -9819,6 +10524,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9926,16 +10638,16 @@ var doc = `{
                     },
                     {
                         "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
-                        "in": "path",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "resource_Id",
-                        "name": "resource_Id",
-                        "in": "query",
+                        "description": "table_slug",
+                        "name": "table_slug",
+                        "in": "path",
                         "required": true
                     },
                     {
@@ -10030,6 +10742,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10137,6 +10856,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -10234,6 +10960,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10341,6 +11074,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -10438,6 +11178,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10541,6 +11288,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -10630,6 +11384,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10761,6 +11522,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "offline_appointment_id",
                         "name": "offline_appointment_id",
                         "in": "path",
@@ -10851,6 +11619,13 @@ var doc = `{
                         "name": "Resource-Id",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -10935,6 +11710,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11035,6 +11817,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "role_id",
                         "name": "role_id",
                         "in": "path",
@@ -11123,6 +11912,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11229,6 +12025,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "GetAllQueryRowsRequestBody",
                         "name": "object",
                         "in": "body",
@@ -11328,8 +12131,22 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11452,8 +12269,22 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11547,6 +12378,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11650,8 +12488,22 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11730,6 +12582,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11838,6 +12697,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateSectionRequestBody",
                         "name": "table",
                         "in": "body",
@@ -11937,13 +12803,6 @@ var doc = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "resource_Id",
-                        "name": "resource_Id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -12436,6 +13295,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "TemplateBody",
                         "name": "view",
                         "in": "body",
@@ -12531,6 +13397,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "file",
                         "description": "file",
                         "name": "file",
@@ -12620,6 +13493,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -12738,6 +13618,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "app_id",
                         "in": "query"
                     },
@@ -12836,6 +13723,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateViewRequestBody",
                         "name": "view",
                         "in": "body",
@@ -12925,6 +13819,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -13020,6 +13921,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -13125,6 +14033,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "view_id",
                         "name": "view_id",
                         "in": "path",
@@ -13216,6 +14131,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "view_id",
                         "name": "view_id",
                         "in": "path",
@@ -13289,6 +14211,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -13397,6 +14326,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpsertViewRelationsBody",
                         "name": "table",
                         "in": "body",
@@ -13488,6 +14424,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -13601,6 +14544,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateQueryRequest",
                         "name": "table",
                         "in": "body",
@@ -13697,6 +14647,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -13783,6 +14740,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -13888,6 +14852,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -13961,6 +14932,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -14074,6 +15052,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateQueryFolderRequest",
                         "name": "table",
                         "in": "body",
@@ -14170,6 +15155,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -14256,6 +15248,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -14361,6 +15360,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -14434,6 +15440,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -14537,6 +15550,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateWebPageRequest",
                         "name": "table",
                         "in": "body",
@@ -14633,6 +15653,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -14719,6 +15746,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -14824,6 +15858,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -14888,6 +15929,20 @@ var doc = `{
                 "summary": "Verify",
                 "operationId": "verify_email",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "sms_id",

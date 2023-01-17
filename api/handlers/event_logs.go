@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/http"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -15,6 +16,7 @@ import (
 // GetEventLogs godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_event_logs
 // @Router /v1/event-log [GET]
 // @Summary Get event logs
@@ -57,13 +59,33 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	res, err := services.EventLogsService().GetList(
 		context.Background(),
 		&obs.GetEventLogsListRequest{
 			TableSlug: c.Query("table_slug"),
 			Offset:    int32(offset),
 			Limit:     int32(limit),
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		})
 
 	if err != nil {
@@ -77,6 +99,7 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 // GetEventLogById godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_event_log
 // @Router /v1/event-log/{event_log_id} [GET]
 // @Summary Get event log
@@ -115,11 +138,31 @@ func (h *Handler) GetEventLogById(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 	resp, err := services.EventLogsService().GetSingle(
 		context.Background(),
 		&obs.GetEventLogById{
 			Id:        eventLogID,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {

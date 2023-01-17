@@ -7,6 +7,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/http"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pbObject "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	pbSms "ucode/ucode_go_api_gateway/genproto/sms_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -79,12 +80,32 @@ func (h *Handler) SendCode(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	respObject, err := services.LoginService().LoginWithOtp(
 		c.Request.Context(),
 		&pbObject.PhoneOtpRequst{
 			PhoneNumber: phone,
 			ClientType:  request.ClientType,
-			ProjectId:   resourceId.(string),
+			ProjectId:   resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
@@ -93,7 +114,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 	}
 
 	if (respObject == nil || !respObject.UserFound) && request.ClientType != "PATIENT" {
-		err := errors.New("Пользователь не найдено")
+		err := errors.New("пользователь не найдено")
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
 	}
@@ -187,12 +208,32 @@ func (h *Handler) Verify(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	res, err := services.SessionServiceAuth().SessionAndTokenGenerator(
 		context.Background(),
 		&pb.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
 			Tables:    body.Tables,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
@@ -252,12 +293,32 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	_, err = services.ObjectBuilderServiceAuth().Create(
 		context.Background(),
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
