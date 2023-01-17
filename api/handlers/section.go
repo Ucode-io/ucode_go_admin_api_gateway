@@ -3,15 +3,17 @@ package handlers
 import (
 	"context"
 	"errors"
+	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
-	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
 )
 
 // GetAllSections godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_sections
 // @Router /v1/section [GET]
 // @Summary Get all sections
@@ -47,13 +49,33 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.SectionService().GetAll(
 		context.Background(),
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
 			TableSlug: c.Query("table_slug"),
 			RoleId:    authInfo.GetRoleId(),
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -68,6 +90,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 // UpdateSection godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID update_section
 // @Router /v1/section [PUT]
 // @Summary Update section
@@ -93,13 +116,6 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-	sections.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -107,6 +123,33 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	sections.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := services.SectionService().Update(
 		context.Background(),

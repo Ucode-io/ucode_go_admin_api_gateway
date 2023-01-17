@@ -24,7 +24,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/auth_service.ConfirmStrategies'
+        type: integer
       id:
         type: string
       name:
@@ -40,16 +40,6 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
-  auth_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -243,8 +233,6 @@ definitions:
       user_id:
         type: string
     type: object
-  big.Int:
-    type: object
   company_service.AddResourceRequest:
     properties:
       company_id:
@@ -258,9 +246,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -316,9 +304,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -371,9 +359,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.EmptyProto:
     type: object
@@ -516,9 +504,9 @@ definitions:
       id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
     type: object
@@ -535,18 +523,6 @@ definitions:
       username:
         type: string
     type: object
-  company_service.ResourceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ResourceType_NOT_DECIDED
-    - ResourceType_MONGODB
-    - ResourceType_CLICKHOUSE
-    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -560,7 +536,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -590,16 +566,6 @@ definitions:
       resource_environment_id:
         type: string
     type: object
-  company_service.ServiceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ServiceType_NOT_SPECIFIED
-    - ServiceType_BUILDER_SERVICE
-    - ServiceType_ANALYTICS_SERVICE
   company_service.UpdateResourceRequest:
     properties:
       credentials:
@@ -613,7 +579,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -696,347 +662,6 @@ definitions:
         type: string
       hash:
         type: string
-    type: object
-  http.Header:
-    additionalProperties:
-      items:
-        type: string
-      type: array
-    type: object
-  http.Request:
-    properties:
-      body:
-        description: |-
-          Body is the request's body.
-
-          For client requests, a nil body means the request has no
-          body, such as a GET request. The HTTP Client's Transport
-          is responsible for calling the Close method.
-
-          For server requests, the Request Body is always non-nil
-          but will return EOF immediately when no body is present.
-          The Server will close the request body. The ServeHTTP
-          Handler does not need to.
-
-          Body must allow Read to be called concurrently with Close.
-          In particular, calling Close should unblock a Read waiting
-          for input.
-      cancel:
-        description: |-
-          Cancel is an optional channel whose closure indicates that the client
-          request should be regarded as canceled. Not all implementations of
-          RoundTripper may support Cancel.
-
-          For server requests, this field is not applicable.
-
-          Deprecated: Set the Request's context with NewRequestWithContext
-          instead. If a Request's Cancel field and context are both
-          set, it is undefined whether Cancel is respected.
-        type: object
-      close:
-        description: |-
-          Close indicates whether to close the connection after
-          replying to this request (for servers) or after sending this
-          request and reading its response (for clients).
-
-          For server requests, the HTTP server handles this automatically
-          and this field is not needed by Handlers.
-
-          For client requests, setting this field prevents re-use of
-          TCP connections between requests to the same hosts, as if
-          Transport.DisableKeepAlives were set.
-        type: boolean
-      contentLength:
-        description: |-
-          ContentLength records the length of the associated content.
-          The value -1 indicates that the length is unknown.
-          Values >= 0 indicate that the given number of bytes may
-          be read from Body.
-
-          For client requests, a value of 0 with a non-nil Body is
-          also treated as unknown.
-        type: integer
-      form:
-        allOf:
-        - $ref: '#/definitions/url.Values'
-        description: |-
-          Form contains the parsed form data, including both the URL
-          field's query parameters and the PATCH, POST, or PUT form data.
-          This field is only available after ParseForm is called.
-          The HTTP client ignores Form and uses Body instead.
-      header:
-        allOf:
-        - $ref: '#/definitions/http.Header'
-        description: "Header contains the request header fields either received\nby
-          the server or to be sent by the client.\n\nIf a server received a request
-          with header lines,\n\n\tHost: example.com\n\taccept-encoding: gzip, deflate\n\tAccept-Language:
-          en-us\n\tfOO: Bar\n\tfoo: two\n\nthen\n\n\tHeader = map[string][]string{\n\t\t\"Accept-Encoding\":
-          {\"gzip, deflate\"},\n\t\t\"Accept-Language\": {\"en-us\"},\n\t\t\"Foo\":
-          {\"Bar\", \"two\"},\n\t}\n\nFor incoming requests, the Host header is promoted
-          to the\nRequest.Host field and removed from the Header map.\n\nHTTP defines
-          that header names are case-insensitive. The\nrequest parser implements this
-          by using CanonicalHeaderKey,\nmaking the first character and any characters
-          following a\nhyphen uppercase and the rest lowercase.\n\nFor client requests,
-          certain headers such as Content-Length\nand Connection are automatically
-          written when needed and\nvalues in Header may be ignored. See the documentation\nfor
-          the Request.Write method."
-      host:
-        description: |-
-          For server requests, Host specifies the host on which the
-          URL is sought. For HTTP/1 (per RFC 7230, section 5.4), this
-          is either the value of the "Host" header or the host name
-          given in the URL itself. For HTTP/2, it is the value of the
-          ":authority" pseudo-header field.
-          It may be of the form "host:port". For international domain
-          names, Host may be in Punycode or Unicode form. Use
-          golang.org/x/net/idna to convert it to either format if
-          needed.
-          To prevent DNS rebinding attacks, server Handlers should
-          validate that the Host header has a value for which the
-          Handler considers itself authoritative. The included
-          ServeMux supports patterns registered to particular host
-          names and thus protects its registered Handlers.
-
-          For client requests, Host optionally overrides the Host
-          header to send. If empty, the Request.Write method uses
-          the value of URL.Host. Host may contain an international
-          domain name.
-        type: string
-      method:
-        description: |-
-          Method specifies the HTTP method (GET, POST, PUT, etc.).
-          For client requests, an empty string means GET.
-
-          Go's HTTP client does not support sending a request with
-          the CONNECT method. See the documentation on Transport for
-          details.
-        type: string
-      multipartForm:
-        allOf:
-        - $ref: '#/definitions/multipart.Form'
-        description: |-
-          MultipartForm is the parsed multipart form, including file uploads.
-          This field is only available after ParseMultipartForm is called.
-          The HTTP client ignores MultipartForm and uses Body instead.
-      postForm:
-        allOf:
-        - $ref: '#/definitions/url.Values'
-        description: |-
-          PostForm contains the parsed form data from PATCH, POST
-          or PUT body parameters.
-
-          This field is only available after ParseForm is called.
-          The HTTP client ignores PostForm and uses Body instead.
-      proto:
-        description: |-
-          The protocol version for incoming server requests.
-
-          For client requests, these fields are ignored. The HTTP
-          client code always uses either HTTP/1.1 or HTTP/2.
-          See the docs on Transport for details.
-        type: string
-      protoMajor:
-        description: "1"
-        type: integer
-      protoMinor:
-        description: "0"
-        type: integer
-      remoteAddr:
-        description: |-
-          RemoteAddr allows HTTP servers and other software to record
-          the network address that sent the request, usually for
-          logging. This field is not filled in by ReadRequest and
-          has no defined format. The HTTP server in this package
-          sets RemoteAddr to an "IP:port" address before invoking a
-          handler.
-          This field is ignored by the HTTP client.
-        type: string
-      requestURI:
-        description: |-
-          RequestURI is the unmodified request-target of the
-          Request-Line (RFC 7230, Section 3.1.1) as sent by the client
-          to a server. Usually the URL field should be used instead.
-          It is an error to set this field in an HTTP client request.
-        type: string
-      response:
-        allOf:
-        - $ref: '#/definitions/http.Response'
-        description: |-
-          Response is the redirect response which caused this request
-          to be created. This field is only populated during client
-          redirects.
-      tls:
-        allOf:
-        - $ref: '#/definitions/tls.ConnectionState'
-        description: |-
-          TLS allows HTTP servers and other software to record
-          information about the TLS connection on which the request
-          was received. This field is not filled in by ReadRequest.
-          The HTTP server in this package sets the field for
-          TLS-enabled connections before invoking a handler;
-          otherwise it leaves the field nil.
-          This field is ignored by the HTTP client.
-      trailer:
-        allOf:
-        - $ref: '#/definitions/http.Header'
-        description: |-
-          Trailer specifies additional headers that are sent after the request
-          body.
-
-          For server requests, the Trailer map initially contains only the
-          trailer keys, with nil values. (The client declares which trailers it
-          will later send.)  While the handler is reading from Body, it must
-          not reference Trailer. After reading from Body returns EOF, Trailer
-          can be read again and will contain non-nil values, if they were sent
-          by the client.
-
-          For client requests, Trailer must be initialized to a map containing
-          the trailer keys to later send. The values may be nil or their final
-          values. The ContentLength must be 0 or -1, to send a chunked request.
-          After the HTTP request is sent the map values can be updated while
-          the request body is read. Once the body returns EOF, the caller must
-          not mutate Trailer.
-
-          Few HTTP clients, servers, or proxies support HTTP trailers.
-      transferEncoding:
-        description: |-
-          TransferEncoding lists the transfer encodings from outermost to
-          innermost. An empty list denotes the "identity" encoding.
-          TransferEncoding can usually be ignored; chunked encoding is
-          automatically added and removed as necessary when sending and
-          receiving requests.
-        items:
-          type: string
-        type: array
-      url:
-        allOf:
-        - $ref: '#/definitions/url.URL'
-        description: |-
-          URL specifies either the URI being requested (for server
-          requests) or the URL to access (for client requests).
-
-          For server requests, the URL is parsed from the URI
-          supplied on the Request-Line as stored in RequestURI.  For
-          most requests, fields other than Path and RawQuery will be
-          empty. (See RFC 7230, Section 5.3)
-
-          For client requests, the URL's Host specifies the server to
-          connect to, while the Request's Host field optionally
-          specifies the Host header value to send in the HTTP
-          request.
-    type: object
-  http.Response:
-    properties:
-      body:
-        description: |-
-          Body represents the response body.
-
-          The response body is streamed on demand as the Body field
-          is read. If the network connection fails or the server
-          terminates the response, Body.Read calls return an error.
-
-          The http Client and Transport guarantee that Body is always
-          non-nil, even on responses without a body or responses with
-          a zero-length body. It is the caller's responsibility to
-          close Body. The default HTTP client's Transport may not
-          reuse HTTP/1.x "keep-alive" TCP connections if the Body is
-          not read to completion and closed.
-
-          The Body is automatically dechunked if the server replied
-          with a "chunked" Transfer-Encoding.
-
-          As of Go 1.12, the Body will also implement io.Writer
-          on a successful "101 Switching Protocols" response,
-          as used by WebSockets and HTTP/2's "h2c" mode.
-      close:
-        description: |-
-          Close records whether the header directed that the connection be
-          closed after reading Body. The value is advice for clients: neither
-          ReadResponse nor Response.Write ever closes a connection.
-        type: boolean
-      contentLength:
-        description: |-
-          ContentLength records the length of the associated content. The
-          value -1 indicates that the length is unknown. Unless Request.Method
-          is "HEAD", values >= 0 indicate that the given number of bytes may
-          be read from Body.
-        type: integer
-      header:
-        allOf:
-        - $ref: '#/definitions/http.Header'
-        description: |-
-          Header maps header keys to values. If the response had multiple
-          headers with the same key, they may be concatenated, with comma
-          delimiters.  (RFC 7230, section 3.2.2 requires that multiple headers
-          be semantically equivalent to a comma-delimited sequence.) When
-          Header values are duplicated by other fields in this struct (e.g.,
-          ContentLength, TransferEncoding, Trailer), the field values are
-          authoritative.
-
-          Keys in the map are canonicalized (see CanonicalHeaderKey).
-      proto:
-        description: e.g. "HTTP/1.0"
-        type: string
-      protoMajor:
-        description: e.g. 1
-        type: integer
-      protoMinor:
-        description: e.g. 0
-        type: integer
-      request:
-        allOf:
-        - $ref: '#/definitions/http.Request'
-        description: |-
-          Request is the request that was sent to obtain this Response.
-          Request's Body is nil (having already been consumed).
-          This is only populated for Client requests.
-      status:
-        description: e.g. "200 OK"
-        type: string
-      statusCode:
-        description: e.g. 200
-        type: integer
-      tls:
-        allOf:
-        - $ref: '#/definitions/tls.ConnectionState'
-        description: |-
-          TLS contains information about the TLS connection on which the
-          response was received. It is nil for unencrypted responses.
-          The pointer is shared between responses and should not be
-          modified.
-      trailer:
-        allOf:
-        - $ref: '#/definitions/http.Header'
-        description: |-
-          Trailer maps trailer keys to values in the same
-          format as Header.
-
-          The Trailer initially contains only nil values, one for
-          each key specified in the server's "Trailer" header
-          value. Those values are not added to Header.
-
-          Trailer must not be accessed concurrently with Read calls
-          on the Body.
-
-          After Body.Read has returned io.EOF, Trailer will contain
-          any trailer values sent by the server.
-      transferEncoding:
-        description: |-
-          Contains transfer encodings from outer-most to inner-most. Value is
-          nil, means that "identity" encoding is used.
-        items:
-          type: string
-        type: array
-      uncompressed:
-        description: |-
-          Uncompressed reports whether the response was sent compressed but
-          was decompressed by the http package. When true, reading from
-          Body yields the uncompressed content instead of the compressed
-          content actually set from the server, ContentLength is set to -1,
-          and the "Content-Length" and "Content-Encoding" fields are deleted
-          from the responseHeader. To get the original response from
-          the server, set Transport.DisableCompression to true.
-        type: boolean
     type: object
   models.Assays:
     properties:
@@ -1593,43 +1218,6 @@ definitions:
       title:
         type: string
     type: object
-  multipart.FileHeader:
-    properties:
-      filename:
-        type: string
-      header:
-        $ref: '#/definitions/textproto.MIMEHeader'
-      size:
-        type: integer
-    type: object
-  multipart.Form:
-    properties:
-      file:
-        additionalProperties:
-          items:
-            $ref: '#/definitions/multipart.FileHeader'
-          type: array
-        type: object
-      value:
-        additionalProperties:
-          items:
-            type: string
-          type: array
-        type: object
-    type: object
-  net.IPNet:
-    properties:
-      ip:
-        description: network number
-        items:
-          type: integer
-        type: array
-      mask:
-        description: network mask
-        items:
-          type: integer
-        type: array
-    type: object
   object_builder_service.ActionRelation:
     properties:
       key:
@@ -1704,7 +1292,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
+        type: integer
       guid:
         type: string
       name:
@@ -1727,16 +1315,6 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
-  object_builder_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -2634,61 +2212,6 @@ definitions:
       project_id:
         type: string
     type: object
-  pkix.AttributeTypeAndValue:
-    properties:
-      type:
-        items:
-          type: integer
-        type: array
-      value: {}
-    type: object
-  pkix.Extension:
-    properties:
-      critical:
-        type: boolean
-      id:
-        items:
-          type: integer
-        type: array
-      value:
-        items:
-          type: integer
-        type: array
-    type: object
-  pkix.Name:
-    properties:
-      country:
-        items:
-          type: string
-        type: array
-      extraNames:
-        description: |-
-          ExtraNames contains attributes to be copied, raw, into any marshaled
-          distinguished names. Values override any attributes with the same OID.
-          The ExtraNames field is not populated when parsing, see Names.
-        items:
-          $ref: '#/definitions/pkix.AttributeTypeAndValue'
-        type: array
-      locality:
-        items:
-          type: string
-        type: array
-      names:
-        description: |-
-          Names contains all parsed attributes. When parsing distinguished names,
-          this can be used to extract non-standard attributes that are not parsed
-          by this package. When marshaling to RDNSequences, the Names field is
-          ignored, see ExtraNames.
-        items:
-          $ref: '#/definitions/pkix.AttributeTypeAndValue'
-        type: array
-      serialNumber:
-        type: string
-      streetAddress:
-        items:
-          type: string
-        type: array
-    type: object
   pos_service.BookedAppointment:
     properties:
       date:
@@ -2840,468 +2363,6 @@ definitions:
       kind:
         description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
     type: object
-  textproto.MIMEHeader:
-    additionalProperties:
-      items:
-        type: string
-      type: array
-    type: object
-  tls.ConnectionState:
-    properties:
-      cipherSuite:
-        description: |-
-          CipherSuite is the cipher suite negotiated for the connection (e.g.
-          TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_AES_128_GCM_SHA256).
-        type: integer
-      didResume:
-        description: |-
-          DidResume is true if this connection was successfully resumed from a
-          previous session with a session ticket or similar mechanism.
-        type: boolean
-      handshakeComplete:
-        description: HandshakeComplete is true if the handshake has concluded.
-        type: boolean
-      negotiatedProtocol:
-        description: NegotiatedProtocol is the application protocol negotiated with
-          ALPN.
-        type: string
-      negotiatedProtocolIsMutual:
-        description: |-
-          NegotiatedProtocolIsMutual used to indicate a mutual NPN negotiation.
-
-          Deprecated: this value is always true.
-        type: boolean
-      ocspresponse:
-        description: |-
-          OCSPResponse is a stapled Online Certificate Status Protocol (OCSP)
-          response provided by the peer for the leaf certificate, if any.
-        items:
-          type: integer
-        type: array
-      peerCertificates:
-        description: |-
-          PeerCertificates are the parsed certificates sent by the peer, in the
-          order in which they were sent. The first element is the leaf certificate
-          that the connection is verified against.
-
-          On the client side, it can't be empty. On the server side, it can be
-          empty if Config.ClientAuth is not RequireAnyClientCert or
-          RequireAndVerifyClientCert.
-        items:
-          $ref: '#/definitions/x509.Certificate'
-        type: array
-      serverName:
-        description: |-
-          ServerName is the value of the Server Name Indication extension sent by
-          the client. It's available both on the server and on the client side.
-        type: string
-      signedCertificateTimestamps:
-        description: |-
-          SignedCertificateTimestamps is a list of SCTs provided by the peer
-          through the TLS handshake for the leaf certificate, if any.
-        items:
-          items:
-            type: integer
-          type: array
-        type: array
-      tlsunique:
-        description: |-
-          TLSUnique contains the "tls-unique" channel binding value (see RFC 5929,
-          Section 3). This value will be nil for TLS 1.3 connections and for all
-          resumed connections.
-
-          Deprecated: there are conditions in which this value might not be unique
-          to a connection. See the Security Considerations sections of RFC 5705 and
-          RFC 7627, and https://mitls.org/pages/attacks/3SHAKE#channelbindings.
-        items:
-          type: integer
-        type: array
-      verifiedChains:
-        description: |-
-          VerifiedChains is a list of one or more chains where the first element is
-          PeerCertificates[0] and the last element is from Config.RootCAs (on the
-          client side) or Config.ClientCAs (on the server side).
-
-          On the client side, it's set if Config.InsecureSkipVerify is false. On
-          the server side, it's set if Config.ClientAuth is VerifyClientCertIfGiven
-          (and the peer provided a certificate) or RequireAndVerifyClientCert.
-        items:
-          items:
-            $ref: '#/definitions/x509.Certificate'
-          type: array
-        type: array
-      version:
-        description: Version is the TLS version used by the connection (e.g. VersionTLS12).
-        type: integer
-    type: object
-  url.URL:
-    properties:
-      forceQuery:
-        description: append a query ('?') even if RawQuery is empty
-        type: boolean
-      fragment:
-        description: fragment for references, without '#'
-        type: string
-      host:
-        description: host or host:port
-        type: string
-      opaque:
-        description: encoded opaque data
-        type: string
-      path:
-        description: path (relative paths may omit leading slash)
-        type: string
-      rawFragment:
-        description: encoded fragment hint (see EscapedFragment method)
-        type: string
-      rawPath:
-        description: encoded path hint (see EscapedPath method)
-        type: string
-      rawQuery:
-        description: encoded query values, without '?'
-        type: string
-      scheme:
-        type: string
-      user:
-        allOf:
-        - $ref: '#/definitions/url.Userinfo'
-        description: username and password information
-    type: object
-  url.Userinfo:
-    type: object
-  url.Values:
-    additionalProperties:
-      items:
-        type: string
-      type: array
-    type: object
-  x509.Certificate:
-    properties:
-      authorityKeyId:
-        items:
-          type: integer
-        type: array
-      basicConstraintsValid:
-        description: |-
-          BasicConstraintsValid indicates whether IsCA, MaxPathLen,
-          and MaxPathLenZero are valid.
-        type: boolean
-      crldistributionPoints:
-        description: CRL Distribution Points
-        items:
-          type: string
-        type: array
-      dnsnames:
-        description: |-
-          Subject Alternate Name values. (Note that these values may not be valid
-          if invalid values were contained within a parsed certificate. For
-          example, an element of DNSNames may not be a valid DNS domain name.)
-        items:
-          type: string
-        type: array
-      emailAddresses:
-        items:
-          type: string
-        type: array
-      excludedDNSDomains:
-        items:
-          type: string
-        type: array
-      excludedEmailAddresses:
-        items:
-          type: string
-        type: array
-      excludedIPRanges:
-        items:
-          $ref: '#/definitions/net.IPNet'
-        type: array
-      excludedURIDomains:
-        items:
-          type: string
-        type: array
-      extKeyUsage:
-        description: Sequence of extended key usages.
-        items:
-          $ref: '#/definitions/x509.ExtKeyUsage'
-        type: array
-      extensions:
-        description: |-
-          Extensions contains raw X.509 extensions. When parsing certificates,
-          this can be used to extract non-critical extensions that are not
-          parsed by this package. When marshaling certificates, the Extensions
-          field is ignored, see ExtraExtensions.
-        items:
-          $ref: '#/definitions/pkix.Extension'
-        type: array
-      extraExtensions:
-        description: |-
-          ExtraExtensions contains extensions to be copied, raw, into any
-          marshaled certificates. Values override any extensions that would
-          otherwise be produced based on the other fields. The ExtraExtensions
-          field is not populated when parsing certificates, see Extensions.
-        items:
-          $ref: '#/definitions/pkix.Extension'
-        type: array
-      ipaddresses:
-        items:
-          items:
-            type: integer
-          type: array
-        type: array
-      isCA:
-        type: boolean
-      issuer:
-        $ref: '#/definitions/pkix.Name'
-      issuingCertificateURL:
-        items:
-          type: string
-        type: array
-      keyUsage:
-        $ref: '#/definitions/x509.KeyUsage'
-      maxPathLen:
-        description: |-
-          MaxPathLen and MaxPathLenZero indicate the presence and
-          value of the BasicConstraints' "pathLenConstraint".
-
-          When parsing a certificate, a positive non-zero MaxPathLen
-          means that the field was specified, -1 means it was unset,
-          and MaxPathLenZero being true mean that the field was
-          explicitly set to zero. The case of MaxPathLen==0 with MaxPathLenZero==false
-          should be treated equivalent to -1 (unset).
-
-          When generating a certificate, an unset pathLenConstraint
-          can be requested with either MaxPathLen == -1 or using the
-          zero value for both MaxPathLen and MaxPathLenZero.
-        type: integer
-      maxPathLenZero:
-        description: |-
-          MaxPathLenZero indicates that BasicConstraintsValid==true
-          and MaxPathLen==0 should be interpreted as an actual
-          maximum path length of zero. Otherwise, that combination is
-          interpreted as MaxPathLen not being set.
-        type: boolean
-      notBefore:
-        description: Validity bounds.
-        type: string
-      ocspserver:
-        description: RFC 5280, 4.2.2.1 (Authority Information Access)
-        items:
-          type: string
-        type: array
-      permittedDNSDomains:
-        items:
-          type: string
-        type: array
-      permittedDNSDomainsCritical:
-        description: Name constraints
-        type: boolean
-      permittedEmailAddresses:
-        items:
-          type: string
-        type: array
-      permittedIPRanges:
-        items:
-          $ref: '#/definitions/net.IPNet'
-        type: array
-      permittedURIDomains:
-        items:
-          type: string
-        type: array
-      policyIdentifiers:
-        items:
-          items:
-            type: integer
-          type: array
-        type: array
-      publicKey: {}
-      publicKeyAlgorithm:
-        $ref: '#/definitions/x509.PublicKeyAlgorithm'
-      raw:
-        description: Complete ASN.1 DER content (certificate, signature algorithm
-          and signature).
-        items:
-          type: integer
-        type: array
-      rawIssuer:
-        description: DER encoded Issuer
-        items:
-          type: integer
-        type: array
-      rawSubject:
-        description: DER encoded Subject
-        items:
-          type: integer
-        type: array
-      rawSubjectPublicKeyInfo:
-        description: DER encoded SubjectPublicKeyInfo.
-        items:
-          type: integer
-        type: array
-      rawTBSCertificate:
-        description: Certificate part of raw ASN.1 DER content.
-        items:
-          type: integer
-        type: array
-      serialNumber:
-        $ref: '#/definitions/big.Int'
-      signature:
-        items:
-          type: integer
-        type: array
-      signatureAlgorithm:
-        $ref: '#/definitions/x509.SignatureAlgorithm'
-      subject:
-        $ref: '#/definitions/pkix.Name'
-      subjectKeyId:
-        items:
-          type: integer
-        type: array
-      unhandledCriticalExtensions:
-        description: |-
-          UnhandledCriticalExtensions contains a list of extension IDs that
-          were not (fully) processed when parsing. Verify will fail if this
-          slice is non-empty, unless verification is delegated to an OS
-          library which understands all the critical extensions.
-
-          Users can access these extensions using Extensions and can remove
-          elements from this slice if they believe that they have been
-          handled.
-        items:
-          items:
-            type: integer
-          type: array
-        type: array
-      unknownExtKeyUsage:
-        description: Encountered extended key usages unknown to this package.
-        items:
-          items:
-            type: integer
-          type: array
-        type: array
-      uris:
-        items:
-          $ref: '#/definitions/url.URL'
-        type: array
-      version:
-        type: integer
-    type: object
-  x509.ExtKeyUsage:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
-    - 10
-    - 11
-    - 12
-    - 13
-    type: integer
-    x-enum-varnames:
-    - ExtKeyUsageAny
-    - ExtKeyUsageServerAuth
-    - ExtKeyUsageClientAuth
-    - ExtKeyUsageCodeSigning
-    - ExtKeyUsageEmailProtection
-    - ExtKeyUsageIPSECEndSystem
-    - ExtKeyUsageIPSECTunnel
-    - ExtKeyUsageIPSECUser
-    - ExtKeyUsageTimeStamping
-    - ExtKeyUsageOCSPSigning
-    - ExtKeyUsageMicrosoftServerGatedCrypto
-    - ExtKeyUsageNetscapeServerGatedCrypto
-    - ExtKeyUsageMicrosoftCommercialCodeSigning
-    - ExtKeyUsageMicrosoftKernelCodeSigning
-  x509.KeyUsage:
-    enum:
-    - 1
-    - 2
-    - 4
-    - 8
-    - 16
-    - 32
-    - 64
-    - 128
-    - 256
-    type: integer
-    x-enum-varnames:
-    - KeyUsageDigitalSignature
-    - KeyUsageContentCommitment
-    - KeyUsageKeyEncipherment
-    - KeyUsageDataEncipherment
-    - KeyUsageKeyAgreement
-    - KeyUsageCertSign
-    - KeyUsageCRLSign
-    - KeyUsageEncipherOnly
-    - KeyUsageDecipherOnly
-  x509.PublicKeyAlgorithm:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    type: integer
-    x-enum-comments:
-      DSA: Unsupported.
-    x-enum-varnames:
-    - UnknownPublicKeyAlgorithm
-    - RSA
-    - DSA
-    - ECDSA
-    - Ed25519
-  x509.SignatureAlgorithm:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
-    - 10
-    - 11
-    - 12
-    - 13
-    - 14
-    - 15
-    - 16
-    type: integer
-    x-enum-comments:
-      DSAWithSHA1: Unsupported.
-      DSAWithSHA256: Unsupported.
-      ECDSAWithSHA1: Only supported for signing, and verification of CRLs, CSRs, and
-        OCSP responses.
-      MD2WithRSA: Unsupported.
-      MD5WithRSA: Only supported for signing, not verification.
-      SHA1WithRSA: Only supported for signing, and verification of CRLs, CSRs, and
-        OCSP responses.
-    x-enum-varnames:
-    - UnknownSignatureAlgorithm
-    - MD2WithRSA
-    - MD5WithRSA
-    - SHA1WithRSA
-    - SHA256WithRSA
-    - SHA384WithRSA
-    - SHA512WithRSA
-    - DSAWithSHA1
-    - DSAWithSHA256
-    - ECDSAWithSHA1
-    - ECDSAWithSHA256
-    - ECDSAWithSHA384
-    - ECDSAWithSHA512
-    - SHA256WithRSAPSS
-    - SHA384WithRSAPSS
-    - SHA512WithRSAPSS
-    - PureEd25519
 info:
   contact: {}
   description: This is a api gateway
@@ -3401,6 +2462,16 @@ paths:
       description: Create Integration
       operationId: create_Integration
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateIntegrationRequestBody
         in: body
         name: Integration
@@ -3437,6 +2508,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create Integration
       tags:
       - Integration
@@ -3456,7 +2529,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -3638,7 +2711,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -3739,6 +2812,16 @@ paths:
       description: RegisterOtp
       operationId: registerEmailOtp
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: register_body
         in: body
         name: registerBody
@@ -3887,6 +2970,16 @@ paths:
       description: Send Message to Email
       operationId: send_message_to_email
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: SendMessageToEmailRequestBody
         in: body
         name: send_message
@@ -3936,6 +3029,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: role_id
@@ -3995,6 +3093,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreatePatientRequestBody
         in: body
         name: table
@@ -4048,6 +3151,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: nr
         in: query
         name: nr
@@ -4099,6 +3207,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - in: query
         name: name
         type: string
@@ -4146,6 +3259,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: CreateDashboardRequestBody
@@ -4198,6 +3316,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateDashboardRequestBody
@@ -4253,6 +3376,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: dashboard_id
         in: path
         name: dashboard_id
@@ -4262,7 +3390,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4295,6 +3423,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: dashboard_id
@@ -4349,6 +3482,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - in: query
         name: project_id
         type: string
@@ -4401,6 +3539,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreatePanelRequestBody
         in: body
         name: table
@@ -4451,6 +3594,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdatePanelRequestBody
@@ -4506,6 +3654,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: panel_id
         in: path
         name: panel_id
@@ -4515,7 +3668,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4548,6 +3701,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: panel_id
@@ -4602,6 +3760,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: UpdatePanelCoordinatesRequestBody
         in: body
         name: panel_coordinates
@@ -4653,6 +3816,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -4710,6 +3878,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateVariableRequestBody
         in: body
         name: variable
@@ -4760,6 +3933,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateVariableRequestBody
@@ -4815,6 +3993,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: variable_id
         in: path
         name: variable_id
@@ -4824,7 +4007,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4857,6 +4040,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: variable_id
@@ -4909,6 +4097,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -4969,6 +4162,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateAppRequestBody
         in: body
         name: app
@@ -5019,6 +4217,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateAppRequestBody
@@ -5074,6 +4277,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: app_id
         in: path
         name: app_id
@@ -5083,7 +4291,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -5116,6 +4324,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: app_id
@@ -5170,6 +4383,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -5220,6 +4438,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -5290,6 +4513,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: booked_appointment_id
         in: path
         name: booked_appointment_id
@@ -5342,6 +4570,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateTransactionBody
         in: body
         name: app
@@ -5352,7 +4585,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: ""
         "400":
           description: Bad Request
           schema:
@@ -5386,6 +4619,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       produces:
@@ -5431,6 +4669,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -5495,6 +4738,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - in: query
         name: company_id
         type: string
@@ -5553,6 +4801,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CompanyProjectCreateRequest
         in: body
         name: Project
@@ -5606,6 +4859,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: project_id
         in: path
         name: project_id
@@ -5655,6 +4913,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: project_id
@@ -5710,6 +4973,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: project_id
@@ -5770,6 +5038,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: company_id
         in: path
         name: company_id
@@ -5779,7 +5052,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -5812,6 +5085,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: company_id
@@ -5863,6 +5141,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: company_id
@@ -5923,6 +5206,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: ProjectResourceConfigureRequest
         in: body
         name: ProjectResource
@@ -5974,6 +5262,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: ProjectResourceCreateRequest
@@ -6029,6 +5322,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: ProjectResourceRemoveRequest
         in: body
         name: ProjectResource
@@ -6079,6 +5377,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -6139,6 +5442,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: ProjectResourceAddRequest
         in: body
         name: ProjectResource
@@ -6192,6 +5500,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: resource_id
         in: path
         name: resource_id
@@ -6204,7 +5517,7 @@ paths:
           description: Resource data
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   $ref: '#/definitions/company_service.ResourceWithoutPassword'
@@ -6213,7 +5526,7 @@ paths:
           description: Invalid Argument
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6222,7 +5535,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/http.Response'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
                   type: string
@@ -6242,6 +5555,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: resource_id
@@ -6293,6 +5611,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateResourceRequestBody
@@ -6348,6 +5671,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: ProjectResourceReconnectRequest
         in: body
         name: ProjectResource
@@ -6399,6 +5727,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -6453,6 +5786,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateCustomEventRequestBody
         in: body
         name: Customevent
@@ -6503,6 +5841,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateCustomEventRequestBody
@@ -6558,6 +5901,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: custom_event_id
         in: path
         name: custom_event_id
@@ -6567,7 +5915,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -6600,6 +5948,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: custom_event_id
@@ -6652,6 +6005,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -6715,6 +6073,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateDocumentRequestBody
         in: body
         name: Document
@@ -6765,6 +6128,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateDocumentRequestBody
@@ -6820,6 +6188,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: document_id
         in: path
         name: document_id
@@ -6829,7 +6202,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -6862,6 +6235,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: document_id
@@ -6914,6 +6292,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -6974,6 +6357,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateEnvironmentRequestBody
         in: body
         name: environment
@@ -7024,6 +6412,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateEnvironmentRequestBody
@@ -7079,6 +6472,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: environment_id
         in: path
         name: environment_id
@@ -7088,7 +6486,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7121,6 +6519,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: environment_id
@@ -7175,6 +6578,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - in: query
         name: project_id
         type: string
@@ -7225,6 +6633,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: CreateEventRequestBody
@@ -7279,6 +6692,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: UpdateEventRequestBody
         in: body
         name: event
@@ -7330,6 +6748,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -7388,6 +6811,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: event_log_id
         in: path
         name: event_log_id
@@ -7438,6 +6866,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: event_id
@@ -7492,6 +6925,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: event_id
         in: path
         name: event_id
@@ -7501,7 +6939,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7535,6 +6973,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: excel_id
@@ -7587,6 +7030,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: excel_id
@@ -7695,6 +7143,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - in: query
         name: limit
         type: integer
@@ -7768,6 +7221,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateFieldRequestBody
         in: body
         name: table
@@ -7818,6 +7276,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateFieldRequestBody
@@ -7871,6 +7334,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: role_id
@@ -7930,6 +7398,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: field_id
         in: path
         name: field_id
@@ -7939,7 +7412,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7973,6 +7446,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -8030,6 +7508,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateFunctionRequestBody
         in: body
         name: Function
@@ -8080,6 +7563,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateFunctionRequestBody
@@ -8135,6 +7623,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: function_id
         in: path
         name: function_id
@@ -8144,7 +7637,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8177,6 +7670,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: function_id
@@ -8231,9 +7729,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: table_slug
@@ -8289,6 +7797,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - in: query
         name: project_id
         type: string
@@ -8341,6 +7854,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateHtmlTemplateRequestBody
         in: body
         name: html_template
@@ -8391,6 +7909,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateHtmlTemplateRequestBody
@@ -8446,6 +7969,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: html_template_id
         in: path
         name: html_template_id
@@ -8455,7 +7983,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8488,6 +8016,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: html_template_id
@@ -8540,6 +8073,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: HtmlBody
@@ -8643,6 +8181,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: InvokeFunctionRequest
         in: body
         name: InvokeFunctionRequest
@@ -8696,6 +8239,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: DeleteManyToManyBody
         in: body
         name: object
@@ -8706,7 +8254,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8739,6 +8287,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateMany2ManyRequestBody
@@ -8792,6 +8345,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: table_slug
@@ -8852,6 +8410,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -8908,6 +8471,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: table_slug
@@ -8968,6 +8536,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -8988,7 +8561,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -9021,6 +8594,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: table_slug
@@ -9078,6 +8656,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: table_slug
@@ -9138,6 +8721,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -9196,14 +8784,14 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: resource_Id
-        in: query
-        name: resource_Id
         required: true
         type: string
       - description: GetListObjectRequestBody
@@ -9257,6 +8845,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: table_slug
@@ -9317,6 +8910,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -9373,6 +8971,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -9446,6 +9049,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: offline_appointment_id
         in: path
         name: offline_appointment_id
@@ -9498,6 +9106,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -9543,6 +9156,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateAppointmentStatus
@@ -9598,6 +9216,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: role_id
         in: path
         name: role_id
@@ -9648,6 +9271,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: app_id
@@ -9708,6 +9336,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: GetAllQueryRowsRequestBody
         in: body
         name: object
@@ -9761,9 +9394,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -9831,6 +9474,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateRelationRequestBody
         in: body
         name: table
@@ -9883,9 +9531,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateRelationRequestBody
@@ -9942,9 +9600,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: relation_id
@@ -9956,7 +9624,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -9991,6 +9659,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -10051,6 +9724,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: UpdateSectionRequestBody
         in: body
         name: table
@@ -10107,11 +9785,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: resource_Id
-        in: query
-        name: resource_Id
         required: true
         type: string
       - in: query
@@ -10301,7 +9974,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10393,6 +10066,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: TemplateBody
         in: body
         name: view
@@ -10446,6 +10124,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: file
         in: formData
         name: file
@@ -10496,6 +10179,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: file
@@ -10564,6 +10252,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - in: query
         name: app_id
         type: string
@@ -10619,6 +10312,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateViewRequestBody
         in: body
         name: view
@@ -10669,6 +10367,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateViewRequestBody
@@ -10722,6 +10425,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: role_id
@@ -10781,6 +10489,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: view_id
         in: path
         name: view_id
@@ -10790,7 +10503,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10823,6 +10536,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: view_id
@@ -10877,6 +10595,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -10937,6 +10660,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: UpsertViewRelationsBody
         in: body
         name: table
@@ -10988,6 +10716,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -11051,6 +10784,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateQueryRequest
         in: body
         name: table
@@ -11104,6 +10842,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: guid
         in: path
         name: guid
@@ -11113,7 +10856,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11146,6 +10889,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: guid
@@ -11197,6 +10945,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: guid
@@ -11255,6 +11008,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - in: query
@@ -11318,6 +11076,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateQueryFolderRequest
         in: body
         name: table
@@ -11371,6 +11134,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: guid
         in: path
         name: guid
@@ -11380,7 +11148,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11413,6 +11181,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: guid
@@ -11464,6 +11237,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: guid
@@ -11524,6 +11302,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - in: query
         name: limit
         type: integer
@@ -11579,6 +11362,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateWebPageRequest
         in: body
         name: table
@@ -11632,6 +11420,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: guid
         in: path
         name: guid
@@ -11641,7 +11434,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11674,6 +11467,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: guid
@@ -11725,6 +11523,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: guid
@@ -11780,6 +11583,16 @@ paths:
       description: Verify
       operationId: verify_email
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: sms_id
         in: path
         name: sms_id

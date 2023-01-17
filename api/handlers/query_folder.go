@@ -4,16 +4,18 @@ import (
 	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
-	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
+	"ucode/ucode_go_api_gateway/api/status_http"
 )
 
-// Create Query Folder godoc
+// CreateQueryFolder godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_query_folder
 // @Router /v3/query_folder [POST]
 // @Summary Create Query Folder
@@ -40,10 +42,37 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 	//	return
 	//}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
 		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -52,7 +81,7 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 		&obs.CreateQueryFolderRequest{
 			Title:     queryfolder.Title,
 			ParentId:  queryfolder.ParentId,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -64,9 +93,10 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, resp)
 }
 
-// GetQueryFolderById godoc
+// GetQueryFolderByID godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_query_folder
 // @Router /v3/query_folder/{guid} [GET]
 // @Summary Get Query Folder By Id
@@ -112,6 +142,7 @@ func (h *Handler) GetQueryFolderByID(c *gin.Context) {
 // GetQueryFolderList godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_query_folder_list
 // @Router /v3/query_folder [GET]
 // @Summary Get Query Folder List
@@ -142,10 +173,37 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 	//	return
 	//}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
 		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -156,7 +214,7 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 			Offset:    int32(offset),
 			Search:    c.DefaultQuery("search", ""),
 			ParentId:  c.DefaultQuery("parent_id", ""),
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -171,6 +229,7 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 // UpdateQueryFolder godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID update_query_folder
 // @Router /v3/query_folder/{guid} [PUT]
 // @Summary Update Query Folder
@@ -199,10 +258,37 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 	//	return
 	//}
 
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
 		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -212,7 +298,7 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 			Id:        guid,
 			Title:     queryFolder.Title,
 			ParentId:  queryFolder.ParentId,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -227,6 +313,7 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 // DeleteQueryFolder godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_query_folder
 // @Router /v3/query_folder/{guid} [DELETE]
 // @Summary Delete Query Folder

@@ -30,8 +30,8 @@ type CreateFieldsRequest struct {
 	Required   bool                   `json:"required"`
 	Attributes map[string]interface{} `json:"attributes"`
 	IsVisible  bool                   `json:"is_visible"`
-	Unique        bool                   `json:"unique"`
-	Automatic     bool                   `json:"automatic"`
+	Unique     bool                   `json:"unique"`
+	Automatic  bool                   `json:"automatic"`
 }
 
 type CreateFieldRequest struct {

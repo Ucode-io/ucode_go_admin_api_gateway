@@ -3,15 +3,17 @@ package handlers
 import (
 	"context"
 	"errors"
+	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
-	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
 )
 
 // GetNewGeneratedBarCode godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID generate_new_barcode_for_items
 // @Router /v1/barcode-generator/{table_slug} [GET]
 // @Summary get barcode
@@ -46,11 +48,31 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.BarcodeService().Generate(
 		context.Background(),
 		&obs.BarcodeGenerateReq{
 			TableSlug: tableSlug,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {

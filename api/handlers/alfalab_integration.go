@@ -8,13 +8,14 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
-	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
+	"ucode/ucode_go_api_gateway/api/status_http"
 )
 
 // CreateDirections godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_patient
 // @Router /v1/alfalab/directions [POST]
 // @Summary Create Directions
@@ -110,6 +111,7 @@ func (h *Handler) CreateDirections(c *gin.Context) {
 // GetReferral godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID query_referral_result
 // @Router /v1/alfalab/referral [GET]
 // @Summary query referral result
