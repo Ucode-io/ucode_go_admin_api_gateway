@@ -243,6 +243,8 @@ definitions:
       user_id:
         type: string
     type: object
+  big.Int:
+    type: object
   company_service.AddResourceRequest:
     properties:
       company_id:
@@ -694,6 +696,347 @@ definitions:
         type: string
       hash:
         type: string
+    type: object
+  http.Header:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  http.Request:
+    properties:
+      body:
+        description: |-
+          Body is the request's body.
+
+          For client requests, a nil body means the request has no
+          body, such as a GET request. The HTTP Client's Transport
+          is responsible for calling the Close method.
+
+          For server requests, the Request Body is always non-nil
+          but will return EOF immediately when no body is present.
+          The Server will close the request body. The ServeHTTP
+          Handler does not need to.
+
+          Body must allow Read to be called concurrently with Close.
+          In particular, calling Close should unblock a Read waiting
+          for input.
+      cancel:
+        description: |-
+          Cancel is an optional channel whose closure indicates that the client
+          request should be regarded as canceled. Not all implementations of
+          RoundTripper may support Cancel.
+
+          For server requests, this field is not applicable.
+
+          Deprecated: Set the Request's context with NewRequestWithContext
+          instead. If a Request's Cancel field and context are both
+          set, it is undefined whether Cancel is respected.
+        type: object
+      close:
+        description: |-
+          Close indicates whether to close the connection after
+          replying to this request (for servers) or after sending this
+          request and reading its response (for clients).
+
+          For server requests, the HTTP server handles this automatically
+          and this field is not needed by Handlers.
+
+          For client requests, setting this field prevents re-use of
+          TCP connections between requests to the same hosts, as if
+          Transport.DisableKeepAlives were set.
+        type: boolean
+      contentLength:
+        description: |-
+          ContentLength records the length of the associated content.
+          The value -1 indicates that the length is unknown.
+          Values >= 0 indicate that the given number of bytes may
+          be read from Body.
+
+          For client requests, a value of 0 with a non-nil Body is
+          also treated as unknown.
+        type: integer
+      form:
+        allOf:
+        - $ref: '#/definitions/url.Values'
+        description: |-
+          Form contains the parsed form data, including both the URL
+          field's query parameters and the PATCH, POST, or PUT form data.
+          This field is only available after ParseForm is called.
+          The HTTP client ignores Form and uses Body instead.
+      header:
+        allOf:
+        - $ref: '#/definitions/http.Header'
+        description: "Header contains the request header fields either received\nby
+          the server or to be sent by the client.\n\nIf a server received a request
+          with header lines,\n\n\tHost: example.com\n\taccept-encoding: gzip, deflate\n\tAccept-Language:
+          en-us\n\tfOO: Bar\n\tfoo: two\n\nthen\n\n\tHeader = map[string][]string{\n\t\t\"Accept-Encoding\":
+          {\"gzip, deflate\"},\n\t\t\"Accept-Language\": {\"en-us\"},\n\t\t\"Foo\":
+          {\"Bar\", \"two\"},\n\t}\n\nFor incoming requests, the Host header is promoted
+          to the\nRequest.Host field and removed from the Header map.\n\nHTTP defines
+          that header names are case-insensitive. The\nrequest parser implements this
+          by using CanonicalHeaderKey,\nmaking the first character and any characters
+          following a\nhyphen uppercase and the rest lowercase.\n\nFor client requests,
+          certain headers such as Content-Length\nand Connection are automatically
+          written when needed and\nvalues in Header may be ignored. See the documentation\nfor
+          the Request.Write method."
+      host:
+        description: |-
+          For server requests, Host specifies the host on which the
+          URL is sought. For HTTP/1 (per RFC 7230, section 5.4), this
+          is either the value of the "Host" header or the host name
+          given in the URL itself. For HTTP/2, it is the value of the
+          ":authority" pseudo-header field.
+          It may be of the form "host:port". For international domain
+          names, Host may be in Punycode or Unicode form. Use
+          golang.org/x/net/idna to convert it to either format if
+          needed.
+          To prevent DNS rebinding attacks, server Handlers should
+          validate that the Host header has a value for which the
+          Handler considers itself authoritative. The included
+          ServeMux supports patterns registered to particular host
+          names and thus protects its registered Handlers.
+
+          For client requests, Host optionally overrides the Host
+          header to send. If empty, the Request.Write method uses
+          the value of URL.Host. Host may contain an international
+          domain name.
+        type: string
+      method:
+        description: |-
+          Method specifies the HTTP method (GET, POST, PUT, etc.).
+          For client requests, an empty string means GET.
+
+          Go's HTTP client does not support sending a request with
+          the CONNECT method. See the documentation on Transport for
+          details.
+        type: string
+      multipartForm:
+        allOf:
+        - $ref: '#/definitions/multipart.Form'
+        description: |-
+          MultipartForm is the parsed multipart form, including file uploads.
+          This field is only available after ParseMultipartForm is called.
+          The HTTP client ignores MultipartForm and uses Body instead.
+      postForm:
+        allOf:
+        - $ref: '#/definitions/url.Values'
+        description: |-
+          PostForm contains the parsed form data from PATCH, POST
+          or PUT body parameters.
+
+          This field is only available after ParseForm is called.
+          The HTTP client ignores PostForm and uses Body instead.
+      proto:
+        description: |-
+          The protocol version for incoming server requests.
+
+          For client requests, these fields are ignored. The HTTP
+          client code always uses either HTTP/1.1 or HTTP/2.
+          See the docs on Transport for details.
+        type: string
+      protoMajor:
+        description: "1"
+        type: integer
+      protoMinor:
+        description: "0"
+        type: integer
+      remoteAddr:
+        description: |-
+          RemoteAddr allows HTTP servers and other software to record
+          the network address that sent the request, usually for
+          logging. This field is not filled in by ReadRequest and
+          has no defined format. The HTTP server in this package
+          sets RemoteAddr to an "IP:port" address before invoking a
+          handler.
+          This field is ignored by the HTTP client.
+        type: string
+      requestURI:
+        description: |-
+          RequestURI is the unmodified request-target of the
+          Request-Line (RFC 7230, Section 3.1.1) as sent by the client
+          to a server. Usually the URL field should be used instead.
+          It is an error to set this field in an HTTP client request.
+        type: string
+      response:
+        allOf:
+        - $ref: '#/definitions/http.Response'
+        description: |-
+          Response is the redirect response which caused this request
+          to be created. This field is only populated during client
+          redirects.
+      tls:
+        allOf:
+        - $ref: '#/definitions/tls.ConnectionState'
+        description: |-
+          TLS allows HTTP servers and other software to record
+          information about the TLS connection on which the request
+          was received. This field is not filled in by ReadRequest.
+          The HTTP server in this package sets the field for
+          TLS-enabled connections before invoking a handler;
+          otherwise it leaves the field nil.
+          This field is ignored by the HTTP client.
+      trailer:
+        allOf:
+        - $ref: '#/definitions/http.Header'
+        description: |-
+          Trailer specifies additional headers that are sent after the request
+          body.
+
+          For server requests, the Trailer map initially contains only the
+          trailer keys, with nil values. (The client declares which trailers it
+          will later send.)  While the handler is reading from Body, it must
+          not reference Trailer. After reading from Body returns EOF, Trailer
+          can be read again and will contain non-nil values, if they were sent
+          by the client.
+
+          For client requests, Trailer must be initialized to a map containing
+          the trailer keys to later send. The values may be nil or their final
+          values. The ContentLength must be 0 or -1, to send a chunked request.
+          After the HTTP request is sent the map values can be updated while
+          the request body is read. Once the body returns EOF, the caller must
+          not mutate Trailer.
+
+          Few HTTP clients, servers, or proxies support HTTP trailers.
+      transferEncoding:
+        description: |-
+          TransferEncoding lists the transfer encodings from outermost to
+          innermost. An empty list denotes the "identity" encoding.
+          TransferEncoding can usually be ignored; chunked encoding is
+          automatically added and removed as necessary when sending and
+          receiving requests.
+        items:
+          type: string
+        type: array
+      url:
+        allOf:
+        - $ref: '#/definitions/url.URL'
+        description: |-
+          URL specifies either the URI being requested (for server
+          requests) or the URL to access (for client requests).
+
+          For server requests, the URL is parsed from the URI
+          supplied on the Request-Line as stored in RequestURI.  For
+          most requests, fields other than Path and RawQuery will be
+          empty. (See RFC 7230, Section 5.3)
+
+          For client requests, the URL's Host specifies the server to
+          connect to, while the Request's Host field optionally
+          specifies the Host header value to send in the HTTP
+          request.
+    type: object
+  http.Response:
+    properties:
+      body:
+        description: |-
+          Body represents the response body.
+
+          The response body is streamed on demand as the Body field
+          is read. If the network connection fails or the server
+          terminates the response, Body.Read calls return an error.
+
+          The http Client and Transport guarantee that Body is always
+          non-nil, even on responses without a body or responses with
+          a zero-length body. It is the caller's responsibility to
+          close Body. The default HTTP client's Transport may not
+          reuse HTTP/1.x "keep-alive" TCP connections if the Body is
+          not read to completion and closed.
+
+          The Body is automatically dechunked if the server replied
+          with a "chunked" Transfer-Encoding.
+
+          As of Go 1.12, the Body will also implement io.Writer
+          on a successful "101 Switching Protocols" response,
+          as used by WebSockets and HTTP/2's "h2c" mode.
+      close:
+        description: |-
+          Close records whether the header directed that the connection be
+          closed after reading Body. The value is advice for clients: neither
+          ReadResponse nor Response.Write ever closes a connection.
+        type: boolean
+      contentLength:
+        description: |-
+          ContentLength records the length of the associated content. The
+          value -1 indicates that the length is unknown. Unless Request.Method
+          is "HEAD", values >= 0 indicate that the given number of bytes may
+          be read from Body.
+        type: integer
+      header:
+        allOf:
+        - $ref: '#/definitions/http.Header'
+        description: |-
+          Header maps header keys to values. If the response had multiple
+          headers with the same key, they may be concatenated, with comma
+          delimiters.  (RFC 7230, section 3.2.2 requires that multiple headers
+          be semantically equivalent to a comma-delimited sequence.) When
+          Header values are duplicated by other fields in this struct (e.g.,
+          ContentLength, TransferEncoding, Trailer), the field values are
+          authoritative.
+
+          Keys in the map are canonicalized (see CanonicalHeaderKey).
+      proto:
+        description: e.g. "HTTP/1.0"
+        type: string
+      protoMajor:
+        description: e.g. 1
+        type: integer
+      protoMinor:
+        description: e.g. 0
+        type: integer
+      request:
+        allOf:
+        - $ref: '#/definitions/http.Request'
+        description: |-
+          Request is the request that was sent to obtain this Response.
+          Request's Body is nil (having already been consumed).
+          This is only populated for Client requests.
+      status:
+        description: e.g. "200 OK"
+        type: string
+      statusCode:
+        description: e.g. 200
+        type: integer
+      tls:
+        allOf:
+        - $ref: '#/definitions/tls.ConnectionState'
+        description: |-
+          TLS contains information about the TLS connection on which the
+          response was received. It is nil for unencrypted responses.
+          The pointer is shared between responses and should not be
+          modified.
+      trailer:
+        allOf:
+        - $ref: '#/definitions/http.Header'
+        description: |-
+          Trailer maps trailer keys to values in the same
+          format as Header.
+
+          The Trailer initially contains only nil values, one for
+          each key specified in the server's "Trailer" header
+          value. Those values are not added to Header.
+
+          Trailer must not be accessed concurrently with Read calls
+          on the Body.
+
+          After Body.Read has returned io.EOF, Trailer will contain
+          any trailer values sent by the server.
+      transferEncoding:
+        description: |-
+          Contains transfer encodings from outer-most to inner-most. Value is
+          nil, means that "identity" encoding is used.
+        items:
+          type: string
+        type: array
+      uncompressed:
+        description: |-
+          Uncompressed reports whether the response was sent compressed but
+          was decompressed by the http package. When true, reading from
+          Body yields the uncompressed content instead of the compressed
+          content actually set from the server, ContentLength is set to -1,
+          and the "Content-Length" and "Content-Encoding" fields are deleted
+          from the responseHeader. To get the original response from
+          the server, set Transport.DisableCompression to true.
+        type: boolean
     type: object
   models.Assays:
     properties:
@@ -1249,6 +1592,43 @@ definitions:
         type: string
       title:
         type: string
+    type: object
+  multipart.FileHeader:
+    properties:
+      filename:
+        type: string
+      header:
+        $ref: '#/definitions/textproto.MIMEHeader'
+      size:
+        type: integer
+    type: object
+  multipart.Form:
+    properties:
+      file:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/multipart.FileHeader'
+          type: array
+        type: object
+      value:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        type: object
+    type: object
+  net.IPNet:
+    properties:
+      ip:
+        description: network number
+        items:
+          type: integer
+        type: array
+      mask:
+        description: network mask
+        items:
+          type: integer
+        type: array
     type: object
   object_builder_service.ActionRelation:
     properties:
@@ -2254,6 +2634,61 @@ definitions:
       project_id:
         type: string
     type: object
+  pkix.AttributeTypeAndValue:
+    properties:
+      type:
+        items:
+          type: integer
+        type: array
+      value: {}
+    type: object
+  pkix.Extension:
+    properties:
+      critical:
+        type: boolean
+      id:
+        items:
+          type: integer
+        type: array
+      value:
+        items:
+          type: integer
+        type: array
+    type: object
+  pkix.Name:
+    properties:
+      country:
+        items:
+          type: string
+        type: array
+      extraNames:
+        description: |-
+          ExtraNames contains attributes to be copied, raw, into any marshaled
+          distinguished names. Values override any attributes with the same OID.
+          The ExtraNames field is not populated when parsing, see Names.
+        items:
+          $ref: '#/definitions/pkix.AttributeTypeAndValue'
+        type: array
+      locality:
+        items:
+          type: string
+        type: array
+      names:
+        description: |-
+          Names contains all parsed attributes. When parsing distinguished names,
+          this can be used to extract non-standard attributes that are not parsed
+          by this package. When marshaling to RDNSequences, the Names field is
+          ignored, see ExtraNames.
+        items:
+          $ref: '#/definitions/pkix.AttributeTypeAndValue'
+        type: array
+      serialNumber:
+        type: string
+      streetAddress:
+        items:
+          type: string
+        type: array
+    type: object
   pos_service.BookedAppointment:
     properties:
       date:
@@ -2405,6 +2840,468 @@ definitions:
       kind:
         description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
     type: object
+  textproto.MIMEHeader:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  tls.ConnectionState:
+    properties:
+      cipherSuite:
+        description: |-
+          CipherSuite is the cipher suite negotiated for the connection (e.g.
+          TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_AES_128_GCM_SHA256).
+        type: integer
+      didResume:
+        description: |-
+          DidResume is true if this connection was successfully resumed from a
+          previous session with a session ticket or similar mechanism.
+        type: boolean
+      handshakeComplete:
+        description: HandshakeComplete is true if the handshake has concluded.
+        type: boolean
+      negotiatedProtocol:
+        description: NegotiatedProtocol is the application protocol negotiated with
+          ALPN.
+        type: string
+      negotiatedProtocolIsMutual:
+        description: |-
+          NegotiatedProtocolIsMutual used to indicate a mutual NPN negotiation.
+
+          Deprecated: this value is always true.
+        type: boolean
+      ocspresponse:
+        description: |-
+          OCSPResponse is a stapled Online Certificate Status Protocol (OCSP)
+          response provided by the peer for the leaf certificate, if any.
+        items:
+          type: integer
+        type: array
+      peerCertificates:
+        description: |-
+          PeerCertificates are the parsed certificates sent by the peer, in the
+          order in which they were sent. The first element is the leaf certificate
+          that the connection is verified against.
+
+          On the client side, it can't be empty. On the server side, it can be
+          empty if Config.ClientAuth is not RequireAnyClientCert or
+          RequireAndVerifyClientCert.
+        items:
+          $ref: '#/definitions/x509.Certificate'
+        type: array
+      serverName:
+        description: |-
+          ServerName is the value of the Server Name Indication extension sent by
+          the client. It's available both on the server and on the client side.
+        type: string
+      signedCertificateTimestamps:
+        description: |-
+          SignedCertificateTimestamps is a list of SCTs provided by the peer
+          through the TLS handshake for the leaf certificate, if any.
+        items:
+          items:
+            type: integer
+          type: array
+        type: array
+      tlsunique:
+        description: |-
+          TLSUnique contains the "tls-unique" channel binding value (see RFC 5929,
+          Section 3). This value will be nil for TLS 1.3 connections and for all
+          resumed connections.
+
+          Deprecated: there are conditions in which this value might not be unique
+          to a connection. See the Security Considerations sections of RFC 5705 and
+          RFC 7627, and https://mitls.org/pages/attacks/3SHAKE#channelbindings.
+        items:
+          type: integer
+        type: array
+      verifiedChains:
+        description: |-
+          VerifiedChains is a list of one or more chains where the first element is
+          PeerCertificates[0] and the last element is from Config.RootCAs (on the
+          client side) or Config.ClientCAs (on the server side).
+
+          On the client side, it's set if Config.InsecureSkipVerify is false. On
+          the server side, it's set if Config.ClientAuth is VerifyClientCertIfGiven
+          (and the peer provided a certificate) or RequireAndVerifyClientCert.
+        items:
+          items:
+            $ref: '#/definitions/x509.Certificate'
+          type: array
+        type: array
+      version:
+        description: Version is the TLS version used by the connection (e.g. VersionTLS12).
+        type: integer
+    type: object
+  url.URL:
+    properties:
+      forceQuery:
+        description: append a query ('?') even if RawQuery is empty
+        type: boolean
+      fragment:
+        description: fragment for references, without '#'
+        type: string
+      host:
+        description: host or host:port
+        type: string
+      opaque:
+        description: encoded opaque data
+        type: string
+      path:
+        description: path (relative paths may omit leading slash)
+        type: string
+      rawFragment:
+        description: encoded fragment hint (see EscapedFragment method)
+        type: string
+      rawPath:
+        description: encoded path hint (see EscapedPath method)
+        type: string
+      rawQuery:
+        description: encoded query values, without '?'
+        type: string
+      scheme:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/url.Userinfo'
+        description: username and password information
+    type: object
+  url.Userinfo:
+    type: object
+  url.Values:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  x509.Certificate:
+    properties:
+      authorityKeyId:
+        items:
+          type: integer
+        type: array
+      basicConstraintsValid:
+        description: |-
+          BasicConstraintsValid indicates whether IsCA, MaxPathLen,
+          and MaxPathLenZero are valid.
+        type: boolean
+      crldistributionPoints:
+        description: CRL Distribution Points
+        items:
+          type: string
+        type: array
+      dnsnames:
+        description: |-
+          Subject Alternate Name values. (Note that these values may not be valid
+          if invalid values were contained within a parsed certificate. For
+          example, an element of DNSNames may not be a valid DNS domain name.)
+        items:
+          type: string
+        type: array
+      emailAddresses:
+        items:
+          type: string
+        type: array
+      excludedDNSDomains:
+        items:
+          type: string
+        type: array
+      excludedEmailAddresses:
+        items:
+          type: string
+        type: array
+      excludedIPRanges:
+        items:
+          $ref: '#/definitions/net.IPNet'
+        type: array
+      excludedURIDomains:
+        items:
+          type: string
+        type: array
+      extKeyUsage:
+        description: Sequence of extended key usages.
+        items:
+          $ref: '#/definitions/x509.ExtKeyUsage'
+        type: array
+      extensions:
+        description: |-
+          Extensions contains raw X.509 extensions. When parsing certificates,
+          this can be used to extract non-critical extensions that are not
+          parsed by this package. When marshaling certificates, the Extensions
+          field is ignored, see ExtraExtensions.
+        items:
+          $ref: '#/definitions/pkix.Extension'
+        type: array
+      extraExtensions:
+        description: |-
+          ExtraExtensions contains extensions to be copied, raw, into any
+          marshaled certificates. Values override any extensions that would
+          otherwise be produced based on the other fields. The ExtraExtensions
+          field is not populated when parsing certificates, see Extensions.
+        items:
+          $ref: '#/definitions/pkix.Extension'
+        type: array
+      ipaddresses:
+        items:
+          items:
+            type: integer
+          type: array
+        type: array
+      isCA:
+        type: boolean
+      issuer:
+        $ref: '#/definitions/pkix.Name'
+      issuingCertificateURL:
+        items:
+          type: string
+        type: array
+      keyUsage:
+        $ref: '#/definitions/x509.KeyUsage'
+      maxPathLen:
+        description: |-
+          MaxPathLen and MaxPathLenZero indicate the presence and
+          value of the BasicConstraints' "pathLenConstraint".
+
+          When parsing a certificate, a positive non-zero MaxPathLen
+          means that the field was specified, -1 means it was unset,
+          and MaxPathLenZero being true mean that the field was
+          explicitly set to zero. The case of MaxPathLen==0 with MaxPathLenZero==false
+          should be treated equivalent to -1 (unset).
+
+          When generating a certificate, an unset pathLenConstraint
+          can be requested with either MaxPathLen == -1 or using the
+          zero value for both MaxPathLen and MaxPathLenZero.
+        type: integer
+      maxPathLenZero:
+        description: |-
+          MaxPathLenZero indicates that BasicConstraintsValid==true
+          and MaxPathLen==0 should be interpreted as an actual
+          maximum path length of zero. Otherwise, that combination is
+          interpreted as MaxPathLen not being set.
+        type: boolean
+      notBefore:
+        description: Validity bounds.
+        type: string
+      ocspserver:
+        description: RFC 5280, 4.2.2.1 (Authority Information Access)
+        items:
+          type: string
+        type: array
+      permittedDNSDomains:
+        items:
+          type: string
+        type: array
+      permittedDNSDomainsCritical:
+        description: Name constraints
+        type: boolean
+      permittedEmailAddresses:
+        items:
+          type: string
+        type: array
+      permittedIPRanges:
+        items:
+          $ref: '#/definitions/net.IPNet'
+        type: array
+      permittedURIDomains:
+        items:
+          type: string
+        type: array
+      policyIdentifiers:
+        items:
+          items:
+            type: integer
+          type: array
+        type: array
+      publicKey: {}
+      publicKeyAlgorithm:
+        $ref: '#/definitions/x509.PublicKeyAlgorithm'
+      raw:
+        description: Complete ASN.1 DER content (certificate, signature algorithm
+          and signature).
+        items:
+          type: integer
+        type: array
+      rawIssuer:
+        description: DER encoded Issuer
+        items:
+          type: integer
+        type: array
+      rawSubject:
+        description: DER encoded Subject
+        items:
+          type: integer
+        type: array
+      rawSubjectPublicKeyInfo:
+        description: DER encoded SubjectPublicKeyInfo.
+        items:
+          type: integer
+        type: array
+      rawTBSCertificate:
+        description: Certificate part of raw ASN.1 DER content.
+        items:
+          type: integer
+        type: array
+      serialNumber:
+        $ref: '#/definitions/big.Int'
+      signature:
+        items:
+          type: integer
+        type: array
+      signatureAlgorithm:
+        $ref: '#/definitions/x509.SignatureAlgorithm'
+      subject:
+        $ref: '#/definitions/pkix.Name'
+      subjectKeyId:
+        items:
+          type: integer
+        type: array
+      unhandledCriticalExtensions:
+        description: |-
+          UnhandledCriticalExtensions contains a list of extension IDs that
+          were not (fully) processed when parsing. Verify will fail if this
+          slice is non-empty, unless verification is delegated to an OS
+          library which understands all the critical extensions.
+
+          Users can access these extensions using Extensions and can remove
+          elements from this slice if they believe that they have been
+          handled.
+        items:
+          items:
+            type: integer
+          type: array
+        type: array
+      unknownExtKeyUsage:
+        description: Encountered extended key usages unknown to this package.
+        items:
+          items:
+            type: integer
+          type: array
+        type: array
+      uris:
+        items:
+          $ref: '#/definitions/url.URL'
+        type: array
+      version:
+        type: integer
+    type: object
+  x509.ExtKeyUsage:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    type: integer
+    x-enum-varnames:
+    - ExtKeyUsageAny
+    - ExtKeyUsageServerAuth
+    - ExtKeyUsageClientAuth
+    - ExtKeyUsageCodeSigning
+    - ExtKeyUsageEmailProtection
+    - ExtKeyUsageIPSECEndSystem
+    - ExtKeyUsageIPSECTunnel
+    - ExtKeyUsageIPSECUser
+    - ExtKeyUsageTimeStamping
+    - ExtKeyUsageOCSPSigning
+    - ExtKeyUsageMicrosoftServerGatedCrypto
+    - ExtKeyUsageNetscapeServerGatedCrypto
+    - ExtKeyUsageMicrosoftCommercialCodeSigning
+    - ExtKeyUsageMicrosoftKernelCodeSigning
+  x509.KeyUsage:
+    enum:
+    - 1
+    - 2
+    - 4
+    - 8
+    - 16
+    - 32
+    - 64
+    - 128
+    - 256
+    type: integer
+    x-enum-varnames:
+    - KeyUsageDigitalSignature
+    - KeyUsageContentCommitment
+    - KeyUsageKeyEncipherment
+    - KeyUsageDataEncipherment
+    - KeyUsageKeyAgreement
+    - KeyUsageCertSign
+    - KeyUsageCRLSign
+    - KeyUsageEncipherOnly
+    - KeyUsageDecipherOnly
+  x509.PublicKeyAlgorithm:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-comments:
+      DSA: Unsupported.
+    x-enum-varnames:
+    - UnknownPublicKeyAlgorithm
+    - RSA
+    - DSA
+    - ECDSA
+    - Ed25519
+  x509.SignatureAlgorithm:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    type: integer
+    x-enum-comments:
+      DSAWithSHA1: Unsupported.
+      DSAWithSHA256: Unsupported.
+      ECDSAWithSHA1: Only supported for signing, and verification of CRLs, CSRs, and
+        OCSP responses.
+      MD2WithRSA: Unsupported.
+      MD5WithRSA: Only supported for signing, not verification.
+      SHA1WithRSA: Only supported for signing, and verification of CRLs, CSRs, and
+        OCSP responses.
+    x-enum-varnames:
+    - UnknownSignatureAlgorithm
+    - MD2WithRSA
+    - MD5WithRSA
+    - SHA1WithRSA
+    - SHA256WithRSA
+    - SHA384WithRSA
+    - SHA512WithRSA
+    - DSAWithSHA1
+    - DSAWithSHA256
+    - ECDSAWithSHA1
+    - ECDSAWithSHA256
+    - ECDSAWithSHA384
+    - ECDSAWithSHA512
+    - SHA256WithRSAPSS
+    - SHA384WithRSAPSS
+    - SHA512WithRSAPSS
+    - PureEd25519
 info:
   contact: {}
   description: This is a api gateway
@@ -5039,11 +5936,7 @@ paths:
           description: ProjectResource data
           schema:
             allOf:
-<<<<<<< HEAD
             - $ref: '#/definitions/status_http.Response'
-=======
-            - $ref: '#/definitions/http.Response'
->>>>>>> 0eb328ad367b4d09203f87472a7eb1b60e5ae609
             - properties:
                 data:
                   $ref: '#/definitions/company_service.ConfigureResourceResponse'
@@ -5052,11 +5945,7 @@ paths:
           description: Bad Request
           schema:
             allOf:
-<<<<<<< HEAD
             - $ref: '#/definitions/status_http.Response'
-=======
-            - $ref: '#/definitions/http.Response'
->>>>>>> 0eb328ad367b4d09203f87472a7eb1b60e5ae609
             - properties:
                 data:
                   type: string
@@ -5065,11 +5954,7 @@ paths:
           description: Server Error
           schema:
             allOf:
-<<<<<<< HEAD
             - $ref: '#/definitions/status_http.Response'
-=======
-            - $ref: '#/definitions/http.Response'
->>>>>>> 0eb328ad367b4d09203f87472a7eb1b60e5ae609
             - properties:
                 data:
                   type: string
@@ -5293,8 +6178,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Add ProjectResource
-<<<<<<< HEAD
-=======
       tags:
       - Company Resource
   /v1/company/project/resource-environment/{resource_id}:
@@ -5347,7 +6230,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get Resource Environment by id
->>>>>>> 0eb328ad367b4d09203f87472a7eb1b60e5ae609
       tags:
       - Company Resource
   /v1/company/project/resource/{resource_id}:
