@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -330,6 +330,34 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 			UserId:    authInfo.GetUserId(),
 			ProjectId: resp.GetProjectId(),
 			CompanyId: project.GetCompanyId(),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	_, err = h.companyServices.EnvironmentService().Create(
+		c.Request.Context(),
+		&company_service.CreateEnvironmentRequest{
+			ProjectId:    resp.ProjectId,
+			Name:         "production",
+			DisplayColor: "#00FF00",
+			Description:  "Production Environment",
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	_, err = h.companyServices.EnvironmentService().Create(
+		c.Request.Context(),
+		&company_service.CreateEnvironmentRequest{
+			ProjectId:    resp.ProjectId,
+			Name:         "staging",
+			DisplayColor: "#FFFF00",
+			Description:  "Test Environment",
 		},
 	)
 	if err != nil {
