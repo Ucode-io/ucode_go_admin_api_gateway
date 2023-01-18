@@ -1,0 +1,7 @@
+syntax="proto3";
+
+package api_reference_service;
+option go_package="genproto/api_reference_service";
+
+import "api_reference.proto";
+import "categories.proto";

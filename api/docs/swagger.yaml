@@ -224,12 +224,16 @@ definitions:
         $ref: '#/definitions/auth_service.ClientPlatform'
       client_type:
         $ref: '#/definitions/auth_service.ClientType'
+      environment_id:
+        type: string
       login_table_slug:
         type: string
       permissions:
         items:
           $ref: '#/definitions/auth_service.RecordPermission'
         type: array
+      resource_id:
+        type: string
       role:
         $ref: '#/definitions/auth_service.Role'
       sessions:
@@ -622,6 +626,10 @@ definitions:
       analyticsGRPCPort:
         type: string
       analyticsServiceHost:
+        type: string
+      apiReferenceServiceHost:
+        type: string
+      apiReferenceServicePort:
         type: string
       authGRPCPort:
         type: string
@@ -1038,6 +1046,32 @@ definitions:
           the server, set Transport.DisableCompression to true.
         type: boolean
     type: object
+  models.ApiReference:
+    properties:
+      additional_url:
+        type: string
+      attributes:
+        additionalProperties: true
+        type: object
+      authentification:
+        type: boolean
+      category_id:
+        type: string
+      desc:
+        type: string
+      external_url:
+        type: string
+      guid:
+        type: string
+      method:
+        type: string
+      new_window:
+        type: boolean
+      project_id:
+        type: string
+      title:
+        type: string
+    type: object
   models.Assays:
     properties:
       item:
@@ -1057,6 +1091,20 @@ definitions:
   models.AssaysOrders:
     properties:
       item_code:
+        type: string
+    type: object
+  models.Category:
+    properties:
+      attributes:
+        additionalProperties: true
+        type: object
+      base_url:
+        type: string
+      guid:
+        type: string
+      name:
+        type: string
+      project_id:
         type: string
     type: object
   models.CommonInput:
@@ -1087,6 +1135,30 @@ definitions:
       company_id:
         type: string
     type: object
+  models.CreateApiReference:
+    properties:
+      additional_url:
+        type: string
+      attributes:
+        additionalProperties: true
+        type: object
+      authentification:
+        type: boolean
+      category_id:
+        type: string
+      desc:
+        type: string
+      external_url:
+        type: string
+      method:
+        type: string
+      new_window:
+        type: boolean
+      project_id:
+        type: string
+      title:
+        type: string
+    type: object
   models.CreateCashboxTransactionRequest:
     properties:
       amount_of_money:
@@ -1094,6 +1166,18 @@ definitions:
       comment:
         type: string
       status:
+        type: string
+    type: object
+  models.CreateCategory:
+    properties:
+      attributes:
+        additionalProperties: true
+        type: object
+      base_url:
+        type: string
+      name:
+        type: string
+      project_id:
         type: string
     type: object
   models.CreateDashboardRequest:
@@ -1374,6 +1458,24 @@ definitions:
         type: string
       url:
         type: string
+    type: object
+  models.GetAllApiReferenceResponse:
+    properties:
+      api_refences:
+        items:
+          $ref: '#/definitions/models.ApiReference'
+        type: array
+      count:
+        type: integer
+    type: object
+  models.GetAllCategoriesResponse:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/models.Category'
+        type: array
+      count:
+        type: integer
     type: object
   models.GetAllDashboardsResponse:
     properties:
@@ -3022,7 +3124,7 @@ definitions:
       extKeyUsage:
         description: Sequence of extended key usages.
         items:
-          $ref: '#/definitions/x509.ExtKeyUsage'
+          type: integer
         type: array
       extensions:
         description: |-
@@ -3057,7 +3159,7 @@ definitions:
           type: string
         type: array
       keyUsage:
-        $ref: '#/definitions/x509.KeyUsage'
+        type: integer
       maxPathLen:
         description: |-
           MaxPathLen and MaxPathLenZero indicate the presence and
@@ -3115,7 +3217,7 @@ definitions:
         type: array
       publicKey: {}
       publicKeyAlgorithm:
-        $ref: '#/definitions/x509.PublicKeyAlgorithm'
+        type: integer
       raw:
         description: Complete ASN.1 DER content (certificate, signature algorithm
           and signature).
@@ -3149,7 +3251,7 @@ definitions:
           type: integer
         type: array
       signatureAlgorithm:
-        $ref: '#/definitions/x509.SignatureAlgorithm'
+        type: integer
       subject:
         $ref: '#/definitions/pkix.Name'
       subjectKeyId:
@@ -3185,123 +3287,6 @@ definitions:
       version:
         type: integer
     type: object
-  x509.ExtKeyUsage:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
-    - 10
-    - 11
-    - 12
-    - 13
-    type: integer
-    x-enum-varnames:
-    - ExtKeyUsageAny
-    - ExtKeyUsageServerAuth
-    - ExtKeyUsageClientAuth
-    - ExtKeyUsageCodeSigning
-    - ExtKeyUsageEmailProtection
-    - ExtKeyUsageIPSECEndSystem
-    - ExtKeyUsageIPSECTunnel
-    - ExtKeyUsageIPSECUser
-    - ExtKeyUsageTimeStamping
-    - ExtKeyUsageOCSPSigning
-    - ExtKeyUsageMicrosoftServerGatedCrypto
-    - ExtKeyUsageNetscapeServerGatedCrypto
-    - ExtKeyUsageMicrosoftCommercialCodeSigning
-    - ExtKeyUsageMicrosoftKernelCodeSigning
-  x509.KeyUsage:
-    enum:
-    - 1
-    - 2
-    - 4
-    - 8
-    - 16
-    - 32
-    - 64
-    - 128
-    - 256
-    type: integer
-    x-enum-varnames:
-    - KeyUsageDigitalSignature
-    - KeyUsageContentCommitment
-    - KeyUsageKeyEncipherment
-    - KeyUsageDataEncipherment
-    - KeyUsageKeyAgreement
-    - KeyUsageCertSign
-    - KeyUsageCRLSign
-    - KeyUsageEncipherOnly
-    - KeyUsageDecipherOnly
-  x509.PublicKeyAlgorithm:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    type: integer
-    x-enum-comments:
-      DSA: Unsupported.
-    x-enum-varnames:
-    - UnknownPublicKeyAlgorithm
-    - RSA
-    - DSA
-    - ECDSA
-    - Ed25519
-  x509.SignatureAlgorithm:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
-    - 10
-    - 11
-    - 12
-    - 13
-    - 14
-    - 15
-    - 16
-    type: integer
-    x-enum-comments:
-      DSAWithSHA1: Unsupported.
-      DSAWithSHA256: Unsupported.
-      ECDSAWithSHA1: Only supported for signing, and verification of CRLs, CSRs, and
-        OCSP responses.
-      MD2WithRSA: Unsupported.
-      MD5WithRSA: Only supported for signing, not verification.
-      SHA1WithRSA: Only supported for signing, and verification of CRLs, CSRs, and
-        OCSP responses.
-    x-enum-varnames:
-    - UnknownSignatureAlgorithm
-    - MD2WithRSA
-    - MD5WithRSA
-    - SHA1WithRSA
-    - SHA256WithRSA
-    - SHA384WithRSA
-    - SHA512WithRSA
-    - DSAWithSHA1
-    - DSAWithSHA256
-    - ECDSAWithSHA1
-    - ECDSAWithSHA256
-    - ECDSAWithSHA384
-    - ECDSAWithSHA512
-    - SHA256WithRSAPSS
-    - SHA384WithRSAPSS
-    - SHA512WithRSAPSS
-    - PureEd25519
 info:
   contact: {}
   description: This is a api gateway
@@ -4899,6 +4884,240 @@ paths:
       summary: Get single variable
       tags:
       - Variable
+  /v1/api-reference:
+    get:
+      consumes:
+      - application/json
+      description: Get all api reference
+      operationId: get_all_api_reference
+      parameters:
+      - in: query
+        name: category_id
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ApiReferencesBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetAllApiReferenceResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all apps
+      tags:
+      - ApiReference
+    post:
+      consumes:
+      - application/json
+      description: Create api reference
+      operationId: create_api_reference
+      parameters:
+      - description: CreateApiReferenceRequestBody
+        in: body
+        name: app
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateApiReference'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Api Reference data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ApiReference'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create api reference
+      tags:
+      - ApiReference
+    put:
+      consumes:
+      - application/json
+      description: Update api reference
+      operationId: update_reference
+      parameters:
+      - description: UpdateApiReferenceRequestBody
+        in: body
+        name: api_reference
+        required: true
+        schema:
+          $ref: '#/definitions/models.ApiReference'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Api Reference data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ApiReference'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update api reference
+      tags:
+      - ApiReference
+  /v1/api-reference/{api_reference_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete App
+      operationId: delete_api_reference
+      parameters:
+      - description: api_reference_id
+        in: path
+        name: api_reference_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete App
+      tags:
+      - ApiReference
+    get:
+      consumes:
+      - application/json
+      description: Get api reference by id
+      operationId: get_api_reference_by_id
+      parameters:
+      - description: api_reference_id
+        in: path
+        name: api_reference_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: AppBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ApiReference'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get api reference by id
+      tags:
+      - ApiReference
   /v1/app:
     get:
       consumes:
@@ -5376,6 +5595,237 @@ paths:
       summary: Create cashbox transaction
       tags:
       - Cashbox
+  /v1/category:
+    get:
+      consumes:
+      - application/json
+      description: Get all categories
+      operationId: get_all_category
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetAllCategoriesBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetAllCategoriesResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all categories
+      tags:
+      - ApiReference
+    post:
+      consumes:
+      - application/json
+      description: Create category
+      operationId: create_category
+      parameters:
+      - description: CreateApiReferenceRequestBody
+        in: body
+        name: app
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCategory'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Categoryç data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create category
+      tags:
+      - ApiReference
+    put:
+      consumes:
+      - application/json
+      description: Update category
+      operationId: update_reference
+      parameters:
+      - description: UpdateCategoryRequestBody
+        in: body
+        name: api_reference
+        required: true
+        schema:
+          $ref: '#/definitions/models.Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Category data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update category
+      tags:
+      - ApiReference
+  /v1/category/{category_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete App
+      operationId: delete_api_reference
+      parameters:
+      - description: category_id
+        in: path
+        name: category_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete App
+      tags:
+      - ApiReference
+    get:
+      consumes:
+      - application/json
+      description: Get api reference by id
+      operationId: get_category_by_id
+      parameters:
+      - description: category_id
+        in: path
+        name: category_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: AppBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ApiReference'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get api reference by id
+      tags:
+      - ApiReference
   /v1/close-cashbox:
     get:
       consumes:

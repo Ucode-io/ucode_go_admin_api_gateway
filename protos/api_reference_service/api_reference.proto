@@ -1,0 +1,65 @@
+syntax="proto3";
+
+package api_reference_service;
+option go_package="genproto/api_reference_service";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+
+service ApiReferenceService {
+    rpc Create (CreateApiReferenceRequest) returns (ApiReference) {}
+    rpc Update (ApiReference) returns (ApiReference) {}
+    rpc Get (GetApiReferenceRequest) returns (ApiReference) {}
+    rpc GetList (GetListApiReferenceRequest) returns (GetListApiReferenceResponse) {}
+    rpc Delete (DeleteApiReferenceRequest) returns (google.protobuf.Empty) {}
+}
+
+message CreateApiReferenceRequest {
+    string name = 1;
+    string additional_url = 2;
+    string title = 3;
+    string desc = 4;
+    string method = 5;
+    string category_id = 6;
+    string external_url = 7;
+    bool authentification = 8;
+    bool new_window = 9;
+    google.protobuf.Struct attributes = 10;
+    string project_id = 11;
+}
+
+message ApiReference {
+    string guid = 1;
+    string name = 2;
+    string additional_url = 3;
+    string title = 4;
+    string desc = 5;
+    string method = 6;
+    string category_id = 7;
+    string external_url = 8;
+    bool authentification = 9;
+    bool new_window = 10;
+    google.protobuf.Struct attributes = 11;
+    string project_id = 12;
+}
+
+
+message GetApiReferenceRequest {
+    string guid = 1;
+}
+
+message GetListApiReferenceRequest {
+    int64 limit = 1;
+    int64 offset = 2;
+    string category_id = 3;
+    string project_id = 4;
+}
+
+message GetListApiReferenceResponse {
+    int64 count = 1;
+    repeated ApiReference api_references = 2;
+}
+
+message DeleteApiReferenceRequest {
+    string guid = 1;
+}

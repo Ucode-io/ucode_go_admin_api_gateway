@@ -5,6 +5,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/genproto/analytics_service"
+	"ucode/ucode_go_api_gateway/genproto/api_reference_service"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -59,6 +60,8 @@ type ServiceManagerI interface {
 	EnvironmentService() company_service.EnvironmentServiceClient
 	ResourceService() company_service.ResourceServiceClient
 	TableHelpersService() object_builder_service.TableHelpersServiceClient
+	ApiReferenceService() api_reference_service.ApiReferenceServiceClient
+	CategoryService() api_reference_service.CategoryServiceClient
 }
 
 type grpcClients struct {
@@ -103,7 +106,9 @@ type grpcClients struct {
 	cascadingService          object_builder_service.CascadingServiceClient
 	environmentService        company_service.EnvironmentServiceClient
 	resourceService           company_service.ResourceServiceClient
-	tableHelpersService        object_builder_service.TableHelpersServiceClient
+	tableHelpersService       object_builder_service.TableHelpersServiceClient
+	apiReferenceService       api_reference_service.ApiReferenceServiceClient
+	categoryService           api_reference_service.CategoryServiceClient
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -158,6 +163,11 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		cfg.CompanyServiceHost+cfg.CompanyServicePort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
+	connApiReferenceService, err := grpc.DialContext(
+		ctx,
+		cfg.ApiReferenceServiceHost+cfg.ApiReferenceServicePort,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 
 	if err != nil {
 		return nil, err
@@ -205,7 +215,9 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		cascadingService:          object_builder_service.NewCascadingServiceClient(connObjectBuilderService),
 		environmentService:        company_service.NewEnvironmentServiceClient(connCompanyService),
 		resourceService:           company_service.NewResourceServiceClient(connCompanyService),
-		tableHelpersService:        object_builder_service.NewTableHelpersServiceClient(connObjectBuilderService),
+		tableHelpersService:       object_builder_service.NewTableHelpersServiceClient(connObjectBuilderService),
+		apiReferenceService:       api_reference_service.NewApiReferenceServiceClient(connApiReferenceService),
+		categoryService:           api_reference_service.NewCategoryServiceClient(connApiReferenceService),
 	}, nil
 }
 
@@ -380,4 +392,14 @@ func (g *grpcClients) CascadingService() object_builder_service.CascadingService
 
 func (g *grpcClients) ResourceService() company_service.ResourceServiceClient {
 	return g.resourceService
+}
+
+//this is api reference service
+
+func (g *grpcClients) ApiReferenceService() api_reference_service.ApiReferenceServiceClient {
+	return g.apiReferenceService
+}
+
+func (g *grpcClients) CategoryService() api_reference_service.CategoryServiceClient {
+	return g.categoryService
 }

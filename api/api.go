@@ -36,7 +36,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	v1.Use(h.AuthMiddleware())
+	// v1.Use(h.AuthMiddleware())
 	{
 		v1.POST("/upload", h.Upload)
 		v1.POST("/upload-file/:table_slug/:object_id", h.UploadFile)
@@ -213,7 +213,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	}
 
 	v1Admin := r.Group("/v1")
-	v1Admin.Use(h.AdminAuthMiddleware())
+	// v1Admin.Use(h.AdminAuthMiddleware())
 	{
 		// company service
 		// v1.POST("/company", h.CreateCompany)
@@ -245,6 +245,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/environment", h.GetAllEnvironments)
 		v1Admin.PUT("/environment", h.UpdateEnvironment)
 		v1Admin.DELETE("/environment/:environment_id", h.DeleteEnvironment)
+		//api-reference service
+		v1Admin.POST("/api-reference", h.CreateApiReference)
+		v1Admin.PUT("/api-reference", h.UpdateApiReference)
+		v1Admin.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
+		v1Admin.GET("api-reference", h.GetAllApiReferences)
 	}
 
 	// v3 for ucode version 2

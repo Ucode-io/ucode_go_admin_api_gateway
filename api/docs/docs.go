@@ -2840,6 +2840,432 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/api-reference": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all api reference",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Get all apps",
+                "operationId": "get_all_api_reference",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "category_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ApiReferencesBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.GetAllApiReferenceResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update api reference",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Update api reference",
+                "operationId": "update_reference",
+                "parameters": [
+                    {
+                        "description": "UpdateApiReferenceRequestBody",
+                        "name": "api_reference",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiReference"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Api Reference data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ApiReference"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create api reference",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Create api reference",
+                "operationId": "create_api_reference",
+                "parameters": [
+                    {
+                        "description": "CreateApiReferenceRequestBody",
+                        "name": "app",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateApiReference"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Api Reference data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ApiReference"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/api-reference/{api_reference_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get api reference by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Get api reference by id",
+                "operationId": "get_api_reference_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "api_reference_id",
+                        "name": "api_reference_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AppBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ApiReference"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete App",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Delete App",
+                "operationId": "delete_api_reference",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "api_reference_id",
+                        "name": "api_reference_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/app": {
             "get": {
                 "security": [
@@ -3651,6 +4077,427 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/category": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all categories",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Get all categories",
+                "operationId": "get_all_category",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetAllCategoriesBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.GetAllCategoriesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Update category",
+                "operationId": "update_reference",
+                "parameters": [
+                    {
+                        "description": "UpdateCategoryRequestBody",
+                        "name": "api_reference",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Category"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Category data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Category"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Create category",
+                "operationId": "create_category",
+                "parameters": [
+                    {
+                        "description": "CreateApiReferenceRequestBody",
+                        "name": "app",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateCategory"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Categoryç data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Category"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/category/{category_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get api reference by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Get api reference by id",
+                "operationId": "get_category_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "category_id",
+                        "name": "category_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AppBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ApiReference"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete App",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Delete App",
+                "operationId": "delete_api_reference",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "category_id",
+                        "name": "category_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
@@ -15580,6 +16427,9 @@ const docTemplate = `{
                 "client_type": {
                     "$ref": "#/definitions/auth_service.ClientType"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "login_table_slug": {
                     "type": "string"
                 },
@@ -15588,6 +16438,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/auth_service.RecordPermission"
                     }
+                },
+                "resource_id": {
+                    "type": "string"
                 },
                 "role": {
                     "$ref": "#/definitions/auth_service.Role"
@@ -16189,6 +17042,12 @@ const docTemplate = `{
                 "analyticsServiceHost": {
                     "type": "string"
                 },
+                "apiReferenceServiceHost": {
+                    "type": "string"
+                },
+                "apiReferenceServicePort": {
+                    "type": "string"
+                },
                 "authGRPCPort": {
                     "type": "string"
                 },
@@ -16508,6 +17367,45 @@ const docTemplate = `{
                 }
             }
         },
+        "models.ApiReference": {
+            "type": "object",
+            "properties": {
+                "additional_url": {
+                    "type": "string"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "authentification": {
+                    "type": "boolean"
+                },
+                "category_id": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "external_url": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "new_window": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Assays": {
             "type": "object",
             "properties": {
@@ -16537,6 +17435,27 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "item_code": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Category": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "base_url": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 }
             }
@@ -16584,6 +17503,42 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CreateApiReference": {
+            "type": "object",
+            "properties": {
+                "additional_url": {
+                    "type": "string"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "authentification": {
+                    "type": "boolean"
+                },
+                "category_id": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "external_url": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "new_window": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CreateCashboxTransactionRequest": {
             "type": "object",
             "properties": {
@@ -16594,6 +17549,24 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateCategory": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "base_url": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 }
             }
@@ -17018,6 +17991,34 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "models.GetAllApiReferenceResponse": {
+            "type": "object",
+            "properties": {
+                "api_refences": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ApiReference"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.GetAllCategoriesResponse": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Category"
+                    }
+                },
+                "count": {
+                    "type": "integer"
                 }
             }
         },
@@ -19452,7 +20453,7 @@ const docTemplate = `{
                     "description": "Sequence of extended key usages.",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/x509.ExtKeyUsage"
+                        "type": "integer"
                     }
                 },
                 "extensions": {
@@ -19491,7 +20492,7 @@ const docTemplate = `{
                     }
                 },
                 "keyUsage": {
-                    "$ref": "#/definitions/x509.KeyUsage"
+                    "type": "integer"
                 },
                 "maxPathLen": {
                     "description": "MaxPathLen and MaxPathLenZero indicate the presence and\nvalue of the BasicConstraints' \"pathLenConstraint\".\n\nWhen parsing a certificate, a positive non-zero MaxPathLen\nmeans that the field was specified, -1 means it was unset,\nand MaxPathLenZero being true mean that the field was\nexplicitly set to zero. The case of MaxPathLen==0 with MaxPathLenZero==false\nshould be treated equivalent to -1 (unset).\n\nWhen generating a certificate, an unset pathLenConstraint\ncan be requested with either MaxPathLen == -1 or using the\nzero value for both MaxPathLen and MaxPathLenZero.",
@@ -19551,7 +20552,7 @@ const docTemplate = `{
                 },
                 "publicKey": {},
                 "publicKeyAlgorithm": {
-                    "$ref": "#/definitions/x509.PublicKeyAlgorithm"
+                    "type": "integer"
                 },
                 "raw": {
                     "description": "Complete ASN.1 DER content (certificate, signature algorithm and signature).",
@@ -19598,7 +20599,7 @@ const docTemplate = `{
                     }
                 },
                 "signatureAlgorithm": {
-                    "$ref": "#/definitions/x509.SignatureAlgorithm"
+                    "type": "integer"
                 },
                 "subject": {
                     "$ref": "#/definitions/pkix.Name"
@@ -19639,135 +20640,6 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
-        },
-        "x509.ExtKeyUsage": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13
-            ],
-            "x-enum-varnames": [
-                "ExtKeyUsageAny",
-                "ExtKeyUsageServerAuth",
-                "ExtKeyUsageClientAuth",
-                "ExtKeyUsageCodeSigning",
-                "ExtKeyUsageEmailProtection",
-                "ExtKeyUsageIPSECEndSystem",
-                "ExtKeyUsageIPSECTunnel",
-                "ExtKeyUsageIPSECUser",
-                "ExtKeyUsageTimeStamping",
-                "ExtKeyUsageOCSPSigning",
-                "ExtKeyUsageMicrosoftServerGatedCrypto",
-                "ExtKeyUsageNetscapeServerGatedCrypto",
-                "ExtKeyUsageMicrosoftCommercialCodeSigning",
-                "ExtKeyUsageMicrosoftKernelCodeSigning"
-            ]
-        },
-        "x509.KeyUsage": {
-            "type": "integer",
-            "enum": [
-                1,
-                2,
-                4,
-                8,
-                16,
-                32,
-                64,
-                128,
-                256
-            ],
-            "x-enum-varnames": [
-                "KeyUsageDigitalSignature",
-                "KeyUsageContentCommitment",
-                "KeyUsageKeyEncipherment",
-                "KeyUsageDataEncipherment",
-                "KeyUsageKeyAgreement",
-                "KeyUsageCertSign",
-                "KeyUsageCRLSign",
-                "KeyUsageEncipherOnly",
-                "KeyUsageDecipherOnly"
-            ]
-        },
-        "x509.PublicKeyAlgorithm": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4
-            ],
-            "x-enum-comments": {
-                "DSA": "Unsupported."
-            },
-            "x-enum-varnames": [
-                "UnknownPublicKeyAlgorithm",
-                "RSA",
-                "DSA",
-                "ECDSA",
-                "Ed25519"
-            ]
-        },
-        "x509.SignatureAlgorithm": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15,
-                16
-            ],
-            "x-enum-comments": {
-                "DSAWithSHA1": "Unsupported.",
-                "DSAWithSHA256": "Unsupported.",
-                "ECDSAWithSHA1": "Only supported for signing, and verification of CRLs, CSRs, and OCSP responses.",
-                "MD2WithRSA": "Unsupported.",
-                "MD5WithRSA": "Only supported for signing, not verification.",
-                "SHA1WithRSA": "Only supported for signing, and verification of CRLs, CSRs, and OCSP responses."
-            },
-            "x-enum-varnames": [
-                "UnknownSignatureAlgorithm",
-                "MD2WithRSA",
-                "MD5WithRSA",
-                "SHA1WithRSA",
-                "SHA256WithRSA",
-                "SHA384WithRSA",
-                "SHA512WithRSA",
-                "DSAWithSHA1",
-                "DSAWithSHA256",
-                "ECDSAWithSHA1",
-                "ECDSAWithSHA256",
-                "ECDSAWithSHA384",
-                "ECDSAWithSHA512",
-                "SHA256WithRSAPSS",
-                "SHA384WithRSAPSS",
-                "SHA512WithRSAPSS",
-                "PureEd25519"
-            ]
         }
     },
     "securityDefinitions": {
