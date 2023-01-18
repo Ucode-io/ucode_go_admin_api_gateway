@@ -167,7 +167,6 @@ message ConfigureResourceRequest {
     string company_id = 8;
     string user_id = 9;
     string resource_id = 10;
-    bool default = 11;
 }
 
 message CreateResourceReq {
