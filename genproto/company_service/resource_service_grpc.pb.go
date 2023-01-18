@@ -36,7 +36,7 @@ type ResourceServiceClient interface {
 	GetResourceByResEnvironId(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error)
 	// resource environment
 	UpsertResourceEnvironment(ctx context.Context, in *UpsertResourceEnvironmentRequest, opts ...grpc.CallOption) (*UpsertResourceEnvironmentResponse, error)
-	GetResourceEnvironment(ctx context.Context, in *GetResourceEnvironmentReq, opts ...grpc.CallOption) (*GetResourceEnvironmentRes, error)
+	GetResourceEnvironment(ctx context.Context, in *GetResourceEnvironmentReq, opts ...grpc.CallOption) (*ResourceEnvironment, error)
 	GetDefaultResourceEnvironment(ctx context.Context, in *GetDefaultResourceEnvironmentReq, opts ...grpc.CallOption) (*ResourceEnvironment, error)
 	GetListResourceEnvironment(ctx context.Context, in *GetListResourceEnvironmentReq, opts ...grpc.CallOption) (*GetListResourceEnvironmentRes, error)
 	GetListConfiguredResourceEnvironment(ctx context.Context, in *GetListConfiguredResourceEnvironmentReq, opts ...grpc.CallOption) (*GetListConfiguredResourceEnvironmentRes, error)
@@ -167,8 +167,8 @@ func (c *resourceServiceClient) UpsertResourceEnvironment(ctx context.Context, i
 	return out, nil
 }
 
-func (c *resourceServiceClient) GetResourceEnvironment(ctx context.Context, in *GetResourceEnvironmentReq, opts ...grpc.CallOption) (*GetResourceEnvironmentRes, error) {
-	out := new(GetResourceEnvironmentRes)
+func (c *resourceServiceClient) GetResourceEnvironment(ctx context.Context, in *GetResourceEnvironmentReq, opts ...grpc.CallOption) (*ResourceEnvironment, error) {
+	out := new(ResourceEnvironment)
 	err := c.cc.Invoke(ctx, "/company_service.ResourceService/GetResourceEnvironment", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ type ResourceServiceServer interface {
 	GetResourceByResEnvironId(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error)
 	// resource environment
 	UpsertResourceEnvironment(context.Context, *UpsertResourceEnvironmentRequest) (*UpsertResourceEnvironmentResponse, error)
-	GetResourceEnvironment(context.Context, *GetResourceEnvironmentReq) (*GetResourceEnvironmentRes, error)
+	GetResourceEnvironment(context.Context, *GetResourceEnvironmentReq) (*ResourceEnvironment, error)
 	GetDefaultResourceEnvironment(context.Context, *GetDefaultResourceEnvironmentReq) (*ResourceEnvironment, error)
 	GetListResourceEnvironment(context.Context, *GetListResourceEnvironmentReq) (*GetListResourceEnvironmentRes, error)
 	GetListConfiguredResourceEnvironment(context.Context, *GetListConfiguredResourceEnvironmentReq) (*GetListConfiguredResourceEnvironmentRes, error)
@@ -271,7 +271,7 @@ func (UnimplementedResourceServiceServer) GetResourceByResEnvironId(context.Cont
 func (UnimplementedResourceServiceServer) UpsertResourceEnvironment(context.Context, *UpsertResourceEnvironmentRequest) (*UpsertResourceEnvironmentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpsertResourceEnvironment not implemented")
 }
-func (UnimplementedResourceServiceServer) GetResourceEnvironment(context.Context, *GetResourceEnvironmentReq) (*GetResourceEnvironmentRes, error) {
+func (UnimplementedResourceServiceServer) GetResourceEnvironment(context.Context, *GetResourceEnvironmentReq) (*ResourceEnvironment, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResourceEnvironment not implemented")
 }
 func (UnimplementedResourceServiceServer) GetDefaultResourceEnvironment(context.Context, *GetDefaultResourceEnvironmentReq) (*ResourceEnvironment, error) {
