@@ -24,16 +24,8 @@ service ResourceService {
     // resource environment
     rpc UpsertResourceEnvironment(UpsertResourceEnvironmentRequest) returns (UpsertResourceEnvironmentResponse) {}
     rpc GetResourceEnvironment(GetResourceEnvironmentReq) returns (GetResourceEnvironmentRes) {}
-    rpc GetDefaultResourceEnvironment(GetDefaultResourceEnvironmentReq) returns (ResourceEnvironment) {}
     rpc GetListResourceEnvironment(GetListResourceEnvironmentReq) returns (GetListResourceEnvironmentRes) {}
     rpc GetListConfiguredResourceEnvironment(GetListConfiguredResourceEnvironmentReq) returns (GetListConfiguredResourceEnvironmentRes) {}
-}
-
-message GetDefaultResourceEnvironmentReq {
-    string id = 1;
-    string project_id = 2;
-    string resource_id = 3;
-    string environment_id = 4;
 }
 
 message GetListConfiguredResourceEnvironmentReq {
