@@ -3400,7 +3400,7 @@ var doc = `{
                     "ApiReference"
                 ],
                 "summary": "Delete App",
-                "operationId": "delete_api_reference",
+                "operationId": "delete_api_reference_id",
                 "parameters": [
                     {
                         "type": "string",
@@ -17988,6 +17988,9 @@ var doc = `{
         "company_service.ResourceWithoutPassword_Environment": {
             "type": "object",
             "properties": {
+                "default": {
+                    "type": "boolean"
+                },
                 "description": {
                     "type": "string"
                 },

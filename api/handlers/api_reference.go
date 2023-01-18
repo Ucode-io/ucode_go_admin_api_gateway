@@ -241,7 +241,7 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 
 // DeleteApiReference godoc
 // @Security ApiKeyAuth
-// @ID delete_api_reference
+// @ID delete_api_reference_id
 // @Router /v1/api-reference/{api_reference_id} [DELETE]
 // @Summary Delete App
 // @Description Delete App
