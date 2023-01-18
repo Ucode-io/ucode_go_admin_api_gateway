@@ -72,4 +72,5 @@ message ResourceEnvironment {
     string port = 10;
     string username = 11;
     string database = 12;
+    bool default = 13;
 }

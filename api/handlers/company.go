@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -16,6 +16,7 @@ import (
 // // CreateCompany godoc
 // // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // // @ID create_company
 // // @Router /v1/company [POST]
 // // @Summary Create Company
@@ -56,6 +57,7 @@ import (
 // GetCompanyByID godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_company_by_id
 // @Router /v1/company/{company_id} [GET]
 // @Summary Get Company by id
@@ -87,6 +89,7 @@ func (h *Handler) GetCompanyByID(c *gin.Context) {
 // GetCompanyList godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_company_list
 // @Router /v1/company [GET]
 // @Summary Get all companies
@@ -133,6 +136,7 @@ func (h *Handler) GetCompanyList(c *gin.Context) {
 // GetCompanyListWithProjects godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_company_list
 // @Router /v1/company [GET]
 // @Summary Get all companies
@@ -179,6 +183,7 @@ func (h *Handler) GetCompanyListWithProjects(c *gin.Context) {
 // UpdateCompany godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID update_company
 // @Router /v1/company/{company_id} [PUT]
 // @Summary Update company
@@ -243,6 +248,7 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 // DeleteCompany godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_company
 // @Router /v1/company/{company_id} [DELETE]
 // @Summary Delete Company
@@ -284,6 +290,7 @@ func (h *Handler) DeleteCompany(c *gin.Context) {
 // CreateCompanyProject godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_project
 // @Router /v1/company-project [POST]
 // @Summary Create Company
@@ -330,6 +337,34 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 			UserId:    authInfo.GetUserId(),
 			ProjectId: resp.GetProjectId(),
 			CompanyId: project.GetCompanyId(),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	_, err = h.companyServices.EnvironmentService().Create(
+		c.Request.Context(),
+		&company_service.CreateEnvironmentRequest{
+			ProjectId:    resp.ProjectId,
+			Name:         "production",
+			DisplayColor: "#00FF00",
+			Description:  "Production Environment",
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	_, err = h.companyServices.EnvironmentService().Create(
+		c.Request.Context(),
+		&company_service.CreateEnvironmentRequest{
+			ProjectId:    resp.ProjectId,
+			Name:         "staging",
+			DisplayColor: "#FFFF00",
+			Description:  "Test Environment",
 		},
 	)
 	if err != nil {

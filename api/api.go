@@ -10,7 +10,7 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
-// @description This is a api gateway
+// SetUpAPI @description This is an api gateway
 // @termsOfService https://udevs.io
 func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	docs.SwaggerInfo.Title = cfg.ServiceName

@@ -3,8 +3,8 @@ package handlers
 import (
 	"ucode/ucode_go_api_gateway/config"
 
-	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
+	"ucode/ucode_go_api_gateway/api/status_http"
 )
 
 // Ping godoc

@@ -14,6 +14,7 @@ import (
 // GetResource godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_resource_id
 // @Router /v1/company/project/resource/{resource_id} [GET]
 // @Summary Get Resource by id
@@ -45,6 +46,7 @@ func (h *Handler) GetResource(c *gin.Context) {
 // AddProjectResource godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID add_project_resource
 // @Router /v1/company/project/resource [POST]
 // @Summary Add ProjectResource
@@ -95,6 +97,7 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 // ConfigureProjectResource godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID configure_project_resource
 // @Router /v1/company/project/configure-resource [POST]
 // @Summary Configure ProjectResource
@@ -145,6 +148,7 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 // CreateProjectResource godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_project_resource
 // @Router /v1/company/project/create-resource [POST]
 // @Summary Create ProjectResource
@@ -181,6 +185,7 @@ func (h *Handler) CreateProjectResource(c *gin.Context) {
 // RemoveProjectResource godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID remove_project_resource
 // @Router /v1/company/project/resource [DELETE]
 // @Summary Remove ProjectResource
@@ -217,6 +222,7 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 // UpdateResource godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID put_resource_id
 // @Router /v1/company/project/resource/{resource_id} [PUT]
 // @Summary Update Resource by id
@@ -253,6 +259,7 @@ func (h *Handler) UpdateResource(c *gin.Context) {
 // GetResourceList godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_resource_list
 // @Router /v1/company/project/resource [GET]
 // @Summary Get all companies
@@ -299,6 +306,7 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 // ReconnectProjectResource godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID reconnect_project_resource
 // @Router /v1/company/project/resource/reconnect [POST]
 // @Summary Reconnect ProjectResource
@@ -335,6 +343,7 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 // GetResourceEnvironment godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_resource_environment_id
 // @Router /v1/company/project/resource-environment/{resource_id} [GET]
 // @Summary Get Resource Environment by id
@@ -343,9 +352,9 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param resource_id path string true "resource_id"
-// @Success 200 {object} http.Response{data=company_service.ResourceWithoutPassword} "Resource data"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=company_service.ResourceWithoutPassword} "Resource data"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetResourceEnvironment(c *gin.Context) {
 
 	resp, err := h.companyServices.ResourceService().GetResourceByResEnvironId(

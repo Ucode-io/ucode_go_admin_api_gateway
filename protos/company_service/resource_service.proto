@@ -94,6 +94,7 @@ message UpdateResourceRequest {
     string title = 5;
     bool is_configured = 6;
     Resource.Credentials credentials = 7;
+    bool default = 8;
 }
 
 message UpdateResourceResponse {

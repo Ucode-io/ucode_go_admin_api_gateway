@@ -2,13 +2,12 @@ package handlers
 
 import (
 	"strconv"
-	http "ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
 	"ucode/ucode_go_api_gateway/storage"
 
-	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,7 +30,7 @@ func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNode
 	}
 }
 
-func (h *Handler) handleResponse(c *gin.Context, status http.Status, data interface{}) {
+func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {
 	switch code := status.Code; {
 	case code < 300:
 		h.log.Info(

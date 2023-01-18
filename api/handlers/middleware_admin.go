@@ -6,10 +6,10 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
-	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"ucode/ucode_go_api_gateway/api/status_http"
 )
 
 func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {

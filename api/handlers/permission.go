@@ -5,16 +5,18 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
-	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
+	"ucode/ucode_go_api_gateway/api/status_http"
 )
 
 // UpsertPermissionsByAppId godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID upsert_permission
 // @Router /v1/permission-upsert/{app_id} [POST]
 // @Summary Upsert permissions
@@ -61,12 +63,32 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.PermissionService().UpsertPermissionsByAppId(
 		context.Background(),
 		&obs.UpsertPermissionsByAppIdRequest{
 			AppId:     c.Param("app_id"),
 			Data:      structData,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -93,6 +115,7 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 // GetAllPermissionByRoleId godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_permission_by_role_id
 // @Router /v1/permission-get-all/{role_id} [GET]
 // @Summary Get all permissions by role id
@@ -125,11 +148,31 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.PermissionService().GetAllPermissionsByRoleId(
 		context.Background(),
 		&obs.GetAllPermissionRequest{
 			RoleId:    c.Param("role_id"),
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -144,6 +187,7 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 // GetFieldPermissions godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_field_permission
 // @Router /v1/field-permission/{role_id}/{table_slug} [GET]
 // @Summary Get all field permissions
@@ -177,12 +221,32 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.PermissionService().GetFieldPermissions(
 		context.Background(),
 		&obs.GetFieldPermissionRequest{
 			RoleId:    c.Param("role_id"),
 			TableSlug: c.Param("table_slug"),
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -197,6 +261,7 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 // GetActionPermissions godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_action_permission
 // @Router /v1/action-permission/{role_id}/{table_slug} [GET]
 // @Summary Get all action permissions
@@ -230,12 +295,32 @@ func (h *Handler) GetActionPermissions(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.PermissionService().GetActionPermissions(
 		context.Background(),
 		&obs.GetActionPermissionRequest{
 			RoleId:    c.Param("role_id"),
 			TableSlug: c.Param("table_slug"),
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -250,6 +335,7 @@ func (h *Handler) GetActionPermissions(c *gin.Context) {
 // GetViewRelationPermissions godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_view_relation_permission
 // @Router /v1/view-relation-permission/{role_id}/{table_slug} [GET]
 // @Summary Get all view relation permissions
@@ -283,12 +369,32 @@ func (h *Handler) GetViewRelationPermissions(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.PermissionService().GetViewRelationPermissions(
 		context.Background(),
 		&obs.GetActionPermissionRequest{
 			RoleId:    c.Param("role_id"),
 			TableSlug: c.Param("table_slug"),
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 

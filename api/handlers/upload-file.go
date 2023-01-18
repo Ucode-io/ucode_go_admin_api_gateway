@@ -8,7 +8,9 @@ import (
 	"os"
 	"strings"
 	"time"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -16,7 +18,6 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
-	"ucode/ucode_go_api_gateway/api/status_http"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
@@ -43,6 +44,7 @@ type Path struct {
 // @ID upload_image
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v1/upload [POST]
 // @Summary Upload
 // @Description Upload
@@ -99,12 +101,17 @@ func (h *Handler) Upload(c *gin.Context) {
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
-		os.Remove(dst + "/" + file.File.Filename)
-
+		err = os.Remove(dst + "/" + file.File.Filename)
+		if err != nil {
+			h.log.Error("cant remove file")
+		}
 		return
 	}
 
-	os.Remove(dst + "/" + file.File.Filename)
+	err = os.Remove(dst + "/" + file.File.Filename)
+	if err != nil {
+		h.log.Error("cant remove file")
+	}
 
 	h.handleResponse(c, status_http.Created, Path{
 		Filename: file.File.Filename,
@@ -115,6 +122,7 @@ func (h *Handler) Upload(c *gin.Context) {
 // UploadFile godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID upload_file
 // @Router /v1/upload-file/{table_slug}/{object_id} [POST]
 // @Summary Upload file
@@ -180,13 +188,19 @@ func (h *Handler) UploadFile(c *gin.Context) {
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
-		os.Remove(dst + "/" + file.File.Filename)
+		err = os.Remove(dst + "/" + file.File.Filename)
+		if err != nil {
+			h.log.Error("cant remove file")
+		}
 
 		return
 	}
-	os.Remove(dst + "/" + file.File.Filename)
+	err = os.Remove(dst + "/" + file.File.Filename)
+	if err != nil {
+		h.log.Error("cant remove file")
+	}
 
-	tags := []string{}
+	var tags []string
 	if c.Query("tags") != "" {
 		tags = strings.Split(c.Query("tags"), ",")
 	}
@@ -225,12 +239,32 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	_, err = services.ObjectBuilderService().Create(
 		context.Background(),
 		&object_builder_service.CommonMessage{
 			TableSlug: "file",
 			Data:      structData,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
