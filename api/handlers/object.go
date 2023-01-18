@@ -126,7 +126,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
