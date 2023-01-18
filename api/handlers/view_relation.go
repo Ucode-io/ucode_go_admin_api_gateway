@@ -79,7 +79,7 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
 			TableSlug: c.Query("table_slug"),
-			RoleId:    tokenInfo.RoleId,
+			RoleId:    tokenInfo.GetRoleId(),
 			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
