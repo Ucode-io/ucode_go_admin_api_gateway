@@ -41,7 +41,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -57,7 +57,7 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/http.Response"
+                            "$ref": "#/definitions/status_http.Response"
                         }
                     }
                 }
@@ -121,7 +121,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -139,7 +139,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -157,7 +157,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -173,6 +173,11 @@ var doc = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create Integration",
                 "consumes": [
                     "application/json"
@@ -186,6 +191,20 @@ var doc = `{
                 "summary": "Create Integration",
                 "operationId": "create_Integration",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateIntegrationRequestBody",
                         "name": "Integration",
@@ -202,7 +221,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -220,7 +239,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -238,7 +257,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -283,7 +302,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -301,7 +320,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -319,7 +338,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -365,7 +384,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -383,7 +402,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -428,7 +447,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -446,7 +465,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -464,7 +483,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -516,7 +535,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -534,7 +553,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -552,7 +571,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -604,7 +623,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -622,7 +641,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -640,7 +659,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -693,7 +712,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -711,7 +730,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -744,7 +763,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -760,7 +779,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/http.Response"
+                            "$ref": "#/definitions/status_http.Response"
                         }
                     }
                 }
@@ -781,6 +800,20 @@ var doc = `{
                 "summary": "RegisterEmailOtp",
                 "operationId": "registerEmailOtp",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "register_body",
                         "name": "registerBody",
@@ -804,7 +837,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -822,7 +855,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -840,7 +873,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -894,7 +927,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -912,7 +945,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -930,7 +963,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -977,7 +1010,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -995,7 +1028,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1013,7 +1046,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1045,6 +1078,20 @@ var doc = `{
                 "operationId": "send_message_to_email",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "SendMessageToEmailRequestBody",
                         "name": "send_message",
                         "in": "body",
@@ -1060,7 +1107,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1078,7 +1125,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1096,7 +1143,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1134,6 +1181,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "role_id",
                         "name": "role_id",
                         "in": "path",
@@ -1153,7 +1214,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1171,7 +1232,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1189,7 +1250,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1226,6 +1287,20 @@ var doc = `{
                 "operationId": "create_patient",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreatePatientRequestBody",
                         "name": "table",
                         "in": "body",
@@ -1241,7 +1316,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1259,7 +1334,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1277,7 +1352,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1315,6 +1390,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "nr",
                         "name": "nr",
                         "in": "query"
@@ -1326,7 +1415,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1344,7 +1433,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1362,7 +1451,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1400,6 +1489,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "name",
                         "in": "query"
                     }
@@ -1410,7 +1513,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1428,7 +1531,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1446,7 +1549,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1481,6 +1584,20 @@ var doc = `{
                 "operationId": "update_dashboard",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateDashboardRequestBody",
                         "name": "dashboard",
                         "in": "body",
@@ -1496,7 +1613,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1514,7 +1631,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1532,7 +1649,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1567,6 +1684,20 @@ var doc = `{
                 "operationId": "create_dashboard",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateDashboardRequestBody",
                         "name": "dashboard",
                         "in": "body",
@@ -1582,7 +1713,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1600,7 +1731,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1618,7 +1749,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1656,6 +1787,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "dashboard_id",
                         "name": "dashboard_id",
                         "in": "path",
@@ -1668,7 +1813,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1686,7 +1831,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1704,7 +1849,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1740,6 +1885,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "dashboard_id",
                         "name": "dashboard_id",
                         "in": "path",
@@ -1755,7 +1914,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1773,7 +1932,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1811,6 +1970,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -1826,7 +1999,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1844,7 +2017,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1862,7 +2035,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1897,6 +2070,20 @@ var doc = `{
                 "operationId": "update_panel",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdatePanelRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -1912,7 +2099,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1930,7 +2117,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1948,7 +2135,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1983,6 +2170,20 @@ var doc = `{
                 "operationId": "create_panel",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreatePanelRequestBody",
                         "name": "table",
                         "in": "body",
@@ -1998,7 +2199,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2016,7 +2217,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2034,7 +2235,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2071,6 +2272,20 @@ var doc = `{
                 "operationId": "panel_coordinates",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdatePanelCoordinatesRequestBody",
                         "name": "panel_coordinates",
                         "in": "body",
@@ -2086,7 +2301,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2104,7 +2319,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2122,7 +2337,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2160,6 +2375,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "panel_id",
                         "name": "panel_id",
                         "in": "path",
@@ -2172,7 +2401,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2190,7 +2419,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2208,7 +2437,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2244,6 +2473,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "panel_id",
                         "name": "panel_id",
                         "in": "path",
@@ -2259,7 +2502,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2277,7 +2520,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2315,6 +2558,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "dashboard_id",
                         "in": "query"
                     },
@@ -2335,7 +2592,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2353,7 +2610,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2371,7 +2628,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2406,6 +2663,20 @@ var doc = `{
                 "operationId": "update_variable",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateVariableRequestBody",
                         "name": "variable",
                         "in": "body",
@@ -2421,7 +2692,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2439,7 +2710,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2457,7 +2728,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2492,6 +2763,20 @@ var doc = `{
                 "operationId": "create_variable",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateVariableRequestBody",
                         "name": "variable",
                         "in": "body",
@@ -2507,7 +2792,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2525,7 +2810,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2543,7 +2828,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2581,6 +2866,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "variable_id",
                         "name": "variable_id",
                         "in": "path",
@@ -2593,7 +2892,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2611,7 +2910,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2629,7 +2928,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2665,6 +2964,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "variable_id",
                         "name": "variable_id",
                         "in": "path",
@@ -2680,7 +2993,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2698,7 +3011,433 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/api-reference": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all api reference",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Get all apps",
+                "operationId": "get_all_api_reference",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "category_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ApiReferencesBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.GetAllApiReferenceResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update api reference",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Update api reference",
+                "operationId": "update_reference",
+                "parameters": [
+                    {
+                        "description": "UpdateApiReferenceRequestBody",
+                        "name": "api_reference",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiReference"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Api Reference data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ApiReference"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create api reference",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Create api reference",
+                "operationId": "create_api_reference",
+                "parameters": [
+                    {
+                        "description": "CreateApiReferenceRequestBody",
+                        "name": "app",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateApiReference"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Api Reference data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ApiReference"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/api-reference/{api_reference_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get api reference by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Get api reference by id",
+                "operationId": "get_api_reference_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "api_reference_id",
+                        "name": "api_reference_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AppBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ApiReference"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete App",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Delete App",
+                "operationId": "delete_api_reference_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "api_reference_id",
+                        "name": "api_reference_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2735,6 +3474,20 @@ var doc = `{
                 "operationId": "get_all_apps",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -2761,7 +3514,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2779,7 +3532,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2797,7 +3550,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2832,6 +3585,20 @@ var doc = `{
                 "operationId": "update_app",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateAppRequestBody",
                         "name": "app",
                         "in": "body",
@@ -2847,7 +3614,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2865,7 +3632,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2883,7 +3650,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2918,6 +3685,20 @@ var doc = `{
                 "operationId": "create_app",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateAppRequestBody",
                         "name": "app",
                         "in": "body",
@@ -2933,7 +3714,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2951,7 +3732,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2969,7 +3750,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3007,6 +3788,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "app_id",
                         "name": "app_id",
                         "in": "path",
@@ -3019,7 +3814,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3037,7 +3832,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3055,7 +3850,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3091,6 +3886,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "app_id",
                         "name": "app_id",
                         "in": "path",
@@ -3106,7 +3915,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3124,7 +3933,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3162,6 +3971,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -3174,7 +3997,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3192,7 +4015,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3210,7 +4033,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3246,6 +4069,20 @@ var doc = `{
                 "summary": "Get all booked appointments",
                 "operationId": "get_all_booked_appointments",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "branch_id",
@@ -3288,7 +4125,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3306,7 +4143,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3324,7 +4161,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3362,6 +4199,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "booked_appointment_id",
                         "name": "booked_appointment_id",
                         "in": "path",
@@ -3374,7 +4225,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3392,7 +4243,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3410,7 +4261,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3447,6 +4298,20 @@ var doc = `{
                 "operationId": "create_cashbox_transaction",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateTransactionBody",
                         "name": "app",
                         "in": "body",
@@ -3465,7 +4330,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3483,7 +4348,428 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/category": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all categories",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Get all categories",
+                "operationId": "get_all_category",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetAllCategoriesBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.GetAllCategoriesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Update category",
+                "operationId": "update_reference",
+                "parameters": [
+                    {
+                        "description": "UpdateCategoryRequestBody",
+                        "name": "api_reference",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Category"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Category data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Category"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Create category",
+                "operationId": "create_category",
+                "parameters": [
+                    {
+                        "description": "CreateApiReferenceRequestBody",
+                        "name": "app",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateCategory"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Categoryç data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Category"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/category/{category_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get api reference by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Get api reference by id",
+                "operationId": "get_category_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "category_id",
+                        "name": "category_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AppBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ApiReference"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete App",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Delete App",
+                "operationId": "delete_api_reference",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "category_id",
+                        "name": "category_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3518,13 +4804,29 @@ var doc = `{
                 ],
                 "summary": "Get close cashbox",
                 "operationId": "close_cashbox_info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Cashbox data",
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3542,7 +4844,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3560,7 +4862,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3595,6 +4897,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "comany_id",
                         "in": "query"
                     },
@@ -3625,7 +4941,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3643,7 +4959,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3661,7 +4977,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3699,6 +5015,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "company_id",
                         "in": "query"
                     },
@@ -3724,7 +5054,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3742,7 +5072,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3760,7 +5090,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3795,6 +5125,20 @@ var doc = `{
                 "operationId": "create_project",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CompanyProjectCreateRequest",
                         "name": "Project",
                         "in": "body",
@@ -3810,7 +5154,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3828,7 +5172,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3846,7 +5190,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3884,6 +5228,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "project_id",
                         "name": "project_id",
                         "in": "path",
@@ -3902,7 +5260,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3920,7 +5278,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3938,7 +5296,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3974,6 +5332,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "project_id",
                         "name": "project_id",
                         "in": "path",
@@ -3995,7 +5367,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4013,7 +5385,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4031,7 +5403,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4067,6 +5439,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "project_id",
                         "name": "project_id",
                         "in": "path",
@@ -4079,7 +5465,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4097,7 +5483,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4115,7 +5501,109 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/company/project/configure-resource": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Configure ProjectResource",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Resource"
+                ],
+                "summary": "Configure ProjectResource",
+                "operationId": "configure_project_resource",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "ProjectResourceConfigureRequest",
+                        "name": "ProjectResource",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.ConfigureResourceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ProjectResource data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.ConfigureResourceResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4152,6 +5640,20 @@ var doc = `{
                 "operationId": "create_project_resource",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "ProjectResourceCreateRequest",
                         "name": "ProjectResource",
                         "in": "body",
@@ -4167,7 +5669,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4185,7 +5687,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4203,7 +5705,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4240,6 +5742,20 @@ var doc = `{
                 "operationId": "get_resource_list",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -4266,7 +5782,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4284,7 +5800,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4302,7 +5818,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4337,6 +5853,20 @@ var doc = `{
                 "operationId": "add_project_resource",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "ProjectResourceAddRequest",
                         "name": "ProjectResource",
                         "in": "body",
@@ -4352,7 +5882,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4370,7 +5900,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4388,7 +5918,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4423,6 +5953,20 @@ var doc = `{
                 "operationId": "remove_project_resource",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "ProjectResourceRemoveRequest",
                         "name": "ProjectResource",
                         "in": "body",
@@ -4438,7 +5982,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4456,7 +6000,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4474,7 +6018,107 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/company/project/resource-environment/{resource_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Resource Environment by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Resource"
+                ],
+                "summary": "Get Resource Environment by id",
+                "operationId": "get_resource_environment_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "resource_id",
+                        "name": "resource_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resource data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.ResourceWithoutPassword"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4511,6 +6155,20 @@ var doc = `{
                 "operationId": "reconnect_project_resource",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "ProjectResourceReconnectRequest",
                         "name": "ProjectResource",
                         "in": "body",
@@ -4526,7 +6184,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4544,7 +6202,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4562,7 +6220,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4600,6 +6258,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "resource_id",
                         "name": "resource_id",
                         "in": "path",
@@ -4612,7 +6284,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4630,7 +6302,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4648,7 +6320,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4662,16 +6334,14 @@ var doc = `{
                         }
                     }
                 }
-            }
-        },
-        "/v1/company/project/ucode-resource": {
-            "post": {
+            },
+            "put": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Add ProjectResource In Ucode Cluster",
+                "description": "Update Resource by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -4681,32 +6351,46 @@ var doc = `{
                 "tags": [
                     "Company Resource"
                 ],
-                "summary": "Add ProjectResource In Ucode Cluster",
-                "operationId": "add_project_resource_in_ucode",
+                "summary": "Update Resource by id",
+                "operationId": "put_resource_id",
                 "parameters": [
                     {
-                        "description": "ProjectResourceAddRequest",
-                        "name": "ProjectResource",
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "UpdateResourceRequestBody",
+                        "name": "UpdateResourceRequestBody",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.AddResourceInUcodeRequest"
+                            "$ref": "#/definitions/company_service.UpdateResourceRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "ProjectResource data",
+                    "200": {
+                        "description": "Resource data",
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.AddResourceResponse"
+                                            "$ref": "#/definitions/company_service.ResourceWithoutPassword"
                                         }
                                     }
                                 }
@@ -4714,11 +6398,11 @@ var doc = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4736,7 +6420,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4774,6 +6458,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "company_id",
                         "name": "company_id",
                         "in": "path",
@@ -4786,7 +6484,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4804,7 +6502,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4822,7 +6520,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4858,6 +6556,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "company_id",
                         "name": "company_id",
                         "in": "path",
@@ -4879,7 +6591,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4897,7 +6609,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4915,7 +6627,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4951,6 +6663,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "company_id",
                         "name": "company_id",
                         "in": "path",
@@ -4966,7 +6692,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4984,7 +6710,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5022,6 +6748,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -5037,7 +6777,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5055,7 +6795,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5073,7 +6813,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5108,6 +6848,20 @@ var doc = `{
                 "operationId": "update_Customevent",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateCustomEventRequestBody",
                         "name": "Customevent",
                         "in": "body",
@@ -5123,7 +6877,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5141,7 +6895,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5159,7 +6913,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5194,6 +6948,20 @@ var doc = `{
                 "operationId": "create_custom_event",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateCustomEventRequestBody",
                         "name": "Customevent",
                         "in": "body",
@@ -5209,7 +6977,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5227,7 +6995,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5245,7 +7013,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5283,6 +7051,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "custom_event_id",
                         "name": "custom_event_id",
                         "in": "path",
@@ -5295,7 +7077,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5313,7 +7095,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5331,7 +7113,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5367,6 +7149,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "custom_event_id",
                         "name": "custom_event_id",
                         "in": "path",
@@ -5382,7 +7178,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5400,7 +7196,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5438,6 +7234,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "end_date",
                         "in": "query"
                     },
@@ -5468,7 +7278,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5486,7 +7296,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5504,7 +7314,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5539,6 +7349,20 @@ var doc = `{
                 "operationId": "update_document",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateDocumentRequestBody",
                         "name": "Document",
                         "in": "body",
@@ -5554,7 +7378,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5572,7 +7396,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5590,7 +7414,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5625,6 +7449,20 @@ var doc = `{
                 "operationId": "create_document",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateDocumentRequestBody",
                         "name": "Document",
                         "in": "body",
@@ -5640,7 +7478,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5658,7 +7496,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5676,7 +7514,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5714,6 +7552,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "document_id",
                         "name": "document_id",
                         "in": "path",
@@ -5726,7 +7578,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5744,7 +7596,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5762,7 +7614,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5798,6 +7650,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "document_id",
                         "name": "document_id",
                         "in": "path",
@@ -5813,7 +7679,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5831,7 +7697,503 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/environment": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get environment list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "Get environment list",
+                "operationId": "get_environment_list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "EnvironmentBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.GetEnvironmentListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update environment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "Update environment",
+                "operationId": "update_environment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "UpdateEnvironmentRequestBody",
+                        "name": "environment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.Environment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Environment data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.Environment"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create environment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "Create environment",
+                "operationId": "create_environment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateEnvironmentRequestBody",
+                        "name": "environment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.CreateEnvironmentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Environment data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.Environment"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/environment/{environment_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get single environment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "Get single environment",
+                "operationId": "get_environment_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "environment_id",
+                        "name": "environment_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "EnvironmentBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.Environment"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete environment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "Delete environment",
+                "operationId": "delete_environment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "environment_id",
+                        "name": "environment_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5869,6 +8231,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -5884,7 +8260,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5902,7 +8278,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5920,7 +8296,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5955,6 +8331,20 @@ var doc = `{
                 "operationId": "update_event",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateEventRequestBody",
                         "name": "event",
                         "in": "body",
@@ -5970,7 +8360,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5988,7 +8378,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6006,7 +8396,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6041,6 +8431,20 @@ var doc = `{
                 "operationId": "create_event",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateEventRequestBody",
                         "name": "event",
                         "in": "body",
@@ -6056,7 +8460,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6074,7 +8478,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6092,7 +8496,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6130,6 +8534,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "limit",
                         "in": "query"
                     },
@@ -6150,7 +8568,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6168,7 +8586,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6186,7 +8604,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6224,6 +8642,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "event_log_id",
                         "name": "event_log_id",
                         "in": "path",
@@ -6236,7 +8668,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6254,7 +8686,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6272,7 +8704,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6310,6 +8742,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "event_id",
                         "name": "event_id",
                         "in": "path",
@@ -6322,7 +8768,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6340,7 +8786,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6358,7 +8804,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6396,6 +8842,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "event_id",
                         "name": "event_id",
                         "in": "path",
@@ -6411,7 +8871,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6429,7 +8889,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6467,6 +8927,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "excel_id",
                         "name": "excel_id",
                         "in": "path",
@@ -6488,7 +8962,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6506,7 +8980,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6524,7 +8998,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6562,6 +9036,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "excel_id",
                         "name": "excel_id",
                         "in": "path",
@@ -6574,7 +9062,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6592,7 +9080,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6610,7 +9098,95 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/export-to-json": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "export to json",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ExportToJSON"
+                ],
+                "summary": "export to json",
+                "operationId": "export_to_json",
+                "parameters": [
+                    {
+                        "description": "ExportToJSONRequestBody",
+                        "name": "export_to_json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.ExportToJSONRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Link",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.ExportToJSONReponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6646,6 +9222,20 @@ var doc = `{
                 "summary": "Get all fields",
                 "operationId": "get_all_fields",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "name": "limit",
@@ -6698,7 +9288,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6716,7 +9306,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6734,7 +9324,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6769,6 +9359,20 @@ var doc = `{
                 "operationId": "update_field",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateFieldRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -6784,7 +9388,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6802,7 +9406,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6820,7 +9424,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6855,6 +9459,20 @@ var doc = `{
                 "operationId": "create_field",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateFieldRequestBody",
                         "name": "table",
                         "in": "body",
@@ -6870,7 +9488,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6888,7 +9506,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6906,7 +9524,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6944,6 +9562,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "role_id",
                         "name": "role_id",
                         "in": "path",
@@ -6963,7 +9595,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6981,7 +9613,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -6999,7 +9631,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7037,6 +9669,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "field_id",
                         "name": "field_id",
                         "in": "path",
@@ -7052,7 +9698,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7070,7 +9716,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7107,6 +9753,20 @@ var doc = `{
                 "operationId": "get_all_functions",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -7128,7 +9788,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7146,7 +9806,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7164,7 +9824,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7199,6 +9859,20 @@ var doc = `{
                 "operationId": "update_function",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateFunctionRequestBody",
                         "name": "Function",
                         "in": "body",
@@ -7214,7 +9888,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7232,7 +9906,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7250,7 +9924,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7285,6 +9959,20 @@ var doc = `{
                 "operationId": "create_function",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateFunctionRequestBody",
                         "name": "Function",
                         "in": "body",
@@ -7300,7 +9988,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7318,7 +10006,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7336,7 +10024,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7374,6 +10062,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "function_id",
                         "name": "function_id",
                         "in": "path",
@@ -7386,7 +10088,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7404,7 +10106,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7422,7 +10124,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7458,6 +10160,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "function_id",
                         "name": "function_id",
                         "in": "path",
@@ -7473,7 +10189,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7491,7 +10207,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7512,6 +10228,9 @@ var doc = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Get all relations",
@@ -7529,6 +10248,34 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -7541,7 +10288,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7559,7 +10306,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7577,7 +10324,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7615,6 +10362,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -7630,7 +10391,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7648,7 +10409,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7666,7 +10427,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7701,6 +10462,20 @@ var doc = `{
                 "operationId": "update_html_template",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateHtmlTemplateRequestBody",
                         "name": "html_template",
                         "in": "body",
@@ -7716,7 +10491,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7734,7 +10509,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7752,7 +10527,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7787,6 +10562,20 @@ var doc = `{
                 "operationId": "create_html_template",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateHtmlTemplateRequestBody",
                         "name": "html_template",
                         "in": "body",
@@ -7802,7 +10591,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7820,7 +10609,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7838,7 +10627,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7876,6 +10665,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "html_template_id",
                         "name": "html_template_id",
                         "in": "path",
@@ -7888,7 +10691,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7906,7 +10709,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7924,7 +10727,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7960,6 +10763,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "html_template_id",
                         "name": "html_template_id",
                         "in": "path",
@@ -7975,7 +10792,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -7993,7 +10810,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8030,6 +10847,20 @@ var doc = `{
                 "operationId": "convert_html_to_pdf",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "HtmlBody",
                         "name": "view",
                         "in": "body",
@@ -8045,7 +10876,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8063,7 +10894,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8081,7 +10912,95 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/import-from-json": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "import from json",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ExportToJSON"
+                ],
+                "summary": "import from json",
+                "operationId": "import_from_json",
+                "parameters": [
+                    {
+                        "description": "ImportFromJSONRequestBody",
+                        "name": "export_to_json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.ImportFromJSONRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8118,6 +11037,20 @@ var doc = `{
                 "operationId": "invoke_function",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "InvokeFunctionRequest",
                         "name": "InvokeFunctionRequest",
                         "in": "body",
@@ -8133,7 +11066,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8151,7 +11084,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8169,7 +11102,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8206,6 +11139,20 @@ var doc = `{
                 "operationId": "append_many2many",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateMany2ManyRequestBody",
                         "name": "object",
                         "in": "body",
@@ -8221,7 +11168,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8239,7 +11186,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8257,7 +11204,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8292,6 +11239,20 @@ var doc = `{
                 "operationId": "delete_many2many",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "DeleteManyToManyBody",
                         "name": "object",
                         "in": "body",
@@ -8310,7 +11271,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8328,7 +11289,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8366,6 +11327,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -8387,7 +11362,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8405,7 +11380,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8423,7 +11398,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8461,6 +11436,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -8482,7 +11471,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8500,7 +11489,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8518,7 +11507,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8556,6 +11545,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -8577,7 +11580,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8595,7 +11598,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8613,7 +11616,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8651,6 +11654,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -8672,7 +11689,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8690,7 +11707,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8708,7 +11725,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8742,8 +11759,22 @@ var doc = `{
                     "Object"
                 ],
                 "summary": "Multiple Update object",
-                "operationId": "multipe_update_object",
+                "operationId": "multiple_update_object",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "table_slug",
@@ -8767,7 +11798,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8785,7 +11816,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8803,7 +11834,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8841,6 +11872,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -8862,7 +11907,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8880,7 +11925,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8898,7 +11943,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8936,6 +11981,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -8957,7 +12016,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8975,7 +12034,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -8993,7 +12052,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9031,6 +12090,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -9052,7 +12125,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9070,7 +12143,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9088,7 +12161,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9126,6 +12199,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -9145,7 +12232,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9163,7 +12250,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9181,7 +12268,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9217,6 +12304,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
@@ -9248,7 +12349,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9266,7 +12367,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9302,6 +12403,20 @@ var doc = `{
                 "summary": "Get all offline appointments",
                 "operationId": "get_all_offline_appointments",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "branch_id",
@@ -9349,7 +12464,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9367,7 +12482,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9385,7 +12500,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9423,6 +12538,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "offline_appointment_id",
                         "name": "offline_appointment_id",
                         "in": "path",
@@ -9435,7 +12564,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9453,7 +12582,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9471,7 +12600,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9506,13 +12635,29 @@ var doc = `{
                 ],
                 "summary": "Get open cashbox",
                 "operationId": "open_cashbox_info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Cashbox data",
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9530,7 +12675,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9548,7 +12693,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9585,6 +12730,20 @@ var doc = `{
                 "operationId": "update_appointment_payment_status",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateAppointmentStatus",
                         "name": "view",
                         "in": "body",
@@ -9600,7 +12759,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9618,7 +12777,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9636,7 +12795,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9674,6 +12833,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "role_id",
                         "name": "role_id",
                         "in": "path",
@@ -9686,7 +12859,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9704,7 +12877,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9722,7 +12895,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9760,6 +12933,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "app_id",
                         "name": "app_id",
                         "in": "path",
@@ -9781,7 +12968,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9799,7 +12986,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9817,7 +13004,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9854,6 +13041,20 @@ var doc = `{
                 "operationId": "get_list_query_rows",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "GetAllQueryRowsRequestBody",
                         "name": "object",
                         "in": "body",
@@ -9869,7 +13070,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9887,7 +13088,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9905,7 +13106,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9926,6 +13127,9 @@ var doc = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Get all relations",
@@ -9941,6 +13145,34 @@ var doc = `{
                 "summary": "Get all relations",
                 "operationId": "get_all_relations",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "name": "limit",
@@ -9978,7 +13210,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -9996,7 +13228,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10014,7 +13246,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10033,6 +13265,9 @@ var doc = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Update relation",
@@ -10049,6 +13284,34 @@ var doc = `{
                 "operationId": "update_relation",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateRelationRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -10064,7 +13327,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10082,7 +13345,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10100,7 +13363,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10116,6 +13379,11 @@ var doc = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create relation",
                 "consumes": [
                     "application/json"
@@ -10129,6 +13397,20 @@ var doc = `{
                 "summary": "Create relation",
                 "operationId": "create_relation",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateRelationRequestBody",
                         "name": "table",
@@ -10145,7 +13427,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10163,7 +13445,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10181,7 +13463,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10202,6 +13484,9 @@ var doc = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Delete Relation",
@@ -10219,6 +13504,34 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "relation_id",
                         "name": "relation_id",
                         "in": "path",
@@ -10234,7 +13547,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10252,7 +13565,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10290,6 +13603,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -10315,7 +13642,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10333,7 +13660,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10351,7 +13678,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10386,6 +13713,20 @@ var doc = `{
                 "operationId": "update_section",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateSectionRequestBody",
                         "name": "table",
                         "in": "body",
@@ -10401,7 +13742,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10419,7 +13760,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10437,7 +13778,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10474,6 +13815,20 @@ var doc = `{
                 "operationId": "get_all_tables",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -10500,7 +13855,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10518,7 +13873,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10536,7 +13891,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10571,6 +13926,20 @@ var doc = `{
                 "operationId": "update_table",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateTableRequestBody",
                         "name": "table",
                         "in": "body",
@@ -10586,7 +13955,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10604,7 +13973,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10622,7 +13991,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10657,6 +14026,20 @@ var doc = `{
                 "operationId": "create_table",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateTableRequestBody",
                         "name": "table",
                         "in": "body",
@@ -10672,7 +14055,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10690,7 +14073,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10708,7 +14091,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10746,6 +14129,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_id",
                         "name": "table_id",
                         "in": "path",
@@ -10758,7 +14155,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10776,7 +14173,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10794,7 +14191,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10830,6 +14227,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_id",
                         "name": "table_id",
                         "in": "path",
@@ -10845,7 +14256,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10863,7 +14274,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10900,6 +14311,20 @@ var doc = `{
                 "operationId": "convert_template_to_html",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "TemplateBody",
                         "name": "view",
                         "in": "body",
@@ -10915,7 +14340,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10933,7 +14358,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10951,7 +14376,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -10988,6 +14413,20 @@ var doc = `{
                 "operationId": "upload_image",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "file",
                         "description": "file",
                         "name": "file",
@@ -11001,7 +14440,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11019,7 +14458,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11037,7 +14476,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11074,6 +14513,20 @@ var doc = `{
                 "operationId": "upload_file",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "file",
                         "description": "file",
                         "name": "file",
@@ -11107,7 +14560,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11125,7 +14578,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11143,7 +14596,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11181,6 +14634,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "app_id",
                         "in": "query"
                     },
@@ -11201,7 +14668,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11219,7 +14686,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11237,7 +14704,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11272,6 +14739,20 @@ var doc = `{
                 "operationId": "update_view",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateViewRequestBody",
                         "name": "view",
                         "in": "body",
@@ -11287,7 +14768,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11305,7 +14786,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11323,7 +14804,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11358,6 +14839,20 @@ var doc = `{
                 "operationId": "create_view",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateViewRequestBody",
                         "name": "view",
                         "in": "body",
@@ -11373,7 +14868,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11391,7 +14886,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11409,7 +14904,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11447,6 +14942,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "role_id",
                         "name": "role_id",
                         "in": "path",
@@ -11466,7 +14975,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11484,7 +14993,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11502,7 +15011,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11540,6 +15049,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "view_id",
                         "name": "view_id",
                         "in": "path",
@@ -11552,7 +15075,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11570,7 +15093,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11588,7 +15111,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11624,6 +15147,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "view_id",
                         "name": "view_id",
                         "in": "path",
@@ -11639,7 +15176,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11657,7 +15194,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11695,6 +15232,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -11720,7 +15271,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11738,7 +15289,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11756,7 +15307,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11791,6 +15342,20 @@ var doc = `{
                 "operationId": "upsert_view_relation",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpsertViewRelationsBody",
                         "name": "table",
                         "in": "body",
@@ -11806,7 +15371,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11824,7 +15389,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11842,7 +15407,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11879,6 +15444,20 @@ var doc = `{
                 "operationId": "get_query_list",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -11910,7 +15489,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11928,7 +15507,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11946,7 +15525,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -11981,6 +15560,20 @@ var doc = `{
                 "operationId": "create_query",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateQueryRequest",
                         "name": "table",
                         "in": "body",
@@ -11996,7 +15589,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12014,7 +15607,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12032,7 +15625,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12070,6 +15663,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -12082,7 +15689,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12100,7 +15707,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12118,7 +15725,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12150,8 +15757,22 @@ var doc = `{
                     "Queries"
                 ],
                 "summary": "Update Query",
-                "operationId": "update_field",
+                "operationId": "update_query",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "guid",
@@ -12175,7 +15796,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12193,7 +15814,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12211,7 +15832,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12247,6 +15868,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -12262,7 +15897,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12280,7 +15915,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12317,6 +15952,20 @@ var doc = `{
                 "operationId": "get_query_folder_list",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -12348,7 +15997,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12366,7 +16015,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12384,7 +16033,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12419,6 +16068,20 @@ var doc = `{
                 "operationId": "create_query_folder",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateQueryFolderRequest",
                         "name": "table",
                         "in": "body",
@@ -12434,7 +16097,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12452,7 +16115,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12470,7 +16133,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12508,6 +16171,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -12520,7 +16197,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12538,7 +16215,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12556,7 +16233,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12592,6 +16269,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -12613,7 +16304,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12631,7 +16322,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12649,7 +16340,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12685,6 +16376,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -12700,7 +16405,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12718,7 +16423,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12755,6 +16460,20 @@ var doc = `{
                 "operationId": "get_web_page_list",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -12776,7 +16495,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12794,7 +16513,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12812,7 +16531,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12847,6 +16566,20 @@ var doc = `{
                 "operationId": "create_web_page",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "CreateWebPageRequest",
                         "name": "table",
                         "in": "body",
@@ -12862,7 +16595,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12880,7 +16613,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12898,7 +16631,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12936,6 +16669,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -12948,7 +16695,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12966,7 +16713,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -12984,7 +16731,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13020,6 +16767,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -13027,7 +16788,7 @@ var doc = `{
                     },
                     {
                         "description": "UpdateWebPageRequestBody",
-                        "name": "page",
+                        "name": "web_page",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -13041,7 +16802,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13059,7 +16820,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13077,7 +16838,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13113,6 +16874,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
@@ -13128,7 +16903,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13146,7 +16921,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13179,6 +16954,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "sms_id",
                         "name": "sms_id",
                         "in": "path",
@@ -13207,7 +16996,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13225,7 +17014,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13243,7 +17032,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13304,7 +17093,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13322,7 +17111,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13340,7 +17129,7 @@ var doc = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/http.Response"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -13687,6 +17476,9 @@ var doc = `{
                 "client_type": {
                     "$ref": "#/definitions/auth_service.ClientType"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "login_table_slug": {
                     "type": "string"
                 },
@@ -13695,6 +17487,9 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/auth_service.RecordPermission"
                     }
+                },
+                "resource_id": {
+                    "type": "string"
                 },
                 "role": {
                     "$ref": "#/definitions/auth_service.Role"
@@ -13716,48 +17511,20 @@ var doc = `{
                 }
             }
         },
-        "company_service.AddResourceInUcodeRequest": {
-            "type": "object",
-            "properties": {
-                "company_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "project_title": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
         "company_service.AddResourceRequest": {
             "type": "object",
             "properties": {
                 "company_id": {
                     "type": "string"
                 },
-                "project_id": {
+                "credentials": {
+                    "$ref": "#/definitions/company_service.Resource_Credentials"
+                },
+                "environment_id": {
                     "type": "string"
                 },
-                "resources": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/company_service.Resource"
-                    }
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "company_service.AddResourceResponse": {
-            "type": "object",
-            "properties": {
-                "company_id": {
-                    "type": "string"
+                "is_configured": {
+                    "type": "boolean"
                 },
                 "project_id": {
                     "type": "string"
@@ -13767,6 +17534,20 @@ var doc = `{
                 },
                 "service_type": {
                     "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.AddResourceResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
                 }
             }
         },
@@ -13816,6 +17597,69 @@ var doc = `{
                 }
             }
         },
+        "company_service.ConfigureResourceRequest": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "credentials": {
+                    "$ref": "#/definitions/company_service.Resource_Credentials"
+                },
+                "default": {
+                    "type": "boolean"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
+                },
+                "service_type": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.ConfigureResourceResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.CreateEnvironmentRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
         "company_service.CreateProjectRequest": {
             "type": "object",
             "properties": {
@@ -13843,9 +17687,6 @@ var doc = `{
                     "type": "string"
                 },
                 "project_id": {
-                    "type": "string"
-                },
-                "project_title": {
                     "type": "string"
                 },
                 "resource": {
@@ -13876,6 +17717,63 @@ var doc = `{
         "company_service.EmptyProto": {
             "type": "object"
         },
+        "company_service.Environment": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.EnvironmentWithResources": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resources": {
+                    "$ref": "#/definitions/company_service.EnvironmentWithResources_Resources"
+                }
+            }
+        },
+        "company_service.EnvironmentWithResources_Resources": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Resource"
+                    }
+                }
+            }
+        },
         "company_service.GetComanyListResponse": {
             "type": "object",
             "properties": {
@@ -13895,6 +17793,20 @@ var doc = `{
             "properties": {
                 "company": {
                     "$ref": "#/definitions/company_service.Company"
+                }
+            }
+        },
+        "company_service.GetEnvironmentListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.EnvironmentWithResources"
+                    }
                 }
             }
         },
@@ -13935,8 +17847,22 @@ var doc = `{
                 "resources": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/company_service.ResourceWithoutPassword"
+                        "$ref": "#/definitions/company_service.NewResource"
                     }
+                }
+            }
+        },
+        "company_service.NewResource": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -13991,20 +17917,8 @@ var doc = `{
         "company_service.RemoveResourceRequest": {
             "type": "object",
             "properties": {
-                "company_id": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "resource_type": {
-                    "type": "integer"
-                },
-                "service_type": {
-                    "type": "integer"
                 }
             }
         },
@@ -14022,6 +17936,9 @@ var doc = `{
                 },
                 "service_type": {
                     "type": "integer"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -14030,6 +17947,12 @@ var doc = `{
             "properties": {
                 "credentials": {
                     "$ref": "#/definitions/company_service.ResourceWithoutPassword_Credentials"
+                },
+                "environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.ResourceWithoutPassword_Environment"
+                    }
                 },
                 "id": {
                     "type": "string"
@@ -14040,8 +17963,8 @@ var doc = `{
                 "resource_type": {
                     "type": "integer"
                 },
-                "service_type": {
-                    "type": "integer"
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -14058,6 +17981,32 @@ var doc = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.ResourceWithoutPassword_Environment": {
+            "type": "object",
+            "properties": {
+                "default": {
+                    "type": "boolean"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "resource_environment_id": {
                     "type": "string"
                 }
             }
@@ -14082,6 +18031,35 @@ var doc = `{
                 }
             }
         },
+        "company_service.UpdateResourceRequest": {
+            "type": "object",
+            "properties": {
+                "credentials": {
+                    "$ref": "#/definitions/company_service.Resource_Credentials"
+                },
+                "default": {
+                    "type": "boolean"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "config.Config": {
             "type": "object",
             "properties": {
@@ -14089,6 +18067,12 @@ var doc = `{
                     "type": "string"
                 },
                 "analyticsServiceHost": {
+                    "type": "string"
+                },
+                "apiReferenceServiceHost": {
+                    "type": "string"
+                },
+                "apiReferenceServicePort": {
                     "type": "string"
                 },
                 "authGRPCPort": {
@@ -14203,14 +18187,41 @@ var doc = `{
                 }
             }
         },
-        "http.Response": {
+        "models.ApiReference": {
             "type": "object",
             "properties": {
-                "data": {},
-                "description": {
+                "additional_url": {
                     "type": "string"
                 },
-                "status": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "authentification": {
+                    "type": "boolean"
+                },
+                "category_id": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "external_url": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "new_window": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -14244,6 +18255,27 @@ var doc = `{
             "type": "object",
             "properties": {
                 "item_code": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Category": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "base_url": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 }
             }
@@ -14291,6 +18323,42 @@ var doc = `{
                 }
             }
         },
+        "models.CreateApiReference": {
+            "type": "object",
+            "properties": {
+                "additional_url": {
+                    "type": "string"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "authentification": {
+                    "type": "boolean"
+                },
+                "category_id": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "external_url": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "new_window": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CreateCashboxTransactionRequest": {
             "type": "object",
             "properties": {
@@ -14301,6 +18369,24 @@ var doc = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateCategory": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "base_url": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 }
             }
@@ -14346,6 +18432,9 @@ var doc = `{
                 "autofill_table": {
                     "type": "string"
                 },
+                "automatic": {
+                    "type": "boolean"
+                },
                 "default": {
                     "type": "string"
                 },
@@ -14372,6 +18461,9 @@ var doc = `{
                 },
                 "type": {
                     "type": "string"
+                },
+                "unique": {
+                    "type": "boolean"
                 }
             }
         },
@@ -14381,6 +18473,9 @@ var doc = `{
                 "attributes": {
                     "type": "object",
                     "additionalProperties": true
+                },
+                "automatic": {
+                    "type": "boolean"
                 },
                 "default": {
                     "type": "string"
@@ -14405,6 +18500,9 @@ var doc = `{
                 },
                 "type": {
                     "type": "string"
+                },
+                "unique": {
+                    "type": "boolean"
                 }
             }
         },
@@ -14654,6 +18752,9 @@ var doc = `{
                 "autofill_table": {
                     "type": "string"
                 },
+                "automatic": {
+                    "type": "boolean"
+                },
                 "default": {
                     "type": "string"
                 },
@@ -14683,6 +18784,9 @@ var doc = `{
                 },
                 "type": {
                     "type": "string"
+                },
+                "unique": {
+                    "type": "boolean"
                 }
             }
         },
@@ -14707,6 +18811,34 @@ var doc = `{
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "models.GetAllApiReferenceResponse": {
+            "type": "object",
+            "properties": {
+                "api_refences": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ApiReference"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.GetAllCategoriesResponse": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Category"
+                    }
+                },
+                "count": {
+                    "type": "integer"
                 }
             }
         },
@@ -15714,6 +19846,25 @@ var doc = `{
                 }
             }
         },
+        "object_builder_service.ExportToJSONReponse": {
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.ExportToJSONRequest": {
+            "type": "object",
+            "properties": {
+                "app_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.FieldForSection": {
             "type": "object",
             "properties": {
@@ -15868,6 +20019,20 @@ var doc = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.ImportFromJSONRequest": {
+            "type": "object",
+            "properties": {
+                "app_id": {
+                    "type": "string"
+                },
+                "file_name": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 }
             }
@@ -16731,6 +20896,18 @@ var doc = `{
                 }
             }
         },
+        "status_http.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "description": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "structpb.Struct": {
             "type": "object",
             "properties": {
@@ -16777,7 +20954,7 @@ var SwaggerInfo = swaggerInfo{
 	BasePath:    "",
 	Schemes:     []string{},
 	Title:       "",
-	Description: "This is a api gateway",
+	Description: "",
 }
 
 type s struct{}

@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"strconv"
-	"ucode/ucode_go_api_gateway/api/http"
+	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
@@ -20,18 +20,17 @@ type Handler struct {
 	authService     services.AuthServiceManagerI
 }
 
-func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNodesI, strg storage.StorageI, cmpServ services.ServiceManagerI, authService services.AuthServiceManagerI) Handler {
+func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.ServiceManagerI, authService services.AuthServiceManagerI) Handler {
 	return Handler{
 		cfg:             cfg,
 		log:             log,
 		services:        svcs,
-		storage:         strg,
 		companyServices: cmpServ,
 		authService:     authService,
 	}
 }
 
-func (h *Handler) handleResponse(c *gin.Context, status http.Status, data interface{}) {
+func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {
 	switch code := status.Code; {
 	case code < 300:
 		h.log.Info(
@@ -59,7 +58,7 @@ func (h *Handler) handleResponse(c *gin.Context, status http.Status, data interf
 		)
 	}
 
-	c.JSON(status.Code, http.Response{
+	c.JSON(status.Code, status_http.Response{
 		Status:      status.Status,
 		Description: status.Description,
 		Data:        data,

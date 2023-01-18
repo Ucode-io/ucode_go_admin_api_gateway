@@ -10,7 +10,7 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
-// @description This is a api gateway
+// SetUpAPI @description This is an api gateway
 // @termsOfService https://udevs.io
 func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	docs.SwaggerInfo.Title = cfg.ServiceName
@@ -20,6 +20,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 	r.Use(customCORSMiddleware())
 	r.Use(MaxAllowed(5000))
+	r.Use(h.NodeMiddleware())
 
 	r.GET("/ping", h.Ping)
 	r.GET("/config", h.GetConfig)
@@ -44,8 +45,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		//table
 		v1.POST("/table", h.CreateTable)
-		v1.GET("/table/:table_id", h.GetTableByID)
 		v1.GET("/table", h.GetAllTables)
+		v1.GET("/table/:table_id", h.GetTableByID)
+
 		v1.PUT("/table", h.UpdateTable)
 		v1.DELETE("/table/:table_id", h.DeleteTable)
 		//field
@@ -205,6 +207,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/alfalab/directions", h.CreateDirections)
 		v1.GET("/alfalab/referral", h.GetReferral)
 
+		v1.POST("/export-to-json", h.ExportToJSON)
+		v1.POST("import-from-json", h.ImportFromJSON)
+
 	}
 
 	v1Admin := r.Group("/v1")
@@ -226,11 +231,25 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		v1Admin.POST("/company/project/resource", h.AddProjectResource)
 		v1Admin.POST("/company/project/create-resource", h.CreateProjectResource)
-		v1Admin.POST("/company/project/ucode-resource", h.AddProjectResourceInUcodeCluster)
 		v1Admin.DELETE("/company/project/resource", h.RemoveProjectResource)
 		v1Admin.GET("/company/project/resource/:resource_id", h.GetResource)
 		v1Admin.GET("/company/project/resource", h.GetResourceList)
 		v1Admin.POST("/company/project/resource/reconnect", h.ReconnectProjectResource)
+		v1Admin.PUT("/company/project/resource/:resource_id", h.UpdateResource)
+		v1Admin.POST("/company/project/configure-resource", h.ConfigureProjectResource)
+		v1Admin.GET("/company/project/resource-environment/:resource_id", h.GetResourceEnvironment)
+
+		// environment service
+		v1Admin.POST("/environment", h.CreateEnvironment)
+		v1Admin.GET("/environment/:environment_id", h.GetSingleEnvironment)
+		v1Admin.GET("/environment", h.GetAllEnvironments)
+		v1Admin.PUT("/environment", h.UpdateEnvironment)
+		v1Admin.DELETE("/environment/:environment_id", h.DeleteEnvironment)
+		//api-reference service
+		v1Admin.POST("/api-reference", h.CreateApiReference)
+		v1Admin.PUT("/api-reference", h.UpdateApiReference)
+		v1Admin.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
+		v1Admin.GET("api-reference", h.GetAllApiReferences)
 	}
 
 	// v3 for ucode version 2
@@ -267,7 +286,7 @@ func customCORSMiddleware() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id")
 		c.Header("Access-Control-Max-Age", "3600")
 
 		if c.Request.Method == "OPTIONS" {

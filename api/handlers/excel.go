@@ -2,16 +2,20 @@ package handlers
 
 import (
 	"context"
-	"ucode/ucode_go_api_gateway/api/http"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
 	"github.com/gin-gonic/gin"
+	"ucode/ucode_go_api_gateway/api/status_http"
 )
 
 // ExcelReader godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID excel_reader
 // @Router /v1/excel/{excel_id} [GET]
 // @Summary Get excel writer
@@ -20,22 +24,49 @@ import (
 // @Accept json
 // @Produce json
 // @Param excel_id path string true "excel_id"
-// @Success 200 {object} http.Response{data=object_builder_service.ExcelReadResponse} "ExcelReadResponse"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=object_builder_service.ExcelReadResponse} "ExcelReadResponse"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) ExcelReader(c *gin.Context) {
 	excelId := c.Param("excel_id")
 	namespace := c.GetString("namespace")
 
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -43,19 +74,21 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 		context.Background(),
 		&object_builder_service.ExcelReadRequest{
 			Id:        excelId,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, res)
+	h.handleResponse(c, status_http.OK, res)
 }
 
-// ExcelReader godoc
+// ExcelToDb godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID excel_to_db
 // @Router /v1/excel/excel_to_db/{excel_id} [POST]
 // @Summary Post excel writer
@@ -65,34 +98,61 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 // @Produce json
 // @Param excel_id path string true "excel_id"
 // @Param table body models.ExcelToDbRequest true "ExcelToDbRequest"
-// @Success 200 {object} http.Response{data=models.ExcelToDbResponse} "ExcelToDbResponse"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=models.ExcelToDbResponse} "ExcelToDbResponse"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) ExcelToDb(c *gin.Context) {
 	var excelRequest models.ExcelToDbRequest
 
 	err := c.ShouldBindJSON(&excelRequest)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	data, err := helper.ConvertMapToStruct(excelRequest.Data)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -102,15 +162,15 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 			Id:        c.Param("excel_id"),
 			TableSlug: excelRequest.TableSlug,
 			Data:      data,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, models.ExcelToDbResponse{
+	h.handleResponse(c, status_http.Created, models.ExcelToDbResponse{
 		Message: "Success!",
 	})
 }

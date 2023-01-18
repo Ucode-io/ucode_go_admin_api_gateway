@@ -5,6 +5,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 
 	"ucode/ucode_go_api_gateway/genproto/analytics_service"
+	"ucode/ucode_go_api_gateway/genproto/api_reference_service"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -56,7 +57,11 @@ type ServiceManagerI interface {
 	QueriesService() object_builder_service.QueryServiceClient
 	WebPageService() object_builder_service.WebPageServiceClient
 	CascadingService() object_builder_service.CascadingServiceClient
-
+	EnvironmentService() company_service.EnvironmentServiceClient
+	ResourceService() company_service.ResourceServiceClient
+	TableHelpersService() object_builder_service.TableHelpersServiceClient
+	ApiReferenceService() api_reference_service.ApiReferenceServiceClient
+	CategoryService() api_reference_service.CategoryServiceClient
 }
 
 type grpcClients struct {
@@ -99,7 +104,11 @@ type grpcClients struct {
 	queriesService            object_builder_service.QueryServiceClient
 	webPageService            object_builder_service.WebPageServiceClient
 	cascadingService          object_builder_service.CascadingServiceClient
-
+	environmentService        company_service.EnvironmentServiceClient
+	resourceService           company_service.ResourceServiceClient
+	tableHelpersService       object_builder_service.TableHelpersServiceClient
+	apiReferenceService       api_reference_service.ApiReferenceServiceClient
+	categoryService           api_reference_service.CategoryServiceClient
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -154,6 +163,11 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		cfg.CompanyServiceHost+cfg.CompanyServicePort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
+	connApiReferenceService, err := grpc.DialContext(
+		ctx,
+		cfg.ApiReferenceServiceHost+cfg.ApiReferenceServicePort,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 
 	if err != nil {
 		return nil, err
@@ -199,7 +213,11 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		queriesService:            object_builder_service.NewQueryServiceClient(connObjectBuilderService),
 		webPageService:            object_builder_service.NewWebPageServiceClient(connObjectBuilderService),
 		cascadingService:          object_builder_service.NewCascadingServiceClient(connObjectBuilderService),
-
+		environmentService:        company_service.NewEnvironmentServiceClient(connCompanyService),
+		resourceService:           company_service.NewResourceServiceClient(connCompanyService),
+		tableHelpersService:       object_builder_service.NewTableHelpersServiceClient(connObjectBuilderService),
+		apiReferenceService:       api_reference_service.NewApiReferenceServiceClient(connApiReferenceService),
+		categoryService:           api_reference_service.NewCategoryServiceClient(connApiReferenceService),
 	}, nil
 }
 
@@ -298,6 +316,10 @@ func (g *grpcClients) BarcodeService() object_builder_service.BarcodeServiceClie
 	return g.barcodeService
 }
 
+func (g *grpcClients) TableHelpersService() object_builder_service.TableHelpersServiceClient {
+	return g.tableHelpersService
+}
+
 // auth functions
 
 func (g *grpcClients) ClientServiceAuth() auth_service.ClientServiceClient {
@@ -346,6 +368,10 @@ func (g *grpcClients) ProjectService() company_service.ProjectServiceClient {
 	return g.projectService
 }
 
+func (g *grpcClients) EnvironmentService() company_service.EnvironmentServiceClient {
+	return g.environmentService
+}
+
 // for ucode version 2
 
 func (g *grpcClients) QueryFolderService() object_builder_service.QueryFolderServiceClient {
@@ -362,4 +388,18 @@ func (g *grpcClients) WebPageService() object_builder_service.WebPageServiceClie
 
 func (g *grpcClients) CascadingService() object_builder_service.CascadingServiceClient {
 	return g.cascadingService
+}
+
+func (g *grpcClients) ResourceService() company_service.ResourceServiceClient {
+	return g.resourceService
+}
+
+//this is api reference service
+
+func (g *grpcClients) ApiReferenceService() api_reference_service.ApiReferenceServiceClient {
+	return g.apiReferenceService
+}
+
+func (g *grpcClients) CategoryService() api_reference_service.CategoryServiceClient {
+	return g.categoryService
 }

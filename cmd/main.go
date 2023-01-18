@@ -7,7 +7,6 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
-	"ucode/ucode_go_api_gateway/storage/postgres"
 
 	"github.com/gin-gonic/gin"
 )
@@ -56,18 +55,11 @@ func main() {
 	serviceNodes := services.NewServiceNodes()
 	serviceNodes.Add(grpcSvcs, cfg.UcodeNamespace)
 
-	pgStore, err := postgres.NewPostgres(ctx, cfg)
-	if err != nil {
-		log.Panic("postgres.NewPostgres", logger.Error(err))
-		return
-	}
-	defer pgStore.CloseDB()
-
 	r := gin.New()
 
 	r.Use(gin.Logger(), gin.Recovery())
 
-	h := handlers.NewHandler(cfg, log, serviceNodes, pgStore, grpcSvcs, authSrvc)
+	h := handlers.NewHandler(cfg, log, serviceNodes, grpcSvcs, authSrvc)
 
 	api.SetUpAPI(r, h, cfg)
 

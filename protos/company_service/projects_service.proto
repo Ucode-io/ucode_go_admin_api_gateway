@@ -11,16 +11,7 @@ service ProjectService {
     rpc GetById(GetProjectByIdRequest) returns (Project) {}
     rpc Update(Project) returns (Project) {}
     rpc Delete(DeleteProjectRequest) returns (EmptyProto) {}
-    rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
-    rpc CreateResource(CreateResourceReq) returns (CreateResourceRes) {}
-    rpc AddResourceInUcode(AddResourceInUcodeRequest) returns (AddResourceResponse) {}
-    rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
-    rpc GetResource(GetResourceRequest) returns (ResourceWithoutPassword) {}
-    rpc GetReourceList(GetReourceListRequest) returns (GetReourceListResponse) {}
-    rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
-    rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
     rpc GetProjects(GetProjectsRequest) returns (GetProjectsResponse) {}
-    rpc AutoConnect(GetProjectsRequest) returns (EmptyProto) {}
     rpc GetProjectsByCompanyId(GetProjectsByCompanyIdReq) returns (GetProjectsByCompanyIdRes) {}
     rpc UpdateProjectUserData (UpdateProjectUserDataReq) returns (UpdateProjectUserDataRes) {}
 }
@@ -91,11 +82,22 @@ message ResourceWithoutPassword {
         string username = 3;
         string database = 4;
     }
-    ServiceType service_type = 1;
-    ResourceType resource_type = 2;
-    Credentials credentials = 3;
-    string id = 4;
-    string project_id = 5;
+    message Environment {
+        string resource_environment_id = 1;
+        string name = 2;
+        string display_color = 3;
+        string description = 4;
+        bool is_configured = 5;
+        string id = 6;
+        bool default = 7;
+    }
+
+    ResourceType resource_type = 1;
+    Credentials credentials = 2;
+    string id = 3;
+    string project_id = 4;
+    string title = 5;
+    repeated Environment environments = 6;
 }
 
 message Project {
@@ -145,9 +147,28 @@ message EmptyProto {
 
 message AddResourceRequest {
     string project_id = 1;
-    repeated Resource resources = 2;
-    string company_id = 3;
-    string user_id = 4;
+    string environment_id = 2;
+    ResourceType resource_type = 3;
+    string title = 4;
+    bool is_configured = 5;
+    Resource.Credentials credentials = 6;
+    ServiceType service_type = 7;
+    string company_id = 8;
+    string user_id = 9;
+}
+
+message ConfigureResourceRequest {
+    string project_id = 1;
+    string environment_id = 2;
+    ResourceType resource_type = 3;
+    string title = 4;
+    bool is_configured = 5;
+    Resource.Credentials credentials = 6;
+    ServiceType service_type = 7;
+    string company_id = 8;
+    string user_id = 9;
+    string resource_id = 10;
+    bool default = 11;
 }
 
 message CreateResourceReq {
@@ -155,7 +176,6 @@ message CreateResourceReq {
     Resource resource = 2;
     string company_id = 3;
     string user_id = 4;
-    string project_title = 5;
 }
 
 message AddResourceInUcodeRequest {
@@ -166,10 +186,11 @@ message AddResourceInUcodeRequest {
 }
 
 message AddResourceResponse {
-    string project_id = 1;
-    ServiceType service_type = 2;
-    ResourceType resource_type = 3;
-    string company_id = 4;
+    string id = 1;
+}
+
+message ConfigureResourceResponse {
+    string id = 1;
 }
 
 message CreateResourceRes {
@@ -180,10 +201,6 @@ message CreateResourceRes {
 }
 
 message RemoveResourceRequest {
-    string project_id = 1;
-    ServiceType service_type = 2;
-    ResourceType resource_type = 3;
-    string company_id = 4;
     string id = 5;
 }
 
@@ -196,7 +213,7 @@ message GetReourceListRequest {
 
 message GetReourceListResponse {
     int32 count = 1;
-    repeated ResourceWithoutPassword resources = 2;
+    repeated NewResource resources = 2;
 }
 
 message GetResourceRequest {
@@ -220,6 +237,7 @@ message GetResourceWithPathResponse {
     string id = 4;
     string project_id = 5;
     string path = 6;
+    string title = 7;
 }
 
 message GetResourceManyRequest {

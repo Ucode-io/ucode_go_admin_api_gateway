@@ -1,0 +1,105 @@
+syntax="proto3";
+
+package company_service;
+option go_package="genproto/company_service";
+
+import "company.proto";
+import "projects_service.proto";
+
+service ResourceService {
+
+    rpc AddResource(AddResourceRequest) returns (AddResourceResponse) {}
+    rpc ConfigureResource(ConfigureResourceRequest) returns (ConfigureResourceResponse) {}
+    rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
+    rpc UpdateResource(UpdateResourceRequest) returns (ResourceWithoutPassword) {}
+    rpc GetResource(GetResourceRequest) returns (ResourceWithoutPassword) {}
+    rpc GetReourceList(GetReourceListRequest) returns (GetReourceListResponse) {}
+    rpc CreateResource(CreateResourceReq) returns (CreateResourceRes) {}
+    rpc AddResourceInUcode(AddResourceInUcodeRequest) returns (AddResourceResponse) {}
+    rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
+    rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
+    rpc AutoConnect(GetProjectsRequest) returns (EmptyProto) {}
+    rpc GetResourceByResEnvironId(GetResourceRequest) returns (ResourceWithoutPassword) {}
+
+    // resource environment
+    rpc UpsertResourceEnvironment(UpsertResourceEnvironmentRequest) returns (UpsertResourceEnvironmentResponse) {}
+    rpc GetResourceEnvironment(GetResourceEnvironmentReq) returns (ResourceEnvironment) {}
+    rpc GetDefaultResourceEnvironment(GetDefaultResourceEnvironmentReq) returns (ResourceEnvironment) {}
+    rpc GetListResourceEnvironment(GetListResourceEnvironmentReq) returns (GetListResourceEnvironmentRes) {}
+    rpc GetListConfiguredResourceEnvironment(GetListConfiguredResourceEnvironmentReq) returns (GetListConfiguredResourceEnvironmentRes) {}
+}
+
+message GetDefaultResourceEnvironmentReq {
+    string id = 1;
+    string project_id = 2;
+    string resource_id = 3;
+    string environment_id = 4;
+}
+
+message GetListConfiguredResourceEnvironmentReq {
+    string id = 1;
+    string project_id = 2;
+    string resource_id = 3;
+    string environment_id = 4;
+}
+
+message GetListConfiguredResourceEnvironmentRes {
+    message resource_environment {string id = 1;
+        string project_id = 2;
+        string resource_id = 3;
+        string environment_id = 4;
+        bool is_configured = 5;
+        int32 resource_type = 6;
+        int32 service_type = 7;
+        string name = 8;
+        string display_color = 9;
+        string description = 10;
+    }
+    repeated resource_environment data = 1;
+}
+
+message GetListResourceEnvironmentReq {
+    string id = 1;
+    string project_id = 2;
+    string resource_id = 3;
+    string environment_id = 4;
+}
+
+message GetListResourceEnvironmentRes {
+    repeated ResourceEnvironment data = 1;
+    int32 count = 2;
+}
+
+message GetResourceEnvironmentReq {
+    string id = 1;
+    string project_id = 2;
+    string resource_id = 3;
+    string environment_id = 4;
+}
+
+message UpsertResourceEnvironmentRequest {
+    repeated ResourceEnvironment resource_environments = 1;
+}
+
+message UpsertResourceEnvironmentResponse {
+    repeated ResourceEnvironment resource_environments = 1;
+}
+
+message UpdateResourceRequest {
+    string id = 1;
+    string project_id = 2;
+    string environment_id = 3;
+    ResourceType resource_type = 4;
+    string title = 5;
+    bool is_configured = 6;
+    Resource.Credentials credentials = 7;
+    bool default = 8;
+}
+
+message UpdateResourceResponse {
+    string project_id = 1;
+    repeated Resource resources = 2;
+    string company_id = 3;
+    string user_id = 4;
+    repeated ResourceEnvironment resource_environments = 5;
+}

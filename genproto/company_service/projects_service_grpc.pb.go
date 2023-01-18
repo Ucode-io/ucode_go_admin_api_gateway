@@ -27,16 +27,7 @@ type ProjectServiceClient interface {
 	GetById(ctx context.Context, in *GetProjectByIdRequest, opts ...grpc.CallOption) (*Project, error)
 	Update(ctx context.Context, in *Project, opts ...grpc.CallOption) (*Project, error)
 	Delete(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*EmptyProto, error)
-	AddResource(ctx context.Context, in *AddResourceRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
-	CreateResource(ctx context.Context, in *CreateResourceReq, opts ...grpc.CallOption) (*CreateResourceRes, error)
-	AddResourceInUcode(ctx context.Context, in *AddResourceInUcodeRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
-	RemoveResource(ctx context.Context, in *RemoveResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error)
-	GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error)
-	GetReourceList(ctx context.Context, in *GetReourceListRequest, opts ...grpc.CallOption) (*GetReourceListResponse, error)
-	ReconnectResource(ctx context.Context, in *ReconnectResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error)
-	GetResourceWithPath(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*GetResourceWithPathResponse, error)
 	GetProjects(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*GetProjectsResponse, error)
-	AutoConnect(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*EmptyProto, error)
 	GetProjectsByCompanyId(ctx context.Context, in *GetProjectsByCompanyIdReq, opts ...grpc.CallOption) (*GetProjectsByCompanyIdRes, error)
 	UpdateProjectUserData(ctx context.Context, in *UpdateProjectUserDataReq, opts ...grpc.CallOption) (*UpdateProjectUserDataRes, error)
 }
@@ -94,90 +85,9 @@ func (c *projectServiceClient) Delete(ctx context.Context, in *DeleteProjectRequ
 	return out, nil
 }
 
-func (c *projectServiceClient) AddResource(ctx context.Context, in *AddResourceRequest, opts ...grpc.CallOption) (*AddResourceResponse, error) {
-	out := new(AddResourceResponse)
-	err := c.cc.Invoke(ctx, "/company_service.ProjectService/AddResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *projectServiceClient) CreateResource(ctx context.Context, in *CreateResourceReq, opts ...grpc.CallOption) (*CreateResourceRes, error) {
-	out := new(CreateResourceRes)
-	err := c.cc.Invoke(ctx, "/company_service.ProjectService/CreateResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *projectServiceClient) AddResourceInUcode(ctx context.Context, in *AddResourceInUcodeRequest, opts ...grpc.CallOption) (*AddResourceResponse, error) {
-	out := new(AddResourceResponse)
-	err := c.cc.Invoke(ctx, "/company_service.ProjectService/AddResourceInUcode", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *projectServiceClient) RemoveResource(ctx context.Context, in *RemoveResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error) {
-	out := new(EmptyProto)
-	err := c.cc.Invoke(ctx, "/company_service.ProjectService/RemoveResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *projectServiceClient) GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error) {
-	out := new(ResourceWithoutPassword)
-	err := c.cc.Invoke(ctx, "/company_service.ProjectService/GetResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *projectServiceClient) GetReourceList(ctx context.Context, in *GetReourceListRequest, opts ...grpc.CallOption) (*GetReourceListResponse, error) {
-	out := new(GetReourceListResponse)
-	err := c.cc.Invoke(ctx, "/company_service.ProjectService/GetReourceList", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *projectServiceClient) ReconnectResource(ctx context.Context, in *ReconnectResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error) {
-	out := new(EmptyProto)
-	err := c.cc.Invoke(ctx, "/company_service.ProjectService/ReconnectResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *projectServiceClient) GetResourceWithPath(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*GetResourceWithPathResponse, error) {
-	out := new(GetResourceWithPathResponse)
-	err := c.cc.Invoke(ctx, "/company_service.ProjectService/GetResourceWithPath", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *projectServiceClient) GetProjects(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*GetProjectsResponse, error) {
 	out := new(GetProjectsResponse)
 	err := c.cc.Invoke(ctx, "/company_service.ProjectService/GetProjects", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *projectServiceClient) AutoConnect(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*EmptyProto, error) {
-	out := new(EmptyProto)
-	err := c.cc.Invoke(ctx, "/company_service.ProjectService/AutoConnect", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -211,16 +121,7 @@ type ProjectServiceServer interface {
 	GetById(context.Context, *GetProjectByIdRequest) (*Project, error)
 	Update(context.Context, *Project) (*Project, error)
 	Delete(context.Context, *DeleteProjectRequest) (*EmptyProto, error)
-	AddResource(context.Context, *AddResourceRequest) (*AddResourceResponse, error)
-	CreateResource(context.Context, *CreateResourceReq) (*CreateResourceRes, error)
-	AddResourceInUcode(context.Context, *AddResourceInUcodeRequest) (*AddResourceResponse, error)
-	RemoveResource(context.Context, *RemoveResourceRequest) (*EmptyProto, error)
-	GetResource(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error)
-	GetReourceList(context.Context, *GetReourceListRequest) (*GetReourceListResponse, error)
-	ReconnectResource(context.Context, *ReconnectResourceRequest) (*EmptyProto, error)
-	GetResourceWithPath(context.Context, *GetResourceRequest) (*GetResourceWithPathResponse, error)
 	GetProjects(context.Context, *GetProjectsRequest) (*GetProjectsResponse, error)
-	AutoConnect(context.Context, *GetProjectsRequest) (*EmptyProto, error)
 	GetProjectsByCompanyId(context.Context, *GetProjectsByCompanyIdReq) (*GetProjectsByCompanyIdRes, error)
 	UpdateProjectUserData(context.Context, *UpdateProjectUserDataReq) (*UpdateProjectUserDataRes, error)
 	mustEmbedUnimplementedProjectServiceServer()
@@ -245,35 +146,8 @@ func (UnimplementedProjectServiceServer) Update(context.Context, *Project) (*Pro
 func (UnimplementedProjectServiceServer) Delete(context.Context, *DeleteProjectRequest) (*EmptyProto, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedProjectServiceServer) AddResource(context.Context, *AddResourceRequest) (*AddResourceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddResource not implemented")
-}
-func (UnimplementedProjectServiceServer) CreateResource(context.Context, *CreateResourceReq) (*CreateResourceRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateResource not implemented")
-}
-func (UnimplementedProjectServiceServer) AddResourceInUcode(context.Context, *AddResourceInUcodeRequest) (*AddResourceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddResourceInUcode not implemented")
-}
-func (UnimplementedProjectServiceServer) RemoveResource(context.Context, *RemoveResourceRequest) (*EmptyProto, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveResource not implemented")
-}
-func (UnimplementedProjectServiceServer) GetResource(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetResource not implemented")
-}
-func (UnimplementedProjectServiceServer) GetReourceList(context.Context, *GetReourceListRequest) (*GetReourceListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetReourceList not implemented")
-}
-func (UnimplementedProjectServiceServer) ReconnectResource(context.Context, *ReconnectResourceRequest) (*EmptyProto, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReconnectResource not implemented")
-}
-func (UnimplementedProjectServiceServer) GetResourceWithPath(context.Context, *GetResourceRequest) (*GetResourceWithPathResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetResourceWithPath not implemented")
-}
 func (UnimplementedProjectServiceServer) GetProjects(context.Context, *GetProjectsRequest) (*GetProjectsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProjects not implemented")
-}
-func (UnimplementedProjectServiceServer) AutoConnect(context.Context, *GetProjectsRequest) (*EmptyProto, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AutoConnect not implemented")
 }
 func (UnimplementedProjectServiceServer) GetProjectsByCompanyId(context.Context, *GetProjectsByCompanyIdReq) (*GetProjectsByCompanyIdRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProjectsByCompanyId not implemented")
@@ -384,150 +258,6 @@ func _ProjectService_Delete_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProjectService_AddResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddResourceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectServiceServer).AddResource(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.ProjectService/AddResource",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).AddResource(ctx, req.(*AddResourceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProjectService_CreateResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateResourceReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectServiceServer).CreateResource(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.ProjectService/CreateResource",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).CreateResource(ctx, req.(*CreateResourceReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProjectService_AddResourceInUcode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddResourceInUcodeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectServiceServer).AddResourceInUcode(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.ProjectService/AddResourceInUcode",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).AddResourceInUcode(ctx, req.(*AddResourceInUcodeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProjectService_RemoveResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveResourceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectServiceServer).RemoveResource(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.ProjectService/RemoveResource",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).RemoveResource(ctx, req.(*RemoveResourceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProjectService_GetResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetResourceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectServiceServer).GetResource(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.ProjectService/GetResource",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).GetResource(ctx, req.(*GetResourceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProjectService_GetReourceList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetReourceListRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectServiceServer).GetReourceList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.ProjectService/GetReourceList",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).GetReourceList(ctx, req.(*GetReourceListRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProjectService_ReconnectResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReconnectResourceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectServiceServer).ReconnectResource(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.ProjectService/ReconnectResource",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).ReconnectResource(ctx, req.(*ReconnectResourceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProjectService_GetResourceWithPath_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetResourceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectServiceServer).GetResourceWithPath(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.ProjectService/GetResourceWithPath",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).GetResourceWithPath(ctx, req.(*GetResourceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _ProjectService_GetProjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetProjectsRequest)
 	if err := dec(in); err != nil {
@@ -542,24 +272,6 @@ func _ProjectService_GetProjects_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProjectServiceServer).GetProjects(ctx, req.(*GetProjectsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProjectService_AutoConnect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetProjectsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectServiceServer).AutoConnect(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.ProjectService/AutoConnect",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).AutoConnect(ctx, req.(*GetProjectsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -628,44 +340,8 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ProjectService_Delete_Handler,
 		},
 		{
-			MethodName: "AddResource",
-			Handler:    _ProjectService_AddResource_Handler,
-		},
-		{
-			MethodName: "CreateResource",
-			Handler:    _ProjectService_CreateResource_Handler,
-		},
-		{
-			MethodName: "AddResourceInUcode",
-			Handler:    _ProjectService_AddResourceInUcode_Handler,
-		},
-		{
-			MethodName: "RemoveResource",
-			Handler:    _ProjectService_RemoveResource_Handler,
-		},
-		{
-			MethodName: "GetResource",
-			Handler:    _ProjectService_GetResource_Handler,
-		},
-		{
-			MethodName: "GetReourceList",
-			Handler:    _ProjectService_GetReourceList_Handler,
-		},
-		{
-			MethodName: "ReconnectResource",
-			Handler:    _ProjectService_ReconnectResource_Handler,
-		},
-		{
-			MethodName: "GetResourceWithPath",
-			Handler:    _ProjectService_GetResourceWithPath_Handler,
-		},
-		{
 			MethodName: "GetProjects",
 			Handler:    _ProjectService_GetProjects_Handler,
-		},
-		{
-			MethodName: "AutoConnect",
-			Handler:    _ProjectService_AutoConnect_Handler,
 		},
 		{
 			MethodName: "GetProjectsByCompanyId",

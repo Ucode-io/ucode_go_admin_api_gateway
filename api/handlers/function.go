@@ -2,17 +2,21 @@ package handlers
 
 import (
 	"context"
-	"ucode/ucode_go_api_gateway/api/http"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"ucode/ucode_go_api_gateway/api/status_http"
 )
 
 // CreateFunction godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_function
 // @Router /v1/function [POST]
 // @Summary Create Function
@@ -21,34 +25,61 @@ import (
 // @Accept json
 // @Produce json
 // @Param Function body models.CreateFunctionRequest true "CreateFunctionRequestBody"
-// @Success 201 {object} http.Response{data=models.Function} "Function data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=models.Function} "Function data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateFunction(c *gin.Context) {
 	var function models.CreateFunctionRequest
 
 	err := c.ShouldBindJSON(&function)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	structData, err := helper.ConvertMapToStruct(function.Body)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -59,20 +90,22 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 			Name:        function.Name,
 			Description: function.Description,
 			Body:        structData,
-			ProjectId:   authInfo.GetProjectId(),
+			ProjectId:   resourceEnvironment.GetId(),
 		},
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 // GetFunctionByID godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_function_by_id
 // @Router /v1/function/{function_id} [GET]
 // @Summary Get Function by id
@@ -81,27 +114,54 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param function_id path string true "function_id"
-// @Success 200 {object} http.Response{data=models.Function} "FunctionBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=models.Function} "FunctionBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetFunctionByID(c *gin.Context) {
 	functionID := c.Param("function_id")
 
 	if !util.IsValidUUID(functionID) {
-		h.handleResponse(c, http.InvalidArgument, "function id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "function id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -109,19 +169,21 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id:        functionID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // GetAllFunctions godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_functions
 // @Router /v1/function [GET]
 // @Summary Get all functions
@@ -130,27 +192,54 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query object_builder_service.GetAllFunctionsRequest true "filters"
-// @Success 200 {object} http.Response{data=string} "FunctionBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=string} "FunctionBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllFunctions(c *gin.Context) {
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -159,20 +248,22 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		&obs.GetAllFunctionsRequest{
 			Search:    c.DefaultQuery("search", ""),
 			Limit:     int32(limit),
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateFunction godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID update_function
 // @Router /v1/function [PUT]
 // @Summary Update function
@@ -181,34 +272,61 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param Function body models.Function  true "UpdateFunctionRequestBody"
-// @Success 200 {object} http.Response{data=models.Function} "Function data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status_http.Response{data=models.Function} "Function data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateFunction(c *gin.Context) {
 	var function models.Function
 
 	err := c.ShouldBindJSON(&function)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	structData, err := helper.ConvertMapToStruct(function.Body)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -220,20 +338,22 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 			Name:        function.Name,
 			Path:        function.Path,
 			Body:        structData,
-			ProjectId:   authInfo.GetProjectId(),
+			ProjectId:   resourceEnvironment.GetId(),
 		},
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // DeleteFunction godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_function
 // @Router /v1/function/{function_id} [DELETE]
 // @Summary Delete Function
@@ -243,26 +363,53 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 // @Produce json
 // @Param function_id path string true "function_id"
 // @Success 204
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteFunction(c *gin.Context) {
 	functionID := c.Param("function_id")
 
 	if !util.IsValidUUID(functionID) {
-		h.handleResponse(c, http.InvalidArgument, "function id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "function id is an invalid uuid")
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -270,20 +417,22 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id:        functionID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.NoContent, resp)
+	h.handleResponse(c, status_http.NoContent, resp)
 }
 
 // InvokeFunction godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID invoke_function
 // @Router /v1/invoke_function [POST]
 // @Summary Invoke Function
@@ -292,28 +441,55 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param InvokeFunctionRequest body models.InvokeFunctionRequest true "InvokeFunctionRequest"
-// @Success 201 {object} http.Response{data=models.InvokeFunctionRequest} "Function data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status_http.Response{data=models.InvokeFunctionRequest} "Function data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) InvokeFunction(c *gin.Context) {
 	var invokeFunction models.InvokeFunctionRequest
 
 	err := c.ShouldBindJSON(&invokeFunction)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
 	if err != nil {
-		h.handleResponse(c, http.Forbidden, err.Error())
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -321,17 +497,17 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id:        invokeFunction.FunctionID,
-			ProjectId: authInfo.GetProjectId(),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	resp, err := util.DoRequest("https://ofs.medion.udevs.io/function/"+function.Path, "POST", invokeFunction)
+	resp, err := util.DoRequest("status_https://ofs.medion.udevs.io/function/"+function.Path, "POST", invokeFunction)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 	_, err = services.CustomEventService().UpdateByFunctionId(
@@ -340,12 +516,12 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 			FunctionId: invokeFunction.FunctionID,
 			ObjectIds:  invokeFunction.ObjectIDs,
 			FieldSlug:  function.Path + "_disable",
-			ProjectId:  authInfo.GetProjectId(),
+			ProjectId:  resourceId.(string),
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }

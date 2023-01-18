@@ -18,6 +18,7 @@ message LoginDataReq {
     string user_id = 1;
     string client_type = 2;
     string project_id = 3;
+    string resource_environment_id = 4;
 }
 
 message LoginDataRes {
