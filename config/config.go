@@ -126,8 +126,8 @@ func Load() Config {
 	config.SmsServiceHost = cast.ToString(GetOrReturnDefaultValue("SMS_SERVICE_HOST", "go-sms-service"))
 	config.SmsGRPCPort = cast.ToString(GetOrReturnDefaultValue("SMS_GRPC_PORT", ":80"))
 
-	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_PORT", "localhost"))
-	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_HOST", ":8099"))
+	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", "localhost"))
+	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_SERVICE_HOST", ":8099"))
 
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = "Here$houldBe$ome$ecretKey"
