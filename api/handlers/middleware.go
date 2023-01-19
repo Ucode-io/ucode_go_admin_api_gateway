@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -43,6 +44,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 
 		resourceId := c.GetHeader("Resource-Id")
 		environmentId := c.GetHeader("Environment-Id")
+		fmt.Println(res)
 
 		c.Set("Auth", res)
 		c.Set("resource_id", resourceId)
@@ -85,7 +87,7 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 		h.handleResponse(c, status_http.Unauthorized, err.Error())
 		return nil, false
 	}
-
+	fmt.Println("resp", resp)
 	return resp, true
 }
 
