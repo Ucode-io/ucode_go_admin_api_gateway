@@ -23,17 +23,9 @@ service ResourceService {
 
     // resource environment
     rpc UpsertResourceEnvironment(UpsertResourceEnvironmentRequest) returns (UpsertResourceEnvironmentResponse) {}
-    rpc GetResourceEnvironment(GetResourceEnvironmentReq) returns (ResourceEnvironment) {}
-    rpc GetDefaultResourceEnvironment(GetDefaultResourceEnvironmentReq) returns (ResourceEnvironment) {}
+    rpc GetResourceEnvironment(GetResourceEnvironmentReq) returns (GetResourceEnvironmentRes) {}
     rpc GetListResourceEnvironment(GetListResourceEnvironmentReq) returns (GetListResourceEnvironmentRes) {}
     rpc GetListConfiguredResourceEnvironment(GetListConfiguredResourceEnvironmentReq) returns (GetListConfiguredResourceEnvironmentRes) {}
-}
-
-message GetDefaultResourceEnvironmentReq {
-    string id = 1;
-    string project_id = 2;
-    string resource_id = 3;
-    string environment_id = 4;
 }
 
 message GetListConfiguredResourceEnvironmentReq {
@@ -66,7 +58,7 @@ message GetListResourceEnvironmentReq {
 }
 
 message GetListResourceEnvironmentRes {
-    repeated ResourceEnvironment data = 1;
+    repeated GetResourceEnvironmentRes data = 1;
     int32 count = 2;
 }
 
@@ -75,6 +67,15 @@ message GetResourceEnvironmentReq {
     string project_id = 2;
     string resource_id = 3;
     string environment_id = 4;
+}
+
+message GetResourceEnvironmentRes {
+    string id = 1;
+    string project_id = 2;
+    string resource_id = 3;
+    string environment_id = 4;
+    int32 service_type = 5;
+    int32 resource_type = 6;
 }
 
 message UpsertResourceEnvironmentRequest {

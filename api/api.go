@@ -213,7 +213,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	}
 
 	v1Admin := r.Group("/v1")
-	v1Admin.Use(h.AdminAuthMiddleware())
+	// v1Admin.Use(h.AdminAuthMiddleware())
 	{
 		// company service
 		// v1.POST("/company", h.CreateCompany)
@@ -249,7 +249,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.POST("/api-reference", h.CreateApiReference)
 		v1Admin.PUT("/api-reference", h.UpdateApiReference)
 		v1Admin.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
-		v1Admin.GET("api-reference", h.GetAllApiReferences)
+		v1Admin.GET("/api-reference", h.GetAllApiReferences)
+		v1Admin.DELETE("/api-reference/:api_reference_id", h.DeleteApiReference)
+
+		v1Admin.POST("/category", h.CreateCategory)
+		v1Admin.PUT("/category", h.UpdateCategory)
+		v1Admin.GET("/category/:category_id", h.GetApiCategoryByID)
+		v1Admin.GET("/category", h.GetAllCategories)
+		v1Admin.DELETE("/category/:category_id", h.DeleteCategory)
 	}
 
 	// v3 for ucode version 2

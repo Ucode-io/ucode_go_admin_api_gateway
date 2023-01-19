@@ -89,7 +89,6 @@ message ResourceWithoutPassword {
         string description = 4;
         bool is_configured = 5;
         string id = 6;
-        bool default = 7;
     }
 
     ResourceType resource_type = 1;
@@ -168,7 +167,6 @@ message ConfigureResourceRequest {
     string company_id = 8;
     string user_id = 9;
     string resource_id = 10;
-    bool default = 11;
 }
 
 message CreateResourceReq {
