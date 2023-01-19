@@ -33,8 +33,9 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			ok  bool
 		)
 		host := c.Request.Host
-
+		fmt.Println("HOST", host)
 		if strings.Contains(host, CLIENT_HOST) {
+			fmt.Println("HOST::::2", host)
 			res, ok = h.hasAccess(c)
 			if !ok {
 				c.Abort()
