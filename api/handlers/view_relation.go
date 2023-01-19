@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -35,8 +34,6 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
-
-	fmt.Println("tokenInfo", tokenInfo)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
