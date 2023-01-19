@@ -17600,6 +17600,9 @@
                 "credentials": {
                     "$ref": "#/definitions/company_service.Resource_Credentials"
                 },
+                "default": {
+                    "type": "boolean"
+                },
                 "environment_id": {
                     "type": "string"
                 },
@@ -17994,6 +17997,9 @@
         "company_service.ResourceWithoutPassword_Environment": {
             "type": "object",
             "properties": {
+                "default": {
+                    "type": "boolean"
+                },
                 "description": {
                     "type": "string"
                 },

@@ -17612,6 +17612,9 @@ const docTemplate = `{
                 "credentials": {
                     "$ref": "#/definitions/company_service.Resource_Credentials"
                 },
+                "default": {
+                    "type": "boolean"
+                },
                 "environment_id": {
                     "type": "string"
                 },
@@ -18006,6 +18009,9 @@ const docTemplate = `{
         "company_service.ResourceWithoutPassword_Environment": {
             "type": "object",
             "properties": {
+                "default": {
+                    "type": "boolean"
+                },
                 "description": {
                     "type": "string"
                 },

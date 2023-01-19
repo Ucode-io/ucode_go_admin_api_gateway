@@ -32,11 +32,12 @@ type ResourceServiceClient interface {
 	AddResourceInUcode(ctx context.Context, in *AddResourceInUcodeRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
 	ReconnectResource(ctx context.Context, in *ReconnectResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error)
 	GetResourceWithPath(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*GetResourceWithPathResponse, error)
-	AutoConnect(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*EmptyProto, error)
+	AutoConnect(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*AutoConnectRes, error)
 	GetResourceByResEnvironId(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error)
 	// resource environment
 	UpsertResourceEnvironment(ctx context.Context, in *UpsertResourceEnvironmentRequest, opts ...grpc.CallOption) (*UpsertResourceEnvironmentResponse, error)
-	GetResourceEnvironment(ctx context.Context, in *GetResourceEnvironmentReq, opts ...grpc.CallOption) (*GetResourceEnvironmentRes, error)
+	GetResourceEnvironment(ctx context.Context, in *GetResourceEnvironmentReq, opts ...grpc.CallOption) (*ResourceEnvironment, error)
+	GetDefaultResourceEnvironment(ctx context.Context, in *GetDefaultResourceEnvironmentReq, opts ...grpc.CallOption) (*ResourceEnvironment, error)
 	GetListResourceEnvironment(ctx context.Context, in *GetListResourceEnvironmentReq, opts ...grpc.CallOption) (*GetListResourceEnvironmentRes, error)
 	GetListConfiguredResourceEnvironment(ctx context.Context, in *GetListConfiguredResourceEnvironmentReq, opts ...grpc.CallOption) (*GetListConfiguredResourceEnvironmentRes, error)
 }
@@ -139,8 +140,8 @@ func (c *resourceServiceClient) GetResourceWithPath(ctx context.Context, in *Get
 	return out, nil
 }
 
-func (c *resourceServiceClient) AutoConnect(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*EmptyProto, error) {
-	out := new(EmptyProto)
+func (c *resourceServiceClient) AutoConnect(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*AutoConnectRes, error) {
+	out := new(AutoConnectRes)
 	err := c.cc.Invoke(ctx, "/company_service.ResourceService/AutoConnect", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -166,9 +167,18 @@ func (c *resourceServiceClient) UpsertResourceEnvironment(ctx context.Context, i
 	return out, nil
 }
 
-func (c *resourceServiceClient) GetResourceEnvironment(ctx context.Context, in *GetResourceEnvironmentReq, opts ...grpc.CallOption) (*GetResourceEnvironmentRes, error) {
-	out := new(GetResourceEnvironmentRes)
+func (c *resourceServiceClient) GetResourceEnvironment(ctx context.Context, in *GetResourceEnvironmentReq, opts ...grpc.CallOption) (*ResourceEnvironment, error) {
+	out := new(ResourceEnvironment)
 	err := c.cc.Invoke(ctx, "/company_service.ResourceService/GetResourceEnvironment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) GetDefaultResourceEnvironment(ctx context.Context, in *GetDefaultResourceEnvironmentReq, opts ...grpc.CallOption) (*ResourceEnvironment, error) {
+	out := new(ResourceEnvironment)
+	err := c.cc.Invoke(ctx, "/company_service.ResourceService/GetDefaultResourceEnvironment", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -207,11 +217,12 @@ type ResourceServiceServer interface {
 	AddResourceInUcode(context.Context, *AddResourceInUcodeRequest) (*AddResourceResponse, error)
 	ReconnectResource(context.Context, *ReconnectResourceRequest) (*EmptyProto, error)
 	GetResourceWithPath(context.Context, *GetResourceRequest) (*GetResourceWithPathResponse, error)
-	AutoConnect(context.Context, *GetProjectsRequest) (*EmptyProto, error)
+	AutoConnect(context.Context, *GetProjectsRequest) (*AutoConnectRes, error)
 	GetResourceByResEnvironId(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error)
 	// resource environment
 	UpsertResourceEnvironment(context.Context, *UpsertResourceEnvironmentRequest) (*UpsertResourceEnvironmentResponse, error)
-	GetResourceEnvironment(context.Context, *GetResourceEnvironmentReq) (*GetResourceEnvironmentRes, error)
+	GetResourceEnvironment(context.Context, *GetResourceEnvironmentReq) (*ResourceEnvironment, error)
+	GetDefaultResourceEnvironment(context.Context, *GetDefaultResourceEnvironmentReq) (*ResourceEnvironment, error)
 	GetListResourceEnvironment(context.Context, *GetListResourceEnvironmentReq) (*GetListResourceEnvironmentRes, error)
 	GetListConfiguredResourceEnvironment(context.Context, *GetListConfiguredResourceEnvironmentReq) (*GetListConfiguredResourceEnvironmentRes, error)
 	mustEmbedUnimplementedResourceServiceServer()
@@ -251,7 +262,7 @@ func (UnimplementedResourceServiceServer) ReconnectResource(context.Context, *Re
 func (UnimplementedResourceServiceServer) GetResourceWithPath(context.Context, *GetResourceRequest) (*GetResourceWithPathResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResourceWithPath not implemented")
 }
-func (UnimplementedResourceServiceServer) AutoConnect(context.Context, *GetProjectsRequest) (*EmptyProto, error) {
+func (UnimplementedResourceServiceServer) AutoConnect(context.Context, *GetProjectsRequest) (*AutoConnectRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AutoConnect not implemented")
 }
 func (UnimplementedResourceServiceServer) GetResourceByResEnvironId(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error) {
@@ -260,8 +271,11 @@ func (UnimplementedResourceServiceServer) GetResourceByResEnvironId(context.Cont
 func (UnimplementedResourceServiceServer) UpsertResourceEnvironment(context.Context, *UpsertResourceEnvironmentRequest) (*UpsertResourceEnvironmentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpsertResourceEnvironment not implemented")
 }
-func (UnimplementedResourceServiceServer) GetResourceEnvironment(context.Context, *GetResourceEnvironmentReq) (*GetResourceEnvironmentRes, error) {
+func (UnimplementedResourceServiceServer) GetResourceEnvironment(context.Context, *GetResourceEnvironmentReq) (*ResourceEnvironment, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResourceEnvironment not implemented")
+}
+func (UnimplementedResourceServiceServer) GetDefaultResourceEnvironment(context.Context, *GetDefaultResourceEnvironmentReq) (*ResourceEnvironment, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDefaultResourceEnvironment not implemented")
 }
 func (UnimplementedResourceServiceServer) GetListResourceEnvironment(context.Context, *GetListResourceEnvironmentReq) (*GetListResourceEnvironmentRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListResourceEnvironment not implemented")
@@ -534,6 +548,24 @@ func _ResourceService_GetResourceEnvironment_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ResourceService_GetDefaultResourceEnvironment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDefaultResourceEnvironmentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).GetDefaultResourceEnvironment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ResourceService/GetDefaultResourceEnvironment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).GetDefaultResourceEnvironment(ctx, req.(*GetDefaultResourceEnvironmentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ResourceService_GetListResourceEnvironment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetListResourceEnvironmentReq)
 	if err := dec(in); err != nil {
@@ -632,6 +664,10 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetResourceEnvironment",
 			Handler:    _ResourceService_GetResourceEnvironment_Handler,
+		},
+		{
+			MethodName: "GetDefaultResourceEnvironment",
+			Handler:    _ResourceService_GetDefaultResourceEnvironment_Handler,
 		},
 		{
 			MethodName: "GetListResourceEnvironment",

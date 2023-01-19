@@ -18,14 +18,22 @@ service ResourceService {
     rpc AddResourceInUcode(AddResourceInUcodeRequest) returns (AddResourceResponse) {}
     rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
     rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
-    rpc AutoConnect(GetProjectsRequest) returns (EmptyProto) {}
+    rpc AutoConnect(GetProjectsRequest) returns (AutoConnectRes) {}
     rpc GetResourceByResEnvironId(GetResourceRequest) returns (ResourceWithoutPassword) {}
 
     // resource environment
     rpc UpsertResourceEnvironment(UpsertResourceEnvironmentRequest) returns (UpsertResourceEnvironmentResponse) {}
-    rpc GetResourceEnvironment(GetResourceEnvironmentReq) returns (GetResourceEnvironmentRes) {}
+    rpc GetResourceEnvironment(GetResourceEnvironmentReq) returns (ResourceEnvironment) {}
+    rpc GetDefaultResourceEnvironment(GetDefaultResourceEnvironmentReq) returns (ResourceEnvironment) {}
     rpc GetListResourceEnvironment(GetListResourceEnvironmentReq) returns (GetListResourceEnvironmentRes) {}
     rpc GetListConfiguredResourceEnvironment(GetListConfiguredResourceEnvironmentReq) returns (GetListConfiguredResourceEnvironmentRes) {}
+}
+
+message GetDefaultResourceEnvironmentReq {
+    string id = 1;
+    string project_id = 2;
+    string resource_id = 3;
+    string environment_id = 4;
 }
 
 message GetListConfiguredResourceEnvironmentReq {
@@ -58,7 +66,7 @@ message GetListResourceEnvironmentReq {
 }
 
 message GetListResourceEnvironmentRes {
-    repeated GetResourceEnvironmentRes data = 1;
+    repeated ResourceEnvironment data = 1;
     int32 count = 2;
 }
 
@@ -67,15 +75,6 @@ message GetResourceEnvironmentReq {
     string project_id = 2;
     string resource_id = 3;
     string environment_id = 4;
-}
-
-message GetResourceEnvironmentRes {
-    string id = 1;
-    string project_id = 2;
-    string resource_id = 3;
-    string environment_id = 4;
-    int32 service_type = 5;
-    int32 resource_type = 6;
 }
 
 message UpsertResourceEnvironmentRequest {
@@ -103,4 +102,22 @@ message UpdateResourceResponse {
     string company_id = 3;
     string user_id = 4;
     repeated ResourceEnvironment resource_environments = 5;
+}
+
+message AutoConnectRes {
+    message ReconnectReq {
+        message Credentials {
+            string host = 1;
+            string port = 2;
+            string username = 3;
+            string password = 4;
+            string database = 5;
+        }
+        string k8s_namespace = 1;
+        string project_id = 2;
+        string secret_path = 3;
+        Credentials credentials = 4;
+        string user_id = 5;
+    }
+    repeated ReconnectReq data = 1;
 }

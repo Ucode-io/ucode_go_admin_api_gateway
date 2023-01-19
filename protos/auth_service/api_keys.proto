@@ -33,12 +33,10 @@ message RefreshApiTokenRes {
 }
 
 message CreateReq {
-  string id = 1;
-  string name = 2;
-  string app_id = 3;
-  string role_id = 4;
-  string app_secret = 5;
-  string resource_environment_id = 6;
+  string name = 1;
+  string project_id = 2;
+  string role_id = 3;
+  string resource_environment_id = 4;
 }
 
 message CreateRes {
@@ -51,6 +49,7 @@ message CreateRes {
   string created_at = 7;
   string updated_at = 8;
   string resource_environment_id = 9;
+  string project_id = 10;
 }
 
 message UpdateReq {
@@ -58,6 +57,7 @@ message UpdateReq {
   string status = 2;
   string name = 3;
   string role_id = 4;
+  string project_id = 5;
 }
 
 message UpdateRes {
@@ -78,10 +78,15 @@ message GetRes {
   string updated_at = 7;
   string app_secret = 8;
   string resource_environment_id = 9;
+  string project_id = 10;
 }
 
 message GetListReq {
   string resource_environment_id = 1;
+  string project_id = 2;
+  int32 offset = 3;
+  int32 limit = 4;
+  string search = 5;
 }
 
 message GetListRes {
@@ -90,7 +95,7 @@ message GetListRes {
 }
 
 message DeleteReq {
-  string ids = 1;
+  string id = 1;
 }
 
 message DeleteRes {

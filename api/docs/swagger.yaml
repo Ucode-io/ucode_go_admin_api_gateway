@@ -309,6 +309,8 @@ definitions:
         type: string
       credentials:
         $ref: '#/definitions/company_service.Resource_Credentials'
+      default:
+        type: boolean
       environment_id:
         type: string
       is_configured:
@@ -579,6 +581,8 @@ definitions:
     type: object
   company_service.ResourceWithoutPassword_Environment:
     properties:
+      default:
+        type: boolean
       description:
         type: string
       display_color:
