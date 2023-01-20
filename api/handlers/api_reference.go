@@ -3,10 +3,8 @@ package handlers
 import (
 	"context"
 	"errors"
-	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -21,20 +19,20 @@ import (
 // @Tags ApiReference
 // @Accept json
 // @Produce json
-// @Param app body models.CreateApiReference true "CreateApiReferenceRequestBody"
+// @Param api_reference body models.CreateApiReferenceModel true "CreateApiReferenceRequestBody"
 // @Success 201 {object} status_http.Response{data=models.ApiReference} "Api Reference data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateApiReference(c *gin.Context) {
-	var apiRefence models.ApiReference
+	var apiReference ars.CreateApiReferenceRequest
 
-	err := c.ShouldBindJSON(&apiRefence)
+	err := c.ShouldBindJSON(&apiReference)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
-	if !util.IsValidUUID(c.Query("project_id")) {
+	if !util.IsValidUUID(apiReference.ProjectId) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
 		return
 	}
@@ -58,26 +56,26 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-	attributes, err := helper.ConvertMapToStruct(apiRefence.Attributes)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
+	// attributes, err := helper.ConvertMapToStruct(apiReference.Attributes)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.BadRequest, err)
+	// 	return
+	// }
 
 	resp, err := services.ApiReferenceService().Create(
-		context.Background(),
-		&ars.CreateApiReferenceRequest{
-			Title: apiRefence.Title,
-			ProjectId: apiRefence.ProjectID,
-			AdditionalUrl: apiRefence.AdditionalUrl,
-			ExternalUrl: apiRefence.ExternalUrl,
-			Desc: apiRefence.Desc,
-			Method: apiRefence.Method,
-			CategoryId: apiRefence.CategoryID,
-			Authentification: apiRefence.Authentification,
-			NewWindow: apiRefence.NewWindow,
-			Attributes: attributes,
-		},
+		context.Background(), &apiReference,
+		// &ars.CreateApiReferenceRequest{
+		// 	Title:            apiReference.Title,
+		// 	ProjectId:        apiReference.ProjectID,
+		// 	AdditionalUrl:    apiReference.AdditionalUrl,
+		// 	ExternalUrl:      apiReference.ExternalUrl,
+		// 	Desc:             apiReference.Desc,
+		// 	Method:           apiReference.Method,
+		// 	CategoryId:       apiReference.CategoryID,
+		// 	Authentification: apiReference.Authentification,
+		// 	NewWindow:        apiReference.NewWindow,
+		// 	Attributes:       attributes,
+		// },
 	)
 
 	if err != nil {
@@ -224,7 +222,7 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateApiReference(c *gin.Context) {
-	var apiReference models.ApiReference
+	var apiReference ars.ApiReference
 
 	err := c.ShouldBindJSON(&apiReference)
 	if err != nil {
@@ -232,7 +230,7 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(c.Query("project_id")) {
+	if !util.IsValidUUID(apiReference.ProjectId) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
 		return
 	}
@@ -256,27 +254,27 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-	attributes, err := helper.ConvertMapToStruct(apiReference.Attributes)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
+	// attributes, err := helper.ConvertMapToStruct(apiReference.Attributes)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.BadRequest, err)
+	// 	return
+	// }
 
 	resp, err := services.ApiReferenceService().Update(
-		context.Background(),
-		&ars.ApiReference{
-			Guid: apiReference.Guid,
-			Title: apiReference.Title,
-			ProjectId: apiReference.ProjectID,
-			AdditionalUrl: apiReference.AdditionalUrl,
-			ExternalUrl: apiReference.ExternalUrl,
-			Desc: apiReference.Desc,
-			Method: apiReference.Method,
-			CategoryId: apiReference.CategoryID,
-			Authentification: apiReference.Authentification,
-			NewWindow: apiReference.NewWindow,
-			Attributes: attributes,
-		},
+		context.Background(), &apiReference,
+		// &ars.ApiReference{
+		// 	Guid:             apiReference.Guid,
+		// 	Title:            apiReference.Title,
+		// 	ProjectId:        apiReference.ProjectID,
+		// 	AdditionalUrl:    apiReference.AdditionalUrl,
+		// 	ExternalUrl:      apiReference.ExternalUrl,
+		// 	Desc:             apiReference.Desc,
+		// 	Method:           apiReference.Method,
+		// 	CategoryId:       apiReference.CategoryID,
+		// 	Authentification: apiReference.Authentification,
+		// 	NewWindow:        apiReference.NewWindow,
+		// 	Attributes:       attributes,
+		// },
 	)
 
 	if err != nil {

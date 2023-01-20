@@ -1,6 +1,6 @@
 package models
 
-type CreateApiReference struct {
+type CreateApiReferenceModel struct {
 	AdditionalUrl    string                 `json:"additional_url"`
 	Desc             string                 `json:"desc"`
 	Method           string                 `json:"method"`

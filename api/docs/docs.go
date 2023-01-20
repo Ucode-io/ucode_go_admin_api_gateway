@@ -3225,11 +3225,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "CreateApiReferenceRequestBody",
-                        "name": "app",
+                        "name": "api_reference",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreateApiReference"
+                            "$ref": "#/definitions/models.CreateApiReferenceModel"
                         }
                     }
                 ],
@@ -18357,7 +18357,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.CreateApiReference": {
+        "models.CreateApiReferenceModel": {
             "type": "object",
             "properties": {
                 "additional_url": {

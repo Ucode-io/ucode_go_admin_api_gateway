@@ -26,14 +26,14 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateCategory(c *gin.Context) {
-	var category models.CreateCategory
+	var category ars.CreateCategoryRequest
 
 	err := c.ShouldBindJSON(&category)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	if !util.IsValidUUID(c.Query("project_id")) {
+	if !util.IsValidUUID(category.ProjectId) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
 		return
 	}
@@ -58,20 +58,20 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-	attributes, err := helper.ConvertMapToStruct(category.Attributes)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
+	// attributes, err := helper.ConvertMapToStruct(category.Attributes)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.BadRequest, err)
+	// 	return
+	// }
 
 	resp, err := services.CategoryService().Create(
-		context.Background(),
-		&ars.CreateCategoryRequest{
-			Name:       category.Name,
-			BaseUrl:    category.BaseUrl,
-			ProjectId:  category.ProjectID,
-			Attributes: attributes,
-		},
+		context.Background(), &category,
+		// &ars.CreateCategoryRequest{
+		// 	Name:       category.Name,
+		// 	BaseUrl:    category.BaseUrl,
+		// 	ProjectId:  category.ProjectID,
+		// 	Attributes: attributes,
+		// },
 	)
 
 	if err != nil {
@@ -224,7 +224,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	if !util.IsValidUUID(c.Query("project_id")) {
+	if !util.IsValidUUID(category.ProjectID) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
 		return
 	}

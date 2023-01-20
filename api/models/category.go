@@ -1,18 +1,18 @@
 package models
 
 type CreateCategory struct {
-	Name       string                 `json:"name" bson:"name"`
-	ProjectID  string                 `json:"project_id" bson:"project_id"`
-	BaseUrl    string                 `json:"base_url" bson:"base_url"`
-	Attributes map[string]interface{} `json:"attributes" bson:"attributes"`
+	Name       string                 `json:"name"`
+	ProjectID  string                 `json:"project_id"`
+	BaseUrl    string                 `json:"base_url"`
+	Attributes map[string]interface{} `json:"attributes"`
 }
 
 type Category struct {
-	Guid       string                 `json:"guid" bson:"guid"`
-	Name       string                 `json:"name" bson:"name"`
-	ProjectID  string                 `json:"project_id" bson:"project_id"`
-	BaseUrl    string                 `json:"base_url" bson:"base_url"`
-	Attributes map[string]interface{} `json:"attributes" bson:"attributes"`
+	Guid       string                 `json:"guid"`
+	Name       string                 `json:"name"`
+	ProjectID  string                 `json:"project_id"`
+	BaseUrl    string                 `json:"base_url"`
+	Attributes map[string]interface{} `json:"attributes"`
 }
 
 type GetAllCategoriesResponse struct {

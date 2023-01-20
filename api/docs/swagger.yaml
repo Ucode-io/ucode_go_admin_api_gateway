@@ -798,7 +798,7 @@ definitions:
       company_id:
         type: string
     type: object
-  models.CreateApiReference:
+  models.CreateApiReferenceModel:
     properties:
       additional_url:
         type: string
@@ -4298,10 +4298,10 @@ paths:
       parameters:
       - description: CreateApiReferenceRequestBody
         in: body
-        name: app
+        name: api_reference
         required: true
         schema:
-          $ref: '#/definitions/models.CreateApiReference'
+          $ref: '#/definitions/models.CreateApiReferenceModel'
       produces:
       - application/json
       responses:
