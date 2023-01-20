@@ -3,8 +3,10 @@ package handlers
 import (
 	"context"
 	"errors"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +26,7 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateCategory(c *gin.Context) {
-	var category ars.CreateCategoryRequest
+	var category models.CreateCategory
 
 	err := c.ShouldBindJSON(&category)
 	if err != nil {
@@ -56,10 +58,20 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+	attributes, err := helper.ConvertMapToStruct(category.Attributes)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
 
 	resp, err := services.CategoryService().Create(
 		context.Background(),
-		&category,
+		&ars.CreateCategoryRequest{
+			Name:       category.Name,
+			BaseUrl:    category.BaseUrl,
+			ProjectId:  category.ProjectID,
+			Attributes: attributes,
+		},
 	)
 
 	if err != nil {
@@ -205,7 +217,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateCategory(c *gin.Context) {
-	var category ars.Category
+	var category models.Category
 
 	err := c.ShouldBindJSON(&category)
 	if err != nil {
@@ -237,10 +249,21 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+	attributes, err := helper.ConvertMapToStruct(category.Attributes)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
 
 	resp, err := services.CategoryService().Update(
 		context.Background(),
-		&category,
+		&ars.Category{
+			Guid:       category.Guid,
+			Name:       category.Name,
+			BaseUrl:    category.BaseUrl,
+			ProjectId:  category.ProjectID,
+			Attributes: attributes,
+		},
 	)
 
 	if err != nil {
