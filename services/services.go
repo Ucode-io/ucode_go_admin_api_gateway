@@ -62,6 +62,8 @@ type ServiceManagerI interface {
 	TableHelpersService() object_builder_service.TableHelpersServiceClient
 	ApiReferenceService() api_reference_service.ApiReferenceServiceClient
 	CategoryService() api_reference_service.CategoryServiceClient
+	ReleaseService() company_service.ReleaseServiceClient
+	CommitService() company_service.CommitServiceClient
 }
 
 type grpcClients struct {
@@ -109,6 +111,8 @@ type grpcClients struct {
 	tableHelpersService       object_builder_service.TableHelpersServiceClient
 	apiReferenceService       api_reference_service.ApiReferenceServiceClient
 	categoryService           api_reference_service.CategoryServiceClient
+	releaseService            company_service.ReleaseServiceClient
+	commitService             company_service.CommitServiceClient
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -218,6 +222,8 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		tableHelpersService:       object_builder_service.NewTableHelpersServiceClient(connObjectBuilderService),
 		apiReferenceService:       api_reference_service.NewApiReferenceServiceClient(connApiReferenceService),
 		categoryService:           api_reference_service.NewCategoryServiceClient(connApiReferenceService),
+		releaseService:            company_service.NewReleaseServiceClient(connCompanyService),
+		commitService:             company_service.NewCommitServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -392,6 +398,14 @@ func (g *grpcClients) CascadingService() object_builder_service.CascadingService
 
 func (g *grpcClients) ResourceService() company_service.ResourceServiceClient {
 	return g.resourceService
+}
+
+func (g *grpcClients) ReleaseService() company_service.ReleaseServiceClient {
+	return g.releaseService
+}
+
+func (g *grpcClients) CommitService() company_service.CommitServiceClient {
+	return g.CommitService()
 }
 
 //this is api reference service

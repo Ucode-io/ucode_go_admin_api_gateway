@@ -245,6 +245,21 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/environment", h.GetAllEnvironments)
 		v1Admin.PUT("/environment", h.UpdateEnvironment)
 		v1Admin.DELETE("/environment/:environment_id", h.DeleteEnvironment)
+
+		// release service
+		v1Admin.POST("/release", h.CreateRelease)
+		v1Admin.GET("/release/:id", h.GetReleaseByID)
+		v1Admin.GET("/release", h.GetAllReleases)
+		v1Admin.PUT("/release/:id", h.UpdateRelease)
+		v1Admin.DELETE("/release/:id", h.DeleteRelease)
+		v1Admin.POST("/release/current", h.SetCurrentRelease)
+		v1Admin.GET("/release/current/:environment-id", h.GetCurrentRelease)
+
+		// commit service
+		v1Admin.POST("/commit", h.CreateRelease)
+		v1Admin.GET("/commit/:id", h.GetReleaseByID)
+		v1Admin.GET("/commit", h.GetAllReleases)
+
 		//api-reference service
 		v1Admin.POST("/api-reference", h.CreateApiReference)
 		v1Admin.PUT("/api-reference", h.UpdateApiReference)

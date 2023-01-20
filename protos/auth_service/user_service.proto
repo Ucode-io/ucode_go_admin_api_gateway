@@ -75,6 +75,7 @@ message CreateUserRequest {
     string client_platform_id = 11;
     int32 active = 12;
     string expires_at = 13;
+    string resource_environment_id = 14;
 }
 
 message UserPrimaryKey {

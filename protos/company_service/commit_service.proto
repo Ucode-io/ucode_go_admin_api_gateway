@@ -7,22 +7,17 @@ import "google/protobuf/empty.proto";
 import "company.proto";
 
 service CommitService {
-    rpc Create(CreateCommitRequest) returns (Commit) {}
-    rpc GetByID(CommitPrimaryKey) returns (Commit) {}
+    rpc Create(CreateCommitRequest) returns (CommitWithRelease) {}
+    rpc GetByID(CommitPrimaryKey) returns (CommitWithRelease) {}
     rpc GetList(GetCommitListRequest) returns (GetCommitListResponse) {}
-    rpc Update(UpdateCommitRequest) returns (Commit) {}
-    rpc Restore(RestoreRequest) returns (google.protobuf.Empty) {}
-    rpc GetCurrent(GetCurrentRequest) returns (GetCurrentResponse) {}
-
+    rpc Restore(RestoreCommitRequest) returns (google.protobuf.Empty) {}
 }
-
 
 message CreateCommitRequest {
     string project_id = 1;
     string environment_id = 2;
     string author_id = 3;
     string name = 4;
-    string description = 5;
 }
 
 message CommitPrimaryKey {
@@ -40,24 +35,11 @@ message GetCommitListRequest {
 
 message GetCommitListResponse {
     int32 count = 1;
-    repeated Commit commits = 2;
+    repeated CommitWithRelease commits = 2;
 }
 
-message UpdateCommitRequest {
-    string id = 1;
-    string description = 2;
-}
-
-message GetCurrentRequest {
-    string environment_id = 1;
-}
-
-message RestoreRequest {
+message RestoreCommitRequest {
     string project_id = 1;
     string environment_id = 2;
     string id = 3;
-}
-
-message GetCurrentResponse {
-    string commit_id = 1;
 }

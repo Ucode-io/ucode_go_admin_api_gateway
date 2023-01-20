@@ -24,7 +24,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/auth_service.ConfirmStrategies'
+        type: integer
       id:
         type: string
       name:
@@ -40,16 +40,6 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
-  auth_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -260,9 +250,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -271,6 +261,32 @@ definitions:
   company_service.AddResourceResponse:
     properties:
       id:
+        type: string
+    type: object
+  company_service.CommitWithRelease:
+    properties:
+      author_id:
+        type: string
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      release_info:
+        $ref: '#/definitions/company_service.CommitWithRelease_Release'
+    type: object
+  company_service.CommitWithRelease_Release:
+    properties:
+      id:
+        type: string
+      is_current:
+        type: boolean
+      version:
         type: string
     type: object
   company_service.Company:
@@ -320,9 +336,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -331,6 +347,17 @@ definitions:
   company_service.ConfigureResourceResponse:
     properties:
       id:
+        type: string
+    type: object
+  company_service.CreateCommitRequest:
+    properties:
+      author_id:
+        type: string
+      environment_id:
+        type: string
+      name:
+        type: string
+      project_id:
         type: string
     type: object
   company_service.CreateEnvironmentRequest:
@@ -357,6 +384,23 @@ definitions:
       title:
         type: string
     type: object
+  company_service.CreateReleaseRequest:
+    properties:
+      author_id:
+        type: string
+      commit_id:
+        type: string
+      description:
+        type: string
+      environment_id:
+        type: string
+      is_current:
+        type: boolean
+      project_id:
+        type: string
+      release_type:
+        type: integer
+    type: object
   company_service.CreateResourceReq:
     properties:
       company_id:
@@ -375,9 +419,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.EmptyProto:
     type: object
@@ -427,10 +471,24 @@ definitions:
       count:
         type: integer
     type: object
+  company_service.GetCommitListResponse:
+    properties:
+      commits:
+        items:
+          $ref: '#/definitions/company_service.CommitWithRelease'
+        type: array
+      count:
+        type: integer
+    type: object
   company_service.GetCompanyByIdResponse:
     properties:
       company:
         $ref: '#/definitions/company_service.Company'
+    type: object
+  company_service.GetCurrentReleaseResponse:
+    properties:
+      commit_id:
+        type: string
     type: object
   company_service.GetEnvironmentListResponse:
     properties:
@@ -457,6 +515,15 @@ definitions:
       projects:
         items:
           $ref: '#/definitions/company_service.Project'
+        type: array
+    type: object
+  company_service.GetReleaseListResponse:
+    properties:
+      count:
+        type: integer
+      releases:
+        items:
+          $ref: '#/definitions/company_service.ReleaseWithCommit'
         type: array
     type: object
   company_service.GetReourceListResponse:
@@ -508,6 +575,36 @@ definitions:
       id:
         type: string
     type: object
+  company_service.ReleaseWithCommit:
+    properties:
+      author_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/company_service.ReleaseWithCommit_Commit'
+      created_at:
+        type: string
+      description:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      is_current:
+        type: boolean
+      project_id:
+        type: string
+      updated_at:
+        type: string
+      version:
+        type: string
+    type: object
+  company_service.ReleaseWithCommit_Commit:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   company_service.RemoveResourceRequest:
     properties:
       id:
@@ -520,9 +617,9 @@ definitions:
       id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
     type: object
@@ -539,18 +636,6 @@ definitions:
       username:
         type: string
     type: object
-  company_service.ResourceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ResourceType_NOT_DECIDED
-    - ResourceType_MONGODB
-    - ResourceType_CLICKHOUSE
-    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -564,7 +649,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -596,16 +681,22 @@ definitions:
       resource_environment_id:
         type: string
     type: object
-  company_service.ServiceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ServiceType_NOT_SPECIFIED
-    - ServiceType_BUILDER_SERVICE
-    - ServiceType_ANALYTICS_SERVICE
+  company_service.SetCurrentReleaseRequest:
+    properties:
+      environment_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  company_service.UpdateReleaseRequest:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+    type: object
   company_service.UpdateResourceRequest:
     properties:
       credentials:
@@ -621,7 +712,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -1432,7 +1523,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
+        type: integer
       guid:
         type: string
       name:
@@ -1455,16 +1546,6 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
-  object_builder_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -2678,7 +2759,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -2860,7 +2941,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -3539,7 +3620,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -3817,7 +3898,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4156,7 +4237,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4400,7 +4481,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4674,7 +4755,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4968,7 +5049,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: ""
         "400":
           description: Bad Request
           schema:
@@ -5153,7 +5234,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -5275,6 +5356,160 @@ paths:
       summary: Get close cashbox
       tags:
       - Appointment
+  /v1/commit:
+    get:
+      consumes:
+      - application/json
+      description: Get all commits
+      operationId: get_all_commits
+      parameters:
+      - in: query
+        name: created_at
+        type: string
+      - in: query
+        name: environment_id
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CommitBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetCommitListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all commits
+      tags:
+      - Commit
+    post:
+      consumes:
+      - application/json
+      description: Create commit
+      operationId: create_commit
+      parameters:
+      - description: CreateCommitRequestBody
+        in: body
+        name: commit
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.CreateCommitRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Commit data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.CommitWithRelease'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create commit
+      tags:
+      - Commit
+  /v1/commit/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get commit by id
+      operationId: get_commit_by_id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CommitBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.CommitWithRelease'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get commit by id
+      tags:
+      - Commit
   /v1/company:
     get:
       description: Get all companies
@@ -5666,7 +5901,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -6529,7 +6764,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -6816,7 +7051,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7100,7 +7335,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7553,7 +7788,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8026,7 +8261,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8251,7 +8486,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8597,7 +8832,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8868,7 +9103,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -9175,7 +9410,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10238,7 +10473,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10263,6 +10498,346 @@ paths:
       summary: Delete Relation
       tags:
       - Relation
+  /v1/release:
+    get:
+      consumes:
+      - application/json
+      description: Get all releases
+      operationId: get_all_releases
+      parameters:
+      - in: query
+        name: created_at
+        type: string
+      - in: query
+        name: environment_id
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ReleaseBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetReleaseListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all releases
+      tags:
+      - Release
+    post:
+      consumes:
+      - application/json
+      description: Create release
+      operationId: create_release
+      parameters:
+      - description: CreateReleaseRequestBody
+        in: body
+        name: release
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.CreateReleaseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Release data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ReleaseWithCommit'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create release
+      tags:
+      - Release
+  /v1/release/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Release
+      operationId: delete_release
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Release
+      tags:
+      - Release
+    get:
+      consumes:
+      - application/json
+      description: Get release by id
+      operationId: get_release_by_id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ReleaseBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ReleaseWithCommit'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get release by id
+      tags:
+      - Release
+    put:
+      consumes:
+      - application/json
+      description: Update release
+      operationId: update_release
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: UpdateReleaseRequestBody
+        in: body
+        name: release
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.UpdateReleaseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Release data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ReleaseWithCommit'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update release
+      tags:
+      - Release
+  /v1/release/current:
+    post:
+      consumes:
+      - application/json
+      description: SetCurrent release
+      operationId: set_current_release
+      parameters:
+      - description: SetCurrentReleaseRequestBody
+        in: body
+        name: release
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.SetCurrentReleaseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Release data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: SetCurrent release
+      tags:
+      - Release
+  /v1/release/current/{environment-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get release by id
+      operationId: get_current_release
+      parameters:
+      - description: environment-id
+        in: path
+        name: environment-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetReleaseBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetCurrentReleaseResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get release by id
+      tags:
+      - GetRelease
   /v1/section:
     get:
       consumes:
@@ -10588,7 +11163,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11117,7 +11692,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11470,7 +12045,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11762,7 +12337,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12048,7 +12623,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
