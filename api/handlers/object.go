@@ -79,7 +79,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		err = errors.New("error getting resource environment id")
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
-	}
+	}	
 
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
 	for key, value := range objectRequest.Data {

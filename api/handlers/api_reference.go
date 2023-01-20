@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -31,6 +32,10 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		return
 	}
 
+	if !util.IsValidUUID(c.Query("project_id")) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
+		return
+	}
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
@@ -151,6 +156,10 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+	if !util.IsValidUUID(c.Query("project_id")) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
+		return
+	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
@@ -205,6 +214,10 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		return
 	}
 
+	if !util.IsValidUUID(c.Query("project_id")) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
+		return
+	}
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
 	//	h.handleResponse(c, status_http.Forbidden, err.Error())

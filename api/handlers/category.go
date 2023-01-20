@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -28,6 +29,10 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 	err := c.ShouldBindJSON(&category)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	if !util.IsValidUUID(c.Query("project_id")) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
 		return
 	}
 
@@ -145,6 +150,10 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	if !util.IsValidUUID(c.Query("project_id")) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
+		return
+	}
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -201,6 +210,10 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 	err := c.ShouldBindJSON(&category)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	if !util.IsValidUUID(c.Query("project_id")) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
 		return
 	}
 
