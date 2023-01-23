@@ -11,8 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//GetResourceEnvironment
-
 // CreateApp godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
