@@ -63,9 +63,9 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -140,9 +140,9 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -211,9 +211,9 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -291,9 +291,9 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -375,9 +375,9 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},

@@ -245,7 +245,25 @@ message GetResourceManyRequest {
 }
 
 message GetResourceManyWithPathResponse {
-    repeated GetResourceWithPathResponse res = 1;
+    message ResourceEnvironment {
+        message Credentials {
+            string host = 1;
+            string port = 2;
+            string username = 3;
+            string database = 4;
+            string password = 5;
+        }
+        ServiceType service_type = 1;
+        ResourceType resource_type = 2;
+        Credentials credentials = 3;
+        string id = 4;
+        string project_id = 5;
+        string path = 6;
+        string title = 7;
+        string resource_id = 8;
+        string environment_id = 9;
+    }
+    repeated ResourceEnvironment res = 1;
 }
 
 message GetProjectRes {

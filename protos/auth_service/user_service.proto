@@ -75,6 +75,7 @@ message CreateUserRequest {
     string client_platform_id = 11;
     int32 active = 12;
     string expires_at = 13;
+    string resource_environment_id = 14;
 }
 
 message UserPrimaryKey {
@@ -94,6 +95,7 @@ message GetUserListRequest {
     string client_platform_id = 4;
     string client_type_id = 5;
     string project_id = 6;
+    string resource_environment_id = 7;
 }
 
 message GetUserListResponse {
