@@ -405,7 +405,7 @@ func (g *grpcClients) ReleaseService() company_service.ReleaseServiceClient {
 }
 
 func (g *grpcClients) CommitService() company_service.CommitServiceClient {
-	return g.CommitService()
+	return g.commitService
 }
 
 //this is api reference service

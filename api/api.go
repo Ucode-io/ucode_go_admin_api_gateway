@@ -256,9 +256,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/release/current/:environment-id", h.GetCurrentRelease)
 
 		// commit service
-		v1Admin.POST("/commit", h.CreateRelease)
-		v1Admin.GET("/commit/:id", h.GetReleaseByID)
-		v1Admin.GET("/commit", h.GetAllReleases)
+		v1Admin.POST("/commit", h.CreateCommit)
+		v1Admin.GET("/commit/:id", h.GetCommitByID)
+		v1Admin.GET("/commit", h.GetAllCommits)
 
 		//api-reference service
 		v1Admin.POST("/api-reference", h.CreateApiReference)
