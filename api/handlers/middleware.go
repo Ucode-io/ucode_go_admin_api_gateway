@@ -76,11 +76,11 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			// c.Set("resource_id", resourceId)
 			// c.Set("environment_id", environmentId)
 
-			tDec, _ := base64.StdEncoding.DecodeString(bearerToken)
-			if string(tDec) != config.API_KEY_SECRET {
-				_ = c.AbortWithError(http.StatusForbidden, errors.New("wrong token"))
-				return
-			}
+			// tDec, _ := base64.StdEncoding.DecodeString(bearerToken)
+			// if string(tDec) != config.API_KEY_SECRET {
+			// 	_ = c.AbortWithError(http.StatusForbidden, errors.New("wrong token"))
+			// 	return
+			// }
 
 			app_id := c.GetHeader("X-API-KEY")
 			apikeys, err := h.authService.ApiKeyService().GetEnvID(c, &auth_service.GetReq{

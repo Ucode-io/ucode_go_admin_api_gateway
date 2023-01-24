@@ -178,6 +178,7 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 // @Tags App
 // @Accept json
 // @Produce json
+// @Param X-API-KEY header string true "API key for the endpoint"
 // @Param filters query object_builder_service.GetAllAppsRequest true "filters"
 // @Success 200 {object} status_http.Response{data=object_builder_service.GetAllAppsResponse} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"

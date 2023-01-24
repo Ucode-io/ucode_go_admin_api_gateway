@@ -3469,6 +3469,13 @@
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "API key for the endpoint",
+                        "name": "X-API-KEY",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"

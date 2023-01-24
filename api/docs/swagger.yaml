@@ -4568,6 +4568,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: API key for the endpoint
+        in: header
+        name: X-API-KEY
+        required: true
+        type: string
       - in: query
         name: limit
         type: integer
