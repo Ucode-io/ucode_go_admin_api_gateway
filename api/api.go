@@ -258,7 +258,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// commit service
 		v1Admin.POST("/commit", h.CreateCommit)
 		v1Admin.GET("/commit/:id", h.GetCommitByID)
-		v1Admin.GET("/commit", h.GetCommitByID)
+		v1Admin.GET("/commit", h.GetAllCommits)
 
 		//api-reference service
 		v1Admin.POST("/api-reference", h.CreateApiReference)
