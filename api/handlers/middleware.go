@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -76,11 +74,11 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			// c.Set("resource_id", resourceId)
 			// c.Set("environment_id", environmentId)
 
-			tDec, _ := base64.StdEncoding.DecodeString(bearerToken)
-			if string(tDec) != config.API_KEY_SECRET {
-				_ = c.AbortWithError(http.StatusForbidden, errors.New("wrong token"))
-				return
-			}
+			// tDec, _ := base64.StdEncoding.DecodeString(bearerToken)
+			// if string(tDec) != config.API_KEY_SECRET {
+			// 	_ = c.AbortWithError(http.StatusForbidden, errors.New("wrong token"))
+			// 	return
+			// }
 
 			app_id := c.GetHeader("X-API-KEY")
 			apikeys, err := h.authService.ApiKeyService().GetEnvID(c, &auth_service.GetReq{
@@ -94,7 +92,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			resource, err := h.companyServices.ResourceService().GetResourceByEnvID(c, &company_service.GetResourceByEnvIDRequest{
 				EnvId: apikeys.GetEnvironmentId(),
 			})
-			if err != nil{
+			if err != nil {
 				h.handleResponse(c, status_http.GRPCError, err.Error())
 				return
 			}
