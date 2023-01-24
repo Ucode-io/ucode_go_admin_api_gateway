@@ -20,6 +20,7 @@ type AuthServiceManagerI interface {
 	SessionServiceAuth() auth_service.SessionServiceClient
 	EmailServie() auth_service.EmailOtpServiceClient
 	CompanyService() auth_service.CompanyServiceClient
+	ApiKeyService() auth_service.ApiKeysClient
 }
 
 type authGrpcClients struct {
@@ -32,6 +33,7 @@ type authGrpcClients struct {
 	sessionServiceAuth    auth_service.SessionServiceClient
 	emailServie           auth_service.EmailOtpServiceClient
 	authCompanyService    auth_service.CompanyServiceClient
+	apikeyService         auth_service.ApiKeysClient
 }
 
 func NewAuthGrpcClient(ctx context.Context, cfg config.Config) (AuthServiceManagerI, error) {
@@ -55,6 +57,7 @@ func NewAuthGrpcClient(ctx context.Context, cfg config.Config) (AuthServiceManag
 		integrationService:    auth_service.NewIntegrationServiceClient(connAuthService),
 		emailServie:           auth_service.NewEmailOtpServiceClient(connAuthService),
 		authCompanyService:    auth_service.NewCompanyServiceClient(connAuthService),
+		apikeyService:         auth_service.NewApiKeysClient(connAuthService),
 	}, nil
 }
 
@@ -94,4 +97,8 @@ func (g *authGrpcClients) EmailServie() auth_service.EmailOtpServiceClient {
 
 func (g *authGrpcClients) CompanyService() auth_service.CompanyServiceClient {
 	return g.authCompanyService
+}
+
+func (g *authGrpcClients) ApiKeyService() auth_service.ApiKeysClient {
+	return g.apikeyService
 }

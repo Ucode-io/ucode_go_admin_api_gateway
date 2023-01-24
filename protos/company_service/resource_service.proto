@@ -20,13 +20,14 @@ service ResourceService {
     rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
     rpc AutoConnect(GetProjectsRequest) returns (GetResourceManyWithPathResponse) {}
     rpc GetResourceByResEnvironId(GetResourceRequest) returns (ResourceWithoutPassword) {}
-
+    rpc GetResEnvByResIdEnvId(GetResEnvByResIdEnvIdRequest) returns (ResourceEnvironment) {}
     // resource environment
     rpc UpsertResourceEnvironment(UpsertResourceEnvironmentRequest) returns (UpsertResourceEnvironmentResponse) {}
     rpc GetResourceEnvironment(GetResourceEnvironmentReq) returns (ResourceEnvironment) {}
     rpc GetDefaultResourceEnvironment(GetDefaultResourceEnvironmentReq) returns (ResourceEnvironment) {}
     rpc GetListResourceEnvironment(GetListResourceEnvironmentReq) returns (GetListResourceEnvironmentRes) {}
     rpc GetListConfiguredResourceEnvironment(GetListConfiguredResourceEnvironmentReq) returns (GetListConfiguredResourceEnvironmentRes) {}
+    rpc GetResourceByEnvID(GetResourceByEnvIDRequest) returns (GetResourceByEnvIDResponse) {}
 }
 
 message GetDefaultResourceEnvironmentReq {
@@ -121,3 +122,22 @@ message AutoConnectRes {
     }
     repeated ReconnectReq data = 1;
 }
+
+message GetResEnvByResIdEnvIdRequest {
+    string resource_id = 1;
+    string environment_id = 2;
+}
+
+
+message GetResourceByEnvIDRequest {
+    string env_id = 1;
+}
+
+message GetResourceByEnvIDResponse {
+    message Resourse {
+        string id = 1;
+    }
+
+    Resourse resource = 1;
+}
+

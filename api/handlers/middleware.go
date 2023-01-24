@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"encoding/base64"
 	"errors"
 	"net/http"
 	"strings"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -40,7 +43,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		strArr := strings.Split(bearerToken, " ")
 
 		if len(strArr) < 1 && (strArr[0] != "Bearer" || strArr[0] != "API-KEY") {
-			c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
+			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
 			return
 		}
 
@@ -67,6 +70,32 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 
 			// c.Set("resource_id", resourceId)
 			// c.Set("environment_id", environmentId)
+
+			tDec, _ := base64.StdEncoding.DecodeString(bearerToken)
+			if string(tDec) != config.API_KEY_SECRET {
+				_ = c.AbortWithError(http.StatusForbidden, errors.New("wrong token"))
+				return
+			}
+
+			app_id := c.GetHeader("X-API-KEY")
+			apikeys, err := h.authService.ApiKeyService().GetEnvID(c, &auth_service.GetReq{
+				Id: app_id,
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+
+			resource, err := h.companyServices.ResourceService().GetResourceByEnvID(c, &company_service.GetResourceByEnvIDRequest{
+				EnvId: apikeys.GetEnvironmentId(),
+			})
+			if err != nil{
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+
+			c.Set("resource_id", resource.GetResource().GetId())
+			c.Set("environment_id", apikeys.GetEnvironmentId())
 
 		}
 
