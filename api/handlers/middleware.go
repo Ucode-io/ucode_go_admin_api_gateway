@@ -2,14 +2,16 @@ package handlers
 
 import (
 	"errors"
+	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
+	"ucode/ucode_go_api_gateway/api/status_http"
+
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"ucode/ucode_go_api_gateway/api/status_http"
 )
 
 const (
@@ -27,27 +29,49 @@ func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 
 func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var (
-			res *auth_service.V2HasAccessUserRes
-			ok  bool
-		)
-		//host := c.Request.Host
-		origin := c.GetHeader("Origin")
 
-		if strings.Contains(origin, CLIENT_HOST) {
-			res, ok = h.hasAccess(c)
-			if !ok {
-				c.Abort()
-				return
-			}
+		var (
+			res    = &auth_service.V2HasAccessUserRes{}
+			ok     bool
+			origin = c.GetHeader("Origin")
+		)
+
+		bearerToken := c.GetHeader("Authorization")
+		strArr := strings.Split(bearerToken, " ")
+
+		if len(strArr) < 1 && (strArr[0] != "Bearer" || strArr[0] != "API-KEY") {
+			c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
+			return
 		}
 
-		resourceId := c.GetHeader("Resource-Id")
-		environmentId := c.GetHeader("Environment-Id")
+		switch strArr[0] {
+		case "Bearer":
+			if strings.Contains(origin, CLIENT_HOST) {
+				res, ok = h.hasAccess(c)
+				if !ok {
+					c.Abort()
+					return
+				}
+
+				resourceId := c.GetHeader("Resource-Id")
+				environmentId := c.GetHeader("Environment-Id")
+
+				c.Set("resource_id", resourceId)
+				c.Set("environment_id", environmentId)
+			}
+
+		case "API-KEY":
+			// X-API-KEY contains app_id
+			// get environment_id by app_id from api_keys table
+			// get resource_id from resource_environment table filter by environment_id
+
+			// c.Set("resource_id", resourceId)
+			// c.Set("environment_id", environmentId)
+
+		}
 
 		c.Set("Auth", res)
-		c.Set("resource_id", resourceId)
-		c.Set("environment_id", environmentId)
+
 		c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
 	}
