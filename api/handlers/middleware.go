@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -44,21 +45,25 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		fmt.Println("1::::", strArr)
 		switch strArr[0] {
 		case "Bearer":
+			fmt.Println("2::::", strArr[0])
 			if strings.Contains(origin, CLIENT_HOST) {
+				fmt.Println("3::::")
 				res, ok = h.hasAccess(c)
 				if !ok {
 					c.Abort()
 					return
 				}
-
-				resourceId := c.GetHeader("Resource-Id")
-				environmentId := c.GetHeader("Environment-Id")
-
-				c.Set("resource_id", resourceId)
-				c.Set("environment_id", environmentId)
 			}
+
+			fmt.Println("4::::")
+			resourceId := c.GetHeader("Resource-Id")
+			environmentId := c.GetHeader("Environment-Id")
+
+			c.Set("resource_id", resourceId)
+			c.Set("environment_id", environmentId)
 
 		case "API-KEY":
 			// X-API-KEY contains app_id
