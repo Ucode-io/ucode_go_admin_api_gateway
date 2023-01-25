@@ -4625,7 +4625,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get api reference by id",
+                "description": "Get category by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -4635,7 +4635,7 @@
                 "tags": [
                     "ApiReference"
                 ],
-                "summary": "Get api reference by id",
+                "summary": "Get category by id",
                 "operationId": "get_category_by_id",
                 "parameters": [
                     {
@@ -4658,7 +4658,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.ApiReference"
+                                            "$ref": "#/definitions/models.Category"
                                         }
                                     }
                                 }

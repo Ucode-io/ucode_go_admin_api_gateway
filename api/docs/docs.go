@@ -4637,7 +4637,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get api reference by id",
+                "description": "Get category by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -4647,7 +4647,7 @@ const docTemplate = `{
                 "tags": [
                     "ApiReference"
                 ],
-                "summary": "Get api reference by id",
+                "summary": "Get category by id",
                 "operationId": "get_category_by_id",
                 "parameters": [
                     {
@@ -4670,7 +4670,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.ApiReference"
+                                            "$ref": "#/definitions/models.Category"
                                         }
                                     }
                                 }

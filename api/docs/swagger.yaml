@@ -5266,7 +5266,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get api reference by id
+      description: Get category by id
       operationId: get_category_by_id
       parameters:
       - description: category_id
@@ -5284,7 +5284,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.ApiReference'
+                  $ref: '#/definitions/models.Category'
               type: object
         "400":
           description: Invalid Argument
@@ -5306,7 +5306,7 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-      summary: Get api reference by id
+      summary: Get category by id
       tags:
       - ApiReference
   /v1/close-cashbox:

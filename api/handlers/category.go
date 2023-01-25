@@ -86,20 +86,20 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 // @Security ApiKeyAuth
 // @ID get_category_by_id
 // @Router /v1/category/{category_id} [GET]
-// @Summary Get api reference by id
-// @Description Get api reference by id
+// @Summary Get category by id
+// @Description Get category by id
 // @Tags ApiReference
 // @Accept json
 // @Produce json
 // @Param category_id path string true "category_id"
-// @Success 200 {object} status_http.Response{data=models.ApiReference} "AppBody"
+// @Success 200 {object} status_http.Response{data=models.Category} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 	id := c.Param("category_id")
 
 	if !util.IsValidUUID(id) {
-		h.handleResponse(c, status_http.InvalidArgument, "api reference id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "category id is an invalid uuid")
 		return
 	}
 
@@ -123,9 +123,9 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.ApiReferenceService().Get(
+	resp, err := services.CategoryService().Get(
 		context.Background(),
-		&ars.GetApiReferenceRequest{
+		&ars.GetCategoryRequest{
 			Guid: id,
 		},
 	)
