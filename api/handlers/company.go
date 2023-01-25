@@ -348,23 +348,9 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 		c.Request.Context(),
 		&company_service.CreateEnvironmentRequest{
 			ProjectId:    resp.ProjectId,
-			Name:         "production",
+			Name:         "Production",
 			DisplayColor: "#00FF00",
 			Description:  "Production Environment",
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	_, err = h.companyServices.EnvironmentService().Create(
-		c.Request.Context(),
-		&company_service.CreateEnvironmentRequest{
-			ProjectId:    resp.ProjectId,
-			Name:         "staging",
-			DisplayColor: "#FFFF00",
-			Description:  "Test Environment",
 		},
 	)
 	if err != nil {
