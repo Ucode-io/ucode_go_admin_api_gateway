@@ -25,6 +25,7 @@ message CreateCustomEventRequest {
     string url = 5;
     bool disable = 6;
     string project_id = 7;
+    string commit_id = 8;
 }
 
 message CustomEvent {

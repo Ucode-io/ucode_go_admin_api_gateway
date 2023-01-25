@@ -74,7 +74,16 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	relation.ProjectId = resourceEnvironment.GetId()
+	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	if err != nil {
+		err = errors.New("error creating commit")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	relation.CommitId = commitID
 
 	resp, err := services.RelationService().Create(
 		context.Background(),

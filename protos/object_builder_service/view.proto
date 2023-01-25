@@ -44,6 +44,7 @@ message CreateViewRequest {
     string default_limit = 23;
     google.protobuf.Struct attributes = 24;
     string project_id = 25;
+    string commit_id = 26;
 }
 
 message QuickFilter {

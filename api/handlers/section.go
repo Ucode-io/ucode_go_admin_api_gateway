@@ -151,6 +151,15 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 	}
 	sections.ProjectId = resourceEnvironment.GetId()
 
+	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	if err != nil {
+		err = errors.New("error creating commit")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	sections.CommitId = commitID
+
 	resp, err := services.SectionService().Update(
 		context.Background(),
 		&sections,
