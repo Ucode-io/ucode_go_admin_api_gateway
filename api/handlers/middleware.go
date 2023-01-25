@@ -2,18 +2,14 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 const (
@@ -46,12 +42,9 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		fmt.Println("1::::", strArr)
 		switch strArr[0] {
 		case "Bearer":
-			fmt.Println("2::::", strArr[0])
 			if strings.Contains(origin, CLIENT_HOST) {
-				fmt.Println("3::::")
 				res, ok = h.hasAccess(c)
 				if !ok {
 					c.Abort()
@@ -59,7 +52,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				}
 			}
 
-			fmt.Println("4::::")
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
 
@@ -67,32 +59,25 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			c.Set("environment_id", environmentId)
 
 		case "API-KEY":
-			// X-API-KEY contains app_id
-			// get environment_id by app_id from api_keys table
-			// get resource_id from resource_environment table filter by environment_id
-
-			// c.Set("resource_id", resourceId)
-			// c.Set("environment_id", environmentId)
-
-			// tDec, _ := base64.StdEncoding.DecodeString(bearerToken)
-			// if string(tDec) != config.API_KEY_SECRET {
-			// 	_ = c.AbortWithError(http.StatusForbidden, errors.New("wrong token"))
-			// 	return
-			// }
-
 			app_id := c.GetHeader("X-API-KEY")
-			apikeys, err := h.authService.ApiKeyService().GetEnvID(c, &auth_service.GetReq{
-				Id: app_id,
-			})
+			apikeys, err := h.authService.ApiKeyService().GetEnvID(
+				c.Request.Context(),
+				&auth_service.GetReq{
+					Id: app_id,
+				},
+			)
 			if err != nil {
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				c.Abort()
 				return
 			}
 
-			resource, err := h.companyServices.ResourceService().GetResourceByEnvID(c, &company_service.GetResourceByEnvIDRequest{
-				EnvId: apikeys.GetEnvironmentId(),
-			})
+			resource, err := h.companyServices.ResourceService().GetResourceByEnvID(
+				c.Request.Context(),
+				&company_service.GetResourceByEnvIDRequest{
+					EnvId: apikeys.GetEnvironmentId(),
+				},
+			)
 			if err != nil {
 				h.handleResponse(c, status_http.BadRequest, err.Error())
 				c.Abort()
@@ -105,63 +90,78 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		}
 
 		c.Set("Auth", res)
-
 		c.Set("namespace", h.cfg.UcodeNamespace)
+
 		c.Next()
 	}
 }
 
-func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
-	bearerToken := c.GetHeader("Authorization")
-	projectId := c.DefaultQuery("project_id", "")
-	strArr := strings.Split(bearerToken, " ")
-	if len(strArr) != 2 || strArr[0] != "Bearer" {
-		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
-		return nil, false
-	}
-	accessToken := strArr[1]
-	resp, err := h.authService.SessionService().V2HasAccessUser(
-		c.Request.Context(),
-		&auth_service.V2HasAccessUserReq{
-			AccessToken: accessToken,
-			ProjectId:   projectId,
-			// ClientPlatformId: "3f6320a6-b6ed-4f5f-ad90-14a154c95ed3",
-			Path:   helper.GetURLWithTableSlug(c),
-			Method: c.Request.Method,
-		},
-	)
-	if err != nil {
-		errr := status.Error(codes.PermissionDenied, "Permission denied")
-		if errr.Error() == err.Error() {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			return nil, false
-		}
-		errr = status.Error(codes.InvalidArgument, "User has been expired")
-		if errr.Error() == err.Error() {
+func (h *Handler) ResEnvMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		namespaceVal, ok := c.Get("namespace")
+		if !ok {
+			err := errors.New("error getting namespace")
 			h.handleResponse(c, status_http.Forbidden, err.Error())
-			return nil, false
+			return
 		}
-		h.handleResponse(c, status_http.Unauthorized, err.Error())
-		return nil, false
+
+		namespace, ok := namespaceVal.(string)
+		if !ok {
+			err := errors.New("error namespace not ok")
+			h.handleResponse(c, status_http.Forbidden, err.Error())
+			return
+		}
+
+		services, err := h.GetService(namespace)
+		if err != nil {
+			h.handleResponse(c, status_http.Forbidden, err)
+			return
+		}
+
+		resourceIDVal, ok := c.Get("resource_id")
+		if !ok {
+			err = errors.New("error getting resource id")
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		resourceID, ok := resourceIDVal.(string)
+		if !ok {
+			err = errors.New("error resource id not ok")
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		environmentIDVal, ok := c.Get("environment_id")
+		if !ok {
+			err = errors.New("error getting environment id")
+			h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+			return
+		}
+
+		environmentID, ok := environmentIDVal.(string)
+		if !ok {
+			err = errors.New("error environment id not ok")
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetResourceEnvironmentReq{
+				EnvironmentId: environmentID,
+				ResourceId:    resourceID,
+			},
+		)
+		if err != nil {
+			err = errors.New("error getting resource environment id")
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		c.Set("resource_environment_id", resourceEnvironment.GetId())
+
+		c.Next()
 	}
-
-	return resp, true
-}
-
-func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessUserRes, err error) {
-	data, ok := c.Get("Auth")
-
-	if !ok {
-		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
-		c.Abort()
-		return nil, errors.New("token error: wrong format")
-	}
-	accessResponse, ok := data.(*auth_service.V2HasAccessUserRes)
-	if !ok {
-		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
-		c.Abort()
-		return nil, errors.New("token error: wrong format")
-	}
-
-	return accessResponse, nil
 }
