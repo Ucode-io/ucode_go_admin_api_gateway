@@ -41,7 +41,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		bearerToken := c.GetHeader("Authorization")
 		strArr := strings.Split(bearerToken, " ")
 
-		if len(strArr) < 1 && (strArr[0] != "Bearer" || strArr[0] != "API-KEY") {
+		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
 			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
 			return
 		}
