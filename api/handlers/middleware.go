@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	SUPERADMIN_HOST string = "admin.u-code.io"
-	CLIENT_HOST     string = "app.u-code.io"
+	SUPERADMIN_HOST string = "test.admin.u-code.io"
+	CLIENT_HOST     string = "test.app.u-code.io"
 )
 
 func (h *Handler) NodeMiddleware() gin.HandlerFunc {
