@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"strings"
+	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
 	"github.com/gin-gonic/gin"
@@ -68,4 +71,30 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessU
 	}
 
 	return accessResponse, nil
+}
+
+func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID string) (commitID string, err error) {
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println("authInfo.GetUserId()", authInfo.GetUserId())
+	fmt.Println("authInfo.GetProjectId()", authInfo.GetProjectId())
+	fmt.Println("environmentID", environmentID)
+
+	commit, err := h.companyServices.CommitService().Create(
+		c.Request.Context(),
+		&company_service.CreateCommitRequest{
+			AuthorId:      authInfo.GetUserId(),
+			ProjectId:     authInfo.GetProjectId(),
+			EnvironmentId: environmentID,
+			Name:          fmt.Sprintf("Auto Created Commit - %s", time.Now().Format(time.RFC1123)),
+		},
+	)
+	if err != nil {
+		return "", err
+	}
+
+	return commit.GetId(), nil
 }

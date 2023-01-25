@@ -35,12 +35,6 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -74,7 +68,17 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
 	app.ProjectId = resourceEnvironment.GetId()
+
+	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	if err != nil {
+		err = errors.New("error creating commit")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	app.CommitId = commitID
 
 	resp, err := services.AppService().Create(
 		context.Background(),
