@@ -85,7 +85,8 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				Id: app_id,
 			})
 			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				c.Abort()
 				return
 			}
 
@@ -93,7 +94,8 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				EnvId: apikeys.GetEnvironmentId(),
 			})
 			if err != nil {
-				h.handleResponse(c, status_http.GRPCError, err.Error())
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				c.Abort()
 				return
 			}
 
