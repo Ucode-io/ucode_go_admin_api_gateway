@@ -27,6 +27,7 @@ service ResourceService {
     rpc GetDefaultResourceEnvironment(GetDefaultResourceEnvironmentReq) returns (ResourceEnvironment) {}
     rpc GetListResourceEnvironment(GetListResourceEnvironmentReq) returns (GetListResourceEnvironmentRes) {}
     rpc GetListConfiguredResourceEnvironment(GetListConfiguredResourceEnvironmentReq) returns (GetListConfiguredResourceEnvironmentRes) {}
+    rpc GetResourceByEnvID(GetResourceByEnvIDRequest) returns (GetResourceByEnvIDResponse) {}
 }
 
 message GetDefaultResourceEnvironmentReq {
@@ -126,3 +127,17 @@ message GetResEnvByResIdEnvIdRequest {
     string resource_id = 1;
     string environment_id = 2;
 }
+
+
+message GetResourceByEnvIDRequest {
+    string env_id = 1;
+}
+
+message GetResourceByEnvIDResponse {
+    message Resourse {
+        string id = 1;
+    }
+
+    Resourse resource = 1;
+}
+
