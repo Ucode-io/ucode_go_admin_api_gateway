@@ -63,9 +63,9 @@ func (h *Handler) CreateView(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -139,9 +139,9 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -217,9 +217,9 @@ func (h *Handler) UpdateView(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -293,9 +293,9 @@ func (h *Handler) DeleteView(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -365,9 +365,9 @@ func (h *Handler) GetViewList(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -450,9 +450,9 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -537,9 +537,9 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},

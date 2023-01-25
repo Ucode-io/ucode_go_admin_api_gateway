@@ -63,9 +63,9 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -194,9 +194,9 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -279,9 +279,9 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},

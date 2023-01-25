@@ -84,9 +84,9 @@ func (h *Handler) CreateField(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -176,9 +176,9 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -284,9 +284,9 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -361,9 +361,9 @@ func (h *Handler) DeleteField(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
+		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
