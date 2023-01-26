@@ -61,7 +61,7 @@ func (h *Handler) ExportToJSON(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		err = errors.New("error getting resource environment id")
+		err = errors.New("error getting resource environment id: " + err.Error())
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
