@@ -21,6 +21,7 @@ message CreateDashboardRequest {
     string name = 1;
     string icon = 2;
     string project_id = 3;
+    string commit_id = 4;
 }
 
 

@@ -83,6 +83,15 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
+	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	if err != nil {
+		err = errors.New("error creating commit")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	function.CommitId = commitID
+
 	resp, err := services.FunctionService().Create(
 		context.Background(),
 		&obs.CreateFunctionRequest{

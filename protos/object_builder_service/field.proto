@@ -30,6 +30,7 @@ message CreateFieldRequest {
     bool unique = 12;
     bool automatic = 13;
     string project_id = 14;
+    string commit_id = 15;
 }
 
 message CreateFieldsRequest {
@@ -45,6 +46,7 @@ message CreateFieldsRequest {
     bool unique = 10;
     bool automatic = 11;
     string project_id = 12;
+    string commit_id = 13;
 }
 
 message Field {

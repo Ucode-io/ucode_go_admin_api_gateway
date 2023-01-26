@@ -249,6 +249,15 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 	}
 	panel.ProjectId = resourceEnvironment.GetId()
 
+	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	if err != nil {
+		err = errors.New("error creating commit")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	panel.CommitId = commitID
+
 	resp, err := services.PanelService().Create(
 		context.Background(),
 		&panel,

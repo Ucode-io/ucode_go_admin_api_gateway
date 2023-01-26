@@ -118,6 +118,16 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		},
 	}
 
+	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	if err != nil {
+		err = errors.New("error creating commit")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	fmt.Println("create table -- commit_id ---->>", commitID)
+
+	table.CommitId = commitID
+
 	table.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := services.TableService().Create(

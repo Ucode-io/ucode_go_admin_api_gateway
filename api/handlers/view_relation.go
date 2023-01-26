@@ -155,6 +155,15 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 	}
 	viewRelation.ProjectId = resourceEnvironment.GetId()
 
+	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	if err != nil {
+		err = errors.New("error creating commit")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	viewRelation.CommitId = commitID
+
 	resp, err := services.SectionService().UpsertViewRelations(
 		context.Background(),
 		&viewRelation,
