@@ -3,14 +3,16 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateFunction godoc
@@ -83,14 +85,14 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
-	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string))
 	if err != nil {
-		err = errors.New("error creating commit")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
 		return
 	}
 
 	function.CommitId = commitID
+	function.CommitGuid = commitGuid
 
 	resp, err := services.FunctionService().Create(
 		context.Background(),

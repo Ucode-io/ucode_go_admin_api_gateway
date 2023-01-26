@@ -11,6 +11,7 @@ service CommitService {
     rpc GetByID(CommitPrimaryKey) returns (CommitWithRelease) {}
     rpc GetList(GetCommitListRequest) returns (GetCommitListResponse) {}
     rpc Restore(RestoreCommitRequest) returns (google.protobuf.Empty) {}
+    rpc Insert(CreateCommitRequest) returns (InsertCommitResponse) {}
 }
 
 message CreateCommitRequest {
@@ -42,4 +43,9 @@ message RestoreCommitRequest {
     string project_id = 1;
     string environment_id = 2;
     string id = 3;
+}
+
+message InsertCommitResponse {
+    string id = 1;
+    int64 commit_id = 2;
 }
