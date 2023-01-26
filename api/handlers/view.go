@@ -77,6 +77,15 @@ func (h *Handler) CreateView(c *gin.Context) {
 	}
 	view.ProjectId = resourceEnvironment.GetId()
 
+	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	if err != nil {
+		err = errors.New("error creating commit")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	view.CommitId = commitID
+
 	resp, err := services.ViewService().Create(
 		context.Background(),
 		&view,

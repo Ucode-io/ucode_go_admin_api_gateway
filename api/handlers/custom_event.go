@@ -77,6 +77,15 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 	}
 	customevent.ProjectId = resourceEnvironment.GetId()
 
+	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	if err != nil {
+		err = errors.New("error creating commit")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	customevent.CommitId = commitID
+
 	resp, err := services.CustomEventService().Create(
 		context.Background(),
 		&customevent,

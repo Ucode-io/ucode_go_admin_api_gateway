@@ -83,6 +83,15 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 		ProjectId: resourceEnvironment.GetId(),
 	}
 
+	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	if err != nil {
+		err = errors.New("error creating commit")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	dashboard.CommitId = commitID
+
 	resp, err := services.DashboardService().Create(
 		context.Background(),
 		&dashboard,

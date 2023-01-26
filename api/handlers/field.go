@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -98,6 +99,15 @@ func (h *Handler) CreateField(c *gin.Context) {
 	}
 
 	field.ProjectId = resourceEnvironment.GetId()
+	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	if err != nil {
+		err = errors.New("error creating commit")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	fmt.Println("create table -- commit_id ---->>", commitID)
+
+	field.CommitId = commitID
 
 	resp, err := services.FieldService().Create(
 		context.Background(),

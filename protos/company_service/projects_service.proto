@@ -155,6 +155,7 @@ message AddResourceRequest {
     ServiceType service_type = 7;
     string company_id = 8;
     string user_id = 9;
+    bool is_default = 10;
 }
 
 message ConfigureResourceRequest {
