@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -73,7 +74,7 @@ func (h *Handler) CreateApp(c *gin.Context) {
 
 	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err)
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
 		return
 	}
 
