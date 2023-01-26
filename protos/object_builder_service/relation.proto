@@ -45,7 +45,8 @@ message CreateRelationRequest {
     repeated string updated_fields = 26;
     string multiple_insert_field = 27;
     string project_id = 28;
-    string commit_id = 29;
+    int64 commit_id = 29;
+    string commit_guid = 30;
 }
 
 message AutoFilter {

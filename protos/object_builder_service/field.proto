@@ -30,7 +30,8 @@ message CreateFieldRequest {
     bool unique = 12;
     bool automatic = 13;
     string project_id = 14;
-    string commit_id = 15;
+    int64 commit_id = 15;
+    string commit_guid = 16;
 }
 
 message CreateFieldsRequest {

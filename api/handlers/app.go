@@ -72,13 +72,14 @@ func (h *Handler) CreateApp(c *gin.Context) {
 
 	app.ProjectId = resourceEnvironment.GetId()
 
-	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
+	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string))
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
 		return
 	}
 
 	app.CommitId = commitID
+	app.CommitGuid = commitGuid
 
 	resp, err := services.AppService().Create(
 		context.Background(),

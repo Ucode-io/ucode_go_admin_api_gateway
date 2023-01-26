@@ -24,7 +24,8 @@ message CreatePanelRequest {
     string dashboard_id = 5;
     bool has_pagination = 6;
     string project_id = 7;
-    string commit_id = 8;
+    int64 commit_id = 8;
+    string commit_guid = 9;
 }
 
 
