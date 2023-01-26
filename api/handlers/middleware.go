@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
