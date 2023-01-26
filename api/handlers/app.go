@@ -73,8 +73,7 @@ func (h *Handler) CreateApp(c *gin.Context) {
 
 	commitID, err := h.CreateAutoCommit(c, environmentId.(string))
 	if err != nil {
-		err = errors.New("error creating commit")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err)
 		return
 	}
 
