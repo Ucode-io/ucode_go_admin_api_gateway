@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -10,11 +11,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
-)
-
-const (
-	SUPERADMIN_HOST string = "test.admin.u-code.io"
-	CLIENT_HOST     string = "test.app.u-code.io"
 )
 
 func (h *Handler) NodeMiddleware() gin.HandlerFunc {
@@ -44,7 +40,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 
 		switch strArr[0] {
 		case "Bearer":
-			if strings.Contains(origin, CLIENT_HOST) {
+			if strings.Contains(origin, h.cfg.CLIENT_HOST) {
 				res, ok = h.hasAccess(c)
 				if !ok {
 					c.Abort()

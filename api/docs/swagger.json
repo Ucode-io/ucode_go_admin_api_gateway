@@ -4888,6 +4888,11 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "name": "commit_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "created_at",
                         "in": "query"
                     },
@@ -18412,6 +18417,9 @@
                 "is_configured": {
                     "type": "boolean"
                 },
+                "is_default": {
+                    "type": "boolean"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -18441,6 +18449,9 @@
             "type": "object",
             "properties": {
                 "author_id": {
+                    "type": "string"
+                },
+                "commit_type": {
                     "type": "string"
                 },
                 "created_at": {
@@ -18573,6 +18584,9 @@
             "type": "object",
             "properties": {
                 "author_id": {
+                    "type": "string"
+                },
+                "commit_type": {
                     "type": "string"
                 },
                 "environment_id": {
@@ -19157,6 +19171,9 @@
                 "authServiceHost": {
                     "type": "string"
                 },
+                "client_HOST": {
+                    "type": "string"
+                },
                 "companyServiceHost": {
                     "type": "string"
                 },
@@ -19242,6 +19259,9 @@
                     "type": "string"
                 },
                 "smsServiceHost": {
+                    "type": "string"
+                },
+                "superadmin_HOST": {
                     "type": "string"
                 },
                 "ucodeNamespace": {
@@ -20287,6 +20307,12 @@
         "object_builder_service.AppRequest": {
             "type": "object",
             "properties": {
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -20426,6 +20452,12 @@
         "object_builder_service.CreateCustomEventRequest": {
             "type": "object",
             "properties": {
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
                 "disable": {
                     "type": "boolean"
                 },
@@ -20557,6 +20589,12 @@
                         "type": "string"
                     }
                 },
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
                 "default_limit": {
                     "type": "string"
                 },
@@ -20649,6 +20687,12 @@
         "object_builder_service.CreateVariableRequest": {
             "type": "object",
             "properties": {
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
                 "dashboard_id": {
                     "type": "string"
                 },
@@ -20701,6 +20745,12 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
                 },
                 "default_limit": {
                     "type": "string"
@@ -21518,6 +21568,12 @@
         "object_builder_service.UpdateSectionsRequest": {
             "type": "object",
             "properties": {
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -21549,6 +21605,12 @@
         "object_builder_service.UpsertViewRelationsBody": {
             "type": "object",
             "properties": {
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
                 "project_id": {
                     "type": "string"
                 },

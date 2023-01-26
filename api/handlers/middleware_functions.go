@@ -73,7 +73,7 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessU
 	return accessResponse, nil
 }
 
-func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID string) (commitID int64, commitGuid string, err error) {
+func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType string) (commitID int64, commitGuid string, err error) {
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		return 0, "", err
@@ -89,6 +89,7 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID string) (commit
 			AuthorId:      authInfo.GetUserId(),
 			ProjectId:     authInfo.GetProjectId(),
 			EnvironmentId: environmentID,
+			CommitType:    commitType,
 			Name:          fmt.Sprintf("Auto Created Commit - %s", time.Now().Format(time.RFC1123)),
 		},
 	)

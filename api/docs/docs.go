@@ -4907,6 +4907,11 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "name": "commit_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "created_at",
                         "in": "query"
                     },
@@ -18431,6 +18436,9 @@ var doc = `{
                 "is_configured": {
                     "type": "boolean"
                 },
+                "is_default": {
+                    "type": "boolean"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -18460,6 +18468,9 @@ var doc = `{
             "type": "object",
             "properties": {
                 "author_id": {
+                    "type": "string"
+                },
+                "commit_type": {
                     "type": "string"
                 },
                 "created_at": {
@@ -18592,6 +18603,9 @@ var doc = `{
             "type": "object",
             "properties": {
                 "author_id": {
+                    "type": "string"
+                },
+                "commit_type": {
                     "type": "string"
                 },
                 "environment_id": {
@@ -19176,6 +19190,9 @@ var doc = `{
                 "authServiceHost": {
                     "type": "string"
                 },
+                "client_HOST": {
+                    "type": "string"
+                },
                 "companyServiceHost": {
                     "type": "string"
                 },
@@ -19261,6 +19278,9 @@ var doc = `{
                     "type": "string"
                 },
                 "smsServiceHost": {
+                    "type": "string"
+                },
+                "superadmin_HOST": {
                     "type": "string"
                 },
                 "ucodeNamespace": {
@@ -20306,6 +20326,12 @@ var doc = `{
         "object_builder_service.AppRequest": {
             "type": "object",
             "properties": {
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -20445,6 +20471,12 @@ var doc = `{
         "object_builder_service.CreateCustomEventRequest": {
             "type": "object",
             "properties": {
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
                 "disable": {
                     "type": "boolean"
                 },
@@ -20576,6 +20608,12 @@ var doc = `{
                         "type": "string"
                     }
                 },
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
                 "default_limit": {
                     "type": "string"
                 },
@@ -20668,6 +20706,12 @@ var doc = `{
         "object_builder_service.CreateVariableRequest": {
             "type": "object",
             "properties": {
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
                 "dashboard_id": {
                     "type": "string"
                 },
@@ -20720,6 +20764,12 @@ var doc = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
                 },
                 "default_limit": {
                     "type": "string"
@@ -21537,6 +21587,12 @@ var doc = `{
         "object_builder_service.UpdateSectionsRequest": {
             "type": "object",
             "properties": {
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -21568,6 +21624,12 @@ var doc = `{
         "object_builder_service.UpsertViewRelationsBody": {
             "type": "object",
             "properties": {
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
                 "project_id": {
                     "type": "string"
                 },

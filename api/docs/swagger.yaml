@@ -247,6 +247,8 @@ definitions:
         type: string
       is_configured:
         type: boolean
+      is_default:
+        type: boolean
       project_id:
         type: string
       resource_type:
@@ -266,6 +268,8 @@ definitions:
   company_service.CommitWithRelease:
     properties:
       author_id:
+        type: string
+      commit_type:
         type: string
       created_at:
         type: string
@@ -352,6 +356,8 @@ definitions:
   company_service.CreateCommitRequest:
     properties:
       author_id:
+        type: string
+      commit_type:
         type: string
       environment_id:
         type: string
@@ -730,6 +736,8 @@ definitions:
         type: string
       authServiceHost:
         type: string
+      client_HOST:
+        type: string
       companyServiceHost:
         type: string
       companyServicePort:
@@ -787,6 +795,8 @@ definitions:
       smsGRPCPort:
         type: string
       smsServiceHost:
+        type: string
+      superadmin_HOST:
         type: string
       ucodeNamespace:
         type: string
@@ -1473,6 +1483,10 @@ definitions:
     type: object
   object_builder_service.AppRequest:
     properties:
+      commit_guid:
+        type: string
+      commit_id:
+        type: integer
       description:
         type: string
       icon:
@@ -1563,6 +1577,10 @@ definitions:
     type: object
   object_builder_service.CreateCustomEventRequest:
     properties:
+      commit_guid:
+        type: string
+      commit_id:
+        type: integer
       disable:
         type: boolean
       event_path:
@@ -1649,6 +1667,10 @@ definitions:
         items:
           type: string
         type: array
+      commit_guid:
+        type: string
+      commit_id:
+        type: integer
       default_limit:
         type: string
       default_values:
@@ -1710,6 +1732,10 @@ definitions:
     type: object
   object_builder_service.CreateVariableRequest:
     properties:
+      commit_guid:
+        type: string
+      commit_id:
+        type: integer
       dashboard_id:
         type: string
       field_slug:
@@ -1745,6 +1771,10 @@ definitions:
         items:
           type: string
         type: array
+      commit_guid:
+        type: string
+      commit_id:
+        type: integer
       default_limit:
         type: string
       disable_dates:
@@ -2277,6 +2307,10 @@ definitions:
     type: object
   object_builder_service.UpdateSectionsRequest:
     properties:
+      commit_guid:
+        type: string
+      commit_id:
+        type: integer
       project_id:
         type: string
       sections:
@@ -2297,6 +2331,10 @@ definitions:
     type: object
   object_builder_service.UpsertViewRelationsBody:
     properties:
+      commit_guid:
+        type: string
+      commit_id:
+        type: integer
       project_id:
         type: string
       table_slug:
@@ -5368,6 +5406,9 @@ paths:
       description: Get all commits
       operationId: get_all_commits
       parameters:
+      - in: query
+        name: commit_type
+        type: string
       - in: query
         name: created_at
         type: string
