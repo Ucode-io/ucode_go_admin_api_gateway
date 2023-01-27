@@ -111,8 +111,9 @@ func (h *Handler) GetAllCommits(c *gin.Context) {
 			Limit:         int32(limit),
 			Offset:        int32(offset),
 			Search:        c.Query("search"),
-			ProjectId:     c.Query("project-id"),
-			EnvironmentId: c.Query("environment-id"),
+			ProjectId:     c.Query("project_id"),
+			EnvironmentId: c.Query("environment_id"),
+			CommitType:    c.Query("commit_type"),
 		},
 	)
 

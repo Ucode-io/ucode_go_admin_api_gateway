@@ -72,6 +72,9 @@ type Config struct {
 	ClientHost     string
 
 	SecretKey string
+
+	CLIENT_HOST     string
+	SUPERADMIN_HOST string
 }
 
 // Load ...

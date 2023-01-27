@@ -19,6 +19,7 @@ message CreateCommitRequest {
     string environment_id = 2;
     string author_id = 3;
     string name = 4;
+    string commit_type = 5;
 }
 
 message CommitPrimaryKey {
@@ -32,6 +33,7 @@ message GetCommitListRequest {
     string project_id = 4;
     string environment_id = 5;
     string created_at = 6;
+    string commit_type = 7;
 }
 
 message GetCommitListResponse {

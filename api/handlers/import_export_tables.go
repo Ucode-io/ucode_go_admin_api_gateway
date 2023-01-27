@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -135,7 +136,9 @@ func (h *Handler) ImportFromJSON(c *gin.Context) {
 
 	body.ProjectId = resourceEnvironment.GetId()
 
-	_, err = services.TableHelpersService().ImportFromJSON(c.Request.Context(), &body)
+	ctx, cnlFunc := context.WithTimeout(c.Request.Context(), time.Minute*3)
+	defer cnlFunc()
+	_, err = services.TableHelpersService().ImportFromJSON(ctx, &body)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return

@@ -98,6 +98,7 @@ message CommitWithRelease {
     string name = 5;
     string created_at = 6;
     Release release_info = 7;
+    string commit_type = 8;
 }
 
 message Release {
@@ -126,4 +127,8 @@ message ReleaseWithCommit {
     Commit commit_info = 8;
     string created_at = 9;
     string updated_at = 10;
+}
+
+message Empty {
+
 }
