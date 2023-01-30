@@ -3,8 +3,10 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -82,6 +84,15 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 		Icon:      dashboardRequest.Icon,
 		ProjectId: resourceEnvironment.GetId(),
 	}
+
+	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_DASHBOARD)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		return
+	}
+
+	dashboard.CommitId = commitID
+	dashboard.CommitGuid = commitGuid
 
 	resp, err := services.DashboardService().Create(
 		context.Background(),

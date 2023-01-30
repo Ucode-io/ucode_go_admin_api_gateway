@@ -15,6 +15,8 @@ type CreateFunctionRequest struct {
 	Description string                 `json:"description"`
 	Body        map[string]interface{} `json:"body"`
 	Url         string                 `json:"url"`
+	CommitId    int64                  `json:"-"`
+	CommitGuid  string                 `json:"-"`
 }
 
 type InvokeFunctionRequest struct {

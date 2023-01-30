@@ -19249,6 +19249,9 @@ const docTemplate = `{
                 "authServiceHost": {
                     "type": "string"
                 },
+                "client_HOST": {
+                    "type": "string"
+                },
                 "companyServiceHost": {
                     "type": "string"
                 },
@@ -19334,6 +19337,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "smsServiceHost": {
+                    "type": "string"
+                },
+                "superadmin_HOST": {
                     "type": "string"
                 },
                 "ucodeNamespace": {
@@ -19845,6 +19851,12 @@ const docTemplate = `{
                 "attributes": {
                     "type": "object",
                     "additionalProperties": true
+                },
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "string"
                 },
                 "disable": {
                     "type": "boolean"

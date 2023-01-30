@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
@@ -154,6 +156,15 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 		return
 	}
 	viewRelation.ProjectId = resourceEnvironment.GetId()
+
+	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_VIEW_RELATION)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		return
+	}
+
+	viewRelation.CommitId = commitID
+	viewRelation.CommitGuid = commitGuid
 
 	resp, err := services.SectionService().UpsertViewRelations(
 		context.Background(),

@@ -780,6 +780,8 @@ definitions:
         type: string
       authServiceHost:
         type: string
+      client_HOST:
+        type: string
       companyServiceHost:
         type: string
       companyServicePort:
@@ -837,6 +839,8 @@ definitions:
       smsGRPCPort:
         type: string
       smsServiceHost:
+        type: string
+      superadmin_HOST:
         type: string
       ucodeNamespace:
         type: string
@@ -1174,6 +1178,10 @@ definitions:
       attributes:
         additionalProperties: true
         type: object
+      commit_guid:
+        type: string
+      commit_id:
+        type: string
       disable:
         type: boolean
       event_path:
