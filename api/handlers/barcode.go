@@ -55,7 +55,7 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -68,7 +68,7 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BarcodeService().Generate(
+	resp, err := services.BuilderService().Barcode().Generate(
 		context.Background(),
 		&obs.BarcodeGenerateReq{
 			TableSlug: tableSlug,

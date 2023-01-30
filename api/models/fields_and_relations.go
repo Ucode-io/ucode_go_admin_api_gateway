@@ -1,8 +1,9 @@
 package models
 
+import "google.golang.org/protobuf/runtime/protoimpl"
+
 type FieldsAndRelationsM struct {
-	fields CreateFieldRequest `json:"fields"`;
-	relations 
+	fields CreateFieldRequest `json:"fields"`
 }
 
 type CreateRelationRequest struct {

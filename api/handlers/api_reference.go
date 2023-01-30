@@ -62,7 +62,7 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.ApiReferenceService().Create(
+	resp, err := services.ApiReferenceService().ApiReference().Create(
 		context.Background(), &apiReference,
 		// &ars.CreateApiReferenceRequest{
 		// 	Title:            apiReference.Title,
@@ -127,7 +127,7 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.ApiReferenceService().Get(
+	resp, err := services.ApiReferenceService().ApiReference().Get(
 		context.Background(),
 		&ars.GetApiReferenceRequest{
 			Guid: id,
@@ -190,7 +190,7 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.ApiReferenceService().GetList(
+	resp, err := services.ApiReferenceService().ApiReference().GetList(
 		context.Background(),
 		&ars.GetListApiReferenceRequest{
 			Limit:      int64(limit),
@@ -260,7 +260,7 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.ApiReferenceService().Update(
+	resp, err := services.ApiReferenceService().ApiReference().Update(
 		context.Background(), &apiReference,
 		// &ars.ApiReference{
 		// 	Guid:             apiReference.Guid,
@@ -326,7 +326,7 @@ func (h *Handler) DeleteApiReference(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.ApiReferenceService().Delete(
+	resp, err := services.ApiReferenceService().ApiReference().Delete(
 		context.Background(),
 		&ars.DeleteApiReferenceRequest{
 			Guid: id,

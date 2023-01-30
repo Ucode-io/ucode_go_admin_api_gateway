@@ -346,37 +346,3 @@ func MaxAllowed(n int) gin.HandlerFunc {
 		c.Next()
 	}
 }
-
-// // @description This is a api gateway
-// // @termsOfService https://udevs.io
-// func SetUpProjectAPIs(r *gin.Engine, h handlers.ProjectsHandler, cfg config.Config) {
-// 	docs.SwaggerInfo.Title = cfg.ServiceName
-// 	docs.SwaggerInfo.Version = cfg.Version
-// 	// docs.SwaggerInfo.Host = cfg.ServiceHost + cfg.HTTPPort
-// 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}
-
-// 	r.Use(customCORSMiddleware())
-// 	r.Use(MaxAllowed(5000))
-
-// // Project
-// r.POST("/v1/project", h.CreateProject)
-
-// 	v1 := r.Group("/v1")
-// 	// @securityDefinitions.apikey ApiKeyAuth
-// 	// @in header
-// 	// @name Authorization
-
-// // MUST be executed before AuthMiddleware
-// v1.Use(h.ProjectsMiddleware())
-// 	v1.Use(h.AuthMiddleware())
-
-// 	{
-// 		// App
-// 		v1.POST("/app", h.CreateApp)
-// 		v1.GET("/app", h.GetAllApps)
-
-// 	}
-
-// 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-// }

@@ -3,7 +3,6 @@ include:
 
 stages:
   - build
-  - migrate
   - deploy
   - rollback
 
@@ -26,23 +25,23 @@ build-prod:
     - master
 
 
-migrate-staging:
-  stage: migrate
-  extends: .migrate_template
-  variables:
-    PATH_MIGRATION: migrations/postgres
-    POSTGRES_LINK: $UCODE_ADMIN_API_TESTDB
-  only:
-    - staging
+# migrate-staging:
+#   stage: migrate
+#   extends: .migrate_template
+#   variables:
+#     PATH_MIGRATION: migrations/postgres
+#     POSTGRES_LINK: $UCODE_ADMIN_API_TESTDB
+#   only:
+#     - staging
 
-migrate-prod:
-  stage: migrate
-  extends: .migrate_template
-  variables:
-    PATH_MIGRATION: migrations/postgres
-    POSTGRES_LINK: $UCODE_ADMIN_API_PRODDB
-  only:
-    - master
+# migrate-prod:
+#   stage: migrate
+#   extends: .migrate_template
+#   variables:
+#     PATH_MIGRATION: migrations/postgres
+#     POSTGRES_LINK: $UCODE_ADMIN_API_PRODDB
+#   only:
+#     - master
 
 # migrate-demo:
 #   stage: migrate

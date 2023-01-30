@@ -64,7 +64,7 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -76,7 +76,7 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	resp, err := services.SectionService().GetViewRelation(
+	resp, err := services.BuilderService().Section().GetViewRelation(
 		context.Background(),
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
@@ -143,7 +143,7 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -166,7 +166,7 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 	viewRelation.CommitId = commitID
 	viewRelation.CommitGuid = commitGuid
 
-	resp, err := services.SectionService().UpsertViewRelations(
+	resp, err := services.BuilderService().Section().UpsertViewRelations(
 		context.Background(),
 		&viewRelation,
 	)

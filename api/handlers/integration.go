@@ -63,7 +63,7 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -77,7 +77,7 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 	}
 	integration.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.IntegrationService().CreateIntegration(
+	resp, err := services.AuthService().Integration().CreateIntegration(
 		c.Request.Context(),
 		&integration,
 	)
@@ -127,7 +127,7 @@ func (h *Handler) GetIntegrationList(c *gin.Context) {
 	}
 
 	//@TODO::protobuff already has project_id field
-	resp, err := services.IntegrationService().GetIntegrationList(
+	resp, err := services.AuthService().Integration().GetIntegrationList(
 		c.Request.Context(),
 		&auth_service.GetIntegrationListRequest{
 			Limit:            int32(limit),
@@ -167,7 +167,7 @@ func (h *Handler) GetIntegrationSessions(c *gin.Context) {
 	}
 
 	//@TODO:: no project_id field
-	resp, err := services.IntegrationService().GetIntegrationSessions(
+	resp, err := services.AuthService().Integration().GetIntegrationSessions(
 		c.Request.Context(),
 		&auth_service.IntegrationPrimaryKey{
 			Id: c.Param("integration-id"),
@@ -218,7 +218,7 @@ func (h *Handler) AddSessionToIntegration(c *gin.Context) {
 	login.IntegrationId = integrationID
 
 	//@TODO:: no project_id field
-	resp, err := services.IntegrationService().AddSessionToIntegration(
+	resp, err := services.AuthService().Integration().AddSessionToIntegration(
 		c.Request.Context(),
 		&login,
 	)
@@ -258,7 +258,7 @@ func (h *Handler) GetIntegrationByID(c *gin.Context) {
 	}
 
 	//@TODO:: no project id field
-	resp, err := services.IntegrationService().GetIntegrationByID(
+	resp, err := services.AuthService().Integration().GetIntegrationByID(
 		c.Request.Context(),
 		&auth_service.IntegrationPrimaryKey{
 			Id: IntegrationID,
@@ -300,7 +300,7 @@ func (h *Handler) DeleteIntegration(c *gin.Context) {
 	}
 
 	//@TODO:: no project id field
-	resp, err := services.IntegrationService().DeleteIntegration(
+	resp, err := services.AuthService().Integration().DeleteIntegration(
 		c.Request.Context(),
 		&auth_service.IntegrationPrimaryKey{
 			Id: IntegrationID,
@@ -349,7 +349,7 @@ func (h *Handler) GetIntegrationToken(c *gin.Context) {
 	}
 
 	//@TODO:: no project id field
-	resp, err := services.IntegrationService().GetIntegrationToken(
+	resp, err := services.AuthService().Integration().GetIntegrationToken(
 		c.Request.Context(),
 		&auth_service.GetIntegrationTokenRequest{
 			IntegrationId: integrationID,
@@ -398,7 +398,7 @@ func (h *Handler) RemoveSessionFromIntegration(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.IntegrationService().DeleteSessionFromIntegration(
+	resp, err := services.AuthService().Integration().DeleteSessionFromIntegration(
 		c.Request.Context(),
 		&auth_service.GetIntegrationTokenRequest{
 			IntegrationId: integrationID,

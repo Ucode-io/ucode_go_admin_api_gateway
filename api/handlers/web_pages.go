@@ -70,7 +70,7 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -83,7 +83,7 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.WebPageService().Create(
+	resp, err := h.companyServices.BuilderService().WebPage().Create(
 		context.Background(),
 		&obs.CreateWebPageRequest{
 			Title:      webPage.Title,
@@ -130,7 +130,7 @@ func (h *Handler) GetWebPagesById(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.WebPageService().GetById(
+	resp, err := h.companyServices.BuilderService().WebPage().GetById(
 		context.Background(),
 		&obs.WebPageId{
 			Id:        c.Param("guid"),
@@ -201,7 +201,7 @@ func (h *Handler) GetWebPagesList(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -214,7 +214,7 @@ func (h *Handler) GetWebPagesList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.WebPageService().GetAll(
+	resp, err := h.companyServices.BuilderService().WebPage().GetAll(
 		context.Background(),
 		&obs.GetAllWebPagesRequest{
 			Limit:     int32(limit),
@@ -290,7 +290,7 @@ func (h *Handler) UpdateWebPage(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -303,7 +303,7 @@ func (h *Handler) UpdateWebPage(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.WebPageService().Update(
+	resp, err := h.companyServices.BuilderService().WebPage().Update(
 		context.Background(),
 		&obs.WebPage{
 			Id:         guid,
@@ -357,7 +357,7 @@ func (h *Handler) DeleteWebPage(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.WebPageService().Delete(
+	resp, err := h.companyServices.BuilderService().WebPage().Delete(
 		context.Background(),
 		&obs.WebPageId{
 			Id:        webPageId,

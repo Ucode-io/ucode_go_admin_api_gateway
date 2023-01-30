@@ -87,7 +87,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -100,7 +100,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 		return
 	}
 
-	respObject, err := services.LoginService().LoginWithOtp(
+	respObject, err := services.BuilderService().Login().LoginWithOtp(
 		c.Request.Context(),
 		&pbObject.PhoneOtpRequst{
 			PhoneNumber: phone,
@@ -119,7 +119,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.SmsService().Send(
+	resp, err := services.SmsService().SmsService().Send(
 		c.Request.Context(),
 		&pbSms.Sms{
 			Id:        id.String(),
@@ -172,7 +172,7 @@ func (h *Handler) Verify(c *gin.Context) {
 		return
 	}
 
-	_, err = services.SmsService().ConfirmOtp(
+	_, err = services.SmsService().SmsService().ConfirmOtp(
 		c.Request.Context(),
 		&pbSms.ConfirmOtpRequest{
 			SmsId: c.Param("sms_id"),
@@ -215,7 +215,7 @@ func (h *Handler) Verify(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -228,7 +228,7 @@ func (h *Handler) Verify(c *gin.Context) {
 		return
 	}
 
-	res, err := services.SessionServiceAuth().SessionAndTokenGenerator(
+	res, err := services.AuthService().Session().SessionAndTokenGenerator(
 		context.Background(),
 		&pb.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
@@ -300,7 +300,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -313,7 +313,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		return
 	}
 
-	_, err = services.ObjectBuilderServiceAuth().Create(
+	_, err = services.BuilderService().ObjectBuilderAuth().Create(
 		context.Background(),
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -326,7 +326,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.LoginService().LoginWithOtp(
+	resp, err := services.BuilderService().Login().LoginWithOtp(
 		context.Background(),
 		&pbObject.PhoneOtpRequst{
 			PhoneNumber: body.Data["phone"].(string),
@@ -340,7 +340,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 	}
 
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
-	res, err := services.SessionServiceAuth().SessionAndTokenGenerator(
+	res, err := services.AuthService().Session().SessionAndTokenGenerator(
 		context.Background(),
 		&pb.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,

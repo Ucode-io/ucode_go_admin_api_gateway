@@ -11,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // const (
@@ -56,12 +57,28 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
 
+			if _, err := uuid.Parse(resourceId); err != nil {
+				resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
+					c.Request.Context(),
+					&company_service.GetResourceByEnvIDRequest{
+						EnvId: environmentId,
+					},
+				)
+				if err != nil {
+					h.handleResponse(c, status_http.BadRequest, err.Error())
+					c.Abort()
+					return
+				}
+
+				resourceId = resource.GetResource().Id
+			}
+
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
 
 		case "API-KEY":
 			app_id := c.GetHeader("X-API-KEY")
-			apikeys, err := h.authService.ApiKeyService().GetEnvID(
+			apikeys, err := h.authService.ApiKey().GetEnvID(
 				c.Request.Context(),
 				&auth_service.GetReq{
 					Id: app_id,
@@ -73,7 +90,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 				return
 			}
 
-			resource, err := h.companyServices.ResourceService().GetResourceByEnvID(
+			resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
 				c.Request.Context(),
 				&company_service.GetResourceByEnvIDRequest{
 					EnvId: apikeys.GetEnvironmentId(),
@@ -84,7 +101,6 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 
@@ -148,7 +164,7 @@ func (h *Handler) ResEnvMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&company_service.GetResourceEnvironmentReq{
 				EnvironmentId: environmentID,
