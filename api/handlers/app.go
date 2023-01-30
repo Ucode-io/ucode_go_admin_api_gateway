@@ -222,8 +222,6 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("RES", "ENV", resourceId, "sdfsdfsdf", environmentId)
-
 	// We get resource_environment relation
 	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
 		context.Background(),
