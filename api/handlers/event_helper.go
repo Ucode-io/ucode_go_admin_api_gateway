@@ -45,7 +45,7 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -58,7 +58,7 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 		return
 	}
 
-	res, err := services.CustomEventService().GetList(
+	res, err := services.BuilderService().CustomEvent().GetList(
 		context.Background(),
 		&obs.GetCustomEventsListRequest{
 			TableSlug: tableSlug,
@@ -107,7 +107,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -120,7 +120,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		return
 	}
 
-	apiKeys, err  := h.authService.ApiKeyService().GetList(context.Background(), &auth_service.GetListReq{
+	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
 		EnvironmentId: environmentId.(string),
 	})
 	if err != nil {
@@ -136,7 +136,6 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
 
 	for _, customEvent := range request.CustomEvents {
 		//this is new invoke function request for befor and after actions
@@ -162,7 +161,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 			}
 			return customEvent.Functions[0].Name, errors.New(errStr)
 		}
-		_, err = services.CustomEventService().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
+		_, err = services.BuilderService().CustomEvent().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
 			FunctionId: customEvent.Functions[0].Id,
 			ObjectIds:  request.IDs,
 			FieldSlug:  customEvent.Functions[0].Path + "_disable",

@@ -31,7 +31,7 @@ func (h *Handler) CreateRelease(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ReleaseService().Create(
+	resp, err := h.companyServices.CompanyService().Release().Create(
 		context.Background(),
 		&release,
 	)
@@ -65,7 +65,7 @@ func (h *Handler) GetReleaseByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ReleaseService().GetByID(
+	resp, err := h.companyServices.CompanyService().Release().GetByID(
 		context.Background(),
 		&obs.ReleasePrimaryKey{
 			Id: releaseID,
@@ -105,7 +105,7 @@ func (h *Handler) GetAllReleases(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ReleaseService().GetList(
+	resp, err := h.companyServices.CompanyService().Release().GetList(
 		context.Background(),
 		&obs.GetReleaseListRequest{
 			Limit:         int32(limit),
@@ -149,7 +149,7 @@ func (h *Handler) UpdateRelease(c *gin.Context) {
 
 	release.Id = c.Param("id")
 
-	resp, err := h.companyServices.ReleaseService().Update(
+	resp, err := h.companyServices.CompanyService().Release().Update(
 		context.Background(),
 		&release,
 	)
@@ -183,7 +183,7 @@ func (h *Handler) DeleteRelease(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ReleaseService().Delete(
+	resp, err := h.companyServices.CompanyService().Release().Delete(
 		context.Background(),
 		&obs.ReleasePrimaryKey{
 			Id: releaseID,
@@ -220,7 +220,7 @@ func (h *Handler) SetCurrentRelease(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ReleaseService().SetCurrentActive(
+	resp, err := h.companyServices.CompanyService().Release().SetCurrentActive(
 		context.Background(),
 		&release,
 	)
@@ -254,7 +254,7 @@ func (h *Handler) GetCurrentRelease(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ReleaseService().GetCurrentActive(
+	resp, err := h.companyServices.CompanyService().Release().GetCurrentActive(
 		context.Background(),
 		&obs.GetCurrentReleaseRequest{
 			EnvironmentId: environmentId,

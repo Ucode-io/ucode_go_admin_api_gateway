@@ -66,7 +66,7 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -90,7 +90,7 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.CustomEventService().Create(
+	resp, err := services.BuilderService().CustomEvent().Create(
 		context.Background(),
 		&obs.CreateCustomEventRequest{
 			TableSlug:  customevent.TableSlug,
@@ -166,7 +166,7 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -179,7 +179,7 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.CustomEventService().GetSingle(
+	resp, err := services.BuilderService().CustomEvent().GetSingle(
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
 			Id:        customeventID,
@@ -237,7 +237,7 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -250,7 +250,7 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.CustomEventService().GetList(
+	resp, err := services.BuilderService().CustomEvent().GetList(
 		context.Background(),
 		&obs.GetCustomEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
@@ -317,7 +317,7 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -335,7 +335,7 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.CustomEventService().Update(
+	resp, err := services.BuilderService().CustomEvent().Update(
 		context.Background(),
 		&obs.CustomEvent{
 			Id:         customevent.Id,
@@ -409,7 +409,7 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -422,7 +422,7 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.CustomEventService().Delete(
+	resp, err := services.BuilderService().CustomEvent().Delete(
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
 			Id:        customeventID,

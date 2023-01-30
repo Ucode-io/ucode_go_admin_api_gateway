@@ -26,7 +26,7 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 	}
 
 	accessToken := strArr[1]
-	resp, err := h.authService.SessionService().V2HasAccessUser(
+	resp, err := h.authService.Session().V2HasAccessUser(
 		c.Request.Context(),
 		&auth_service.V2HasAccessUserReq{
 			AccessToken: accessToken,
@@ -83,7 +83,7 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType str
 	fmt.Println("authInfo.GetProjectId()", authInfo.GetProjectId())
 	fmt.Println("environmentID", environmentID)
 
-	commit, err := h.companyServices.CommitService().Insert(
+	commit, err := h.companyServices.CompanyService().Commit().Insert(
 		c.Request.Context(),
 		&company_service.CreateCommitRequest{
 			AuthorId:      authInfo.GetUserId(),

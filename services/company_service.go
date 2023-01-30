@@ -1,0 +1,73 @@
+package services
+
+import (
+	"context"
+	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+type CompanyServiceI interface {
+	Company() company_service.CompanyServiceClient
+	Project() company_service.ProjectServiceClient
+	Environment() company_service.EnvironmentServiceClient
+	Resource() company_service.ResourceServiceClient
+	Release() company_service.ReleaseServiceClient
+	Commit() company_service.CommitServiceClient
+}
+
+type companyServiceClient struct {
+	companyService     company_service.CompanyServiceClient
+	projectService     company_service.ProjectServiceClient
+	environmentService company_service.EnvironmentServiceClient
+	resourceService    company_service.ResourceServiceClient
+	releaseService     company_service.ReleaseServiceClient
+	commitService      company_service.CommitServiceClient
+}
+
+func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanyServiceI, error) {
+
+	connCompanyService, err := grpc.DialContext(
+		ctx,
+		cfg.CompanyServiceHost+cfg.CompanyServicePort,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &companyServiceClient{
+		companyService:     company_service.NewCompanyServiceClient(connCompanyService),
+		projectService:     company_service.NewProjectServiceClient(connCompanyService),
+		environmentService: company_service.NewEnvironmentServiceClient(connCompanyService),
+		resourceService:    company_service.NewResourceServiceClient(connCompanyService),
+		releaseService:     company_service.NewReleaseServiceClient(connCompanyService),
+		commitService:      company_service.NewCommitServiceClient(connCompanyService),
+	}, nil
+}
+
+func (g *companyServiceClient) Company() company_service.CompanyServiceClient {
+	return g.companyService
+}
+
+func (g *companyServiceClient) Project() company_service.ProjectServiceClient {
+	return g.projectService
+}
+
+func (g *companyServiceClient) Environment() company_service.EnvironmentServiceClient {
+	return g.environmentService
+}
+
+func (g *companyServiceClient) Resource() company_service.ResourceServiceClient {
+	return g.resourceService
+}
+
+func (g *companyServiceClient) Release() company_service.ReleaseServiceClient {
+	return g.releaseService
+}
+
+func (g *companyServiceClient) Commit() company_service.CommitServiceClient {
+	return g.commitService
+}

@@ -31,7 +31,7 @@ func (h *Handler) CreateCommit(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CommitService().Create(
+	resp, err := h.companyServices.CompanyService().Commit().Create(
 		context.Background(),
 		&commit,
 	)
@@ -65,7 +65,7 @@ func (h *Handler) GetCommitByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CommitService().GetByID(
+	resp, err := h.companyServices.CompanyService().Commit().GetByID(
 		context.Background(),
 		&obs.CommitPrimaryKey{
 			Id: commitID,
@@ -105,7 +105,7 @@ func (h *Handler) GetAllCommits(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CommitService().GetList(
+	resp, err := h.companyServices.CompanyService().Commit().GetList(
 		context.Background(),
 		&obs.GetCommitListRequest{
 			Limit:         int32(limit),

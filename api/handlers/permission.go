@@ -9,8 +9,9 @@ import (
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // UpsertPermissionsByAppId godoc
@@ -70,7 +71,7 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -83,7 +84,7 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.PermissionService().UpsertPermissionsByAppId(
+	resp, err := services.BuilderService().Permission().UpsertPermissionsByAppId(
 		context.Background(),
 		&obs.UpsertPermissionsByAppIdRequest{
 			AppId:     c.Param("app_id"),
@@ -100,7 +101,7 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 		err := errors.New("role id must be have in update permission")
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 	}
-	_, err = services.SessionService().UpdateSessionsByRoleId(context.Background(), &authPb.UpdateSessionByRoleIdRequest{
+	_, err = services.AuthService().Session().UpdateSessionsByRoleId(context.Background(), &authPb.UpdateSessionByRoleIdRequest{
 		RoleId:    objectRequest.Data["role_id"].(string),
 		IsChanged: true,
 	})
@@ -155,7 +156,7 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -168,7 +169,7 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.PermissionService().GetAllPermissionsByRoleId(
+	resp, err := services.BuilderService().Permission().GetAllPermissionsByRoleId(
 		context.Background(),
 		&obs.GetAllPermissionRequest{
 			RoleId:    c.Param("role_id"),
@@ -228,7 +229,7 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -241,7 +242,7 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.PermissionService().GetFieldPermissions(
+	resp, err := services.BuilderService().Permission().GetFieldPermissions(
 		context.Background(),
 		&obs.GetFieldPermissionRequest{
 			RoleId:    c.Param("role_id"),
@@ -302,7 +303,7 @@ func (h *Handler) GetActionPermissions(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -315,7 +316,7 @@ func (h *Handler) GetActionPermissions(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.PermissionService().GetActionPermissions(
+	resp, err := services.BuilderService().Permission().GetActionPermissions(
 		context.Background(),
 		&obs.GetActionPermissionRequest{
 			RoleId:    c.Param("role_id"),
@@ -376,7 +377,7 @@ func (h *Handler) GetViewRelationPermissions(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -389,7 +390,7 @@ func (h *Handler) GetViewRelationPermissions(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.PermissionService().GetViewRelationPermissions(
+	resp, err := services.BuilderService().Permission().GetViewRelationPermissions(
 		context.Background(),
 		&obs.GetActionPermissionRequest{
 			RoleId:    c.Param("role_id"),

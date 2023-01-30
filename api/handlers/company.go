@@ -37,7 +37,7 @@ import (
 // 		return
 // 	}
 
-// 	resp, err := h.companyServices.CompanyService().CreateCompany(
+// 	resp, err := h.companyServices.CompanyService().Company().CreateCompany(
 // 		context.Background(),
 // 		&company_service.CreateCompanyRequest{
 // 			Title:       company.Title,
@@ -71,7 +71,7 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetCompanyByID(c *gin.Context) {
 	companyId := c.Param("company_id")
-	resp, err := h.companyServices.CompanyService().GetById(
+	resp, err := h.companyServices.CompanyService().Company().GetById(
 		context.Background(),
 		&company_service.GetCompanyByIdRequest{
 			Id: companyId,
@@ -115,7 +115,7 @@ func (h *Handler) GetCompanyList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().GetList(
+	resp, err := h.companyServices.CompanyService().Company().GetList(
 		context.Background(),
 		&company_service.GetCompanyListRequest{
 			Limit:    int32(limit),
@@ -162,7 +162,7 @@ func (h *Handler) GetCompanyListWithProjects(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().GetListWithProjects(
+	resp, err := h.companyServices.CompanyService().Company().GetListWithProjects(
 		context.Background(),
 		&company_service.GetListWithProjectsRequest{
 			Limit:    int32(limit),
@@ -215,7 +215,7 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 		return
 	}
 
-	_, err = h.authService.CompanyService().Update(
+	_, err = h.authService.Company().Update(
 		c.Request.Context(),
 		&auth_service.UpdateCompanyRequest{
 			Id:   companyId,
@@ -227,7 +227,7 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Update(
+	resp, err := h.companyServices.CompanyService().Company().Update(
 		context.Background(),
 		&company_service.Company{
 			Id:          companyId,
@@ -263,7 +263,7 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 func (h *Handler) DeleteCompany(c *gin.Context) {
 	companyId := c.Param("company_id")
 
-	_, err := h.authService.CompanyService().Remove(
+	_, err := h.authService.Company().Remove(
 		c.Request.Context(),
 		&auth_service.CompanyPrimaryKey{Id: companyId},
 	)
@@ -272,7 +272,7 @@ func (h *Handler) DeleteCompany(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Delete(
+	resp, err := h.companyServices.CompanyService().Company().Delete(
 		context.Background(),
 		&company_service.DeleteCompanyRequest{
 			Id: companyId,
@@ -311,7 +311,7 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ProjectService().Create(
+	resp, err := h.companyServices.CompanyService().Project().Create(
 		context.Background(),
 		&company_service.CreateProjectRequest{
 			Title:        project.Title,
@@ -331,7 +331,7 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 		return
 	}
 
-	_, err = h.authService.UserService().AddUserToProject(
+	_, err = h.authService.User().AddUserToProject(
 		c.Request.Context(),
 		&auth_service.AddUserToProjectReq{
 			UserId:    authInfo.GetUserId(),
@@ -344,7 +344,7 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 		return
 	}
 
-	_, err = h.companyServices.EnvironmentService().Create(
+	_, err = h.companyServices.CompanyService().Environment().Create(
 		c.Request.Context(),
 		&company_service.CreateEnvironmentRequest{
 			ProjectId:    resp.ProjectId,

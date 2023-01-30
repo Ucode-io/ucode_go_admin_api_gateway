@@ -65,7 +65,7 @@ func (h *Handler) CreateView(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -88,7 +88,7 @@ func (h *Handler) CreateView(c *gin.Context) {
 	view.CommitId = commitID
 	view.CommitGuid = commitGuid
 
-	resp, err := services.ViewService().Create(
+	resp, err := services.BuilderService().View().Create(
 		context.Background(),
 		&view,
 	)
@@ -150,7 +150,7 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -163,7 +163,7 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ViewService().GetSingle(
+	resp, err := services.BuilderService().View().GetSingle(
 		context.Background(),
 		&obs.ViewPrimaryKey{
 			Id:        viewID,
@@ -228,7 +228,7 @@ func (h *Handler) UpdateView(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -242,7 +242,7 @@ func (h *Handler) UpdateView(c *gin.Context) {
 	}
 	view.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.ViewService().Update(
+	resp, err := services.BuilderService().View().Update(
 		context.Background(),
 		&view,
 	)
@@ -304,7 +304,7 @@ func (h *Handler) DeleteView(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -317,7 +317,7 @@ func (h *Handler) DeleteView(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ViewService().Delete(
+	resp, err := services.BuilderService().View().Delete(
 		context.Background(),
 		&obs.ViewPrimaryKey{
 			Id:        viewID,
@@ -376,7 +376,7 @@ func (h *Handler) GetViewList(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -389,7 +389,7 @@ func (h *Handler) GetViewList(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ViewService().GetList(
+	resp, err := services.BuilderService().View().GetList(
 		context.Background(),
 		&obs.GetAllViewsRequest{
 			TableSlug: c.Query("table_slug"),
@@ -461,7 +461,7 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -474,7 +474,7 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ViewService().ConvertHtmlToPdf(
+	resp, err := services.BuilderService().View().ConvertHtmlToPdf(
 		context.Background(),
 		&obs.HtmlBody{
 			Data:      structData,
@@ -548,7 +548,7 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -561,7 +561,7 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ViewService().ConvertTemplateToHtml(
+	resp, err := services.BuilderService().View().ConvertTemplateToHtml(
 		context.Background(),
 		&obs.HtmlBody{
 			Data:      structData,

@@ -66,7 +66,7 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -79,7 +79,7 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 		return
 	}
 
-	res, err := services.EventLogsService().GetList(
+	res, err := services.BuilderService().EventLogs().GetList(
 		context.Background(),
 		&obs.GetEventLogsListRequest{
 			TableSlug: c.Query("table_slug"),
@@ -146,7 +146,7 @@ func (h *Handler) GetEventLogById(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -158,7 +158,7 @@ func (h *Handler) GetEventLogById(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	resp, err := services.EventLogsService().GetSingle(
+	resp, err := services.BuilderService().EventLogs().GetSingle(
 		context.Background(),
 		&obs.GetEventLogById{
 			Id:        eventLogID,
