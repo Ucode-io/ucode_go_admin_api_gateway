@@ -1,9 +1,5 @@
 package config
 
-var (
-	API_KEY_SECRET = "Y0+ntqnSuhPNPH9k0YfcQQg8nAHo788OQXP1y6ewZwY="
-)
-
 const (
 	COMMIT_TYPE_APP                      = "APP"
 	COMMIT_TYPE_TABLE                    = "TABLE"
