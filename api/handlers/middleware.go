@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -64,10 +63,10 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 					c.Abort()
 					return
 				}
-				
+
 				resourceId = resource.GetResource().Id
 			}
-			
+
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
 
@@ -96,11 +95,9 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			fmt.Println(resource, "RSDKMSKDMSD")
-			
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
-			
+
 		}
 
 		c.Set("Auth", res)
