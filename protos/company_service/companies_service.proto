@@ -3,7 +3,7 @@ syntax="proto3";
 package company_service;
 option go_package="genproto/company_service";
 
-
+import "company.proto";
 import "projects_service.proto";
 
 service CompanyService {
@@ -75,10 +75,6 @@ message GetCompanyByIdResponse {
 
 message DeleteCompanyRequest {
     string id = 1;
-}
-
-message Empty {
-
 }
 
 message GetListWithProjectsRequest {

@@ -1,0 +1,72 @@
+syntax="proto3";
+
+package company_service;
+option go_package="genproto/company_service";
+
+import "projects_service.proto";
+
+
+service ServiceResource {
+  rpc Create(CreateServiceResourceRequest) returns (ServiceResources) {}
+  rpc GetList(GetListServiceResourceRequest) returns (GetListServiceResourceResponse) {}
+  rpc GetById(ServiceResourcePrimaryKey) returns (ServiceResources) {}
+  rpc Update(UpdateServiceResourceRequest) returns (ServiceResources) {}
+  rpc Delete(ServiceResourcePrimaryKey) returns (EmptyProto) {}
+}
+
+message CreateServiceResourceRequest {
+  string resource_name = 1;
+  string microservice_name = 2;
+  string name = 3;
+  string description = 4;
+}
+
+message GetListServiceResourceRequest {
+  int32 offset = 1;
+  int32 limit = 2;
+  string search = 3;
+}
+
+message GetListServiceResourceResponse {
+  repeated ServiceResources service_resources = 1;
+  int32 count = 2;
+}
+
+message ServiceResourcePrimaryKey {
+  string id = 1;
+}
+
+message GetByIdByIdServiceResourceResponse {
+  string id = 1;
+  string resource_name = 2;
+  string microservice_name = 3;
+  string name = 4;
+  string description = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+message UpdateServiceResourceRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string resource_name = 4;
+  string microservice_name = 5;
+
+}
+message UpdateServiceResourceResponse {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string resource_name = 4;
+  string microservice_name = 5;
+}
+
+message ServiceResources {
+  string  id = 1;
+  string resource_name = 2;
+  string microservice_name = 3;
+  string name = 4;
+  string description = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}

@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -78,7 +79,8 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		return
 	}
 
-	app.CommitId = commitID
+	commitIDToInt, _ := strconv.Atoi(commitID)
+	app.CommitId = int64(commitIDToInt)
 
 	resp, err := services.AppService().Create(
 		context.Background(),
