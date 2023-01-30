@@ -24,7 +24,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/auth_service.ConfirmStrategies'
       id:
         type: string
       name:
@@ -40,6 +40,16 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
+  auth_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -252,9 +262,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
       user_id:
@@ -340,9 +350,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
       user_id:
@@ -405,7 +415,7 @@ definitions:
       project_id:
         type: string
       release_type:
-        type: integer
+        $ref: '#/definitions/company_service.ReleaseType'
     type: object
   company_service.CreateResourceReq:
     properties:
@@ -425,9 +435,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.EmptyProto:
     type: object
@@ -581,6 +591,18 @@ definitions:
       id:
         type: string
     type: object
+  company_service.ReleaseType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ReleaseType_UNDEFINED
+    - ReleaseType_MAJOR
+    - ReleaseType_MINOR
+    - ReleaseType_PATCH
   company_service.ReleaseWithCommit:
     properties:
       author_id:
@@ -623,9 +645,9 @@ definitions:
       id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
     type: object
@@ -642,6 +664,18 @@ definitions:
       username:
         type: string
     type: object
+  company_service.ResourceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ResourceType_NOT_DECIDED
+    - ResourceType_MONGODB
+    - ResourceType_CLICKHOUSE
+    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -655,7 +689,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -687,6 +721,16 @@ definitions:
       resource_environment_id:
         type: string
     type: object
+  company_service.ServiceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ServiceType_NOT_SPECIFIED
+    - ServiceType_BUILDER_SERVICE
+    - ServiceType_ANALYTICS_SERVICE
   company_service.SetCurrentReleaseRequest:
     properties:
       environment_id:
@@ -718,7 +762,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -1129,6 +1173,15 @@ definitions:
     type: object
   models.CustomEvent:
     properties:
+      action_type:
+        type: string
+      attributes:
+        additionalProperties: true
+        type: object
+      commit_guid:
+        type: string
+      commit_id:
+        type: string
       disable:
         type: boolean
       event_path:
@@ -1137,7 +1190,9 @@ definitions:
         type: string
       id:
         type: string
-      lanel:
+      label:
+        type: string
+      method:
         type: string
       table_slug:
         type: string
@@ -1537,7 +1592,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
       guid:
         type: string
       name:
@@ -1560,6 +1615,16 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
+  object_builder_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -1577,6 +1642,10 @@ definitions:
     type: object
   object_builder_service.CreateCustomEventRequest:
     properties:
+      action_type:
+        type: string
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -1588,6 +1657,8 @@ definitions:
       icon:
         type: string
       label:
+        type: string
+      method:
         type: string
       project_id:
         type: string
@@ -2797,7 +2868,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -2979,7 +3050,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -3658,7 +3729,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -3936,7 +4007,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -4275,7 +4346,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -4519,7 +4590,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -4798,7 +4869,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -5092,7 +5163,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: ""
+          description: Created
         "400":
           description: Bad Request
           schema:
@@ -5277,7 +5348,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -5947,7 +6018,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6630,7 +6701,13 @@ paths:
         required: true
         type: string
       - in: query
+        name: method
+        type: string
+      - in: query
         name: project_id
+        type: string
+      - in: query
+        name: role_id
         type: string
       - in: query
         name: table_slug
@@ -6810,7 +6887,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7097,7 +7174,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7381,7 +7458,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7834,7 +7911,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -8307,7 +8384,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -8532,7 +8609,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -8878,7 +8955,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -9149,7 +9226,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -9456,7 +9533,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -10519,7 +10596,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -10667,7 +10744,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11209,7 +11286,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11738,7 +11815,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12091,7 +12168,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12383,7 +12460,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12669,7 +12746,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:

@@ -80,6 +80,8 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	id, _ := uuid.NewRandom()
+	objectRequest.Data["guid"] = id.String()
 
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
 	for key, value := range objectRequest.Data {
@@ -120,6 +122,27 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "CREATE", c, h)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	if len(beforeActions) > 0 {
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+			CustomEvents: beforeActions,
+			IDs:          []string{id.String()},
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   objectRequest.Data,
+			Method:       "CREATE",
+		},
+			c,
+			h,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+	}
 
 	resp, err := services.BuilderService().ObjectBuilder().Create(
 		context.Background(),
@@ -133,6 +156,23 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
+	}
+	if len(afterActions) > 0 {
+		functionName, err := DoInvokeFuntion(
+			DoInvokeFuntionStruct{
+				CustomEvents: afterActions,
+				IDs:          []string{id.String()},
+				TableSlug:    c.Param("table_slug"),
+				ObjectData:   objectRequest.Data,
+				Method:       "CREATE",
+			},
+			c, // gin context,
+			h, // handler
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -261,6 +301,13 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	var id string
+	if objectRequest.Data["guid"] != nil {
+		id = objectRequest.Data["guid"].(string)
+	} else {
+		h.handleResponse(c, status_http.BadRequest, "guid is required")
+		return
+	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -301,6 +348,27 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "UPDATE", c, h)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	if len(beforeActions) > 0 {
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+			CustomEvents: beforeActions,
+			IDs:          []string{id},
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   objectRequest.Data,
+			Method:       "UPDATE",
+		},
+			c,
+			h,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+	}
 
 	resp, err := services.BuilderService().ObjectBuilder().Update(
 		context.Background(),
@@ -331,6 +399,23 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+	if len(afterActions) > 0 {
+		functionName, err := DoInvokeFuntion(
+			DoInvokeFuntionStruct{
+				CustomEvents: afterActions,
+				IDs:          []string{id},
+				TableSlug:    c.Param("table_slug"),
+				ObjectData:   objectRequest.Data,
+				Method:       "UPDATE",
+			},
+			c, // gin context,
+			h, // handler
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
 			return
 		}
 	}
@@ -417,6 +502,28 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		return
 	}
 
+	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "DELETE", c, h)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	if len(beforeActions) > 0 {
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+			CustomEvents: beforeActions,
+			IDs:          []string{objectID},
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   objectRequest.Data,
+			Method:       "DELETE",
+		},
+			c,
+			h,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+	}
+
 	resp, err := services.BuilderService().ObjectBuilder().Delete(
 		context.Background(),
 		&obs.CommonMessage{
@@ -429,6 +536,23 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
+	}
+	if len(afterActions) > 0 {
+		functionName, err := DoInvokeFuntion(
+			DoInvokeFuntionStruct{
+				CustomEvents: afterActions,
+				IDs:          []string{objectID},
+				TableSlug:    c.Param("table_slug"),
+				ObjectData:   objectRequest.Data,
+				Method:       "DELETE",
+			},
+			c, // gin context,
+			h, // handler
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
@@ -680,6 +804,27 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 	m2mMessage.ProjectId = resourceEnvironment.GetId()
+	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "DELETE_MANY2MANY", c, h)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	if len(beforeActions) > 0 {
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+			CustomEvents: beforeActions,
+			IDs:          []string{m2mMessage.IdFrom},
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   map[string]interface{}{},
+			Method:       "DELETE_MANY2MANY",
+		},
+			c,
+			h,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+	}
 
 	resp, err := services.BuilderService().ObjectBuilder().ManyToManyDelete(
 		context.Background(),
@@ -689,6 +834,23 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
+	}
+	if len(afterActions) > 0 {
+		functionName, err := DoInvokeFuntion(
+			DoInvokeFuntionStruct{
+				CustomEvents: afterActions,
+				IDs:          []string{m2mMessage.IdFrom},
+				TableSlug:    c.Param("table_slug"),
+				ObjectData:   map[string]interface{}{},
+				Method:       "DELETE_MANY2MANY",
+			},
+			c, // gin context,
+			h, // handler
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
@@ -757,6 +919,27 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		return
 	}
 	m2mMessage.ProjectId = resourceEnvironment.GetId()
+	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "APPEND_MANY2MANY", c, h)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	if len(beforeActions) > 0 {
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+			CustomEvents: beforeActions,
+			IDs:          []string{m2mMessage.IdFrom},
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   map[string]interface{}{},
+			Method:       "APPEND_MANY2MANY",
+		},
+			c,
+			h,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+	}
 
 	resp, err := services.BuilderService().ObjectBuilder().ManyToManyAppend(
 		context.Background(),
@@ -766,6 +949,23 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
+	}
+	if len(afterActions) > 0 {
+		functionName, err := DoInvokeFuntion(
+			DoInvokeFuntionStruct{
+				CustomEvents: afterActions,
+				IDs:          []string{m2mMessage.IdFrom},
+				TableSlug:    c.Param("table_slug"),
+				ObjectData:   map[string]interface{}{},
+				Method:       "APPEND_MANY2MANY",
+			},
+			c, // gin context,
+			h, // handler
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
@@ -924,6 +1124,41 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	objects := objectRequest.Data["objects"].([]interface{})
+	editedObjects := make([]interface{}, 0, len(objects))
+	var objectIds = make([]string, 0, len(objects))
+	for _, object := range objects {
+		newObject := object.(map[string]interface{})
+		if newObject["guid"] == nil || newObject["guid"] == "" {
+			guid, _ := uuid.NewRandom()
+			newObject["guid"] = guid.String()
+			newObject["is_new"] = true
+		}
+		objectIds = append(objectIds, newObject["guid"].(string))
+		editedObjects = append(editedObjects, newObject)
+	}
+	objectRequest.Data["objects"] = editedObjects
+	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "MULTIPLE_UPDATE", c, h)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	if len(beforeActions) > 0 {
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+			CustomEvents: beforeActions,
+			IDs:          []string{},
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   map[string]interface{}{},
+			Method:       "MULTIPLE_UPDATE",
+		},
+			c,
+			h,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+	}
 
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
 	for key, value := range objectRequest.Data {
@@ -997,6 +1232,23 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 			return
 		}
 	}
+	if len(afterActions) > 0 {
+		functionName, err := DoInvokeFuntion(
+			DoInvokeFuntionStruct{
+				CustomEvents: afterActions,
+				IDs:          objectIds,
+				TableSlug:    c.Param("table_slug"),
+				ObjectData:   objectRequest.Data,
+				Method:       "MULTIPLE_UPDATE",
+			},
+			c, // gin context
+			h, // handler
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+	}
 
 	h.handleResponse(c, status_http.Created, resp)
 }
@@ -1032,6 +1284,20 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	objects := objectRequest.Data["objects"].([]interface{})
+	editedObjects := make([]interface{}, 0, len(objects))
+	var objectIds = make([]string, 0, len(objects))
+	for _, object := range objects {
+		newObjects := object.(map[string]interface{})
+		if newObjects["guid"] == "" {
+			guid, _ := uuid.NewRandom()
+			newObjects["guid"] = guid.String()
+			newObjects["is_new"] = true
+		}
+		objectIds = append(objectIds, newObjects["guid"].(string))
+		editedObjects = append(editedObjects, newObjects)
+	}
+	objectRequest.Data["objects"] = editedObjects
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -1071,6 +1337,27 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "MULTIPLE_UPDATE", c, h)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	if len(beforeActions) > 0 {
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+			CustomEvents: beforeActions,
+			IDs:          objectIds,
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   map[string]interface{}{},
+			Method:       "MULTIPLE_UPDATE",
+		},
+			c,
+			h,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+	}
 
 	resp, err := services.BuilderService().ObjectBuilder().MultipleUpdate(
 		context.Background(),
@@ -1084,6 +1371,23 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
+	}
+	if len(afterActions) > 0 {
+		functionName, err := DoInvokeFuntion(
+			DoInvokeFuntionStruct{
+				CustomEvents: afterActions,
+				IDs:          objectIds,
+				TableSlug:    c.Param("table_slug"),
+				ObjectData:   objectRequest.Data,
+				Method:       "MULTIPLE_UPDATE",
+			},
+			c, // gin context
+			h, // handler
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.Created, resp)

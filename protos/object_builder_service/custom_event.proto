@@ -4,6 +4,7 @@ package object_builder_service;
 option go_package="genproto/object_builder_service";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
 import "function.proto";
 
 
@@ -27,6 +28,9 @@ message CreateCustomEventRequest {
     string project_id = 7;
     int64 commit_id = 8;
     string commit_guid = 9;
+    string method = 10;
+    string action_type = 11;
+    google.protobuf.Struct attributes = 12;
 }
 
 message CustomEvent {
@@ -39,6 +43,10 @@ message CustomEvent {
     bool disable = 7;
     repeated Function functions = 8;
     string project_id = 9;
+    string method = 10;
+    string action_type =11;
+    google.protobuf.Struct attributes = 12;
+    google.protobuf.Struct action_permission = 13;
 }
 
 message GetCustomEventsListResponse {
@@ -49,6 +57,8 @@ message GetCustomEventsListResponse {
 message GetCustomEventsListRequest {
     string table_slug = 1;
     string project_id = 2;
+    string method = 3;
+    string role_id = 4;
 }   
 
 message CustomEventPrimaryKey {

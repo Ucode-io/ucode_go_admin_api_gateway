@@ -208,12 +208,6 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
@@ -228,6 +222,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		return
 	}
 
+	// We get resource_environment relation
 	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
