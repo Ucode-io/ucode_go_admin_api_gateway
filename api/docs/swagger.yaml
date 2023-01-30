@@ -1169,6 +1169,11 @@ definitions:
     type: object
   models.CustomEvent:
     properties:
+      action_type:
+        type: string
+      attributes:
+        additionalProperties: true
+        type: object
       disable:
         type: boolean
       event_path:
@@ -1177,7 +1182,9 @@ definitions:
         type: string
       id:
         type: string
-      lanel:
+      label:
+        type: string
+      method:
         type: string
       table_slug:
         type: string

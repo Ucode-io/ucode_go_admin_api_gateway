@@ -19839,6 +19839,13 @@ const docTemplate = `{
         "models.CustomEvent": {
             "type": "object",
             "properties": {
+                "action_type": {
+                    "type": "string"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "disable": {
                     "type": "boolean"
                 },
@@ -19851,7 +19858,10 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "lanel": {
+                "label": {
+                    "type": "string"
+                },
+                "method": {
                     "type": "string"
                 },
                 "table_slug": {
