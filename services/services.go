@@ -64,6 +64,7 @@ type ServiceManagerI interface {
 	CategoryService() api_reference_service.CategoryServiceClient
 	ReleaseService() company_service.ReleaseServiceClient
 	CommitService() company_service.CommitServiceClient
+	FieldAndRelationService() object_builder_service.FieldAndRelationServiceClient
 }
 
 type grpcClients struct {
@@ -113,6 +114,7 @@ type grpcClients struct {
 	categoryService           api_reference_service.CategoryServiceClient
 	releaseService            company_service.ReleaseServiceClient
 	commitService             company_service.CommitServiceClient
+	fieldAndrelationService   object_builder_service.FieldAndRelationServiceClient
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -324,6 +326,10 @@ func (g *grpcClients) BarcodeService() object_builder_service.BarcodeServiceClie
 
 func (g *grpcClients) TableHelpersService() object_builder_service.TableHelpersServiceClient {
 	return g.tableHelpersService
+}
+
+func (g *grpcClients) FieldAndRelationService() object_builder_service.FieldAndRelationServiceClient {
+	return g.fieldAndrelationService
 }
 
 // auth functions
