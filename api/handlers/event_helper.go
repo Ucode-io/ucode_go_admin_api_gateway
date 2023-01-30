@@ -151,7 +151,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		data["api_key"] = appId
 		invokeFunction.Data = data
 
-		resp, err := util.DoRequest("https://ofs.medion.udevs.io/function/"+customEvent.Functions[0].Path, "POST", invokeFunction)
+		resp, err := util.DoRequest("https://ofs.u-code.io/ucode/ucode_functions/"+customEvent.Functions[0].Path, "POST", invokeFunction)
 		if err != nil {
 			return customEvent.Functions[0].Name, err
 		} else if resp.Status == "error" {
