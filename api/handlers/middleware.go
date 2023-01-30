@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -10,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func (h *Handler) NodeMiddleware() gin.HandlerFunc {
@@ -50,6 +52,22 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
 
+			if _, err := uuid.Parse(resourceId); err != nil {
+				resource, err := h.companyServices.ResourceService().GetResourceByEnvID(
+					c.Request.Context(),
+					&company_service.GetResourceByEnvIDRequest{
+						EnvId: environmentId,
+					},
+				)
+				if err != nil {
+					h.handleResponse(c, status_http.BadRequest, err.Error())
+					c.Abort()
+					return
+				}
+				
+				resourceId = resource.GetResource().Id
+			}
+			
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
 
@@ -78,10 +96,11 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-
+			fmt.Println(resource, "RSDKMSKDMSD")
+			
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
-
+			
 		}
 
 		c.Set("Auth", res)
