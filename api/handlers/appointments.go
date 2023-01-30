@@ -5,8 +5,9 @@ import (
 	ps "ucode/ucode_go_api_gateway/genproto/pos_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // GetAllOfflineAppointments godoc
@@ -59,7 +60,7 @@ func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.OfflineAppointmentService().GetList(
+	resp, err := services.PosService().OfflineAppointment().GetList(
 		context.Background(),
 		&ps.GetAllOfflineAppointmentsRequest{
 			Limit:         int32(limit),
@@ -114,7 +115,7 @@ func (h *Handler) GetAllBookedAppointments(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BookedAppointmentService().GetList(
+	resp, err := services.PosService().BookedAppointment().GetList(
 		context.Background(),
 		&ps.GetAllBookedAppointmentsRequest{
 			Limit:         int32(limit),
@@ -163,7 +164,7 @@ func (h *Handler) GetSingleOfflineAppointment(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.OfflineAppointmentService().GetSingle(
+	resp, err := services.PosService().OfflineAppointment().GetSingle(
 		context.Background(),
 		&ps.OfflineAppointmentPrimaryKey{
 			Id: offlineAppointmentID,
@@ -207,7 +208,7 @@ func (h *Handler) GetSingleBookedAppointment(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BookedAppointmentService().GetSingle(
+	resp, err := services.PosService().BookedAppointment().GetSingle(
 		context.Background(),
 		&ps.BookedAppointmentPrimaryKey{
 			Id: bookedAppointmentID,
@@ -267,7 +268,7 @@ func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.OfflineAppointmentService().UpdatePaymentStatus(
+	resp, err := services.PosService().OfflineAppointment().UpdatePaymentStatus(
 		context.Background(),
 		&paymentBody,
 	)
@@ -319,7 +320,7 @@ func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.OfflineAppointmentService().GetCloseCashboxInfo(
+	resp, err := services.PosService().OfflineAppointment().GetCloseCashboxInfo(
 		context.Background(),
 		&cashbox,
 	)
@@ -370,7 +371,7 @@ func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.OfflineAppointmentService().GetOpenCashboxInfo(
+	resp, err := services.PosService().OfflineAppointment().GetOpenCashboxInfo(
 		context.Background(),
 		&cashbox,
 	)
@@ -430,7 +431,7 @@ func (h *Handler) CashboxTransaction(c *gin.Context) {
 		return
 	}
 
-	_, err = services.OfflineAppointmentService().CreateCashboxTransaction(context.Background(), &ps.CreateCashboxTransactionRequest{
+	_, err = services.PosService().OfflineAppointment().CreateCashboxTransaction(context.Background(), &ps.CreateCashboxTransactionRequest{
 		CashboxId:     cashboxId,
 		AmountOfMoney: cashboxTransactionRequest.AmountOfMoney,
 		Comment:       cashboxTransactionRequest.Comment,

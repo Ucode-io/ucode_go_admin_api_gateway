@@ -68,7 +68,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -79,7 +79,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		err = errors.New("error getting resource environment id")
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
-	}	
+	}
 
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
 	for key, value := range objectRequest.Data {
@@ -96,7 +96,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 				return
 			}
 
-			_, err = services.ObjectBuilderService().Create(
+			_, err = services.BuilderService().ObjectBuilder().Create(
 				context.Background(),
 				&obs.CommonMessage{
 					TableSlug: key[1:],
@@ -121,7 +121,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ObjectBuilderService().Create(
+	resp, err := services.BuilderService().ObjectBuilder().Create(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -200,7 +200,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -213,7 +213,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ObjectBuilderService().GetSingle(
+	resp, err := services.BuilderService().ObjectBuilder().GetSingle(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -289,7 +289,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -302,7 +302,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ObjectBuilderService().Update(
+	resp, err := services.BuilderService().ObjectBuilder().Update(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -322,7 +322,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 			return
 		}
 
-		_, err = services.SessionService().UpdateSessionsByRoleId(
+		_, err = services.AuthService().Session().UpdateSessionsByRoleId(
 			context.Background(),
 			&authPb.UpdateSessionByRoleIdRequest{
 				RoleId:    objectRequest.Data["role_id"].(string),
@@ -404,7 +404,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -417,7 +417,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ObjectBuilderService().Delete(
+	resp, err := services.BuilderService().ObjectBuilder().Delete(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -500,7 +500,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -513,7 +513,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ObjectBuilderService().GetList(
+	resp, err := services.BuilderService().ObjectBuilder().GetList(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -588,7 +588,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -601,7 +601,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ObjectBuilderService().GetListInExcel(
+	resp, err := services.BuilderService().ObjectBuilder().GetListInExcel(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -667,7 +667,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -681,7 +681,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	}
 	m2mMessage.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.ObjectBuilderService().ManyToManyDelete(
+	resp, err := services.BuilderService().ObjectBuilder().ManyToManyDelete(
 		context.Background(),
 		&m2mMessage,
 	)
@@ -744,7 +744,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -758,7 +758,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 	}
 	m2mMessage.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.ObjectBuilderService().ManyToManyAppend(
+	resp, err := services.BuilderService().ObjectBuilder().ManyToManyAppend(
 		context.Background(),
 		&m2mMessage,
 	)
@@ -829,7 +829,7 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -842,7 +842,7 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ObjectBuilderService().GetObjectDetails(
+	resp, err := services.BuilderService().ObjectBuilder().GetObjectDetails(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -912,7 +912,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -939,7 +939,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 				h.handleResponse(c, status_http.InvalidArgument, err.Error())
 				return
 			}
-			// _, err = services.ObjectBuilderService().Create(
+			// _, err = services.BuilderService()..ObjectBuilde().Create(
 			// 	context.Background(),
 			// 	&obs.CommonMessage{
 			// 		TableSlug: key[1:],
@@ -963,7 +963,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ObjectBuilderService().Batch(
+	resp, err := services.BuilderService().ObjectBuilder().Batch(
 		context.Background(),
 		&obs.BatchRequest{
 			TableSlug:     c.Param("table_slug"),
@@ -985,7 +985,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
 		}
-		_, err = services.SessionService().UpdateSessionsByRoleId(
+		_, err = services.AuthService().Session().UpdateSessionsByRoleId(
 			context.Background(),
 			&authPb.UpdateSessionByRoleIdRequest{
 				RoleId:    objectRequest.Data["role_id"].(string),
@@ -1059,7 +1059,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -1072,7 +1072,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ObjectBuilderService().MultipleUpdate(
+	resp, err := services.BuilderService().ObjectBuilder().MultipleUpdate(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -1141,7 +1141,7 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -1165,7 +1165,7 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ObjectBuilderService().GetFinancialAnalytics(
+	resp, err := services.BuilderService().ObjectBuilder().GetFinancialAnalytics(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),

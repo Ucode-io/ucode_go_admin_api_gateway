@@ -58,7 +58,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -71,7 +71,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.SectionService().GetAll(
+	resp, err := services.BuilderService().Section().GetAll(
 		context.Background(),
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
@@ -139,7 +139,7 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -162,7 +162,7 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 	sections.CommitId = commitID
 	sections.CommitGuid = commitGuid
 
-	resp, err := services.SectionService().Update(
+	resp, err := services.BuilderService().Section().Update(
 		context.Background(),
 		&sections,
 	)

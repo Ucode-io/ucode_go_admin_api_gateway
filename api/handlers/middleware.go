@@ -55,7 +55,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 
 		case "API-KEY":
 			app_id := c.GetHeader("X-API-KEY")
-			apikeys, err := h.authService.ApiKeyService().GetEnvID(
+			apikeys, err := h.authService.ApiKey().GetEnvID(
 				c.Request.Context(),
 				&auth_service.GetReq{
 					Id: app_id,
@@ -67,7 +67,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				return
 			}
 
-			resource, err := h.companyServices.ResourceService().GetResourceByEnvID(
+			resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
 				c.Request.Context(),
 				&company_service.GetResourceByEnvIDRequest{
 					EnvId: apikeys.GetEnvironmentId(),
@@ -142,7 +142,7 @@ func (h *Handler) ResEnvMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		resourceEnvironment, err := services.ResourceService().GetResourceEnvironment(
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&company_service.GetResourceEnvironmentReq{
 				EnvironmentId: environmentID,

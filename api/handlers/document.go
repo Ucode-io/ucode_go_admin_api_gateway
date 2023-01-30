@@ -62,7 +62,7 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -76,7 +76,7 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 	}
 	document.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.DocumentService().Create(
+	resp, err := services.BuilderService().Document().Create(
 		context.Background(),
 		&document,
 	)
@@ -139,7 +139,7 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -152,7 +152,7 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.DocumentService().GetSingle(
+	resp, err := services.BuilderService().Document().GetSingle(
 		context.Background(),
 		&obs.DocumentPrimaryKey{
 			Id:        documentID,
@@ -223,7 +223,7 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -237,7 +237,7 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 	}
 	document.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.DocumentService().Update(
+	resp, err := services.BuilderService().Document().Update(
 		context.Background(),
 		&document,
 	)
@@ -299,7 +299,7 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -312,7 +312,7 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.DocumentService().Delete(
+	resp, err := services.BuilderService().Document().Delete(
 		context.Background(),
 		&obs.DocumentPrimaryKey{
 			Id:        documentID,
@@ -377,7 +377,7 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -390,7 +390,7 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.DocumentService().GetList(
+	resp, err := services.BuilderService().Document().GetList(
 		context.Background(),
 		&obs.GetAllDocumentsRequest{
 			ObjectId:  c.Query("object_id"),

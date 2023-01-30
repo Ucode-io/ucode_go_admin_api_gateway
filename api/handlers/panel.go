@@ -66,7 +66,7 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -80,7 +80,7 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 	}
 	panelCoordinates.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.PanelService().UpdateCoordinates(
+	resp, err := services.BuilderService().Panel().UpdateCoordinates(
 		context.Background(),
 		&panelCoordinates,
 	)
@@ -143,7 +143,7 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -156,7 +156,7 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.PanelService().GetSingle(
+	resp, err := services.BuilderService().Panel().GetSingle(
 		context.Background(),
 		&obs.PanelPrimaryKey{
 			Id:        panelID,
@@ -237,7 +237,7 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -260,7 +260,7 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 	panel.CommitId = commitID
 	panel.CommitGuid = commitGuid
 
-	resp, err := services.PanelService().Create(
+	resp, err := services.BuilderService().Panel().Create(
 		context.Background(),
 		&panel,
 	)
@@ -317,7 +317,7 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -330,7 +330,7 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.PanelService().GetList(
+	resp, err := services.BuilderService().Panel().GetList(
 		context.Background(),
 		&obs.GetAllPanelsRequest{
 			Title:     c.DefaultQuery("title", ""),
@@ -414,7 +414,7 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -428,7 +428,7 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 	}
 	panel.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.PanelService().Update(
+	resp, err := services.BuilderService().Panel().Update(
 		context.Background(),
 		&panel,
 	)
@@ -491,7 +491,7 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -504,7 +504,7 @@ func (h *Handler) DeletePanel(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.PanelService().Delete(
+	resp, err := services.BuilderService().Panel().Delete(
 		context.Background(),
 		&obs.PanelPrimaryKey{
 			Id:        panelID,

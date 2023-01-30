@@ -8,8 +8,9 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // GetQueryRows godoc
@@ -69,7 +70,7 @@ func (h *Handler) GetQueryRows(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -82,7 +83,7 @@ func (h *Handler) GetQueryRows(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.QueryService().GetQueryRows(
+	resp, err := services.AnalyticsService().Query().GetQueryRows(
 		context.Background(),
 		&as.CommonInput{
 			Data:      structData,

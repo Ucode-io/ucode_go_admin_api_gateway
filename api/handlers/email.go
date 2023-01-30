@@ -87,7 +87,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -100,7 +100,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	respObject, err := services.LoginService().LoginWithEmailOtp(
+	respObject, err := services.BuilderService().Login().LoginWithEmailOtp(
 		c.Request.Context(),
 		&pbObject.EmailOtpRequest{
 			Email:      request.Email,
@@ -117,7 +117,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.EmailServie().Create(
+	resp, err := services.AuthService().Email().Create(
 		c.Request.Context(),
 		&pb.Email{
 			Id:        id.String(),
@@ -197,7 +197,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -211,7 +211,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 	}
 
 	if c.Param("otp") != "1212" {
-		resp, err := services.EmailServie().GetEmailByID(
+		resp, err := services.AuthService().Email().GetEmailByID(
 			c.Request.Context(),
 			&pb.EmailOtpPrimaryKey{
 				Id: c.Param("sms_id"),
@@ -232,7 +232,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		return
 	}
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
-	res, err := services.SessionService().SessionAndTokenGenerator(
+	res, err := services.AuthService().Session().SessionAndTokenGenerator(
 		context.Background(),
 		&pb.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
@@ -298,7 +298,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -317,7 +317,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	_, err = services.ObjectBuilderServiceAuth().Create(
+	_, err = services.BuilderService().ObjectBuilderAuth().Create(
 		context.Background(),
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -330,7 +330,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.LoginService().LoginWithEmailOtp(
+	resp, err := services.BuilderService().Login().LoginWithEmailOtp(
 		context.Background(),
 		&pbObject.EmailOtpRequest{
 			Email:      body.Data["email"].(string),
@@ -343,7 +343,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	}
 
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
-	res, err := services.SessionServiceAuth().SessionAndTokenGenerator(
+	res, err := services.AuthService().Session().SessionAndTokenGenerator(
 		context.Background(),
 		&pb.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,

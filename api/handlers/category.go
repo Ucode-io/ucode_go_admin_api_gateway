@@ -64,7 +64,7 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.CategoryService().Create(
+	resp, err := services.ApiReferenceService().Category().Create(
 		context.Background(), &category,
 		// &ars.CreateCategoryRequest{
 		// 	Name:       category.Name,
@@ -123,7 +123,7 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.CategoryService().Get(
+	resp, err := services.ApiReferenceService().Category().Get(
 		context.Background(),
 		&ars.GetCategoryRequest{
 			Guid: id,
@@ -186,7 +186,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.CategoryService().GetList(
+	resp, err := services.ApiReferenceService().Category().GetList(
 		context.Background(),
 		&ars.GetListCategoryRequest{
 			Limit:     int64(limit),
@@ -255,7 +255,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.CategoryService().Update(
+	resp, err := services.ApiReferenceService().Category().Update(
 		context.Background(),
 		&ars.Category{
 			Guid:       category.Guid,
@@ -315,7 +315,7 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.CategoryService().Delete(
+	resp, err := services.ApiReferenceService().Category().Delete(
 		context.Background(),
 		&ars.DeleteCategoryRequest{
 			Guid: id,
