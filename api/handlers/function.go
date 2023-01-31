@@ -530,7 +530,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	resp, err := util.DoRequest("https://ofs.u-code.io/ucode/ucode_functions/"+function.Path, "POST", models.InvokeFunctionRequestWithAppId{
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.InvokeFunctionRequestWithAppId{
 		ObjectIDs: invokeFunction.ObjectIDs, 
 		AppID: apiKeys.GetData()[0].GetAppId(),
 	})

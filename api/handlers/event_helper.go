@@ -122,6 +122,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 
 	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
 		EnvironmentId: environmentId.(string),
+		ProjectId:     resourceEnvironment.ProjectId,
 	})
 	if err != nil {
 		err = errors.New("error getting api keys by environment id")
@@ -151,7 +152,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		data["api_key"] = appId
 		invokeFunction.Data = data
 
-		resp, err := util.DoRequest("https://ofs.u-code.io/ucode/ucode_functions/"+customEvent.Functions[0].Path, "POST", invokeFunction)
+		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.Functions[0].Path, "POST", invokeFunction)
 		if err != nil {
 			return customEvent.Functions[0].Name, err
 		} else if resp.Status == "error" {
