@@ -544,7 +544,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 			FunctionId: invokeFunction.FunctionID,
 			ObjectIds:  invokeFunction.ObjectIDs,
 			FieldSlug:  function.Path + "_disable",
-			ProjectId:  resourceId.(string),
+			ProjectId:  resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
