@@ -8,21 +8,22 @@ import (
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateField godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID create_field
-// @Router /v1/field [POST]
+// @ID create_fields_and_relations
+// @Router /v1/fields-relations [POST]
 // @Summary Create field
 // @Description Create field
 // @Tags Field
 // @Accept json
 // @Produce json
-// @Param table body models.CreateFieldRequest true "CreateFieldRequestBody"
-// @Success 201 {object} status_http.Response{data=models.Field} "Field data"
+// @Param table body obs.CreateFieldsAndRelationsRequest true "Request Body"
+// @Success 201 {object} status_http.Response{data=obs.CreateFieldsAndRelationsResponse} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateFieldsAndRelations(c *gin.Context) {
@@ -56,7 +57,7 @@ func (h *Handler) CreateFieldsAndRelations(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -76,15 +77,18 @@ func (h *Handler) CreateFieldsAndRelations(c *gin.Context) {
 	// }
 	// fmt.Println("create table -- commit_id ---->>", commitID)
 
+	id, _ := uuid.NewRandom()
+
 	// setting options
 	request.Options = &obs.CreateFieldsAndRelationsRequest_Options{
 		CommitId:   0,
-		CommitGuid: "",
+		CommitGuid: id.String(),
 		ProjectId:  resourceEnvironment.GetId(),
+		TableId:    request.Options.GetTableId(),
 	}
 
 	// Creating Fields and relations
-	resp, err := services.FieldAndRelationService().CreateFieldsAndRelations(c.Request.Context(), &request)
+	resp, err := services.BuilderService().FieldsAndRelations().CreateFieldsAndRelations(c.Request.Context(), &request)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
