@@ -217,11 +217,11 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
@@ -254,6 +254,7 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		context.Background(),
 		&obs.GetCustomEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
+			RoleId: authInfo.GetRoleId(),
 			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
