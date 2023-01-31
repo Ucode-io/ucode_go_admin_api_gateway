@@ -519,6 +519,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 	}
 	apiKeys, err := services.AuthService().ApiKey().GetList(context.Background(), &auth_service.GetListReq{
 		EnvironmentId: environmentId.(string),
+		ProjectId: resourceEnvironment.ProjectId,
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
