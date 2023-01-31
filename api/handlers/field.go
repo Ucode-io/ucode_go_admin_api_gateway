@@ -109,7 +109,6 @@ func (h *Handler) CreateField(c *gin.Context) {
 
 	field.CommitId = commitID
 	field.CommitGuid = commitGuid
-
 	resp, err := services.BuilderService().Field().Create(
 		context.Background(),
 		&field,

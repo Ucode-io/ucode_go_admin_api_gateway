@@ -72,6 +72,7 @@ func (h *Handler) CreateApp(c *gin.Context) {
 	}
 
 	app.ProjectId = resourceEnvironment.GetId()
+	fmt.Println("PROJECT_ID", app.ProjectId)
 
 	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_APP)
 	if err != nil {

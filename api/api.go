@@ -36,7 +36,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	v1.Use(h.AuthMiddleware())
+	v1.Use(h.AuthMiddleware(cfg))
 	{
 		v1.POST("/upload", h.Upload)
 		v1.POST("/upload-file/:table_slug/:object_id", h.UploadFile)
@@ -55,6 +55,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/field", h.GetAllFields)
 		v1.PUT("/field", h.UpdateField)
 		v1.DELETE("/field/:field_id", h.DeleteField)
+		v1.POST("/fields-relations", h.CreateFieldsAndRelations)
 
 		//relation
 		v1.POST("/relation", h.CreateRelation)

@@ -68,10 +68,10 @@ type Config struct {
 
 	UcodeNamespace string
 
-	SecretKey string
+	SuperAdminHost string
+	ClientHost     string
 
-	CLIENT_HOST     string
-	SUPERADMIN_HOST string
+	SecretKey string
 }
 
 // Load ...
@@ -135,8 +135,9 @@ func Load() Config {
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = "Here$houldBe$ome$ecretKey"
 
-	config.CLIENT_HOST = cast.ToString(GetOrReturnDefaultValue("CLIENT_HOST", "https://test.app.u-code.i"))
-	config.SUPERADMIN_HOST = cast.ToString(GetOrReturnDefaultValue("SUPERADMIN_HOST", "https://test.admin.u-code.io"))
+	config.SuperAdminHost = cast.ToString(GetOrReturnDefaultValue("SUPERADMIN_HOST", "test.admin.u-code.io"))
+	config.ClientHost = cast.ToString(GetOrReturnDefaultValue("CLIENT_HOST", "test.app.u-code.io"))
+
 	return config
 }
 
