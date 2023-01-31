@@ -42,6 +42,7 @@ message GetProjectsByCompanyIdRes {
             string domain = 4;
             string created_at = 5;
             string updated_at = 6;
+            string logo = 7;
         }
         string id = 1;
         string name = 2;
@@ -106,6 +107,7 @@ message Project {
     string k8s_namespace = 3;
     string title = 4;
     repeated ResourceWithoutPassword resources = 5;
+    string logo = 6;
 }
 
 message CreateProjectRequest {

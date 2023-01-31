@@ -19018,6 +19018,9 @@ const docTemplate = `{
                 "k8s_namespace": {
                     "type": "string"
                 },
+                "logo": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
