@@ -3,12 +3,13 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // CreateField godoc
@@ -70,19 +71,17 @@ func (h *Handler) CreateFieldsAndRelations(c *gin.Context) {
 		return
 	}
 
-	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FIELD)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-	// 	return
-	// }
-	// fmt.Println("create table -- commit_id ---->>", commitID)
-
-	id, _ := uuid.NewRandom()
+	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FIELD)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		return
+	}
+	fmt.Println("create table -- commit_id ---->>", commitID)
 
 	// setting options
 	request.Options = &obs.CreateFieldsAndRelationsRequest_Options{
-		CommitId:   0,
-		CommitGuid: id.String(),
+		CommitId:   commitID,
+		CommitGuid: commitGuid,
 		ProjectId:  resourceEnvironment.GetId(),
 		TableId:    request.Options.GetTableId(),
 	}
