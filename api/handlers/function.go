@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -516,8 +517,22 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	apiKeys, err := services.AuthService().ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+		EnvironmentId: environmentId.(string),
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	if len(apiKeys.Data) < 1 {
+		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
+		return
+	}
 
-	resp, err := util.DoRequest("https://ofs.u-code.io/ucode/ucode_functions/"+function.Path, "POST", invokeFunction)
+	resp, err := util.DoRequest("https://ofs.u-code.io/ucode/ucode_functions/"+function.Path, "POST", models.InvokeFunctionRequestWithAppId{
+		ObjectIDs: invokeFunction.ObjectIDs, 
+		AppID: apiKeys.GetData()[0].GetAppId(),
+	})
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return

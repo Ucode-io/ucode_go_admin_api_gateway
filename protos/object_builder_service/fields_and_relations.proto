@@ -19,6 +19,7 @@ message CreateFieldsAndRelationsRequest {
         int64 commit_id = 1;
         string commit_guid = 2;
         string project_id = 3;
+        string table_id = 4;
     }
     Options options = 3;
 }

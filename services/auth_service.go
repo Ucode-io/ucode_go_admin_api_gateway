@@ -16,6 +16,7 @@ type AuthServiceI interface {
 	Permission() auth_service.PermissionServiceClient
 	User() auth_service.UserServiceClient
 	Email() auth_service.EmailOtpServiceClient
+	ApiKey() auth_service.ApiKeysClient
 }
 
 type authServiceClient struct {
@@ -27,6 +28,7 @@ type authServiceClient struct {
 	userService           auth_service.UserServiceClient
 	sessionServiceAuth    auth_service.SessionServiceClient
 	emailServie           auth_service.EmailOtpServiceClient
+	apiKeyService         auth_service.ApiKeysClient
 }
 
 func NewAuthServiceClient(ctx context.Context, cfg config.Config) (AuthServiceI, error) {
@@ -49,6 +51,7 @@ func NewAuthServiceClient(ctx context.Context, cfg config.Config) (AuthServiceI,
 		sessionServiceAuth:    auth_service.NewSessionServiceClient(connAuthService),
 		integrationService:    auth_service.NewIntegrationServiceClient(connAuthService),
 		emailServie:           auth_service.NewEmailOtpServiceClient(connAuthService),
+		apiKeyService:         auth_service.NewApiKeysClient(connAuthService),
 	}, nil
 }
 
@@ -74,4 +77,8 @@ func (g *authServiceClient) Integration() auth_service.IntegrationServiceClient 
 
 func (g *authServiceClient) Email() auth_service.EmailOtpServiceClient {
 	return g.emailServie
+}
+
+func (g *authServiceClient) ApiKey() auth_service.ApiKeysClient {
+	return g.apiKeyService
 }

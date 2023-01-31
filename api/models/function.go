@@ -32,3 +32,8 @@ type InvokeFunctionResponse struct {
 type NewInvokeFunctionRequest struct {
 	Data map[string]interface{} `json:"data"`
 }
+
+type InvokeFunctionRequestWithAppId struct {
+	ObjectIDs []string `json:"object_ids"`
+	AppID     string   `json:"app_id"`
+}
