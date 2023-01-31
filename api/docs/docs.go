@@ -370,7 +370,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -698,7 +698,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -1900,7 +1900,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2488,7 +2488,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2979,7 +2979,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3405,7 +3405,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3908,7 +3908,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4323,7 +4323,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
@@ -4744,7 +4744,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -6971,7 +6971,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -7467,7 +7467,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -7968,7 +7968,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8464,7 +8464,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -9160,7 +9160,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -9987,10 +9987,112 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/fields-relations": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create field",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Field"
+                ],
+                "summary": "Create field",
+                "operationId": "create_fields_and_relations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.CreateFieldsAndRelationsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Response Body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.CreateFieldsAndRelationsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -10478,7 +10580,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -11081,7 +11183,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -11560,7 +11662,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -12638,7 +12740,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13836,7 +13938,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -14453,7 +14555,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -15162,7 +15264,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -16082,7 +16184,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -16803,7 +16905,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -17311,7 +17413,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -17809,7 +17911,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -18098,7 +18200,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "$ref": "#/definitions/auth_service.ConfirmStrategies"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "string"
@@ -18122,19 +18224,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "auth_service.ConfirmStrategies": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ConfirmStrategies_UNDECIDED",
-                "ConfirmStrategies_PHONE",
-                "ConfirmStrategies_EMAIL"
-            ]
         },
         "auth_service.CreateIntegrationRequest": {
             "type": "object",
@@ -18459,10 +18548,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -18594,10 +18683,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -18694,7 +18783,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release_type": {
-                    "$ref": "#/definitions/company_service.ReleaseType"
+                    "type": "integer"
                 }
             }
         },
@@ -18725,10 +18814,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -18971,21 +19060,6 @@ const docTemplate = `{
                 }
             }
         },
-        "company_service.ReleaseType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "ReleaseType_UNDEFINED",
-                "ReleaseType_MAJOR",
-                "ReleaseType_MINOR",
-                "ReleaseType_PATCH"
-            ]
-        },
         "company_service.ReleaseWithCommit": {
             "type": "object",
             "properties": {
@@ -19050,30 +19124,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
                 }
             }
-        },
-        "company_service.ResourceType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "ResourceType_NOT_DECIDED",
-                "ResourceType_MONGODB",
-                "ResourceType_CLICKHOUSE",
-                "ResourceType_POSTGRESQL"
-            ]
         },
         "company_service.ResourceWithoutPassword": {
             "type": "object",
@@ -19094,7 +19153,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -19164,19 +19223,6 @@ const docTemplate = `{
                 }
             }
         },
-        "company_service.ServiceType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ServiceType_NOT_SPECIFIED",
-                "ServiceType_BUILDER_SERVICE",
-                "ServiceType_ANALYTICS_SERVICE"
-            ]
-        },
         "company_service.SetCurrentReleaseRequest": {
             "type": "object",
             "properties": {
@@ -19224,7 +19270,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -19252,7 +19298,7 @@ const docTemplate = `{
                 "authServiceHost": {
                     "type": "string"
                 },
-                "client_HOST": {
+                "clientHost": {
                     "type": "string"
                 },
                 "companyServiceHost": {
@@ -19342,7 +19388,7 @@ const docTemplate = `{
                 "smsServiceHost": {
                     "type": "string"
                 },
-                "superadmin_HOST": {
+                "superAdminHost": {
                     "type": "string"
                 },
                 "ucodeNamespace": {
@@ -20487,7 +20533,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
+                    "type": "integer"
                 },
                 "guid": {
                     "type": "string"
@@ -20522,19 +20568,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "object_builder_service.ConfirmStrategies": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ConfirmStrategies_UNDECIDED",
-                "ConfirmStrategies_PHONE",
-                "ConfirmStrategies_EMAIL"
-            ]
         },
         "object_builder_service.CreateAppResponse": {
             "type": "object",
@@ -20651,6 +20684,99 @@ const docTemplate = `{
                     "$ref": "#/definitions/object_builder_service.When"
                 }
             }
+        },
+        "object_builder_service.CreateFieldRequest": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "autofill_field": {
+                    "type": "string"
+                },
+                "autofill_table": {
+                    "type": "string"
+                },
+                "automatic": {
+                    "type": "boolean"
+                },
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
+                "default": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "index": {
+                    "type": "string"
+                },
+                "is_visible": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "unique": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "object_builder_service.CreateFieldsAndRelationsRequest": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.CreateFieldRequest"
+                    }
+                },
+                "options": {
+                    "$ref": "#/definitions/object_builder_service.CreateFieldsAndRelationsRequest_Options"
+                },
+                "relations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.CreateRelationRequest"
+                    }
+                }
+            }
+        },
+        "object_builder_service.CreateFieldsAndRelationsRequest_Options": {
+            "type": "object",
+            "properties": {
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "integer"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.CreateFieldsAndRelationsResponse": {
+            "type": "object"
         },
         "object_builder_service.CreateHtmlTemplateRequest": {
             "type": "object",

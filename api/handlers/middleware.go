@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 
@@ -14,6 +15,11 @@ import (
 	"github.com/google/uuid"
 )
 
+// const (
+// 	SUPERADMIN_HOST string = "test.admin.u-code.io"
+// 	CLIENT_HOST     string = "test.app.u-code.io"
+// )
+
 func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -22,7 +28,7 @@ func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 	}
 }
 
-func (h *Handler) AuthMiddleware() gin.HandlerFunc {
+func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
@@ -42,7 +48,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 
 		switch strArr[0] {
 		case "Bearer":
-			if strings.Contains(origin, h.cfg.CLIENT_HOST) {
+			if strings.Contains(origin, cfg.AppHost) || strings.Contains(origin, cfg.ApiHost) {
 				res, ok = h.hasAccess(c)
 				if !ok {
 					c.Abort()
