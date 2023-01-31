@@ -79,7 +79,7 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType str
 		return 0, "", err
 	}
 
-	fmt.Println("authInfo.GetUserId()", authInfo.GetUserId())
+	fmt.Println("auethInfo.GetUsrId()", authInfo.GetUserId())
 	fmt.Println("authInfo.GetProjectId()", authInfo.GetProjectId())
 	fmt.Println("environmentID", environmentID)
 

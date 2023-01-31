@@ -517,7 +517,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	resp, err := util.DoRequest("status_https://ofs.medion.udevs.io/function/"+function.Path, "POST", invokeFunction)
+	resp, err := util.DoRequest("https://ofs.u-code.io/ucode/ucode_functions/"+function.Path, "POST", invokeFunction)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return

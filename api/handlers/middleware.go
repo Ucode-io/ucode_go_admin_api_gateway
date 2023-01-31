@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/config"
@@ -36,6 +37,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			origin = c.GetHeader("Origin")
 		)
 
+		fmt.Println("--origin--", origin)
 		bearerToken := c.GetHeader("Authorization")
 		strArr := strings.Split(bearerToken, " ")
 
