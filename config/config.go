@@ -61,6 +61,9 @@ type Config struct {
 	ApiReferenceServiceHost string
 	ApiReferenceServicePort string
 
+	FunctionServiceHost string
+	FunctionServicePort string
+
 	MinioEndpoint        string
 	MinioAccessKeyID     string
 	MinioSecretAccessKey string
@@ -131,6 +134,9 @@ func Load() Config {
 
 	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_SERVICE_HOST", "localhost"))
 	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", ":8099"))
+
+	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", "localhost"))
+	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_PORT", ":8100"))
 
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = "Here$houldBe$ome$ecretKey"
