@@ -48,7 +48,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 
 		switch strArr[0] {
 		case "Bearer":
-			if strings.Contains(origin, cfg.AppHost) || strings.Contains(origin, cfg.ApiHost) {
+			if strings.Contains(origin, cfg.AppHost) || strings.Contains(origin, cfg.ApiHost) || strings.Contains(origin, cfg.Localhost) {
 				res, ok = h.hasAccess(c)
 				if !ok {
 					c.Abort()
