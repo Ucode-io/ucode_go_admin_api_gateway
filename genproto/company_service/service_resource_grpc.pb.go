@@ -26,7 +26,7 @@ type ServiceResourceClient interface {
 	GetList(ctx context.Context, in *GetListServiceResourceRequest, opts ...grpc.CallOption) (*GetListServiceResourceResponse, error)
 	GetById(ctx context.Context, in *ServiceResourcePrimaryKey, opts ...grpc.CallOption) (*ServiceResources, error)
 	Update(ctx context.Context, in *UpdateServiceResourceRequest, opts ...grpc.CallOption) (*ServiceResources, error)
-	Delete(ctx context.Context, in *ServiceResourcePrimaryKey, opts ...grpc.CallOption) (*Empty, error)
+	Delete(ctx context.Context, in *ServiceResourcePrimaryKey, opts ...grpc.CallOption) (*EmptyProto, error)
 }
 
 type serviceResourceClient struct {
@@ -73,8 +73,8 @@ func (c *serviceResourceClient) Update(ctx context.Context, in *UpdateServiceRes
 	return out, nil
 }
 
-func (c *serviceResourceClient) Delete(ctx context.Context, in *ServiceResourcePrimaryKey, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *serviceResourceClient) Delete(ctx context.Context, in *ServiceResourcePrimaryKey, opts ...grpc.CallOption) (*EmptyProto, error) {
+	out := new(EmptyProto)
 	err := c.cc.Invoke(ctx, "/company_service.ServiceResource/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ type ServiceResourceServer interface {
 	GetList(context.Context, *GetListServiceResourceRequest) (*GetListServiceResourceResponse, error)
 	GetById(context.Context, *ServiceResourcePrimaryKey) (*ServiceResources, error)
 	Update(context.Context, *UpdateServiceResourceRequest) (*ServiceResources, error)
-	Delete(context.Context, *ServiceResourcePrimaryKey) (*Empty, error)
+	Delete(context.Context, *ServiceResourcePrimaryKey) (*EmptyProto, error)
 	mustEmbedUnimplementedServiceResourceServer()
 }
 
@@ -110,7 +110,7 @@ func (UnimplementedServiceResourceServer) GetById(context.Context, *ServiceResou
 func (UnimplementedServiceResourceServer) Update(context.Context, *UpdateServiceResourceRequest) (*ServiceResources, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedServiceResourceServer) Delete(context.Context, *ServiceResourcePrimaryKey) (*Empty, error) {
+func (UnimplementedServiceResourceServer) Delete(context.Context, *ServiceResourcePrimaryKey) (*EmptyProto, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedServiceResourceServer) mustEmbedUnimplementedServiceResourceServer() {}

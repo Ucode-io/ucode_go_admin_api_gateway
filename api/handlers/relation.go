@@ -64,7 +64,7 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -87,7 +87,7 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 	relation.CommitId = commitID
 	relation.CommitGuid = commitGuid
 
-	resp, err := services.RelationService().Create(
+	resp, err := services.BuilderService().Relation().Create(
 		context.Background(),
 		&relation,
 	)
@@ -157,7 +157,7 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -170,7 +170,7 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.RelationService().GetAll(
+	resp, err := services.BuilderService().Relation().GetAll(
 		context.Background(),
 		&obs.GetAllRelationsRequest{
 			Limit:     int32(limit),
@@ -242,7 +242,7 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -256,7 +256,7 @@ func (h *Handler) UpdateRelation(c *gin.Context) {
 	}
 	relation.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.RelationService().Update(
+	resp, err := services.BuilderService().Relation().Update(
 		context.Background(),
 		&relation,
 	)
@@ -321,7 +321,7 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -334,7 +334,7 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.RelationService().Delete(
+	resp, err := services.BuilderService().Relation().Delete(
 		context.Background(),
 		&obs.RelationPrimaryKey{
 			Id:        relationID,
@@ -396,7 +396,7 @@ func (h *Handler) GetRelationCascaders(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -409,7 +409,7 @@ func (h *Handler) GetRelationCascaders(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.CascadingService().GetCascadings(
+	resp, err := services.BuilderService().Cascading().GetCascadings(
 		context.Background(),
 		&obs.GetCascadingRequest{
 			TableSlug: c.Param("table_slug"),

@@ -30,3 +30,4 @@ import "cascading.proto";
 import "builder_project.proto";
 import "ping_service.proto";
 import "table_helpers.proto";
+import "fields_and_relations.proto";

@@ -86,7 +86,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -109,8 +109,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 
 	field.CommitId = commitID
 	field.CommitGuid = commitGuid
-
-	resp, err := services.FieldService().Create(
+	resp, err := services.BuilderService().Field().Create(
 		context.Background(),
 		&field,
 	)
@@ -187,7 +186,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -200,7 +199,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FieldService().GetAll(
+	resp, err := services.BuilderService().Field().GetAll(
 		context.Background(),
 		&obs.GetAllFieldsRequest{
 			Limit:            int32(limit),
@@ -295,7 +294,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -309,7 +308,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 	}
 	field.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.FieldService().Update(
+	resp, err := services.BuilderService().Field().Update(
 		context.Background(),
 		&field,
 	)
@@ -372,7 +371,7 @@ func (h *Handler) DeleteField(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -385,7 +384,7 @@ func (h *Handler) DeleteField(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FieldService().Delete(
+	resp, err := services.BuilderService().Field().Delete(
 		context.Background(),
 		&obs.FieldPrimaryKey{
 			Id:        fieldID,

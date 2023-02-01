@@ -24,7 +24,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/auth_service.ConfirmStrategies'
       id:
         type: string
       name:
@@ -40,6 +40,16 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
+  auth_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -252,9 +262,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
       user_id:
@@ -340,9 +350,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
       user_id:
@@ -405,7 +415,7 @@ definitions:
       project_id:
         type: string
       release_type:
-        type: integer
+        $ref: '#/definitions/company_service.ReleaseType'
     type: object
   company_service.CreateResourceReq:
     properties:
@@ -425,9 +435,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.EmptyProto:
     type: object
@@ -556,6 +566,8 @@ definitions:
         type: string
       k8s_namespace:
         type: string
+      logo:
+        type: string
       project_id:
         type: string
       resources:
@@ -581,6 +593,18 @@ definitions:
       id:
         type: string
     type: object
+  company_service.ReleaseType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ReleaseType_UNDEFINED
+    - ReleaseType_MAJOR
+    - ReleaseType_MINOR
+    - ReleaseType_PATCH
   company_service.ReleaseWithCommit:
     properties:
       author_id:
@@ -623,9 +647,9 @@ definitions:
       id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
     type: object
@@ -642,6 +666,18 @@ definitions:
       username:
         type: string
     type: object
+  company_service.ResourceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ResourceType_NOT_DECIDED
+    - ResourceType_MONGODB
+    - ResourceType_CLICKHOUSE
+    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -655,7 +691,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -687,6 +723,16 @@ definitions:
       resource_environment_id:
         type: string
     type: object
+  company_service.ServiceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ServiceType_NOT_SPECIFIED
+    - ServiceType_BUILDER_SERVICE
+    - ServiceType_ANALYTICS_SERVICE
   company_service.SetCurrentReleaseRequest:
     properties:
       environment_id:
@@ -718,25 +764,29 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
   config.Config:
     properties:
+      adminHost:
+        type: string
       analyticsGRPCPort:
         type: string
       analyticsServiceHost:
+        type: string
+      apiHost:
         type: string
       apiReferenceServiceHost:
         type: string
       apiReferenceServicePort:
         type: string
+      appHost:
+        type: string
       authGRPCPort:
         type: string
       authServiceHost:
-        type: string
-      client_HOST:
         type: string
       companyServiceHost:
         type: string
@@ -795,8 +845,6 @@ definitions:
       smsGRPCPort:
         type: string
       smsServiceHost:
-        type: string
-      superadmin_HOST:
         type: string
       ucodeNamespace:
         type: string
@@ -1129,6 +1177,15 @@ definitions:
     type: object
   models.CustomEvent:
     properties:
+      action_type:
+        type: string
+      attributes:
+        additionalProperties: true
+        type: object
+      commit_guid:
+        type: string
+      commit_id:
+        type: string
       disable:
         type: boolean
       event_path:
@@ -1137,7 +1194,9 @@ definitions:
         type: string
       id:
         type: string
-      lanel:
+      label:
+        type: string
+      method:
         type: string
       table_slug:
         type: string
@@ -1537,7 +1596,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
       guid:
         type: string
       name:
@@ -1560,6 +1619,16 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
+  object_builder_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -1577,6 +1646,10 @@ definitions:
     type: object
   object_builder_service.CreateCustomEventRequest:
     properties:
+      action_type:
+        type: string
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -1588,6 +1661,8 @@ definitions:
       icon:
         type: string
       label:
+        type: string
+      method:
         type: string
       project_id:
         type: string
@@ -1629,6 +1704,67 @@ definitions:
         type: string
       when:
         $ref: '#/definitions/object_builder_service.When'
+    type: object
+  object_builder_service.CreateFieldRequest:
+    properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      autofill_field:
+        type: string
+      autofill_table:
+        type: string
+      automatic:
+        type: boolean
+      commit_guid:
+        type: string
+      commit_id:
+        type: integer
+      default:
+        type: string
+      id:
+        type: string
+      index:
+        type: string
+      is_visible:
+        type: boolean
+      label:
+        type: string
+      project_id:
+        type: string
+      slug:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      unique:
+        type: boolean
+    type: object
+  object_builder_service.CreateFieldsAndRelationsRequest:
+    properties:
+      fields:
+        items:
+          $ref: '#/definitions/object_builder_service.CreateFieldRequest'
+        type: array
+      options:
+        $ref: '#/definitions/object_builder_service.CreateFieldsAndRelationsRequest_Options'
+      relations:
+        items:
+          $ref: '#/definitions/object_builder_service.CreateRelationRequest'
+        type: array
+    type: object
+  object_builder_service.CreateFieldsAndRelationsRequest_Options:
+    properties:
+      commit_guid:
+        type: string
+      commit_id:
+        type: integer
+      project_id:
+        type: string
+      table_id:
+        type: string
+    type: object
+  object_builder_service.CreateFieldsAndRelationsResponse:
     type: object
   object_builder_service.CreateHtmlTemplateRequest:
     properties:
@@ -2797,7 +2933,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -2979,7 +3115,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -3658,7 +3794,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -3936,7 +4072,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -4275,7 +4411,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -4519,7 +4655,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -4798,7 +4934,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -5092,7 +5228,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: ""
+          description: Created
         "400":
           description: Bad Request
           schema:
@@ -5277,7 +5413,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -5947,7 +6083,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6630,7 +6766,13 @@ paths:
         required: true
         type: string
       - in: query
+        name: method
+        type: string
+      - in: query
         name: project_id
+        type: string
+      - in: query
+        name: role_id
         type: string
       - in: query
         name: table_slug
@@ -6810,7 +6952,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7097,7 +7239,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7381,7 +7523,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7834,7 +7976,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -8307,7 +8449,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -8329,6 +8471,64 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Delete Field
+      tags:
+      - Field
+  /v1/fields-relations:
+    post:
+      consumes:
+      - application/json
+      description: Create field
+      operationId: create_fields_and_relations
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateFieldsAndRelationsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.CreateFieldsAndRelationsResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create field
       tags:
       - Field
   /v1/function:
@@ -8532,7 +8732,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -8878,7 +9078,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -9149,7 +9349,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -9456,7 +9656,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -10519,7 +10719,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -10667,7 +10867,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11209,7 +11409,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11738,7 +11938,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12091,7 +12291,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12383,7 +12583,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12669,7 +12869,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:

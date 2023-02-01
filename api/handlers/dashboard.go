@@ -65,7 +65,7 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -94,7 +94,7 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 	dashboard.CommitId = commitID
 	dashboard.CommitGuid = commitGuid
 
-	resp, err := services.DashboardService().Create(
+	resp, err := services.BuilderService().Dashboard().Create(
 		context.Background(),
 		&dashboard,
 	)
@@ -157,7 +157,7 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -170,7 +170,7 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.DashboardService().GetSingle(
+	resp, err := services.BuilderService().Dashboard().GetSingle(
 		context.Background(),
 		&obs.DashboardPrimaryKey{
 			Id:        dashboardID,
@@ -236,7 +236,7 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -250,7 +250,7 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 	}
 	dashboard.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.DashboardService().Update(
+	resp, err := services.BuilderService().Dashboard().Update(
 		context.Background(),
 		&dashboard,
 	)
@@ -313,7 +313,7 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -326,7 +326,7 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.DashboardService().Delete(
+	resp, err := services.BuilderService().Dashboard().Delete(
 		context.Background(),
 		&obs.DashboardPrimaryKey{
 			Id:        dashboardID,
@@ -385,7 +385,7 @@ func (h *Handler) GetAllDashboards(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -398,7 +398,7 @@ func (h *Handler) GetAllDashboards(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.DashboardService().GetList(
+	resp, err := services.BuilderService().Dashboard().GetList(
 		context.Background(),
 		&obs.GetAllDashboardsRequest{
 			Name:      c.Query("name"),

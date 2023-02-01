@@ -9,8 +9,9 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateQuery godoc
@@ -43,7 +44,7 @@ func (h *Handler) CreateQuery(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.QueriesService().Create(
+	resp, err := h.companyServices.BuilderService().Queries().Create(
 		context.Background(),
 		&obs.CreateQueryRequest{
 			Title:         query.Title,
@@ -77,7 +78,7 @@ func (h *Handler) CreateQuery(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetQueryByID(c *gin.Context) {
 	guid := c.Param("guid")
-	resp, err := h.companyServices.QueriesService().GetById(
+	resp, err := h.companyServices.BuilderService().Queries().GetById(
 		context.Background(),
 		&obs.QueryId{
 			Id: guid,
@@ -147,7 +148,7 @@ func (h *Handler) GetQueryList(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -160,7 +161,7 @@ func (h *Handler) GetQueryList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.QueriesService().GetAll(
+	resp, err := h.companyServices.BuilderService().Queries().GetAll(
 		context.Background(),
 		&obs.GetAllQueriesRequest{
 			Limit:         int32(limit),
@@ -238,7 +239,7 @@ func (h *Handler) UpdateQuery(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -251,7 +252,7 @@ func (h *Handler) UpdateQuery(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.QueriesService().Update(
+	resp, err := h.companyServices.BuilderService().Queries().Update(
 		context.Background(),
 		&obs.Query{
 			Id:            guid,
@@ -306,7 +307,7 @@ func (h *Handler) DeleteQuery(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.QueryFolderService().Delete(
+	resp, err := h.companyServices.BuilderService().QueryFolder().Delete(
 		context.Background(),
 		&obs.QueryFolderId{
 			Id:        queryId,

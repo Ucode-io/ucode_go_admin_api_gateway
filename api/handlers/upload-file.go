@@ -246,7 +246,7 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -259,7 +259,7 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	_, err = services.ObjectBuilderService().Create(
+	_, err = services.BuilderService().ObjectBuilder().Create(
 		context.Background(),
 		&object_builder_service.CommonMessage{
 			TableSlug: "file",

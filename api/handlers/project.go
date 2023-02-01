@@ -4,8 +4,9 @@ import (
 	"context"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // GetCompanyProjectById godoc
@@ -27,7 +28,7 @@ import (
 func (h *Handler) GetCompanyProjectById(c *gin.Context) {
 	projectId := c.Param("project_id")
 
-	resp, err := h.companyServices.ProjectService().GetById(
+	resp, err := h.companyServices.CompanyService().Project().GetById(
 		context.Background(),
 		&company_service.GetProjectByIdRequest{
 			ProjectId: projectId,
@@ -72,7 +73,7 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ProjectService().GetList(
+	resp, err := h.companyServices.CompanyService().Project().GetList(
 		context.Background(),
 		&company_service.GetProjectListRequest{
 			Limit:     int32(limit),
@@ -116,13 +117,14 @@ func (h *Handler) UpdateCompanyProject(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ProjectService().Update(
+	resp, err := h.companyServices.CompanyService().Project().Update(
 		context.Background(),
 		&company_service.Project{
 			ProjectId:    projectId,
 			CompanyId:    project.CompanyId,
 			Title:        project.Title,
 			K8SNamespace: project.K8SNamespace,
+			Logo:         project.GetLogo(),
 		},
 	)
 
@@ -152,7 +154,7 @@ func (h *Handler) UpdateCompanyProject(c *gin.Context) {
 func (h *Handler) DeleteCompanyProject(c *gin.Context) {
 	projectId := c.Param("project_id")
 
-	resp, err := h.companyServices.ProjectService().Delete(
+	resp, err := h.companyServices.CompanyService().Project().Delete(
 		context.Background(),
 		&company_service.DeleteProjectRequest{
 			ProjectId: projectId,

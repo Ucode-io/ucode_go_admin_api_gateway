@@ -4,8 +4,9 @@ import (
 	obs "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateEnvironment godoc
@@ -32,7 +33,7 @@ func (h *Handler) CreateEnvironment(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.EnvironmentService().Create(
+	resp, err := h.companyServices.CompanyService().Environment().Create(
 		c.Request.Context(),
 		&environmentRequest,
 	)
@@ -68,7 +69,7 @@ func (h *Handler) GetSingleEnvironment(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.EnvironmentService().GetById(
+	resp, err := h.companyServices.CompanyService().Environment().GetById(
 		c.Request.Context(),
 		&obs.EnvironmentPrimaryKey{
 			Id: environmentID,
@@ -107,7 +108,7 @@ func (h *Handler) UpdateEnvironment(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.EnvironmentService().Update(
+	resp, err := h.companyServices.CompanyService().Environment().Update(
 		c.Request.Context(),
 		&environment,
 	)
@@ -143,7 +144,7 @@ func (h *Handler) DeleteEnvironment(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.EnvironmentService().Delete(
+	resp, err := h.companyServices.CompanyService().Environment().Delete(
 		c.Request.Context(),
 		&obs.EnvironmentPrimaryKey{Id: environmentID},
 	)
@@ -185,7 +186,7 @@ func (h *Handler) GetAllEnvironments(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.EnvironmentService().GetList(
+	resp, err := h.companyServices.CompanyService().Environment().GetList(
 		c.Request.Context(),
 		&obs.GetEnvironmentListRequest{
 			Offset:    int32(offset),

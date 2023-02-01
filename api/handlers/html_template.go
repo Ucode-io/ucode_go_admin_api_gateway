@@ -62,7 +62,7 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -76,7 +76,7 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 	}
 	htmlTemplate.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.HtmlTemplateService().Create(
+	resp, err := services.BuilderService().HtmlTemplate().Create(
 		context.Background(),
 		&htmlTemplate,
 	)
@@ -138,7 +138,7 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -151,7 +151,7 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.HtmlTemplateService().GetSingle(
+	resp, err := services.BuilderService().HtmlTemplate().GetSingle(
 		context.Background(),
 		&obs.HtmlTemplatePrimaryKey{
 			Id:        htmlTemplateID,
@@ -217,7 +217,7 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -231,7 +231,7 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 	}
 	htmlTemplate.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.HtmlTemplateService().Update(
+	resp, err := services.BuilderService().HtmlTemplate().Update(
 		context.Background(),
 		&htmlTemplate,
 	)
@@ -294,7 +294,7 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -307,7 +307,7 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.HtmlTemplateService().Delete(
+	resp, err := services.BuilderService().HtmlTemplate().Delete(
 		context.Background(),
 		&obs.HtmlTemplatePrimaryKey{
 			Id:        htmlTemplateID,
@@ -367,7 +367,7 @@ func (h *Handler) GetHtmlTemplateList(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -380,7 +380,7 @@ func (h *Handler) GetHtmlTemplateList(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.HtmlTemplateService().GetList(
+	resp, err := services.BuilderService().HtmlTemplate().GetList(
 		context.Background(),
 		&obs.GetAllHtmlTemplateRequest{
 			TableSlug: c.Query("table_slug"),

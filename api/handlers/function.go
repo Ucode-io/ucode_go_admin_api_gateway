@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -73,7 +74,7 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -95,7 +96,7 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 	function.CommitId = commitID
 	function.CommitGuid = commitGuid
 
-	resp, err := services.FunctionService().Create(
+	resp, err := services.BuilderService().Function().Create(
 		context.Background(),
 		&obs.CreateFunctionRequest{
 			Path:        function.Path,
@@ -164,7 +165,7 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -177,7 +178,7 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().GetSingle(
+	resp, err := services.BuilderService().Function().GetSingle(
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id:        functionID,
@@ -242,7 +243,7 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -255,7 +256,7 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().GetList(
+	resp, err := services.BuilderService().Function().GetList(
 		context.Background(),
 		&obs.GetAllFunctionsRequest{
 			Search:    c.DefaultQuery("search", ""),
@@ -329,7 +330,7 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -342,7 +343,7 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().Update(
+	resp, err := services.BuilderService().Function().Update(
 		context.Background(),
 		&obs.Function{
 			Id:          function.ID,
@@ -412,7 +413,7 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -425,7 +426,7 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FunctionService().Delete(
+	resp, err := services.BuilderService().Function().Delete(
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id:        functionID,
@@ -492,7 +493,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -505,7 +506,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	function, err := services.FunctionService().GetSingle(
+	function, err := services.BuilderService().Function().GetSingle(
 		context.Background(),
 		&obs.FunctionPrimaryKey{
 			Id:        invokeFunction.FunctionID,
@@ -516,19 +517,34 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	apiKeys, err := services.AuthService().ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+		EnvironmentId: environmentId.(string),
+		ProjectId: resourceEnvironment.ProjectId,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	if len(apiKeys.Data) < 1 {
+		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
+		return
+	}
 
-	resp, err := util.DoRequest("status_https://ofs.medion.udevs.io/function/"+function.Path, "POST", invokeFunction)
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.InvokeFunctionRequestWithAppId{
+		ObjectIDs: invokeFunction.ObjectIDs, 
+		AppID: apiKeys.GetData()[0].GetAppId(),
+	})
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	_, err = services.CustomEventService().UpdateByFunctionId(
+	_, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
 		context.Background(),
 		&obs.UpdateByFunctionIdRequest{
 			FunctionId: invokeFunction.FunctionID,
 			ObjectIds:  invokeFunction.ObjectIDs,
 			FieldSlug:  function.Path + "_disable",
-			ProjectId:  resourceId.(string),
+			ProjectId:  resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
