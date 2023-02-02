@@ -137,9 +137,9 @@ func Load() Config {
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = "Here$houldBe$ome$ecretKey"
 
-	config.AdminHost = cast.ToString(GetOrReturnDefaultValue("ADMIN_HOST", "test.admin.u-code.io"))
-	config.AppHost = cast.ToString(GetOrReturnDefaultValue("APP_HOST", "test.app.u-code.io"))
-	config.ApiHost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "test.admin.api.u-code.io"))
+	config.AdminHost = cast.ToString(GetOrReturnDefaultValue("ADMIN_HOST", "admin.u-code.io"))
+	config.AppHost = cast.ToString(GetOrReturnDefaultValue("APP_HOST", "app.u-code.io"))
+	config.ApiHost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "admin.api.u-code.io"))
 	config.Localhost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "localhost:7777"))
 	return config
 }
