@@ -8,6 +8,7 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
@@ -67,6 +68,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 					},
 				)
 				if err != nil {
+					h.log.Error("--ERR-->GetResourceByEnvID->", logger.Error(err))
 					h.handleResponse(c, status_http.BadRequest, err.Error())
 					c.Abort()
 					return
