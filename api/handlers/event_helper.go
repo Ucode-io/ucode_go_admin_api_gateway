@@ -149,7 +149,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		data["table_slug"] = request.TableSlug
 		data["object_data"] = request.ObjectData
 		data["method"] = request.Method
-		data["api_key"] = appId
+		data["app_id"] = appId
 		invokeFunction.Data = data
 
 		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.Functions[0].Path, "POST", invokeFunction)
