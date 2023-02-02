@@ -535,7 +535,16 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		AppID: apiKeys.GetData()[0].GetAppId(),
 	})
 	if err != nil {
+		fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	} else if resp.Status == "error" {
+		fmt.Println("error in response status", err)
+		var errStr = resp.Status
+		if resp.Data != nil && resp.Data["message"] != nil {
+			errStr = resp.Data["message"].(string)
+		}
+		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
 	_, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
