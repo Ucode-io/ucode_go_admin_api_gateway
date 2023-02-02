@@ -7,8 +7,10 @@ import (
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/genproto/versioning_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
@@ -73,19 +75,37 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessU
 	return accessResponse, nil
 }
 
-func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType string) (commitID int64, commitGuid string, err error) {
+func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType string) (versionId, commitGuid string, err error) {
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
 	fmt.Println("auethInfo.GetUsrId()", authInfo.GetUserId())
 	fmt.Println("authInfo.GetProjectId()", authInfo.GetProjectId())
 	fmt.Println("environmentID", environmentID)
 
-	commit, err := h.companyServices.CompanyService().Commit().Insert(
+	if !util.IsValidUUID(authInfo.GetUserId()) {
+		err := errors.New("invalid or missing user id")
+		h.log.Error("--CreateAutoCommit--", logger.Error(err))
+		return "", "", err
+	}
+
+	if !util.IsValidUUID(authInfo.GetProjectId()) {
+		err := errors.New("invalid or missing project id")
+		h.log.Error("--CreateAutoCommit--", logger.Error(err))
+		return "", "", err
+	}
+
+	if !util.IsValidUUID(environmentID) {
+		err := errors.New("invalid or missing environment id")
+		h.log.Error("--CreateAutoCommit--", logger.Error(err))
+		return "", "", err
+	}
+
+	commit, err := h.companyServices.VersioningService().Commit().Insert(
 		c.Request.Context(),
-		&company_service.CreateCommitRequest{
+		&versioning_service.CreateCommitRequest{
 			AuthorId:      authInfo.GetUserId(),
 			ProjectId:     authInfo.GetProjectId(),
 			EnvironmentId: environmentID,
@@ -94,8 +114,8 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType str
 		},
 	)
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
-	return commit.GetCommitId(), commit.GetId(), nil
+	return commit.GetVersionId(), commit.GetCommitId(), nil
 }

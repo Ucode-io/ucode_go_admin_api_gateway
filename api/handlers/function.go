@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -87,14 +86,14 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
-	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FUNCTION)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-		return
-	}
+	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FUNCTION)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+	// 	return
+	// }
 
-	function.CommitId = commitID
-	function.CommitGuid = commitGuid
+	// function.CommitId = commitID
+	// function.CommitGuid = commitGuid
 
 	resp, err := services.BuilderService().Function().Create(
 		context.Background(),
@@ -519,7 +518,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 	}
 	apiKeys, err := services.AuthService().ApiKey().GetList(context.Background(), &auth_service.GetListReq{
 		EnvironmentId: environmentId.(string),
-		ProjectId: resourceEnvironment.ProjectId,
+		ProjectId:     resourceEnvironment.ProjectId,
 	})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -531,8 +530,8 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 	}
 
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.InvokeFunctionRequestWithAppId{
-		ObjectIDs: invokeFunction.ObjectIDs, 
-		AppID: apiKeys.GetData()[0].GetAppId(),
+		ObjectIDs: invokeFunction.ObjectIDs,
+		AppID:     apiKeys.GetData()[0].GetAppId(),
 	})
 	if err != nil {
 		fmt.Println("error in do request", err)

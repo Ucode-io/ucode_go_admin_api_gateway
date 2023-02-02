@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -119,15 +118,15 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		},
 	}
 
-	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_TABLE)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-		return
-	}
-	fmt.Println("create table -- commit_id ---->>", commitID)
+	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_TABLE)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+	// 	return
+	// }
+	// fmt.Println("create table -- commit_id ---->>", commitID)
 
-	table.CommitId = commitID
-	table.CommitGuid = commitGuid
+	// // table.CommitId = commitID
+	// // table.CommitGuid = commitGuid
 
 	table.ProjectId = resourceEnvironment.GetId()
 
