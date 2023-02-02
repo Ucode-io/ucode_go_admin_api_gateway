@@ -804,7 +804,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 	m2mMessage.ProjectId = resourceEnvironment.GetId()
-	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "DELETE_MANY2MANY", c, h)
+	beforeActions, afterActions, err := GetListCustomEvents(m2mMessage.TableFrom, "", "DELETE_MANY2MANY", c, h)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -813,7 +813,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    m2mMessage.TableFrom,
 			ObjectData:   map[string]interface{}{},
 			Method:       "DELETE_MANY2MANY",
 		},
@@ -840,7 +840,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{m2mMessage.IdFrom},
-				TableSlug:    c.Param("table_slug"),
+				TableSlug:    m2mMessage.TableFrom,
 				ObjectData:   map[string]interface{}{},
 				Method:       "DELETE_MANY2MANY",
 			},
@@ -919,7 +919,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		return
 	}
 	m2mMessage.ProjectId = resourceEnvironment.GetId()
-	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "APPEND_MANY2MANY", c, h)
+	beforeActions, afterActions, err := GetListCustomEvents(m2mMessage.TableFrom, "", "APPEND_MANY2MANY", c, h)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -928,7 +928,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
-			TableSlug:    c.Param("table_slug"),
+			TableSlug:    m2mMessage.TableFrom,
 			ObjectData:   map[string]interface{}{},
 			Method:       "APPEND_MANY2MANY",
 		},
@@ -955,7 +955,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{m2mMessage.IdFrom},
-				TableSlug:    c.Param("table_slug"),
+				TableSlug:    m2mMessage.TableFrom,
 				ObjectData:   map[string]interface{}{},
 				Method:       "APPEND_MANY2MANY",
 			},
