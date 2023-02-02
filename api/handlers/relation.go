@@ -1,426 +1,426 @@
 package handlers
 
-import (
-	"context"
-	"errors"
-	"fmt"
-	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
-	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
-	"ucode/ucode_go_api_gateway/pkg/util"
+// import (
+// 	"context"
+// 	"errors"
+// 	"fmt"
+// 	"ucode/ucode_go_api_gateway/api/status_http"
+// 	"ucode/ucode_go_api_gateway/config"
+// 	"ucode/ucode_go_api_gateway/genproto/company_service"
+// 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+// 	"ucode/ucode_go_api_gateway/pkg/util"
 
-	"github.com/gin-gonic/gin"
-)
+// 	"github.com/gin-gonic/gin"
+// )
 
-// CreateRelation godoc
-// @ID create_relation
-// @Router /v1/relation [POST]
-// @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @Summary Create relation
-// @Description Create relation
-// @Tags Relation
-// @Accept json
-// @Produce json
-// @Param table body object_builder_service.CreateRelationRequest true "CreateRelationRequestBody"
-// @Success 201 {object} status_http.Response{data=string} "Relation data"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) CreateRelation(c *gin.Context) {
-	var relation obs.CreateRelationRequest
+// // CreateRelation godoc
+// // @ID create_relation
+// // @Router /v1/relation [POST]
+// // @Security ApiKeyAuth
+// // @Param Resource-Id header string true "Resource-Id"
+// // @Param Environment-Id header string true "Environment-Id"
+// // @Summary Create relation
+// // @Description Create relation
+// // @Tags Relation
+// // @Accept json
+// // @Produce json
+// // @Param table body object_builder_service.CreateRelationRequest true "CreateRelationRequestBody"
+// // @Success 201 {object} status_http.Response{data=string} "Relation data"
+// // @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// // @Failure 500 {object} status_http.Response{data=string} "Server Error"
+// func (h *Handler) CreateRelation(c *gin.Context) {
+// 	var relation obs.CreateRelationRequest
 
-	err := c.ShouldBindJSON(&relation)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+// 	err := c.ShouldBindJSON(&relation)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.BadRequest, err.Error())
+// 		return
+// 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+// 	//authInfo, err := h.GetAuthInfo(c)
+// 	//if err != nil {
+// 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+// 	//	return
+// 	//}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+// 	namespace := c.GetString("namespace")
+// 	services, err := h.GetService(namespace)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.Forbidden, err)
+// 		return
+// 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+// 	resourceId, ok := c.Get("resource_id")
+// 	if !ok {
+// 		err = errors.New("error getting resource id")
+// 		h.handleResponse(c, status_http.BadRequest, err.Error())
+// 		return
+// 	}
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
+// 	environmentId, ok := c.Get("environment_id")
+// 	if !ok {
+// 		err = errors.New("error getting environment id")
+// 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+// 		return
+// 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+// 	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+// 		context.Background(),
+// 		&company_service.GetResEnvByResIdEnvIdRequest{
+// 			EnvironmentId: environmentId.(string),
+// 			ResourceId:    resourceId.(string),
+// 		},
+// 	)
+// 	if err != nil {
+// 		err = errors.New("error getting resource environment id")
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+// 		return
+// 	}
 
-	relation.ProjectId = resourceEnvironment.GetId()
-	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_RELATION)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-		return
-	}
+// 	relation.ProjectId = resourceEnvironment.GetId()
+// 	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_RELATION)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+// 		return
+// 	}
 
-	relation.CommitId = commitID
-	relation.CommitGuid = commitGuid
+// 	relation.CommitId = commitID
+// 	relation.CommitGuid = commitGuid
 
-	resp, err := services.BuilderService().Relation().Create(
-		context.Background(),
-		&relation,
-	)
+// 	resp, err := services.BuilderService().Relation().Create(
+// 		context.Background(),
+// 		&relation,
+// 	)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+// 		return
+// 	}
 
-	h.handleResponse(c, status_http.Created, resp)
-}
+// 	h.handleResponse(c, status_http.Created, resp)
+// }
 
-// GetAllRelations godoc
-// @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @ID get_all_relations
-// @Router /v1/relation [GET]
-// @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @Summary Get all relations
-// @Description Get all relations
-// @Tags Relation
-// @Accept json
-// @Produce json
-// @Param filters query object_builder_service.GetAllRelationsRequest true "filters"
-// @Success 200 {object} status_http.Response{data=string} "RelationBody"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) GetAllRelations(c *gin.Context) {
-	offset, err := h.getOffsetParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
+// // GetAllRelations godoc
+// // @Security ApiKeyAuth
+// // @Param Resource-Id header string true "Resource-Id"
+// // @Param Environment-Id header string true "Environment-Id"
+// // @ID get_all_relations
+// // @Router /v1/relation [GET]
+// // @Security ApiKeyAuth
+// // @Param Resource-Id header string true "Resource-Id"
+// // @Param Environment-Id header string true "Environment-Id"
+// // @Summary Get all relations
+// // @Description Get all relations
+// // @Tags Relation
+// // @Accept json
+// // @Produce json
+// // @Param filters query object_builder_service.GetAllRelationsRequest true "filters"
+// // @Success 200 {object} status_http.Response{data=string} "RelationBody"
+// // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// // @Failure 500 {object} status_http.Response{data=string} "Server Error"
+// func (h *Handler) GetAllRelations(c *gin.Context) {
+// 	offset, err := h.getOffsetParam(c)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+// 		return
+// 	}
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
+// 	limit, err := h.getLimitParam(c)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+// 		return
+// 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+// 	namespace := c.GetString("namespace")
+// 	services, err := h.GetService(namespace)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.Forbidden, err)
+// 		return
+// 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+// 	//authInfo, err := h.GetAuthInfo(c)
+// 	//if err != nil {
+// 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+// 	//	return
+// 	//}
+// 	resourceId, ok := c.Get("resource_id")
+// 	if !ok {
+// 		err = errors.New("error getting resource id")
+// 		h.handleResponse(c, status_http.BadRequest, err.Error())
+// 		return
+// 	}
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
+// 	environmentId, ok := c.Get("environment_id")
+// 	if !ok {
+// 		err = errors.New("error getting environment id")
+// 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+// 		return
+// 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+// 	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+// 		context.Background(),
+// 		&company_service.GetResEnvByResIdEnvIdRequest{
+// 			EnvironmentId: environmentId.(string),
+// 			ResourceId:    resourceId.(string),
+// 		},
+// 	)
+// 	if err != nil {
+// 		err = errors.New("error getting resource environment id")
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+// 		return
+// 	}
 
-	resp, err := services.BuilderService().Relation().GetAll(
-		context.Background(),
-		&obs.GetAllRelationsRequest{
-			Limit:     int32(limit),
-			Offset:    int32(offset),
-			TableSlug: c.DefaultQuery("table_slug", ""),
-			TableId:   c.DefaultQuery("table_id", ""),
-			ProjectId: resourceEnvironment.GetId(),
-		},
-	)
+// 	resp, err := services.BuilderService().Relation().GetAll(
+// 		context.Background(),
+// 		&obs.GetAllRelationsRequest{
+// 			Limit:     int32(limit),
+// 			Offset:    int32(offset),
+// 			TableSlug: c.DefaultQuery("table_slug", ""),
+// 			TableId:   c.DefaultQuery("table_id", ""),
+// 			ProjectId: resourceEnvironment.GetId(),
+// 		},
+// 	)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+// 		return
+// 	}
 
-	h.handleResponse(c, status_http.OK, resp)
-}
+// 	h.handleResponse(c, status_http.OK, resp)
+// }
 
-// UpdateRelation godoc
-// @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @ID update_relation
-// @Router /v1/relation [PUT]
-// @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @Summary Update relation
-// @Description Update relation
-// @Tags Relation
-// @Accept json
-// @Produce json
-// @Param relation body object_builder_service.UpdateRelationRequest  true "UpdateRelationRequestBody"
-// @Success 200 {object} status_http.Response{data=string} "Relation data"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) UpdateRelation(c *gin.Context) {
-	var relation obs.UpdateRelationRequest
+// // UpdateRelation godoc
+// // @Security ApiKeyAuth
+// // @Param Resource-Id header string true "Resource-Id"
+// // @Param Environment-Id header string true "Environment-Id"
+// // @ID update_relation
+// // @Router /v1/relation [PUT]
+// // @Security ApiKeyAuth
+// // @Param Resource-Id header string true "Resource-Id"
+// // @Param Environment-Id header string true "Environment-Id"
+// // @Summary Update relation
+// // @Description Update relation
+// // @Tags Relation
+// // @Accept json
+// // @Produce json
+// // @Param relation body object_builder_service.UpdateRelationRequest  true "UpdateRelationRequestBody"
+// // @Success 200 {object} status_http.Response{data=string} "Relation data"
+// // @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// // @Failure 500 {object} status_http.Response{data=string} "Server Error"
+// func (h *Handler) UpdateRelation(c *gin.Context) {
+// 	var relation obs.UpdateRelationRequest
 
-	err := c.ShouldBindJSON(&relation)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+// 	err := c.ShouldBindJSON(&relation)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.BadRequest, err.Error())
+// 		return
+// 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+// 	//authInfo, err := h.GetAuthInfo(c)
+// 	//if err != nil {
+// 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+// 	//	return
+// 	//}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+// 	namespace := c.GetString("namespace")
+// 	services, err := h.GetService(namespace)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.Forbidden, err)
+// 		return
+// 	}
+// 	resourceId, ok := c.Get("resource_id")
+// 	if !ok {
+// 		err = errors.New("error getting resource id")
+// 		h.handleResponse(c, status_http.BadRequest, err.Error())
+// 		return
+// 	}
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
+// 	environmentId, ok := c.Get("environment_id")
+// 	if !ok {
+// 		err = errors.New("error getting environment id")
+// 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+// 		return
+// 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-	relation.ProjectId = resourceEnvironment.GetId()
+// 	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+// 		context.Background(),
+// 		&company_service.GetResEnvByResIdEnvIdRequest{
+// 			EnvironmentId: environmentId.(string),
+// 			ResourceId:    resourceId.(string),
+// 		},
+// 	)
+// 	if err != nil {
+// 		err = errors.New("error getting resource environment id")
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+// 		return
+// 	}
+// 	relation.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.BuilderService().Relation().Update(
-		context.Background(),
-		&relation,
-	)
+// 	resp, err := services.BuilderService().Relation().Update(
+// 		context.Background(),
+// 		&relation,
+// 	)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+// 		return
+// 	}
 
-	h.handleResponse(c, status_http.OK, resp)
-}
+// 	h.handleResponse(c, status_http.OK, resp)
+// }
 
-// DeleteRelation godoc
-// @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @ID delete_relation
-// @Router /v1/relation/{relation_id} [DELETE]
-// @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @Summary Delete Relation
-// @Description Delete Relation
-// @Tags Relation
-// @Accept json
-// @Produce json
-// @Param relation_id path string true "relation_id"
-// @Success 204
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) DeleteRelation(c *gin.Context) {
-	relationID := c.Param("relation_id")
+// // DeleteRelation godoc
+// // @Security ApiKeyAuth
+// // @Param Resource-Id header string true "Resource-Id"
+// // @Param Environment-Id header string true "Environment-Id"
+// // @ID delete_relation
+// // @Router /v1/relation/{relation_id} [DELETE]
+// // @Security ApiKeyAuth
+// // @Param Resource-Id header string true "Resource-Id"
+// // @Param Environment-Id header string true "Environment-Id"
+// // @Summary Delete Relation
+// // @Description Delete Relation
+// // @Tags Relation
+// // @Accept json
+// // @Produce json
+// // @Param relation_id path string true "relation_id"
+// // @Success 204
+// // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// // @Failure 500 {object} status_http.Response{data=string} "Server Error"
+// func (h *Handler) DeleteRelation(c *gin.Context) {
+// 	relationID := c.Param("relation_id")
 
-	if !util.IsValidUUID(relationID) {
-		h.handleResponse(c, status_http.InvalidArgument, "relation id is an invalid uuid")
-		return
-	}
+// 	if !util.IsValidUUID(relationID) {
+// 		h.handleResponse(c, status_http.InvalidArgument, "relation id is an invalid uuid")
+// 		return
+// 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+// 	namespace := c.GetString("namespace")
+// 	services, err := h.GetService(namespace)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.Forbidden, err)
+// 		return
+// 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+// 	//authInfo, err := h.GetAuthInfo(c)
+// 	//if err != nil {
+// 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+// 	//	return
+// 	//}
+// 	resourceId, ok := c.Get("resource_id")
+// 	if !ok {
+// 		err = errors.New("error getting resource id")
+// 		h.handleResponse(c, status_http.BadRequest, err.Error())
+// 		return
+// 	}
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
+// 	environmentId, ok := c.Get("environment_id")
+// 	if !ok {
+// 		err = errors.New("error getting environment id")
+// 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+// 		return
+// 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+// 	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+// 		context.Background(),
+// 		&company_service.GetResEnvByResIdEnvIdRequest{
+// 			EnvironmentId: environmentId.(string),
+// 			ResourceId:    resourceId.(string),
+// 		},
+// 	)
+// 	if err != nil {
+// 		err = errors.New("error getting resource environment id")
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+// 		return
+// 	}
 
-	resp, err := services.BuilderService().Relation().Delete(
-		context.Background(),
-		&obs.RelationPrimaryKey{
-			Id:        relationID,
-			ProjectId: resourceEnvironment.GetId(),
-		},
-	)
+// 	resp, err := services.BuilderService().Relation().Delete(
+// 		context.Background(),
+// 		&obs.RelationPrimaryKey{
+// 			Id:        relationID,
+// 			ProjectId: resourceEnvironment.GetId(),
+// 		},
+// 	)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+// 		return
+// 	}
 
-	h.handleResponse(c, status_http.NoContent, resp)
-}
+// 	h.handleResponse(c, status_http.NoContent, resp)
+// }
 
-// GetRelationCascaders godoc
-// @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @ID get_relation_cascaders
-// @Router /v1/get-relation-cascading/{table_slug} [GET]
-// @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @Summary Get all relations
-// @Description Get all relations
-// @Tags Relation
-// @Accept json
-// @Produce json
-// @Param table_slug path string true "table_slug"
-// @Success 200 {object} status_http.Response{data=string} "CascaderBody"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) GetRelationCascaders(c *gin.Context) {
+// // GetRelationCascaders godoc
+// // @Security ApiKeyAuth
+// // @Param Resource-Id header string true "Resource-Id"
+// // @Param Environment-Id header string true "Environment-Id"
+// // @ID get_relation_cascaders
+// // @Router /v1/get-relation-cascading/{table_slug} [GET]
+// // @Security ApiKeyAuth
+// // @Param Resource-Id header string true "Resource-Id"
+// // @Param Environment-Id header string true "Environment-Id"
+// // @Summary Get all relations
+// // @Description Get all relations
+// // @Tags Relation
+// // @Accept json
+// // @Produce json
+// // @Param table_slug path string true "table_slug"
+// // @Success 200 {object} status_http.Response{data=string} "CascaderBody"
+// // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// // @Failure 500 {object} status_http.Response{data=string} "Server Error"
+// func (h *Handler) GetRelationCascaders(c *gin.Context) {
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+// 	namespace := c.GetString("namespace")
+// 	services, err := h.GetService(namespace)
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.Forbidden, err)
+// 		return
+// 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+// 	//authInfo, err := h.GetAuthInfo(c)
+// 	//if err != nil {
+// 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+// 	//	return
+// 	//}
+// 	resourceId, ok := c.Get("resource_id")
+// 	if !ok {
+// 		err = errors.New("error getting resource id")
+// 		h.handleResponse(c, status_http.BadRequest, err.Error())
+// 		return
+// 	}
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
+// 	environmentId, ok := c.Get("environment_id")
+// 	if !ok {
+// 		err = errors.New("error getting environment id")
+// 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+// 		return
+// 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+// 	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+// 		context.Background(),
+// 		&company_service.GetResEnvByResIdEnvIdRequest{
+// 			EnvironmentId: environmentId.(string),
+// 			ResourceId:    resourceId.(string),
+// 		},
+// 	)
+// 	if err != nil {
+// 		err = errors.New("error getting resource environment id")
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+// 		return
+// 	}
 
-	resp, err := services.BuilderService().Cascading().GetCascadings(
-		context.Background(),
-		&obs.GetCascadingRequest{
-			TableSlug: c.Param("table_slug"),
-			ProjectId: resourceEnvironment.GetId(),
-		},
-	)
+// 	resp, err := services.BuilderService().Cascading().GetCascadings(
+// 		context.Background(),
+// 		&obs.GetCascadingRequest{
+// 			TableSlug: c.Param("table_slug"),
+// 			ProjectId: resourceEnvironment.GetId(),
+// 		},
+// 	)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+// 	if err != nil {
+// 		h.handleResponse(c, status_http.GRPCError, err.Error())
+// 		return
+// 	}
 
-	h.handleResponse(c, status_http.OK, resp)
-}
+// 	h.handleResponse(c, status_http.OK, resp)
+// }

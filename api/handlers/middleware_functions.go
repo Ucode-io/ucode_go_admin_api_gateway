@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -89,7 +90,7 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType str
 			AuthorId:      authInfo.GetUserId(),
 			ProjectId:     authInfo.GetProjectId(),
 			EnvironmentId: environmentID,
-			CommitType:    commitType,
+			CommitType:    config.COMMIT_TYPE_APP,
 			Name:          fmt.Sprintf("Auto Created Commit - %s", time.Now().Format(time.RFC1123)),
 		},
 	)

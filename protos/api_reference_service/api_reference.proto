@@ -26,6 +26,8 @@ message CreateApiReferenceRequest {
     bool new_window = 9;
     google.protobuf.Struct attributes = 10;
     string project_id = 11;
+    string commit_id = 12;
+    string version_id = 13;
 }
 
 message ApiReference {
@@ -41,11 +43,15 @@ message ApiReference {
     bool new_window = 10;
     google.protobuf.Struct attributes = 11;
     string project_id = 12;
+    string version_id = 13;
+    string commit_id = 14;
 }
 
 
 message GetApiReferenceRequest {
     string guid = 1;
+    string version_id = 2;
+    string commit_id = 3;
 }
 
 message GetListApiReferenceRequest {
@@ -53,6 +59,8 @@ message GetListApiReferenceRequest {
     int64 offset = 2;
     string category_id = 3;
     string project_id = 4;
+    string version_id = 5;
+    string commit_id = 6;
 }
 
 message GetListApiReferenceResponse {
@@ -62,4 +70,5 @@ message GetListApiReferenceResponse {
 
 message DeleteApiReferenceRequest {
     string guid = 1;
+    string version_id = 2;
 }

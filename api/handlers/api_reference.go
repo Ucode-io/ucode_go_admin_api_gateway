@@ -3,11 +3,15 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateApiReference godoc
@@ -36,19 +40,6 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
 		return
 	}
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	// resourceId, ok := c.Get("resource_id")
-	// if !ok {
-	// 	err = errors.New("error getting resource id")
-	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
-	// 	return
-	// }
-	// app.ProjectId = resourceId.(string)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -56,26 +47,50 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-	// attributes, err := helper.ConvertMapToStruct(apiReference.Attributes)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.BadRequest, err)
-	// 	return
-	// }
+
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentID, b := c.Get("environment_id")
+	if !b {
+		h.handleResponse(c, status_http.BadRequest, fmt.Errorf("EMPTY ENVIRONMENT").Error())
+		return
+	}
+
+	fmt.Println("auethInfo.GetUsrId()", authInfo.GetUserId())
+	fmt.Println("authInfo.GetProjectId()", authInfo.GetProjectId())
+	fmt.Println("environmentID", environmentID)
+
+	commit, err := h.companyServices.CompanyService().Commit().Insert(
+		c.Request.Context(),
+		&company_service.CreateCommitRequest{
+			AuthorId:      authInfo.GetUserId(),
+			ProjectId:     authInfo.GetProjectId(),
+			EnvironmentId: environmentID.(string),
+			CommitType:    "REFERENCE",
+			Name:          fmt.Sprintf("Auto Created Commit - %s", time.Now().Format(time.RFC1123)),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	if _, err := uuid.Parse(commit.GetId()); err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	// set: commit_id
+	apiReference.CommitId = commit.Id
+	apiReference.VersionId = "35b03c1a-971d-46dc-998d-4503420d29c0"
+
+	fmt.Println("create table -- commit_id ---->>", commit.Id)
 
 	resp, err := services.ApiReferenceService().ApiReference().Create(
-		context.Background(), &apiReference,
-		// &ars.CreateApiReferenceRequest{
-		// 	Title:            apiReference.Title,
-		// 	ProjectId:        apiReference.ProjectID,
-		// 	AdditionalUrl:    apiReference.AdditionalUrl,
-		// 	ExternalUrl:      apiReference.ExternalUrl,
-		// 	Desc:             apiReference.Desc,
-		// 	Method:           apiReference.Method,
-		// 	CategoryId:       apiReference.CategoryID,
-		// 	Authentification: apiReference.Authentification,
-		// 	NewWindow:        apiReference.NewWindow,
-		// 	Attributes:       attributes,
-		// },
+		context.Background(),
+		&apiReference,
 	)
 
 	if err != nil {

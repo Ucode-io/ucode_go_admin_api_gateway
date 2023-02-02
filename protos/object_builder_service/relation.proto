@@ -45,8 +45,8 @@ message CreateRelationRequest {
     repeated string updated_fields = 26;
     string multiple_insert_field = 27;
     string project_id = 28;
-    int64 commit_id = 29;
-    string commit_guid = 30;
+    string commit_id = 29;
+    string version_id = 30;
 }
 
 message AutoFilter {
@@ -89,6 +89,8 @@ message UpdateRelationRequest {
     repeated string updated_fields = 27;
     string multiple_insert_field = 28;
     string project_id = 29;
+    string commit_id = 30;
+    string version_id = 31;
 }
 
 
@@ -137,6 +139,7 @@ message GetAllRelationsRequest {
     string table_id = 4;
     string relation_table_slug = 5;
     string project_id = 6;
+    string version_id = 7;
 }
 
 message RelationPrimaryKey {
