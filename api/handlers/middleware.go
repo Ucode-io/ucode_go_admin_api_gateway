@@ -107,7 +107,11 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			}
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
-
+		default:
+			err := errors.New("error invalid authorization method")
+			h.log.Error("--AuthMiddleware--", logger.Error(err))
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			c.Abort()
 		}
 
 		c.Set("Auth", res)
