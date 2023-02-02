@@ -40,7 +40,7 @@ func (h *Handler) CreateFieldsAndRelations(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
@@ -54,7 +54,7 @@ func (h *Handler) CreateFieldsAndRelations(c *gin.Context) {
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id").Error())
 		return
 	}
 
@@ -73,7 +73,7 @@ func (h *Handler) CreateFieldsAndRelations(c *gin.Context) {
 
 	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FIELD)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 		return
 	}
 	fmt.Println("create table -- commit_id ---->>", commitID)
