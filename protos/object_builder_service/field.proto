@@ -30,8 +30,8 @@ message CreateFieldRequest {
     bool unique = 12;
     bool automatic = 13;
     string project_id = 14;
-    int64 commit_id = 15;
-    string commit_guid = 16;
+    string commit_id = 15;
+    string version_id = 16;
 }
 
 message CreateFieldsRequest {
@@ -67,6 +67,8 @@ message Field {
     bool unique = 14;
     bool automatic = 15;
     string project_id = 16;
+    string commit_id = 17;
+    string version_id = 18;
 }
 
 message GetAllFieldsResponse {
@@ -85,6 +87,7 @@ message GetAllFieldsRequest {
     bool with_one_relation = 7;
     string role_id = 8;
     string project_id = 9;
+    string version_id = 10;
 }
 
 message FieldPrimaryKey {

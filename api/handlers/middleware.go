@@ -68,7 +68,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 
 				resourceId = resource.GetResource().Id
 			}
-
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
 

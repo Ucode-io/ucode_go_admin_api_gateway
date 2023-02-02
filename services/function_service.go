@@ -3,20 +3,20 @@ package services
 import (
 	"context"
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/function_service"
+	function_service "ucode/ucode_go_api_gateway/genproto/new_function_service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type FunctionServiceI interface {
-	FunctionService() function_service.FunctionServiceClient
-	CustomEventService() function_service.CustomEventServiceClient
+	FunctionService() function_service.FunctionServiceV2Client
+	CustomEventService() function_service.CustomEventServiceV2Client
 }
 
 type functionServiceClient struct {
-	functionService function_service.FunctionServiceClient
-	categoryService function_service.CustomEventServiceClient
+	functionService function_service.FunctionServiceV2Client
+	categoryService function_service.CustomEventServiceV2Client
 }
 
 func NewFunctionServiceClient(ctx context.Context, cfg config.Config) (FunctionServiceI, error) {
@@ -32,15 +32,15 @@ func NewFunctionServiceClient(ctx context.Context, cfg config.Config) (FunctionS
 	}
 
 	return &functionServiceClient{
-		functionService: function_service.NewFunctionServiceClient(connFunctionService),
-		categoryService: function_service.NewCustomEventServiceClient(connFunctionService),
+		functionService: function_service.NewFunctionServiceV2Client(connFunctionService),
+		categoryService: function_service.NewCustomEventServiceV2Client(connFunctionService),
 	}, nil
 }
 
-func (g *functionServiceClient) FunctionService() function_service.FunctionServiceClient {
+func (g *functionServiceClient) FunctionService() function_service.FunctionServiceV2Client {
 	return g.functionService
 }
 
-func (g *functionServiceClient) CustomEventService() function_service.CustomEventServiceClient {
+func (g *functionServiceClient) CustomEventService() function_service.CustomEventServiceV2Client {
 	return g.categoryService
 }

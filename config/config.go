@@ -73,8 +73,12 @@ type Config struct {
 
 	SecretKey string
 
-	CLIENT_HOST     string
-	SUPERADMIN_HOST string
+	CLIENT_HOST            string
+	SUPERADMIN_HOST        string
+	GitlabIntegrationToken string
+	GitlabIntegrationURL   string
+	GitlabGroupId          int
+	GitlabProjectId        int
 }
 
 // Load ...
@@ -137,6 +141,10 @@ func Load() Config {
 
 	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", "localhost"))
 	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_PORT", ":8100"))
+	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("gitlab_token", "glpat-8pVhpBeeBXxcoQdVef2R"))
+	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", "https://gitlab.udevs.io"))
+	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 2008))
+	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 1467))
 
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = "Here$houldBe$ome$ecretKey"

@@ -3,16 +3,15 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
-	fc "ucode/ucode_go_api_gateway/genproto/function_service"
+	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateNewCustomEvent godoc
@@ -26,7 +25,7 @@ import (
 // @Tags NewCustomEvent
 // @Accept json
 // @Produce json
-// @Param Customevent body function_service.CreateCustomEventRequest true "CreateCustomEventRequestBody"
+// @Param Customevent body new_function_service.CreateCustomEventRequest true "CreateCustomEventRequestBody"
 // @Success 201 {object} status_http.Response{data=string} "CustomEvent data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -84,11 +83,12 @@ func (h *Handler) CreateNewCustomEvent(c *gin.Context) {
 		return
 	}
 
-	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_CUSTOM_EVENT)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-		return
-	}
+	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_CUSTOM_EVENT)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+	// 	return
+	// }
+	commitID, _ := uuid.NewRandom()
 
 	resp, err := services.FunctionService().CustomEventService().Create(
 		context.Background(),
@@ -103,8 +103,7 @@ func (h *Handler) CreateNewCustomEvent(c *gin.Context) {
 			Method:     customevent.Method,
 			Attributes: structData,
 			ProjectId:  resourceEnvironment.GetId(), //added resource id
-			CommitId:   commitID,
-			CommitGuid: commitGuid,
+			CommitId:   commitID.String(),
 		},
 	)
 
@@ -120,7 +119,7 @@ func (h *Handler) CreateNewCustomEvent(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID get_custom_event_by_id
+// @ID get_new_custom_event_by_id
 // @Router /v1/new/custom-event/{custom_event_id} [GET]
 // @Summary Get CustomEvent by id
 // @Description Get CustomEvent by id
@@ -198,14 +197,14 @@ func (h *Handler) GetNewCustomEventByID(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID get_all_custom_events
+// @ID get_new_all_custom_events
 // @Router /v1/new/custom-event [GET]
 // @Summary Get all custom events
 // @Description Get all custom events
 // @Tags CustomEvent
 // @Accept json
 // @Produce json
-// @Param filters query function_service.GetCustomEventsListRequest true "filters"
+// @Param filters query new_function_service.GetCustomEventsListRequest true "filters"
 // @Success 200 {object} status_http.Response{data=string} "CustomEventBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -270,7 +269,7 @@ func (h *Handler) GetAllNewCustomEvents(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID update_Customevent
+// @ID update_new_custom_event
 // @Router /v1/new/custom-event [PUT]
 // @Summary Update New Customevent
 // @Description Update new custom event
@@ -360,11 +359,11 @@ func (h *Handler) UpdateNewCustomEvent(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// DeletNewCustomEvent godoc
+// DeleteNewCustomEvent godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID delete_custom_event
+// @ID delete_new_custom_event
 // @Router /v1/new/custom-event/{custom_event_id} [DELETE]
 // @Summary Delete CustomEvent
 // @Description Delete CustomEvent
@@ -375,7 +374,7 @@ func (h *Handler) UpdateNewCustomEvent(c *gin.Context) {
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) DeletNewCustomEvent(c *gin.Context) {
+func (h *Handler) DeleteNewCustomEvent(c *gin.Context) {
 	customeventID := c.Param("custom_event_id")
 
 	if !util.IsValidUUID(customeventID) {

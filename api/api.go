@@ -274,18 +274,18 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.DELETE("/category/:category_id", h.DeleteCategory)
 
 		// custom event
-		v1Admin.POST("/new/custom-event", h.CreateCustomEvent)
-		v1Admin.GET("/new/custom-event/:custom_event_id", h.GetCustomEventByID)
-		v1Admin.GET("/new/custom-event", h.GetAllCustomEvents)
-		v1Admin.PUT("/new/custom-event", h.UpdateCustomEvent)
-		v1Admin.DELETE("/new/custom-event/:custom_event_id", h.DeleteCustomEvent)
+		v1Admin.POST("/new/custom-event", h.CreateNewCustomEvent)
+		v1Admin.GET("/new/custom-event/:custom_event_id", h.GetNewCustomEventByID)
+		v1Admin.GET("/new/custom-event", h.GetAllNewCustomEvents)
+		v1Admin.PUT("/new/custom-event", h.UpdateNewCustomEvent)
+		v1Admin.DELETE("/new/custom-event/:custom_event_id", h.DeleteNewCustomEvent)
 
 		// function
-		v1Admin.POST("/new/function", h.CreateFunction)
-		v1Admin.GET("/new/function/:function_id", h.GetFunctionByID)
-		v1Admin.GET("/new/function", h.GetAllFunctions)
-		v1Admin.PUT("/new/function", h.UpdateFunction)
-		v1Admin.DELETE("/new/function/:function_id", h.DeleteFunction)
+		v1Admin.POST("/new/function", h.CreateNewFunction)
+		v1Admin.GET("/new/function/:function_id", h.GetNewFunctionByID)
+		v1Admin.GET("/new/function", h.GetAllNewFunctions)
+		v1Admin.PUT("/new/function", h.UpdateNewFunction)
+		v1Admin.DELETE("/new/function/:function_id", h.DeleteNewFunction)
 		
 	}
 
