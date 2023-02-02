@@ -18,6 +18,7 @@ type Handler struct {
 	storage         storage.StorageI
 	companyServices services.ServiceManagerI
 	authService     services.AuthServiceManagerI
+	apikeyService   services.AuthServiceManagerI
 }
 
 func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.ServiceManagerI, authService services.AuthServiceManagerI) Handler {

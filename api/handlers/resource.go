@@ -28,7 +28,7 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetResource(c *gin.Context) {
 
-	resp, err := h.companyServices.ResourceService().GetResource(
+	resp, err := h.companyServices.CompanyService().Resource().GetResource(
 		context.Background(),
 		&company_service.GetResourceRequest{
 			Id: c.Param("resource_id"),
@@ -81,7 +81,7 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 		}
 	}
 
-	resp, err := h.companyServices.ResourceService().AddResource(
+	resp, err := h.companyServices.CompanyService().Resource().AddResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -132,7 +132,7 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 		}
 	}
 
-	resp, err := h.companyServices.ResourceService().ConfigureResource(
+	resp, err := h.companyServices.CompanyService().Resource().ConfigureResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -169,7 +169,7 @@ func (h *Handler) CreateProjectResource(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ResourceService().CreateResource(
+	resp, err := h.companyServices.CompanyService().Resource().CreateResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -206,7 +206,7 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ResourceService().RemoveResource(
+	resp, err := h.companyServices.CompanyService().Resource().RemoveResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -243,7 +243,7 @@ func (h *Handler) UpdateResource(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ResourceService().UpdateResource(
+	resp, err := h.companyServices.CompanyService().Resource().UpdateResource(
 		c.Request.Context(),
 		&resource,
 	)
@@ -285,7 +285,7 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ResourceService().GetReourceList(
+	resp, err := h.companyServices.CompanyService().Resource().GetReourceList(
 		context.Background(),
 		&company_service.GetReourceListRequest{
 			Limit:     int32(limit),
@@ -327,7 +327,7 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.ResourceService().ReconnectResource(
+	resp, err := h.companyServices.CompanyService().Resource().ReconnectResource(
 		c.Request.Context(),
 		&company,
 	)
@@ -357,7 +357,7 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetResourceEnvironment(c *gin.Context) {
 
-	resp, err := h.companyServices.ResourceService().GetResourceByResEnvironId(
+	resp, err := h.companyServices.CompanyService().Resource().GetResourceByResEnvironId(
 		context.Background(),
 		&company_service.GetResourceRequest{
 			Id: c.Param("resource_id"),

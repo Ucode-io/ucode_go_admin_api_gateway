@@ -3,10 +3,13 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -28,7 +31,7 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateCustomEvent(c *gin.Context) {
-	var customevent obs.CreateCustomEventRequest
+	var customevent models.CreateCustomEventRequest
 
 	err := c.ShouldBindJSON(&customevent)
 	if err != nil {
@@ -63,7 +66,7 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -75,11 +78,34 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	customevent.ProjectId = resourceEnvironment.GetId()
+	structData, err := helper.ConvertMapToStruct(customevent.Attributes)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
 
-	resp, err := services.CustomEventService().Create(
+	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_CUSTOM_EVENT)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		return
+	}
+
+	resp, err := services.BuilderService().CustomEvent().Create(
 		context.Background(),
-		&customevent,
+		&obs.CreateCustomEventRequest{
+			TableSlug:  customevent.TableSlug,
+			EventPath:  customevent.EventPath,
+			Label:      customevent.Label,
+			Icon:       customevent.Icon,
+			Url:        customevent.Url,
+			Disable:    customevent.Disable,
+			ActionType: customevent.ActionType,
+			Method:     customevent.Method,
+			Attributes: structData,
+			ProjectId:  resourceEnvironment.GetId(), //added resource id
+			CommitId:   commitID,
+			CommitGuid: commitGuid,
+		},
 	)
 
 	if err != nil {
@@ -140,7 +166,7 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -153,7 +179,7 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.CustomEventService().GetSingle(
+	resp, err := services.BuilderService().CustomEvent().GetSingle(
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
 			Id:        customeventID,
@@ -191,11 +217,11 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
@@ -211,7 +237,7 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -224,10 +250,11 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.CustomEventService().GetList(
+	resp, err := services.BuilderService().CustomEvent().GetList(
 		context.Background(),
 		&obs.GetCustomEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
+			RoleId: authInfo.GetRoleId(),
 			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
@@ -291,7 +318,7 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -303,18 +330,26 @@ func (h *Handler) UpdateCustomEvent(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	structData, err := helper.ConvertMapToStruct(customevent.Attributes)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
 
-	resp, err := services.CustomEventService().Update(
+	resp, err := services.BuilderService().CustomEvent().Update(
 		context.Background(),
 		&obs.CustomEvent{
-			Id:        customevent.Id,
-			EventPath: customevent.EventPath,
-			Disable:   customevent.Disable,
-			Icon:      customevent.Icon,
-			TableSlug: customevent.TableSlug,
-			Url:       customevent.Url,
-			Label:     customevent.Label,
-			ProjectId: resourceEnvironment.GetId(),
+			Id:         customevent.Id,
+			TableSlug:  customevent.TableSlug,
+			EventPath:  customevent.EventPath,
+			Label:      customevent.Label,
+			Icon:       customevent.Icon,
+			Url:        customevent.Url,
+			Disable:    customevent.Disable,
+			ActionType: customevent.ActionType,
+			Method:     customevent.Method,
+			Attributes: structData,
+			ProjectId:  resourceEnvironment.GetId(),
 		},
 	)
 
@@ -375,7 +410,7 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -388,7 +423,7 @@ func (h *Handler) DeleteCustomEvent(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.CustomEventService().Delete(
+	resp, err := services.BuilderService().CustomEvent().Delete(
 		context.Background(),
 		&obs.CustomEventPrimaryKey{
 			Id:        customeventID,

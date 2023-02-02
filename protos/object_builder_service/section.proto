@@ -129,6 +129,8 @@ message UpsertViewRelationsBody {
     string table_slug = 1;
     repeated ViewRelationReq view_relations = 2;
     string project_id = 3;
+    int64 commit_id = 4;
+    string commit_guid = 5;
 }
 
 
@@ -169,6 +171,8 @@ message UpdateSectionsRequest {
     repeated Section sections = 1;
     string table_id = 2;
     string project_id = 3;
+    int64 commit_id = 4;
+    string commit_guid = 5;
 }
 
 message GetAllSectionsResponse {

@@ -3,8 +3,10 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -84,7 +86,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -98,8 +100,16 @@ func (h *Handler) CreateField(c *gin.Context) {
 	}
 
 	field.ProjectId = resourceEnvironment.GetId()
+	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FIELD)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		return
+	}
+	fmt.Println("create table -- commit_id ---->>", commitID)
 
-	resp, err := services.FieldService().Create(
+	field.CommitId = commitID
+	field.CommitGuid = commitGuid
+	resp, err := services.BuilderService().Field().Create(
 		context.Background(),
 		&field,
 	)
@@ -176,7 +186,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -189,7 +199,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FieldService().GetAll(
+	resp, err := services.BuilderService().Field().GetAll(
 		context.Background(),
 		&obs.GetAllFieldsRequest{
 			Limit:            int32(limit),
@@ -284,7 +294,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -298,7 +308,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 	}
 	field.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.FieldService().Update(
+	resp, err := services.BuilderService().Field().Update(
 		context.Background(),
 		&field,
 	)
@@ -361,7 +371,7 @@ func (h *Handler) DeleteField(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -374,7 +384,7 @@ func (h *Handler) DeleteField(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.FieldService().Delete(
+	resp, err := services.BuilderService().Field().Delete(
 		context.Background(),
 		&obs.FieldPrimaryKey{
 			Id:        fieldID,

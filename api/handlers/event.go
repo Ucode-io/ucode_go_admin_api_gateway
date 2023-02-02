@@ -62,7 +62,7 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -76,7 +76,7 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 	}
 	event.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.EventService().Create(
+	resp, err := services.BuilderService().Event().Create(
 		context.Background(),
 		&event,
 	)
@@ -139,7 +139,7 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -152,7 +152,7 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.EventService().GetSingle(
+	resp, err := services.BuilderService().Event().GetSingle(
 		context.Background(),
 		&obs.EventPrimaryKey{
 			Id:        eventID,
@@ -210,7 +210,7 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -223,7 +223,7 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.EventService().GetList(
+	resp, err := services.BuilderService().Event().GetList(
 		context.Background(),
 		&obs.GetEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
@@ -290,7 +290,7 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -304,7 +304,7 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 	}
 	event.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.EventService().Update(
+	resp, err := services.BuilderService().Event().Update(
 		context.Background(),
 		&event,
 	)
@@ -367,7 +367,7 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -380,7 +380,7 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.EventService().Delete(
+	resp, err := services.BuilderService().Event().Delete(
 		context.Background(),
 		&obs.EventPrimaryKey{
 			Id:        eventID,

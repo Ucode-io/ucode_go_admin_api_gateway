@@ -36,7 +36,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	v1.Use(h.AuthMiddleware())
+	v1.Use(h.AuthMiddleware(cfg))
 	{
 		v1.POST("/upload", h.Upload)
 		v1.POST("/upload-file/:table_slug/:object_id", h.UploadFile)
@@ -55,6 +55,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/field", h.GetAllFields)
 		v1.PUT("/field", h.UpdateField)
 		v1.DELETE("/field/:field_id", h.DeleteField)
+		v1.POST("/fields-relations", h.CreateFieldsAndRelations)
 
 		//relation
 		v1.POST("/relation", h.CreateRelation)
@@ -245,11 +246,33 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/environment", h.GetAllEnvironments)
 		v1Admin.PUT("/environment", h.UpdateEnvironment)
 		v1Admin.DELETE("/environment/:environment_id", h.DeleteEnvironment)
+
+		// release service
+		v1Admin.POST("/release", h.CreateRelease)
+		v1Admin.GET("/release/:id", h.GetReleaseByID)
+		v1Admin.GET("/release", h.GetAllReleases)
+		v1Admin.PUT("/release/:id", h.UpdateRelease)
+		v1Admin.DELETE("/release/:id", h.DeleteRelease)
+		v1Admin.POST("/release/current", h.SetCurrentRelease)
+		v1Admin.GET("/release/current/:environment-id", h.GetCurrentRelease)
+
+		// commit service
+		v1Admin.POST("/commit", h.CreateCommit)
+		v1Admin.GET("/commit/:id", h.GetCommitByID)
+		v1Admin.GET("/commit", h.GetAllCommits)
+
 		//api-reference service
 		v1Admin.POST("/api-reference", h.CreateApiReference)
 		v1Admin.PUT("/api-reference", h.UpdateApiReference)
 		v1Admin.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
-		v1Admin.GET("api-reference", h.GetAllApiReferences)
+		v1Admin.GET("/api-reference", h.GetAllApiReferences)
+		v1Admin.DELETE("/api-reference/:api_reference_id", h.DeleteApiReference)
+
+		v1Admin.POST("/category", h.CreateCategory)
+		v1Admin.PUT("/category", h.UpdateCategory)
+		v1Admin.GET("/category/:category_id", h.GetApiCategoryByID)
+		v1Admin.GET("/category", h.GetAllCategories)
+		v1Admin.DELETE("/category/:category_id", h.DeleteCategory)
 	}
 
 	// v3 for ucode version 2
@@ -324,37 +347,3 @@ func MaxAllowed(n int) gin.HandlerFunc {
 		c.Next()
 	}
 }
-
-// // @description This is a api gateway
-// // @termsOfService https://udevs.io
-// func SetUpProjectAPIs(r *gin.Engine, h handlers.ProjectsHandler, cfg config.Config) {
-// 	docs.SwaggerInfo.Title = cfg.ServiceName
-// 	docs.SwaggerInfo.Version = cfg.Version
-// 	// docs.SwaggerInfo.Host = cfg.ServiceHost + cfg.HTTPPort
-// 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}
-
-// 	r.Use(customCORSMiddleware())
-// 	r.Use(MaxAllowed(5000))
-
-// // Project
-// r.POST("/v1/project", h.CreateProject)
-
-// 	v1 := r.Group("/v1")
-// 	// @securityDefinitions.apikey ApiKeyAuth
-// 	// @in header
-// 	// @name Authorization
-
-// // MUST be executed before AuthMiddleware
-// v1.Use(h.ProjectsMiddleware())
-// 	v1.Use(h.AuthMiddleware())
-
-// 	{
-// 		// App
-// 		v1.POST("/app", h.CreateApp)
-// 		v1.GET("/app", h.GetAllApps)
-
-// 	}
-
-// 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-// }

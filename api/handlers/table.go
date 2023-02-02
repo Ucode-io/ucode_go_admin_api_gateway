@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -64,7 +65,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -118,9 +119,19 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		},
 	}
 
+	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_TABLE)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		return
+	}
+	fmt.Println("create table -- commit_id ---->>", commitID)
+
+	table.CommitId = commitID
+	table.CommitGuid = commitGuid
+
 	table.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.TableService().Create(
+	resp, err := services.BuilderService().Table().Create(
 		context.Background(),
 		&table,
 	)
@@ -181,7 +192,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -193,7 +204,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.TableService().GetByID(
+	resp, err := services.BuilderService().Table().GetByID(
 		context.Background(),
 		&obs.TablePrimaryKey{
 			Id:        tableID,
@@ -262,7 +273,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -278,7 +289,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 	fmt.Println("environmentId::::::", environmentId)
 	fmt.Println("resourceEnvironment", resourceEnvironment)
 
-	resp, err := services.TableService().GetAll(
+	resp, err := services.BuilderService().Table().GetAll(
 		context.Background(),
 		&obs.GetAllTablesRequest{
 			Limit:     int32(limit),
@@ -344,7 +355,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -357,7 +368,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 	}
 	table.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.TableService().Update(
+	resp, err := services.BuilderService().Table().Update(
 		context.Background(),
 		&table,
 	)
@@ -418,7 +429,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -430,7 +441,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.TableService().Delete(
+	resp, err := services.BuilderService().Table().Delete(
 		context.Background(),
 		&obs.TablePrimaryKey{
 			Id:        tableID,

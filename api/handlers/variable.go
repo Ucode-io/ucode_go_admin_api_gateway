@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -62,7 +64,7 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -76,7 +78,16 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 	}
 	variable.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.VariableService().Create(
+	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_VARIABLE)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		return
+	}
+
+	variable.CommitId = commitID
+	variable.CommitGuid = commitGuid
+
+	resp, err := services.BuilderService().Variable().Create(
 		context.Background(),
 		&variable,
 	)
@@ -139,7 +150,7 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -152,7 +163,7 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.VariableService().GetSingle(
+	resp, err := services.BuilderService().Variable().GetSingle(
 		context.Background(),
 		&obs.VariablePrimaryKey{
 			Id:        variableID,
@@ -218,7 +229,7 @@ func (h *Handler) UpdateVariable(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -232,7 +243,7 @@ func (h *Handler) UpdateVariable(c *gin.Context) {
 	}
 	variable.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.VariableService().Update(
+	resp, err := services.BuilderService().Variable().Update(
 		context.Background(),
 		&variable,
 	)
@@ -291,7 +302,7 @@ func (h *Handler) DeleteVariable(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -303,7 +314,7 @@ func (h *Handler) DeleteVariable(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	resp, err := services.VariableService().Delete(
+	resp, err := services.BuilderService().Variable().Delete(
 		context.Background(),
 		&obs.VariablePrimaryKey{
 			Id:        variableID,
@@ -359,7 +370,7 @@ func (h *Handler) GetAllVariables(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -371,7 +382,7 @@ func (h *Handler) GetAllVariables(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	resp, err := services.VariableService().GetList(
+	resp, err := services.BuilderService().Variable().GetList(
 		context.Background(),
 		&obs.GetAllVariablesRequest{
 			Slug:        c.Query("slug"),

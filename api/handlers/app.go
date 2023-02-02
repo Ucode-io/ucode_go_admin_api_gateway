@@ -3,15 +3,15 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )
-
-//GetResourceEnvironment
 
 // CreateApp godoc
 // @Security ApiKeyAuth
@@ -37,12 +37,6 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -64,7 +58,7 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -76,9 +70,20 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	app.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.AppService().Create(
+	app.ProjectId = resourceEnvironment.GetId()
+	fmt.Println("PROJECT_ID", app.ProjectId)
+
+	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_APP)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		return
+	}
+
+	app.CommitId = commitID
+	app.CommitGuid = commitGuid
+
+	resp, err := services.BuilderService().App().Create(
 		context.Background(),
 		&app,
 	)
@@ -141,7 +146,7 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -154,7 +159,7 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.AppService().GetByID(
+	resp, err := services.BuilderService().App().GetByID(
 		context.Background(),
 		&obs.AppPrimaryKey{
 			Id:        appID,
@@ -180,6 +185,7 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 // @Tags App
 // @Accept json
 // @Produce json
+// @Param X-API-KEY header string true "API key for the endpoint"
 // @Param filters query object_builder_service.GetAllAppsRequest true "filters"
 // @Success 200 {object} status_http.Response{data=object_builder_service.GetAllAppsResponse} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -203,12 +209,6 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
@@ -223,7 +223,8 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	// We get resource_environment relation
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -236,7 +237,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.AppService().GetAll(
+	resp, err := services.BuilderService().App().GetAll(
 		context.Background(),
 		&obs.GetAllAppsRequest{
 			Limit:     int32(limit),
@@ -305,7 +306,7 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -319,7 +320,7 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 	}
 	app.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.AppService().Update(
+	resp, err := services.BuilderService().App().Update(
 		context.Background(),
 		&app,
 	)
@@ -382,7 +383,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -395,7 +396,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.AppService().Delete(
+	resp, err := services.BuilderService().App().Delete(
 		context.Background(),
 		&obs.AppPrimaryKey{
 			Id:        appID,

@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
@@ -56,7 +58,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -69,7 +71,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.SectionService().GetAll(
+	resp, err := services.BuilderService().Section().GetAll(
 		context.Background(),
 		&obs.GetAllSectionsRequest{
 			TableId:   c.Query("table_id"),
@@ -137,7 +139,7 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -151,7 +153,16 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 	}
 	sections.ProjectId = resourceEnvironment.GetId()
 
-	resp, err := services.SectionService().Update(
+	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_SECTION)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		return
+	}
+
+	sections.CommitId = commitID
+	sections.CommitGuid = commitGuid
+
+	resp, err := services.BuilderService().Section().Update(
 		context.Background(),
 		&sections,
 	)

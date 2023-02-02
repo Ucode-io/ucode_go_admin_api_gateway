@@ -13,6 +13,7 @@ service ApiKeys {
   rpc Delete (DeleteReq) returns (DeleteRes) {}
   rpc GenerateApiToken (GenerateApiTokenReq) returns (GenerateApiTokenRes) {}
   rpc RefreshApiToken (RefreshApiTokenReq) returns (RefreshApiTokenRes) {}
+  rpc GetEnvID(GetReq) returns (GetRes) {}
 }
 
 message GenerateApiTokenReq {

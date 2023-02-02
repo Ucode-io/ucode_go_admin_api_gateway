@@ -2,20 +2,24 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
 	"strings"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/logger"
+
+	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"ucode/ucode_go_api_gateway/api/status_http"
+	"github.com/google/uuid"
 )
 
-const (
-	SUPERADMIN_HOST string = "admin.u-code.io"
-	CLIENT_HOST     string = "app.u-code.io"
-)
+// const (
+// 	SUPERADMIN_HOST string = "test.admin.u-code.io"
+// 	CLIENT_HOST     string = "test.app.u-code.io"
+// )
 
 func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -25,85 +29,160 @@ func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 	}
 }
 
-func (h *Handler) AuthMiddleware() gin.HandlerFunc {
+func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var (
-			res *auth_service.V2HasAccessUserRes
-			ok  bool
-		)
-		//host := c.Request.Host
-		origin := c.GetHeader("Origin")
 
-		if strings.Contains(origin, CLIENT_HOST) {
-			res, ok = h.hasAccess(c)
-			if !ok {
+		var (
+			res    = &auth_service.V2HasAccessUserRes{}
+			ok     bool
+			origin = c.GetHeader("Origin")
+		)
+
+		fmt.Println("--origin--", origin)
+		bearerToken := c.GetHeader("Authorization")
+		strArr := strings.Split(bearerToken, " ")
+
+		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
+			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
+			return
+		}
+
+		switch strArr[0] {
+		case "Bearer":
+			if strings.Contains(origin, cfg.AppHost) || strings.Contains(origin, cfg.ApiHost) || strings.Contains(origin, cfg.Localhost) {
+				res, ok = h.hasAccess(c)
+				if !ok {
+					c.Abort()
+					return
+				}
+			}
+
+			resourceId := c.GetHeader("Resource-Id")
+			environmentId := c.GetHeader("Environment-Id")
+
+			if _, err := uuid.Parse(resourceId); err != nil {
+				resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
+					c.Request.Context(),
+					&company_service.GetResourceByEnvIDRequest{
+						EnvId: environmentId,
+					},
+				)
+				if err != nil {
+					h.log.Error("--ERR-->GetResourceByEnvID->", logger.Error(err))
+					h.handleResponse(c, status_http.BadRequest, err.Error())
+					c.Abort()
+					return
+				}
+
+				resourceId = resource.GetResource().Id
+			}
+
+			c.Set("resource_id", resourceId)
+			c.Set("environment_id", environmentId)
+
+		case "API-KEY":
+			app_id := c.GetHeader("X-API-KEY")
+			apikeys, err := h.authService.ApiKey().GetEnvID(
+				c.Request.Context(),
+				&auth_service.GetReq{
+					Id: app_id,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
 				c.Abort()
 				return
 			}
+
+			resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
+				c.Request.Context(),
+				&company_service.GetResourceByEnvIDRequest{
+					EnvId: apikeys.GetEnvironmentId(),
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				c.Abort()
+				return
+			}
+			c.Set("resource_id", resource.GetResource().GetId())
+			c.Set("environment_id", apikeys.GetEnvironmentId())
+
 		}
 
-		resourceId := c.GetHeader("Resource-Id")
-		environmentId := c.GetHeader("Environment-Id")
-
 		c.Set("Auth", res)
-		c.Set("resource_id", resourceId)
-		c.Set("environment_id", environmentId)
 		c.Set("namespace", h.cfg.UcodeNamespace)
+
 		c.Next()
 	}
 }
 
-func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
-	bearerToken := c.GetHeader("Authorization")
-	projectId := c.DefaultQuery("project_id", "")
-	strArr := strings.Split(bearerToken, " ")
-	if len(strArr) != 2 || strArr[0] != "Bearer" {
-		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
-		return nil, false
-	}
-	accessToken := strArr[1]
-	resp, err := h.authService.SessionService().V2HasAccessUser(
-		c.Request.Context(),
-		&auth_service.V2HasAccessUserReq{
-			AccessToken: accessToken,
-			ProjectId:   projectId,
-			// ClientPlatformId: "3f6320a6-b6ed-4f5f-ad90-14a154c95ed3",
-			Path:   helper.GetURLWithTableSlug(c),
-			Method: c.Request.Method,
-		},
-	)
-	if err != nil {
-		errr := status.Error(codes.PermissionDenied, "Permission denied")
-		if errr.Error() == err.Error() {
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			return nil, false
-		}
-		errr = status.Error(codes.InvalidArgument, "User has been expired")
-		if errr.Error() == err.Error() {
+func (h *Handler) ResEnvMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		namespaceVal, ok := c.Get("namespace")
+		if !ok {
+			err := errors.New("error getting namespace")
 			h.handleResponse(c, status_http.Forbidden, err.Error())
-			return nil, false
+			return
 		}
-		h.handleResponse(c, status_http.Unauthorized, err.Error())
-		return nil, false
+
+		namespace, ok := namespaceVal.(string)
+		if !ok {
+			err := errors.New("error namespace not ok")
+			h.handleResponse(c, status_http.Forbidden, err.Error())
+			return
+		}
+
+		services, err := h.GetService(namespace)
+		if err != nil {
+			h.handleResponse(c, status_http.Forbidden, err)
+			return
+		}
+
+		resourceIDVal, ok := c.Get("resource_id")
+		if !ok {
+			err = errors.New("error getting resource id")
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		resourceID, ok := resourceIDVal.(string)
+		if !ok {
+			err = errors.New("error resource id not ok")
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		environmentIDVal, ok := c.Get("environment_id")
+		if !ok {
+			err = errors.New("error getting environment id")
+			h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+			return
+		}
+
+		environmentID, ok := environmentIDVal.(string)
+		if !ok {
+			err = errors.New("error environment id not ok")
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetResourceEnvironmentReq{
+				EnvironmentId: environmentID,
+				ResourceId:    resourceID,
+			},
+		)
+		if err != nil {
+			err = errors.New("error getting resource environment id")
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		c.Set("resource_environment_id", resourceEnvironment.GetId())
+
+		c.Next()
 	}
-
-	return resp, true
-}
-
-func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessUserRes, err error) {
-	data, ok := c.Get("Auth")
-
-	if !ok {
-		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
-		c.Abort()
-		return nil, errors.New("token error: wrong format")
-	}
-	accessResponse, ok := data.(*auth_service.V2HasAccessUserRes)
-	if !ok {
-		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
-		c.Abort()
-		return nil, errors.New("token error: wrong format")
-	}
-
-	return accessResponse, nil
 }

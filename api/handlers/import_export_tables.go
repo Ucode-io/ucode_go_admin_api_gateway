@@ -53,7 +53,7 @@ func (h *Handler) ExportToJSON(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -61,14 +61,14 @@ func (h *Handler) ExportToJSON(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		err = errors.New("error getting resource environment id")
+		err = errors.New("error getting resource environment id: " + err.Error())
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	body.ProjectId = resourceEnvironment.GetId()
 
-	response, err := services.TableHelpersService().ExportToJSON(c.Request.Context(), &body)
+	response, err := services.BuilderService().TableHelpers().ExportToJSON(c.Request.Context(), &body)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -120,7 +120,7 @@ func (h *Handler) ImportFromJSON(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -135,7 +135,7 @@ func (h *Handler) ImportFromJSON(c *gin.Context) {
 
 	body.ProjectId = resourceEnvironment.GetId()
 
-	_, err = services.TableHelpersService().ImportFromJSON(c.Request.Context(), &body)
+	_, err = services.BuilderService().TableHelpers().ImportFromJSON(c.Request.Context(), &body)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return

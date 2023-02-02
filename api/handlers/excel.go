@@ -8,8 +8,9 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // ExcelReader godoc
@@ -57,7 +58,7 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -70,7 +71,7 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 		return
 	}
 
-	res, err := services.ExcelService().ExcelRead(
+	res, err := services.BuilderService().Excel().ExcelRead(
 		context.Background(),
 		&object_builder_service.ExcelReadRequest{
 			Id:        excelId,
@@ -143,7 +144,7 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -156,7 +157,7 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 		return
 	}
 
-	_, err = services.ExcelService().ExcelToDb(
+	_, err = services.BuilderService().Excel().ExcelToDb(
 		context.Background(),
 		&object_builder_service.ExcelToDbRequest{
 			Id:        c.Param("excel_id"),

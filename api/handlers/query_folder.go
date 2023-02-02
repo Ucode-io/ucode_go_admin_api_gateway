@@ -8,8 +8,9 @@ import (
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateQueryFolder godoc
@@ -63,7 +64,7 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -76,7 +77,7 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.QueryFolderService().Create(
+	resp, err := h.companyServices.BuilderService().QueryFolder().Create(
 		context.Background(),
 		&obs.CreateQueryFolderRequest{
 			Title:     queryfolder.Title,
@@ -123,7 +124,7 @@ func (h *Handler) GetQueryFolderByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.QueryFolderService().GetById(
+	resp, err := h.companyServices.BuilderService().QueryFolder().GetById(
 		context.Background(),
 		&obs.QueryFolderId{
 			Id:        c.Param("guid"),
@@ -194,7 +195,7 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -207,7 +208,7 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.QueryFolderService().GetAll(
+	resp, err := h.companyServices.BuilderService().QueryFolder().GetAll(
 		context.Background(),
 		&obs.GetAllQueryFolderRequest{
 			Limit:     int32(limit),
@@ -279,7 +280,7 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.ResourceService().GetResEnvByResIdEnvId(
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
@@ -292,7 +293,7 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.QueryFolderService().Update(
+	resp, err := h.companyServices.BuilderService().QueryFolder().Update(
 		context.Background(),
 		&obs.QueryFolder{
 			Id:        guid,
@@ -346,7 +347,7 @@ func (h *Handler) DeleteQueryFolder(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.QueryFolderService().Delete(
+	resp, err := h.companyServices.BuilderService().QueryFolder().Delete(
 		context.Background(),
 		&obs.QueryFolderId{
 			Id:        queryFolderId,

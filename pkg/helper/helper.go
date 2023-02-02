@@ -125,7 +125,6 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 	return res
 }
 
-
 func ConverPhoneNumberToMongoPhoneFormat(input string) string {
 	//input +998995677777
 	input = input[4:]
@@ -134,4 +133,14 @@ func ConverPhoneNumberToMongoPhoneFormat(input string) string {
 	input = "(" + changedEl + ") " + input[2:5] + "-" + input[5:7] + "-" + input[7:]
 	// input = (99) 567-77-77
 	return input
+}
+
+func ConvertStructToResponse(inputStruct *structpb.Struct) (map[string]interface{}, error) {
+	marshelledInputStruct, err := protojson.Marshal(inputStruct)
+	outputMap := make(map[string]interface{}, 0)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(marshelledInputStruct, &outputMap)
+	return outputMap, err
 }

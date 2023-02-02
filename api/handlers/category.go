@@ -2,8 +2,11 @@ package handlers
 
 import (
 	"context"
+	"errors"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -30,6 +33,10 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+	if !util.IsValidUUID(category.ProjectId) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
+		return
+	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
@@ -51,10 +58,20 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+	// attributes, err := helper.ConvertMapToStruct(category.Attributes)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.BadRequest, err)
+	// 	return
+	// }
 
-	resp, err := services.CategoryService().Create(
-		context.Background(),
-		&category,
+	resp, err := services.ApiReferenceService().Category().Create(
+		context.Background(), &category,
+		// &ars.CreateCategoryRequest{
+		// 	Name:       category.Name,
+		// 	BaseUrl:    category.BaseUrl,
+		// 	ProjectId:  category.ProjectID,
+		// 	Attributes: attributes,
+		// },
 	)
 
 	if err != nil {
@@ -69,20 +86,20 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 // @Security ApiKeyAuth
 // @ID get_category_by_id
 // @Router /v1/category/{category_id} [GET]
-// @Summary Get api reference by id
-// @Description Get api reference by id
+// @Summary Get category by id
+// @Description Get category by id
 // @Tags ApiReference
 // @Accept json
 // @Produce json
 // @Param category_id path string true "category_id"
-// @Success 200 {object} status_http.Response{data=models.ApiReference} "AppBody"
+// @Success 200 {object} status_http.Response{data=models.Category} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 	id := c.Param("category_id")
 
 	if !util.IsValidUUID(id) {
-		h.handleResponse(c, status_http.InvalidArgument, "api reference id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "category id is an invalid uuid")
 		return
 	}
 
@@ -106,9 +123,9 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.ApiReferenceService().Get(
+	resp, err := services.ApiReferenceService().Category().Get(
 		context.Background(),
-		&ars.GetApiReferenceRequest{
+		&ars.GetCategoryRequest{
 			Guid: id,
 		},
 	)
@@ -145,6 +162,10 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	if !util.IsValidUUID(c.Query("project_id")) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
+		return
+	}
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -165,7 +186,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.CategoryService().GetList(
+	resp, err := services.ApiReferenceService().Category().GetList(
 		context.Background(),
 		&ars.GetListCategoryRequest{
 			Limit:     int64(limit),
@@ -196,11 +217,15 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateCategory(c *gin.Context) {
-	var category ars.Category
+	var category models.Category
 
 	err := c.ShouldBindJSON(&category)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	if !util.IsValidUUID(category.ProjectID) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
 		return
 	}
 
@@ -224,10 +249,21 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+	attributes, err := helper.ConvertMapToStruct(category.Attributes)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
 
-	resp, err := services.CategoryService().Update(
+	resp, err := services.ApiReferenceService().Category().Update(
 		context.Background(),
-		&category,
+		&ars.Category{
+			Guid:       category.Guid,
+			Name:       category.Name,
+			BaseUrl:    category.BaseUrl,
+			ProjectId:  category.ProjectID,
+			Attributes: attributes,
+		},
 	)
 
 	if err != nil {
@@ -279,7 +315,7 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 	// 	return
 	// }
 
-	resp, err := services.CategoryService().Delete(
+	resp, err := services.ApiReferenceService().Category().Delete(
 		context.Background(),
 		&ars.DeleteCategoryRequest{
 			Guid: id,
