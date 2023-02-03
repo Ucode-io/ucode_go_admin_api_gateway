@@ -3053,6 +3053,11 @@ var doc = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "name": "commit_id",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -3065,6 +3070,11 @@ var doc = `{
                     {
                         "type": "string",
                         "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "version_id",
                         "in": "query"
                     }
                 ],
@@ -4392,6 +4402,11 @@ var doc = `{
                 "operationId": "get_all_category",
                 "parameters": [
                     {
+                        "type": "string",
+                        "name": "commit_id",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -4404,6 +4419,11 @@ var doc = `{
                     {
                         "type": "string",
                         "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "version_id",
                         "in": "query"
                     }
                 ],
@@ -4904,62 +4924,7 @@ var doc = `{
                 ],
                 "summary": "Get all commits",
                 "operationId": "get_all_commits",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "commit_type",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "created_at",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "environment_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "search",
-                        "in": "query"
-                    }
-                ],
                 "responses": {
-                    "200": {
-                        "description": "CommitBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/company_service.GetCommitListResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "400": {
                         "description": "Invalid Argument",
                         "schema": {
@@ -5016,36 +4981,7 @@ var doc = `{
                 ],
                 "summary": "Create commit",
                 "operationId": "create_commit",
-                "parameters": [
-                    {
-                        "description": "CreateCommitRequestBody",
-                        "name": "commit",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/company_service.CreateCommitRequest"
-                        }
-                    }
-                ],
                 "responses": {
-                    "201": {
-                        "description": "Commit data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/company_service.CommitWithRelease"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
@@ -5114,24 +5050,6 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "CommitBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/company_service.CommitWithRelease"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "400": {
                         "description": "Invalid Argument",
                         "schema": {
@@ -9575,6 +9493,11 @@ var doc = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "name": "version_id",
+                        "in": "query"
+                    },
+                    {
                         "type": "boolean",
                         "name": "with_many_relation",
                         "in": "query"
@@ -13607,6 +13530,11 @@ var doc = `{
                         "type": "string",
                         "name": "table_slug",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "version_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -14049,7 +13977,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetReleaseListResponse"
+                                            "$ref": "#/definitions/versioning_service.GetReleaseListResponse"
                                         }
                                     }
                                 }
@@ -14119,7 +14047,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.CreateReleaseRequest"
+                            "$ref": "#/definitions/versioning_service.CreateReleaseRequest"
                         }
                     }
                 ],
@@ -14135,7 +14063,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.ReleaseWithCommit"
+                                            "$ref": "#/definitions/versioning_service.ReleaseWithCommit"
                                         }
                                     }
                                 }
@@ -14207,7 +14135,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.SetCurrentReleaseRequest"
+                            "$ref": "#/definitions/versioning_service.SetCurrentReleaseRequest"
                         }
                     }
                 ],
@@ -14309,7 +14237,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetCurrentReleaseResponse"
+                                            "$ref": "#/definitions/versioning_service.GetCurrentReleaseResponse"
                                         }
                                     }
                                 }
@@ -14395,7 +14323,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.ReleaseWithCommit"
+                                            "$ref": "#/definitions/versioning_service.ReleaseWithCommit"
                                         }
                                     }
                                 }
@@ -14472,7 +14400,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.UpdateReleaseRequest"
+                            "$ref": "#/definitions/versioning_service.UpdateReleaseRequest"
                         }
                     }
                 ],
@@ -14488,7 +14416,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.ReleaseWithCommit"
+                                            "$ref": "#/definitions/versioning_service.ReleaseWithCommit"
                                         }
                                     }
                                 }
@@ -15348,6 +15276,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "folder-id",
                         "name": "folder-id",
                         "in": "query",
@@ -15459,6 +15394,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateTemplateReqBody",
                         "name": "template",
                         "in": "body",
@@ -15556,6 +15498,13 @@ var doc = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -15659,6 +15608,13 @@ var doc = `{
                         "name": "Environment-Id",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -15749,6 +15705,13 @@ var doc = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -15849,6 +15812,13 @@ var doc = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -15955,6 +15925,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "template-folder-id",
                         "name": "template-folder-id",
                         "in": "path",
@@ -16049,6 +16026,13 @@ var doc = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -16240,6 +16224,13 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "template-id",
                         "name": "template-id",
                         "in": "path",
@@ -16334,6 +16325,13 @@ var doc = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -19549,49 +19547,6 @@ var doc = `{
                 }
             }
         },
-        "company_service.CommitWithRelease": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "string"
-                },
-                "commit_type": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "release_info": {
-                    "$ref": "#/definitions/company_service.CommitWithRelease_Release"
-                }
-            }
-        },
-        "company_service.CommitWithRelease_Release": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "is_current": {
-                    "type": "boolean"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
         "company_service.Company": {
             "type": "object",
             "properties": {
@@ -19684,26 +19639,6 @@ var doc = `{
                 }
             }
         },
-        "company_service.CreateCommitRequest": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "string"
-                },
-                "commit_type": {
-                    "type": "string"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                }
-            }
-        },
         "company_service.CreateEnvironmentRequest": {
             "type": "object",
             "properties": {
@@ -19738,32 +19673,6 @@ var doc = `{
                 },
                 "title": {
                     "type": "string"
-                }
-            }
-        },
-        "company_service.CreateReleaseRequest": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "string"
-                },
-                "commit_id": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "is_current": {
-                    "type": "boolean"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "release_type": {
-                    "type": "integer"
                 }
             }
         },
@@ -19875,33 +19784,11 @@ var doc = `{
                 }
             }
         },
-        "company_service.GetCommitListResponse": {
-            "type": "object",
-            "properties": {
-                "commits": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/company_service.CommitWithRelease"
-                    }
-                },
-                "count": {
-                    "type": "integer"
-                }
-            }
-        },
         "company_service.GetCompanyByIdResponse": {
             "type": "object",
             "properties": {
                 "company": {
                     "$ref": "#/definitions/company_service.Company"
-                }
-            }
-        },
-        "company_service.GetCurrentReleaseResponse": {
-            "type": "object",
-            "properties": {
-                "commit_id": {
-                    "type": "string"
                 }
             }
         },
@@ -19943,20 +19830,6 @@ var doc = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/company_service.Project"
-                    }
-                }
-            }
-        },
-        "company_service.GetReleaseListResponse": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer"
-                },
-                "releases": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/company_service.ReleaseWithCommit"
                     }
                 }
             }
@@ -20036,52 +19909,6 @@ var doc = `{
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "string"
-                }
-            }
-        },
-        "company_service.ReleaseWithCommit": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "string"
-                },
-                "commit_info": {
-                    "$ref": "#/definitions/company_service.ReleaseWithCommit_Commit"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "is_current": {
-                    "type": "boolean"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "company_service.ReleaseWithCommit_Commit": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
                     "type": "string"
                 }
             }
@@ -20199,31 +20026,6 @@ var doc = `{
                     "type": "string"
                 },
                 "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "company_service.SetCurrentReleaseRequest": {
-            "type": "object",
-            "properties": {
-                "environment_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "company_service.UpdateReleaseRequest": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "id": {
                     "type": "string"
                 }
             }
@@ -20387,6 +20189,12 @@ var doc = `{
                     "type": "string"
                 },
                 "version": {
+                    "type": "string"
+                },
+                "versioningGRPCPort": {
+                    "type": "string"
+                },
+                "versioningServiceHost": {
                     "type": "string"
                 }
             }
@@ -21692,11 +21500,8 @@ var doc = `{
                 "automatic": {
                     "type": "boolean"
                 },
-                "commit_guid": {
-                    "type": "string"
-                },
                 "commit_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "default": {
                     "type": "string"
@@ -21727,42 +21532,37 @@ var doc = `{
                 },
                 "unique": {
                     "type": "boolean"
+                },
+                "version_id": {
+                    "type": "string"
                 }
             }
         },
         "object_builder_service.CreateFieldsAndRelationsRequest": {
             "type": "object",
             "properties": {
+                "commit_id": {
+                    "type": "string"
+                },
                 "fields": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/object_builder_service.CreateFieldRequest"
                     }
                 },
-                "options": {
-                    "$ref": "#/definitions/object_builder_service.CreateFieldsAndRelationsRequest_Options"
+                "project_id": {
+                    "type": "string"
                 },
                 "relations": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/object_builder_service.CreateRelationRequest"
                     }
-                }
-            }
-        },
-        "object_builder_service.CreateFieldsAndRelationsRequest_Options": {
-            "type": "object",
-            "properties": {
-                "commit_guid": {
-                    "type": "string"
-                },
-                "commit_id": {
-                    "type": "integer"
-                },
-                "project_id": {
-                    "type": "string"
                 },
                 "table_id": {
+                    "type": "string"
+                },
+                "version_id": {
                     "type": "string"
                 }
             }
@@ -21826,11 +21626,8 @@ var doc = `{
                         "type": "string"
                     }
                 },
-                "commit_guid": {
-                    "type": "string"
-                },
                 "commit_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "default_limit": {
                     "type": "string"
@@ -21909,6 +21706,9 @@ var doc = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "version_id": {
+                    "type": "string"
                 },
                 "view_fields": {
                     "type": "array",
@@ -22710,6 +22510,9 @@ var doc = `{
                         "type": "string"
                     }
                 },
+                "commit_id": {
+                    "type": "string"
+                },
                 "default_limit": {
                     "type": "string"
                 },
@@ -22790,6 +22593,9 @@ var doc = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "version_id": {
+                    "type": "string"
                 },
                 "view_fields": {
                     "type": "array",
@@ -23597,6 +23403,125 @@ var doc = `{
             "type": "object",
             "properties": {
                 "relation_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "versioning_service.CreateReleaseRequest": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "is_current": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "release_type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "versioning_service.GetCurrentReleaseResponse": {
+            "type": "object",
+            "properties": {
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "versioning_service.GetReleaseListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "releases": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/versioning_service.ReleaseWithCommit"
+                    }
+                }
+            }
+        },
+        "versioning_service.ReleaseWithCommit": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "commit_info": {
+                    "$ref": "#/definitions/versioning_service.ReleaseWithCommit_Commit"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_current": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "versioning_service.ReleaseWithCommit_Commit": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "versioning_service.SetCurrentReleaseRequest": {
+            "type": "object",
+            "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "versioning_service.UpdateReleaseRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 }
             }

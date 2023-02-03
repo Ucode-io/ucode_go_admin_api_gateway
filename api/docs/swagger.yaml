@@ -265,34 +265,6 @@ definitions:
       id:
         type: string
     type: object
-  company_service.CommitWithRelease:
-    properties:
-      author_id:
-        type: string
-      commit_type:
-        type: string
-      created_at:
-        type: string
-      environment_id:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      release_info:
-        $ref: '#/definitions/company_service.CommitWithRelease_Release'
-    type: object
-  company_service.CommitWithRelease_Release:
-    properties:
-      id:
-        type: string
-      is_current:
-        type: boolean
-      version:
-        type: string
-    type: object
   company_service.Company:
     properties:
       description:
@@ -353,19 +325,6 @@ definitions:
       id:
         type: string
     type: object
-  company_service.CreateCommitRequest:
-    properties:
-      author_id:
-        type: string
-      commit_type:
-        type: string
-      environment_id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-    type: object
   company_service.CreateEnvironmentRequest:
     properties:
       description:
@@ -389,23 +348,6 @@ definitions:
         type: array
       title:
         type: string
-    type: object
-  company_service.CreateReleaseRequest:
-    properties:
-      author_id:
-        type: string
-      commit_id:
-        type: string
-      description:
-        type: string
-      environment_id:
-        type: string
-      is_current:
-        type: boolean
-      project_id:
-        type: string
-      release_type:
-        type: integer
     type: object
   company_service.CreateResourceReq:
     properties:
@@ -477,24 +419,10 @@ definitions:
       count:
         type: integer
     type: object
-  company_service.GetCommitListResponse:
-    properties:
-      commits:
-        items:
-          $ref: '#/definitions/company_service.CommitWithRelease'
-        type: array
-      count:
-        type: integer
-    type: object
   company_service.GetCompanyByIdResponse:
     properties:
       company:
         $ref: '#/definitions/company_service.Company'
-    type: object
-  company_service.GetCurrentReleaseResponse:
-    properties:
-      commit_id:
-        type: string
     type: object
   company_service.GetEnvironmentListResponse:
     properties:
@@ -521,15 +449,6 @@ definitions:
       projects:
         items:
           $ref: '#/definitions/company_service.Project'
-        type: array
-    type: object
-  company_service.GetReleaseListResponse:
-    properties:
-      count:
-        type: integer
-      releases:
-        items:
-          $ref: '#/definitions/company_service.ReleaseWithCommit'
         type: array
     type: object
   company_service.GetReourceListResponse:
@@ -581,36 +500,6 @@ definitions:
   company_service.ReconnectResourceRequest:
     properties:
       id:
-        type: string
-    type: object
-  company_service.ReleaseWithCommit:
-    properties:
-      author_id:
-        type: string
-      commit_info:
-        $ref: '#/definitions/company_service.ReleaseWithCommit_Commit'
-      created_at:
-        type: string
-      description:
-        type: string
-      environment_id:
-        type: string
-      id:
-        type: string
-      is_current:
-        type: boolean
-      project_id:
-        type: string
-      updated_at:
-        type: string
-      version:
-        type: string
-    type: object
-  company_service.ReleaseWithCommit_Commit:
-    properties:
-      id:
-        type: string
-      name:
         type: string
     type: object
   company_service.RemoveResourceRequest:
@@ -687,22 +576,6 @@ definitions:
       name:
         type: string
       resource_environment_id:
-        type: string
-    type: object
-  company_service.SetCurrentReleaseRequest:
-    properties:
-      environment_id:
-        type: string
-      id:
-        type: string
-      project_id:
-        type: string
-    type: object
-  company_service.UpdateReleaseRequest:
-    properties:
-      description:
-        type: string
-      id:
         type: string
     type: object
   company_service.UpdateResourceRequest:
@@ -811,6 +684,10 @@ definitions:
       ucodeNamespace:
         type: string
       version:
+        type: string
+      versioningGRPCPort:
+        type: string
+      versioningServiceHost:
         type: string
     type: object
   handlers.Path:
@@ -1667,10 +1544,8 @@ definitions:
         type: string
       automatic:
         type: boolean
-      commit_guid:
-        type: string
       commit_id:
-        type: integer
+        type: string
       default:
         type: string
       id:
@@ -1691,29 +1566,26 @@ definitions:
         type: string
       unique:
         type: boolean
+      version_id:
+        type: string
     type: object
   object_builder_service.CreateFieldsAndRelationsRequest:
     properties:
+      commit_id:
+        type: string
       fields:
         items:
           $ref: '#/definitions/object_builder_service.CreateFieldRequest'
         type: array
-      options:
-        $ref: '#/definitions/object_builder_service.CreateFieldsAndRelationsRequest_Options'
+      project_id:
+        type: string
       relations:
         items:
           $ref: '#/definitions/object_builder_service.CreateRelationRequest'
         type: array
-    type: object
-  object_builder_service.CreateFieldsAndRelationsRequest_Options:
-    properties:
-      commit_guid:
-        type: string
-      commit_id:
-        type: integer
-      project_id:
-        type: string
       table_id:
+        type: string
+      version_id:
         type: string
     type: object
   object_builder_service.CreateFieldsAndRelationsResponse:
@@ -1755,10 +1627,8 @@ definitions:
         items:
           type: string
         type: array
-      commit_guid:
-        type: string
       commit_id:
-        type: integer
+        type: string
       default_limit:
         type: string
       default_values:
@@ -1811,6 +1681,8 @@ definitions:
         items:
           type: string
         type: array
+      version_id:
+        type: string
       view_fields:
         items:
           type: string
@@ -2332,6 +2204,8 @@ definitions:
         items:
           type: string
         type: array
+      commit_id:
+        type: string
       default_limit:
         type: string
       default_values:
@@ -2386,6 +2260,8 @@ definitions:
         items:
           type: string
         type: array
+      version_id:
+        type: string
       view_fields:
         items:
           type: string
@@ -2912,6 +2788,83 @@ definitions:
   template_service.UpdateTemplateReq_Table_Relation:
     properties:
       relation_id:
+        type: string
+    type: object
+  versioning_service.CreateReleaseRequest:
+    properties:
+      author_id:
+        type: string
+      commit_id:
+        type: string
+      description:
+        type: string
+      environment_id:
+        type: string
+      is_current:
+        type: boolean
+      project_id:
+        type: string
+      release_type:
+        type: integer
+    type: object
+  versioning_service.GetCurrentReleaseResponse:
+    properties:
+      version_id:
+        type: string
+    type: object
+  versioning_service.GetReleaseListResponse:
+    properties:
+      count:
+        type: integer
+      releases:
+        items:
+          $ref: '#/definitions/versioning_service.ReleaseWithCommit'
+        type: array
+    type: object
+  versioning_service.ReleaseWithCommit:
+    properties:
+      author_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/versioning_service.ReleaseWithCommit_Commit'
+      created_at:
+        type: string
+      description:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      is_current:
+        type: boolean
+      project_id:
+        type: string
+      updated_at:
+        type: string
+      version:
+        type: string
+    type: object
+  versioning_service.ReleaseWithCommit_Commit:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  versioning_service.SetCurrentReleaseRequest:
+    properties:
+      environment_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  versioning_service.UpdateReleaseRequest:
+    properties:
+      description:
+        type: string
+      id:
         type: string
     type: object
 info:
@@ -4648,6 +4601,9 @@ paths:
         name: category_id
         type: string
       - in: query
+        name: commit_id
+        type: string
+      - in: query
         name: limit
         type: integer
       - in: query
@@ -4655,6 +4611,9 @@ paths:
         type: integer
       - in: query
         name: project_id
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json
@@ -5406,6 +5365,9 @@ paths:
       operationId: get_all_category
       parameters:
       - in: query
+        name: commit_id
+        type: string
+      - in: query
         name: limit
         type: integer
       - in: query
@@ -5413,6 +5375,9 @@ paths:
         type: integer
       - in: query
         name: project_id
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json
@@ -5687,40 +5652,9 @@ paths:
       - application/json
       description: Get all commits
       operationId: get_all_commits
-      parameters:
-      - in: query
-        name: commit_type
-        type: string
-      - in: query
-        name: created_at
-        type: string
-      - in: query
-        name: environment_id
-        type: string
-      - in: query
-        name: limit
-        type: integer
-      - in: query
-        name: offset
-        type: integer
-      - in: query
-        name: project_id
-        type: string
-      - in: query
-        name: search
-        type: string
       produces:
       - application/json
       responses:
-        "200":
-          description: CommitBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.GetCommitListResponse'
-              type: object
         "400":
           description: Invalid Argument
           schema:
@@ -5749,25 +5683,9 @@ paths:
       - application/json
       description: Create commit
       operationId: create_commit
-      parameters:
-      - description: CreateCommitRequestBody
-        in: body
-        name: commit
-        required: true
-        schema:
-          $ref: '#/definitions/company_service.CreateCommitRequest'
       produces:
       - application/json
       responses:
-        "201":
-          description: Commit data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.CommitWithRelease'
-              type: object
         "400":
           description: Bad Request
           schema:
@@ -5806,15 +5724,6 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: CommitBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.CommitWithRelease'
-              type: object
         "400":
           description: Invalid Argument
           schema:
@@ -8353,6 +8262,9 @@ paths:
         name: table_slug
         type: string
       - in: query
+        name: version_id
+        type: string
+      - in: query
         name: with_many_relation
         type: boolean
       - in: query
@@ -10668,6 +10580,9 @@ paths:
       - in: query
         name: table_slug
         type: string
+      - in: query
+        name: version_id
+        type: string
       produces:
       - application/json
       responses:
@@ -10925,7 +10840,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.GetReleaseListResponse'
+                  $ref: '#/definitions/versioning_service.GetReleaseListResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -10961,7 +10876,7 @@ paths:
         name: release
         required: true
         schema:
-          $ref: '#/definitions/company_service.CreateReleaseRequest'
+          $ref: '#/definitions/versioning_service.CreateReleaseRequest'
       produces:
       - application/json
       responses:
@@ -10972,7 +10887,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.ReleaseWithCommit'
+                  $ref: '#/definitions/versioning_service.ReleaseWithCommit'
               type: object
         "400":
           description: Bad Request
@@ -11058,7 +10973,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.ReleaseWithCommit'
+                  $ref: '#/definitions/versioning_service.ReleaseWithCommit'
               type: object
         "400":
           description: Invalid Argument
@@ -11099,7 +11014,7 @@ paths:
         name: release
         required: true
         schema:
-          $ref: '#/definitions/company_service.UpdateReleaseRequest'
+          $ref: '#/definitions/versioning_service.UpdateReleaseRequest'
       produces:
       - application/json
       responses:
@@ -11110,7 +11025,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.ReleaseWithCommit'
+                  $ref: '#/definitions/versioning_service.ReleaseWithCommit'
               type: object
         "400":
           description: Bad Request
@@ -11147,7 +11062,7 @@ paths:
         name: release
         required: true
         schema:
-          $ref: '#/definitions/company_service.SetCurrentReleaseRequest'
+          $ref: '#/definitions/versioning_service.SetCurrentReleaseRequest'
       produces:
       - application/json
       responses:
@@ -11205,7 +11120,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.GetCurrentReleaseResponse'
+                  $ref: '#/definitions/versioning_service.GetCurrentReleaseResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -11652,6 +11567,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: folder-id
         in: query
         name: folder-id
@@ -11718,6 +11638,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: CreateTemplateReq
         in: body
         name: template
@@ -11773,6 +11698,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateTemplateReqBody
@@ -11833,6 +11763,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -11882,6 +11817,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: CreateFolderReq
@@ -11939,6 +11879,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateFolderReqBody
@@ -11999,6 +11944,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: template-folder-id
         in: path
         name: template-folder-id
@@ -12046,6 +11996,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: template-folder-id
@@ -12163,6 +12118,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: template-id
         in: path
         name: template-id
@@ -12210,6 +12170,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: template-id
