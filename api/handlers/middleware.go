@@ -43,6 +43,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		strArr := strings.Split(bearerToken, " ")
 
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
+			h.log.Error("---ERR->Unexpected token format")
 			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
 			return
 		}
@@ -52,6 +53,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			if strings.Contains(origin, cfg.AppHost) || strings.Contains(origin, cfg.ApiHost) || strings.Contains(origin, cfg.Localhost) {
 				res, ok = h.hasAccess(c)
 				if !ok {
+					h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
 					c.Abort()
 					return
 				}

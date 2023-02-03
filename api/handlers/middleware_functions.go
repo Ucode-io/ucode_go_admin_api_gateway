@@ -21,6 +21,7 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 
 	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
+		h.log.Error("---ERR->HasAccess->Unexpected token format")
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		return nil, false
 	}
@@ -44,6 +45,7 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 		}
 		errr = status.Error(codes.InvalidArgument, "User has been expired")
 		if errr.Error() == err.Error() {
+			h.log.Error("---ERR->HasAccess->User Expired-->")
 			h.handleResponse(c, status_http.Forbidden, err.Error())
 			return nil, false
 		}
