@@ -162,15 +162,15 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 			}
 			return customEvent.Functions[0].Name, errors.New(errStr)
 		}
-		_, err = services.BuilderService().CustomEvent().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
-			FunctionId: customEvent.Functions[0].Id,
-			ObjectIds:  request.IDs,
-			FieldSlug:  customEvent.Functions[0].Path + "_disable",
-			ProjectId:  resourceEnvironment.GetId(),
-		})
-		if err != nil {
-			return customEvent.Functions[0].Name, err
-		}
+		// _, err = services.BuilderService().CustomEvent().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
+		// 	FunctionId: customEvent.Functions[0].Id,
+		// 	ObjectIds:  request.IDs,
+		// 	FieldSlug:  customEvent.Functions[0].Path + "_disable",
+		// 	ProjectId:  resourceEnvironment.GetId(),
+		// })
+		// if err != nil {
+		// 	return customEvent.Functions[0].Name, err
+		// }
 	}
 	return
 }
