@@ -1278,24 +1278,27 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
+	objects := objectRequest.Data["objects"].([]interface{})
+	editedObjects := make([]map[string]interface{}, 0, len(objects))
+	var objectIds = make([]string, 0, len(objects))
+	for _, object := range objects {
+		newObjects := object.(map[string]interface{})
+		guid, ok := newObjects["guid"]
+		if ok {
+			if guid.(string) == "" {
+				guid, _ := uuid.NewRandom()
+				newObjects["guid"] = guid.String()
+				newObjects["is_new"] = true
+			}
+		}
+		objectIds = append(objectIds, newObjects["guid"].(string))
+		editedObjects = append(editedObjects, newObjects)
+	}
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
-	}
-	objects := objectRequest.Data["objects"].([]interface{})
-	editedObjects := make([]interface{}, 0, len(objects))
-	var objectIds = make([]string, 0, len(objects))
-	for _, object := range objects {
-		newObjects := object.(map[string]interface{})
-		if newObjects["guid"] == "" {
-			guid, _ := uuid.NewRandom()
-			newObjects["guid"] = guid.String()
-			newObjects["is_new"] = true
-		}
-		objectIds = append(objectIds, newObjects["guid"].(string))
-		editedObjects = append(editedObjects, newObjects)
 	}
 	objectRequest.Data["objects"] = editedObjects
 
