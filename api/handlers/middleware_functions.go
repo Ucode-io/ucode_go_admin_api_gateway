@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
@@ -40,6 +41,7 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 	if err != nil {
 		errr := status.Error(codes.PermissionDenied, "Permission denied")
 		if errr.Error() == err.Error() {
+			h.log.Error("---ERR->HasAccess->Permission--->", logger.Error(err))
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return nil, false
 		}
@@ -49,6 +51,7 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 			h.handleResponse(c, status_http.Forbidden, err.Error())
 			return nil, false
 		}
+		h.log.Error("---ERR->HasAccess->Session->V2HasAccessUser--->", logger.Error(err))
 		h.handleResponse(c, status_http.Unauthorized, err.Error())
 		return nil, false
 	}
