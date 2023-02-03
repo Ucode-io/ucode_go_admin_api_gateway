@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/config"
@@ -51,6 +52,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		switch strArr[0] {
 		case "Bearer":
 			if strings.Contains(origin, cfg.AppHost) || strings.Contains(origin, cfg.ApiHost) || strings.Contains(origin, cfg.Localhost) {
+				log.Println("---AuthMiddleware->Contains--->", origin)
 				res, ok = h.hasAccess(c)
 				if !ok {
 					h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
