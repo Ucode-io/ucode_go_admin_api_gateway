@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package template_service;
+
+option go_package="genproto/template_service";
+
+import "template.proto";

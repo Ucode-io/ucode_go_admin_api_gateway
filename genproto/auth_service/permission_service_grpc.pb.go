@@ -42,11 +42,11 @@ type PermissionServiceClient interface {
 	RemoveRolePermission(ctx context.Context, in *RolePermissionPrimaryKey, opts ...grpc.CallOption) (*RolePermission, error)
 	PermissionList(ctx context.Context, in *PermissionGenerated, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	//V2
-	V2GetRoleById(ctx context.Context, in *RolePrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error)
-	V2GetRolesList(ctx context.Context, in *GetRolesListRequest, opts ...grpc.CallOption) (*CommonMessage, error)
-	V2AddRole(ctx context.Context, in *AddRoleRequest, opts ...grpc.CallOption) (*CommonMessage, error)
-	V2UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*CommonMessage, error)
-	V2RemoveRole(ctx context.Context, in *RolePrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error)
+	V2GetRoleById(ctx context.Context, in *V2RolePrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error)
+	V2GetRolesList(ctx context.Context, in *V2GetRolesListRequest, opts ...grpc.CallOption) (*CommonMessage, error)
+	V2AddRole(ctx context.Context, in *V2AddRoleRequest, opts ...grpc.CallOption) (*CommonMessage, error)
+	V2UpdateRole(ctx context.Context, in *V2UpdateRoleRequest, opts ...grpc.CallOption) (*CommonMessage, error)
+	V2RemoveRole(ctx context.Context, in *V2RolePrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error)
 	V2CreatePermission(ctx context.Context, in *CreatePermissionRequest, opts ...grpc.CallOption) (*CommonMessage, error)
 	V2GetPermissionByID(ctx context.Context, in *PermissionPrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error)
 	V2GetPermissionList(ctx context.Context, in *GetPermissionListRequest, opts ...grpc.CallOption) (*CommonMessage, error)
@@ -232,7 +232,7 @@ func (c *permissionServiceClient) PermissionList(ctx context.Context, in *Permis
 	return out, nil
 }
 
-func (c *permissionServiceClient) V2GetRoleById(ctx context.Context, in *RolePrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error) {
+func (c *permissionServiceClient) V2GetRoleById(ctx context.Context, in *V2RolePrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error) {
 	out := new(CommonMessage)
 	err := c.cc.Invoke(ctx, "/auth_service.PermissionService/V2GetRoleById", in, out, opts...)
 	if err != nil {
@@ -241,7 +241,7 @@ func (c *permissionServiceClient) V2GetRoleById(ctx context.Context, in *RolePri
 	return out, nil
 }
 
-func (c *permissionServiceClient) V2GetRolesList(ctx context.Context, in *GetRolesListRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
+func (c *permissionServiceClient) V2GetRolesList(ctx context.Context, in *V2GetRolesListRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
 	out := new(CommonMessage)
 	err := c.cc.Invoke(ctx, "/auth_service.PermissionService/V2GetRolesList", in, out, opts...)
 	if err != nil {
@@ -250,7 +250,7 @@ func (c *permissionServiceClient) V2GetRolesList(ctx context.Context, in *GetRol
 	return out, nil
 }
 
-func (c *permissionServiceClient) V2AddRole(ctx context.Context, in *AddRoleRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
+func (c *permissionServiceClient) V2AddRole(ctx context.Context, in *V2AddRoleRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
 	out := new(CommonMessage)
 	err := c.cc.Invoke(ctx, "/auth_service.PermissionService/V2AddRole", in, out, opts...)
 	if err != nil {
@@ -259,7 +259,7 @@ func (c *permissionServiceClient) V2AddRole(ctx context.Context, in *AddRoleRequ
 	return out, nil
 }
 
-func (c *permissionServiceClient) V2UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
+func (c *permissionServiceClient) V2UpdateRole(ctx context.Context, in *V2UpdateRoleRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
 	out := new(CommonMessage)
 	err := c.cc.Invoke(ctx, "/auth_service.PermissionService/V2UpdateRole", in, out, opts...)
 	if err != nil {
@@ -268,7 +268,7 @@ func (c *permissionServiceClient) V2UpdateRole(ctx context.Context, in *UpdateRo
 	return out, nil
 }
 
-func (c *permissionServiceClient) V2RemoveRole(ctx context.Context, in *RolePrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error) {
+func (c *permissionServiceClient) V2RemoveRole(ctx context.Context, in *V2RolePrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error) {
 	out := new(CommonMessage)
 	err := c.cc.Invoke(ctx, "/auth_service.PermissionService/V2RemoveRole", in, out, opts...)
 	if err != nil {
@@ -417,11 +417,11 @@ type PermissionServiceServer interface {
 	RemoveRolePermission(context.Context, *RolePermissionPrimaryKey) (*RolePermission, error)
 	PermissionList(context.Context, *PermissionGenerated) (*emptypb.Empty, error)
 	//V2
-	V2GetRoleById(context.Context, *RolePrimaryKey) (*CommonMessage, error)
-	V2GetRolesList(context.Context, *GetRolesListRequest) (*CommonMessage, error)
-	V2AddRole(context.Context, *AddRoleRequest) (*CommonMessage, error)
-	V2UpdateRole(context.Context, *UpdateRoleRequest) (*CommonMessage, error)
-	V2RemoveRole(context.Context, *RolePrimaryKey) (*CommonMessage, error)
+	V2GetRoleById(context.Context, *V2RolePrimaryKey) (*CommonMessage, error)
+	V2GetRolesList(context.Context, *V2GetRolesListRequest) (*CommonMessage, error)
+	V2AddRole(context.Context, *V2AddRoleRequest) (*CommonMessage, error)
+	V2UpdateRole(context.Context, *V2UpdateRoleRequest) (*CommonMessage, error)
+	V2RemoveRole(context.Context, *V2RolePrimaryKey) (*CommonMessage, error)
 	V2CreatePermission(context.Context, *CreatePermissionRequest) (*CommonMessage, error)
 	V2GetPermissionByID(context.Context, *PermissionPrimaryKey) (*CommonMessage, error)
 	V2GetPermissionList(context.Context, *GetPermissionListRequest) (*CommonMessage, error)
@@ -496,19 +496,19 @@ func (UnimplementedPermissionServiceServer) RemoveRolePermission(context.Context
 func (UnimplementedPermissionServiceServer) PermissionList(context.Context, *PermissionGenerated) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PermissionList not implemented")
 }
-func (UnimplementedPermissionServiceServer) V2GetRoleById(context.Context, *RolePrimaryKey) (*CommonMessage, error) {
+func (UnimplementedPermissionServiceServer) V2GetRoleById(context.Context, *V2RolePrimaryKey) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2GetRoleById not implemented")
 }
-func (UnimplementedPermissionServiceServer) V2GetRolesList(context.Context, *GetRolesListRequest) (*CommonMessage, error) {
+func (UnimplementedPermissionServiceServer) V2GetRolesList(context.Context, *V2GetRolesListRequest) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2GetRolesList not implemented")
 }
-func (UnimplementedPermissionServiceServer) V2AddRole(context.Context, *AddRoleRequest) (*CommonMessage, error) {
+func (UnimplementedPermissionServiceServer) V2AddRole(context.Context, *V2AddRoleRequest) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2AddRole not implemented")
 }
-func (UnimplementedPermissionServiceServer) V2UpdateRole(context.Context, *UpdateRoleRequest) (*CommonMessage, error) {
+func (UnimplementedPermissionServiceServer) V2UpdateRole(context.Context, *V2UpdateRoleRequest) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2UpdateRole not implemented")
 }
-func (UnimplementedPermissionServiceServer) V2RemoveRole(context.Context, *RolePrimaryKey) (*CommonMessage, error) {
+func (UnimplementedPermissionServiceServer) V2RemoveRole(context.Context, *V2RolePrimaryKey) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2RemoveRole not implemented")
 }
 func (UnimplementedPermissionServiceServer) V2CreatePermission(context.Context, *CreatePermissionRequest) (*CommonMessage, error) {
@@ -888,7 +888,7 @@ func _PermissionService_PermissionList_Handler(srv interface{}, ctx context.Cont
 }
 
 func _PermissionService_V2GetRoleById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RolePrimaryKey)
+	in := new(V2RolePrimaryKey)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -900,13 +900,13 @@ func _PermissionService_V2GetRoleById_Handler(srv interface{}, ctx context.Conte
 		FullMethod: "/auth_service.PermissionService/V2GetRoleById",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PermissionServiceServer).V2GetRoleById(ctx, req.(*RolePrimaryKey))
+		return srv.(PermissionServiceServer).V2GetRoleById(ctx, req.(*V2RolePrimaryKey))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _PermissionService_V2GetRolesList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRolesListRequest)
+	in := new(V2GetRolesListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -918,13 +918,13 @@ func _PermissionService_V2GetRolesList_Handler(srv interface{}, ctx context.Cont
 		FullMethod: "/auth_service.PermissionService/V2GetRolesList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PermissionServiceServer).V2GetRolesList(ctx, req.(*GetRolesListRequest))
+		return srv.(PermissionServiceServer).V2GetRolesList(ctx, req.(*V2GetRolesListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _PermissionService_V2AddRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddRoleRequest)
+	in := new(V2AddRoleRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -936,13 +936,13 @@ func _PermissionService_V2AddRole_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: "/auth_service.PermissionService/V2AddRole",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PermissionServiceServer).V2AddRole(ctx, req.(*AddRoleRequest))
+		return srv.(PermissionServiceServer).V2AddRole(ctx, req.(*V2AddRoleRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _PermissionService_V2UpdateRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateRoleRequest)
+	in := new(V2UpdateRoleRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -954,13 +954,13 @@ func _PermissionService_V2UpdateRole_Handler(srv interface{}, ctx context.Contex
 		FullMethod: "/auth_service.PermissionService/V2UpdateRole",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PermissionServiceServer).V2UpdateRole(ctx, req.(*UpdateRoleRequest))
+		return srv.(PermissionServiceServer).V2UpdateRole(ctx, req.(*V2UpdateRoleRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _PermissionService_V2RemoveRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RolePrimaryKey)
+	in := new(V2RolePrimaryKey)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -972,7 +972,7 @@ func _PermissionService_V2RemoveRole_Handler(srv interface{}, ctx context.Contex
 		FullMethod: "/auth_service.PermissionService/V2RemoveRole",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PermissionServiceServer).V2RemoveRole(ctx, req.(*RolePrimaryKey))
+		return srv.(PermissionServiceServer).V2RemoveRole(ctx, req.(*V2RolePrimaryKey))
 	}
 	return interceptor(ctx, in, info, handler)
 }
