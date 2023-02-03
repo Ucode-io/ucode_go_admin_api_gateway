@@ -1,13 +1,13 @@
 syntax="proto3";
 
-package function_service;
-option go_package="genproto/function_service";
+package new_function_service;
+option go_package="genproto/new_function_service";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
 
 
-service FunctionService {
+service FunctionServiceV2 {
     rpc Create(CreateFunctionRequest) returns (Function) {}
     rpc GetList(GetAllFunctionsRequest) returns (GetAllFunctionsResponse) {}
     rpc GetSingle(FunctionPrimaryKey) returns (Function) {}
@@ -21,8 +21,9 @@ message CreateFunctionRequest {
     string description = 3;
     google.protobuf.Struct body = 4;
     string project_id = 5;
-    int64 commit_id = 6;
+    string commit_id = 6;
     string commit_guid = 7;
+    string version_id = 8;
 }
 
 message Function {

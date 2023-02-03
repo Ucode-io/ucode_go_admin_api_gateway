@@ -3,11 +3,8 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
-	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -48,45 +45,17 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.adminAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+	
 
-	environmentID, b := c.Get("environment_id")
-	if !b {
-		h.handleResponse(c, status_http.BadRequest, fmt.Errorf("EMPTY ENVIRONMENT").Error())
-		return
-	}
+	commit_id, _ := uuid.NewRandom()
+	version_id, _ := uuid.NewRandom()
+	apiReference.CommitId = commit_id.String()
+	apiReference.VersionId = version_id.String()
 
-	fmt.Println("auethInfo.GetUsrId()", authInfo.GetUserId())
-	fmt.Println("authInfo.GetProjectId()", authInfo.GetProjectId())
-	fmt.Println("environmentID", environmentID)
+	apiReference.CommitId = commit_id.String()
+	apiReference.VersionId = "0a4d3e5a-a273-422c-bef3-aebea3f2cec9"
 
-	commit, err := h.companyServices.CompanyService().Commit().Insert(
-		c.Request.Context(),
-		&company_service.CreateCommitRequest{
-			AuthorId:      authInfo.GetUserId(),
-			ProjectId:     authInfo.GetProjectId(),
-			EnvironmentId: environmentID.(string),
-			CommitType:    "REFERENCE",
-			Name:          fmt.Sprintf("Auto Created Commit - %s", time.Now().Format(time.RFC1123)),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-	if _, err := uuid.Parse(commit.GetId()); err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
 	// set: commit_id
-	apiReference.CommitId = commit.Id
-	apiReference.VersionId = "35b03c1a-971d-46dc-998d-4503420d29c0"
-
-	fmt.Println("create table -- commit_id ---->>", commit.Id)
 
 	resp, err := services.ApiReferenceService().ApiReference().Create(
 		context.Background(),
@@ -145,7 +114,8 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 	resp, err := services.ApiReferenceService().ApiReference().Get(
 		context.Background(),
 		&ars.GetApiReferenceRequest{
-			Guid: id,
+			Guid:      id,
+			VersionId: "0a4d3e5a-a273-422c-bef3-aebea3f2cec9",
 		},
 	)
 	if err != nil {
@@ -212,6 +182,7 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 			Offset:     int64(offset),
 			CategoryId: c.Query("category_id"),
 			ProjectId:  c.Query("project_id"),
+			VersionId:  "0a4d3e5a-a273-422c-bef3-aebea3f2cec9",
 		},
 	)
 
