@@ -13,15 +13,14 @@ service FieldAndRelationService {
 }
 
 message CreateFieldsAndRelationsRequest {
-    repeated CreateFieldRequest fields = 1;
-    repeated CreateRelationRequest relations = 2;
-    message Options {
-        int64 commit_id = 1;
-        string commit_guid = 2;
-        string project_id = 3;
-        string table_id = 4;
-    }
-    Options options = 3;
+    string project_id = 1;
+    string version_id = 2;
+    string commit_id = 3;
+    string table_id = 4;
+    repeated CreateFieldRequest fields = 5;
+    repeated CreateRelationRequest relations = 6;
+    
+    
 }
 
 message CreateFieldsAndRelationsResponse {

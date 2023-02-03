@@ -3,9 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -78,14 +76,14 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 	}
 	variable.ProjectId = resourceEnvironment.GetId()
 
-	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_VARIABLE)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-		return
-	}
+	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_VARIABLE)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+	// 	return
+	// }
 
-	variable.CommitId = commitID
-	variable.CommitGuid = commitGuid
+	// variable.CommitId = commitID
+	// variable.CommitGuid = commitGuid
 
 	resp, err := services.BuilderService().Variable().Create(
 		context.Background(),

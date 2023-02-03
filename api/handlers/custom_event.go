@@ -3,10 +3,8 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -84,11 +82,11 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 		return
 	}
 
-	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_CUSTOM_EVENT)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-		return
-	}
+	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_CUSTOM_EVENT)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+	// 	return
+	// }
 
 	resp, err := services.BuilderService().CustomEvent().Create(
 		context.Background(),
@@ -103,8 +101,8 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 			Method:     customevent.Method,
 			Attributes: structData,
 			ProjectId:  resourceEnvironment.GetId(), //added resource id
-			CommitId:   commitID,
-			CommitGuid: commitGuid,
+			// CommitId:   commitID,
+			// CommitGuid: commitGuid,
 		},
 	)
 
@@ -254,7 +252,7 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 		context.Background(),
 		&obs.GetCustomEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
-			RoleId: authInfo.GetRoleId(),
+			RoleId:    authInfo.GetRoleId(),
 			ProjectId: resourceEnvironment.GetId(),
 		},
 	)

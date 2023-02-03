@@ -31,11 +31,11 @@ service PermissionService {
     rpc RemoveRolePermission(RolePermissionPrimaryKey) returns (RolePermission) {}
     rpc PermissionList(PermissionGenerated) returns(google.protobuf.Empty) {}
     //V2
-    rpc V2GetRoleById(RolePrimaryKey) returns (CommonMessage) {}
-    rpc V2GetRolesList(GetRolesListRequest) returns (CommonMessage) {}
-    rpc V2AddRole(AddRoleRequest) returns (CommonMessage) {}
-    rpc V2UpdateRole(UpdateRoleRequest) returns (CommonMessage) {}
-    rpc V2RemoveRole(RolePrimaryKey) returns (CommonMessage) {}
+    rpc V2GetRoleById(V2RolePrimaryKey) returns (CommonMessage) {}
+    rpc V2GetRolesList(V2GetRolesListRequest) returns (CommonMessage) {}
+    rpc V2AddRole(V2AddRoleRequest) returns (CommonMessage) {}
+    rpc V2UpdateRole(V2UpdateRoleRequest) returns (CommonMessage) {}
+    rpc V2RemoveRole(V2RolePrimaryKey) returns (CommonMessage) {}
 
     rpc V2CreatePermission(CreatePermissionRequest) returns (CommonMessage) {}
     rpc V2GetPermissionByID(PermissionPrimaryKey) returns (CommonMessage) {}
@@ -200,4 +200,34 @@ message GetScopeListRequest {
 message GetScopesResponse {
     uint32 count = 1;
     repeated Scope scopes = 2;
+}
+
+message V2RolePrimaryKey {
+    string id = 1;
+    string project_id = 2;
+}
+
+message V2GetRolesListRequest {
+    uint32 offset = 1;
+    uint32 limit = 2;
+    string client_platform_id = 3;
+    string client_type_id = 4;
+    string project_id = 5;
+}
+
+message V2AddRoleRequest {
+    string client_type_id = 2;
+    string name = 3;
+    string client_platform_id = 4;
+    string project_id = 5;
+    string db_project_id = 6;
+}
+
+message V2UpdateRoleRequest {
+    string guid = 1;
+    string client_type_id = 2;
+    string name = 3;
+    string client_platform_id = 4;
+    string project_id = 5;
+    string db_project_id = 6;
 }
