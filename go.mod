@@ -24,6 +24,7 @@ require (
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-cmd/cmd v1.4.1
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/pkg/errors v0.9.1
 	github.com/saidamir98/udevs_pkg v0.0.0-20220413125729-5342e90c08a3

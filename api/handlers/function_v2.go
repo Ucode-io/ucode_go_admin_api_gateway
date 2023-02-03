@@ -111,8 +111,9 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	err = gitlab_integration.CloneForkToPath(resp.Message["http_url_to_repo"].(string), h.cfg)
 	fmt.Println(resp.Code)
-	fmt.Println(resp.Message["path"].(string))
+	fmt.Println(resp.Message["http_url_to_repo"].(string))
 	fmt.Println(err)
 
 	// resp, err := services.FunctionService().FunctionService().Create(

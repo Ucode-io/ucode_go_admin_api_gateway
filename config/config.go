@@ -79,6 +79,7 @@ type Config struct {
 	GitlabIntegrationURL   string
 	GitlabGroupId          int
 	GitlabProjectId        int
+	PathToClone            string
 }
 
 // Load ...
@@ -141,10 +142,11 @@ func Load() Config {
 
 	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", "localhost"))
 	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_PORT", ":8100"))
-	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("gitlab_token", ""))
+	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("gitlab_token", "glpat-8pVhpBeeBXxcoQdVef2R"))
 	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", "https://gitlab.udevs.io"))
 	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 2008))
 	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 1467))
+	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "app"))
 
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = "Here$houldBe$ome$ecretKey"
