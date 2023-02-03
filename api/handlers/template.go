@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
+	obs "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -24,12 +24,16 @@ import (
 // @Tags Template
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param template_folder body tmp.CreateFolderReq true "CreateFolderReq"
 // @Success 201 {object} status_http.Response{data=tmp.Folder} "Template folder data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateTemplateFolder(c *gin.Context) {
-	var folder tmp.CreateFolderReq
+	var (
+		folder              tmp.CreateFolderReq
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 
 	err := c.ShouldBindJSON(&folder)
 	if err != nil {
@@ -49,6 +53,13 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
@@ -63,17 +74,30 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 	folder.ProjectId = resourceEnvironment.GetId()
 
@@ -111,11 +135,15 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param template-folder-id path string true "template-folder-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetSingleFolderRes} "TemplateFolderBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 	folderId := c.Param("template-folder-id")
 
 	if !util.IsValidUUID(folderId) {
@@ -127,6 +155,12 @@ func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -149,17 +183,30 @@ func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	res, err := services.TemplateService().Template().GetSingleFolder(
@@ -190,12 +237,16 @@ func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param folder body tmp.UpdateFolderReq true "UpdateFolderReqBody"
 // @Success 200 {object} status_http.Response{data=tmp.Folder} "Folder data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
-	var folder tmp.UpdateFolderReq
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+		folder              tmp.UpdateFolderReq
+	)
 
 	err := c.ShouldBindJSON(&folder)
 	if err != nil {
@@ -215,6 +266,13 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
@@ -229,17 +287,30 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 	folder.ProjectId = resourceEnvironment.GetId()
 
@@ -277,11 +348,15 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param template-folder-id path string true "template-folder-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 	folderId := c.Param("template-folder-id")
 
 	if !util.IsValidUUID(folderId) {
@@ -293,6 +368,12 @@ func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -315,17 +396,30 @@ func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	res, err := services.TemplateService().Template().DeleteFolder(
@@ -356,10 +450,14 @@ func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetListFolderRes} "FolderBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetListTemplateFolder(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -373,6 +471,13 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
@@ -387,17 +492,30 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	res, err := services.TemplateService().Template().GetListFolder(
@@ -427,12 +545,16 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param template body tmp.CreateTemplateReq true "CreateTemplateReq"
 // @Success 201 {object} status_http.Response{data=tmp.Template} "Template data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateTemplate(c *gin.Context) {
-	var template tmp.CreateTemplateReq
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+		template            tmp.CreateTemplateReq
+	)
 
 	err := c.ShouldBindJSON(&template)
 	if err != nil {
@@ -452,6 +574,13 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
@@ -466,17 +595,30 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 	template.ProjectId = resourceEnvironment.GetId()
 
@@ -514,11 +656,15 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param template-id path string true "template-id"
 // @Success 200 {object} status_http.Response{data=tmp.Template} "TemplateBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleTemplate(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 	templateId := c.Param("template-id")
 
 	if !util.IsValidUUID(templateId) {
@@ -530,6 +676,12 @@ func (h *Handler) GetSingleTemplate(c *gin.Context) {
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -552,17 +704,30 @@ func (h *Handler) GetSingleTemplate(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	res, err := services.TemplateService().Template().GetSingleTemplate(
@@ -593,12 +758,16 @@ func (h *Handler) GetSingleTemplate(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param template body tmp.UpdateTemplateReq true "UpdateTemplateReqBody"
 // @Success 200 {object} status_http.Response{data=tmp.Template} "Template data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateTemplate(c *gin.Context) {
-	var template tmp.UpdateTemplateReq
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+		template            tmp.UpdateTemplateReq
+	)
 
 	err := c.ShouldBindJSON(&template)
 	if err != nil {
@@ -618,6 +787,13 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		err = errors.New("error getting resource id")
@@ -632,17 +808,30 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 	template.ProjectId = resourceEnvironment.GetId()
 
@@ -680,11 +869,15 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param template-id path string true "template-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteTemplate(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 	templateId := c.Param("template-id")
 
 	if !util.IsValidUUID(templateId) {
@@ -696,6 +889,12 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -718,17 +917,30 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	res, err := services.TemplateService().Template().DeleteTemplate(
@@ -759,6 +971,7 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param folder-id query string true "folder-id"
 // @Param limit query string true "limit"
 // @Param offset query string true "offset"
@@ -766,6 +979,10 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetListTemplate(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
+
 	limit, err := strconv.Atoi(c.DefaultQuery("limit", "100"))
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err)
@@ -782,6 +999,12 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -804,17 +1027,30 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	res, err := services.TemplateService().Template().GetListTemplate(
