@@ -76,8 +76,9 @@ message DeleteApiReferenceRequest {
 
 message GetListApiReferenceChangesRequest {
     string guid = 1;
-    int64 limit = 2;
-    int64 offset = 3;
+    string project_id = 2;
+    int64 limit = 3;
+    int64 offset = 4;
 }
 
 message GetListApiReferenceChangesResponse {

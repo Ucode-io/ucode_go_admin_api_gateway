@@ -5,39 +5,37 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"strconv"
-	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	obs "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )
 
-// CreateTemplateFolder godoc
+// CreateNoteFolder godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID create_template_folder
-// @Router /v1/template-folder [POST]
-// @Summary Create template folder
-// @Description Create template folder
-// @Tags Template
+// @ID create_note_folder
+// @Router /v1/note-folder [POST]
+// @Summary Create Note Folder
+// @Description Create Note Folder
+// @Tags Note
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param template_folder body tmp.CreateFolderReq true "CreateFolderReq"
-// @Success 201 {object} status_http.Response{data=tmp.Folder} "Template folder data"
+// @Param Note_Folder body tmp.CreateFolderNoteReq true "CreateFolderNoteReq"
+// @Success 201 {object} status_http.Response{data=tmp.FolderNote} "Note Folder data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) CreateTemplateFolder(c *gin.Context) {
+func (h *Handler) CreateNoteFolder(c *gin.Context) {
 	var (
-		folder              tmp.CreateFolderReq
+		folderNote          tmp.CreateFolderNoteReq
 		resourceEnvironment *obs.ResourceEnvironment
 	)
 
-	err := c.ShouldBindJSON(&folder)
+	err := c.ShouldBindJSON(&folderNote)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -101,7 +99,7 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 			return
 		}
 	}
-	folder.ProjectId = resourceEnvironment.GetId()
+	folderNote.ProjectId = resourceEnvironment.GetId()
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -110,12 +108,12 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	folder.CommitId = uuID.String()
-	folder.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
+	folderNote.CommitId = uuID.String()
+	folderNote.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
 
-	res, err := services.TemplateService().Template().CreateFolder(
+	res, err := services.TemplateService().Note().CreateFolderNote(
 		context.Background(),
-		&folder,
+		&folderNote,
 	)
 
 	if err != nil {
@@ -126,30 +124,30 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, res)
 }
 
-// GetSingleTemplateFolder godoc
+// GetSingleNoteFolder godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID get_single_template_folder
-// @Router /v1/template-folder/{template-folder-id} [GET]
-// @Summary Get single template folder
-// @Description Get single template folder
-// @Tags Template
+// @ID get_single_note_folder
+// @Router /v1/note-folder/{note-folder-id} [GET]
+// @Summary Get single Note Folder
+// @Description Get single Note Folder
+// @Tags Note
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param template-folder-id path string true "template-folder-id"
-// @Success 200 {object} status_http.Response{data=tmp.GetSingleFolderRes} "TemplateFolderBody"
+// @Param note-folder-id path string true "note-folder-id"
+// @Success 200 {object} status_http.Response{data=tmp.GetSingleFolderNoteRes} "NoteFolderBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
+func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
 	)
-	folderId := c.Param("template-folder-id")
+	folderNoteId := c.Param("note-folder-id")
 
-	if !util.IsValidUUID(folderId) {
-		h.handleResponse(c, status_http.InvalidArgument, "folder id is an invalid uuid")
+	if !util.IsValidUUID(folderNoteId) {
+		h.handleResponse(c, status_http.InvalidArgument, "FolderNote id is an invalid uuid")
 		return
 	}
 
@@ -211,10 +209,10 @@ func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
 		}
 	}
 
-	res, err := services.TemplateService().Template().GetSingleFolder(
+	res, err := services.TemplateService().Note().GetSingleFolderNote(
 		context.Background(),
-		&tmp.GetSingleFolderReq{
-			Id:        folderId,
+		&tmp.GetSingleFolderNoteReq{
+			Id:        folderNoteId,
 			ProjectId: resourceEnvironment.GetId(),
 			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -228,29 +226,29 @@ func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, res)
 }
 
-// UpdateTemplateFolder godoc
+// UpdateNoteFolder godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID update_template_folder
-// @Router /v1/template-folder [PUT]
-// @Summary Update template folder
-// @Description Update template folder
-// @Tags Template
+// @ID update_note_folder
+// @Router /v1/note-folder [PUT]
+// @Summary Update Note Folder
+// @Description Update Note Folder
+// @Tags Note
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param folder body tmp.UpdateFolderReq true "UpdateFolderReqBody"
-// @Success 200 {object} status_http.Response{data=tmp.Folder} "Folder data"
+// @Param FolderNote body tmp.UpdateFolderNoteReq true "UpdateFolderNoteReqBody"
+// @Success 200 {object} status_http.Response{data=tmp.FolderNote} "FolderNote data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
+func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
-		folder              tmp.UpdateFolderReq
+		folderNote          tmp.UpdateFolderNoteReq
 	)
 
-	err := c.ShouldBindJSON(&folder)
+	err := c.ShouldBindJSON(&folderNote)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -314,7 +312,7 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 			return
 		}
 	}
-	folder.ProjectId = resourceEnvironment.GetId()
+	folderNote.ProjectId = resourceEnvironment.GetId()
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -323,12 +321,12 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	folder.CommitId = uuID.String()
-	folder.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
+	folderNote.CommitId = uuID.String()
+	folderNote.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
 
-	res, err := services.TemplateService().Template().UpdateFolder(
+	res, err := services.TemplateService().Note().UpdateFolderNote(
 		context.Background(),
-		&folder,
+		&folderNote,
 	)
 
 	if err != nil {
@@ -339,27 +337,27 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, res)
 }
 
-// DeleteTemplateFolder godoc
+// DeleteNoteFolder godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID delete_template_folder
-// @Router /v1/template-folder/{template-folder-id} [DELETE]
-// @Summary Delete template folder
-// @Description Delete template folder
-// @Tags Template
+// @ID delete_note_folder
+// @Router /v1/note-folder/{note-folder-id} [DELETE]
+// @Summary Delete Note Folder
+// @Description Delete Note Folder
+// @Tags Note
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param template-folder-id path string true "template-folder-id"
+// @Param note-folder-id path string true "note-folder-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
+func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
 	)
-	folderId := c.Param("template-folder-id")
+	folderId := c.Param("note-folder-id")
 
 	if !util.IsValidUUID(folderId) {
 		h.handleResponse(c, status_http.InvalidArgument, "view id is an invalid uuid")
@@ -424,9 +422,9 @@ func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
 		}
 	}
 
-	res, err := services.TemplateService().Template().DeleteFolder(
+	res, err := services.TemplateService().Note().DeleteFolderNote(
 		context.Background(),
-		&tmp.DeleteFolderReq{
+		&tmp.DeleteFolderNoteReq{
 			Id:        folderId,
 			ProjectId: resourceEnvironment.GetId(),
 			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
@@ -441,22 +439,22 @@ func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
 	h.handleResponse(c, status_http.NoContent, res)
 }
 
-// GetListTemplateFolder godoc
+// GetListNoteFolder godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID get_list_template_folder
-// @Router /v1/template-folder [GET]
-// @Summary Get List template folder
-// @Description Get List template folder
-// @Tags Template
+// @ID get_list_note_folder
+// @Router /v1/note-folder [GET]
+// @Summary Get List Note Folder
+// @Description Get List Note Folder
+// @Tags Note
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Success 200 {object} status_http.Response{data=tmp.GetListFolderRes} "FolderBody"
+// @Success 200 {object} status_http.Response{data=tmp.GetListFolderNoteRes} "FolderNoteBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) GetListTemplateFolder(c *gin.Context) {
+func (h *Handler) GetListNoteFolder(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
 	)
@@ -520,9 +518,9 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 		}
 	}
 
-	res, err := services.TemplateService().Template().GetListFolder(
+	res, err := services.TemplateService().Note().GetListFolderNote(
 		context.Background(),
-		&tmp.GetListFolderReq{
+		&tmp.GetListFolderNoteReq{
 			ProjectId: resourceEnvironment.GetId(),
 			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -536,29 +534,29 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, res)
 }
 
-// CreateTemplate godoc
+// CreateNote godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID create_template
-// @Router /v1/template [POST]
-// @Summary Create template
-// @Description Create template
-// @Tags Template
+// @ID create_note
+// @Router /v1/note [POST]
+// @Summary Create Note
+// @Description Create Note
+// @Tags Note
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param template body tmp.CreateTemplateReq true "CreateTemplateReq"
-// @Success 201 {object} status_http.Response{data=tmp.Template} "Template data"
+// @Param Note body tmp.CreateNoteReq true "CreateNoteReq"
+// @Success 201 {object} status_http.Response{data=tmp.Note} "Note data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) CreateTemplate(c *gin.Context) {
+func (h *Handler) CreateNote(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
-		template            tmp.CreateTemplateReq
+		note                tmp.CreateNoteReq
 	)
 
-	err := c.ShouldBindJSON(&template)
+	err := c.ShouldBindJSON(&note)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -622,7 +620,7 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 			return
 		}
 	}
-	template.ProjectId = resourceEnvironment.GetId()
+	note.ProjectId = resourceEnvironment.GetId()
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -631,12 +629,12 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 		return
 	}
 
-	template.CommitId = uuID.String()
-	template.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
+	note.CommitId = uuID.String()
+	note.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
 
-	res, err := services.TemplateService().Template().CreateTemplate(
+	res, err := services.TemplateService().Note().CreateNote(
 		context.Background(),
-		&template,
+		&note,
 	)
 
 	if err != nil {
@@ -647,30 +645,30 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, res)
 }
 
-// GetSingleTemplate godoc
+// GetSingleNote godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID get_single_template
-// @Router /v1/template/{template-id} [GET]
-// @Summary Get single template
-// @Description Get single template
-// @Tags Template
+// @ID get_single_note
+// @Router /v1/note/{note-id} [GET]
+// @Summary Get single Note
+// @Description Get single Note
+// @Tags Note
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param template-id path string true "template-id"
-// @Success 200 {object} status_http.Response{data=tmp.Template} "TemplateBody"
+// @Param note-id path string true "note-id"
+// @Success 200 {object} status_http.Response{data=tmp.Note} "NoteBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) GetSingleTemplate(c *gin.Context) {
+func (h *Handler) GetSingleNote(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
 	)
-	templateId := c.Param("template-id")
+	noteId := c.Param("Note-id")
 
-	if !util.IsValidUUID(templateId) {
-		h.handleResponse(c, status_http.InvalidArgument, "folder id is an invalid uuid")
+	if !util.IsValidUUID(noteId) {
+		h.handleResponse(c, status_http.InvalidArgument, "FolderNote id is an invalid uuid")
 		return
 	}
 
@@ -732,10 +730,10 @@ func (h *Handler) GetSingleTemplate(c *gin.Context) {
 		}
 	}
 
-	res, err := services.TemplateService().Template().GetSingleTemplate(
+	res, err := services.TemplateService().Note().GetSingleNote(
 		context.Background(),
-		&tmp.GetSingleTemplateReq{
-			Id:        templateId,
+		&tmp.GetSingleNoteReq{
+			Id:        noteId,
 			ProjectId: resourceEnvironment.GetId(),
 			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -749,29 +747,29 @@ func (h *Handler) GetSingleTemplate(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, res)
 }
 
-// UpdateTemplate godoc
+// UpdateNote godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID update_template
-// @Router /v1/template [PUT]
-// @Summary Update template
-// @Description Update template
-// @Tags Template
+// @ID update_note
+// @Router /v1/note [PUT]
+// @Summary Update Note
+// @Description Update Note
+// @Tags Note
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param template body tmp.UpdateTemplateReq true "UpdateTemplateReqBody"
-// @Success 200 {object} status_http.Response{data=tmp.Template} "Template data"
+// @Param Note body tmp.UpdateNoteReq true "UpdateNoteReqBody"
+// @Success 200 {object} status_http.Response{data=tmp.Note} "Note data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) UpdateTemplate(c *gin.Context) {
+func (h *Handler) UpdateNote(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
-		template            tmp.UpdateTemplateReq
+		note                tmp.UpdateNoteReq
 	)
 
-	err := c.ShouldBindJSON(&template)
+	err := c.ShouldBindJSON(&note)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -835,7 +833,7 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 			return
 		}
 	}
-	template.ProjectId = resourceEnvironment.GetId()
+	note.ProjectId = resourceEnvironment.GetId()
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -844,12 +842,12 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 		return
 	}
 
-	template.CommitId = uuID.String()
-	template.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
+	note.CommitId = uuID.String()
+	note.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
 
-	res, err := services.TemplateService().Template().UpdateTemplate(
+	res, err := services.TemplateService().Note().UpdateNote(
 		context.Background(),
-		&template,
+		&note,
 	)
 
 	if err != nil {
@@ -860,30 +858,30 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, res)
 }
 
-// DeleteTemplate godoc
+// DeleteNote godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID delete_template
-// @Router /v1/template/{template-id} [DELETE]
-// @Summary Delete template
-// @Description Delete template
-// @Tags Template
+// @ID delete_note
+// @Router /v1/note/{note-id} [DELETE]
+// @Summary Delete Note
+// @Description Delete Note
+// @Tags Note
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param template-id path string true "template-id"
+// @Param note-id path string true "note-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) DeleteTemplate(c *gin.Context) {
+func (h *Handler) DeleteNote(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
 	)
-	templateId := c.Param("template-id")
+	noteId := c.Param("note-id")
 
-	if !util.IsValidUUID(templateId) {
-		h.handleResponse(c, status_http.InvalidArgument, "view id is an invalid uuid")
+	if !util.IsValidUUID(noteId) {
+		h.handleResponse(c, status_http.InvalidArgument, "node id is an invalid uuid")
 		return
 	}
 
@@ -945,10 +943,10 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 		}
 	}
 
-	res, err := services.TemplateService().Template().DeleteTemplate(
+	res, err := services.TemplateService().Note().DeleteNote(
 		context.Background(),
-		&tmp.DeleteTemplateReq{
-			Id:        templateId,
+		&tmp.DeleteNoteReq{
+			Id:        noteId,
 			ProjectId: resourceEnvironment.GetId(),
 			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -962,25 +960,25 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 	h.handleResponse(c, status_http.NoContent, res)
 }
 
-// GetListTemplate godoc
+// GetListNote godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID get_list_template
-// @Router /v1/template [GET]
-// @Summary Get List template
-// @Description Get List template
-// @Tags Template
+// @ID get_list_Note
+// @Router /v1/note [GET]
+// @Summary Get List Note
+// @Description Get List Note
+// @Tags Note
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param folder-id query string true "folder-id"
-// @Param limit query string true "limit"
-// @Param offset query string true "offset"
-// @Success 200 {object} status_http.Response{data=tmp.GetListFolderRes} "FolderBody"
+// @Param limit query string false "limit"
+// @Param offset query string false "offset"
+// @Success 200 {object} status_http.Response{data=tmp.GetListNoteRes} "NoteBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) GetListTemplate(c *gin.Context) {
+func (h *Handler) GetListNote(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
 	)
@@ -1055,9 +1053,9 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 		}
 	}
 
-	res, err := services.TemplateService().Template().GetListTemplate(
+	res, err := services.TemplateService().Note().GetListNote(
 		context.Background(),
-		&tmp.GetListTemplateReq{
+		&tmp.GetListNoteReq{
 			ProjectId: resourceEnvironment.GetId(),
 			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 			FolderId:  c.DefaultQuery("folder-id", ""),
@@ -1072,223 +1070,4 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, res)
-}
-
-// ConvertHtmlToPdf godoc
-// @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @ID convert_html_to_pdf
-// @Router /v1/html-to-pdf [POST]
-// @Summary Convert html to pdf
-// @Description Convert html to pdf
-// @Tags Template
-// @Accept json
-// @Produce json
-// @Param project-id body string true "project-id"
-// @Param template body models.HtmlBody true "HtmlBody"
-// @Success 201 {object} status_http.Response{data=tmp.PdfBody} "PdfBody data"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
-	var (
-		resourceEnvironment *obs.ResourceEnvironment
-		html                models.HtmlBody
-	)
-
-	err := c.ShouldBindJSON(&html)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-	structData, err := helper.ConvertMapToStruct(html.Data)
-
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
-
-	if util.IsValidUUID(resourceId.(string)) {
-		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-			c.Request.Context(),
-			&obs.GetResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ResourceId:    resourceId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	} else {
-		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-			c.Request.Context(),
-			&obs.GetDefaultResourceEnvironmentReq{
-				ResourceId: resourceId.(string),
-				ProjectId:  projectId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	}
-
-	resp, err := services.TemplateService().Template().ConvertHtmlToPdf(
-		context.Background(),
-		&tmp.HtmlBody{
-			Data:      structData,
-			Html:      html.Html,
-			ProjectId: resourceEnvironment.GetId(),
-		},
-	)
-
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	h.handleResponse(c, status_http.Created, resp)
-}
-
-// ConvertTemplateToHtml godoc
-// @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @ID convert_template_to_html
-// @Router /v1/template-to-html [POST]
-// @Summary Convert template to html
-// @Description Convert template to html
-// @Tags Template
-// @Accept json
-// @Produce json
-// @Param project-id query string true "project-id"
-// @Param view body models.HtmlBody true "TemplateBody"
-// @Success 201 {object} status_http.Response{data=models.HtmlBody} "HtmlBody data"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
-	var (
-		resourceEnvironment *obs.ResourceEnvironment
-		html                models.HtmlBody
-	)
-
-	err := c.ShouldBindJSON(&html)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
-	structData, err := helper.ConvertMapToStruct(html.Data)
-
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
-
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
-
-	if util.IsValidUUID(resourceId.(string)) {
-		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-			c.Request.Context(),
-			&obs.GetResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ResourceId:    resourceId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	} else {
-		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-			c.Request.Context(),
-			&obs.GetDefaultResourceEnvironmentReq{
-				ResourceId: resourceId.(string),
-				ProjectId:  projectId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	}
-
-	resp, err := services.TemplateService().Template().ConvertTemplateToHtml(
-		context.Background(),
-		&tmp.HtmlBody{
-			Data:      structData,
-			Html:      html.Html,
-			ProjectId: resourceEnvironment.GetId(),
-		},
-	)
-
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	h.handleResponse(c, status_http.Created, resp)
 }

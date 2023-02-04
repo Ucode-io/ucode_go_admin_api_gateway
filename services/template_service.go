@@ -11,15 +11,17 @@ import (
 
 type TemplateServiceI interface {
 	Template() tmp.TemplateFolderServiceClient
+	Note() tmp.NoteFolderServiceClient
 }
 
 type templateServiceClient struct {
 	templateService tmp.TemplateFolderServiceClient
+	noteService     tmp.NoteFolderServiceClient
 }
 
 func NewTemplateServiceClient(ctx context.Context, cfg config.Config) (TemplateServiceI, error) {
 
-	connCompanyService, err := grpc.DialContext(
+	connTemplateService, err := grpc.DialContext(
 		ctx,
 		cfg.TemplateServiceHost+cfg.TemplateGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -29,10 +31,15 @@ func NewTemplateServiceClient(ctx context.Context, cfg config.Config) (TemplateS
 	}
 
 	return &templateServiceClient{
-		templateService: tmp.NewTemplateFolderServiceClient(connCompanyService),
+		templateService: tmp.NewTemplateFolderServiceClient(connTemplateService),
+		noteService:     tmp.NewNoteFolderServiceClient(connTemplateService),
 	}, nil
 }
 
 func (g *templateServiceClient) Template() tmp.TemplateFolderServiceClient {
 	return g.templateService
+}
+
+func (g *templateServiceClient) Note() tmp.NoteFolderServiceClient {
+	return g.noteService
 }
