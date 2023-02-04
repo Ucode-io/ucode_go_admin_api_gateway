@@ -7,9 +7,11 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateCategory godoc
@@ -37,6 +39,12 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
 		return
 	}
+
+	commit_id := uuid.NewString()
+	version_id := "0a4d3e5a-a273-422c-bef3-aebea3f2cec9"
+
+	category.CommitId = commit_id
+	category.VersionId = version_id
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
@@ -123,10 +131,13 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 	// 	return
 	// }
 
+	version_id := "0a4d3e5a-a273-422c-bef3-aebea3f2cec9"
+
 	resp, err := services.ApiReferenceService().Category().Get(
 		context.Background(),
 		&ars.GetCategoryRequest{
-			Guid: id,
+			Guid:      id,
+			VersionId: version_id,
 		},
 	)
 	if err != nil {
@@ -163,7 +174,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		return
 	}
 	if !util.IsValidUUID(c.Query("project_id")) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid").Error())
 		return
 	}
 	namespace := c.GetString("namespace")
@@ -186,12 +197,15 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 	// 	return
 	// }
 
+	version_id := "0a4d3e5a-a273-422c-bef3-aebea3f2cec9"
+
 	resp, err := services.ApiReferenceService().Category().GetList(
 		context.Background(),
 		&ars.GetListCategoryRequest{
 			Limit:     int64(limit),
 			Offset:    int64(offset),
 			ProjectId: c.Query("project_id"),
+			VersionId: version_id,
 		},
 	)
 
@@ -221,11 +235,13 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&category)
 	if err != nil {
+		h.log.Error("error binding json", logger.Error(err))
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 	if !util.IsValidUUID(category.ProjectID) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
+		h.log.Error("project id is invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid").Error())
 		return
 	}
 
@@ -243,15 +259,22 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 	// }
 	// app.ProjectId = resourceId.(string)
 
+	commit_id := uuid.NewString()
+	version_id := "0a4d3e5a-a273-422c-bef3-aebea3f2cec9"
+	category.CommitId = commit_id
+	category.VersionId = version_id
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.log.Error("error getting service", logger.Error(err))
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 	attributes, err := helper.ConvertMapToStruct(category.Attributes)
 	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.log.Error("error converting map to struct", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -263,10 +286,13 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 			BaseUrl:    category.BaseUrl,
 			ProjectId:  category.ProjectID,
 			Attributes: attributes,
+			CommitId:   category.CommitId,
+			VersionId:  category.VersionId,
 		},
 	)
 
 	if err != nil {
+		h.log.Error("error updating category", logger.Error(err))
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}

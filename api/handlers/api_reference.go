@@ -5,6 +5,7 @@ import (
 	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -44,8 +45,6 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	
 
 	commit_id, _ := uuid.NewRandom()
 	version_id, _ := uuid.NewRandom()
@@ -246,6 +245,11 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 	// 	return
 	// }
 
+	commit_id := uuid.NewString()
+	version_id := "0a4d3e5a-a273-422c-bef3-aebea3f2cec9"
+	apiReference.CommitId = commit_id
+	apiReference.VersionId = version_id
+
 	resp, err := services.ApiReferenceService().ApiReference().Update(
 		context.Background(), &apiReference,
 		// &ars.ApiReference{
@@ -325,4 +329,94 @@ func (h *Handler) DeleteApiReference(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
+}
+
+// GetApiReferenceChanges godoc
+// @Security ApiKeyAuth
+// @ID get_api_reference_changes
+// @Router /v1/api-reference/{project_id}/{api_reference_id}/changes [GET]
+// @Summary Get Api Reference Changes
+// @Description Get Api Reference Changes
+// @Tags ApiReference
+// @Accept json
+// @Produce json
+// @Param api_reference_id path string true "api_reference_id"
+// @Param project_id path string true "project_id"
+// @Param page query int false "page"
+// @Param per_page query int false "per_page"
+// @Param sort query string false "sort"
+// @Param order query string false "order"
+// @Success 200 {object} status_http.Response{data=ars.ApiReferenceChanges} "Api Reference Changes"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
+	id := c.Param("api_reference_id")
+	project_id := c.Param("project_id")
+
+	if !util.IsValidUUID(id) {
+		err := errors.New("api_reference_id is an invalid uuid")
+		h.log.Error("api_reference_id is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "api_reference_id is an invalid uuid")
+		return
+	}
+
+	if !util.IsValidUUID(project_id) {
+		err := errors.New("project_id is an invalid uuid")
+		h.log.Error("project_id is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.log.Error("error getting service", logger.Error(err))
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	// resourceId, ok := c.Get("resource_id")
+	// if !ok {
+	// 	err = errors.New("error getting resource id")
+	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
+	// 	return
+	// }
+	
+	offset, err := h.getLimitParam(c)
+	if err != nil {
+		h.log.Error("error getting limit param", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	limit, err := h.getOffsetParam(c)
+	if err != nil {
+		h.log.Error("error getting offset param", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := services.ApiReferenceService().ApiReference().GetApiReferenceChanges(
+		context.Background(),
+		&ars.GetListApiReferenceChangesRequest{
+			Guid:      id,
+			ProjectId: project_id,
+			Offset:    int64(offset),
+			Limit:     int64(limit),
+		},
+	)
+
+	if err != nil {
+		h.log.Error("error getting api reference changes", logger.Error(err))
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
 }

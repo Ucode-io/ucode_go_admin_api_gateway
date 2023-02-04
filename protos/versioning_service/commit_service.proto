@@ -1,10 +1,10 @@
 syntax="proto3";
 
-package company_service;
-option go_package="genproto/company_service";
+package versioning_service;
+option go_package="genproto/versioning_service";
 
 import "google/protobuf/empty.proto";
-import "company.proto";
+import "versioning.proto";
 
 service CommitService {
     rpc Create(CreateCommitRequest) returns (CommitWithRelease) {}
@@ -48,6 +48,6 @@ message RestoreCommitRequest {
 }
 
 message InsertCommitResponse {
-    string id = 1;
-    int64 commit_id = 2;
+    string commit_id = 1;
+    string version_id = 2;
 }

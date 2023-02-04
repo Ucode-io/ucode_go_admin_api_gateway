@@ -27,19 +27,19 @@ type CreateApiReferenceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name             string          `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	AdditionalUrl    string          `protobuf:"bytes,2,opt,name=additional_url,json=additionalUrl,proto3" json:"additional_url,omitempty"`
-	Title            string          `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
-	Desc             string          `protobuf:"bytes,4,opt,name=desc,proto3" json:"desc,omitempty"`
-	Method           string          `protobuf:"bytes,5,opt,name=method,proto3" json:"method,omitempty"`
-	CategoryId       string          `protobuf:"bytes,6,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
-	ExternalUrl      string          `protobuf:"bytes,7,opt,name=external_url,json=externalUrl,proto3" json:"external_url,omitempty"`
-	Authentification bool            `protobuf:"varint,8,opt,name=authentification,proto3" json:"authentification,omitempty"`
-	NewWindow        bool            `protobuf:"varint,9,opt,name=new_window,json=newWindow,proto3" json:"new_window,omitempty"`
-	Attributes       *_struct.Struct `protobuf:"bytes,10,opt,name=attributes,proto3" json:"attributes,omitempty"`
-	ProjectId        string          `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	CommitId         string          `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId        string          `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	Name             string          `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`
+	AdditionalUrl    string          `protobuf:"bytes,2,opt,name=additional_url,json=additionalUrl,proto3" json:"additional_url"`
+	Title            string          `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
+	Desc             string          `protobuf:"bytes,4,opt,name=desc,proto3" json:"desc"`
+	Method           string          `protobuf:"bytes,5,opt,name=method,proto3" json:"method"`
+	CategoryId       string          `protobuf:"bytes,6,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
+	ExternalUrl      string          `protobuf:"bytes,7,opt,name=external_url,json=externalUrl,proto3" json:"external_url"`
+	Authentification bool            `protobuf:"varint,8,opt,name=authentification,proto3" json:"authentification"`
+	NewWindow        bool            `protobuf:"varint,9,opt,name=new_window,json=newWindow,proto3" json:"new_window"`
+	Attributes       *_struct.Struct `protobuf:"bytes,10,opt,name=attributes,proto3" json:"attributes"`
+	ProjectId        string          `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	CommitId         string          `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId        string          `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id"`
 }
 
 func (x *CreateApiReferenceRequest) Reset() {
@@ -170,20 +170,20 @@ type ApiReference struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid             string          `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
-	Name             string          `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	AdditionalUrl    string          `protobuf:"bytes,3,opt,name=additional_url,json=additionalUrl,proto3" json:"additional_url,omitempty"`
-	Title            string          `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
-	Desc             string          `protobuf:"bytes,5,opt,name=desc,proto3" json:"desc,omitempty"`
-	Method           string          `protobuf:"bytes,6,opt,name=method,proto3" json:"method,omitempty"`
-	CategoryId       string          `protobuf:"bytes,7,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
-	ExternalUrl      string          `protobuf:"bytes,8,opt,name=external_url,json=externalUrl,proto3" json:"external_url,omitempty"`
-	Authentification bool            `protobuf:"varint,9,opt,name=authentification,proto3" json:"authentification,omitempty"`
-	NewWindow        bool            `protobuf:"varint,10,opt,name=new_window,json=newWindow,proto3" json:"new_window,omitempty"`
-	Attributes       *_struct.Struct `protobuf:"bytes,11,opt,name=attributes,proto3" json:"attributes,omitempty"`
-	ProjectId        string          `protobuf:"bytes,12,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	VersionId        string          `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CommitId         string          `protobuf:"bytes,14,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	Guid             string          `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
+	Name             string          `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	AdditionalUrl    string          `protobuf:"bytes,3,opt,name=additional_url,json=additionalUrl,proto3" json:"additional_url"`
+	Title            string          `protobuf:"bytes,4,opt,name=title,proto3" json:"title"`
+	Desc             string          `protobuf:"bytes,5,opt,name=desc,proto3" json:"desc"`
+	Method           string          `protobuf:"bytes,6,opt,name=method,proto3" json:"method"`
+	CategoryId       string          `protobuf:"bytes,7,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
+	ExternalUrl      string          `protobuf:"bytes,8,opt,name=external_url,json=externalUrl,proto3" json:"external_url"`
+	Authentification bool            `protobuf:"varint,9,opt,name=authentification,proto3" json:"authentification"`
+	NewWindow        bool            `protobuf:"varint,10,opt,name=new_window,json=newWindow,proto3" json:"new_window"`
+	Attributes       *_struct.Struct `protobuf:"bytes,11,opt,name=attributes,proto3" json:"attributes"`
+	ProjectId        string          `protobuf:"bytes,12,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	VersionId        string          `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CommitId         string          `protobuf:"bytes,14,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
 }
 
 func (x *ApiReference) Reset() {
@@ -321,9 +321,9 @@ type GetApiReferenceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
-	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CommitId  string `protobuf:"bytes,3,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
+	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CommitId  string `protobuf:"bytes,3,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
 }
 
 func (x *GetApiReferenceRequest) Reset() {
@@ -384,12 +384,12 @@ type GetListApiReferenceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit      int64  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset     int64  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
-	CategoryId string `protobuf:"bytes,3,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
-	ProjectId  string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	VersionId  string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CommitId   string `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	Limit      int64  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
+	Offset     int64  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
+	CategoryId string `protobuf:"bytes,3,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
+	ProjectId  string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	VersionId  string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CommitId   string `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
 }
 
 func (x *GetListApiReferenceRequest) Reset() {
@@ -471,8 +471,8 @@ type GetListApiReferenceResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count         int64           `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	ApiReferences []*ApiReference `protobuf:"bytes,2,rep,name=api_references,json=apiReferences,proto3" json:"api_references,omitempty"`
+	Count         int64           `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
+	ApiReferences []*ApiReference `protobuf:"bytes,2,rep,name=api_references,json=apiReferences,proto3" json:"api_references"`
 }
 
 func (x *GetListApiReferenceResponse) Reset() {
@@ -526,8 +526,8 @@ type DeleteApiReferenceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
-	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
+	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id"`
 }
 
 func (x *DeleteApiReferenceRequest) Reset() {
@@ -574,6 +574,132 @@ func (x *DeleteApiReferenceRequest) GetVersionId() string {
 		return x.VersionId
 	}
 	return ""
+}
+
+type GetListApiReferenceChangesRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Limit     int64  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit"`
+	Offset    int64  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset"`
+}
+
+func (x *GetListApiReferenceChangesRequest) Reset() {
+	*x = GetListApiReferenceChangesRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_reference_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetListApiReferenceChangesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetListApiReferenceChangesRequest) ProtoMessage() {}
+
+func (x *GetListApiReferenceChangesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_reference_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetListApiReferenceChangesRequest.ProtoReflect.Descriptor instead.
+func (*GetListApiReferenceChangesRequest) Descriptor() ([]byte, []int) {
+	return file_api_reference_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetListApiReferenceChangesRequest) GetGuid() string {
+	if x != nil {
+		return x.Guid
+	}
+	return ""
+}
+
+func (x *GetListApiReferenceChangesRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *GetListApiReferenceChangesRequest) GetLimit() int64 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *GetListApiReferenceChangesRequest) GetOffset() int64 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+type GetListApiReferenceChangesResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Count         int64           `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
+	ApiReferences []*ApiReference `protobuf:"bytes,2,rep,name=api_references,json=apiReferences,proto3" json:"api_references"`
+}
+
+func (x *GetListApiReferenceChangesResponse) Reset() {
+	*x = GetListApiReferenceChangesResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_reference_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetListApiReferenceChangesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetListApiReferenceChangesResponse) ProtoMessage() {}
+
+func (x *GetListApiReferenceChangesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_reference_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetListApiReferenceChangesResponse.ProtoReflect.Descriptor instead.
+func (*GetListApiReferenceChangesResponse) Descriptor() ([]byte, []int) {
+	return file_api_reference_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetListApiReferenceChangesResponse) GetCount() int64 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *GetListApiReferenceChangesResponse) GetApiReferences() []*ApiReference {
+	if x != nil {
+		return x.ApiReferences
+	}
+	return nil
 }
 
 var File_api_reference_proto protoreflect.FileDescriptor
@@ -673,8 +799,25 @@ var file_api_reference_proto_rawDesc = []byte{
 	0x65, 0x6e, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x67,
 	0x75, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x67, 0x75, 0x69, 0x64, 0x12,
 	0x1d, 0x0a, 0x0a, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x09, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x32, 0xf5,
-	0x03, 0x0a, 0x13, 0x41, 0x70, 0x69, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x53,
+	0x01, 0x28, 0x09, 0x52, 0x09, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x22, 0x84,
+	0x01, 0x0a, 0x21, 0x47, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x41, 0x70, 0x69, 0x52, 0x65, 0x66,
+	0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x73, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x67, 0x75, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x67, 0x75, 0x69, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a,
+	0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x70, 0x72,
+	0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x16, 0x0a,
+	0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x6f,
+	0x66, 0x66, 0x73, 0x65, 0x74, 0x22, 0x86, 0x01, 0x0a, 0x22, 0x47, 0x65, 0x74, 0x4c, 0x69, 0x73,
+	0x74, 0x41, 0x70, 0x69, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x43, 0x68, 0x61,
+	0x6e, 0x67, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05,
+	0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x63, 0x6f, 0x75,
+	0x6e, 0x74, 0x12, 0x4a, 0x0a, 0x0e, 0x61, 0x70, 0x69, 0x5f, 0x72, 0x65, 0x66, 0x65, 0x72, 0x65,
+	0x6e, 0x63, 0x65, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x61, 0x70, 0x69,
+	0x5f, 0x72, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69,
+	0x63, 0x65, 0x2e, 0x41, 0x70, 0x69, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52,
+	0x0d, 0x61, 0x70, 0x69, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x73, 0x32, 0x87,
+	0x05, 0x0a, 0x13, 0x41, 0x70, 0x69, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x53,
 	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x61, 0x0a, 0x06, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
 	0x12, 0x30, 0x2e, 0x61, 0x70, 0x69, 0x5f, 0x72, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65,
 	0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x41,
@@ -705,9 +848,19 @@ var file_api_reference_proto_rawDesc = []byte{
 	0x63, 0x65, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x41, 0x70, 0x69, 0x52, 0x65, 0x66, 0x65,
 	0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67,
 	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45,
-	0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x42, 0x20, 0x5a, 0x1e, 0x67, 0x65, 0x6e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x2f, 0x61, 0x70, 0x69, 0x5f, 0x72, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65,
-	0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x12, 0x8f, 0x01, 0x0a, 0x16, 0x47, 0x65, 0x74, 0x41, 0x70,
+	0x69, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65,
+	0x73, 0x12, 0x38, 0x2e, 0x61, 0x70, 0x69, 0x5f, 0x72, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63,
+	0x65, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x47, 0x65, 0x74, 0x4c, 0x69, 0x73,
+	0x74, 0x41, 0x70, 0x69, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x43, 0x68, 0x61,
+	0x6e, 0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x39, 0x2e, 0x61, 0x70,
+	0x69, 0x5f, 0x72, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x5f, 0x73, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x2e, 0x47, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x41, 0x70, 0x69, 0x52, 0x65,
+	0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x73, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x20, 0x5a, 0x1e, 0x67, 0x65, 0x6e, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x61, 0x70, 0x69, 0x5f, 0x72, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e,
+	0x63, 0x65, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -722,36 +875,41 @@ func file_api_reference_proto_rawDescGZIP() []byte {
 	return file_api_reference_proto_rawDescData
 }
 
-var file_api_reference_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_api_reference_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_api_reference_proto_goTypes = []interface{}{
-	(*CreateApiReferenceRequest)(nil),   // 0: api_reference_service.CreateApiReferenceRequest
-	(*ApiReference)(nil),                // 1: api_reference_service.ApiReference
-	(*GetApiReferenceRequest)(nil),      // 2: api_reference_service.GetApiReferenceRequest
-	(*GetListApiReferenceRequest)(nil),  // 3: api_reference_service.GetListApiReferenceRequest
-	(*GetListApiReferenceResponse)(nil), // 4: api_reference_service.GetListApiReferenceResponse
-	(*DeleteApiReferenceRequest)(nil),   // 5: api_reference_service.DeleteApiReferenceRequest
-	(*_struct.Struct)(nil),              // 6: google.protobuf.Struct
-	(*empty.Empty)(nil),                 // 7: google.protobuf.Empty
+	(*CreateApiReferenceRequest)(nil),          // 0: api_reference_service.CreateApiReferenceRequest
+	(*ApiReference)(nil),                       // 1: api_reference_service.ApiReference
+	(*GetApiReferenceRequest)(nil),             // 2: api_reference_service.GetApiReferenceRequest
+	(*GetListApiReferenceRequest)(nil),         // 3: api_reference_service.GetListApiReferenceRequest
+	(*GetListApiReferenceResponse)(nil),        // 4: api_reference_service.GetListApiReferenceResponse
+	(*DeleteApiReferenceRequest)(nil),          // 5: api_reference_service.DeleteApiReferenceRequest
+	(*GetListApiReferenceChangesRequest)(nil),  // 6: api_reference_service.GetListApiReferenceChangesRequest
+	(*GetListApiReferenceChangesResponse)(nil), // 7: api_reference_service.GetListApiReferenceChangesResponse
+	(*_struct.Struct)(nil),                     // 8: google.protobuf.Struct
+	(*empty.Empty)(nil),                        // 9: google.protobuf.Empty
 }
 var file_api_reference_proto_depIdxs = []int32{
-	6, // 0: api_reference_service.CreateApiReferenceRequest.attributes:type_name -> google.protobuf.Struct
-	6, // 1: api_reference_service.ApiReference.attributes:type_name -> google.protobuf.Struct
-	1, // 2: api_reference_service.GetListApiReferenceResponse.api_references:type_name -> api_reference_service.ApiReference
-	0, // 3: api_reference_service.ApiReferenceService.Create:input_type -> api_reference_service.CreateApiReferenceRequest
-	1, // 4: api_reference_service.ApiReferenceService.Update:input_type -> api_reference_service.ApiReference
-	2, // 5: api_reference_service.ApiReferenceService.Get:input_type -> api_reference_service.GetApiReferenceRequest
-	3, // 6: api_reference_service.ApiReferenceService.GetList:input_type -> api_reference_service.GetListApiReferenceRequest
-	5, // 7: api_reference_service.ApiReferenceService.Delete:input_type -> api_reference_service.DeleteApiReferenceRequest
-	1, // 8: api_reference_service.ApiReferenceService.Create:output_type -> api_reference_service.ApiReference
-	1, // 9: api_reference_service.ApiReferenceService.Update:output_type -> api_reference_service.ApiReference
-	1, // 10: api_reference_service.ApiReferenceService.Get:output_type -> api_reference_service.ApiReference
-	4, // 11: api_reference_service.ApiReferenceService.GetList:output_type -> api_reference_service.GetListApiReferenceResponse
-	7, // 12: api_reference_service.ApiReferenceService.Delete:output_type -> google.protobuf.Empty
-	8, // [8:13] is the sub-list for method output_type
-	3, // [3:8] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	8,  // 0: api_reference_service.CreateApiReferenceRequest.attributes:type_name -> google.protobuf.Struct
+	8,  // 1: api_reference_service.ApiReference.attributes:type_name -> google.protobuf.Struct
+	1,  // 2: api_reference_service.GetListApiReferenceResponse.api_references:type_name -> api_reference_service.ApiReference
+	1,  // 3: api_reference_service.GetListApiReferenceChangesResponse.api_references:type_name -> api_reference_service.ApiReference
+	0,  // 4: api_reference_service.ApiReferenceService.Create:input_type -> api_reference_service.CreateApiReferenceRequest
+	1,  // 5: api_reference_service.ApiReferenceService.Update:input_type -> api_reference_service.ApiReference
+	2,  // 6: api_reference_service.ApiReferenceService.Get:input_type -> api_reference_service.GetApiReferenceRequest
+	3,  // 7: api_reference_service.ApiReferenceService.GetList:input_type -> api_reference_service.GetListApiReferenceRequest
+	5,  // 8: api_reference_service.ApiReferenceService.Delete:input_type -> api_reference_service.DeleteApiReferenceRequest
+	6,  // 9: api_reference_service.ApiReferenceService.GetApiReferenceChanges:input_type -> api_reference_service.GetListApiReferenceChangesRequest
+	1,  // 10: api_reference_service.ApiReferenceService.Create:output_type -> api_reference_service.ApiReference
+	1,  // 11: api_reference_service.ApiReferenceService.Update:output_type -> api_reference_service.ApiReference
+	1,  // 12: api_reference_service.ApiReferenceService.Get:output_type -> api_reference_service.ApiReference
+	4,  // 13: api_reference_service.ApiReferenceService.GetList:output_type -> api_reference_service.GetListApiReferenceResponse
+	9,  // 14: api_reference_service.ApiReferenceService.Delete:output_type -> google.protobuf.Empty
+	7,  // 15: api_reference_service.ApiReferenceService.GetApiReferenceChanges:output_type -> api_reference_service.GetListApiReferenceChangesResponse
+	10, // [10:16] is the sub-list for method output_type
+	4,  // [4:10] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_api_reference_proto_init() }
@@ -832,6 +990,30 @@ func file_api_reference_proto_init() {
 				return nil
 			}
 		}
+		file_api_reference_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetListApiReferenceChangesRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_reference_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetListApiReferenceChangesResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -839,7 +1021,7 @@ func file_api_reference_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_api_reference_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

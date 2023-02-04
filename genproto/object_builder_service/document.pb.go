@@ -26,14 +26,14 @@ type CreateDocumentRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FileLink  string   `protobuf:"bytes,1,opt,name=file_link,json=fileLink,proto3" json:"file_link,omitempty"`
-	ObjectId  string   `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
-	Size      int32    `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
-	Type      string   `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
-	TableSlug string   `protobuf:"bytes,5,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	Name      string   `protobuf:"bytes,6,opt,name=name,proto3" json:"name,omitempty"`
-	Tags      []string `protobuf:"bytes,7,rep,name=tags,proto3" json:"tags,omitempty"`
-	ProjectId string   `protobuf:"bytes,8,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	FileLink  string   `protobuf:"bytes,1,opt,name=file_link,json=fileLink,proto3" json:"file_link"`
+	ObjectId  string   `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id"`
+	Size      int32    `protobuf:"varint,3,opt,name=size,proto3" json:"size"`
+	Type      string   `protobuf:"bytes,4,opt,name=type,proto3" json:"type"`
+	TableSlug string   `protobuf:"bytes,5,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	Name      string   `protobuf:"bytes,6,opt,name=name,proto3" json:"name"`
+	Tags      []string `protobuf:"bytes,7,rep,name=tags,proto3" json:"tags"`
+	ProjectId string   `protobuf:"bytes,8,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *CreateDocumentRequest) Reset() {
@@ -129,16 +129,16 @@ type Document struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	FileLink  string   `protobuf:"bytes,2,opt,name=file_link,json=fileLink,proto3" json:"file_link,omitempty"`
-	ObjectId  string   `protobuf:"bytes,3,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
-	Size      int32    `protobuf:"varint,4,opt,name=size,proto3" json:"size,omitempty"`
-	Type      string   `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
-	TableSlug string   `protobuf:"bytes,6,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
-	Name      string   `protobuf:"bytes,7,opt,name=name,proto3" json:"name,omitempty"`
-	CreatedAt string   `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	Tags      []string `protobuf:"bytes,9,rep,name=tags,proto3" json:"tags,omitempty"`
-	ProjectId string   `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	FileLink  string   `protobuf:"bytes,2,opt,name=file_link,json=fileLink,proto3" json:"file_link"`
+	ObjectId  string   `protobuf:"bytes,3,opt,name=object_id,json=objectId,proto3" json:"object_id"`
+	Size      int32    `protobuf:"varint,4,opt,name=size,proto3" json:"size"`
+	Type      string   `protobuf:"bytes,5,opt,name=type,proto3" json:"type"`
+	TableSlug string   `protobuf:"bytes,6,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
+	Name      string   `protobuf:"bytes,7,opt,name=name,proto3" json:"name"`
+	CreatedAt string   `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	Tags      []string `protobuf:"bytes,9,rep,name=tags,proto3" json:"tags"`
+	ProjectId string   `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *Document) Reset() {
@@ -248,8 +248,8 @@ type GetAllDocumentsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Documents []*Document `protobuf:"bytes,1,rep,name=documents,proto3" json:"documents,omitempty"`
-	Count     int32       `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Documents []*Document `protobuf:"bytes,1,rep,name=documents,proto3" json:"documents"`
+	Count     int32       `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetAllDocumentsResponse) Reset() {
@@ -303,11 +303,11 @@ type GetAllDocumentsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ObjectId  string `protobuf:"bytes,1,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
-	Tags      string `protobuf:"bytes,2,opt,name=tags,proto3" json:"tags,omitempty"`
-	StartDate string `protobuf:"bytes,3,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
-	EndDate   string `protobuf:"bytes,4,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
-	ProjectId string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ObjectId  string `protobuf:"bytes,1,opt,name=object_id,json=objectId,proto3" json:"object_id"`
+	Tags      string `protobuf:"bytes,2,opt,name=tags,proto3" json:"tags"`
+	StartDate string `protobuf:"bytes,3,opt,name=start_date,json=startDate,proto3" json:"start_date"`
+	EndDate   string `protobuf:"bytes,4,opt,name=end_date,json=endDate,proto3" json:"end_date"`
+	ProjectId string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetAllDocumentsRequest) Reset() {
@@ -382,8 +382,8 @@ type DocumentPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *DocumentPrimaryKey) Reset() {

@@ -1,10 +1,10 @@
 syntax="proto3";
 
-package company_service;
-option go_package="genproto/company_service";
+package versioning_service;
+option go_package="genproto/versioning_service";
 
 import "google/protobuf/empty.proto";
-import "company.proto";
+import "versioning.proto";
 
 service ReleaseService {
     rpc Create(CreateReleaseRequest) returns (ReleaseWithCommit) {}
@@ -61,7 +61,7 @@ message GetCurrentReleaseRequest {
 }
 
 message GetCurrentReleaseResponse {
-    string commit_id = 1;
+    string version_id = 1;
 }
 
 message SetCurrentReleaseRequest {

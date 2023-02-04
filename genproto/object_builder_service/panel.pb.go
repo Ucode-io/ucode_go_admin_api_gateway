@@ -27,15 +27,15 @@ type CreatePanelRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Query         string          `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
-	Coordinates   []int32         `protobuf:"varint,2,rep,packed,name=coordinates,proto3" json:"coordinates,omitempty"`
-	Attributes    *_struct.Struct `protobuf:"bytes,3,opt,name=attributes,proto3" json:"attributes,omitempty"`
-	Title         string          `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
-	DashboardId   string          `protobuf:"bytes,5,opt,name=dashboard_id,json=dashboardId,proto3" json:"dashboard_id,omitempty"`
-	HasPagination bool            `protobuf:"varint,6,opt,name=has_pagination,json=hasPagination,proto3" json:"has_pagination,omitempty"`
-	ProjectId     string          `protobuf:"bytes,7,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	CommitId      int64           `protobuf:"varint,8,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	CommitGuid    string          `protobuf:"bytes,9,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid,omitempty"`
+	Query         string          `protobuf:"bytes,1,opt,name=query,proto3" json:"query"`
+	Coordinates   []int32         `protobuf:"varint,2,rep,packed,name=coordinates,proto3" json:"coordinates"`
+	Attributes    *_struct.Struct `protobuf:"bytes,3,opt,name=attributes,proto3" json:"attributes"`
+	Title         string          `protobuf:"bytes,4,opt,name=title,proto3" json:"title"`
+	DashboardId   string          `protobuf:"bytes,5,opt,name=dashboard_id,json=dashboardId,proto3" json:"dashboard_id"`
+	HasPagination bool            `protobuf:"varint,6,opt,name=has_pagination,json=hasPagination,proto3" json:"has_pagination"`
+	ProjectId     string          `protobuf:"bytes,7,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	CommitId      int64           `protobuf:"varint,8,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	CommitGuid    string          `protobuf:"bytes,9,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid"`
 }
 
 func (x *CreatePanelRequest) Reset() {
@@ -138,14 +138,14 @@ type Panel struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string          `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Query         string          `protobuf:"bytes,2,opt,name=query,proto3" json:"query,omitempty"`
-	Coordinates   []int32         `protobuf:"varint,3,rep,packed,name=coordinates,proto3" json:"coordinates,omitempty"`
-	Attributes    *_struct.Struct `protobuf:"bytes,4,opt,name=attributes,proto3" json:"attributes,omitempty"`
-	Title         string          `protobuf:"bytes,5,opt,name=title,proto3" json:"title,omitempty"`
-	DashboardId   string          `protobuf:"bytes,6,opt,name=dashboard_id,json=dashboardId,proto3" json:"dashboard_id,omitempty"`
-	HasPagination bool            `protobuf:"varint,7,opt,name=has_pagination,json=hasPagination,proto3" json:"has_pagination,omitempty"`
-	ProjectId     string          `protobuf:"bytes,8,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id            string          `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Query         string          `protobuf:"bytes,2,opt,name=query,proto3" json:"query"`
+	Coordinates   []int32         `protobuf:"varint,3,rep,packed,name=coordinates,proto3" json:"coordinates"`
+	Attributes    *_struct.Struct `protobuf:"bytes,4,opt,name=attributes,proto3" json:"attributes"`
+	Title         string          `protobuf:"bytes,5,opt,name=title,proto3" json:"title"`
+	DashboardId   string          `protobuf:"bytes,6,opt,name=dashboard_id,json=dashboardId,proto3" json:"dashboard_id"`
+	HasPagination bool            `protobuf:"varint,7,opt,name=has_pagination,json=hasPagination,proto3" json:"has_pagination"`
+	ProjectId     string          `protobuf:"bytes,8,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *Panel) Reset() {
@@ -241,8 +241,8 @@ type GetAllPanelsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Panels []*Panel `protobuf:"bytes,1,rep,name=panels,proto3" json:"panels,omitempty"`
-	Count  int32    `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Panels []*Panel `protobuf:"bytes,1,rep,name=panels,proto3" json:"panels"`
+	Count  int32    `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetAllPanelsResponse) Reset() {
@@ -296,8 +296,8 @@ type GetAllPanelsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Title     string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string `protobuf:"bytes,1,opt,name=title,proto3" json:"title"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetAllPanelsRequest) Reset() {
@@ -351,8 +351,8 @@ type PanelPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *PanelPrimaryKey) Reset() {
@@ -406,8 +406,8 @@ type PanelCoordinates struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string  `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Coordinates []int32 `protobuf:"varint,2,rep,packed,name=coordinates,proto3" json:"coordinates,omitempty"`
+	Id          string  `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Coordinates []int32 `protobuf:"varint,2,rep,packed,name=coordinates,proto3" json:"coordinates"`
 }
 
 func (x *PanelCoordinates) Reset() {
@@ -461,8 +461,8 @@ type UpdatePanelCoordinatesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PanelCoordinates []*PanelCoordinates `protobuf:"bytes,1,rep,name=panel_coordinates,json=panelCoordinates,proto3" json:"panel_coordinates,omitempty"`
-	ProjectId        string              `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	PanelCoordinates []*PanelCoordinates `protobuf:"bytes,1,rep,name=panel_coordinates,json=panelCoordinates,proto3" json:"panel_coordinates"`
+	ProjectId        string              `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *UpdatePanelCoordinatesRequest) Reset() {
