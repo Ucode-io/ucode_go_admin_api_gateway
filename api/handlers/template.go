@@ -536,6 +536,102 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, res)
 }
 
+// GetTemplateFolderCommits godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID get_commits_template_folder
+// @Router /v1/template-folder/commits/{template-folder-id} [GET]
+// @Summary Get Commits template folder
+// @Description Get Commits template folder
+// @Tags Template
+// @Accept json
+// @Produce json
+// @Param project-id query string true "project-id"
+// @Param template-folder-id path string true "template-folder-id"
+// @Success 200 {object} status_http.Response{data=tmp.GetListTemplateRes} "GetListTemplateRes"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetTemplateFolderCommits(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	res, err := services.TemplateService().Template().GetTemplateFolderObjectCommits(
+		context.Background(),
+		&tmp.GetTemplateFolderObjectCommitsReq{
+			ProjectId: resourceEnvironment.GetId(),
+			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:        c.Param("template-folder-id"),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, res)
+}
+
 // CreateTemplate godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
@@ -975,8 +1071,8 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param folder-id query string true "folder-id"
-// @Param limit query string true "limit"
-// @Param offset query string true "offset"
+// @Param limit query string false "limit"
+// @Param offset query string false "offset"
 // @Success 200 {object} status_http.Response{data=tmp.GetListFolderRes} "FolderBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -1063,6 +1159,102 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 			FolderId:  c.DefaultQuery("folder-id", ""),
 			Limit:     int32(limit),
 			Offset:    int32(offset),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, res)
+}
+
+// GetTemplateCommits godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID get_commits_template
+// @Router /v1/template/commits/{template-id} [GET]
+// @Summary Get Commits template
+// @Description Get Commits template
+// @Tags Template
+// @Accept json
+// @Produce json
+// @Param project-id query string true "project-id"
+// @Param template-id path string true "template-id"
+// @Success 200 {object} status_http.Response{data=tmp.GetListTemplateRes} "GetListTemplateRes"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetTemplateCommits(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	res, err := services.TemplateService().Template().GetTemplateObjectCommits(
+		context.Background(),
+		&tmp.GetTemplateObjectCommitsReq{
+			ProjectId: resourceEnvironment.GetId(),
+			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:        c.Param("template-id"),
 		},
 	)
 

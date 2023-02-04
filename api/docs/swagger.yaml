@@ -2760,6 +2760,15 @@ definitions:
           $ref: '#/definitions/template_service.Note'
         type: array
     type: object
+  template_service.GetListTemplateRes:
+    properties:
+      count:
+        type: integer
+      templates:
+        items:
+          $ref: '#/definitions/template_service.Template'
+        type: array
+    type: object
   template_service.GetSingleFolderNoteRes:
     properties:
       count:
@@ -10087,6 +10096,68 @@ paths:
       summary: Get single Note Folder
       tags:
       - Note
+  /v1/note-folder/commits/{note-folder-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Commits note folder
+      operationId: get_commits_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-folder-id
+        in: path
+        name: note-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListFolderNoteRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListFolderNoteRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Commits note folder
+      tags:
+      - Note
   /v1/note/{note-id}:
     delete:
       consumes:
@@ -10201,6 +10272,68 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get single Note
+      tags:
+      - Note
+  /v1/note/commits/{note-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Commits note
+      operationId: get_commits_note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-id
+        in: path
+        name: note-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListNoteRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListNoteRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Commits note
       tags:
       - Note
   /v1/object-upsert/{table_slug}:
@@ -12295,12 +12428,10 @@ paths:
       - description: limit
         in: query
         name: limit
-        required: true
         type: string
       - description: offset
         in: query
         name: offset
-        required: true
         type: string
       produces:
       - application/json
@@ -12758,6 +12889,68 @@ paths:
       summary: Get single template folder
       tags:
       - Template
+  /v1/template-folder/commits/{template-folder-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Commits template folder
+      operationId: get_commits_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-folder-id
+        in: path
+        name: template-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListTemplateRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListTemplateRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Commits template folder
+      tags:
+      - Template
   /v1/template-to-html:
     post:
       consumes:
@@ -12935,6 +13128,68 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get single template
+      tags:
+      - Template
+  /v1/template/commits/{template-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Commits template
+      operationId: get_commits_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-id
+        in: path
+        name: template-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListTemplateRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListTemplateRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Commits template
       tags:
       - Template
   /v1/upload:

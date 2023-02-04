@@ -534,6 +534,102 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, res)
 }
 
+// GetNoteFolderCommits godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID get_commits_note_folder
+// @Router /v1/note-folder/commits/{note-folder-id} [GET]
+// @Summary Get Commits note folder
+// @Description Get Commits note folder
+// @Tags Note
+// @Accept json
+// @Produce json
+// @Param project-id query string true "project-id"
+// @Param note-folder-id path string true "note-folder-id"
+// @Success 200 {object} status_http.Response{data=tmp.GetListFolderNoteRes} "GetListFolderNoteRes"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	res, err := services.TemplateService().Note().GetNoteFolderObjectCommits(
+		context.Background(),
+		&tmp.GetNoteFolderObjectCommitsReq{
+			ProjectId: resourceEnvironment.GetId(),
+			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:        c.Param("note-folder-id"),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, res)
+}
+
 // CreateNote godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
@@ -1061,6 +1157,102 @@ func (h *Handler) GetListNote(c *gin.Context) {
 			FolderId:  c.DefaultQuery("folder-id", ""),
 			Limit:     int32(limit),
 			Offset:    int32(offset),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, res)
+}
+
+// GetNoteCommits godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID get_commits_note
+// @Router /v1/note/commits/{note-id} [GET]
+// @Summary Get Commits note
+// @Description Get Commits note
+// @Tags Note
+// @Accept json
+// @Produce json
+// @Param project-id query string true "project-id"
+// @Param note-id path string true "note-id"
+// @Success 200 {object} status_http.Response{data=tmp.GetListNoteRes} "GetListNoteRes"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetNoteCommits(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	res, err := services.TemplateService().Note().GetNoteObjectCommits(
+		context.Background(),
+		&tmp.GetNoteObjectCommitsReq{
+			ProjectId: resourceEnvironment.GetId(),
+			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:        c.Param("note-id"),
 		},
 	)
 
