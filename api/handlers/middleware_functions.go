@@ -121,7 +121,7 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType str
 }
 
 func (h *Handler) CreateAutoCommitForAdminChange(c *gin.Context, environmentID, commitType string, project_id string) (versionId, commitGuid string, err error) {
-	authInfo, err := h.GetAuthInfo(c)
+	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
 		return "", "", err
 	}

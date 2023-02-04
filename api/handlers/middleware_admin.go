@@ -30,7 +30,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func (h *Handler) adminHasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
+func (h *Handler) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuperAdminRes, bool) {
 	bearerToken := c.GetHeader("Authorization")
 	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
@@ -62,16 +62,7 @@ func (h *Handler) adminHasAccess(c *gin.Context) (*auth_service.V2HasAccessUserR
 		return nil, false
 	}
 
-	return &auth_service.V2HasAccessUserRes{
-		CreatedAt: resp.CreatedAt,
-		UserId:    resp.UserId,
-		UpdatedAt: resp.UpdatedAt,
-		ExpiresAt: resp.ExpiresAt,
-		Data:      resp.Data,
-		Id:        resp.Id,
-		Ip:        resp.Ip,
-		ProjectId: resp.ProjectId,
-	}, true
+	return resp, true
 }
 
 func (h *Handler) adminAuthInfo(c *gin.Context) (result *auth_service.HasAccessSuperAdminRes, err error) {

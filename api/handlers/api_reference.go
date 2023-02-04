@@ -70,7 +70,7 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 
 	// set: commit_id
 	resp, err := services.ApiReferenceService().ApiReference().Create(
-		context.Background(),
+		c.Request.Context(),
 		&apiReference,
 	)
 
@@ -131,7 +131,7 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 	}
 
 	resp, err := services.ApiReferenceService().ApiReference().Get(
-		context.Background(),
+		c.Request.Context(),
 		&ars.GetApiReferenceRequest{
 			Guid:      id,
 			VersionId: activeVersion.GetVersionId(),
@@ -276,7 +276,7 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 	apiReference.VersionId = versionGuid
 
 	resp, err := services.ApiReferenceService().ApiReference().Update(
-		context.Background(), &apiReference,
+		c.Request.Context(), &apiReference,
 	)
 
 	if err != nil {
@@ -339,7 +339,7 @@ func (h *Handler) DeleteApiReference(c *gin.Context) {
 	}
 
 	resp, err := services.ApiReferenceService().ApiReference().Delete(
-		context.Background(),
+		c.Request.Context(),
 		&ars.DeleteApiReferenceRequest{
 			Guid:      id,
 			VersionId: versionGuid,
