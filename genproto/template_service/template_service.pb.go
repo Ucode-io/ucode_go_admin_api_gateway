@@ -7,7 +7,6 @@
 package template_service
 
 import (
-	_ "genproto/note_service"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -47,6 +46,7 @@ func file_template_service_proto_init() {
 		return
 	}
 	file_template_proto_init()
+	file_note_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

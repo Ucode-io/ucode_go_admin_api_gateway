@@ -211,6 +211,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/export-to-json", h.ExportToJSON)
 		v1.POST("import-from-json", h.ImportFromJSON)
 
+		// template
+		v1.POST("/template-folder", h.CreateTemplateFolder)
+		v1.GET("/template-folder/:template-folder-id", h.GetSingleTemplateFolder)
+		v1.PUT("/template-folder", h.UpdateTemplateFolder)
+		v1.DELETE("/template-folder/:template-folder-id", h.DeleteTemplateFolder)
+		v1.GET("/template-folder", h.GetListTemplateFolder)
+		v1.POST("/template", h.CreateTemplate)
+		v1.GET("/template/:template-id", h.GetSingleTemplate)
+		v1.PUT("/template", h.UpdateTemplate)
+		v1.DELETE("/template/:template-id", h.DeleteTemplate)
+		v1.GET("/template", h.GetListTemplate)
 	}
 
 	v1Admin := r.Group("/v1")

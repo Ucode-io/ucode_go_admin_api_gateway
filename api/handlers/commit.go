@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	obs "ucode/ucode_go_api_gateway/genproto/company_service"
+	obs "ucode/ucode_go_api_gateway/genproto/versioning_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -31,7 +31,7 @@ func (h *Handler) CreateCommit(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Commit().Create(
+	resp, err := h.companyServices.VersioningService().Commit().Create(
 		context.Background(),
 		&commit,
 	)
@@ -65,7 +65,7 @@ func (h *Handler) GetCommitByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Commit().GetByID(
+	resp, err := h.companyServices.VersioningService().Commit().GetByID(
 		context.Background(),
 		&obs.CommitPrimaryKey{
 			Id: commitID,
@@ -105,7 +105,7 @@ func (h *Handler) GetAllCommits(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Commit().GetList(
+	resp, err := h.companyServices.VersioningService().Commit().GetList(
 		context.Background(),
 		&obs.GetCommitListRequest{
 			Limit:         int32(limit),

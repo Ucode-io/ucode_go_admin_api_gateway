@@ -24,7 +24,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/auth_service.ConfirmStrategies'
+        type: integer
       id:
         type: string
       name:
@@ -40,16 +40,6 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
-  auth_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -262,9 +252,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -273,34 +263,6 @@ definitions:
   company_service.AddResourceResponse:
     properties:
       id:
-        type: string
-    type: object
-  company_service.CommitWithRelease:
-    properties:
-      author_id:
-        type: string
-      commit_type:
-        type: string
-      created_at:
-        type: string
-      environment_id:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      release_info:
-        $ref: '#/definitions/company_service.CommitWithRelease_Release'
-    type: object
-  company_service.CommitWithRelease_Release:
-    properties:
-      id:
-        type: string
-      is_current:
-        type: boolean
-      version:
         type: string
     type: object
   company_service.Company:
@@ -350,9 +312,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -361,19 +323,6 @@ definitions:
   company_service.ConfigureResourceResponse:
     properties:
       id:
-        type: string
-    type: object
-  company_service.CreateCommitRequest:
-    properties:
-      author_id:
-        type: string
-      commit_type:
-        type: string
-      environment_id:
-        type: string
-      name:
-        type: string
-      project_id:
         type: string
     type: object
   company_service.CreateEnvironmentRequest:
@@ -400,23 +349,6 @@ definitions:
       title:
         type: string
     type: object
-  company_service.CreateReleaseRequest:
-    properties:
-      author_id:
-        type: string
-      commit_id:
-        type: string
-      description:
-        type: string
-      environment_id:
-        type: string
-      is_current:
-        type: boolean
-      project_id:
-        type: string
-      release_type:
-        $ref: '#/definitions/company_service.ReleaseType'
-    type: object
   company_service.CreateResourceReq:
     properties:
       company_id:
@@ -435,9 +367,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.EmptyProto:
     type: object
@@ -487,24 +419,10 @@ definitions:
       count:
         type: integer
     type: object
-  company_service.GetCommitListResponse:
-    properties:
-      commits:
-        items:
-          $ref: '#/definitions/company_service.CommitWithRelease'
-        type: array
-      count:
-        type: integer
-    type: object
   company_service.GetCompanyByIdResponse:
     properties:
       company:
         $ref: '#/definitions/company_service.Company'
-    type: object
-  company_service.GetCurrentReleaseResponse:
-    properties:
-      commit_id:
-        type: string
     type: object
   company_service.GetEnvironmentListResponse:
     properties:
@@ -531,15 +449,6 @@ definitions:
       projects:
         items:
           $ref: '#/definitions/company_service.Project'
-        type: array
-    type: object
-  company_service.GetReleaseListResponse:
-    properties:
-      count:
-        type: integer
-      releases:
-        items:
-          $ref: '#/definitions/company_service.ReleaseWithCommit'
         type: array
     type: object
   company_service.GetReourceListResponse:
@@ -593,48 +502,6 @@ definitions:
       id:
         type: string
     type: object
-  company_service.ReleaseType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ReleaseType_UNDEFINED
-    - ReleaseType_MAJOR
-    - ReleaseType_MINOR
-    - ReleaseType_PATCH
-  company_service.ReleaseWithCommit:
-    properties:
-      author_id:
-        type: string
-      commit_info:
-        $ref: '#/definitions/company_service.ReleaseWithCommit_Commit'
-      created_at:
-        type: string
-      description:
-        type: string
-      environment_id:
-        type: string
-      id:
-        type: string
-      is_current:
-        type: boolean
-      project_id:
-        type: string
-      updated_at:
-        type: string
-      version:
-        type: string
-    type: object
-  company_service.ReleaseWithCommit_Commit:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-    type: object
   company_service.RemoveResourceRequest:
     properties:
       id:
@@ -647,9 +514,9 @@ definitions:
       id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
     type: object
@@ -666,18 +533,6 @@ definitions:
       username:
         type: string
     type: object
-  company_service.ResourceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ResourceType_NOT_DECIDED
-    - ResourceType_MONGODB
-    - ResourceType_CLICKHOUSE
-    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -691,7 +546,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -723,32 +578,6 @@ definitions:
       resource_environment_id:
         type: string
     type: object
-  company_service.ServiceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ServiceType_NOT_SPECIFIED
-    - ServiceType_BUILDER_SERVICE
-    - ServiceType_ANALYTICS_SERVICE
-  company_service.SetCurrentReleaseRequest:
-    properties:
-      environment_id:
-        type: string
-      id:
-        type: string
-      project_id:
-        type: string
-    type: object
-  company_service.UpdateReleaseRequest:
-    properties:
-      description:
-        type: string
-      id:
-        type: string
-    type: object
   company_service.UpdateResourceRequest:
     properties:
       credentials:
@@ -764,7 +593,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -807,6 +636,8 @@ definitions:
         type: string
       httpscheme:
         type: string
+      localhost:
+        type: string
       minioAccessKeyID:
         type: string
       minioEndpoint:
@@ -846,9 +677,17 @@ definitions:
         type: string
       smsServiceHost:
         type: string
+      templateGRPCPort:
+        type: string
+      templateServiceHost:
+        type: string
       ucodeNamespace:
         type: string
       version:
+        type: string
+      versioningGRPCPort:
+        type: string
+      versioningServiceHost:
         type: string
     type: object
   handlers.Path:
@@ -1596,7 +1435,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
+        type: integer
       guid:
         type: string
       name:
@@ -1619,16 +1458,6 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
-  object_builder_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -1715,10 +1544,8 @@ definitions:
         type: string
       automatic:
         type: boolean
-      commit_guid:
-        type: string
       commit_id:
-        type: integer
+        type: string
       default:
         type: string
       id:
@@ -1739,29 +1566,26 @@ definitions:
         type: string
       unique:
         type: boolean
+      version_id:
+        type: string
     type: object
   object_builder_service.CreateFieldsAndRelationsRequest:
     properties:
+      commit_id:
+        type: string
       fields:
         items:
           $ref: '#/definitions/object_builder_service.CreateFieldRequest'
         type: array
-      options:
-        $ref: '#/definitions/object_builder_service.CreateFieldsAndRelationsRequest_Options'
+      project_id:
+        type: string
       relations:
         items:
           $ref: '#/definitions/object_builder_service.CreateRelationRequest'
         type: array
-    type: object
-  object_builder_service.CreateFieldsAndRelationsRequest_Options:
-    properties:
-      commit_guid:
-        type: string
-      commit_id:
-        type: integer
-      project_id:
-        type: string
       table_id:
+        type: string
+      version_id:
         type: string
     type: object
   object_builder_service.CreateFieldsAndRelationsResponse:
@@ -1803,10 +1627,8 @@ definitions:
         items:
           type: string
         type: array
-      commit_guid:
-        type: string
       commit_id:
-        type: integer
+        type: string
       default_limit:
         type: string
       default_values:
@@ -1859,6 +1681,8 @@ definitions:
         items:
           type: string
         type: array
+      version_id:
+        type: string
       view_fields:
         items:
           type: string
@@ -2222,11 +2046,6 @@ definitions:
       id:
         type: string
     type: object
-  object_builder_service.PdfBody:
-    properties:
-      link:
-        type: string
-    type: object
   object_builder_service.QuickFilter:
     properties:
       default_value:
@@ -2380,6 +2199,8 @@ definitions:
         items:
           type: string
         type: array
+      commit_id:
+        type: string
       default_limit:
         type: string
       default_values:
@@ -2434,6 +2255,8 @@ definitions:
         items:
           type: string
         type: array
+      version_id:
+        type: string
       view_fields:
         items:
           type: string
@@ -2768,6 +2591,282 @@ definitions:
       kind:
         description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
     type: object
+  template_service.CreateFolderReq:
+    properties:
+      commit_id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.CreateTemplateReq:
+    properties:
+      commit_id:
+        type: string
+      folder_id:
+        type: string
+      html:
+        type: string
+      project_id:
+        type: string
+      size:
+        items:
+          type: string
+        type: array
+      tables:
+        items:
+          $ref: '#/definitions/template_service.CreateTemplateReq_Table'
+        type: array
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.CreateTemplateReq_Table:
+    properties:
+      filter:
+        type: string
+      object_id:
+        type: string
+      relations:
+        items:
+          $ref: '#/definitions/template_service.CreateTemplateReq_Table_Relation'
+        type: array
+      table_id:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.CreateTemplateReq_Table_Relation:
+    properties:
+      relation_id:
+        type: string
+    type: object
+  template_service.Folder:
+    properties:
+      commit_id:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.GetListFolderRes:
+    properties:
+      count:
+        type: integer
+      folders:
+        items:
+          $ref: '#/definitions/template_service.Folder'
+        type: array
+    type: object
+  template_service.GetSingleFolderRes:
+    properties:
+      count:
+        type: integer
+      folders:
+        items:
+          $ref: '#/definitions/template_service.Folder'
+        type: array
+    type: object
+  template_service.PdfBody:
+    properties:
+      link:
+        type: string
+    type: object
+  template_service.Template:
+    properties:
+      commit_id:
+        type: string
+      folder_id:
+        type: string
+      html:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      size:
+        items:
+          type: string
+        type: array
+      tables:
+        items:
+          $ref: '#/definitions/template_service.Template_Table'
+        type: array
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.Template_Table:
+    properties:
+      filter:
+        type: string
+      object_id:
+        type: string
+      relations:
+        items:
+          $ref: '#/definitions/template_service.Template_Table_Relation'
+        type: array
+      table_id:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.Template_Table_Relation:
+    properties:
+      relation_id:
+        type: string
+    type: object
+  template_service.UpdateFolderReq:
+    properties:
+      commit_id:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.UpdateTemplateReq:
+    properties:
+      commit_id:
+        type: string
+      folder_id:
+        type: string
+      html:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      size:
+        items:
+          type: string
+        type: array
+      tables:
+        items:
+          $ref: '#/definitions/template_service.UpdateTemplateReq_Table'
+        type: array
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.UpdateTemplateReq_Table:
+    properties:
+      filter:
+        type: string
+      object_id:
+        type: string
+      relations:
+        items:
+          $ref: '#/definitions/template_service.UpdateTemplateReq_Table_Relation'
+        type: array
+      table_id:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.UpdateTemplateReq_Table_Relation:
+    properties:
+      relation_id:
+        type: string
+    type: object
+  versioning_service.CreateReleaseRequest:
+    properties:
+      author_id:
+        type: string
+      commit_id:
+        type: string
+      description:
+        type: string
+      environment_id:
+        type: string
+      is_current:
+        type: boolean
+      project_id:
+        type: string
+      release_type:
+        type: integer
+    type: object
+  versioning_service.GetCurrentReleaseResponse:
+    properties:
+      version_id:
+        type: string
+    type: object
+  versioning_service.GetReleaseListResponse:
+    properties:
+      count:
+        type: integer
+      releases:
+        items:
+          $ref: '#/definitions/versioning_service.ReleaseWithCommit'
+        type: array
+    type: object
+  versioning_service.ReleaseWithCommit:
+    properties:
+      author_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/versioning_service.ReleaseWithCommit_Commit'
+      created_at:
+        type: string
+      description:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      is_current:
+        type: boolean
+      project_id:
+        type: string
+      updated_at:
+        type: string
+      version:
+        type: string
+    type: object
+  versioning_service.ReleaseWithCommit_Commit:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  versioning_service.SetCurrentReleaseRequest:
+    properties:
+      environment_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  versioning_service.UpdateReleaseRequest:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+    type: object
 info:
   contact: {}
   termsOfService: https://udevs.io
@@ -2933,7 +3032,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -3115,7 +3214,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -3794,7 +3893,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4072,7 +4171,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4411,7 +4510,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4502,6 +4601,9 @@ paths:
         name: category_id
         type: string
       - in: query
+        name: commit_id
+        type: string
+      - in: query
         name: limit
         type: integer
       - in: query
@@ -4509,6 +4611,9 @@ paths:
         type: integer
       - in: query
         name: project_id
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json
@@ -4655,7 +4760,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4934,7 +5039,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -5228,7 +5333,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: ""
         "400":
           description: Bad Request
           schema:
@@ -5260,6 +5365,9 @@ paths:
       operationId: get_all_category
       parameters:
       - in: query
+        name: commit_id
+        type: string
+      - in: query
         name: limit
         type: integer
       - in: query
@@ -5267,6 +5375,9 @@ paths:
         type: integer
       - in: query
         name: project_id
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json
@@ -5413,7 +5524,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -5535,163 +5646,6 @@ paths:
       summary: Get close cashbox
       tags:
       - Appointment
-  /v1/commit:
-    get:
-      consumes:
-      - application/json
-      description: Get all commits
-      operationId: get_all_commits
-      parameters:
-      - in: query
-        name: commit_type
-        type: string
-      - in: query
-        name: created_at
-        type: string
-      - in: query
-        name: environment_id
-        type: string
-      - in: query
-        name: limit
-        type: integer
-      - in: query
-        name: offset
-        type: integer
-      - in: query
-        name: project_id
-        type: string
-      - in: query
-        name: search
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: CommitBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.GetCommitListResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all commits
-      tags:
-      - Commit
-    post:
-      consumes:
-      - application/json
-      description: Create commit
-      operationId: create_commit
-      parameters:
-      - description: CreateCommitRequestBody
-        in: body
-        name: commit
-        required: true
-        schema:
-          $ref: '#/definitions/company_service.CreateCommitRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Commit data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.CommitWithRelease'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create commit
-      tags:
-      - Commit
-  /v1/commit/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get commit by id
-      operationId: get_commit_by_id
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: CommitBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.CommitWithRelease'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get commit by id
-      tags:
-      - Commit
   /v1/company:
     get:
       description: Get all companies
@@ -6083,7 +6037,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -6952,7 +6906,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7239,7 +7193,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7523,7 +7477,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7976,7 +7930,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8205,6 +8159,9 @@ paths:
         type: string
       - in: query
         name: table_slug
+        type: string
+      - in: query
+        name: version_id
         type: string
       - in: query
         name: with_many_relation
@@ -8449,7 +8406,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8732,7 +8689,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -9078,7 +9035,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -9177,7 +9134,7 @@ paths:
         type: string
       - description: HtmlBody
         in: body
-        name: view
+        name: template
         required: true
         schema:
           $ref: '#/definitions/models.HtmlBody'
@@ -9191,7 +9148,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/object_builder_service.PdfBody'
+                  $ref: '#/definitions/template_service.PdfBody'
               type: object
         "400":
           description: Bad Request
@@ -9215,7 +9172,7 @@ paths:
       - ApiKeyAuth: []
       summary: Convert html to pdf
       tags:
-      - View
+      - Template
   /v1/import-from-json:
     post:
       consumes:
@@ -9349,7 +9306,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -9656,7 +9613,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10522,6 +10479,9 @@ paths:
       - in: query
         name: table_slug
         type: string
+      - in: query
+        name: version_id
+        type: string
       produces:
       - application/json
       responses:
@@ -10719,7 +10679,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10779,7 +10739,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.GetReleaseListResponse'
+                  $ref: '#/definitions/versioning_service.GetReleaseListResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -10815,7 +10775,7 @@ paths:
         name: release
         required: true
         schema:
-          $ref: '#/definitions/company_service.CreateReleaseRequest'
+          $ref: '#/definitions/versioning_service.CreateReleaseRequest'
       produces:
       - application/json
       responses:
@@ -10826,7 +10786,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.ReleaseWithCommit'
+                  $ref: '#/definitions/versioning_service.ReleaseWithCommit'
               type: object
         "400":
           description: Bad Request
@@ -10867,7 +10827,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10912,7 +10872,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.ReleaseWithCommit'
+                  $ref: '#/definitions/versioning_service.ReleaseWithCommit'
               type: object
         "400":
           description: Invalid Argument
@@ -10953,7 +10913,7 @@ paths:
         name: release
         required: true
         schema:
-          $ref: '#/definitions/company_service.UpdateReleaseRequest'
+          $ref: '#/definitions/versioning_service.UpdateReleaseRequest'
       produces:
       - application/json
       responses:
@@ -10964,7 +10924,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.ReleaseWithCommit'
+                  $ref: '#/definitions/versioning_service.ReleaseWithCommit'
               type: object
         "400":
           description: Bad Request
@@ -11001,7 +10961,7 @@ paths:
         name: release
         required: true
         schema:
-          $ref: '#/definitions/company_service.SetCurrentReleaseRequest'
+          $ref: '#/definitions/versioning_service.SetCurrentReleaseRequest'
       produces:
       - application/json
       responses:
@@ -11059,7 +11019,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.GetCurrentReleaseResponse'
+                  $ref: '#/definitions/versioning_service.GetCurrentReleaseResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -11409,7 +11369,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11489,6 +11449,499 @@ paths:
       summary: Get table by id
       tags:
       - Table
+  /v1/template:
+    get:
+      consumes:
+      - application/json
+      description: Get List template
+      operationId: get_list_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: folder-id
+        in: query
+        name: folder-id
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FolderBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListFolderRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List template
+      tags:
+      - Template
+    post:
+      consumes:
+      - application/json
+      description: Create template
+      operationId: create_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateTemplateReq
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.CreateTemplateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Template data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Template'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create template
+      tags:
+      - Template
+    put:
+      consumes:
+      - application/json
+      description: Update template
+      operationId: update_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateTemplateReqBody
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.UpdateTemplateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Template data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Template'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update template
+      tags:
+      - Template
+  /v1/template-folder:
+    get:
+      consumes:
+      - application/json
+      description: Get List template folder
+      operationId: get_list_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FolderBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListFolderRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List template folder
+      tags:
+      - Template
+    post:
+      consumes:
+      - application/json
+      description: Create template folder
+      operationId: create_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateFolderReq
+        in: body
+        name: template_folder
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.CreateFolderReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Template folder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Folder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create template folder
+      tags:
+      - Template
+    put:
+      consumes:
+      - application/json
+      description: Update template folder
+      operationId: update_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateFolderReqBody
+        in: body
+        name: folder
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.UpdateFolderReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Folder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Folder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update template folder
+      tags:
+      - Template
+  /v1/template-folder/{template-folder-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete template folder
+      operationId: delete_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-folder-id
+        in: path
+        name: template-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete template folder
+      tags:
+      - Template
+    get:
+      consumes:
+      - application/json
+      description: Get single template folder
+      operationId: get_single_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-folder-id
+        in: path
+        name: template-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TemplateFolderBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetSingleFolderRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single template folder
+      tags:
+      - Template
   /v1/template-to-html:
     post:
       consumes:
@@ -11546,7 +11999,123 @@ paths:
       - ApiKeyAuth: []
       summary: Convert template to html
       tags:
-      - View
+      - Template
+  /v1/template/{template-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete template
+      operationId: delete_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-id
+        in: path
+        name: template-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete template
+      tags:
+      - Template
+    get:
+      consumes:
+      - application/json
+      description: Get single template
+      operationId: get_single_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-id
+        in: path
+        name: template-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TemplateBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Template'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single template
+      tags:
+      - Template
   /v1/upload:
     post:
       consumes:
@@ -11938,7 +12507,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12291,7 +12860,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12583,7 +13152,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12869,7 +13438,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
