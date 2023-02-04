@@ -37,7 +37,7 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 	}
 
 	if !util.IsValidUUID(apiReference.ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid").Error())
 		return
 	}
 
@@ -54,10 +54,14 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
 		return
 	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
 
 	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, apiReference.GetProjectId())
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 		return
 	}
 
@@ -106,15 +110,19 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(c.Query("environment_id")) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("category id is invalid uuid"))
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
 		return
 	}
-
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
 	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
 		c.Request.Context(),
 		&vcs.GetCurrentReleaseRequest{
-			EnvironmentId: c.Query("environment_id"),
+			EnvironmentId: environmentId.(string),
 		},
 	)
 	if err != nil {
@@ -169,19 +177,24 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 		return
 	}
 	if !util.IsValidUUID(c.Query("project_id")) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid").Error())
 		return
 	}
 
-	if !util.IsValidUUID(c.Query("environment_id")) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("category id is invalid uuid"))
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
+		return
+	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
 	}
 
 	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
 		c.Request.Context(),
 		&vcs.GetCurrentReleaseRequest{
-			EnvironmentId: c.Query("environment_id"),
+			EnvironmentId: environmentId.(string),
 		},
 	)
 	if err != nil {
@@ -230,8 +243,8 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(apiReference.ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid"))
+	if !util.IsValidUUID(apiReference.GetProjectId()) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid").Error())
 		return
 	}
 
@@ -248,10 +261,14 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
 		return
 	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
 
 	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, apiReference.GetProjectId())
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 		return
 	}
 
@@ -310,10 +327,14 @@ func (h *Handler) DeleteApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
 		return
 	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
 
 	versionGuid, _, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, projectId)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 		return
 	}
 

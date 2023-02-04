@@ -69,6 +69,8 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("VERSION", versionGuid, "COMMIT_ID", commitGuid)
+
 	category.CommitId = commitGuid
 	category.VersionId = versionGuid
 
@@ -114,19 +116,24 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
-	if !util.IsValidUUID(c.Query("environment_id")) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid"))
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
+		return
+	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
 	}
 
 	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
 		c.Request.Context(),
 		&vcs.GetCurrentReleaseRequest{
-			EnvironmentId: c.Query("environment_id"),
+			EnvironmentId: environmentId.(string),
 		},
 	)
 	if err != nil {
@@ -185,15 +192,20 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(c.Query("environment_id")) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid"))
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
+		return
+	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
 	}
 
 	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
 		c.Request.Context(),
 		&vcs.GetCurrentReleaseRequest{
-			EnvironmentId: c.Query("environment_id"),
+			EnvironmentId: environmentId.(string),
 		},
 	)
 	if err != nil {
@@ -253,13 +265,17 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
 		return
 	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
 
 	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(
 		c, environmentId.(string),
 		config.COMMIT_TYPE_FIELD, category.ProjectID,
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 		return
 	}
 
@@ -330,15 +346,20 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(c.Query("environment_id")) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid"))
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
+		return
+	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
 	}
 
 	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
 		c.Request.Context(),
 		&vcs.GetCurrentReleaseRequest{
-			EnvironmentId: c.Query("environment_id"),
+			EnvironmentId: environmentId.(string),
 		},
 	)
 	if err != nil {
@@ -353,7 +374,6 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 			VersionId: activeVersion.GetVersionId(),
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
