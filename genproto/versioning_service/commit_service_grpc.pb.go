@@ -28,6 +28,7 @@ type CommitServiceClient interface {
 	GetList(ctx context.Context, in *GetCommitListRequest, opts ...grpc.CallOption) (*GetCommitListResponse, error)
 	Restore(ctx context.Context, in *RestoreCommitRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Insert(ctx context.Context, in *CreateCommitRequest, opts ...grpc.CallOption) (*InsertCommitResponse, error)
+	GetMultipleCommitInfo(ctx context.Context, in *GetMultipleCommitInfoRequest, opts ...grpc.CallOption) (*GetMultipleCommitInfoResponse, error)
 }
 
 type commitServiceClient struct {
@@ -83,6 +84,15 @@ func (c *commitServiceClient) Insert(ctx context.Context, in *CreateCommitReques
 	return out, nil
 }
 
+func (c *commitServiceClient) GetMultipleCommitInfo(ctx context.Context, in *GetMultipleCommitInfoRequest, opts ...grpc.CallOption) (*GetMultipleCommitInfoResponse, error) {
+	out := new(GetMultipleCommitInfoResponse)
+	err := c.cc.Invoke(ctx, "/versioning_service.CommitService/GetMultipleCommitInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CommitServiceServer is the server API for CommitService service.
 // All implementations must embed UnimplementedCommitServiceServer
 // for forward compatibility
@@ -92,6 +102,7 @@ type CommitServiceServer interface {
 	GetList(context.Context, *GetCommitListRequest) (*GetCommitListResponse, error)
 	Restore(context.Context, *RestoreCommitRequest) (*empty.Empty, error)
 	Insert(context.Context, *CreateCommitRequest) (*InsertCommitResponse, error)
+	GetMultipleCommitInfo(context.Context, *GetMultipleCommitInfoRequest) (*GetMultipleCommitInfoResponse, error)
 	mustEmbedUnimplementedCommitServiceServer()
 }
 
@@ -113,6 +124,9 @@ func (UnimplementedCommitServiceServer) Restore(context.Context, *RestoreCommitR
 }
 func (UnimplementedCommitServiceServer) Insert(context.Context, *CreateCommitRequest) (*InsertCommitResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Insert not implemented")
+}
+func (UnimplementedCommitServiceServer) GetMultipleCommitInfo(context.Context, *GetMultipleCommitInfoRequest) (*GetMultipleCommitInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMultipleCommitInfo not implemented")
 }
 func (UnimplementedCommitServiceServer) mustEmbedUnimplementedCommitServiceServer() {}
 
@@ -217,6 +231,24 @@ func _CommitService_Insert_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CommitService_GetMultipleCommitInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMultipleCommitInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommitServiceServer).GetMultipleCommitInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/versioning_service.CommitService/GetMultipleCommitInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommitServiceServer).GetMultipleCommitInfo(ctx, req.(*GetMultipleCommitInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CommitService_ServiceDesc is the grpc.ServiceDesc for CommitService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -243,6 +275,10 @@ var CommitService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Insert",
 			Handler:    _CommitService_Insert_Handler,
+		},
+		{
+			MethodName: "GetMultipleCommitInfo",
+			Handler:    _CommitService_GetMultipleCommitInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

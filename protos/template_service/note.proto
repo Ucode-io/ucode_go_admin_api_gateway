@@ -14,6 +14,7 @@ service NoteFolderService {
     rpc GetSingleNote(GetSingleNoteReq) returns (Note) {}
     rpc UpdateNote(UpdateNoteReq) returns (Note) {}
     rpc DeleteNote(DeleteNoteReq) returns (google.protobuf.Empty) {}
+    rpc GetNoteObjectCommits(GetNoteObjectCommitsReq) returns (GetListNoteRes) {}
 
     // folder rpc methods
     rpc CreateFolderNote(CreateFolderNoteReq) returns (FolderNote) {}
@@ -21,6 +22,19 @@ service NoteFolderService {
     rpc GetSingleFolderNote(GetSingleFolderNoteReq) returns (GetSingleFolderNoteRes) {}
     rpc UpdateFolderNote(UpdateFolderNoteReq) returns (FolderNote) {}
     rpc DeleteFolderNote(DeleteFolderNoteReq) returns (google.protobuf.Empty) {}
+    rpc GetNoteFolderObjectCommits(GetNoteFolderObjectCommitsReq) returns (GetListFolderNoteRes) {}
+}
+
+message GetNoteObjectCommitsReq {
+    string project_id = 1;
+    string id = 2;
+    string version_id = 3;
+}
+
+message GetNoteFolderObjectCommitsReq {
+    string project_id = 1;
+    string id = 2;
+    string version_id = 3;
 }
 
 message DeleteNoteReq {

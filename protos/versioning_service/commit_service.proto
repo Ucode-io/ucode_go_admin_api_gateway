@@ -12,6 +12,7 @@ service CommitService {
     rpc GetList(GetCommitListRequest) returns (GetCommitListResponse) {}
     rpc Restore(RestoreCommitRequest) returns (google.protobuf.Empty) {}
     rpc Insert(CreateCommitRequest) returns (InsertCommitResponse) {}
+    rpc GetMultipleCommitInfo(GetMultipleCommitInfoRequest) returns (GetMultipleCommitInfoResponse) {}
 }
 
 message CreateCommitRequest {
@@ -50,4 +51,25 @@ message RestoreCommitRequest {
 message InsertCommitResponse {
     string commit_id = 1;
     string version_id = 2;
+}
+
+message GetMultipleCommitInfoRequest {
+    repeated string commit_ids = 1;
+    string project_id = 2;
+}
+
+message CommitInfo {
+    string commit_id = 1;
+    string version_id = 2;
+    string project_id = 3;
+    string author_id = 4;
+    string name = 5;
+    string commit_type = 6;
+    string created_at = 7;
+    string updated_at = 8;
+}
+
+message GetMultipleCommitInfoResponse {
+    map<string, CommitInfo> commits = 1;
+    int64 count = 2;
 }

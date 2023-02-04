@@ -277,7 +277,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.PUT("/api-reference", h.UpdateApiReference)
 		v1Admin.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
 		v1Admin.GET("/api-reference", h.GetAllApiReferences)
-		v1Admin.DELETE("/api-reference/:api_reference_id", h.DeleteApiReference)
+		v1Admin.DELETE("/api-reference/:project_id/:api_reference_id", h.DeleteApiReference)
+		v1Admin.GET("/api-reference/history/:project_id/:api_reference_id", h.GetApiReferenceChanges)
 
 		v1Admin.POST("/category", h.CreateCategory)
 		v1Admin.PUT("/category", h.UpdateCategory)

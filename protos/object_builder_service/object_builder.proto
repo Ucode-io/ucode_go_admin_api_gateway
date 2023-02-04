@@ -27,6 +27,7 @@ message CommonMessage {
     string table_slug = 1;
     google.protobuf.Struct data = 2;
     string project_id = 3;
+    string version_id = 4;
 }
 message ManyToManyMessage {
     string table_from = 1;

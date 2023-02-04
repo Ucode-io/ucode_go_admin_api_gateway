@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -18,23 +18,22 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		res, ok := h.adminHasAccess(c)
 		if !ok {
-			c.Abort()
+			_ = c.AbortWithError(401, errors.New("unauthorized"))
 			return
 		}
+		log.Printf("AUTH OBJECT: %+v", res)
 		c.Set("Auth", res)
 		c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Set("environment_id", c.GetHeader("Environment-Id"))
 		c.Set("resource_id", c.GetHeader("Resource-Id"))
-		fmt.Println(":::1")
 		c.Next()
 	}
 }
 
-func (h *Handler) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuperAdminRes, bool) {
+func (h *Handler) adminHasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
 	bearerToken := c.GetHeader("Authorization")
 	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
-		fmt.Println(":::2")
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		return nil, false
 	}
@@ -63,7 +62,16 @@ func (h *Handler) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuperAd
 		return nil, false
 	}
 
-	return resp, true
+	return &auth_service.V2HasAccessUserRes{
+		CreatedAt: resp.CreatedAt,
+		UserId:    resp.UserId,
+		UpdatedAt: resp.UpdatedAt,
+		ExpiresAt: resp.ExpiresAt,
+		Data:      resp.Data,
+		Id:        resp.Id,
+		Ip:        resp.Ip,
+		ProjectId: resp.ProjectId,
+	}, true
 }
 
 func (h *Handler) adminAuthInfo(c *gin.Context) (result *auth_service.HasAccessSuperAdminRes, err error) {

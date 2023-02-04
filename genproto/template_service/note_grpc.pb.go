@@ -29,12 +29,14 @@ type NoteFolderServiceClient interface {
 	GetSingleNote(ctx context.Context, in *GetSingleNoteReq, opts ...grpc.CallOption) (*Note, error)
 	UpdateNote(ctx context.Context, in *UpdateNoteReq, opts ...grpc.CallOption) (*Note, error)
 	DeleteNote(ctx context.Context, in *DeleteNoteReq, opts ...grpc.CallOption) (*empty.Empty, error)
+	GetNoteObjectCommits(ctx context.Context, in *GetNoteObjectCommitsReq, opts ...grpc.CallOption) (*GetListNoteRes, error)
 	// folder rpc methods
 	CreateFolderNote(ctx context.Context, in *CreateFolderNoteReq, opts ...grpc.CallOption) (*FolderNote, error)
 	GetListFolderNote(ctx context.Context, in *GetListFolderNoteReq, opts ...grpc.CallOption) (*GetListFolderNoteRes, error)
 	GetSingleFolderNote(ctx context.Context, in *GetSingleFolderNoteReq, opts ...grpc.CallOption) (*GetSingleFolderNoteRes, error)
 	UpdateFolderNote(ctx context.Context, in *UpdateFolderNoteReq, opts ...grpc.CallOption) (*FolderNote, error)
 	DeleteFolderNote(ctx context.Context, in *DeleteFolderNoteReq, opts ...grpc.CallOption) (*empty.Empty, error)
+	GetNoteFolderObjectCommits(ctx context.Context, in *GetNoteFolderObjectCommitsReq, opts ...grpc.CallOption) (*GetListFolderNoteRes, error)
 }
 
 type noteFolderServiceClient struct {
@@ -90,6 +92,15 @@ func (c *noteFolderServiceClient) DeleteNote(ctx context.Context, in *DeleteNote
 	return out, nil
 }
 
+func (c *noteFolderServiceClient) GetNoteObjectCommits(ctx context.Context, in *GetNoteObjectCommitsReq, opts ...grpc.CallOption) (*GetListNoteRes, error) {
+	out := new(GetListNoteRes)
+	err := c.cc.Invoke(ctx, "/note_service.NoteFolderService/GetNoteObjectCommits", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *noteFolderServiceClient) CreateFolderNote(ctx context.Context, in *CreateFolderNoteReq, opts ...grpc.CallOption) (*FolderNote, error) {
 	out := new(FolderNote)
 	err := c.cc.Invoke(ctx, "/note_service.NoteFolderService/CreateFolderNote", in, out, opts...)
@@ -135,6 +146,15 @@ func (c *noteFolderServiceClient) DeleteFolderNote(ctx context.Context, in *Dele
 	return out, nil
 }
 
+func (c *noteFolderServiceClient) GetNoteFolderObjectCommits(ctx context.Context, in *GetNoteFolderObjectCommitsReq, opts ...grpc.CallOption) (*GetListFolderNoteRes, error) {
+	out := new(GetListFolderNoteRes)
+	err := c.cc.Invoke(ctx, "/note_service.NoteFolderService/GetNoteFolderObjectCommits", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NoteFolderServiceServer is the server API for NoteFolderService service.
 // All implementations must embed UnimplementedNoteFolderServiceServer
 // for forward compatibility
@@ -145,12 +165,14 @@ type NoteFolderServiceServer interface {
 	GetSingleNote(context.Context, *GetSingleNoteReq) (*Note, error)
 	UpdateNote(context.Context, *UpdateNoteReq) (*Note, error)
 	DeleteNote(context.Context, *DeleteNoteReq) (*empty.Empty, error)
+	GetNoteObjectCommits(context.Context, *GetNoteObjectCommitsReq) (*GetListNoteRes, error)
 	// folder rpc methods
 	CreateFolderNote(context.Context, *CreateFolderNoteReq) (*FolderNote, error)
 	GetListFolderNote(context.Context, *GetListFolderNoteReq) (*GetListFolderNoteRes, error)
 	GetSingleFolderNote(context.Context, *GetSingleFolderNoteReq) (*GetSingleFolderNoteRes, error)
 	UpdateFolderNote(context.Context, *UpdateFolderNoteReq) (*FolderNote, error)
 	DeleteFolderNote(context.Context, *DeleteFolderNoteReq) (*empty.Empty, error)
+	GetNoteFolderObjectCommits(context.Context, *GetNoteFolderObjectCommitsReq) (*GetListFolderNoteRes, error)
 	mustEmbedUnimplementedNoteFolderServiceServer()
 }
 
@@ -173,6 +195,9 @@ func (UnimplementedNoteFolderServiceServer) UpdateNote(context.Context, *UpdateN
 func (UnimplementedNoteFolderServiceServer) DeleteNote(context.Context, *DeleteNoteReq) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteNote not implemented")
 }
+func (UnimplementedNoteFolderServiceServer) GetNoteObjectCommits(context.Context, *GetNoteObjectCommitsReq) (*GetListNoteRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNoteObjectCommits not implemented")
+}
 func (UnimplementedNoteFolderServiceServer) CreateFolderNote(context.Context, *CreateFolderNoteReq) (*FolderNote, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFolderNote not implemented")
 }
@@ -187,6 +212,9 @@ func (UnimplementedNoteFolderServiceServer) UpdateFolderNote(context.Context, *U
 }
 func (UnimplementedNoteFolderServiceServer) DeleteFolderNote(context.Context, *DeleteFolderNoteReq) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFolderNote not implemented")
+}
+func (UnimplementedNoteFolderServiceServer) GetNoteFolderObjectCommits(context.Context, *GetNoteFolderObjectCommitsReq) (*GetListFolderNoteRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNoteFolderObjectCommits not implemented")
 }
 func (UnimplementedNoteFolderServiceServer) mustEmbedUnimplementedNoteFolderServiceServer() {}
 
@@ -291,6 +319,24 @@ func _NoteFolderService_DeleteNote_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NoteFolderService_GetNoteObjectCommits_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNoteObjectCommitsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NoteFolderServiceServer).GetNoteObjectCommits(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/note_service.NoteFolderService/GetNoteObjectCommits",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NoteFolderServiceServer).GetNoteObjectCommits(ctx, req.(*GetNoteObjectCommitsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _NoteFolderService_CreateFolderNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateFolderNoteReq)
 	if err := dec(in); err != nil {
@@ -381,6 +427,24 @@ func _NoteFolderService_DeleteFolderNote_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NoteFolderService_GetNoteFolderObjectCommits_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNoteFolderObjectCommitsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NoteFolderServiceServer).GetNoteFolderObjectCommits(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/note_service.NoteFolderService/GetNoteFolderObjectCommits",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NoteFolderServiceServer).GetNoteFolderObjectCommits(ctx, req.(*GetNoteFolderObjectCommitsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NoteFolderService_ServiceDesc is the grpc.ServiceDesc for NoteFolderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -409,6 +473,10 @@ var NoteFolderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _NoteFolderService_DeleteNote_Handler,
 		},
 		{
+			MethodName: "GetNoteObjectCommits",
+			Handler:    _NoteFolderService_GetNoteObjectCommits_Handler,
+		},
+		{
 			MethodName: "CreateFolderNote",
 			Handler:    _NoteFolderService_CreateFolderNote_Handler,
 		},
@@ -427,6 +495,10 @@ var NoteFolderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteFolderNote",
 			Handler:    _NoteFolderService_DeleteFolderNote_Handler,
+		},
+		{
+			MethodName: "GetNoteFolderObjectCommits",
+			Handler:    _NoteFolderService_GetNoteFolderObjectCommits_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
