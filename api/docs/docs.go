@@ -4905,190 +4905,6 @@ var doc = `{
                 }
             }
         },
-        "/v1/commit": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get all commits",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Commit"
-                ],
-                "summary": "Get all commits",
-                "operationId": "get_all_commits",
-                "responses": {
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Create commit",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Commit"
-                ],
-                "summary": "Create commit",
-                "operationId": "create_commit",
-                "responses": {
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/commit/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get commit by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Commit"
-                ],
-                "summary": "Get commit by id",
-                "operationId": "get_commit_by_id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/v1/company": {
             "get": {
                 "security": [
@@ -11169,7 +10985,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "View"
+                    "Template"
                 ],
                 "summary": "Convert html to pdf",
                 "operationId": "convert_html_to_pdf",
@@ -11190,7 +11006,7 @@ var doc = `{
                     },
                     {
                         "description": "HtmlBody",
-                        "name": "view",
+                        "name": "template",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -11210,7 +11026,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.PdfBody"
+                                            "$ref": "#/definitions/template_service.PdfBody"
                                         }
                                     }
                                 }
@@ -16101,7 +15917,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "View"
+                    "Template"
                 ],
                 "summary": "Convert template to html",
                 "operationId": "convert_template_to_html",
@@ -22268,14 +22084,6 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.PdfBody": {
-            "type": "object",
-            "properties": {
-                "link": {
-                    "type": "string"
-                }
-            }
-        },
         "object_builder_service.QuickFilter": {
             "type": "object",
             "properties": {
@@ -23243,6 +23051,14 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/template_service.Folder"
                     }
+                }
+            }
+        },
+        "template_service.PdfBody": {
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string"
                 }
             }
         },

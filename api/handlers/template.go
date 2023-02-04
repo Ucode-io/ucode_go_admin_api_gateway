@@ -5,9 +5,11 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"strconv"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	obs "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -1070,4 +1072,221 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, res)
+}
+
+// ConvertHtmlToPdf godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID convert_html_to_pdf
+// @Router /v1/html-to-pdf [POST]
+// @Summary Convert html to pdf
+// @Description Convert html to pdf
+// @Tags Template
+// @Accept json
+// @Produce json
+// @Param template body models.HtmlBody true "HtmlBody"
+// @Success 201 {object} status_http.Response{data=tmp.PdfBody} "PdfBody data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+		html                models.HtmlBody
+	)
+
+	err := c.ShouldBindJSON(&html)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	structData, err := helper.ConvertMapToStruct(html.Data)
+
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	resp, err := services.TemplateService().Template().ConvertHtmlToPdf(
+		context.Background(),
+		&tmp.HtmlBody{
+			Data:      structData,
+			Html:      html.Html,
+			ProjectId: resourceEnvironment.GetId(),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.Created, resp)
+}
+
+// ConvertTemplateToHtml godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID convert_template_to_html
+// @Router /v1/template-to-html [POST]
+// @Summary Convert template to html
+// @Description Convert template to html
+// @Tags Template
+// @Accept json
+// @Produce json
+// @Param view body models.HtmlBody true "TemplateBody"
+// @Success 201 {object} status_http.Response{data=models.HtmlBody} "HtmlBody data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+		html                models.HtmlBody
+	)
+
+	err := c.ShouldBindJSON(&html)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	structData, err := helper.ConvertMapToStruct(html.Data)
+
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	resp, err := services.TemplateService().Template().ConvertTemplateToHtml(
+		context.Background(),
+		&tmp.HtmlBody{
+			Data:      structData,
+			Html:      html.Html,
+			ProjectId: resourceEnvironment.GetId(),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.Created, resp)
 }

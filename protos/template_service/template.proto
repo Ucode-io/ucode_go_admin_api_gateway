@@ -4,7 +4,7 @@ package template_service;
 option go_package="genproto/template_service";
 
 import "google/protobuf/empty.proto";
-// import "google/protobuf/struct.proto";
+import "google/protobuf/struct.proto";
 
 
 service TemplateFolderService {
@@ -21,6 +21,10 @@ service TemplateFolderService {
     rpc GetSingleFolder(GetSingleFolderReq) returns (GetSingleFolderRes) {}
     rpc UpdateFolder(UpdateFolderReq) returns (Folder) {}
     rpc DeleteFolder(DeleteFolderReq) returns (google.protobuf.Empty) {}
+
+    // generate html and pdf document
+    rpc ConvertHtmlToPdf(HtmlBody) returns (PdfBody) {}
+    rpc ConvertTemplateToHtml(HtmlBody) returns (HtmlBody) {}
 }
 
 message DeleteTemplateReq {
@@ -166,4 +170,14 @@ message DeleteFolderReq {
     string id = 1;
     string project_id = 2;
     string version_id = 3;
+}
+
+message HtmlBody {
+    string html = 1;
+    google.protobuf.Struct data = 2;
+    string project_id = 3;
+}
+
+message PdfBody {
+    string link = 1;
 }

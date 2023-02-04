@@ -2046,11 +2046,6 @@ definitions:
       id:
         type: string
     type: object
-  object_builder_service.PdfBody:
-    properties:
-      link:
-        type: string
-    type: object
   object_builder_service.QuickFilter:
     properties:
       default_value:
@@ -2684,6 +2679,11 @@ definitions:
         items:
           $ref: '#/definitions/template_service.Folder'
         type: array
+    type: object
+  template_service.PdfBody:
+    properties:
+      link:
+        type: string
     type: object
   template_service.Template:
     properties:
@@ -5646,107 +5646,6 @@ paths:
       summary: Get close cashbox
       tags:
       - Appointment
-  /v1/commit:
-    get:
-      consumes:
-      - application/json
-      description: Get all commits
-      operationId: get_all_commits
-      produces:
-      - application/json
-      responses:
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all commits
-      tags:
-      - Commit
-    post:
-      consumes:
-      - application/json
-      description: Create commit
-      operationId: create_commit
-      produces:
-      - application/json
-      responses:
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create commit
-      tags:
-      - Commit
-  /v1/commit/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get commit by id
-      operationId: get_commit_by_id
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get commit by id
-      tags:
-      - Commit
   /v1/company:
     get:
       description: Get all companies
@@ -9235,7 +9134,7 @@ paths:
         type: string
       - description: HtmlBody
         in: body
-        name: view
+        name: template
         required: true
         schema:
           $ref: '#/definitions/models.HtmlBody'
@@ -9249,7 +9148,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/object_builder_service.PdfBody'
+                  $ref: '#/definitions/template_service.PdfBody'
               type: object
         "400":
           description: Bad Request
@@ -9273,7 +9172,7 @@ paths:
       - ApiKeyAuth: []
       summary: Convert html to pdf
       tags:
-      - View
+      - Template
   /v1/import-from-json:
     post:
       consumes:
@@ -12100,7 +11999,7 @@ paths:
       - ApiKeyAuth: []
       summary: Convert template to html
       tags:
-      - View
+      - Template
   /v1/template/{template-id}:
     delete:
       consumes:
