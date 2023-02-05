@@ -152,7 +152,7 @@ func Load() Config {
 	config.AdminHost = cast.ToString(GetOrReturnDefaultValue("ADMIN_HOST", "test.admin.u-code.io"))
 	config.AppHost = cast.ToString(GetOrReturnDefaultValue("APP_HOST", "test.app.u-code.io"))
 	config.ApiHost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "test.admin.api.u-code.io"))
-	config.Localhost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "localhost:7777"))
+	config.Localhost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "localhost"))
 	return config
 }
 

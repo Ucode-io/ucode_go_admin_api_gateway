@@ -18,7 +18,7 @@ copy-proto-module:
 	rsync -rv --exclude=.git ${CURRENT_DIR}/ucode_protos/* ${CURRENT_DIR}/protos
 
 gen-proto-module:
-	./scripts/gen_proto.sh ${CURRENT_DIR}
+	./scripts/gen_proto.sh ${CURRENT_DIR} && chmod 744 ./scripts/rm_omit_empty.sh && ./scripts/rm_omit_empty.sh ${CURRENT_DIR}
 
 rm-proto-omit-empty:
 	chmod 744 ./scripts/rm_omit_empty.sh && ./scripts/rm_omit_empty.sh ${CURRENT_DIR}

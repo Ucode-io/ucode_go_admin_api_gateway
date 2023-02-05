@@ -18,8 +18,8 @@ import (
 // @Tags Commit
 // @Accept json
 // @Produce json
-// @Param commit body company_service.CreateCommitRequest true "CreateCommitRequestBody"
-// @Success 201 {object} status_http.Response{data=company_service.CommitWithRelease} "Commit data"
+// @Param commit body obs.CreateCommitRequest true "CreateCommitRequestBody"
+// @Success 201 {object} status_http.Response{data=obs.CommitWithRelease} "Commit data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateCommit(c *gin.Context) {
@@ -54,7 +54,7 @@ func (h *Handler) CreateCommit(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Success 200 {object} status_http.Response{data=company_service.CommitWithRelease} "CommitBody"
+// @Success 200 {object} status_http.Response{data=versioning_service.CommitWithRelease} "CommitBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetCommitByID(c *gin.Context) {
@@ -88,8 +88,8 @@ func (h *Handler) GetCommitByID(c *gin.Context) {
 // @Tags Commit
 // @Accept json
 // @Produce json
-// @Param filters query company_service.GetCommitListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=company_service.GetCommitListResponse} "CommitBody"
+// @Param filters query obs.GetCommitListRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GetCommitListResponse} "CommitBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllCommits(c *gin.Context) {

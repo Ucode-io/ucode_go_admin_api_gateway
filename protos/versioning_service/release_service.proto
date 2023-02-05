@@ -73,6 +73,7 @@ message SetCurrentReleaseRequest {
 
 message GetMultipleVersionInfoRequest {
     repeated string version_ids = 1;
+    string project_id = 2;
 }
 
 message VersionInfo {
@@ -87,5 +88,6 @@ message VersionInfo {
 }
 
 message GetMultipleVersionInfoResponse {
-    repeated VersionInfo version_infos = 1;
+    map<string, VersionInfo> version_infos = 1;
+    int64 count = 2;
 }

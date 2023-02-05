@@ -46,7 +46,6 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
 			return
 		}
-
 		switch strArr[0] {
 		case "Bearer":
 			if strings.Contains(origin, cfg.AppHost) || strings.Contains(origin, cfg.ApiHost) || strings.Contains(origin, cfg.Localhost) {

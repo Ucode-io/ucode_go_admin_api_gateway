@@ -46,6 +46,30 @@ message ApiReference {
     string project_id = 12;
     string version_id = 13;
     string commit_id = 14;
+    CommitInfo commit_info = 15;
+    VersionInfo version_info = 16;
+
+    message CommitInfo {
+        string commit_id = 1;
+        string version_id = 2;
+        string project_id = 3;
+        string author_id = 4;
+        string name = 5;
+        string commit_type = 6;
+        string created_at = 7;
+        string updated_at = 8;
+    }
+
+    message VersionInfo {
+        string version_id = 1;
+        string commit_id = 2;
+        string author_id = 3;
+        string created_at = 4;
+        string updated_at = 5;
+        string desc = 6;
+        bool is_current = 7;
+        string version = 8;
+    }
 }
 
 

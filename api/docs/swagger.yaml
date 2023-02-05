@@ -1,4 +1,86 @@
 definitions:
+  api_reference_service.ApiReference:
+    properties:
+      additional_url:
+        type: string
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      authentification:
+        type: boolean
+      category_id:
+        type: string
+      commit_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/api_reference_service.ApiReference_CommitInfo'
+      desc:
+        type: string
+      external_url:
+        type: string
+      guid:
+        type: string
+      method:
+        type: string
+      name:
+        type: string
+      new_window:
+        type: boolean
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+      version_info:
+        $ref: '#/definitions/api_reference_service.ApiReference_VersionInfo'
+    type: object
+  api_reference_service.ApiReference_CommitInfo:
+    properties:
+      author_id:
+        type: string
+      commit_id:
+        type: string
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      updated_at:
+        type: string
+      version_id:
+        type: string
+    type: object
+  api_reference_service.ApiReference_VersionInfo:
+    properties:
+      author_id:
+        type: string
+      commit_id:
+        type: string
+      created_at:
+        type: string
+      desc:
+        type: string
+      is_current:
+        type: boolean
+      updated_at:
+        type: string
+      version:
+        type: string
+      version_id:
+        type: string
+    type: object
+  api_reference_service.GetListApiReferenceChangesResponse:
+    properties:
+      api_references:
+        items:
+          $ref: '#/definitions/api_reference_service.ApiReference'
+        type: array
+      count:
+        type: integer
+    type: object
   auth_service.AddSessionToIntegrationRequest:
     properties:
       data:
@@ -751,11 +833,15 @@ definitions:
         type: object
       base_url:
         type: string
+      commit_id:
+        type: string
       guid:
         type: string
       name:
         type: string
       project_id:
+        type: string
+      version_id:
         type: string
     type: object
   models.CommonInput:
@@ -1890,6 +1976,8 @@ definitions:
         type: string
       project_id:
         type: string
+      version_id:
+        type: string
     type: object
   object_builder_service.FieldForSection:
     properties:
@@ -2024,6 +2112,8 @@ definitions:
       table_from:
         type: string
       table_to:
+        type: string
+      version_id:
         type: string
     type: object
   object_builder_service.MatchField:
@@ -3002,6 +3092,47 @@ definitions:
       relation_id:
         type: string
     type: object
+  versioning_service.CommitWithRelease:
+    properties:
+      author_id:
+        type: string
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      release_info:
+        $ref: '#/definitions/versioning_service.CommitWithRelease_Release'
+    type: object
+  versioning_service.CommitWithRelease_Release:
+    properties:
+      id:
+        type: string
+      is_current:
+        type: boolean
+      version:
+        type: string
+    type: object
+  versioning_service.CreateCommitRequest:
+    properties:
+      author_id:
+        type: string
+      commit_type:
+        type: string
+      environment_id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+    type: object
   versioning_service.CreateReleaseRequest:
     properties:
       author_id:
@@ -3017,6 +3148,15 @@ definitions:
       project_id:
         type: string
       release_type:
+        type: integer
+    type: object
+  versioning_service.GetCommitListResponse:
+    properties:
+      commits:
+        items:
+          $ref: '#/definitions/versioning_service.CommitWithRelease'
+        type: array
+      count:
         type: integer
     type: object
   versioning_service.GetCurrentReleaseResponse:
@@ -4957,45 +5097,6 @@ paths:
       tags:
       - ApiReference
   /v1/api-reference/{api_reference_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete App
-      operationId: delete_api_reference_id
-      parameters:
-      - description: api_reference_id
-        in: path
-        name: api_reference_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete App
-      tags:
-      - ApiReference
     get:
       consumes:
       - application/json
@@ -5040,6 +5141,114 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get api reference by id
+      tags:
+      - ApiReference
+  /v1/api-reference/{project_id}/{api_reference_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete App
+      operationId: delete_api_reference_id
+      parameters:
+      - description: api_reference_id
+        in: path
+        name: api_reference_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete App
+      tags:
+      - ApiReference
+  /v1/api-reference/history/{project_id}/{api_reference_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Api Reference Changes
+      operationId: get_api_reference_changes
+      parameters:
+      - description: api_reference_id
+        in: path
+        name: api_reference_id
+        required: true
+        type: string
+      - description: project_id
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: per_page
+        in: query
+        name: per_page
+        type: integer
+      - description: sort
+        in: query
+        name: sort
+        type: string
+      - description: order
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Api Reference Changes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api_reference_service.GetListApiReferenceChangesResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Api Reference Changes
       tags:
       - ApiReference
   /v1/app:
@@ -5858,6 +6067,163 @@ paths:
       summary: Get close cashbox
       tags:
       - Appointment
+  /v1/commit:
+    get:
+      consumes:
+      - application/json
+      description: Get all commits
+      operationId: get_all_commits
+      parameters:
+      - in: query
+        name: commit_type
+        type: string
+      - in: query
+        name: created_at
+        type: string
+      - in: query
+        name: environment_id
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CommitBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/versioning_service.GetCommitListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all commits
+      tags:
+      - Commit
+    post:
+      consumes:
+      - application/json
+      description: Create commit
+      operationId: create_commit
+      parameters:
+      - description: CreateCommitRequestBody
+        in: body
+        name: commit
+        required: true
+        schema:
+          $ref: '#/definitions/versioning_service.CreateCommitRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Commit data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/versioning_service.CommitWithRelease'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create commit
+      tags:
+      - Commit
+  /v1/commit/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get commit by id
+      operationId: get_commit_by_id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CommitBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/versioning_service.CommitWithRelease'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get commit by id
+      tags:
+      - Commit
   /v1/company:
     get:
       description: Get all companies
@@ -6942,6 +7308,9 @@ paths:
         type: string
       - in: query
         name: table_slug
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json
@@ -12022,6 +12391,9 @@ paths:
       - in: query
         name: table_slug
         type: string
+      - in: query
+        name: version_id
+        type: string
       produces:
       - application/json
       responses:
@@ -13693,6 +14065,9 @@ paths:
         type: string
       - in: query
         name: table_slug
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json

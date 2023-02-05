@@ -55,6 +55,7 @@ message InsertCommitResponse {
 
 message GetMultipleCommitInfoRequest {
     repeated string commit_ids = 1;
+    string project_id = 2;
 }
 
 message CommitInfo {
@@ -63,8 +64,12 @@ message CommitInfo {
     string project_id = 3;
     string author_id = 4;
     string name = 5;
+    string commit_type = 6;
+    string created_at = 7;
+    string updated_at = 8;
 }
 
 message GetMultipleCommitInfoResponse {
-    repeated CommitInfo commits = 1;
+    map<string, CommitInfo> commits = 1;
+    int64 count = 2;
 }
