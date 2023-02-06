@@ -12,6 +12,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateApiReference godoc
@@ -92,11 +93,15 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param api_reference_id path string true "api_reference_id"
+// @Query commit_id query string false "commit_id"
+// @Query version_id query string false "version_id"
 // @Success 200 {object} status_http.Response{data=models.ApiReference} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 	id := c.Param("api_reference_id")
+	commit_id := c.Query("commit_id")
+	version_id := c.Query("version_id")
 
 	if !util.IsValidUUID(id) {
 		h.handleResponse(c, status_http.InvalidArgument, "api reference id is an invalid uuid")
@@ -119,22 +124,28 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
 	}
-	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-		c.Request.Context(),
-		&vcs.GetCurrentReleaseRequest{
-			EnvironmentId: environmentId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+
+	if _, err := uuid.Parse(version_id); err != nil {
+		// If version_id is not a valid uuid, then we need to get the active version
+		activeVersion, err := services.VersioningService().Release().GetCurrentActive(
+			c.Request.Context(),
+			&vcs.GetCurrentReleaseRequest{
+				EnvironmentId: environmentId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		version_id = activeVersion.GetVersionId()
 	}
 
 	resp, err := services.ApiReferenceService().ApiReference().Get(
 		c.Request.Context(),
 		&ars.GetApiReferenceRequest{
 			Guid:      id,
-			VersionId: activeVersion.GetVersionId(),
+			VersionId: version_id,
+			CommitId:  commit_id,
 		},
 	)
 	if err != nil {
