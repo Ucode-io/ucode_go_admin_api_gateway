@@ -11376,7 +11376,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Template"
+                    "View"
                 ],
                 "summary": "Convert html to pdf",
                 "operationId": "convert_html_to_pdf",
@@ -11396,17 +11396,8 @@
                         "required": true
                     },
                     {
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
                         "description": "HtmlBody",
-                        "name": "template",
+                        "name": "view",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -11426,7 +11417,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.PdfBody"
+                                            "$ref": "#/definitions/object_builder_service.PdfBody"
                                         }
                                     }
                                 }
@@ -17682,7 +17673,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Template"
+                    "View"
                 ],
                 "summary": "Convert template to html",
                 "operationId": "convert_template_to_html",
@@ -17699,13 +17690,6 @@
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -24101,6 +24085,14 @@
                     }
                 },
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.PdfBody": {
+            "type": "object",
+            "properties": {
+                "link": {
                     "type": "string"
                 }
             }

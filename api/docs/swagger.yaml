@@ -2136,6 +2136,11 @@ definitions:
       id:
         type: string
     type: object
+  object_builder_service.PdfBody:
+    properties:
+      link:
+        type: string
+    type: object
   object_builder_service.QuickFilter:
     properties:
       default_value:
@@ -9713,15 +9718,9 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: body
-        name: project-id
-        required: true
-        schema:
-          type: string
       - description: HtmlBody
         in: body
-        name: template
+        name: view
         required: true
         schema:
           $ref: '#/definitions/models.HtmlBody'
@@ -9735,7 +9734,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/template_service.PdfBody'
+                  $ref: '#/definitions/object_builder_service.PdfBody'
               type: object
         "400":
           description: Bad Request
@@ -9759,7 +9758,7 @@ paths:
       - ApiKeyAuth: []
       summary: Convert html to pdf
       tags:
-      - Template
+      - View
   /v1/import-from-json:
     post:
       consumes:
@@ -13340,11 +13339,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: TemplateBody
         in: body
         name: view
@@ -13385,7 +13379,7 @@ paths:
       - ApiKeyAuth: []
       summary: Convert template to html
       tags:
-      - Template
+      - View
   /v1/template/{template-id}:
     delete:
       consumes:
