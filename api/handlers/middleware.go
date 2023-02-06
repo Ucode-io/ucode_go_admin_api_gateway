@@ -35,7 +35,6 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		var (
 			res          = &auth_service.V2HasAccessUserRes{}
 			ok           bool
-			origin       = c.GetHeader("Origin")
 			platformType = c.GetHeader("Platform-Type")
 		)
 
