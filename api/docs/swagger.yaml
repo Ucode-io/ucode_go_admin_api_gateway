@@ -732,6 +732,8 @@ definitions:
         type: string
       objectBuilderServiceHost:
         type: string
+      platformType:
+        type: string
       posGRPCPort:
         type: string
       posServiceHost:
@@ -2723,9 +2725,7 @@ definitions:
       project_id:
         type: string
       size:
-        items:
-          type: string
-        type: array
+        type: string
       tables:
         items:
           $ref: '#/definitions/template_service.CreateNoteReq_Table'
@@ -2766,9 +2766,7 @@ definitions:
       project_id:
         type: string
       size:
-        items:
-          type: string
-        type: array
+        type: string
       tables:
         items:
           $ref: '#/definitions/template_service.CreateTemplateReq_Table'
@@ -2895,9 +2893,7 @@ definitions:
       project_id:
         type: string
       size:
-        items:
-          type: string
-        type: array
+        type: string
       tables:
         items:
           $ref: '#/definitions/template_service.Note_Table'
@@ -2945,9 +2941,7 @@ definitions:
       project_id:
         type: string
       size:
-        items:
-          type: string
-        type: array
+        type: string
       tables:
         items:
           $ref: '#/definitions/template_service.Template_Table'
@@ -3020,9 +3014,7 @@ definitions:
       project_id:
         type: string
       size:
-        items:
-          type: string
-        type: array
+        type: string
       tables:
         items:
           $ref: '#/definitions/template_service.UpdateNoteReq_Table'
@@ -3065,9 +3057,7 @@ definitions:
       project_id:
         type: string
       size:
-        items:
-          type: string
-        type: array
+        type: string
       tables:
         items:
           $ref: '#/definitions/template_service.UpdateTemplateReq_Table'

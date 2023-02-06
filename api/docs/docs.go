@@ -22186,6 +22186,9 @@ var doc = `{
                 "objectBuilderServiceHost": {
                     "type": "string"
                 },
+                "platformType": {
+                    "type": "string"
+                },
                 "posGRPCPort": {
                     "type": "string"
                 },
@@ -25225,10 +25228,7 @@ var doc = `{
                     "type": "string"
                 },
                 "size": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",
@@ -25291,10 +25291,7 @@ var doc = `{
                     "type": "string"
                 },
                 "size": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",
@@ -25490,10 +25487,7 @@ var doc = `{
                     "type": "string"
                 },
                 "size": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",
@@ -25567,10 +25561,7 @@ var doc = `{
                     "type": "string"
                 },
                 "size": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",
@@ -25682,10 +25673,7 @@ var doc = `{
                     "type": "string"
                 },
                 "size": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",
@@ -25751,10 +25739,7 @@ var doc = `{
                     "type": "string"
                 },
                 "size": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",

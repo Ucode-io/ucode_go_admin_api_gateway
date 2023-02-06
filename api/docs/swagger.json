@@ -22167,6 +22167,9 @@
                 "objectBuilderServiceHost": {
                     "type": "string"
                 },
+                "platformType": {
+                    "type": "string"
+                },
                 "posGRPCPort": {
                     "type": "string"
                 },
@@ -25206,10 +25209,7 @@
                     "type": "string"
                 },
                 "size": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",
@@ -25272,10 +25272,7 @@
                     "type": "string"
                 },
                 "size": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",
@@ -25471,10 +25468,7 @@
                     "type": "string"
                 },
                 "size": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",
@@ -25548,10 +25542,7 @@
                     "type": "string"
                 },
                 "size": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",
@@ -25663,10 +25654,7 @@
                     "type": "string"
                 },
                 "size": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",
@@ -25732,10 +25720,7 @@
                     "type": "string"
                 },
                 "size": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",

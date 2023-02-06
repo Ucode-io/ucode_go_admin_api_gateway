@@ -59,7 +59,7 @@ message UpdateNoteReq {
     string title = 3;
     string html = 4;
     string folder_id = 5;
-    repeated string size = 6;
+    string size = 6;
     repeated Table tables = 7;
     string commit_id = 8;
     string version_id = 9;
@@ -99,7 +99,7 @@ message CreateNoteReq {
     string title = 2;
     string html = 3;
     string folder_id = 4;
-    repeated string size = 5;
+    string size = 5;
     repeated Table tables = 6;
     string commit_id = 7;
     string version_id = 8;
@@ -121,7 +121,7 @@ message Note {
     string title = 3;
     string html = 4;
     string folder_id = 5;
-    repeated string size = 6;
+    string size = 6;
     repeated Table tables = 7;
     string commit_id = 8;
     string version_id = 9;
