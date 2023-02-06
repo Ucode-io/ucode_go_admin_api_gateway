@@ -1270,8 +1270,8 @@ func (h *Handler) GetTemplateCommits(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID convert_html_to_pdf
-// @Router /v1/html-to-pdf [POST]
+// @ID convert_html_to_pdfV2
+// @Router /v1/html-to-pdfV2 [POST]
 // @Summary Convert html to pdf
 // @Description Convert html to pdf
 // @Tags Template
@@ -1379,8 +1379,8 @@ func (h *Handler) ConvertHtmlToPdfV2(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID convert_template_to_html
-// @Router /v1/template-to-html [POST]
+// @ID convert_template_to_htmlV2
+// @Router /v1/template-to-htmlV2 [POST]
 // @Summary Convert template to html
 // @Description Convert template to html
 // @Tags Template
