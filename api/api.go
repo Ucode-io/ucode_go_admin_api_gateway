@@ -220,6 +220,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.DELETE("/template/:template-id", h.DeleteTemplate)
 		v1.GET("/template", h.GetListTemplate)
 		v1.GET("/template/commits/:template-id", h.GetTemplateCommits)
+
+		// HTML TO PDF CONVERTER
+		v1.POST("/html-to-pdfV2", h.ConvertHtmlToPdfV2)
+		v1.POST("/template-to-htmlV2", h.ConvertTemplateToHtmlV2)
+
 		// HTML TO PDF CONVERTER
 		v1.POST("/html-to-pdf", h.ConvertHtmlToPdf)
 		v1.POST("/template-to-html", h.ConvertTemplateToHtml)

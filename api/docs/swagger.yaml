@@ -2136,6 +2136,11 @@ definitions:
       id:
         type: string
     type: object
+  object_builder_service.PdfBody:
+    properties:
+      link:
+        type: string
+    type: object
   object_builder_service.QuickFilter:
     properties:
       default_value:
@@ -9713,6 +9718,64 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: HtmlBody
+        in: body
+        name: view
+        required: true
+        schema:
+          $ref: '#/definitions/models.HtmlBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: PdfBody data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.PdfBody'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Convert html to pdf
+      tags:
+      - View
+  /v1/html-to-pdfV2:
+    post:
+      consumes:
+      - application/json
+      description: Convert html to pdf
+      operationId: convert_html_to_pdfV2
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: project-id
         in: body
         name: project-id
@@ -13329,6 +13392,64 @@ paths:
       - application/json
       description: Convert template to html
       operationId: convert_template_to_html
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: TemplateBody
+        in: body
+        name: view
+        required: true
+        schema:
+          $ref: '#/definitions/models.HtmlBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: HtmlBody data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.HtmlBody'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Convert template to html
+      tags:
+      - View
+  /v1/template-to-htmlV2:
+    post:
+      consumes:
+      - application/json
+      description: Convert template to html
+      operationId: convert_template_to_htmlV2
       parameters:
       - description: Resource-Id
         in: header

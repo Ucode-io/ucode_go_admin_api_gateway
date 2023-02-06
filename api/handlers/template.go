@@ -1266,12 +1266,12 @@ func (h *Handler) GetTemplateCommits(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, res)
 }
 
-// ConvertHtmlToPdf godoc
+// ConvertHtmlToPdfV2 godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID convert_html_to_pdf
-// @Router /v1/html-to-pdf [POST]
+// @ID convert_html_to_pdfV2
+// @Router /v1/html-to-pdfV2 [POST]
 // @Summary Convert html to pdf
 // @Description Convert html to pdf
 // @Tags Template
@@ -1282,7 +1282,7 @@ func (h *Handler) GetTemplateCommits(c *gin.Context) {
 // @Success 201 {object} status_http.Response{data=tmp.PdfBody} "PdfBody data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
+func (h *Handler) ConvertHtmlToPdfV2(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
 		html                models.HtmlBody
@@ -1375,12 +1375,12 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, resp)
 }
 
-// ConvertTemplateToHtml godoc
+// ConvertTemplateToHtmlV2 godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID convert_template_to_html
-// @Router /v1/template-to-html [POST]
+// @ID convert_template_to_htmlV2
+// @Router /v1/template-to-htmlV2 [POST]
 // @Summary Convert template to html
 // @Description Convert template to html
 // @Tags Template
@@ -1391,7 +1391,7 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 // @Success 201 {object} status_http.Response{data=models.HtmlBody} "HtmlBody data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
+func (h *Handler) ConvertTemplateToHtmlV2(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
 		html                models.HtmlBody
