@@ -72,6 +72,13 @@ definitions:
       version_id:
         type: string
     type: object
+  api_reference_service.ApiRevertApiReferenceRequest:
+    properties:
+      commit_id:
+        type: string
+      project_id:
+        type: string
+    type: object
   api_reference_service.GetListApiReferenceChangesResponse:
     properties:
       api_references:
@@ -5244,6 +5251,80 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get Api Reference Changes
+      tags:
+      - ApiReference
+  /v1/api-reference/revert/{api_reference_id}:
+    post:
+      consumes:
+      - application/json
+      description: Revert Api Reference
+      operationId: revert_api_reference
+      parameters:
+      - description: api_reference_id
+        in: path
+        name: api_reference_id
+        required: true
+        type: string
+      - description: project_id
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: per_page
+        in: query
+        name: per_page
+        type: integer
+      - description: sort
+        in: query
+        name: sort
+        type: string
+      - description: order
+        in: query
+        name: order
+        type: string
+      - description: Request Body
+        in: body
+        name: revert_api_reference
+        required: true
+        schema:
+          $ref: '#/definitions/api_reference_service.ApiRevertApiReferenceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api_reference_service.ApiReference'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Revert Api Reference
       tags:
       - ApiReference
   /v1/app:

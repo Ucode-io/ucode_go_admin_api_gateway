@@ -499,3 +499,91 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, resp)
 }
+
+// RevertApiReference godoc
+// @Security ApiKeyAuth
+// @ID revert_api_reference
+// @Router /v1/api-reference/revert/{api_reference_id} [POST]
+// @Summary Revert Api Reference
+// @Description Revert Api Reference
+// @Tags ApiReference
+// @Accept json
+// @Produce json
+// @Param api_reference_id path string true "api_reference_id"
+// @Param page query int false "page"
+// @Param per_page query int false "per_page"
+// @Param sort query string false "sort"
+// @Param order query string false "order"
+// @Param revert_api_reference body ars.ApiRevertApiReferenceRequest true "Request Body"
+// @Success 200 {object} status_http.Response{data=ars.ApiReference} "Response Body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) RevertApiReference(c *gin.Context) {
+
+	body := &ars.ApiRevertApiReferenceRequest{}
+
+	err := c.ShouldBindJSON(body)
+	if err != nil {
+		h.log.Error("error binding json", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	id := c.Param("api_reference_id")
+
+	if !util.IsValidUUID(id) {
+		err := errors.New("api_reference_id is an invalid uuid")
+		h.log.Error("api_reference_id is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "api_reference_id is an invalid uuid")
+		return
+	}
+
+	if !util.IsValidUUID(body.GetProjectId()) {
+		err := errors.New("project_id is an invalid uuid")
+		h.log.Error("project_id is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.log.Error("error getting service", logger.Error(err))
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
+		return
+	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
+
+	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
+		return
+	}
+
+	resp, err := services.ApiReferenceService().ApiReference().RevertApiReference(
+		context.Background(),
+		&ars.RevertApiReferenceRequest{
+			Guid:        id,
+			VersionId:   versionGuid,
+			OldcommitId: body.GetCommitId(),
+			NewcommitId: commitGuid,
+		},
+	)
+	if err != nil {
+		h.log.Error("error reverting api reference", logger.Error(err))
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
