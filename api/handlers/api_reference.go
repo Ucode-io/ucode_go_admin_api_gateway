@@ -451,6 +451,7 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 		c.Request.Context(),
 		&vcs.GetMultipleCommitInfoRequest{
 			CommitIds: commitIds,
+			ProjectId: project_id,
 		},
 	)
 	if err != nil {
@@ -463,6 +464,7 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 		c.Request.Context(),
 		&vcs.GetMultipleVersionInfoRequest{
 			VersionIds: versionIds,
+			ProjectId:  project_id,
 		},
 	)
 	if err != nil {
