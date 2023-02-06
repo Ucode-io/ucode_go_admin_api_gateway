@@ -40,6 +40,7 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 	if err != nil {
 		return
 	}
+	fmt.Println("check do::", string(respByte))
 
 	err = json.Unmarshal(respByte, &responseModel)
 

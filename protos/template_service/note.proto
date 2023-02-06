@@ -1,53 +1,49 @@
 syntax="proto3";
 
-package template_service;
+package note_service;
 option go_package="genproto/template_service";
 
 import "google/protobuf/empty.proto";
-import "google/protobuf/struct.proto";
+// import "google/protobuf/struct.proto";
 
 
-service TemplateFolderService {
-    // template rpc methods
-    rpc CreateTemplate(CreateTemplateReq) returns (Template) {}
-    rpc GetListTemplate(GetListTemplateReq) returns (GetListTemplateRes) {}
-    rpc GetSingleTemplate(GetSingleTemplateReq) returns (Template) {}
-    rpc UpdateTemplate(UpdateTemplateReq) returns (Template) {}
-    rpc DeleteTemplate(DeleteTemplateReq) returns (google.protobuf.Empty) {}
-    rpc GetTemplateObjectCommits(GetTemplateObjectCommitsReq) returns (GetListTemplateRes) {}
+service NoteFolderService {
+    // note rpc methods
+    rpc CreateNote(CreateNoteReq) returns (Note) {}
+    rpc GetListNote(GetListNoteReq) returns (GetListNoteRes) {}
+    rpc GetSingleNote(GetSingleNoteReq) returns (Note) {}
+    rpc UpdateNote(UpdateNoteReq) returns (Note) {}
+    rpc DeleteNote(DeleteNoteReq) returns (google.protobuf.Empty) {}
+    rpc GetNoteObjectCommits(GetNoteObjectCommitsReq) returns (GetListNoteRes) {}
 
     // folder rpc methods
-    rpc CreateFolder(CreateFolderReq) returns (Folder) {}
-    rpc GetListFolder(GetListFolderReq) returns (GetListFolderRes) {}
-    rpc GetSingleFolder(GetSingleFolderReq) returns (GetSingleFolderRes) {}
-    rpc UpdateFolder(UpdateFolderReq) returns (Folder) {}
-    rpc DeleteFolder(DeleteFolderReq) returns (google.protobuf.Empty) {}
-    rpc GetTemplateFolderObjectCommits(GetTemplateFolderObjectCommitsReq) returns (GetListFolderRes) {}
-
-    // generate html and pdf document
-    rpc ConvertHtmlToPdf(HtmlBody) returns (PdfBody) {}
-    rpc ConvertTemplateToHtml(HtmlBody) returns (HtmlBody) {}
+    rpc CreateFolderNote(CreateFolderNoteReq) returns (FolderNote) {}
+    rpc GetListFolderNote(GetListFolderNoteReq) returns (GetListFolderNoteRes) {}
+    rpc GetSingleFolderNote(GetSingleFolderNoteReq) returns (GetSingleFolderNoteRes) {}
+    rpc UpdateFolderNote(UpdateFolderNoteReq) returns (FolderNote) {}
+    rpc DeleteFolderNote(DeleteFolderNoteReq) returns (google.protobuf.Empty) {}
+    rpc GetNoteFolderObjectCommits(GetNoteFolderObjectCommitsReq) returns (GetListFolderNoteRes) {}
 }
 
-message GetTemplateFolderObjectCommitsReq {
+message GetNoteObjectCommitsReq {
     string project_id = 1;
     string id = 2;
     string version_id = 3;
 }
 
-message GetTemplateObjectCommitsReq {
+message GetNoteFolderObjectCommitsReq {
     string project_id = 1;
     string id = 2;
     string version_id = 3;
 }
 
-message DeleteTemplateReq {
+message DeleteNoteReq {
     string project_id = 1;
     string id = 2;
     string version_id = 3;
 }
 
-message UpdateTemplateReq {
+message UpdateNoteReq {
     message Table {
         message Relation {
             string relation_id = 1;
@@ -69,13 +65,13 @@ message UpdateTemplateReq {
     string version_id = 9;
 }
 
-message GetSingleTemplateReq {
+message GetSingleNoteReq {
     string project_id = 1;
     string id = 2;
     string version_id = 3;
 }
 
-message GetListTemplateReq {
+message GetListNoteReq {
     string project_id = 1;
     string folder_id = 2;
     int32 limit = 3;
@@ -83,12 +79,12 @@ message GetListTemplateReq {
     string version_id = 5;
 }
 
-message GetListTemplateRes {
-    repeated Template templates = 1;
+message GetListNoteRes {
+    repeated Note notes = 1;
     int32 count = 2;
 }
 
-message CreateTemplateReq {
+message CreateNoteReq {
     message Table {
         message Relation {
             string relation_id = 1;
@@ -109,7 +105,7 @@ message CreateTemplateReq {
     string version_id = 8;
 }
 
-message Template {
+message Note {
     message Table {
         message Relation {
             string relation_id = 1;
@@ -131,7 +127,7 @@ message Template {
     string version_id = 9;
 }
 
-message CreateFolderReq {
+message CreateFolderNoteReq {
     string project_id = 1;
     string title = 2;
     string parent_id = 3;
@@ -139,7 +135,7 @@ message CreateFolderReq {
     string version_id = 5;
 }
 
-message Folder {
+message FolderNote {
     string id = 1;
     string project_id = 2;
     string title = 3;
@@ -148,30 +144,30 @@ message Folder {
     string version_id = 6;
 }
 
-message GetListFolderReq {
+message GetListFolderNoteReq {
     string project_id = 1;
     int32 limit = 2;
     int32 offset = 3;
     string version_id = 4;
 }
 
-message GetListFolderRes {
-    repeated Folder folders = 1;
+message GetListFolderNoteRes {
+    repeated FolderNote folders = 1;
     int32 count = 2;
 }
 
-message GetSingleFolderReq {
+message GetSingleFolderNoteReq {
     string id = 1;
     string project_id = 2;
     string version_id = 3;
 }
 
-message GetSingleFolderRes {
-    repeated Folder folders = 1;
+message GetSingleFolderNoteRes {
+    repeated FolderNote folders = 1;
     int32 count = 2;
 }
 
-message UpdateFolderReq {
+message UpdateFolderNoteReq {
     string id = 1;
     string project_id = 2;
     string title = 3;
@@ -180,18 +176,8 @@ message UpdateFolderReq {
     string version_id = 6;
 }
 
-message DeleteFolderReq {
+message DeleteFolderNoteReq {
     string id = 1;
     string project_id = 2;
     string version_id = 3;
-}
-
-message HtmlBody {
-    string html = 1;
-    google.protobuf.Struct data = 2;
-    string project_id = 3;
-}
-
-message PdfBody {
-    string link = 1;
 }

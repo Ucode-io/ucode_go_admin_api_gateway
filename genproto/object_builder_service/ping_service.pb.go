@@ -126,9 +126,9 @@ type PingRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId    string       `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	ServiceType  ServiceType  `protobuf:"varint,2,opt,name=service_type,json=serviceType,proto3,enum=object_builder_service.ServiceType" json:"service_type,omitempty"`
-	ResourceType ResourceType `protobuf:"varint,3,opt,name=resource_type,json=resourceType,proto3,enum=object_builder_service.ResourceType" json:"resource_type,omitempty"`
+	ProjectId    string       `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	ServiceType  ServiceType  `protobuf:"varint,2,opt,name=service_type,json=serviceType,proto3,enum=object_builder_service.ServiceType" json:"service_type"`
+	ResourceType ResourceType `protobuf:"varint,3,opt,name=resource_type,json=resourceType,proto3,enum=object_builder_service.ResourceType" json:"resource_type"`
 }
 
 func (x *PingRequest) Reset() {
@@ -189,9 +189,9 @@ type PingResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Definition string `protobuf:"bytes,1,opt,name=definition,proto3" json:"definition,omitempty"`
-	Code       string `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
-	Message    string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	Definition string `protobuf:"bytes,1,opt,name=definition,proto3" json:"definition"`
+	Code       string `protobuf:"bytes,2,opt,name=code,proto3" json:"code"`
+	Message    string `protobuf:"bytes,3,opt,name=message,proto3" json:"message"`
 }
 
 func (x *PingResponse) Reset() {

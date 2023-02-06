@@ -13,6 +13,8 @@ type Category struct {
 	ProjectID  string                 `json:"project_id"`
 	BaseUrl    string                 `json:"base_url"`
 	Attributes map[string]interface{} `json:"attributes"`
+	CommitId   string                 `json:"commit_id"`
+	VersionId  string                 `json:"version_id"`
 }
 
 type GetAllCategoriesResponse struct {

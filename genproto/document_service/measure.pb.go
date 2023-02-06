@@ -26,8 +26,8 @@ type MeasureRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id   string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Id   string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
 }
 
 func (x *MeasureRequest) Reset() {
@@ -81,8 +81,8 @@ type Measure struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id   string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Id   string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
 }
 
 func (x *Measure) Reset() {
@@ -136,9 +136,9 @@ type GetAllMeasureRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit  int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
-	Lang   string `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang,omitempty"`
+	Limit  int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
+	Offset int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
+	Lang   string `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang"`
 }
 
 func (x *GetAllMeasureRequest) Reset() {
@@ -199,8 +199,8 @@ type GetMeasuresList struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count    int32      `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	Measures []*Measure `protobuf:"bytes,2,rep,name=measures,proto3" json:"measures,omitempty"`
+	Count    int32      `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
+	Measures []*Measure `protobuf:"bytes,2,rep,name=measures,proto3" json:"measures"`
 }
 
 func (x *GetMeasuresList) Reset() {
@@ -254,7 +254,7 @@ type MeasureId struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *MeasureId) Reset() {
@@ -301,8 +301,8 @@ type UpdateMeasuresReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MeasureId string `protobuf:"bytes,1,opt,name=measureId,proto3" json:"measureId,omitempty"`
-	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	MeasureId string `protobuf:"bytes,1,opt,name=measureId,proto3" json:"measureId"`
+	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
 }
 
 func (x *UpdateMeasuresReq) Reset() {
@@ -356,8 +356,8 @@ type MeasuresList struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Measures []*UpdateMeasuresReq `protobuf:"bytes,1,rep,name=measures,proto3" json:"measures,omitempty"`
-	Lang     string               `protobuf:"bytes,2,opt,name=lang,proto3" json:"lang,omitempty"`
+	Measures []*UpdateMeasuresReq `protobuf:"bytes,1,rep,name=measures,proto3" json:"measures"`
+	Lang     string               `protobuf:"bytes,2,opt,name=lang,proto3" json:"lang"`
 }
 
 func (x *MeasuresList) Reset() {

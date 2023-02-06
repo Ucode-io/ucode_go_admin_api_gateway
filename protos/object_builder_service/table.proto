@@ -73,6 +73,7 @@ message GetAllTablesResponse {
 message TablePrimaryKey {
     string id = 1;
     string project_id = 2;
+    string version_id = 3;
 }
 
 message GetAllTablesRequest {

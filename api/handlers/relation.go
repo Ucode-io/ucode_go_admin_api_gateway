@@ -78,14 +78,14 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 	}
 
 	relation.ProjectId = resourceEnvironment.GetId()
-	versionGuid, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_RELATION)
+	versionID, commitID, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_RELATION)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
 		return
 	}
 
-	relation.CommitId = commitGuid
-	relation.VersionId = versionGuid
+	relation.CommitId = commitID
+	relation.VersionId = versionID
 
 	resp, err := services.BuilderService().Relation().Create(
 		context.Background(),

@@ -1,4 +1,86 @@
 definitions:
+  api_reference_service.ApiReference:
+    properties:
+      additional_url:
+        type: string
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      authentification:
+        type: boolean
+      category_id:
+        type: string
+      commit_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/api_reference_service.ApiReference_CommitInfo'
+      desc:
+        type: string
+      external_url:
+        type: string
+      guid:
+        type: string
+      method:
+        type: string
+      name:
+        type: string
+      new_window:
+        type: boolean
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+      version_info:
+        $ref: '#/definitions/api_reference_service.ApiReference_VersionInfo'
+    type: object
+  api_reference_service.ApiReference_CommitInfo:
+    properties:
+      author_id:
+        type: string
+      commit_id:
+        type: string
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      updated_at:
+        type: string
+      version_id:
+        type: string
+    type: object
+  api_reference_service.ApiReference_VersionInfo:
+    properties:
+      author_id:
+        type: string
+      commit_id:
+        type: string
+      created_at:
+        type: string
+      desc:
+        type: string
+      is_current:
+        type: boolean
+      updated_at:
+        type: string
+      version:
+        type: string
+      version_id:
+        type: string
+    type: object
+  api_reference_service.GetListApiReferenceChangesResponse:
+    properties:
+      api_references:
+        items:
+          $ref: '#/definitions/api_reference_service.ApiReference'
+        type: array
+      count:
+        type: integer
+    type: object
   auth_service.AddSessionToIntegrationRequest:
     properties:
       data:
@@ -751,11 +833,15 @@ definitions:
         type: object
       base_url:
         type: string
+      commit_id:
+        type: string
       guid:
         type: string
       name:
         type: string
       project_id:
+        type: string
+      version_id:
         type: string
     type: object
   models.CommonInput:
@@ -1890,6 +1976,8 @@ definitions:
         type: string
       project_id:
         type: string
+      version_id:
+        type: string
     type: object
   object_builder_service.FieldForSection:
     properties:
@@ -2025,6 +2113,8 @@ definitions:
         type: string
       table_to:
         type: string
+      version_id:
+        type: string
     type: object
   object_builder_service.MatchField:
     properties:
@@ -2044,11 +2134,6 @@ definitions:
           type: integer
         type: array
       id:
-        type: string
-    type: object
-  object_builder_service.PdfBody:
-    properties:
-      link:
         type: string
     type: object
   object_builder_service.QuickFilter:
@@ -2596,6 +2681,19 @@ definitions:
       kind:
         description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
     type: object
+  template_service.CreateFolderNoteReq:
+    properties:
+      commit_id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
   template_service.CreateFolderReq:
     properties:
       commit_id:
@@ -2607,6 +2705,49 @@ definitions:
       title:
         type: string
       version_id:
+        type: string
+    type: object
+  template_service.CreateNoteReq:
+    properties:
+      commit_id:
+        type: string
+      folder_id:
+        type: string
+      html:
+        type: string
+      project_id:
+        type: string
+      size:
+        items:
+          type: string
+        type: array
+      tables:
+        items:
+          $ref: '#/definitions/template_service.CreateNoteReq_Table'
+        type: array
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.CreateNoteReq_Table:
+    properties:
+      filter:
+        type: string
+      object_id:
+        type: string
+      relations:
+        items:
+          $ref: '#/definitions/template_service.CreateNoteReq_Table_Relation'
+        type: array
+      table_id:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.CreateNoteReq_Table_Relation:
+    properties:
+      relation_id:
         type: string
     type: object
   template_service.CreateTemplateReq:
@@ -2667,6 +2808,30 @@ definitions:
       version_id:
         type: string
     type: object
+  template_service.FolderNote:
+    properties:
+      commit_id:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.GetListFolderNoteRes:
+    properties:
+      count:
+        type: integer
+      folders:
+        items:
+          $ref: '#/definitions/template_service.FolderNote'
+        type: array
+    type: object
   template_service.GetListFolderRes:
     properties:
       count:
@@ -2674,6 +2839,33 @@ definitions:
       folders:
         items:
           $ref: '#/definitions/template_service.Folder'
+        type: array
+    type: object
+  template_service.GetListNoteRes:
+    properties:
+      count:
+        type: integer
+      notes:
+        items:
+          $ref: '#/definitions/template_service.Note'
+        type: array
+    type: object
+  template_service.GetListTemplateRes:
+    properties:
+      count:
+        type: integer
+      templates:
+        items:
+          $ref: '#/definitions/template_service.Template'
+        type: array
+    type: object
+  template_service.GetSingleFolderNoteRes:
+    properties:
+      count:
+        type: integer
+      folders:
+        items:
+          $ref: '#/definitions/template_service.FolderNote'
         type: array
     type: object
   template_service.GetSingleFolderRes:
@@ -2684,6 +2876,56 @@ definitions:
         items:
           $ref: '#/definitions/template_service.Folder'
         type: array
+    type: object
+  template_service.Note:
+    properties:
+      commit_id:
+        type: string
+      folder_id:
+        type: string
+      html:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      size:
+        items:
+          type: string
+        type: array
+      tables:
+        items:
+          $ref: '#/definitions/template_service.Note_Table'
+        type: array
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.Note_Table:
+    properties:
+      filter:
+        type: string
+      object_id:
+        type: string
+      relations:
+        items:
+          $ref: '#/definitions/template_service.Note_Table_Relation'
+        type: array
+      table_id:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.Note_Table_Relation:
+    properties:
+      relation_id:
+        type: string
+    type: object
+  template_service.PdfBody:
+    properties:
+      link:
+        type: string
     type: object
   template_service.Template:
     properties:
@@ -2730,6 +2972,21 @@ definitions:
       relation_id:
         type: string
     type: object
+  template_service.UpdateFolderNoteReq:
+    properties:
+      commit_id:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
   template_service.UpdateFolderReq:
     properties:
       commit_id:
@@ -2743,6 +3000,51 @@ definitions:
       title:
         type: string
       version_id:
+        type: string
+    type: object
+  template_service.UpdateNoteReq:
+    properties:
+      commit_id:
+        type: string
+      folder_id:
+        type: string
+      html:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      size:
+        items:
+          type: string
+        type: array
+      tables:
+        items:
+          $ref: '#/definitions/template_service.UpdateNoteReq_Table'
+        type: array
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.UpdateNoteReq_Table:
+    properties:
+      filter:
+        type: string
+      object_id:
+        type: string
+      relations:
+        items:
+          $ref: '#/definitions/template_service.UpdateNoteReq_Table_Relation'
+        type: array
+      table_id:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.UpdateNoteReq_Table_Relation:
+    properties:
+      relation_id:
         type: string
     type: object
   template_service.UpdateTemplateReq:
@@ -2790,6 +3092,47 @@ definitions:
       relation_id:
         type: string
     type: object
+  versioning_service.CommitWithRelease:
+    properties:
+      author_id:
+        type: string
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      release_info:
+        $ref: '#/definitions/versioning_service.CommitWithRelease_Release'
+    type: object
+  versioning_service.CommitWithRelease_Release:
+    properties:
+      id:
+        type: string
+      is_current:
+        type: boolean
+      version:
+        type: string
+    type: object
+  versioning_service.CreateCommitRequest:
+    properties:
+      author_id:
+        type: string
+      commit_type:
+        type: string
+      environment_id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+    type: object
   versioning_service.CreateReleaseRequest:
     properties:
       author_id:
@@ -2805,6 +3148,15 @@ definitions:
       project_id:
         type: string
       release_type:
+        type: integer
+    type: object
+  versioning_service.GetCommitListResponse:
+    properties:
+      commits:
+        items:
+          $ref: '#/definitions/versioning_service.CommitWithRelease'
+        type: array
+      count:
         type: integer
     type: object
   versioning_service.GetCurrentReleaseResponse:
@@ -4745,45 +5097,6 @@ paths:
       tags:
       - ApiReference
   /v1/api-reference/{api_reference_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete App
-      operationId: delete_api_reference_id
-      parameters:
-      - description: api_reference_id
-        in: path
-        name: api_reference_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete App
-      tags:
-      - ApiReference
     get:
       consumes:
       - application/json
@@ -4828,6 +5141,114 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get api reference by id
+      tags:
+      - ApiReference
+  /v1/api-reference/{project_id}/{api_reference_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete App
+      operationId: delete_api_reference_id
+      parameters:
+      - description: api_reference_id
+        in: path
+        name: api_reference_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete App
+      tags:
+      - ApiReference
+  /v1/api-reference/history/{project_id}/{api_reference_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Api Reference Changes
+      operationId: get_api_reference_changes
+      parameters:
+      - description: api_reference_id
+        in: path
+        name: api_reference_id
+        required: true
+        type: string
+      - description: project_id
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: per_page
+        in: query
+        name: per_page
+        type: integer
+      - description: sort
+        in: query
+        name: sort
+        type: string
+      - description: order
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Api Reference Changes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api_reference_service.GetListApiReferenceChangesResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Api Reference Changes
       tags:
       - ApiReference
   /v1/app:
@@ -5652,9 +6073,40 @@ paths:
       - application/json
       description: Get all commits
       operationId: get_all_commits
+      parameters:
+      - in: query
+        name: commit_type
+        type: string
+      - in: query
+        name: created_at
+        type: string
+      - in: query
+        name: environment_id
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:
+        "200":
+          description: CommitBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/versioning_service.GetCommitListResponse'
+              type: object
         "400":
           description: Invalid Argument
           schema:
@@ -5683,9 +6135,25 @@ paths:
       - application/json
       description: Create commit
       operationId: create_commit
+      parameters:
+      - description: CreateCommitRequestBody
+        in: body
+        name: commit
+        required: true
+        schema:
+          $ref: '#/definitions/versioning_service.CreateCommitRequest'
       produces:
       - application/json
       responses:
+        "201":
+          description: Commit data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/versioning_service.CommitWithRelease'
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -5724,6 +6192,15 @@ paths:
       produces:
       - application/json
       responses:
+        "200":
+          description: CommitBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/versioning_service.CommitWithRelease'
+              type: object
         "400":
           description: Invalid Argument
           schema:
@@ -6831,6 +7308,9 @@ paths:
         type: string
       - in: query
         name: table_slug
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json
@@ -9233,9 +9713,15 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: body
+        name: project-id
+        required: true
+        schema:
+          type: string
       - description: HtmlBody
         in: body
-        name: view
+        name: template
         required: true
         schema:
           $ref: '#/definitions/models.HtmlBody'
@@ -9249,7 +9735,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/object_builder_service.PdfBody'
+                  $ref: '#/definitions/template_service.PdfBody'
               type: object
         "400":
           description: Bad Request
@@ -9273,7 +9759,7 @@ paths:
       - ApiKeyAuth: []
       summary: Convert html to pdf
       tags:
-      - View
+      - Template
   /v1/import-from-json:
     post:
       consumes:
@@ -9488,6 +9974,737 @@ paths:
       summary: Update many-to-many
       tags:
       - Object
+  /v1/note:
+    get:
+      consumes:
+      - application/json
+      description: Get List Note
+      operationId: get_list_Note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: folder-id
+        in: query
+        name: folder-id
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: NoteBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListNoteRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List Note
+      tags:
+      - Note
+    post:
+      consumes:
+      - application/json
+      description: Create Note
+      operationId: create_note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateNoteReq
+        in: body
+        name: Note
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.CreateNoteReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Note data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Note'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Note
+      tags:
+      - Note
+    put:
+      consumes:
+      - application/json
+      description: Update Note
+      operationId: update_note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateNoteReqBody
+        in: body
+        name: Note
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.UpdateNoteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Note data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Note'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Note
+      tags:
+      - Note
+  /v1/note-folder:
+    get:
+      consumes:
+      - application/json
+      description: Get List Note Folder
+      operationId: get_list_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FolderNoteBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListFolderNoteRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List Note Folder
+      tags:
+      - Note
+    post:
+      consumes:
+      - application/json
+      description: Create Note Folder
+      operationId: create_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateFolderNoteReq
+        in: body
+        name: Note_Folder
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.CreateFolderNoteReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Note Folder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.FolderNote'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Note Folder
+      tags:
+      - Note
+    put:
+      consumes:
+      - application/json
+      description: Update Note Folder
+      operationId: update_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateFolderNoteReqBody
+        in: body
+        name: FolderNote
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.UpdateFolderNoteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FolderNote data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.FolderNote'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Note Folder
+      tags:
+      - Note
+  /v1/note-folder/{note-folder-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Note Folder
+      operationId: delete_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-folder-id
+        in: path
+        name: note-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Note Folder
+      tags:
+      - Note
+    get:
+      consumes:
+      - application/json
+      description: Get single Note Folder
+      operationId: get_single_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-folder-id
+        in: path
+        name: note-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: NoteFolderBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetSingleFolderNoteRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single Note Folder
+      tags:
+      - Note
+  /v1/note-folder/commits/{note-folder-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Commits note folder
+      operationId: get_commits_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-folder-id
+        in: path
+        name: note-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListFolderNoteRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListFolderNoteRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Commits note folder
+      tags:
+      - Note
+  /v1/note/{note-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Note
+      operationId: delete_note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-id
+        in: path
+        name: note-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Note
+      tags:
+      - Note
+    get:
+      consumes:
+      - application/json
+      description: Get single Note
+      operationId: get_single_note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-id
+        in: path
+        name: note-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: NoteBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Note'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single Note
+      tags:
+      - Note
+  /v1/note/commits/{note-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Commits note
+      operationId: get_commits_note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-id
+        in: path
+        name: note-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListNoteRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListNoteRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Commits note
+      tags:
+      - Note
   /v1/object-upsert/{table_slug}:
     post:
       consumes:
@@ -11174,6 +12391,9 @@ paths:
       - in: query
         name: table_slug
         type: string
+      - in: query
+        name: version_id
+        type: string
       produces:
       - application/json
       responses:
@@ -11580,12 +12800,10 @@ paths:
       - description: limit
         in: query
         name: limit
-        required: true
         type: string
       - description: offset
         in: query
         name: offset
-        required: true
         type: string
       produces:
       - application/json
@@ -12043,6 +13261,68 @@ paths:
       summary: Get single template folder
       tags:
       - Template
+  /v1/template-folder/commits/{template-folder-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Commits template folder
+      operationId: get_commits_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-folder-id
+        in: path
+        name: template-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListTemplateRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListTemplateRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Commits template folder
+      tags:
+      - Template
   /v1/template-to-html:
     post:
       consumes:
@@ -12058,6 +13338,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: TemplateBody
@@ -12100,7 +13385,7 @@ paths:
       - ApiKeyAuth: []
       summary: Convert template to html
       tags:
-      - View
+      - Template
   /v1/template/{template-id}:
     delete:
       consumes:
@@ -12215,6 +13500,68 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get single template
+      tags:
+      - Template
+  /v1/template/commits/{template-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Commits template
+      operationId: get_commits_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-id
+        in: path
+        name: template-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListTemplateRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListTemplateRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Commits template
       tags:
       - Template
   /v1/upload:
@@ -12718,6 +14065,9 @@ paths:
         type: string
       - in: query
         name: table_slug
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json
