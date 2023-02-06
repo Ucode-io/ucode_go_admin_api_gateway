@@ -516,6 +516,7 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 // @Param per_page query int false "per_page"
 // @Param sort query string false "sort"
 // @Param order query string false "order"
+// @Param Environment-Id header string true "Environment-Id"
 // @Param revert_api_reference body ars.ApiRevertApiReferenceRequest true "Request Body"
 // @Success 200 {object} status_http.Response{data=ars.ApiReference} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"

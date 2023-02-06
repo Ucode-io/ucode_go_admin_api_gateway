@@ -5289,6 +5289,11 @@ paths:
         in: query
         name: order
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: Request Body
         in: body
         name: revert_api_reference
