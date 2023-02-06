@@ -3446,13 +3446,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "type": "integer",
                         "description": "page",
                         "name": "page",
@@ -3570,6 +3563,18 @@ const docTemplate = `{
                         "name": "api_reference_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "commit_id",
+                        "name": "commit_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "version_id",
+                        "name": "version_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {

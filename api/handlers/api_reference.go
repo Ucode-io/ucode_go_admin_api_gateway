@@ -93,8 +93,8 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param api_reference_id path string true "api_reference_id"
-// @Query commit_id query string false "commit_id"
-// @Query version_id query string false "version_id"
+// @Param commit_id query string false "commit_id"
+// @Param version_id query string false "version_id"
 // @Success 200 {object} status_http.Response{data=models.ApiReference} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
