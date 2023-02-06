@@ -79,7 +79,8 @@ type Config struct {
 	ApiHost   string
 	Localhost string
 
-	SecretKey string
+	SecretKey    string
+	PlatformType string
 }
 
 // Load ...
@@ -152,7 +153,7 @@ func Load() Config {
 	config.AdminHost = cast.ToString(GetOrReturnDefaultValue("ADMIN_HOST", "test.admin.u-code.io"))
 	config.AppHost = cast.ToString(GetOrReturnDefaultValue("APP_HOST", "test.app.u-code.io"))
 	config.ApiHost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "test.admin.api.u-code.io"))
-	config.Localhost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "localhost"))
+	config.PlatformType = cast.ToString(GetOrReturnDefaultValue("PLATFORM_TYPE", "super-admin"))
 	return config
 }
 

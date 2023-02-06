@@ -33,12 +33,13 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
-			res    = &auth_service.V2HasAccessUserRes{}
-			ok     bool
-			origin = c.GetHeader("Origin")
+			res          = &auth_service.V2HasAccessUserRes{}
+			ok           bool
+			origin       = c.GetHeader("Origin")
+			platformType = c.GetHeader("Platform-Type")
 		)
 
-		fmt.Println("--origin--", origin)
+		fmt.Println("--platform-type--", platformType)
 		bearerToken := c.GetHeader("Authorization")
 		strArr := strings.Split(bearerToken, " ")
 
@@ -48,7 +49,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		}
 		switch strArr[0] {
 		case "Bearer":
-			if strings.Contains(origin, cfg.AppHost) || strings.Contains(origin, cfg.ApiHost) || strings.Contains(origin, cfg.Localhost) {
+			if platformType != cfg.PlatformType {
 				res, ok = h.hasAccess(c)
 				if !ok {
 					c.Abort()
