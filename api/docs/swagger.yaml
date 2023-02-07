@@ -12372,9 +12372,19 @@ paths:
       description: Get release by id
       operationId: get_release_by_id
       parameters:
-      - description: id
+      - description: version_id
         in: path
-        name: id
+        name: version_id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: path
+        name: project_id
         required: true
         type: string
       produces:

@@ -78,7 +78,9 @@ func (h *Handler) CreateRelease(c *gin.Context) {
 // @Tags Release
 // @Accept json
 // @Produce json
-// @Param id path string true "id"
+// @Param version_id path string true "version_id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Param project_id path string true "project_id"
 // @Success 200 {object} status_http.Response{data=versioning_service.ReleaseWithCommit} "ReleaseBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -86,7 +88,7 @@ func (h *Handler) GetReleaseByID(c *gin.Context) {
 	versionID := c.Param("version_id")
 
 	if !util.IsValidUUID(versionID) {
-		h.handleResponse(c, status_http.InvalidArgument, "release id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "version_id is an invalid uuid")
 		return
 	}
 
