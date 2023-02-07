@@ -4,7 +4,7 @@
 // - protoc             v3.21.5
 // source: release_service.proto
 
-package company_service
+package versioning_service
 
 import (
 	context "context"
@@ -30,6 +30,7 @@ type ReleaseServiceClient interface {
 	Delete(ctx context.Context, in *ReleasePrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetCurrentActive(ctx context.Context, in *GetCurrentReleaseRequest, opts ...grpc.CallOption) (*GetCurrentReleaseResponse, error)
 	SetCurrentActive(ctx context.Context, in *SetCurrentReleaseRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetMultipleVersionInfo(ctx context.Context, in *GetMultipleVersionInfoRequest, opts ...grpc.CallOption) (*GetMultipleVersionInfoResponse, error)
 }
 
 type releaseServiceClient struct {
@@ -42,7 +43,7 @@ func NewReleaseServiceClient(cc grpc.ClientConnInterface) ReleaseServiceClient {
 
 func (c *releaseServiceClient) Create(ctx context.Context, in *CreateReleaseRequest, opts ...grpc.CallOption) (*ReleaseWithCommit, error) {
 	out := new(ReleaseWithCommit)
-	err := c.cc.Invoke(ctx, "/company_service.ReleaseService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/versioning_service.ReleaseService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +52,7 @@ func (c *releaseServiceClient) Create(ctx context.Context, in *CreateReleaseRequ
 
 func (c *releaseServiceClient) GetByID(ctx context.Context, in *ReleasePrimaryKey, opts ...grpc.CallOption) (*ReleaseWithCommit, error) {
 	out := new(ReleaseWithCommit)
-	err := c.cc.Invoke(ctx, "/company_service.ReleaseService/GetByID", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/versioning_service.ReleaseService/GetByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func (c *releaseServiceClient) GetByID(ctx context.Context, in *ReleasePrimaryKe
 
 func (c *releaseServiceClient) GetList(ctx context.Context, in *GetReleaseListRequest, opts ...grpc.CallOption) (*GetReleaseListResponse, error) {
 	out := new(GetReleaseListResponse)
-	err := c.cc.Invoke(ctx, "/company_service.ReleaseService/GetList", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/versioning_service.ReleaseService/GetList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +70,7 @@ func (c *releaseServiceClient) GetList(ctx context.Context, in *GetReleaseListRe
 
 func (c *releaseServiceClient) Update(ctx context.Context, in *UpdateReleaseRequest, opts ...grpc.CallOption) (*ReleaseWithCommit, error) {
 	out := new(ReleaseWithCommit)
-	err := c.cc.Invoke(ctx, "/company_service.ReleaseService/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/versioning_service.ReleaseService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +79,7 @@ func (c *releaseServiceClient) Update(ctx context.Context, in *UpdateReleaseRequ
 
 func (c *releaseServiceClient) Delete(ctx context.Context, in *ReleasePrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/company_service.ReleaseService/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/versioning_service.ReleaseService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +88,7 @@ func (c *releaseServiceClient) Delete(ctx context.Context, in *ReleasePrimaryKey
 
 func (c *releaseServiceClient) GetCurrentActive(ctx context.Context, in *GetCurrentReleaseRequest, opts ...grpc.CallOption) (*GetCurrentReleaseResponse, error) {
 	out := new(GetCurrentReleaseResponse)
-	err := c.cc.Invoke(ctx, "/company_service.ReleaseService/GetCurrentActive", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/versioning_service.ReleaseService/GetCurrentActive", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +97,16 @@ func (c *releaseServiceClient) GetCurrentActive(ctx context.Context, in *GetCurr
 
 func (c *releaseServiceClient) SetCurrentActive(ctx context.Context, in *SetCurrentReleaseRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/company_service.ReleaseService/SetCurrentActive", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/versioning_service.ReleaseService/SetCurrentActive", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *releaseServiceClient) GetMultipleVersionInfo(ctx context.Context, in *GetMultipleVersionInfoRequest, opts ...grpc.CallOption) (*GetMultipleVersionInfoResponse, error) {
+	out := new(GetMultipleVersionInfoResponse)
+	err := c.cc.Invoke(ctx, "/versioning_service.ReleaseService/GetMultipleVersionInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -114,6 +124,7 @@ type ReleaseServiceServer interface {
 	Delete(context.Context, *ReleasePrimaryKey) (*emptypb.Empty, error)
 	GetCurrentActive(context.Context, *GetCurrentReleaseRequest) (*GetCurrentReleaseResponse, error)
 	SetCurrentActive(context.Context, *SetCurrentReleaseRequest) (*emptypb.Empty, error)
+	GetMultipleVersionInfo(context.Context, *GetMultipleVersionInfoRequest) (*GetMultipleVersionInfoResponse, error)
 	mustEmbedUnimplementedReleaseServiceServer()
 }
 
@@ -142,6 +153,9 @@ func (UnimplementedReleaseServiceServer) GetCurrentActive(context.Context, *GetC
 func (UnimplementedReleaseServiceServer) SetCurrentActive(context.Context, *SetCurrentReleaseRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetCurrentActive not implemented")
 }
+func (UnimplementedReleaseServiceServer) GetMultipleVersionInfo(context.Context, *GetMultipleVersionInfoRequest) (*GetMultipleVersionInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMultipleVersionInfo not implemented")
+}
 func (UnimplementedReleaseServiceServer) mustEmbedUnimplementedReleaseServiceServer() {}
 
 // UnsafeReleaseServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -165,7 +179,7 @@ func _ReleaseService_Create_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.ReleaseService/Create",
+		FullMethod: "/versioning_service.ReleaseService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ReleaseServiceServer).Create(ctx, req.(*CreateReleaseRequest))
@@ -183,7 +197,7 @@ func _ReleaseService_GetByID_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.ReleaseService/GetByID",
+		FullMethod: "/versioning_service.ReleaseService/GetByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ReleaseServiceServer).GetByID(ctx, req.(*ReleasePrimaryKey))
@@ -201,7 +215,7 @@ func _ReleaseService_GetList_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.ReleaseService/GetList",
+		FullMethod: "/versioning_service.ReleaseService/GetList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ReleaseServiceServer).GetList(ctx, req.(*GetReleaseListRequest))
@@ -219,7 +233,7 @@ func _ReleaseService_Update_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.ReleaseService/Update",
+		FullMethod: "/versioning_service.ReleaseService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ReleaseServiceServer).Update(ctx, req.(*UpdateReleaseRequest))
@@ -237,7 +251,7 @@ func _ReleaseService_Delete_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.ReleaseService/Delete",
+		FullMethod: "/versioning_service.ReleaseService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ReleaseServiceServer).Delete(ctx, req.(*ReleasePrimaryKey))
@@ -255,7 +269,7 @@ func _ReleaseService_GetCurrentActive_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.ReleaseService/GetCurrentActive",
+		FullMethod: "/versioning_service.ReleaseService/GetCurrentActive",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ReleaseServiceServer).GetCurrentActive(ctx, req.(*GetCurrentReleaseRequest))
@@ -273,10 +287,28 @@ func _ReleaseService_SetCurrentActive_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.ReleaseService/SetCurrentActive",
+		FullMethod: "/versioning_service.ReleaseService/SetCurrentActive",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ReleaseServiceServer).SetCurrentActive(ctx, req.(*SetCurrentReleaseRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ReleaseService_GetMultipleVersionInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMultipleVersionInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReleaseServiceServer).GetMultipleVersionInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/versioning_service.ReleaseService/GetMultipleVersionInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReleaseServiceServer).GetMultipleVersionInfo(ctx, req.(*GetMultipleVersionInfoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -285,7 +317,7 @@ func _ReleaseService_SetCurrentActive_Handler(srv interface{}, ctx context.Conte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ReleaseService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "company_service.ReleaseService",
+	ServiceName: "versioning_service.ReleaseService",
 	HandlerType: (*ReleaseServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -315,6 +347,10 @@ var ReleaseService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetCurrentActive",
 			Handler:    _ReleaseService_SetCurrentActive_Handler,
+		},
+		{
+			MethodName: "GetMultipleVersionInfo",
+			Handler:    _ReleaseService_GetMultipleVersionInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

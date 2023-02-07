@@ -28,8 +28,8 @@ message CreateTableRequest {
     string app_id = 9;
     IncrementID increment_id = 10;
     string project_id = 11;
-    int64 commit_id = 12;
-    string commit_guid = 13;
+    string commit_id = 12;
+    string version_id = 13;
 }
 
 message IncrementID {
@@ -73,6 +73,7 @@ message GetAllTablesResponse {
 message TablePrimaryKey {
     string id = 1;
     string project_id = 2;
+    string version_id = 3;
 }
 
 message GetAllTablesRequest {

@@ -12,6 +12,8 @@ service ApiReferenceService {
     rpc Get (GetApiReferenceRequest) returns (ApiReference) {}
     rpc GetList (GetListApiReferenceRequest) returns (GetListApiReferenceResponse) {}
     rpc Delete (DeleteApiReferenceRequest) returns (google.protobuf.Empty) {}
+    rpc GetApiReferenceChanges (GetListApiReferenceChangesRequest) returns (GetListApiReferenceChangesResponse) {}
+    rpc RevertApiReference (RevertApiReferenceRequest) returns (ApiReference) {}
 }
 
 message CreateApiReferenceRequest {
@@ -26,6 +28,8 @@ message CreateApiReferenceRequest {
     bool new_window = 9;
     google.protobuf.Struct attributes = 10;
     string project_id = 11;
+    string commit_id = 12;
+    string version_id = 13;
 }
 
 message ApiReference {
@@ -41,11 +45,39 @@ message ApiReference {
     bool new_window = 10;
     google.protobuf.Struct attributes = 11;
     string project_id = 12;
+    string version_id = 13;
+    string commit_id = 14;
+    CommitInfo commit_info = 15;
+    VersionInfo version_info = 16;
+
+    message CommitInfo {
+        string commit_id = 1;
+        string version_id = 2;
+        string project_id = 3;
+        string author_id = 4;
+        string name = 5;
+        string commit_type = 6;
+        string created_at = 7;
+        string updated_at = 8;
+    }
+
+    message VersionInfo {
+        string version_id = 1;
+        string commit_id = 2;
+        string author_id = 3;
+        string created_at = 4;
+        string updated_at = 5;
+        string desc = 6;
+        bool is_current = 7;
+        string version = 8;
+    }
 }
 
 
 message GetApiReferenceRequest {
     string guid = 1;
+    string version_id = 2;
+    string commit_id = 3;
 }
 
 message GetListApiReferenceRequest {
@@ -53,6 +85,8 @@ message GetListApiReferenceRequest {
     int64 offset = 2;
     string category_id = 3;
     string project_id = 4;
+    string version_id = 5;
+    string commit_id = 6;
 }
 
 message GetListApiReferenceResponse {
@@ -62,4 +96,29 @@ message GetListApiReferenceResponse {
 
 message DeleteApiReferenceRequest {
     string guid = 1;
+    string version_id = 2;
+}
+
+message GetListApiReferenceChangesRequest {
+    string guid = 1;
+    string project_id = 2;
+    int64 limit = 3;
+    int64 offset = 4;
+}
+
+message GetListApiReferenceChangesResponse {
+    int64 count = 1;
+    repeated ApiReference api_references = 2;
+}
+
+message RevertApiReferenceRequest {
+    string newcommit_id = 1;
+    string version_id = 2;
+    string guid = 3; 
+    string oldcommit_id = 4;
+}
+
+message ApiRevertApiReferenceRequest {
+    string commit_id =1;
+    string project_id = 2;
 }

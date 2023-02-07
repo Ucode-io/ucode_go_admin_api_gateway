@@ -804,7 +804,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 	m2mMessage.ProjectId = resourceEnvironment.GetId()
-	beforeActions, afterActions, err := GetListCustomEvents(m2mMessage.TableFrom, "", "DELETE_MANY2MANY", c, h)
+	beforeActions, afterActions, err := GetListCustomEvents(m2mMessage.TableTo, "", "DELETE_MANY2MANY", c, h)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -813,8 +813,8 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
-			TableSlug:    m2mMessage.TableFrom,
-			ObjectData:   map[string]interface{}{},
+			TableSlug:    m2mMessage.TableTo,
+			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_to": m2mMessage.TableFrom},
 			Method:       "DELETE_MANY2MANY",
 		},
 			c,
@@ -840,8 +840,8 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{m2mMessage.IdFrom},
-				TableSlug:    m2mMessage.TableFrom,
-				ObjectData:   map[string]interface{}{},
+				TableSlug:    c.Param("table_slug"),
+				ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableTo},
 				Method:       "DELETE_MANY2MANY",
 			},
 			c, // gin context,
@@ -928,8 +928,8 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
 			IDs:          []string{m2mMessage.IdFrom},
-			TableSlug:    m2mMessage.TableFrom,
-			ObjectData:   map[string]interface{}{},
+			TableSlug:    m2mMessage.TableTo,
+			ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableFrom},
 			Method:       "APPEND_MANY2MANY",
 		},
 			c,
@@ -955,8 +955,8 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
 				IDs:          []string{m2mMessage.IdFrom},
-				TableSlug:    m2mMessage.TableFrom,
-				ObjectData:   map[string]interface{}{},
+				TableSlug:    m2mMessage.TableTo,
+				ObjectData:   map[string]interface{}{"id_to": m2mMessage.IdTo, "table_from": m2mMessage.TableFrom},
 				Method:       "APPEND_MANY2MANY",
 			},
 			c, // gin context,
@@ -1148,7 +1148,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 			CustomEvents: beforeActions,
 			IDs:          []string{},
 			TableSlug:    c.Param("table_slug"),
-			ObjectData:   map[string]interface{}{},
+			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
 		},
 			c,
@@ -1278,24 +1278,27 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
+	objects := objectRequest.Data["objects"].([]interface{})
+	editedObjects := make([]map[string]interface{}, 0, len(objects))
+	var objectIds = make([]string, 0, len(objects))
+	for _, object := range objects {
+		newObjects := object.(map[string]interface{})
+		guid, ok := newObjects["guid"]
+		if ok {
+			if guid.(string) == "" {
+				guid, _ := uuid.NewRandom()
+				newObjects["guid"] = guid.String()
+				newObjects["is_new"] = true
+			}
+		}
+		objectIds = append(objectIds, newObjects["guid"].(string))
+		editedObjects = append(editedObjects, newObjects)
+	}
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
-	}
-	objects := objectRequest.Data["objects"].([]interface{})
-	editedObjects := make([]interface{}, 0, len(objects))
-	var objectIds = make([]string, 0, len(objects))
-	for _, object := range objects {
-		newObjects := object.(map[string]interface{})
-		if newObjects["guid"] == "" {
-			guid, _ := uuid.NewRandom()
-			newObjects["guid"] = guid.String()
-			newObjects["is_new"] = true
-		}
-		objectIds = append(objectIds, newObjects["guid"].(string))
-		editedObjects = append(editedObjects, newObjects)
 	}
 	objectRequest.Data["objects"] = editedObjects
 
@@ -1347,7 +1350,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 			CustomEvents: beforeActions,
 			IDs:          objectIds,
 			TableSlug:    c.Param("table_slug"),
-			ObjectData:   map[string]interface{}{},
+			ObjectData:   objectRequest.Data,
 			Method:       "MULTIPLE_UPDATE",
 		},
 			c,

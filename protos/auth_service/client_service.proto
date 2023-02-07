@@ -43,11 +43,11 @@ service ClientService {
     rpc V2UpdateClientPlatform(UpdateClientPlatformRequest) returns (CommonMessage) {}
     rpc V2DeleteClientPlatform(ClientPlatformPrimaryKey) returns (google.protobuf.Empty) {}
     
-    rpc V2CreateClientType(CreateClientTypeRequest) returns (CommonMessage) {}
-    rpc V2GetClientTypeByID(ClientTypePrimaryKey) returns (CommonMessage) {}
-    rpc V2GetClientTypeList(GetClientTypeListRequest) returns (CommonMessage) {}
-    rpc V2UpdateClientType(UpdateClientTypeRequest) returns (CommonMessage) {}
-    rpc V2DeleteClientType(ClientTypePrimaryKey) returns (google.protobuf.Empty) {}
+    rpc V2CreateClientType(V2CreateClientTypeRequest) returns (CommonMessage) {}
+    rpc V2GetClientTypeByID(V2ClientTypePrimaryKey) returns (CommonMessage) {}
+    rpc V2GetClientTypeList(V2GetClientTypeListRequest) returns (CommonMessage) {}
+    rpc V2UpdateClientType(V2UpdateClientTypeRequest) returns (CommonMessage) {}
+    rpc V2DeleteClientType(V2ClientTypePrimaryKey) returns (google.protobuf.Empty) {}
 
     rpc V2AddClient(AddClientRequest) returns (CommonMessage) {}
     rpc V2UpdateClient(UpdateClientRequest) returns (CommonMessage) {}
@@ -258,14 +258,48 @@ message CreateClientTypeRequestToObjService {
     bool self_register = 4;
     bool self_recover = 5;
     string project_id = 6;
+    repeated string client_platform_ids = 7;
 }
 
 message UpdateClientTypeRequestToObjService {
-    string id = 1;
+    string guid = 1;
     string name = 2;
     string confirm_by = 3;
     bool self_register = 4;
     bool self_recover = 5;
     string project_id = 6;
     repeated string client_platform_ids = 7;
+}
+
+message V2CreateClientTypeRequest {
+    string name = 2;
+    ConfirmStrategies confirm_by = 3;
+    bool self_register = 4;
+    bool self_recover = 5;
+    string project_id = 6;
+    string db_project_id = 7;
+    repeated string client_platform_ids = 8;
+}
+
+message V2GetClientTypeListRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+    string search = 3;
+    string project_id = 4;
+}
+
+message V2UpdateClientTypeRequest {
+    string guid = 1;
+    string name = 2;
+    ConfirmStrategies confirm_by = 3;
+    bool self_register = 4;
+    bool self_recover = 5;
+    repeated string client_platform_ids = 7;
+    string project_id = 8;
+    string db_project_id = 9;
+}
+
+message V2ClientTypePrimaryKey {
+    string id = 1;
+    string project_id = 2;
 }

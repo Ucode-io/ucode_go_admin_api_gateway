@@ -1,10 +1,10 @@
 syntax="proto3";
 
-package company_service;
-option go_package="genproto/company_service";
+package versioning_service;
+option go_package="genproto/versioning_service";
 
 import "google/protobuf/empty.proto";
-import "company.proto";
+import "versioning.proto";
 
 service ReleaseService {
     rpc Create(CreateReleaseRequest) returns (ReleaseWithCommit) {}
@@ -14,6 +14,7 @@ service ReleaseService {
     rpc Delete(ReleasePrimaryKey) returns (google.protobuf.Empty) {}
     rpc GetCurrentActive(GetCurrentReleaseRequest) returns (GetCurrentReleaseResponse) {}
     rpc SetCurrentActive(SetCurrentReleaseRequest) returns (google.protobuf.Empty) {}
+    rpc GetMultipleVersionInfo(GetMultipleVersionInfoRequest) returns (GetMultipleVersionInfoResponse) {}
 }
 
 enum ReleaseType {
@@ -61,11 +62,32 @@ message GetCurrentReleaseRequest {
 }
 
 message GetCurrentReleaseResponse {
-    string commit_id = 1;
+    string version_id = 1;
 }
 
 message SetCurrentReleaseRequest {
     string project_id = 1;
     string environment_id = 2;
     string id = 3;
+}
+
+message GetMultipleVersionInfoRequest {
+    repeated string version_ids = 1;
+    string project_id = 2;
+}
+
+message VersionInfo {
+    string version_id = 1;
+    string commit_id = 2;
+    string author_id = 3;
+    string created_at = 4;
+    string updated_at = 5;
+    string desc = 6;
+    bool is_current = 7;
+    string version = 8;
+}
+
+message GetMultipleVersionInfoResponse {
+    map<string, VersionInfo> version_infos = 1;
+    int64 count = 2;
 }

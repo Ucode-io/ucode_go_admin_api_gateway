@@ -29,6 +29,7 @@ message GetFieldPermissionRequest {
     string role_id = 1;
     string table_slug = 2;
     string project_id = 3;
+    string version_id = 4;
 }
 
 message UpsertPermissionsByAppIdResponse{
@@ -50,6 +51,7 @@ message GetActionPermissionRequest {
 message GetListWithRoleAppTablePermissionsRequest {
     string project_id = 1;
     string role_id = 2;
+    string version_id = 3;
 }
 
 message RoleWithAppTablePermissions {

@@ -25,10 +25,10 @@ type CreateServiceResourceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ResourceName     string `protobuf:"bytes,1,opt,name=resource_name,json=resourceName,proto3" json:"resource_name,omitempty"`
-	MicroserviceName string `protobuf:"bytes,2,opt,name=microservice_name,json=microserviceName,proto3" json:"microservice_name,omitempty"`
-	Name             string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Description      string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	ResourceName     string `protobuf:"bytes,1,opt,name=resource_name,json=resourceName,proto3" json:"resource_name"`
+	MicroserviceName string `protobuf:"bytes,2,opt,name=microservice_name,json=microserviceName,proto3" json:"microservice_name"`
+	Name             string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	Description      string `protobuf:"bytes,4,opt,name=description,proto3" json:"description"`
 }
 
 func (x *CreateServiceResourceRequest) Reset() {
@@ -96,9 +96,9 @@ type GetListServiceResourceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Offset int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
-	Limit  int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Search string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
+	Offset int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset"`
+	Limit  int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
+	Search string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
 }
 
 func (x *GetListServiceResourceRequest) Reset() {
@@ -159,8 +159,8 @@ type GetListServiceResourceResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ServiceResources []*ServiceResources `protobuf:"bytes,1,rep,name=service_resources,json=serviceResources,proto3" json:"service_resources,omitempty"`
-	Count            int32               `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	ServiceResources []*ServiceResources `protobuf:"bytes,1,rep,name=service_resources,json=serviceResources,proto3" json:"service_resources"`
+	Count            int32               `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetListServiceResourceResponse) Reset() {
@@ -214,7 +214,7 @@ type ServiceResourcePrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *ServiceResourcePrimaryKey) Reset() {
@@ -261,13 +261,13 @@ type GetByIdByIdServiceResourceResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ResourceName     string `protobuf:"bytes,2,opt,name=resource_name,json=resourceName,proto3" json:"resource_name,omitempty"`
-	MicroserviceName string `protobuf:"bytes,3,opt,name=microservice_name,json=microserviceName,proto3" json:"microservice_name,omitempty"`
-	Name             string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	Description      string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	CreatedAt        string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt        string `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ResourceName     string `protobuf:"bytes,2,opt,name=resource_name,json=resourceName,proto3" json:"resource_name"`
+	MicroserviceName string `protobuf:"bytes,3,opt,name=microservice_name,json=microserviceName,proto3" json:"microservice_name"`
+	Name             string `protobuf:"bytes,4,opt,name=name,proto3" json:"name"`
+	Description      string `protobuf:"bytes,5,opt,name=description,proto3" json:"description"`
+	CreatedAt        string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt        string `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
 }
 
 func (x *GetByIdByIdServiceResourceResponse) Reset() {
@@ -356,11 +356,11 @@ type UpdateServiceResourceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name             string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description      string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	ResourceName     string `protobuf:"bytes,4,opt,name=resource_name,json=resourceName,proto3" json:"resource_name,omitempty"`
-	MicroserviceName string `protobuf:"bytes,5,opt,name=microservice_name,json=microserviceName,proto3" json:"microservice_name,omitempty"`
+	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name             string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Description      string `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	ResourceName     string `protobuf:"bytes,4,opt,name=resource_name,json=resourceName,proto3" json:"resource_name"`
+	MicroserviceName string `protobuf:"bytes,5,opt,name=microservice_name,json=microserviceName,proto3" json:"microservice_name"`
 }
 
 func (x *UpdateServiceResourceRequest) Reset() {
@@ -435,11 +435,11 @@ type UpdateServiceResourceResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name             string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description      string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	ResourceName     string `protobuf:"bytes,4,opt,name=resource_name,json=resourceName,proto3" json:"resource_name,omitempty"`
-	MicroserviceName string `protobuf:"bytes,5,opt,name=microservice_name,json=microserviceName,proto3" json:"microservice_name,omitempty"`
+	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name             string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Description      string `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	ResourceName     string `protobuf:"bytes,4,opt,name=resource_name,json=resourceName,proto3" json:"resource_name"`
+	MicroserviceName string `protobuf:"bytes,5,opt,name=microservice_name,json=microserviceName,proto3" json:"microservice_name"`
 }
 
 func (x *UpdateServiceResourceResponse) Reset() {
@@ -514,13 +514,13 @@ type ServiceResources struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ResourceName     string `protobuf:"bytes,2,opt,name=resource_name,json=resourceName,proto3" json:"resource_name,omitempty"`
-	MicroserviceName string `protobuf:"bytes,3,opt,name=microservice_name,json=microserviceName,proto3" json:"microservice_name,omitempty"`
-	Name             string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	Description      string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	CreatedAt        string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt        string `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ResourceName     string `protobuf:"bytes,2,opt,name=resource_name,json=resourceName,proto3" json:"resource_name"`
+	MicroserviceName string `protobuf:"bytes,3,opt,name=microservice_name,json=microserviceName,proto3" json:"microservice_name"`
+	Name             string `protobuf:"bytes,4,opt,name=name,proto3" json:"name"`
+	Description      string `protobuf:"bytes,5,opt,name=description,proto3" json:"description"`
+	CreatedAt        string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt        string `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
 }
 
 func (x *ServiceResources) Reset() {

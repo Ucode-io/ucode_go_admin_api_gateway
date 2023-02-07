@@ -14,8 +14,6 @@ type CompanyServiceI interface {
 	Project() company_service.ProjectServiceClient
 	Environment() company_service.EnvironmentServiceClient
 	Resource() company_service.ResourceServiceClient
-	Release() company_service.ReleaseServiceClient
-	Commit() company_service.CommitServiceClient
 }
 
 type companyServiceClient struct {
@@ -23,8 +21,6 @@ type companyServiceClient struct {
 	projectService     company_service.ProjectServiceClient
 	environmentService company_service.EnvironmentServiceClient
 	resourceService    company_service.ResourceServiceClient
-	releaseService     company_service.ReleaseServiceClient
-	commitService      company_service.CommitServiceClient
 }
 
 func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanyServiceI, error) {
@@ -43,8 +39,6 @@ func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanySer
 		projectService:     company_service.NewProjectServiceClient(connCompanyService),
 		environmentService: company_service.NewEnvironmentServiceClient(connCompanyService),
 		resourceService:    company_service.NewResourceServiceClient(connCompanyService),
-		releaseService:     company_service.NewReleaseServiceClient(connCompanyService),
-		commitService:      company_service.NewCommitServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -62,12 +56,4 @@ func (g *companyServiceClient) Environment() company_service.EnvironmentServiceC
 
 func (g *companyServiceClient) Resource() company_service.ResourceServiceClient {
 	return g.resourceService
-}
-
-func (g *companyServiceClient) Release() company_service.ReleaseServiceClient {
-	return g.releaseService
-}
-
-func (g *companyServiceClient) Commit() company_service.CommitServiceClient {
-	return g.commitService
 }

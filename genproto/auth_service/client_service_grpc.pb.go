@@ -51,11 +51,11 @@ type ClientServiceClient interface {
 	V2GetClientPlatformList(ctx context.Context, in *GetClientPlatformListRequest, opts ...grpc.CallOption) (*CommonMessage, error)
 	V2UpdateClientPlatform(ctx context.Context, in *UpdateClientPlatformRequest, opts ...grpc.CallOption) (*CommonMessage, error)
 	V2DeleteClientPlatform(ctx context.Context, in *ClientPlatformPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	V2CreateClientType(ctx context.Context, in *CreateClientTypeRequest, opts ...grpc.CallOption) (*CommonMessage, error)
-	V2GetClientTypeByID(ctx context.Context, in *ClientTypePrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error)
-	V2GetClientTypeList(ctx context.Context, in *GetClientTypeListRequest, opts ...grpc.CallOption) (*CommonMessage, error)
-	V2UpdateClientType(ctx context.Context, in *UpdateClientTypeRequest, opts ...grpc.CallOption) (*CommonMessage, error)
-	V2DeleteClientType(ctx context.Context, in *ClientTypePrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	V2CreateClientType(ctx context.Context, in *V2CreateClientTypeRequest, opts ...grpc.CallOption) (*CommonMessage, error)
+	V2GetClientTypeByID(ctx context.Context, in *V2ClientTypePrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error)
+	V2GetClientTypeList(ctx context.Context, in *V2GetClientTypeListRequest, opts ...grpc.CallOption) (*CommonMessage, error)
+	V2UpdateClientType(ctx context.Context, in *V2UpdateClientTypeRequest, opts ...grpc.CallOption) (*CommonMessage, error)
+	V2DeleteClientType(ctx context.Context, in *V2ClientTypePrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	V2AddClient(ctx context.Context, in *AddClientRequest, opts ...grpc.CallOption) (*CommonMessage, error)
 	V2UpdateClient(ctx context.Context, in *UpdateClientRequest, opts ...grpc.CallOption) (*CommonMessage, error)
 	V2RemoveClient(ctx context.Context, in *ClientPrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error)
@@ -329,7 +329,7 @@ func (c *clientServiceClient) V2DeleteClientPlatform(ctx context.Context, in *Cl
 	return out, nil
 }
 
-func (c *clientServiceClient) V2CreateClientType(ctx context.Context, in *CreateClientTypeRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
+func (c *clientServiceClient) V2CreateClientType(ctx context.Context, in *V2CreateClientTypeRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
 	out := new(CommonMessage)
 	err := c.cc.Invoke(ctx, "/auth_service.ClientService/V2CreateClientType", in, out, opts...)
 	if err != nil {
@@ -338,7 +338,7 @@ func (c *clientServiceClient) V2CreateClientType(ctx context.Context, in *Create
 	return out, nil
 }
 
-func (c *clientServiceClient) V2GetClientTypeByID(ctx context.Context, in *ClientTypePrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error) {
+func (c *clientServiceClient) V2GetClientTypeByID(ctx context.Context, in *V2ClientTypePrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error) {
 	out := new(CommonMessage)
 	err := c.cc.Invoke(ctx, "/auth_service.ClientService/V2GetClientTypeByID", in, out, opts...)
 	if err != nil {
@@ -347,7 +347,7 @@ func (c *clientServiceClient) V2GetClientTypeByID(ctx context.Context, in *Clien
 	return out, nil
 }
 
-func (c *clientServiceClient) V2GetClientTypeList(ctx context.Context, in *GetClientTypeListRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
+func (c *clientServiceClient) V2GetClientTypeList(ctx context.Context, in *V2GetClientTypeListRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
 	out := new(CommonMessage)
 	err := c.cc.Invoke(ctx, "/auth_service.ClientService/V2GetClientTypeList", in, out, opts...)
 	if err != nil {
@@ -356,7 +356,7 @@ func (c *clientServiceClient) V2GetClientTypeList(ctx context.Context, in *GetCl
 	return out, nil
 }
 
-func (c *clientServiceClient) V2UpdateClientType(ctx context.Context, in *UpdateClientTypeRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
+func (c *clientServiceClient) V2UpdateClientType(ctx context.Context, in *V2UpdateClientTypeRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
 	out := new(CommonMessage)
 	err := c.cc.Invoke(ctx, "/auth_service.ClientService/V2UpdateClientType", in, out, opts...)
 	if err != nil {
@@ -365,7 +365,7 @@ func (c *clientServiceClient) V2UpdateClientType(ctx context.Context, in *Update
 	return out, nil
 }
 
-func (c *clientServiceClient) V2DeleteClientType(ctx context.Context, in *ClientTypePrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *clientServiceClient) V2DeleteClientType(ctx context.Context, in *V2ClientTypePrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/auth_service.ClientService/V2DeleteClientType", in, out, opts...)
 	if err != nil {
@@ -505,11 +505,11 @@ type ClientServiceServer interface {
 	V2GetClientPlatformList(context.Context, *GetClientPlatformListRequest) (*CommonMessage, error)
 	V2UpdateClientPlatform(context.Context, *UpdateClientPlatformRequest) (*CommonMessage, error)
 	V2DeleteClientPlatform(context.Context, *ClientPlatformPrimaryKey) (*emptypb.Empty, error)
-	V2CreateClientType(context.Context, *CreateClientTypeRequest) (*CommonMessage, error)
-	V2GetClientTypeByID(context.Context, *ClientTypePrimaryKey) (*CommonMessage, error)
-	V2GetClientTypeList(context.Context, *GetClientTypeListRequest) (*CommonMessage, error)
-	V2UpdateClientType(context.Context, *UpdateClientTypeRequest) (*CommonMessage, error)
-	V2DeleteClientType(context.Context, *ClientTypePrimaryKey) (*emptypb.Empty, error)
+	V2CreateClientType(context.Context, *V2CreateClientTypeRequest) (*CommonMessage, error)
+	V2GetClientTypeByID(context.Context, *V2ClientTypePrimaryKey) (*CommonMessage, error)
+	V2GetClientTypeList(context.Context, *V2GetClientTypeListRequest) (*CommonMessage, error)
+	V2UpdateClientType(context.Context, *V2UpdateClientTypeRequest) (*CommonMessage, error)
+	V2DeleteClientType(context.Context, *V2ClientTypePrimaryKey) (*emptypb.Empty, error)
 	V2AddClient(context.Context, *AddClientRequest) (*CommonMessage, error)
 	V2UpdateClient(context.Context, *UpdateClientRequest) (*CommonMessage, error)
 	V2RemoveClient(context.Context, *ClientPrimaryKey) (*CommonMessage, error)
@@ -612,19 +612,19 @@ func (UnimplementedClientServiceServer) V2UpdateClientPlatform(context.Context, 
 func (UnimplementedClientServiceServer) V2DeleteClientPlatform(context.Context, *ClientPlatformPrimaryKey) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2DeleteClientPlatform not implemented")
 }
-func (UnimplementedClientServiceServer) V2CreateClientType(context.Context, *CreateClientTypeRequest) (*CommonMessage, error) {
+func (UnimplementedClientServiceServer) V2CreateClientType(context.Context, *V2CreateClientTypeRequest) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2CreateClientType not implemented")
 }
-func (UnimplementedClientServiceServer) V2GetClientTypeByID(context.Context, *ClientTypePrimaryKey) (*CommonMessage, error) {
+func (UnimplementedClientServiceServer) V2GetClientTypeByID(context.Context, *V2ClientTypePrimaryKey) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2GetClientTypeByID not implemented")
 }
-func (UnimplementedClientServiceServer) V2GetClientTypeList(context.Context, *GetClientTypeListRequest) (*CommonMessage, error) {
+func (UnimplementedClientServiceServer) V2GetClientTypeList(context.Context, *V2GetClientTypeListRequest) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2GetClientTypeList not implemented")
 }
-func (UnimplementedClientServiceServer) V2UpdateClientType(context.Context, *UpdateClientTypeRequest) (*CommonMessage, error) {
+func (UnimplementedClientServiceServer) V2UpdateClientType(context.Context, *V2UpdateClientTypeRequest) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2UpdateClientType not implemented")
 }
-func (UnimplementedClientServiceServer) V2DeleteClientType(context.Context, *ClientTypePrimaryKey) (*emptypb.Empty, error) {
+func (UnimplementedClientServiceServer) V2DeleteClientType(context.Context, *V2ClientTypePrimaryKey) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2DeleteClientType not implemented")
 }
 func (UnimplementedClientServiceServer) V2AddClient(context.Context, *AddClientRequest) (*CommonMessage, error) {
@@ -1178,7 +1178,7 @@ func _ClientService_V2DeleteClientPlatform_Handler(srv interface{}, ctx context.
 }
 
 func _ClientService_V2CreateClientType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateClientTypeRequest)
+	in := new(V2CreateClientTypeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1190,13 +1190,13 @@ func _ClientService_V2CreateClientType_Handler(srv interface{}, ctx context.Cont
 		FullMethod: "/auth_service.ClientService/V2CreateClientType",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClientServiceServer).V2CreateClientType(ctx, req.(*CreateClientTypeRequest))
+		return srv.(ClientServiceServer).V2CreateClientType(ctx, req.(*V2CreateClientTypeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ClientService_V2GetClientTypeByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ClientTypePrimaryKey)
+	in := new(V2ClientTypePrimaryKey)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1208,13 +1208,13 @@ func _ClientService_V2GetClientTypeByID_Handler(srv interface{}, ctx context.Con
 		FullMethod: "/auth_service.ClientService/V2GetClientTypeByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClientServiceServer).V2GetClientTypeByID(ctx, req.(*ClientTypePrimaryKey))
+		return srv.(ClientServiceServer).V2GetClientTypeByID(ctx, req.(*V2ClientTypePrimaryKey))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ClientService_V2GetClientTypeList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetClientTypeListRequest)
+	in := new(V2GetClientTypeListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1226,13 +1226,13 @@ func _ClientService_V2GetClientTypeList_Handler(srv interface{}, ctx context.Con
 		FullMethod: "/auth_service.ClientService/V2GetClientTypeList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClientServiceServer).V2GetClientTypeList(ctx, req.(*GetClientTypeListRequest))
+		return srv.(ClientServiceServer).V2GetClientTypeList(ctx, req.(*V2GetClientTypeListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ClientService_V2UpdateClientType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateClientTypeRequest)
+	in := new(V2UpdateClientTypeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1244,13 +1244,13 @@ func _ClientService_V2UpdateClientType_Handler(srv interface{}, ctx context.Cont
 		FullMethod: "/auth_service.ClientService/V2UpdateClientType",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClientServiceServer).V2UpdateClientType(ctx, req.(*UpdateClientTypeRequest))
+		return srv.(ClientServiceServer).V2UpdateClientType(ctx, req.(*V2UpdateClientTypeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ClientService_V2DeleteClientType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ClientTypePrimaryKey)
+	in := new(V2ClientTypePrimaryKey)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1262,7 +1262,7 @@ func _ClientService_V2DeleteClientType_Handler(srv interface{}, ctx context.Cont
 		FullMethod: "/auth_service.ClientService/V2DeleteClientType",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClientServiceServer).V2DeleteClientType(ctx, req.(*ClientTypePrimaryKey))
+		return srv.(ClientServiceServer).V2DeleteClientType(ctx, req.(*V2ClientTypePrimaryKey))
 	}
 	return interceptor(ctx, in, info, handler)
 }

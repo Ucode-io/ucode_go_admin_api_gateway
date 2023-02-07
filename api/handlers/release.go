@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	obs "ucode/ucode_go_api_gateway/genproto/company_service"
+	obs "ucode/ucode_go_api_gateway/genproto/versioning_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -18,8 +18,8 @@ import (
 // @Tags Release
 // @Accept json
 // @Produce json
-// @Param release body company_service.CreateReleaseRequest true "CreateReleaseRequestBody"
-// @Success 201 {object} status_http.Response{data=company_service.ReleaseWithCommit} "Release data"
+// @Param release body versioning_service.CreateReleaseRequest true "CreateReleaseRequestBody"
+// @Success 201 {object} status_http.Response{data=versioning_service.ReleaseWithCommit} "Release data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateRelease(c *gin.Context) {
@@ -31,7 +31,7 @@ func (h *Handler) CreateRelease(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Release().Create(
+	resp, err := h.companyServices.VersioningService().Release().Create(
 		context.Background(),
 		&release,
 	)
@@ -54,7 +54,7 @@ func (h *Handler) CreateRelease(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Success 200 {object} status_http.Response{data=company_service.ReleaseWithCommit} "ReleaseBody"
+// @Success 200 {object} status_http.Response{data=versioning_service.ReleaseWithCommit} "ReleaseBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetReleaseByID(c *gin.Context) {
@@ -65,7 +65,7 @@ func (h *Handler) GetReleaseByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Release().GetByID(
+	resp, err := h.companyServices.VersioningService().Release().GetByID(
 		context.Background(),
 		&obs.ReleasePrimaryKey{
 			Id: releaseID,
@@ -88,8 +88,8 @@ func (h *Handler) GetReleaseByID(c *gin.Context) {
 // @Tags Release
 // @Accept json
 // @Produce json
-// @Param filters query company_service.GetReleaseListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=company_service.GetReleaseListResponse} "ReleaseBody"
+// @Param filters query versioning_service.GetReleaseListRequest true "filters"
+// @Success 200 {object} status_http.Response{data=versioning_service.GetReleaseListResponse} "ReleaseBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllReleases(c *gin.Context) {
@@ -105,7 +105,7 @@ func (h *Handler) GetAllReleases(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Release().GetList(
+	resp, err := h.companyServices.VersioningService().Release().GetList(
 		context.Background(),
 		&obs.GetReleaseListRequest{
 			Limit:         int32(limit),
@@ -134,8 +134,8 @@ func (h *Handler) GetAllReleases(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Param release body company_service.UpdateReleaseRequest  true "UpdateReleaseRequestBody"
-// @Success 200 {object} status_http.Response{data=company_service.ReleaseWithCommit} "Release data"
+// @Param release body versioning_service.UpdateReleaseRequest  true "UpdateReleaseRequestBody"
+// @Success 200 {object} status_http.Response{data=versioning_service.ReleaseWithCommit} "Release data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateRelease(c *gin.Context) {
@@ -149,7 +149,7 @@ func (h *Handler) UpdateRelease(c *gin.Context) {
 
 	release.Id = c.Param("id")
 
-	resp, err := h.companyServices.CompanyService().Release().Update(
+	resp, err := h.companyServices.VersioningService().Release().Update(
 		context.Background(),
 		&release,
 	)
@@ -183,7 +183,7 @@ func (h *Handler) DeleteRelease(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Release().Delete(
+	resp, err := h.companyServices.VersioningService().Release().Delete(
 		context.Background(),
 		&obs.ReleasePrimaryKey{
 			Id: releaseID,
@@ -207,7 +207,7 @@ func (h *Handler) DeleteRelease(c *gin.Context) {
 // @Tags Release
 // @Accept json
 // @Produce json
-// @Param release body company_service.SetCurrentReleaseRequest  true "SetCurrentReleaseRequestBody"
+// @Param release body versioning_service.SetCurrentReleaseRequest  true "SetCurrentReleaseRequestBody"
 // @Success 200 {object} status_http.Response{data=string} "Release data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -220,7 +220,7 @@ func (h *Handler) SetCurrentRelease(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Release().SetCurrentActive(
+	resp, err := h.companyServices.VersioningService().Release().SetCurrentActive(
 		context.Background(),
 		&release,
 	)
@@ -243,7 +243,7 @@ func (h *Handler) SetCurrentRelease(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param environment-id path string true "environment-id"
-// @Success 200 {object} status_http.Response{data=company_service.GetCurrentReleaseResponse} "GetReleaseBody"
+// @Success 200 {object} status_http.Response{data=versioning_service.GetCurrentReleaseResponse} "GetReleaseBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetCurrentRelease(c *gin.Context) {
@@ -254,7 +254,7 @@ func (h *Handler) GetCurrentRelease(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Release().GetCurrentActive(
+	resp, err := h.companyServices.VersioningService().Release().GetCurrentActive(
 		context.Background(),
 		&obs.GetCurrentReleaseRequest{
 			EnvironmentId: environmentId,

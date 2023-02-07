@@ -13,6 +13,8 @@ type ServiceManagerI interface {
 	ApiReferenceService() ApiReferenceServiceI
 	SmsService() SmsServiceI
 	PosService() PosServiceI
+	TemplateService() TemplateServiceI
+	VersioningService() VersioningServiceI
 }
 
 type grpcClients struct {
@@ -23,6 +25,8 @@ type grpcClients struct {
 	apiReferenceService ApiReferenceServiceI
 	smsService          SmsServiceI
 	posService          PosServiceI
+	templateService     TemplateServiceI
+	versioningService   VersioningServiceI
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -61,6 +65,16 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
+	templateServiceClient, err := NewTemplateServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	versioningServiceClient, err := NewVersioningServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return grpcClients{
 		apiReferenceService: apiReferenceClient,
 		analyticsService:    analyticsServiceClient,
@@ -69,6 +83,8 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		posService:          posServiceClient,
 		smsService:          smsServiceClient,
 		companyService:      companyServiceClient,
+		templateService:     templateServiceClient,
+		versioningService:   versioningServiceClient,
 	}, nil
 }
 
@@ -98,4 +114,12 @@ func (g grpcClients) SmsService() SmsServiceI {
 
 func (g grpcClients) PosService() PosServiceI {
 	return g.posService
+}
+
+func (g grpcClients) TemplateService() TemplateServiceI {
+	return g.templateService
+}
+
+func (g grpcClients) VersioningService() VersioningServiceI {
+	return g.versioningService
 }

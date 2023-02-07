@@ -43,6 +43,9 @@ type Config struct {
 	ObjectBuilderServiceHost string
 	ObjectBuilderGRPCPort    string
 
+	TemplateServiceHost string
+	TemplateGRPCPort    string
+
 	AuthServiceHost string
 	AuthGRPCPort    string
 
@@ -54,6 +57,9 @@ type Config struct {
 
 	SmsServiceHost string
 	SmsGRPCPort    string
+
+	VersioningServiceHost string
+	VersioningGRPCPort    string
 
 	CompanyServiceHost string
 	CompanyServicePort string
@@ -73,7 +79,8 @@ type Config struct {
 	ApiHost   string
 	Localhost string
 
-	SecretKey string
+	SecretKey    string
+	PlatformType string
 }
 
 // Load ...
@@ -116,6 +123,9 @@ func Load() Config {
 	config.ObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HOST", "localhost"))
 	config.ObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_GRPC_PORT", ":9102"))
 
+	config.TemplateServiceHost = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_SERVICE_HOST", "localhost"))
+	config.TemplateGRPCPort = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_GRPC_PORT", ":9119"))
+
 	config.AuthServiceHost = cast.ToString(GetOrReturnDefaultValue("AUTH_SERVICE_HOST", "0.0.0.0"))
 	config.AuthGRPCPort = cast.ToString(GetOrReturnDefaultValue("AUTH_GRPC_PORT", ":9103"))
 
@@ -130,6 +140,9 @@ func Load() Config {
 
 	config.SmsServiceHost = cast.ToString(GetOrReturnDefaultValue("SMS_SERVICE_HOST", "go-sms-service"))
 	config.SmsGRPCPort = cast.ToString(GetOrReturnDefaultValue("SMS_GRPC_PORT", ":80"))
+
+	config.VersioningServiceHost = cast.ToString(GetOrReturnDefaultValue("VERSIONING_SERVICE_HOST", "go-versioning-service"))
+	config.VersioningGRPCPort = cast.ToString(GetOrReturnDefaultValue("VERSIONING_GRPC_PORT", ":80"))
 
 	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_SERVICE_HOST", "localhost"))
 	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", ":8099"))

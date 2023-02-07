@@ -25,8 +25,8 @@ type GenerateApiTokenReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AppId     string `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
-	AppSecret string `protobuf:"bytes,2,opt,name=app_secret,json=appSecret,proto3" json:"app_secret,omitempty"`
+	AppId     string `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id"`
+	AppSecret string `protobuf:"bytes,2,opt,name=app_secret,json=appSecret,proto3" json:"app_secret"`
 }
 
 func (x *GenerateApiTokenReq) Reset() {
@@ -80,7 +80,7 @@ type GenerateApiTokenRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Token *Token `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Token *Token `protobuf:"bytes,1,opt,name=token,proto3" json:"token"`
 }
 
 func (x *GenerateApiTokenRes) Reset() {
@@ -127,7 +127,7 @@ type RefreshApiTokenReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RefreshToken string `protobuf:"bytes,1,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	RefreshToken string `protobuf:"bytes,1,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token"`
 }
 
 func (x *RefreshApiTokenReq) Reset() {
@@ -174,7 +174,7 @@ type RefreshApiTokenRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Token *Token `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Token *Token `protobuf:"bytes,1,opt,name=token,proto3" json:"token"`
 }
 
 func (x *RefreshApiTokenRes) Reset() {
@@ -221,11 +221,11 @@ type CreateReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	RoleId        string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ClientTypeId  string `protobuf:"bytes,5,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`
+	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	RoleId        string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id"`
+	EnvironmentId string `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ClientTypeId  string `protobuf:"bytes,5,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
 }
 
 func (x *CreateReq) Reset() {
@@ -300,17 +300,17 @@ type CreateRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        string `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	Name          string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	AppId         string `protobuf:"bytes,4,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
-	AppSecret     string `protobuf:"bytes,5,opt,name=app_secret,json=appSecret,proto3" json:"app_secret,omitempty"`
-	RoleId        string `protobuf:"bytes,6,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	CreatedAt     string `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	EnvironmentId string `protobuf:"bytes,9,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ProjectId     string `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	ClientTypeId  string `protobuf:"bytes,11,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Status        string `protobuf:"bytes,2,opt,name=status,proto3" json:"status"`
+	Name          string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	AppId         string `protobuf:"bytes,4,opt,name=app_id,json=appId,proto3" json:"app_id"`
+	AppSecret     string `protobuf:"bytes,5,opt,name=app_secret,json=appSecret,proto3" json:"app_secret"`
+	RoleId        string `protobuf:"bytes,6,opt,name=role_id,json=roleId,proto3" json:"role_id"`
+	CreatedAt     string `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt     string `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	EnvironmentId string `protobuf:"bytes,9,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ProjectId     string `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	ClientTypeId  string `protobuf:"bytes,11,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
 }
 
 func (x *CreateRes) Reset() {
@@ -427,12 +427,12 @@ type UpdateReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status       string `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	Name         string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	RoleId       string `protobuf:"bytes,4,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	ProjectId    string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	ClientTypeId string `protobuf:"bytes,6,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Status       string `protobuf:"bytes,2,opt,name=status,proto3" json:"status"`
+	Name         string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	RoleId       string `protobuf:"bytes,4,opt,name=role_id,json=roleId,proto3" json:"role_id"`
+	ProjectId    string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	ClientTypeId string `protobuf:"bytes,6,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
 }
 
 func (x *UpdateReq) Reset() {
@@ -514,7 +514,7 @@ type UpdateRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RowEffected int32 `protobuf:"varint,1,opt,name=row_effected,json=rowEffected,proto3" json:"row_effected,omitempty"`
+	RowEffected int32 `protobuf:"varint,1,opt,name=row_effected,json=rowEffected,proto3" json:"row_effected"`
 }
 
 func (x *UpdateRes) Reset() {
@@ -561,7 +561,7 @@ type GetReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *GetReq) Reset() {
@@ -608,17 +608,17 @@ type GetRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        string `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	Name          string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	AppId         string `protobuf:"bytes,4,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
-	RoleId        string `protobuf:"bytes,5,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	CreatedAt     string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	AppSecret     string `protobuf:"bytes,8,opt,name=app_secret,json=appSecret,proto3" json:"app_secret,omitempty"`
-	EnvironmentId string `protobuf:"bytes,9,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ProjectId     string `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	ClientTypeId  string `protobuf:"bytes,11,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Status        string `protobuf:"bytes,2,opt,name=status,proto3" json:"status"`
+	Name          string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	AppId         string `protobuf:"bytes,4,opt,name=app_id,json=appId,proto3" json:"app_id"`
+	RoleId        string `protobuf:"bytes,5,opt,name=role_id,json=roleId,proto3" json:"role_id"`
+	CreatedAt     string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt     string `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	AppSecret     string `protobuf:"bytes,8,opt,name=app_secret,json=appSecret,proto3" json:"app_secret"`
+	EnvironmentId string `protobuf:"bytes,9,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ProjectId     string `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	ClientTypeId  string `protobuf:"bytes,11,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
 }
 
 func (x *GetRes) Reset() {
@@ -735,11 +735,11 @@ type GetListReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	EnvironmentId string `protobuf:"bytes,1,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Offset        int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
-	Limit         int32  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
-	Search        string `protobuf:"bytes,5,opt,name=search,proto3" json:"search,omitempty"`
+	EnvironmentId string `protobuf:"bytes,1,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Offset        int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset"`
+	Limit         int32  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit"`
+	Search        string `protobuf:"bytes,5,opt,name=search,proto3" json:"search"`
 }
 
 func (x *GetListReq) Reset() {
@@ -814,8 +814,8 @@ type GetListRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Data  []*GetRes `protobuf:"bytes,1,rep,name=data,proto3" json:"data,omitempty"`
-	Count int32     `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Data  []*GetRes `protobuf:"bytes,1,rep,name=data,proto3" json:"data"`
+	Count int32     `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetListRes) Reset() {
@@ -869,7 +869,7 @@ type DeleteReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *DeleteReq) Reset() {
@@ -916,7 +916,7 @@ type DeleteRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RowEffected int32 `protobuf:"varint,1,opt,name=row_effected,json=rowEffected,proto3" json:"row_effected,omitempty"`
+	RowEffected int32 `protobuf:"varint,1,opt,name=row_effected,json=rowEffected,proto3" json:"row_effected"`
 }
 
 func (x *DeleteRes) Reset() {

@@ -9,7 +9,6 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // CreateField godoc
@@ -79,13 +78,11 @@ func (h *Handler) CreateFieldsAndRelations(c *gin.Context) {
 	// }
 	// fmt.Println("create table -- commit_id ---->>", commitID)
 
-	uuid, _ := uuid.NewRandom()
+	// uuid, _ := uuid.NewRandom()
 	// setting options
-	request.Options = &obs.CreateFieldsAndRelationsRequest_Options{
-		CommitGuid: uuid.String(),
-		ProjectId:  resourceEnvironment.GetId(),
-		TableId:    request.Options.GetTableId(),
-	}
+
+	// request.CommitGuid = uuid.String()
+	request.ProjectId = resourceEnvironment.GetId()
 
 	// Creating Fields and relations
 	resp, err := services.BuilderService().FieldsAndRelations().CreateFieldsAndRelations(c.Request.Context(), &request)
