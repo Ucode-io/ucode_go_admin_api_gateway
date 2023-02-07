@@ -593,7 +593,7 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 
 // InsertManyVersionForApiRef godoc
 // @Security ApiKeyAuth
-// @ID revert_api_reference
+// @ID insert_many_api_reference
 // @Router /v1/api-reference/select-versions/{api_reference_id} [POST]
 // @Summary Select Api Reference
 // @Description Select Api Reference
@@ -602,7 +602,7 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 // @Produce json
 // @Param api_reference_id path string true "api_reference_id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Param revert_api_reference body ars.ApiRevertApiReferenceRequest true "Request Body"
+// @Param body body ars.ApiRevertApiReferenceRequest true "Request Body"
 // @Success 200 {object} status_http.Response{data=ars.ApiReference} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

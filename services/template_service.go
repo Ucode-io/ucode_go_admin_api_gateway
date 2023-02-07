@@ -12,11 +12,15 @@ import (
 type TemplateServiceI interface {
 	Template() tmp.TemplateFolderServiceClient
 	Note() tmp.NoteFolderServiceClient
+	Share() tmp.ShareServiceClient
+	UserPermission() tmp.UserPermissionServiceClient
 }
 
 type templateServiceClient struct {
 	templateService tmp.TemplateFolderServiceClient
 	noteService     tmp.NoteFolderServiceClient
+	shareService    tmp.ShareServiceClient
+	userPermission  tmp.UserPermissionServiceClient
 }
 
 func NewTemplateServiceClient(ctx context.Context, cfg config.Config) (TemplateServiceI, error) {
@@ -33,6 +37,8 @@ func NewTemplateServiceClient(ctx context.Context, cfg config.Config) (TemplateS
 	return &templateServiceClient{
 		templateService: tmp.NewTemplateFolderServiceClient(connTemplateService),
 		noteService:     tmp.NewNoteFolderServiceClient(connTemplateService),
+		shareService:    tmp.NewShareServiceClient(connTemplateService),
+		userPermission:  tmp.NewUserPermissionServiceClient(connTemplateService),
 	}, nil
 }
 
@@ -42,4 +48,12 @@ func (g *templateServiceClient) Template() tmp.TemplateFolderServiceClient {
 
 func (g *templateServiceClient) Note() tmp.NoteFolderServiceClient {
 	return g.noteService
+}
+
+func (g *templateServiceClient) Share() tmp.ShareServiceClient {
+	return g.shareService
+}
+
+func (g *templateServiceClient) UserPermission() tmp.UserPermissionServiceClient {
+	return g.userPermission
 }

@@ -14,7 +14,7 @@ service ApiReferenceService {
     rpc Delete (DeleteApiReferenceRequest) returns (google.protobuf.Empty) {}
     rpc GetApiReferenceChanges (GetListApiReferenceChangesRequest) returns (GetListApiReferenceChangesResponse) {}
     rpc RevertApiReference (RevertApiReferenceRequest) returns (ApiReference) {}
-    rpc CreateManyApiReference(ManyVersions) returns (google.protobuf.Empty){}
+    rpc CreateManyApiReference(ManyVersions) returns (google.protobuf.Empty) {}
 }
 
 message CreateApiReferenceRequest {
