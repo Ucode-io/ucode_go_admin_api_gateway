@@ -30,6 +30,7 @@ type ApiReferenceServiceClient interface {
 	Delete(ctx context.Context, in *DeleteApiReferenceRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetApiReferenceChanges(ctx context.Context, in *GetListApiReferenceChangesRequest, opts ...grpc.CallOption) (*GetListApiReferenceChangesResponse, error)
 	RevertApiReference(ctx context.Context, in *RevertApiReferenceRequest, opts ...grpc.CallOption) (*ApiReference, error)
+	CreateManyApiReference(ctx context.Context, in *ManyVersions, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type apiReferenceServiceClient struct {
@@ -103,6 +104,15 @@ func (c *apiReferenceServiceClient) RevertApiReference(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *apiReferenceServiceClient) CreateManyApiReference(ctx context.Context, in *ManyVersions, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/api_reference_service.ApiReferenceService/CreateManyApiReference", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ApiReferenceServiceServer is the server API for ApiReferenceService service.
 // All implementations must embed UnimplementedApiReferenceServiceServer
 // for forward compatibility
@@ -114,6 +124,7 @@ type ApiReferenceServiceServer interface {
 	Delete(context.Context, *DeleteApiReferenceRequest) (*empty.Empty, error)
 	GetApiReferenceChanges(context.Context, *GetListApiReferenceChangesRequest) (*GetListApiReferenceChangesResponse, error)
 	RevertApiReference(context.Context, *RevertApiReferenceRequest) (*ApiReference, error)
+	CreateManyApiReference(context.Context, *ManyVersions) (*empty.Empty, error)
 	mustEmbedUnimplementedApiReferenceServiceServer()
 }
 
@@ -141,6 +152,9 @@ func (UnimplementedApiReferenceServiceServer) GetApiReferenceChanges(context.Con
 }
 func (UnimplementedApiReferenceServiceServer) RevertApiReference(context.Context, *RevertApiReferenceRequest) (*ApiReference, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RevertApiReference not implemented")
+}
+func (UnimplementedApiReferenceServiceServer) CreateManyApiReference(context.Context, *ManyVersions) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateManyApiReference not implemented")
 }
 func (UnimplementedApiReferenceServiceServer) mustEmbedUnimplementedApiReferenceServiceServer() {}
 
@@ -281,6 +295,24 @@ func _ApiReferenceService_RevertApiReference_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ApiReferenceService_CreateManyApiReference_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ManyVersions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiReferenceServiceServer).CreateManyApiReference(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api_reference_service.ApiReferenceService/CreateManyApiReference",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiReferenceServiceServer).CreateManyApiReference(ctx, req.(*ManyVersions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ApiReferenceService_ServiceDesc is the grpc.ServiceDesc for ApiReferenceService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -315,6 +347,10 @@ var ApiReferenceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RevertApiReference",
 			Handler:    _ApiReferenceService_RevertApiReference_Handler,
+		},
+		{
+			MethodName: "CreateManyApiReference",
+			Handler:    _ApiReferenceService_CreateManyApiReference_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

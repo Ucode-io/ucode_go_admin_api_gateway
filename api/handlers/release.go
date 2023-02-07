@@ -219,6 +219,12 @@ func (h *Handler) GetAllReleases(c *gin.Context) {
 func (h *Handler) UpdateRelease(c *gin.Context) {
 	var release obs.UpdateReleaseRequest
 
+	err := c.ShouldBindJSON(&release)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
 	version_id := c.Param("version_id")
 	if !util.IsValidUUID(version_id) {
 		h.handleResponse(c, status_http.InvalidArgument, "version_id is an invalid uuid")
@@ -227,12 +233,6 @@ func (h *Handler) UpdateRelease(c *gin.Context) {
 
 	if !util.IsValidUUID(release.GetProjectId()) {
 		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
-		return
-	}
-
-	err := c.ShouldBindJSON(&release)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
