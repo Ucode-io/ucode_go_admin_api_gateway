@@ -14,6 +14,7 @@ service ApiReferenceService {
     rpc Delete (DeleteApiReferenceRequest) returns (google.protobuf.Empty) {}
     rpc GetApiReferenceChanges (GetListApiReferenceChangesRequest) returns (GetListApiReferenceChangesResponse) {}
     rpc RevertApiReference (RevertApiReferenceRequest) returns (ApiReference) {}
+    rpc CreateManyApiReference(ManyVersions) returns (google.protobuf.Empty) {}
 }
 
 message CreateApiReferenceRequest {
@@ -121,4 +122,19 @@ message RevertApiReferenceRequest {
 message ApiRevertApiReferenceRequest {
     string commit_id =1;
     string project_id = 2;
+}
+
+
+message CreateManyApiReferenceRequest {
+    repeated ApiReference api_references = 1;
+}
+
+
+message ManyVersions {
+    repeated string version_ids = 1;
+    string newcommit_id = 2;
+    string project_id = 3;
+    string environment_id = 4;
+    string guid = 5;
+    string oldcommit_id = 6;
 }

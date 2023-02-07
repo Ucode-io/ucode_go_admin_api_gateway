@@ -4,7 +4,7 @@ package note_service;
 option go_package="genproto/template_service";
 
 import "google/protobuf/empty.proto";
-// import "google/protobuf/struct.proto";
+import "google/protobuf/struct.proto";
 
 
 service NoteFolderService {
@@ -44,25 +44,13 @@ message DeleteNoteReq {
 }
 
 message UpdateNoteReq {
-    message Table {
-        message Relation {
-            string relation_id = 1;
-        }
-        string table_id = 1;
-        string type = 2;
-        string object_id = 3;
-        string filter = 4;
-        repeated Relation relations = 5;
-    }
     string id = 1;
     string project_id = 2;
     string title = 3;
-    string html = 4;
+    google.protobuf.Struct json = 4;
     string folder_id = 5;
-    string size = 6;
-    repeated Table tables = 7;
-    string commit_id = 8;
-    string version_id = 9;
+    string commit_id = 6;
+    string version_id = 7;
 }
 
 message GetSingleNoteReq {
@@ -85,46 +73,22 @@ message GetListNoteRes {
 }
 
 message CreateNoteReq {
-    message Table {
-        message Relation {
-            string relation_id = 1;
-        }
-        string table_id = 1;
-        string type = 2;
-        string object_id = 3;
-        string filter = 4;
-        repeated Relation relations = 5;
-    }
     string project_id = 1;
     string title = 2;
-    string html = 3;
+    google.protobuf.Struct json = 3;
     string folder_id = 4;
-    string size = 5;
-    repeated Table tables = 6;
-    string commit_id = 7;
-    string version_id = 8;
+    string commit_id = 5;
+    string version_id = 6;
 }
 
 message Note {
-    message Table {
-        message Relation {
-            string relation_id = 1;
-        }
-        string table_id = 1;
-        string type = 2;
-        string object_id = 3;
-        string filter = 4;
-        repeated Relation relations = 5;
-    }
     string id = 1;
     string project_id = 2;
     string title = 3;
-    string html = 4;
+    google.protobuf.Struct json = 4;
     string folder_id = 5;
-    string size = 6;
-    repeated Table tables = 7;
-    string commit_id = 8;
-    string version_id = 9;
+    string commit_id = 6;
+    string version_id = 7;
 }
 
 message CreateFolderNoteReq {

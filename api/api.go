@@ -242,7 +242,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.DELETE("/note/:note-id", h.DeleteNote)
 		v1.GET("/note", h.GetListNote)
 		v1.GET("/note/commits/:note-id", h.GetNoteCommits)
+		v1.POST("/template-note/users", h.CreateUserTemplate)
+		v1.GET("/template-note/users", h.GetListUserTemplate)
+		v1.PUT("/template-note/users", h.UpdateUserTemplate)
+		v1.DELETE("/template-note/users/:user-permission-id", h.DeleteUserTemplate)
+		v1.POST("/template-note/share", h.CreateSharingToken)
 	}
+	r.POST("/template-note/share-get", h.GetObjectToken)
 
 	v1Admin := r.Group("/v1")
 	v1Admin.Use(h.AdminAuthMiddleware())
