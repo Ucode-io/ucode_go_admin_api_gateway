@@ -15638,113 +15638,6 @@ const docTemplate = `{
             }
         },
         "/v1/release": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get all releases",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Release"
-                ],
-                "summary": "Get all releases",
-                "operationId": "get_all_releases",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "created_at",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "environment_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "search",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "ReleaseBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/versioning_service.GetReleaseListResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -15765,18 +15658,25 @@ const docTemplate = `{
                 "operationId": "create_release",
                 "parameters": [
                     {
-                        "description": "CreateReleaseRequestBody",
+                        "description": "Request Body",
                         "name": "release",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/versioning_service.CreateReleaseRequest"
+                            "$ref": "#/definitions/versioning_service.ApiCreateReleaseRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Release data",
+                        "description": "Response Body",
                         "schema": {
                             "allOf": [
                                 {
@@ -15786,7 +15686,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/versioning_service.ReleaseWithCommit"
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -16007,13 +15907,13 @@ const docTemplate = `{
             }
         },
         "/v1/release/{id}": {
-            "get": {
+            "delete": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get release by id",
+                "description": "Delete Release",
                 "consumes": [
                     "application/json"
                 ],
@@ -16023,8 +15923,8 @@ const docTemplate = `{
                 "tags": [
                     "Release"
                 ],
-                "summary": "Get release by id",
-                "operationId": "get_release_by_id",
+                "summary": "Delete Release",
+                "operationId": "delete_release",
                 "parameters": [
                     {
                         "type": "string",
@@ -16035,8 +15935,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "ReleaseBody",
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
@@ -16046,7 +15949,94 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/versioning_service.ReleaseWithCommit"
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/release/{project_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all releases",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Release"
+                ],
+                "summary": "Get all releases",
+                "operationId": "get_all_releases",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response Body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/versioning_service.GetReleaseListResponse"
                                         }
                                     }
                                 }
@@ -16112,8 +16102,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id",
-                        "name": "id",
+                        "description": "project_id",
+                        "name": "project_id",
                         "in": "path",
                         "required": true
                     },
@@ -16183,14 +16173,16 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "delete": {
+            }
+        },
+        "/v1/release/{project_id}/{version_id}": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Delete Release",
+                "description": "Get release by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -16200,8 +16192,8 @@ const docTemplate = `{
                 "tags": [
                     "Release"
                 ],
-                "summary": "Delete Release",
-                "operationId": "delete_release",
+                "summary": "Get release by id",
+                "operationId": "get_release_by_id",
                 "parameters": [
                     {
                         "type": "string",
@@ -16212,8 +16204,23 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
+                    "200": {
+                        "description": "ReleaseBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/versioning_service.ReleaseWithCommit"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -25928,6 +25935,26 @@ const docTemplate = `{
                 }
             }
         },
+        "versioning_service.ApiCreateReleaseRequest": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "is_current": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "release_type": {
+                    "type": "integer"
+                }
+            }
+        },
         "versioning_service.CommitWithRelease": {
             "type": "object",
             "properties": {
@@ -25988,32 +26015,6 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
-                }
-            }
-        },
-        "versioning_service.CreateReleaseRequest": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "string"
-                },
-                "commit_id": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "is_current": {
-                    "type": "boolean"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "release_type": {
-                    "type": "integer"
                 }
             }
         },

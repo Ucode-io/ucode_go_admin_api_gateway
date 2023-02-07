@@ -36,6 +36,17 @@ message CreateReleaseRequest {
 
 message ReleasePrimaryKey {
     string id = 1;
+    string project_id = 2;
+    string environment_id = 3;
+    
+}
+
+message ApiCreateReleaseRequest {
+    string project_id = 1;
+    bool is_current = 2;
+    string author_id = 3;
+    string description = 4;
+    ReleaseType release_type = 5;
 }
 
 message GetReleaseListRequest {

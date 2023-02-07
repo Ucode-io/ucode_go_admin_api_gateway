@@ -3094,6 +3094,19 @@ definitions:
       relation_id:
         type: string
     type: object
+  versioning_service.ApiCreateReleaseRequest:
+    properties:
+      author_id:
+        type: string
+      description:
+        type: string
+      is_current:
+        type: boolean
+      project_id:
+        type: string
+      release_type:
+        type: integer
+    type: object
   versioning_service.CommitWithRelease:
     properties:
       author_id:
@@ -3134,23 +3147,6 @@ definitions:
         type: string
       project_id:
         type: string
-    type: object
-  versioning_service.CreateReleaseRequest:
-    properties:
-      author_id:
-        type: string
-      commit_id:
-        type: string
-      description:
-        type: string
-      environment_id:
-        type: string
-      is_current:
-        type: boolean
-      project_id:
-        type: string
-      release_type:
-        type: integer
     type: object
   versioning_service.GetCommitListResponse:
     properties:
@@ -12165,88 +12161,34 @@ paths:
       tags:
       - Relation
   /v1/release:
-    get:
-      consumes:
-      - application/json
-      description: Get all releases
-      operationId: get_all_releases
-      parameters:
-      - in: query
-        name: created_at
-        type: string
-      - in: query
-        name: environment_id
-        type: string
-      - in: query
-        name: limit
-        type: integer
-      - in: query
-        name: offset
-        type: integer
-      - in: query
-        name: project_id
-        type: string
-      - in: query
-        name: search
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ReleaseBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/versioning_service.GetReleaseListResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all releases
-      tags:
-      - Release
     post:
       consumes:
       - application/json
       description: Create release
       operationId: create_release
       parameters:
-      - description: CreateReleaseRequestBody
+      - description: Request Body
         in: body
         name: release
         required: true
         schema:
-          $ref: '#/definitions/versioning_service.CreateReleaseRequest'
+          $ref: '#/definitions/versioning_service.ApiCreateReleaseRequest'
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "201":
-          description: Release data
+          description: Response Body
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/versioning_service.ReleaseWithCommit'
+                  type: string
               type: object
         "400":
           description: Bad Request
@@ -12311,6 +12253,119 @@ paths:
       summary: Delete Release
       tags:
       - Release
+  /v1/release/{project_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all releases
+      operationId: get_all_releases
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/versioning_service.GetReleaseListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all releases
+      tags:
+      - Release
+    put:
+      consumes:
+      - application/json
+      description: Update release
+      operationId: update_release
+      parameters:
+      - description: project_id
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: UpdateReleaseRequestBody
+        in: body
+        name: release
+        required: true
+        schema:
+          $ref: '#/definitions/versioning_service.UpdateReleaseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Release data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/versioning_service.ReleaseWithCommit'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update release
+      tags:
+      - Release
+  /v1/release/{project_id}/{version_id}:
     get:
       consumes:
       - application/json
@@ -12355,58 +12410,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get release by id
-      tags:
-      - Release
-    put:
-      consumes:
-      - application/json
-      description: Update release
-      operationId: update_release
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: UpdateReleaseRequestBody
-        in: body
-        name: release
-        required: true
-        schema:
-          $ref: '#/definitions/versioning_service.UpdateReleaseRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Release data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/versioning_service.ReleaseWithCommit'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Update release
       tags:
       - Release
   /v1/release/current:

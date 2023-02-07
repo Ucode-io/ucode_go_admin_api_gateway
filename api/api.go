@@ -280,12 +280,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		// release service
 		v1Admin.POST("/release", h.CreateRelease)
-		v1Admin.GET("/release/:id", h.GetReleaseByID)
-		v1Admin.GET("/release", h.GetAllReleases)
+		v1Admin.GET("/release/:project_id/:id", h.GetReleaseByID)
+		v1Admin.GET("/release/:project_id", h.GetAllReleases)
 		v1Admin.PUT("/release/:id", h.UpdateRelease)
-		v1Admin.DELETE("/release/:id", h.DeleteRelease)
-		v1Admin.POST("/release/current", h.SetCurrentRelease)
-		v1Admin.GET("/release/current/:environment-id", h.GetCurrentRelease)
+		v1Admin.DELETE("/release/:project_id/:id", h.DeleteRelease)
+		v1Admin.POST("/release/:version_id", h.SetCurrentRelease)
+		v1Admin.GET("/release/current/:project_id", h.GetCurrentRelease)
 
 		// commit service
 		v1Admin.POST("/commit", h.CreateCommit)
