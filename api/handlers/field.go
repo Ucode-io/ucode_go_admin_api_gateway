@@ -3,10 +3,8 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -99,15 +97,15 @@ func (h *Handler) CreateField(c *gin.Context) {
 		return
 	}
 
-	versionGuid, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FIELD)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-		return
-	}
+	//versionGuid, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FIELD)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+	//	return
+	//}
 
 	field.ProjectId = resourceEnvironment.GetId()
-	field.CommitId = commitGuid
-	field.VersionId = versionGuid
+	//field.CommitId = commitGuid
+	//field.VersionId = versionGuid
 	resp, err := services.BuilderService().Field().Create(
 		context.Background(),
 		&field,
