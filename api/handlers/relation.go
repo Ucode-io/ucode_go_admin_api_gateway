@@ -3,14 +3,13 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateRelation godoc
@@ -78,14 +77,14 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 	}
 
 	relation.ProjectId = resourceEnvironment.GetId()
-	versionID, commitID, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_RELATION)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-		return
-	}
+	// versionID, commitID, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_RELATION)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+	// 	return
+	// }
 
-	relation.CommitId = commitID
-	relation.VersionId = versionID
+	relation.CommitId = uuid.New().String()
+	relation.VersionId = uuid.New().String()
 
 	resp, err := services.BuilderService().Relation().Create(
 		context.Background(),
