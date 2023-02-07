@@ -3667,7 +3667,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api_reference_service.ApiRevertApiReferenceRequest"
+                            "$ref": "#/definitions/api_reference_service.ManyVersions"
                         }
                     }
                 ],
@@ -22190,6 +22190,32 @@ const docTemplate = `{
                 },
                 "count": {
                     "type": "integer"
+                }
+            }
+        },
+        "api_reference_service.ManyVersions": {
+            "type": "object",
+            "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "newcommit_id": {
+                    "type": "string"
+                },
+                "oldcommit_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

@@ -88,6 +88,23 @@ definitions:
       count:
         type: integer
     type: object
+  api_reference_service.ManyVersions:
+    properties:
+      environment_id:
+        type: string
+      guid:
+        type: string
+      newcommit_id:
+        type: string
+      oldcommit_id:
+        type: string
+      project_id:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+    type: object
   auth_service.AddSessionToIntegrationRequest:
     properties:
       data:
@@ -5453,7 +5470,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/api_reference_service.ApiRevertApiReferenceRequest'
+          $ref: '#/definitions/api_reference_service.ManyVersions'
       produces:
       - application/json
       responses:
