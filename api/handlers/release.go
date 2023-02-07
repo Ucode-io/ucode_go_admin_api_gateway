@@ -27,7 +27,18 @@ import (
 func (h *Handler) CreateRelease(c *gin.Context) {
 	var release obs.ApiCreateReleaseRequest
 
-	err := c.ShouldBindJSON(&release)
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
+	if !util.IsValidUUID(authInfo.GetUserId()) {
+		h.handleResponse(c, status_http.InvalidArgument, "user_id is an invalid uuid")
+		return
+	}
+
+	err = c.ShouldBindJSON(&release)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -55,7 +66,7 @@ func (h *Handler) CreateRelease(c *gin.Context) {
 			ProjectId:     release.GetProjectId(),
 			EnvironmentId: environmentId.(string),
 			ReleaseType:   release.GetReleaseType(),
-			AuthorId:      release.GetAuthorId(),
+			AuthorId:      authInfo.GetUserId(),
 			Description:   release.GetDescription(),
 			IsCurrent:     release.GetIsCurrent(),
 		},
@@ -193,19 +204,31 @@ func (h *Handler) GetAllReleases(c *gin.Context) {
 // UpdateRelease godoc
 // @Security ApiKeyAuth
 // @ID update_release
-// @Router /v1/release/{project_id} [PUT]
+// @Router /v1/release/{version_id} [PUT]
 // @Summary Update release
 // @Description Update release
 // @Tags Release
 // @Accept json
 // @Produce json
-// @Param project_id path string true "project_id"
-// @Param release body versioning_service.UpdateReleaseRequest  true "Request Body"
+// @Param version_id path string true "version_id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Param release body versioning_service.ApiUpdateReleaseRequest  true "Request Body"
 // @Success 200 {object} status_http.Response{data=versioning_service.ReleaseWithCommit} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateRelease(c *gin.Context) {
 	var release obs.UpdateReleaseRequest
+
+	version_id := c.Param("version_id")
+	if !util.IsValidUUID(version_id) {
+		h.handleResponse(c, status_http.InvalidArgument, "version_id is an invalid uuid")
+		return
+	}
+
+	if !util.IsValidUUID(release.GetProjectId()) {
+		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+		return
+	}
 
 	err := c.ShouldBindJSON(&release)
 	if err != nil {
@@ -224,14 +247,10 @@ func (h *Handler) UpdateRelease(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(release.GetId()) {
-		h.handleResponse(c, status_http.InvalidArgument, "id is an invalid uuid")
-		return
-	}
-
-	release.Id = c.Param("id")
+	release.EnvironmentId = environmentID.(string)
+	release.Id = version_id
 	resp, err := h.companyServices.VersioningService().Release().Update(
-		context.Background(),
+		c.Request.Context(),
 		&release,
 	)
 
@@ -246,28 +265,51 @@ func (h *Handler) UpdateRelease(c *gin.Context) {
 // DeleteRelease godoc
 // @Security ApiKeyAuth
 // @ID delete_release
-// @Router /v1/release/{id} [DELETE]
+// @Router /v1/release/{version_id} [DELETE]
 // @Summary Delete Release
 // @Description Delete Release
 // @Tags Release
 // @Accept json
 // @Produce json
-// @Param id path string true "id"
+// @Param version_id path string true "version_id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Param release body versioning_service.ApiDeleteReleaseRequest true "Request Body"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteRelease(c *gin.Context) {
-	releaseID := c.Param("id")
+	versionID := c.Param("version_id")
 
-	if !util.IsValidUUID(releaseID) {
-		h.handleResponse(c, status_http.InvalidArgument, "release id is an invalid uuid")
+	body := &obs.ApiDeleteReleaseRequest{}
+
+	err := c.ShouldBindJSON(body)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	if !util.IsValidUUID(versionID) {
+		h.handleResponse(c, status_http.InvalidArgument, "version_id is an invalid uuid")
+		return
+	}
+
+	environmentID, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()).Error())
+		return
+	}
+	if !util.IsValidUUID(environmentID.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
 	}
 
 	resp, err := h.companyServices.VersioningService().Release().Delete(
 		context.Background(),
 		&obs.ReleasePrimaryKey{
-			Id: releaseID,
+			Id:            versionID,
+			ProjectId:     body.GetProjectId(),
+			EnvironmentId: environmentID.(string),
 		},
 	)
 
@@ -288,12 +330,34 @@ func (h *Handler) DeleteRelease(c *gin.Context) {
 // @Tags Release
 // @Accept json
 // @Produce json
-// @Param release body versioning_service.SetCurrentReleaseRequest  true "SetCurrentReleaseRequestBody"
-// @Success 200 {object} status_http.Response{data=string} "Release data"
+// @Param Environment-Id header string true "Environment-Id"
+// @Param release body versioning_service.ApiSetCurrentReleaseRequest  true "Request Body"
+// @Success 200 {object} status_http.Response{data=string} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) SetCurrentRelease(c *gin.Context) {
 	var release obs.SetCurrentReleaseRequest
+
+	environmentID, ok := c.Get("environment_id")
+	if !ok {
+		err := errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()).Error())
+		return
+	}
+	if !util.IsValidUUID(environmentID.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
+
+	if !util.IsValidUUID(release.GetProjectId()) {
+		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+		return
+	}
+
+	if !util.IsValidUUID(release.GetVersionId()) {
+		h.handleResponse(c, status_http.InvalidArgument, "version_id is an invalid uuid")
+		return
+	}
 
 	err := c.ShouldBindJSON(&release)
 	if err != nil {
@@ -301,8 +365,10 @@ func (h *Handler) SetCurrentRelease(c *gin.Context) {
 		return
 	}
 
+	release.EnvironmentId = environmentID.(string)
+
 	resp, err := h.companyServices.VersioningService().Release().SetCurrentActive(
-		context.Background(),
+		c.Request.Context(),
 		&release,
 	)
 

@@ -31,7 +31,19 @@ import (
 func (h *Handler) CreateApiReference(c *gin.Context) {
 	var apiReference ars.CreateApiReferenceRequest
 
-	err := c.ShouldBindJSON(&apiReference)
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.log.Error("error getting auth info", logger.Error(err))
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
+	if !util.IsValidUUID(authInfo.GetUserId()) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("user id is invalid uuid").Error())
+		return
+	} 
+
+	err = c.ShouldBindJSON(&apiReference)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
