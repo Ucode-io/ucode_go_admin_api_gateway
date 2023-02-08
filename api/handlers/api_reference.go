@@ -201,16 +201,16 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 		return
 	}
 
-	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-		c.Request.Context(),
-		&vcs.GetCurrentReleaseRequest{
-			EnvironmentId: environmentId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// activeVersion, err := services.VersioningService().Release().GetCurrentActive(
+	// 	c.Request.Context(),
+	// 	&vcs.GetCurrentReleaseRequest{
+	// 		EnvironmentId: environmentId.(string),
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
 	resp, err := services.ApiReferenceService().ApiReference().GetList(
 		context.Background(),
@@ -219,7 +219,7 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 			Offset:     int64(offset),
 			CategoryId: c.Query("category_id"),
 			ProjectId:  c.Query("project_id"),
-			VersionId:  activeVersion.GetVersionId(),
+			VersionId:  "",
 		},
 	)
 
