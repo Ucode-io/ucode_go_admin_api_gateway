@@ -761,7 +761,7 @@ func (h *Handler) GetSingleNote(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
 	)
-	noteId := c.Param("Note-id")
+	noteId := c.Param("note-id")
 
 	if !util.IsValidUUID(noteId) {
 		h.handleResponse(c, status_http.InvalidArgument, "FolderNote id is an invalid uuid")
