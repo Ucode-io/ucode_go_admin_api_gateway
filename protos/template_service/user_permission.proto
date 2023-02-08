@@ -86,4 +86,5 @@ message UpdateUserPermissionReq {
 
 message DeleteUserPermissionReq {
     string id = 1;
+    string project_id = 2;
 }
