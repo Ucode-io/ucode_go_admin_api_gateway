@@ -247,6 +247,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.PUT("/template-note/users", h.UpdateUserTemplate)
 		v1.DELETE("/template-note/users/:user-permission-id", h.DeleteUserTemplate)
 		v1.POST("/template-note/share", h.CreateSharingToken)
+		v1.PUT("/template-note/share", h.UpdateSharingToken)
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
 

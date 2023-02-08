@@ -13654,6 +13654,68 @@ paths:
     post:
       consumes:
       - application/json
+      description: Create share template
+      operationId: create_share_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateTokenReq
+        in: body
+        name: share
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.CreateTokenReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CreateTokenRes data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.CreateTokenRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create share template
+      tags:
+      - Template
+    put:
+      consumes:
+      - application/json
       description: Update share template
       operationId: update_share_template
       parameters:

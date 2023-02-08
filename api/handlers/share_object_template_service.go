@@ -643,7 +643,7 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID update_share_template
-// @Router /v1/template-note/share [POST]
+// @Router /v1/template-note/share [PUT]
 // @Summary Update share template
 // @Description Update share template
 // @Tags Template
