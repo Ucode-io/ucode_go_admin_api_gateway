@@ -413,12 +413,11 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 		}
 	}
 
-	res, err := services.TemplateService().Template().DeleteTemplate(
+	res, err := services.TemplateService().UserPermission().DeleteUserPermission(
 		context.Background(),
-		&tmp.DeleteTemplateReq{
+		&tmp.DeleteUserPermissionReq{
 			Id:        userPermissionId,
 			ProjectId: resourceEnvironment.GetId(),
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
