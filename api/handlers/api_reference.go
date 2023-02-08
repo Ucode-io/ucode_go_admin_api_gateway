@@ -13,6 +13,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateApiReference godoc
@@ -137,20 +138,20 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 		return
 	}
 
-	// if _, err := uuid.Parse(version_id); err != nil {
-	// 	// If version_id is not a valid uuid, then we need to get the active version
-	// 	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-	// 		c.Request.Context(),
-	// 		&vcs.GetCurrentReleaseRequest{
-	// 			EnvironmentId: environmentId.(string),
-	// 		},
-	// 	)
-	// 	if err != nil {
-	// 		h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 		return
-	// 	}
-	// 	version_id = activeVersion.GetVersionId()
-	// }
+	if _, err := uuid.Parse(version_id); err != nil {
+		// If version_id is not a valid uuid, then we need to get the active version
+		activeVersion, err := services.VersioningService().Release().GetCurrentActive(
+			c.Request.Context(),
+			&vcs.GetCurrentReleaseRequest{
+				EnvironmentId: environmentId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		version_id = activeVersion.GetVersionId()
+	}
 
 	resp, err := services.ApiReferenceService().ApiReference().Get(
 		c.Request.Context(),
@@ -698,6 +699,7 @@ func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
 	resp, err := services.ApiReferenceService().ApiReference().CreateManyApiReference(c.Request.Context(), &body)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
+
 		return
 	}
 

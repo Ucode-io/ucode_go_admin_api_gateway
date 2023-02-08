@@ -10,6 +10,7 @@ import "google/protobuf/struct.proto";
 service ShareService {
     // user permission rpc methods
     rpc CreateToken(CreateTokenReq) returns (CreateTokenRes) {}
+    rpc UpdateToken(UpdateTokenReq) returns (UpdateTokenRes) {}
     rpc GetObjectToken(GetObjectTokenReq) returns (GetObjectTokenRes) {}
 }
 
@@ -17,10 +18,34 @@ message CreateTokenReq {
     string object_id = 1;
     string type = 2;
     string project_id = 3;
+    string role = 4;
+    bool is_private = 5;
 }
 
 message CreateTokenRes {
     string token = 1;
+    string object_id = 2;
+    string type = 3;
+    string project_id = 4;
+    string role = 5;
+    bool is_private = 6;
+}
+
+message UpdateTokenReq {
+    string object_id = 1;
+    string type = 2;
+    string project_id = 3;
+    string role = 4;
+    bool is_private = 5;
+}
+
+message UpdateTokenRes {
+    string token = 1;
+    string object_id = 2;
+    string type = 3;
+    string project_id = 4;
+    string role = 5;
+    bool is_private = 6;
 }
 
 message GetObjectTokenReq {
@@ -30,4 +55,5 @@ message GetObjectTokenReq {
 
 message GetObjectTokenRes {
     google.protobuf.Struct data = 1;
+    string role = 2;
 }

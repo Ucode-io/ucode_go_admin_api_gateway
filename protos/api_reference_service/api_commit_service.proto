@@ -9,6 +9,7 @@ import "google/protobuf/struct.proto";
 service CommitService {
     rpc Create(CreateCommitRequest) returns (CommitWithRelease) {}
     rpc GetByID(CommitPrimaryKey) returns (CommitWithRelease) {}
+    rpc Update(CommitWithRelease) returns (CommitWithRelease) {}
     rpc GetList(GetCommitListRequest) returns (GetCommitListResponse) {}
     rpc Restore(RestoreCommitRequest) returns (google.protobuf.Empty) {}
     rpc Insert(CreateCommitRequest) returns (InsertCommitResponse) {}
@@ -17,7 +18,7 @@ service CommitService {
 
 message CommitWithRelease {
     message Release {
-        string id = 1;
+        repeated string ids = 1;
         string version = 2;
         bool is_current = 3;
     }
@@ -38,7 +39,7 @@ message CreateCommitRequest {
     string author_id = 3;
     string name = 4;
     string commit_type = 5;
-    string version_id = 6;
+    repeated string version_ids = 6;
 }
 
 message CommitPrimaryKey {

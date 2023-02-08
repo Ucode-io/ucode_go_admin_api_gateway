@@ -25,6 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type CommitServiceClient interface {
 	Create(ctx context.Context, in *CreateCommitRequest, opts ...grpc.CallOption) (*CommitWithRelease, error)
 	GetByID(ctx context.Context, in *CommitPrimaryKey, opts ...grpc.CallOption) (*CommitWithRelease, error)
+	Update(ctx context.Context, in *CommitWithRelease, opts ...grpc.CallOption) (*CommitWithRelease, error)
 	GetList(ctx context.Context, in *GetCommitListRequest, opts ...grpc.CallOption) (*GetCommitListResponse, error)
 	Restore(ctx context.Context, in *RestoreCommitRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Insert(ctx context.Context, in *CreateCommitRequest, opts ...grpc.CallOption) (*InsertCommitResponse, error)
@@ -51,6 +52,15 @@ func (c *commitServiceClient) Create(ctx context.Context, in *CreateCommitReques
 func (c *commitServiceClient) GetByID(ctx context.Context, in *CommitPrimaryKey, opts ...grpc.CallOption) (*CommitWithRelease, error) {
 	out := new(CommitWithRelease)
 	err := c.cc.Invoke(ctx, "/api_reference_service.CommitService/GetByID", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commitServiceClient) Update(ctx context.Context, in *CommitWithRelease, opts ...grpc.CallOption) (*CommitWithRelease, error) {
+	out := new(CommitWithRelease)
+	err := c.cc.Invoke(ctx, "/api_reference_service.CommitService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -99,6 +109,7 @@ func (c *commitServiceClient) GetMultipleCommitInfo(ctx context.Context, in *Get
 type CommitServiceServer interface {
 	Create(context.Context, *CreateCommitRequest) (*CommitWithRelease, error)
 	GetByID(context.Context, *CommitPrimaryKey) (*CommitWithRelease, error)
+	Update(context.Context, *CommitWithRelease) (*CommitWithRelease, error)
 	GetList(context.Context, *GetCommitListRequest) (*GetCommitListResponse, error)
 	Restore(context.Context, *RestoreCommitRequest) (*empty.Empty, error)
 	Insert(context.Context, *CreateCommitRequest) (*InsertCommitResponse, error)
@@ -115,6 +126,9 @@ func (UnimplementedCommitServiceServer) Create(context.Context, *CreateCommitReq
 }
 func (UnimplementedCommitServiceServer) GetByID(context.Context, *CommitPrimaryKey) (*CommitWithRelease, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetByID not implemented")
+}
+func (UnimplementedCommitServiceServer) Update(context.Context, *CommitWithRelease) (*CommitWithRelease, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedCommitServiceServer) GetList(context.Context, *GetCommitListRequest) (*GetCommitListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetList not implemented")
@@ -173,6 +187,24 @@ func _CommitService_GetByID_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CommitServiceServer).GetByID(ctx, req.(*CommitPrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommitService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommitWithRelease)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommitServiceServer).Update(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api_reference_service.CommitService/Update",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommitServiceServer).Update(ctx, req.(*CommitWithRelease))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -263,6 +295,10 @@ var CommitService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetByID",
 			Handler:    _CommitService_GetByID_Handler,
+		},
+		{
+			MethodName: "Update",
+			Handler:    _CommitService_Update_Handler,
 		},
 		{
 			MethodName: "GetList",

@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ShareServiceClient interface {
 	// user permission rpc methods
 	CreateToken(ctx context.Context, in *CreateTokenReq, opts ...grpc.CallOption) (*CreateTokenRes, error)
+	UpdateToken(ctx context.Context, in *UpdateTokenReq, opts ...grpc.CallOption) (*UpdateTokenRes, error)
 	GetObjectToken(ctx context.Context, in *GetObjectTokenReq, opts ...grpc.CallOption) (*GetObjectTokenRes, error)
 }
 
@@ -38,6 +39,15 @@ func NewShareServiceClient(cc grpc.ClientConnInterface) ShareServiceClient {
 func (c *shareServiceClient) CreateToken(ctx context.Context, in *CreateTokenReq, opts ...grpc.CallOption) (*CreateTokenRes, error) {
 	out := new(CreateTokenRes)
 	err := c.cc.Invoke(ctx, "/share_service.ShareService/CreateToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *shareServiceClient) UpdateToken(ctx context.Context, in *UpdateTokenReq, opts ...grpc.CallOption) (*UpdateTokenRes, error) {
+	out := new(UpdateTokenRes)
+	err := c.cc.Invoke(ctx, "/share_service.ShareService/UpdateToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -59,6 +69,7 @@ func (c *shareServiceClient) GetObjectToken(ctx context.Context, in *GetObjectTo
 type ShareServiceServer interface {
 	// user permission rpc methods
 	CreateToken(context.Context, *CreateTokenReq) (*CreateTokenRes, error)
+	UpdateToken(context.Context, *UpdateTokenReq) (*UpdateTokenRes, error)
 	GetObjectToken(context.Context, *GetObjectTokenReq) (*GetObjectTokenRes, error)
 	mustEmbedUnimplementedShareServiceServer()
 }
@@ -69,6 +80,9 @@ type UnimplementedShareServiceServer struct {
 
 func (UnimplementedShareServiceServer) CreateToken(context.Context, *CreateTokenReq) (*CreateTokenRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateToken not implemented")
+}
+func (UnimplementedShareServiceServer) UpdateToken(context.Context, *UpdateTokenReq) (*UpdateTokenRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateToken not implemented")
 }
 func (UnimplementedShareServiceServer) GetObjectToken(context.Context, *GetObjectTokenReq) (*GetObjectTokenRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetObjectToken not implemented")
@@ -104,6 +118,24 @@ func _ShareService_CreateToken_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ShareService_UpdateToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTokenReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShareServiceServer).UpdateToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/share_service.ShareService/UpdateToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShareServiceServer).UpdateToken(ctx, req.(*UpdateTokenReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ShareService_GetObjectToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetObjectTokenReq)
 	if err := dec(in); err != nil {
@@ -132,6 +164,10 @@ var ShareService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateToken",
 			Handler:    _ShareService_CreateToken_Handler,
+		},
+		{
+			MethodName: "UpdateToken",
+			Handler:    _ShareService_UpdateToken_Handler,
 		},
 		{
 			MethodName: "GetObjectToken",
