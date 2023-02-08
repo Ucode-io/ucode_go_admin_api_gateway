@@ -295,8 +295,19 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 	// 	return
 	// }
 
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
+		return
+	}
 	apiReference.VersionId = ""
-
+	apiReference.CommitInfo = &ars.CommitInfo{
+		CommitId:   "",
+		CommitType: config.COMMIT_TYPE_FIELD,
+		Name:       fmt.Sprintf("Auto Created Commit Create api reference - %s", time.Now().Format(time.RFC1123)),
+		AuthorId:   authInfo.GetUserId(),
+		ProjectId:  apiReference.ProjectId,
+	}
 	resp, err := services.ApiReferenceService().ApiReference().Update(
 		c.Request.Context(), &apiReference,
 	)
