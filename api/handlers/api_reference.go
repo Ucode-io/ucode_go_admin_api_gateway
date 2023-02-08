@@ -312,7 +312,19 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
 		return
 	}
-	apiReference.VersionId = ""
+
+	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
+		c.Request.Context(),
+		&vcs.GetCurrentReleaseRequest{
+			EnvironmentId: environmentId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	apiReference.VersionId = activeVersion.GetVersionId()
 	apiReference.CommitInfo = &ars.CommitInfo{
 		CommitId:   "",
 		CommitType: config.COMMIT_TYPE_FIELD,
