@@ -462,6 +462,7 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 
 	var (
 		versionIds []string
+		// autherGuids []string
 	)
 	for _, item := range resp.GetApiReferences() {
 		versionIds = append(versionIds, item.GetCommitInfo().GetVersionId())
@@ -496,6 +497,29 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 			}
 		}
 	}
+	// reqAutherGuids, err := helper.ConvertMapToStruct(map[string]interface{}{
+	// 	"guid": []string{},
+	// })
+	// if err != nil {
+	// 	h.log.Error("error converting map to struct", logger.Error(err))
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
+
+	// // Get User Data
+	// respAuthersData, err := services.BuilderService().ObjectBuilder().GetList(
+	// 	c.Request.Context(),
+
+	// 	&builder.CommonMessage{
+	// 		TableSlug: "users",
+	// 		Data:      reqAutherGuids,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.log.Error("error getting user data", logger.Error(err))
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
 	h.handleResponse(c, status_http.OK, resp)
 }
