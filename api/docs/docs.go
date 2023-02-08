@@ -3667,7 +3667,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api_reference_service.ManyVersions"
+                            "$ref": "#/definitions/api_reference_service.ApiManyVersions"
                         }
                     }
                 ],
@@ -22057,6 +22057,23 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api_reference_service.ApiManyVersions": {
+            "type": "object",
+            "properties": {
+                "oldcommit_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "api_reference_service.ApiReference": {
             "type": "object",
             "properties": {
@@ -22076,9 +22093,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "commit_info": {
-                    "$ref": "#/definitions/api_reference_service.ApiReference_CommitInfo"
+                    "$ref": "#/definitions/api_reference_service.CommitInfo"
                 },
                 "desc": {
+                    "type": "string"
+                },
+                "environment_id": {
                     "type": "string"
                 },
                 "external_url": {
@@ -22107,35 +22127,6 @@ const docTemplate = `{
                 },
                 "version_info": {
                     "$ref": "#/definitions/api_reference_service.ApiReference_VersionInfo"
-                }
-            }
-        },
-        "api_reference_service.ApiReference_CommitInfo": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "string"
-                },
-                "commit_id": {
-                    "type": "string"
-                },
-                "commit_type": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "version_id": {
-                    "type": "string"
                 }
             }
         },
@@ -22179,43 +22170,95 @@ const docTemplate = `{
                 }
             }
         },
+        "api_reference_service.CommitInfo": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "string"
+                },
+                "commit_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
         "api_reference_service.GetListApiReferenceChangesResponse": {
             "type": "object",
             "properties": {
                 "api_references": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api_reference_service.ApiReference"
+                        "$ref": "#/definitions/api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange"
                     }
                 },
                 "count": {
                     "type": "integer"
-                }
-            }
-        },
-        "api_reference_service.ManyVersions": {
-            "type": "object",
-            "properties": {
-                "environment_id": {
-                    "type": "string"
                 },
                 "guid": {
                     "type": "string"
+                }
+            }
+        },
+        "api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange": {
+            "type": "object",
+            "properties": {
+                "commit_info": {
+                    "$ref": "#/definitions/api_reference_service.CommitInfo"
                 },
-                "newcommit_id": {
+                "created_at": {
                     "type": "string"
                 },
-                "oldcommit_id": {
+                "updated_at": {
                     "type": "string"
                 },
-                "project_id": {
-                    "type": "string"
-                },
-                "version_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
+                "version_infos": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/api_reference_service.VersionInfo"
                     }
+                }
+            }
+        },
+        "api_reference_service.VersionInfo": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "is_current": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
                 }
             }
         },

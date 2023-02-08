@@ -624,7 +624,7 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 // @Produce json
 // @Param api_reference_id path string true "api_reference_id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Param body body ars.ManyVersions true "Request Body"
+// @Param body body ars.ApiManyVersions true "Request Body"
 // @Success 200 {object} status_http.Response{data=ars.ApiReference} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

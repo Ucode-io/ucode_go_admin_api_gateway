@@ -1,4 +1,15 @@
 definitions:
+  api_reference_service.ApiManyVersions:
+    properties:
+      oldcommit_id:
+        type: string
+      project_id:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+    type: object
   api_reference_service.ApiReference:
     properties:
       additional_url:
@@ -12,8 +23,10 @@ definitions:
       commit_id:
         type: string
       commit_info:
-        $ref: '#/definitions/api_reference_service.ApiReference_CommitInfo'
+        $ref: '#/definitions/api_reference_service.CommitInfo'
       desc:
+        type: string
+      environment_id:
         type: string
       external_url:
         type: string
@@ -33,25 +46,6 @@ definitions:
         type: string
       version_info:
         $ref: '#/definitions/api_reference_service.ApiReference_VersionInfo'
-    type: object
-  api_reference_service.ApiReference_CommitInfo:
-    properties:
-      author_id:
-        type: string
-      commit_id:
-        type: string
-      commit_type:
-        type: string
-      created_at:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      updated_at:
-        type: string
-      version_id:
-        type: string
     type: object
   api_reference_service.ApiReference_VersionInfo:
     properties:
@@ -79,31 +73,65 @@ definitions:
       project_id:
         type: string
     type: object
+  api_reference_service.CommitInfo:
+    properties:
+      author_id:
+        type: string
+      commit_id:
+        type: string
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      updated_at:
+        type: string
+      version_id:
+        type: string
+    type: object
   api_reference_service.GetListApiReferenceChangesResponse:
     properties:
       api_references:
         items:
-          $ref: '#/definitions/api_reference_service.ApiReference'
+          $ref: '#/definitions/api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange'
         type: array
       count:
         type: integer
-    type: object
-  api_reference_service.ManyVersions:
-    properties:
-      environment_id:
-        type: string
       guid:
         type: string
-      newcommit_id:
+    type: object
+  api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange:
+    properties:
+      commit_info:
+        $ref: '#/definitions/api_reference_service.CommitInfo'
+      created_at:
         type: string
-      oldcommit_id:
+      updated_at:
         type: string
-      project_id:
+      version_infos:
+        additionalProperties:
+          $ref: '#/definitions/api_reference_service.VersionInfo'
+        type: object
+    type: object
+  api_reference_service.VersionInfo:
+    properties:
+      author_id:
         type: string
-      version_ids:
-        items:
-          type: string
-        type: array
+      created_at:
+        type: string
+      desc:
+        type: string
+      is_current:
+        type: boolean
+      updated_at:
+        type: string
+      version:
+        type: string
+      version_id:
+        type: string
     type: object
   auth_service.AddSessionToIntegrationRequest:
     properties:
@@ -5470,7 +5498,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/api_reference_service.ManyVersions'
+          $ref: '#/definitions/api_reference_service.ApiManyVersions'
       produces:
       - application/json
       responses:
