@@ -60,14 +60,13 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		return
 	}
 
-	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, apiReference.GetProjectId())
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
-		return
-	}
+	// versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, apiReference.GetProjectId())
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
+	// 	return
+	// }
 
-	apiReference.CommitId = commitGuid
-	apiReference.VersionId = versionGuid
+	apiReference.VersionId = ""
 
 	// set: commit_id
 	resp, err := services.ApiReferenceService().ApiReference().Create(
@@ -277,14 +276,13 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		return
 	}
 
-	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, apiReference.GetProjectId())
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
-		return
-	}
+	// versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, apiReference.GetProjectId())
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
+	// 	return
+	// }
 
-	apiReference.CommitId = commitGuid
-	apiReference.VersionId = versionGuid
+	apiReference.VersionId = ""
 
 	resp, err := services.ApiReferenceService().ApiReference().Update(
 		c.Request.Context(), &apiReference,
@@ -439,25 +437,10 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 	}
 
 	var (
-		commitIds  []string
 		versionIds []string
 	)
 	for _, item := range resp.GetApiReferences() {
-		commitIds = append(commitIds, item.GetCommitId())
-		versionIds = append(versionIds, item.GetVersionId())
-	}
-
-	multipleCommitResp, err := services.VersioningService().Commit().GetMultipleCommitInfo(
-		c.Request.Context(),
-		&vcs.GetMultipleCommitInfoRequest{
-			CommitIds: commitIds,
-			ProjectId: project_id,
-		},
-	)
-	if err != nil {
-		h.log.Error("error getting multiple commit infos", logger.Error(err))
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		versionIds = append(versionIds, item.GetCommitInfo().GetVersionId())
 	}
 
 	multipleVersionResp, err := services.VersioningService().Release().GetMultipleVersionInfo(
@@ -474,28 +457,19 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 	}
 
 	for _, item := range resp.GetApiReferences() {
-		commitInfo := multipleCommitResp.GetCommits()[item.GetCommitId()]
+		for key, _ := range item.GetVersionInfos() {
 
-		item.CommitInfo = &ars.ApiReference_CommitInfo{
-			CommitId:   commitInfo.GetCommitId(),
-			VersionId:  commitInfo.GetVersionId(),
-			ProjectId:  commitInfo.GetProjectId(),
-			AuthorId:   commitInfo.GetAuthorId(),
-			Name:       commitInfo.GetName(),
-			CommitType: commitInfo.GetCommitType(),
-			CreatedAt:  commitInfo.GetCreatedAt(),
-			UpdatedAt:  commitInfo.GetUpdatedAt(),
-		}
+			versionInfoData := multipleVersionResp.GetVersionInfos()[key]
 
-		versionInfo := multipleVersionResp.GetVersionInfos()[item.GetVersionId()]
-
-		item.VersionInfo = &ars.ApiReference_VersionInfo{
-			VersionId: versionInfo.GetVersionId(),
-			Version:   versionInfo.GetVersion(),
-			Desc:      versionInfo.GetDesc(),
-			IsCurrent: versionInfo.GetIsCurrent(),
-			CreatedAt: versionInfo.GetCreatedAt(),
-			UpdatedAt: versionInfo.GetUpdatedAt(),
+			item.VersionInfos[key] = &ars.VersionInfo{
+				VersionId: versionInfoData.GetVersionId(),
+				AuthorId:  versionInfoData.GetAuthorId(),
+				Version:   versionInfoData.GetVersion(),
+				Desc:      versionInfoData.GetDesc(),
+				CreatedAt: versionInfoData.GetCreatedAt(),
+				UpdatedAt: versionInfoData.GetUpdatedAt(),
+				IsCurrent: versionInfoData.GetIsCurrent(),
+			}
 		}
 	}
 

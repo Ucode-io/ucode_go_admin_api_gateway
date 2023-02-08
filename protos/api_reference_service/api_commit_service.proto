@@ -1,10 +1,10 @@
 syntax="proto3";
 
-package versioning_service;
-option go_package="genproto/versioning_service";
+package api_reference_service;
+option go_package="genproto/api_reference_service";
 
 import "google/protobuf/empty.proto";
-import "versioning.proto";
+import "google/protobuf/struct.proto";
 
 service CommitService {
     rpc Create(CreateCommitRequest) returns (CommitWithRelease) {}
@@ -15,12 +15,30 @@ service CommitService {
     rpc GetMultipleCommitInfo(GetMultipleCommitInfoRequest) returns (GetMultipleCommitInfoResponse) {}
 }
 
+message CommitWithRelease {
+    message Release {
+        string id = 1;
+        string version = 2;
+        bool is_current = 3;
+    }
+
+    string id = 1;
+    string project_id = 2;
+    string environment_id = 3;
+    string author_id = 4;
+    string name = 5;
+    string created_at = 6;
+    Release release_info = 7;
+    string commit_type = 8;
+}
+
 message CreateCommitRequest {
     string project_id = 1;
     string environment_id = 2;
     string author_id = 3;
     string name = 4;
     string commit_type = 5;
+    string version_id = 6;
 }
 
 message CommitPrimaryKey {
@@ -69,20 +87,17 @@ message CommitInfo {
     string updated_at = 8;
 }
 
+message VersionInfo {
+    string author_id = 3;
+    string created_at = 4;
+    string updated_at = 5;
+    string desc = 6;
+    bool is_current = 7;
+    string version = 8;
+    string version_id = 9;
+}
+
 message GetMultipleCommitInfoResponse {
     map<string, CommitInfo> commits = 1;
     int64 count = 2;
 }
-
-// message CreateMultipleVersionWithOneCommitRequest {
-//     string project_id = 1;
-//     string environment_id = 2;
-//     string author_id = 3;
-//     string name = 4;
-//     string commit_type = 5;
-//     repeated string version_ids = 6;
-// }
-
-// message CreateMultipleVersionWithOneCommitResponse {
-//     string commit_id = 1;
-// }
