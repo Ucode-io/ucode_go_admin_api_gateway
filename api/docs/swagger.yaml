@@ -1,10 +1,21 @@
 definitions:
+  api_reference_service.ApiManyVersions:
+    properties:
+      oldcommit_id:
+        type: string
+      project_id:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+    type: object
   api_reference_service.ApiReference:
     properties:
       additional_url:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google.golang.org_protobuf_types_known_structpb.Struct'
       authentification:
         type: boolean
       category_id:
@@ -104,27 +115,6 @@ definitions:
         additionalProperties:
           $ref: '#/definitions/api_reference_service.VersionInfo'
         type: object
-    type: object
-  api_reference_service.ManyVersions:
-    properties:
-      commit_info:
-        $ref: '#/definitions/api_reference_service.CommitInfo'
-      environment_id:
-        type: string
-      guid:
-        type: string
-      newcommit_id:
-        type: string
-      oldcommit_id:
-        type: string
-      project_id:
-        type: string
-      version_id:
-        type: string
-      version_ids:
-        items:
-          type: string
-        type: array
     type: object
   api_reference_service.VersionInfo:
     properties:
@@ -321,7 +311,7 @@ definitions:
   auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       label:
@@ -835,6 +825,22 @@ definitions:
         type: string
       versioningServiceHost:
         type: string
+    type: object
+  github.com_golang_protobuf_ptypes_struct.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
+  google.golang.org_protobuf_types_known_structpb.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
     type: object
   handlers.Path:
     properties:
@@ -1628,7 +1634,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -1687,7 +1693,7 @@ definitions:
   object_builder_service.CreateFieldRequest:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       autofill_field:
         type: string
       autofill_table:
@@ -1872,7 +1878,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -2298,7 +2304,7 @@ definitions:
   object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       label:
@@ -2515,7 +2521,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -2737,14 +2743,6 @@ definitions:
       status:
         type: string
     type: object
-  structpb.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
   structpb.Value:
     properties:
       kind:
@@ -2783,7 +2781,7 @@ definitions:
       folder_id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       project_id:
         type: string
       title:
@@ -2952,7 +2950,7 @@ definitions:
   template_service.GetObjectTokenRes:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
     type: object
   template_service.GetSingleFolderNoteRes:
     properties:
@@ -2981,7 +2979,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       project_id:
         type: string
       title:
@@ -3076,7 +3074,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       project_id:
         type: string
       title:
@@ -5481,7 +5479,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/api_reference_service.ManyVersions'
+          $ref: '#/definitions/api_reference_service.ApiManyVersions'
       produces:
       - application/json
       responses:

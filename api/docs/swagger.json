@@ -3655,7 +3655,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api_reference_service.ManyVersions"
+                            "$ref": "#/definitions/api_reference_service.ApiManyVersions"
                         }
                     }
                 ],
@@ -22045,6 +22045,23 @@
         }
     },
     "definitions": {
+        "api_reference_service.ApiManyVersions": {
+            "type": "object",
+            "properties": {
+                "oldcommit_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "api_reference_service.ApiReference": {
             "type": "object",
             "properties": {
@@ -22052,7 +22069,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google.golang.org_protobuf_types_known_structpb.Struct"
                 },
                 "authentification": {
                     "type": "boolean"
@@ -22203,38 +22220,6 @@
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/api_reference_service.VersionInfo"
-                    }
-                }
-            }
-        },
-        "api_reference_service.ManyVersions": {
-            "type": "object",
-            "properties": {
-                "commit_info": {
-                    "$ref": "#/definitions/api_reference_service.CommitInfo"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "guid": {
-                    "type": "string"
-                },
-                "newcommit_id": {
-                    "type": "string"
-                },
-                "oldcommit_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "version_id": {
-                    "type": "string"
-                },
-                "version_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
                     }
                 }
             }
@@ -22537,7 +22522,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -23324,6 +23309,30 @@
                 },
                 "versioningServiceHost": {
                     "type": "string"
+                }
+            }
+        },
+        "github.com_golang_protobuf_ptypes_struct.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/structpb.Value"
+                    }
+                }
+            }
+        },
+        "google.golang.org_protobuf_types_known_structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/structpb.Value"
+                    }
                 }
             }
         },
@@ -24533,7 +24542,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -24623,7 +24632,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "autofill_field": {
                     "type": "string"
@@ -24903,7 +24912,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -25558,7 +25567,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -25888,7 +25897,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -26229,18 +26238,6 @@
                 }
             }
         },
-        "structpb.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
-                    }
-                }
-            }
-        },
         "structpb.Value": {
             "type": "object",
             "properties": {
@@ -26299,7 +26296,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -26560,7 +26557,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
@@ -26605,7 +26602,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -26751,7 +26748,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
