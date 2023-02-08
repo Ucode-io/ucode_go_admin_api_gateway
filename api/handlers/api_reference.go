@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -661,6 +662,8 @@ func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
 		return
 	}
 
+	log.Printf("API->body: %+v", body)
+
 	environmentID, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
@@ -704,20 +707,6 @@ func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
 	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 	// 	return
 	// }
-
-	authInfo, err := h.adminAuthInfo(c)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
-		return
-	}
-	body.VersionId = ""
-	body.CommitInfo = &ars.CommitInfo{
-		CommitId:   "",
-		CommitType: config.COMMIT_TYPE_FIELD,
-		Name:       fmt.Sprintf("Auto Created Commit Change Version - %s", time.Now().Format(time.RFC1123)),
-		AuthorId:   authInfo.GetUserId(),
-		ProjectId:  body.ProjectId,
-	}
 
 	resp, err := services.ApiReferenceService().ApiReference().CreateManyApiReference(c.Request.Context(), &body)
 	if err != nil {
