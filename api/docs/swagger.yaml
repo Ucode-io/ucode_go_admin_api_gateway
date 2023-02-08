@@ -12,8 +12,10 @@ definitions:
       commit_id:
         type: string
       commit_info:
-        $ref: '#/definitions/api_reference_service.ApiReference_CommitInfo'
+        $ref: '#/definitions/api_reference_service.CommitInfo'
       desc:
+        type: string
+      environment_id:
         type: string
       external_url:
         type: string
@@ -33,25 +35,6 @@ definitions:
         type: string
       version_info:
         $ref: '#/definitions/api_reference_service.ApiReference_VersionInfo'
-    type: object
-  api_reference_service.ApiReference_CommitInfo:
-    properties:
-      author_id:
-        type: string
-      commit_id:
-        type: string
-      commit_type:
-        type: string
-      created_at:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      updated_at:
-        type: string
-      version_id:
-        type: string
     type: object
   api_reference_service.ApiReference_VersionInfo:
     properties:
@@ -79,17 +62,53 @@ definitions:
       project_id:
         type: string
     type: object
+  api_reference_service.CommitInfo:
+    properties:
+      author_id:
+        type: string
+      commit_id:
+        type: string
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      updated_at:
+        type: string
+      version_id:
+        type: string
+    type: object
   api_reference_service.GetListApiReferenceChangesResponse:
     properties:
       api_references:
         items:
-          $ref: '#/definitions/api_reference_service.ApiReference'
+          $ref: '#/definitions/api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange'
         type: array
       count:
         type: integer
+      guid:
+        type: string
+    type: object
+  api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange:
+    properties:
+      commit_info:
+        $ref: '#/definitions/api_reference_service.CommitInfo'
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      version_infos:
+        additionalProperties:
+          $ref: '#/definitions/api_reference_service.VersionInfo'
+        type: object
     type: object
   api_reference_service.ManyVersions:
     properties:
+      commit_info:
+        $ref: '#/definitions/api_reference_service.CommitInfo'
       environment_id:
         type: string
       guid:
@@ -100,10 +119,29 @@ definitions:
         type: string
       project_id:
         type: string
+      version_id:
+        type: string
       version_ids:
         items:
           type: string
         type: array
+    type: object
+  api_reference_service.VersionInfo:
+    properties:
+      author_id:
+        type: string
+      created_at:
+        type: string
+      desc:
+        type: string
+      is_current:
+        type: boolean
+      updated_at:
+        type: string
+      version:
+        type: string
+      version_id:
+        type: string
     type: object
   auth_service.AddSessionToIntegrationRequest:
     properties:
@@ -2816,26 +2854,17 @@ definitions:
         type: boolean
       object_id:
         type: string
-      permission:
-        $ref: '#/definitions/template_service.CreateUserPermissionReq_Permission'
       photo_url:
         type: string
       project_id:
+        type: string
+      role:
         type: string
       type:
         type: string
       user_id:
         type: string
       username:
-        type: string
-    type: object
-  template_service.CreateUserPermissionReq_Permission:
-    properties:
-      owner:
-        type: string
-      read:
-        type: string
-      write:
         type: string
     type: object
   template_service.Folder:
@@ -3108,26 +3137,17 @@ definitions:
         type: boolean
       object_id:
         type: string
-      permission:
-        $ref: '#/definitions/template_service.UpdateUserPermissionReq_Permission'
       photo_url:
         type: string
       project_id:
+        type: string
+      role:
         type: string
       type:
         type: string
       user_id:
         type: string
       username:
-        type: string
-    type: object
-  template_service.UpdateUserPermissionReq_Permission:
-    properties:
-      owner:
-        type: string
-      read:
-        type: string
-      write:
         type: string
     type: object
   template_service.UserPermission:
@@ -3140,26 +3160,17 @@ definitions:
         type: boolean
       object_id:
         type: string
-      permission:
-        $ref: '#/definitions/template_service.UserPermission_Permission'
       photo_url:
         type: string
       project_id:
+        type: string
+      role:
         type: string
       type:
         type: string
       user_id:
         type: string
       username:
-        type: string
-    type: object
-  template_service.UserPermission_Permission:
-    properties:
-      owner:
-        type: string
-      read:
-        type: string
-      write:
         type: string
     type: object
   versioning_service.ApiCreateReleaseRequest:

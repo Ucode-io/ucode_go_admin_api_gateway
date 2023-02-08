@@ -17,11 +17,6 @@ service UserPermissionService {
 }
 
 message UserPermission {
-    message Permission {
-        string write = 1;
-        string read = 2;
-        string owner = 3;
-    }
     string id = 1;
     string object_id = 2;
     string email = 3;
@@ -29,24 +24,19 @@ message UserPermission {
     string user_id = 5;
     string photo_url = 6;
     string type = 7;
-    Permission permission = 8;
+    string role = 8;
     bool is_deleted = 9;
     string project_id = 10;
 }
 
 message CreateUserPermissionReq {
-    message Permission {
-        string write = 1;
-        string read = 2;
-        string owner = 3;
-    }
     string object_id = 1;
     string email = 2;
     string username = 3;
     string user_id = 4;
     string photo_url = 5;
     string type = 6;
-    Permission permission = 7;
+    string role = 7;
     bool is_deleted = 8;
     string project_id = 9;
 }
@@ -67,11 +57,6 @@ message GetSingleUserPermissionReq {
 }
 
 message UpdateUserPermissionReq {
-    message Permission {
-        string write = 1;
-        string read = 2;
-        string owner = 3;
-    }
     string id = 1;
     string object_id = 2;
     string email = 3;
@@ -79,7 +64,7 @@ message UpdateUserPermissionReq {
     string user_id = 5;
     string photo_url = 6;
     string type = 7;
-    Permission permission = 8;
+    string role = 8;
     bool is_deleted = 9;
     string project_id = 10;
 }

@@ -22064,9 +22064,12 @@
                     "type": "string"
                 },
                 "commit_info": {
-                    "$ref": "#/definitions/api_reference_service.ApiReference_CommitInfo"
+                    "$ref": "#/definitions/api_reference_service.CommitInfo"
                 },
                 "desc": {
+                    "type": "string"
+                },
+                "environment_id": {
                     "type": "string"
                 },
                 "external_url": {
@@ -22095,35 +22098,6 @@
                 },
                 "version_info": {
                     "$ref": "#/definitions/api_reference_service.ApiReference_VersionInfo"
-                }
-            }
-        },
-        "api_reference_service.ApiReference_CommitInfo": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "string"
-                },
-                "commit_id": {
-                    "type": "string"
-                },
-                "commit_type": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "version_id": {
-                    "type": "string"
                 }
             }
         },
@@ -22167,23 +22141,78 @@
                 }
             }
         },
+        "api_reference_service.CommitInfo": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "string"
+                },
+                "commit_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
         "api_reference_service.GetListApiReferenceChangesResponse": {
             "type": "object",
             "properties": {
                 "api_references": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api_reference_service.ApiReference"
+                        "$ref": "#/definitions/api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange"
                     }
                 },
                 "count": {
                     "type": "integer"
+                },
+                "guid": {
+                    "type": "string"
+                }
+            }
+        },
+        "api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange": {
+            "type": "object",
+            "properties": {
+                "commit_info": {
+                    "$ref": "#/definitions/api_reference_service.CommitInfo"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "version_infos": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/api_reference_service.VersionInfo"
+                    }
                 }
             }
         },
         "api_reference_service.ManyVersions": {
             "type": "object",
             "properties": {
+                "commit_info": {
+                    "$ref": "#/definitions/api_reference_service.CommitInfo"
+                },
                 "environment_id": {
                     "type": "string"
                 },
@@ -22199,11 +22228,40 @@
                 "project_id": {
                     "type": "string"
                 },
+                "version_id": {
+                    "type": "string"
+                },
                 "version_ids": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "api_reference_service.VersionInfo": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "is_current": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
                 }
             }
         },
@@ -26351,13 +26409,13 @@
                 "object_id": {
                     "type": "string"
                 },
-                "permission": {
-                    "$ref": "#/definitions/template_service.CreateUserPermissionReq_Permission"
-                },
                 "photo_url": {
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "role": {
                     "type": "string"
                 },
                 "type": {
@@ -26367,20 +26425,6 @@
                     "type": "string"
                 },
                 "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "template_service.CreateUserPermissionReq_Permission": {
-            "type": "object",
-            "properties": {
-                "owner": {
-                    "type": "string"
-                },
-                "read": {
-                    "type": "string"
-                },
-                "write": {
                     "type": "string"
                 }
             }
@@ -26801,13 +26845,13 @@
                 "object_id": {
                     "type": "string"
                 },
-                "permission": {
-                    "$ref": "#/definitions/template_service.UpdateUserPermissionReq_Permission"
-                },
                 "photo_url": {
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "role": {
                     "type": "string"
                 },
                 "type": {
@@ -26817,20 +26861,6 @@
                     "type": "string"
                 },
                 "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "template_service.UpdateUserPermissionReq_Permission": {
-            "type": "object",
-            "properties": {
-                "owner": {
-                    "type": "string"
-                },
-                "read": {
-                    "type": "string"
-                },
-                "write": {
                     "type": "string"
                 }
             }
@@ -26850,13 +26880,13 @@
                 "object_id": {
                     "type": "string"
                 },
-                "permission": {
-                    "$ref": "#/definitions/template_service.UserPermission_Permission"
-                },
                 "photo_url": {
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "role": {
                     "type": "string"
                 },
                 "type": {
@@ -26866,20 +26896,6 @@
                     "type": "string"
                 },
                 "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "template_service.UserPermission_Permission": {
-            "type": "object",
-            "properties": {
-                "owner": {
-                    "type": "string"
-                },
-                "read": {
-                    "type": "string"
-                },
-                "write": {
                     "type": "string"
                 }
             }
