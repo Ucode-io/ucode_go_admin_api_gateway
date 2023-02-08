@@ -304,7 +304,7 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 	apiReference.CommitInfo = &ars.CommitInfo{
 		CommitId:   "",
 		CommitType: config.COMMIT_TYPE_FIELD,
-		Name:       fmt.Sprintf("Auto Created Commit Create api reference - %s", time.Now().Format(time.RFC1123)),
+		Name:       fmt.Sprintf("Auto Created Commit Update api reference - %s", time.Now().Format(time.RFC1123)),
 		AuthorId:   authInfo.GetUserId(),
 		ProjectId:  apiReference.ProjectId,
 	}
