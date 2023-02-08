@@ -88,6 +88,23 @@ definitions:
       count:
         type: integer
     type: object
+  api_reference_service.ManyVersions:
+    properties:
+      environment_id:
+        type: string
+      guid:
+        type: string
+      newcommit_id:
+        type: string
+      oldcommit_id:
+        type: string
+      project_id:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+    type: object
   auth_service.AddSessionToIntegrationRequest:
     properties:
       data:
@@ -5429,6 +5446,64 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Revert Api Reference
+      tags:
+      - ApiReference
+  /v1/api-reference/select-versions/{api_reference_id}:
+    post:
+      consumes:
+      - application/json
+      description: Select Api Reference
+      operationId: insert_many_api_reference
+      parameters:
+      - description: api_reference_id
+        in: path
+        name: api_reference_id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api_reference_service.ManyVersions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api_reference_service.ApiReference'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Select Api Reference
       tags:
       - ApiReference
   /v1/app:

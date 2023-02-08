@@ -288,7 +288,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.POST("/release", h.CreateRelease)
 		v1Admin.GET("/release/:project_id/:version_id", h.GetReleaseByID)
 		v1Admin.GET("/release/:project_id", h.GetAllReleases)
-		v1Admin.PUT("/release/:id", h.UpdateRelease)
+		v1Admin.PUT("/release/:version_id", h.UpdateRelease)
 		v1Admin.DELETE("/release/:project_id/:version_id", h.DeleteRelease)
 		v1Admin.POST("/release/:version_id", h.SetCurrentRelease)
 		v1Admin.GET("/release/current/:project_id", h.GetCurrentRelease)
@@ -306,6 +306,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.DELETE("/api-reference/:project_id/:api_reference_id", h.DeleteApiReference)
 		v1Admin.GET("/api-reference/history/:project_id/:api_reference_id", h.GetApiReferenceChanges)
 		v1Admin.POST("/api-reference/revert/:api_reference_id", h.RevertApiReference)
+		v1Admin.POST("/api-reference/select-versions/:api_reference_id", h.InsertManyVersionForApiReference)
 
 		v1Admin.POST("/category", h.CreateCategory)
 		v1Admin.PUT("/category", h.UpdateCategory)

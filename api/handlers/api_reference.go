@@ -31,19 +31,7 @@ import (
 func (h *Handler) CreateApiReference(c *gin.Context) {
 	var apiReference ars.CreateApiReferenceRequest
 
-	authInfo, err := h.adminAuthInfo(c)
-	if err != nil {
-		h.log.Error("error getting auth info", logger.Error(err))
-		h.handleResponse(c, status_http.Forbidden, err.Error())
-		return
-	}
-
-	if !util.IsValidUUID(authInfo.GetUserId()) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("user id is invalid uuid").Error())
-		return
-	} 
-
-	err = c.ShouldBindJSON(&apiReference)
+	err := c.ShouldBindJSON(&apiReference)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -596,6 +584,85 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 	)
 	if err != nil {
 		h.log.Error("error reverting api reference", logger.Error(err))
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// InsertManyVersionForApiRef godoc
+// @Security ApiKeyAuth
+// @ID insert_many_api_reference
+// @Router /v1/api-reference/select-versions/{api_reference_id} [POST]
+// @Summary Select Api Reference
+// @Description Select Api Reference
+// @Tags ApiReference
+// @Accept json
+// @Produce json
+// @Param api_reference_id path string true "api_reference_id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Param body body ars.ManyVersions true "Request Body"
+// @Success 200 {object} status_http.Response{data=ars.ApiReference} "Response Body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
+
+	body := ars.ManyVersions{}
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentID, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
+		return
+	}
+
+	if !util.IsValidUUID(environmentID.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
+
+	api_reference_id := c.Param("api_reference_id")
+	if !util.IsValidUUID(api_reference_id) {
+		err := errors.New("api_reference_id is an invalid uuid")
+		h.log.Error("api_reference_id is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "api_reference_id is an invalid uuid")
+		return
+	}
+
+	if !util.IsValidUUID(body.GetProjectId()) {
+		err := errors.New("project_id is an invalid uuid")
+		h.log.Error("project_id is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.log.Error("error getting service", logger.Error(err))
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	body.EnvironmentId = environmentID.(string)
+	body.Guid = api_reference_id
+
+	_, commitId, err := h.CreateAutoCommitForAdminChange(c, environmentID.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
+		return
+	}
+
+	body.NewcommitId = commitId
+
+	resp, err := services.ApiReferenceService().ApiReference().CreateManyApiReference(c.Request.Context(), &body)
+	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
