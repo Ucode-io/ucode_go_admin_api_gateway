@@ -651,13 +651,25 @@ func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
 	body.EnvironmentId = environmentID.(string)
 	body.Guid = api_reference_id
 
-	_, commitId, err := h.CreateAutoCommitForAdminChange(c, environmentID.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
+	// _, commitId, err := h.CreateAutoCommitForAdminChange(c, environmentID.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
+	// 	return
+	// }
+
+	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
 		return
 	}
-
-	body.NewcommitId = commitId
+	body.VersionId = ""
+	body.CommitInfo = &ars.CommitInfo{
+		CommitId:   "",
+		CommitType: config.COMMIT_TYPE_FIELD,
+		Name:       fmt.Sprintf("Auto Created Commit Change Version - %s", time.Now().Format(time.RFC1123)),
+		AuthorId:   authInfo.GetUserId(),
+		ProjectId:  body.ProjectId,
+	}
 
 	resp, err := services.ApiReferenceService().ApiReference().CreateManyApiReference(c.Request.Context(), &body)
 	if err != nil {
