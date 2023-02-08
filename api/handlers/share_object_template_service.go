@@ -638,6 +638,114 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, res)
 }
 
+// UpdateSharingToken godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID update_share_template
+// @Router /v1/template-note/share [POST]
+// @Summary Update share template
+// @Description Update share template
+// @Tags Template
+// @Accept json
+// @Produce json
+// @Param project-id query string true "project-id"
+// @Param share body tmp.UpdateTokenReq true "UpdateTokenReq"
+// @Success 201 {object} status_http.Response{data=tmp.UpdateTokenRes} "UpdateTokenRes data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) UpdateSharingToken(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+		share               tmp.UpdateTokenReq
+	)
+
+	err := c.ShouldBindJSON(&share)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+	share.ProjectId = resourceEnvironment.GetId()
+
+	//uuID, err := uuid.NewRandom()
+	//if err != nil {
+	//	err = errors.New("error generating new id")
+	//	h.handleResponse(c, status_http.InternalServerError, err.Error())
+	//	return
+	//}
+
+	res, err := services.TemplateService().Share().UpdateToken(
+		context.Background(),
+		&share,
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.Created, res)
+}
+
 // GetObjectToken godoc
 // @ID get_single_object_template
 // @Router /template-note/share-get [POST]

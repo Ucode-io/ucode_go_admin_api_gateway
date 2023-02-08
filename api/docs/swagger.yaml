@@ -1,21 +1,10 @@
 definitions:
-  api_reference_service.ApiManyVersions:
-    properties:
-      oldcommit_id:
-        type: string
-      project_id:
-        type: string
-      version_ids:
-        items:
-          type: string
-        type: array
-    type: object
   api_reference_service.ApiReference:
     properties:
       additional_url:
         type: string
       attributes:
-        $ref: '#/definitions/google.golang.org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/structpb.Struct'
       authentification:
         type: boolean
       category_id:
@@ -311,7 +300,7 @@ definitions:
   auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       label:
@@ -825,22 +814,6 @@ definitions:
         type: string
       versioningServiceHost:
         type: string
-    type: object
-  github.com_golang_protobuf_ptypes_struct.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  google.golang.org_protobuf_types_known_structpb.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
     type: object
   handlers.Path:
     properties:
@@ -1634,7 +1607,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -1693,7 +1666,7 @@ definitions:
   object_builder_service.CreateFieldRequest:
     properties:
       attributes:
-        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       autofill_field:
         type: string
       autofill_table:
@@ -1878,7 +1851,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -2304,7 +2277,7 @@ definitions:
   object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       label:
@@ -2521,7 +2494,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -2743,6 +2716,14 @@ definitions:
       status:
         type: string
     type: object
+  structpb.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
   structpb.Value:
     properties:
       kind:
@@ -2781,7 +2762,7 @@ definitions:
       folder_id:
         type: string
       json:
-        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
       title:
@@ -2832,16 +2813,30 @@ definitions:
     type: object
   template_service.CreateTokenReq:
     properties:
+      is_private:
+        type: boolean
       object_id:
         type: string
       project_id:
+        type: string
+      role:
         type: string
       type:
         type: string
     type: object
   template_service.CreateTokenRes:
     properties:
+      is_private:
+        type: boolean
+      object_id:
+        type: string
+      project_id:
+        type: string
+      role:
+        type: string
       token:
+        type: string
+      type:
         type: string
     type: object
   template_service.CreateUserPermissionReq:
@@ -2950,7 +2945,9 @@ definitions:
   template_service.GetObjectTokenRes:
     properties:
       data:
-        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
+      role:
+        type: string
     type: object
   template_service.GetSingleFolderNoteRes:
     properties:
@@ -2979,7 +2976,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
       title:
@@ -3074,7 +3071,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
       title:
@@ -3123,6 +3120,34 @@ definitions:
   template_service.UpdateTemplateReq_Table_Relation:
     properties:
       relation_id:
+        type: string
+    type: object
+  template_service.UpdateTokenReq:
+    properties:
+      is_private:
+        type: boolean
+      object_id:
+        type: string
+      project_id:
+        type: string
+      role:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.UpdateTokenRes:
+    properties:
+      is_private:
+        type: boolean
+      object_id:
+        type: string
+      project_id:
+        type: string
+      role:
+        type: string
+      token:
+        type: string
+      type:
         type: string
     type: object
   template_service.UpdateUserPermissionReq:
@@ -5455,64 +5480,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Revert Api Reference
-      tags:
-      - ApiReference
-  /v1/api-reference/select-versions/{api_reference_id}:
-    post:
-      consumes:
-      - application/json
-      description: Select Api Reference
-      operationId: insert_many_api_reference
-      parameters:
-      - description: api_reference_id
-        in: path
-        name: api_reference_id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: Request Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/api_reference_service.ApiManyVersions'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Response Body
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/api_reference_service.ApiReference'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Select Api Reference
       tags:
       - ApiReference
   /v1/app:
@@ -13687,8 +13654,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create share template
-      operationId: create_share_template
+      description: Update share template
+      operationId: update_share_template
       parameters:
       - description: Resource-Id
         in: header
@@ -13705,23 +13672,23 @@ paths:
         name: project-id
         required: true
         type: string
-      - description: CreateTokenReq
+      - description: UpdateTokenReq
         in: body
         name: share
         required: true
         schema:
-          $ref: '#/definitions/template_service.CreateTokenReq'
+          $ref: '#/definitions/template_service.UpdateTokenReq'
       produces:
       - application/json
       responses:
         "201":
-          description: CreateTokenRes data
+          description: UpdateTokenRes data
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/template_service.CreateTokenRes'
+                  $ref: '#/definitions/template_service.UpdateTokenRes'
               type: object
         "400":
           description: Bad Request
@@ -13743,7 +13710,7 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-      summary: Create share template
+      summary: Update share template
       tags:
       - Template
   /v1/template-note/users:

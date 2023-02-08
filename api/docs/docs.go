@@ -3634,108 +3634,6 @@ var doc = `{
                 }
             }
         },
-        "/v1/api-reference/select-versions/{api_reference_id}": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Select Api Reference",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ApiReference"
-                ],
-                "summary": "Select Api Reference",
-                "operationId": "insert_many_api_reference",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "api_reference_id",
-                        "name": "api_reference_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "Request Body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api_reference_service.ApiManyVersions"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Response Body",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/api_reference_service.ApiReference"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/v1/api-reference/{api_reference_id}": {
             "get": {
                 "security": [
@@ -18169,7 +18067,7 @@ var doc = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Create share template",
+                "description": "Update share template",
                 "consumes": [
                     "application/json"
                 ],
@@ -18179,8 +18077,8 @@ var doc = `{
                 "tags": [
                     "Template"
                 ],
-                "summary": "Create share template",
-                "operationId": "create_share_template",
+                "summary": "Update share template",
+                "operationId": "update_share_template",
                 "parameters": [
                     {
                         "type": "string",
@@ -18204,18 +18102,18 @@ var doc = `{
                         "required": true
                     },
                     {
-                        "description": "CreateTokenReq",
+                        "description": "UpdateTokenReq",
                         "name": "share",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.CreateTokenReq"
+                            "$ref": "#/definitions/template_service.UpdateTokenReq"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "CreateTokenRes data",
+                        "description": "UpdateTokenRes data",
                         "schema": {
                             "allOf": [
                                 {
@@ -18225,7 +18123,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.CreateTokenRes"
+                                            "$ref": "#/definitions/template_service.UpdateTokenRes"
                                         }
                                     }
                                 }
@@ -22064,23 +21962,6 @@ var doc = `{
         }
     },
     "definitions": {
-        "api_reference_service.ApiManyVersions": {
-            "type": "object",
-            "properties": {
-                "oldcommit_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "version_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "api_reference_service.ApiReference": {
             "type": "object",
             "properties": {
@@ -22088,7 +21969,7 @@ var doc = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/google.golang.org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "authentification": {
                     "type": "boolean"
@@ -22541,7 +22422,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -23328,30 +23209,6 @@ var doc = `{
                 },
                 "versioningServiceHost": {
                     "type": "string"
-                }
-            }
-        },
-        "github.com_golang_protobuf_ptypes_struct.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
-                    }
-                }
-            }
-        },
-        "google.golang.org_protobuf_types_known_structpb.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
-                    }
                 }
             }
         },
@@ -24561,7 +24418,7 @@ var doc = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -24651,7 +24508,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "autofill_field": {
                     "type": "string"
@@ -24931,7 +24788,7 @@ var doc = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -25586,7 +25443,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -25916,7 +25773,7 @@ var doc = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -26257,6 +26114,18 @@ var doc = `{
                 }
             }
         },
+        "structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/structpb.Value"
+                    }
+                }
+            }
+        },
         "structpb.Value": {
             "type": "object",
             "properties": {
@@ -26315,7 +26184,7 @@ var doc = `{
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -26394,10 +26263,16 @@ var doc = `{
         "template_service.CreateTokenReq": {
             "type": "object",
             "properties": {
+                "is_private": {
+                    "type": "boolean"
+                },
                 "object_id": {
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "role": {
                     "type": "string"
                 },
                 "type": {
@@ -26408,7 +26283,22 @@ var doc = `{
         "template_service.CreateTokenRes": {
             "type": "object",
             "properties": {
+                "is_private": {
+                    "type": "boolean"
+                },
+                "object_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
                 "token": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }
@@ -26576,7 +26466,10 @@ var doc = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "role": {
+                    "type": "string"
                 }
             }
         },
@@ -26621,7 +26514,7 @@ var doc = `{
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -26767,7 +26660,7 @@ var doc = `{
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -26842,6 +26735,49 @@ var doc = `{
             "type": "object",
             "properties": {
                 "relation_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "template_service.UpdateTokenReq": {
+            "type": "object",
+            "properties": {
+                "is_private": {
+                    "type": "boolean"
+                },
+                "object_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "template_service.UpdateTokenRes": {
+            "type": "object",
+            "properties": {
+                "is_private": {
+                    "type": "boolean"
+                },
+                "object_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }
