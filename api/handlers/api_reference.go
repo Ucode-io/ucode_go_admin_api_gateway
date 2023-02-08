@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
@@ -65,7 +66,20 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 	// 	return
 	// }
 
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
+		return
+	}
+
 	apiReference.VersionId = ""
+	apiReference.CommitInfo = &ars.CommitInfo{
+		CommitId:   "",
+		CommitType: config.COMMIT_TYPE_FIELD,
+		Name:       fmt.Sprintf("Auto Created Commit Create api reference - %s", time.Now().Format(time.RFC1123)),
+		AuthorId:   authInfo.GetUserId(),
+		ProjectId:  apiReference.ProjectId,
+	}
 
 	// set: commit_id
 	resp, err := services.ApiReferenceService().ApiReference().Create(
