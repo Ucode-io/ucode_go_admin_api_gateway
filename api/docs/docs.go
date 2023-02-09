@@ -22231,38 +22231,6 @@ const docTemplate = `{
                 },
                 "version_id": {
                     "type": "string"
-                },
-                "version_info": {
-                    "$ref": "#/definitions/api_reference_service.ApiReference_VersionInfo"
-                }
-            }
-        },
-        "api_reference_service.ApiReference_VersionInfo": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "string"
-                },
-                "commit_id": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "desc": {
-                    "type": "string"
-                },
-                "is_current": {
-                    "type": "boolean"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                },
-                "version_id": {
-                    "type": "string"
                 }
             }
         },
@@ -22283,13 +22251,13 @@ const docTemplate = `{
                 "author_id": {
                     "type": "string"
                 },
-                "commit_id": {
-                    "type": "string"
-                },
                 "commit_type": {
                     "type": "string"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "guid": {
                     "type": "string"
                 },
                 "name": {
@@ -22301,8 +22269,17 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "string"
                 },
-                "version_id": {
-                    "type": "string"
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "version_infos": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api_reference_service.VersionInfo"
+                    }
                 }
             }
         },
