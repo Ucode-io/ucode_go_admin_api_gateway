@@ -1453,14 +1453,6 @@ definitions:
       text:
         type: string
     type: object
-  models.TemplateShareRes:
-    properties:
-      data:
-        additionalProperties: true
-        type: object
-      role:
-        type: string
-    type: object
   models.UpsertCommonMessage:
     properties:
       data:
@@ -2946,6 +2938,13 @@ definitions:
       version_id:
         type: string
     type: object
+  template_service.GetObjectTokenRes:
+    properties:
+      data:
+        $ref: '#/definitions/structpb.Struct'
+      role:
+        type: string
+    type: object
   template_service.GetSingleFolderNoteRes:
     properties:
       count:
@@ -3991,13 +3990,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: TemplateShareRes
+          description: GetObjectTokenRes
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.TemplateShareRes'
+                  $ref: '#/definitions/template_service.GetObjectTokenRes'
               type: object
         "400":
           description: Invalid Argument

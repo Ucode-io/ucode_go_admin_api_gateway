@@ -4,12 +4,9 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
-	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	obs "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
-
 	"ucode/ucode_go_api_gateway/pkg/util"
 )
 
@@ -757,14 +754,13 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param share body tmp.GetObjectTokenReq true "GetObjectTokenReq"
-// @Success 200 {object} status_http.Response{data=models.TemplateShareRes} "TemplateShareRes"
+// @Success 200 {object} status_http.Response{data=tmp.GetObjectTokenRes} "GetObjectTokenRes"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetObjectToken(c *gin.Context) {
 	var (
 		//resourceEnvironment *obs.ResourceEnvironment
 		share tmp.GetObjectTokenReq
-		res   models.TemplateShareRes
 	)
 
 	err := c.ShouldBindJSON(&share)
@@ -831,7 +827,7 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 	//	}
 	//}
 
-	data, err := services.TemplateService().Share().GetObjectToken(
+	res, err := services.TemplateService().Share().GetObjectToken(
 		context.Background(),
 		&tmp.GetObjectTokenReq{
 			Token:     share.GetToken(),
@@ -841,13 +837,6 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	res.Role = data.GetRole()
-	res.Data, err = helper.ConvertStructToResponse(data.GetData())
-	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 

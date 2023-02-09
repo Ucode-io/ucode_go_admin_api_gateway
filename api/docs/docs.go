@@ -1186,7 +1186,7 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "TemplateShareRes",
+                        "description": "GetObjectTokenRes",
                         "schema": {
                             "allOf": [
                                 {
@@ -1196,7 +1196,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.TemplateShareRes"
+                                            "$ref": "#/definitions/template_service.GetObjectTokenRes"
                                         }
                                     }
                                 }
@@ -24391,18 +24391,6 @@ var doc = `{
                 }
             }
         },
-        "models.TemplateShareRes": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "role": {
-                    "type": "string"
-                }
-            }
-        },
         "models.UpsertCommonMessage": {
             "type": "object",
             "properties": {
@@ -26673,6 +26661,17 @@ var doc = `{
                     "type": "string"
                 },
                 "version_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "template_service.GetObjectTokenRes": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "role": {
                     "type": "string"
                 }
             }
