@@ -358,7 +358,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -686,7 +686,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -1971,7 +1971,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2559,7 +2559,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3050,7 +3050,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3615,6 +3615,108 @@
                 }
             }
         },
+        "/v1/api-reference/select-versions/{api_reference_id}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Select Api Reference",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Select Api Reference",
+                "operationId": "insert_many_api_reference",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "api_reference_id",
+                        "name": "api_reference_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api_reference_service.ApiManyVersions"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response Body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api_reference_service.ApiReference"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/api-reference/{api_reference_id}": {
             "get": {
                 "security": [
@@ -3667,7 +3769,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.ApiReference"
+                                            "$ref": "#/definitions/api_reference_service.ApiReference"
                                         }
                                     }
                                 }
@@ -3743,7 +3845,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4246,7 +4348,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4661,7 +4763,7 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": ""
+                        "description": "Created"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -5092,7 +5194,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -7319,7 +7421,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -7820,7 +7922,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8321,7 +8423,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8817,7 +8919,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -9513,7 +9615,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10345,7 +10447,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10938,7 +11040,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -11541,7 +11643,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -12131,7 +12233,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13082,7 +13184,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13386,7 +13488,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -14464,7 +14566,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -15667,7 +15769,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -16335,7 +16437,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -17049,7 +17151,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -18000,7 +18102,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -18734,7 +18836,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -19249,7 +19351,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -20067,7 +20169,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -20793,7 +20895,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -21301,7 +21403,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -21799,7 +21901,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -22050,6 +22152,23 @@
         }
     },
     "definitions": {
+        "api_reference_service.ApiManyVersions": {
+            "type": "object",
+            "properties": {
+                "oldcommit_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "api_reference_service.ApiReference": {
             "type": "object",
             "properties": {
@@ -22276,7 +22395,7 @@
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/auth_service.ConfirmStrategies"
                 },
                 "id": {
                     "type": "string"
@@ -22300,6 +22419,19 @@
                     }
                 }
             }
+        },
+        "auth_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
         },
         "auth_service.CreateIntegrationRequest": {
             "type": "object",
@@ -22624,10 +22756,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
@@ -22716,10 +22848,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
@@ -22801,10 +22933,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -23029,15 +23161,30 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
                 }
             }
+        },
+        "company_service.ResourceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ResourceType_NOT_DECIDED",
+                "ResourceType_MONGODB",
+                "ResourceType_CLICKHOUSE",
+                "ResourceType_POSTGRESQL"
+            ]
         },
         "company_service.ResourceWithoutPassword": {
             "type": "object",
@@ -23058,7 +23205,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -23128,6 +23275,19 @@
                 }
             }
         },
+        "company_service.ServiceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ServiceType_NOT_SPECIFIED",
+                "ServiceType_BUILDER_SERVICE",
+                "ServiceType_ANALYTICS_SERVICE"
+            ]
+        },
         "company_service.UpdateResourceRequest": {
             "type": "object",
             "properties": {
@@ -23150,7 +23310,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -24440,7 +24600,7 @@
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
                 },
                 "guid": {
                     "type": "string"
@@ -24475,6 +24635,19 @@
                     }
                 }
             }
+        },
+        "object_builder_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
         },
         "object_builder_service.CreateAppResponse": {
             "type": "object",
@@ -26956,7 +27129,7 @@
                     "type": "string"
                 },
                 "release_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/versioning_service.ReleaseType"
                 }
             }
         },
@@ -27088,6 +27261,21 @@
                     }
                 }
             }
+        },
+        "versioning_service.ReleaseType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ReleaseType_UNDEFINED",
+                "ReleaseType_MAJOR",
+                "ReleaseType_MINOR",
+                "ReleaseType_PATCH"
+            ]
         },
         "versioning_service.ReleaseWithCommit": {
             "type": "object",

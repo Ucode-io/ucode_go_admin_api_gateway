@@ -74,20 +74,20 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		return
 	}
 
-	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-		c.Request.Context(),
-		&vcs.GetCurrentReleaseRequest{
-			EnvironmentId: environmentId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// activeVersion, err := services.VersioningService().Release().GetCurrentActive(
+	// 	c.Request.Context(),
+	// 	&vcs.GetCurrentReleaseRequest{
+	// 		EnvironmentId: environmentId.(string),
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	apiReference.VersionId = activeVersion.GetVersionId()
+	// apiReference.VersionId = activeVersion.GetVersionId()
 	apiReference.CommitInfo = &ars.CommitInfo{
-		CommitId:   "",
+		Guid:       "",
 		CommitType: config.COMMIT_TYPE_FIELD,
 		Name:       fmt.Sprintf("Auto Created Commit Create api reference - %s", time.Now().Format(time.RFC1123)),
 		AuthorId:   authInfo.GetUserId(),
@@ -120,7 +120,7 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 // @Param api_reference_id path string true "api_reference_id"
 // @Param commit_id query string false "commit_id"
 // @Param version_id query string false "version_id"
-// @Success 200 {object} status_http.Response{data=models.ApiReference} "AppBody"
+// @Success 200 {object} status_http.Response{data=ars.ApiReference} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetApiReferenceByID(c *gin.Context) {
@@ -152,17 +152,17 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 
 	if _, err := uuid.Parse(version_id); err != nil {
 		// If version_id is not a valid uuid, then we need to get the active version
-		activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-			c.Request.Context(),
-			&vcs.GetCurrentReleaseRequest{
-				EnvironmentId: environmentId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-		version_id = activeVersion.GetVersionId()
+		// activeVersion, err := services.VersioningService().Release().GetCurrentActive(
+		// 	c.Request.Context(),
+		// 	&vcs.GetCurrentReleaseRequest{
+		// 		EnvironmentId: environmentId.(string),
+		// 	},
+		// )
+		// if err != nil {
+		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+		// 	return
+		// }
+		// version_id = activeVersion.GetVersionId()
 	}
 
 	resp, err := services.ApiReferenceService().ApiReference().Get(
@@ -177,7 +177,31 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
+	versions, err := services.VersioningService().Release().GetMultipleVersionInfo(context.Background(), &vcs.GetMultipleVersionInfoRequest{
+		VersionIds: resp.CommitInfo.VersionIds,
+		ProjectId:  resp.ProjectId,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	fmt.Println(versions.VersionInfos)
+	versionInfos := make([]*ars.VersionInfo, 0, len(resp.GetCommitInfo().GetVersionIds()))
+	for _, id := range resp.CommitInfo.VersionIds {
+		versionInfo, ok := versions.VersionInfos[id]
+		if ok {
+			versionInfos = append(versionInfos, &ars.VersionInfo{
+				AuthorId:  versionInfo.AuthorId,
+				CreatedAt: versionInfo.CreatedAt,
+				UpdatedAt: versionInfo.UpdatedAt,
+				Desc:      versionInfo.Desc,
+				IsCurrent: versionInfo.IsCurrent,
+				Version:   versionInfo.Version,
+				VersionId: versionInfo.VersionId,
+			})
+		}
+	}
+	resp.CommitInfo.VersionInfos = versionInfos
 	h.handleResponse(c, status_http.OK, resp)
 }
 
@@ -327,7 +351,7 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 
 	apiReference.VersionId = activeVersion.GetVersionId()
 	apiReference.CommitInfo = &ars.CommitInfo{
-		CommitId:   "",
+		Guid:       "",
 		CommitType: config.COMMIT_TYPE_FIELD,
 		Name:       fmt.Sprintf("Auto Created Commit Update api reference - %s", time.Now().Format(time.RFC1123)),
 		AuthorId:   authInfo.GetUserId(),
@@ -490,7 +514,7 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 		// autherGuids []string
 	)
 	for _, item := range resp.GetApiReferences() {
-		versionIds = append(versionIds, item.GetCommitInfo().GetVersionId())
+		versionIds = append(versionIds, item.GetCommitInfo().GetVersionIds()...)
 	}
 
 	multipleVersionResp, err := services.VersioningService().Release().GetMultipleVersionInfo(
@@ -507,7 +531,7 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 	}
 
 	for _, item := range resp.GetApiReferences() {
-		for key, _ := range item.GetVersionInfos() {
+		for key := range item.GetVersionInfos() {
 
 			versionInfoData := multipleVersionResp.GetVersionInfos()[key]
 
@@ -649,7 +673,7 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 // @Produce json
 // @Param api_reference_id path string true "api_reference_id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Param body body ars.ApiManyVersions true "Request Body"
+// @Param body body api_reference_service.ApiManyVersions true "Request Body"
 // @Success 200 {object} status_http.Response{data=ars.ApiReference} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
