@@ -22,7 +22,6 @@ message CommitWithRelease {
         string version = 2;
         bool is_current = 3;
     }
-
     string id = 1;
     string project_id = 2;
     string environment_id = 3;
@@ -78,14 +77,15 @@ message GetMultipleCommitInfoRequest {
 }
 
 message CommitInfo {
-    string commit_id = 1;
-    string version_id = 2;
+    string guid = 1;
+    repeated string version_ids = 2;
     string project_id = 3;
     string author_id = 4;
     string name = 5;
     string commit_type = 6;
     string created_at = 7;
     string updated_at = 8;
+    repeated VersionInfo version_infos = 9;
 }
 
 message VersionInfo {
