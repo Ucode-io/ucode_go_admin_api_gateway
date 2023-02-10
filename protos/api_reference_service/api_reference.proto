@@ -52,7 +52,19 @@ message ApiReference {
     string version_id = 13;
     string commit_id = 14;
     CommitInfo commit_info = 15;
-    string environment_id = 16;
+    VersionInfo version_info = 16;
+    string environment_id = 17;
+
+    message VersionInfo {
+        string version_id = 1;
+        string commit_id = 2;
+        string author_id = 3;
+        string created_at = 4;
+        string updated_at = 5;
+        string desc = 6;
+        bool is_current = 7;
+        string version = 8;
+    }
 }
 
 
@@ -132,11 +144,4 @@ message ManyVersions {
     string oldcommit_id = 6;
     CommitInfo commit_info = 7;
     string version_id = 8;
-}
-
-
-message ApiManyVersions {
-    repeated string version_ids = 1;
-    string project_id = 2;
-    string oldcommit_id = 3;
 }
