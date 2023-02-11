@@ -11840,13 +11840,11 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "description": "HtmlBody",

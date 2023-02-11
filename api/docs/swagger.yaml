@@ -10057,11 +10057,10 @@ paths:
         required: true
         type: string
       - description: project-id
-        in: body
+        in: query
         name: project-id
         required: true
-        schema:
-          type: string
+        type: string
       - description: HtmlBody
         in: body
         name: template
