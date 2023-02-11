@@ -242,7 +242,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.DELETE("/note/:note-id", h.DeleteNote)
 		v1.GET("/note", h.GetListNote)
 		v1.GET("/note/commits/:note-id", h.GetNoteCommits)
+		v1.POST("/template-note/users", h.CreateUserTemplate)
+		v1.GET("/template-note/users", h.GetListUserTemplate)
+		v1.PUT("/template-note/users", h.UpdateUserTemplate)
+		v1.DELETE("/template-note/users/:user-permission-id", h.DeleteUserTemplate)
+		v1.POST("/template-note/share", h.CreateSharingToken)
+		v1.PUT("/template-note/share", h.UpdateSharingToken)
 	}
+	r.POST("/template-note/share-get", h.GetObjectToken)
 
 	v1Admin := r.Group("/v1")
 	v1Admin.Use(h.AdminAuthMiddleware())
@@ -280,12 +287,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		// release service
 		v1Admin.POST("/release", h.CreateRelease)
-		v1Admin.GET("/release/:id", h.GetReleaseByID)
-		v1Admin.GET("/release", h.GetAllReleases)
-		v1Admin.PUT("/release/:id", h.UpdateRelease)
-		v1Admin.DELETE("/release/:id", h.DeleteRelease)
-		v1Admin.POST("/release/current", h.SetCurrentRelease)
-		v1Admin.GET("/release/current/:environment-id", h.GetCurrentRelease)
+		v1Admin.GET("/release/:project_id/:version_id", h.GetReleaseByID)
+		v1Admin.GET("/release/:project_id", h.GetAllReleases)
+		v1Admin.PUT("/release/:version_id", h.UpdateRelease)
+		v1Admin.DELETE("/release/:project_id/:version_id", h.DeleteRelease)
+		v1Admin.POST("/release/:version_id", h.SetCurrentRelease)
+		v1Admin.GET("/release/current/:project_id", h.GetCurrentRelease)
 
 		// commit service
 		v1Admin.POST("/commit", h.CreateCommit)
@@ -300,6 +307,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.DELETE("/api-reference/:project_id/:api_reference_id", h.DeleteApiReference)
 		v1Admin.GET("/api-reference/history/:project_id/:api_reference_id", h.GetApiReferenceChanges)
 		v1Admin.POST("/api-reference/revert/:api_reference_id", h.RevertApiReference)
+		v1Admin.POST("/api-reference/select-versions/:api_reference_id", h.InsertManyVersionForApiReference)
 
 		v1Admin.POST("/category", h.CreateCategory)
 		v1Admin.PUT("/category", h.UpdateCategory)

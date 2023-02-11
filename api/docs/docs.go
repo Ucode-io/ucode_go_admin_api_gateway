@@ -1152,6 +1152,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/template-note/share-get": {
+            "post": {
+                "description": "Get single object template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template"
+                ],
+                "summary": "Get single object template",
+                "operationId": "get_single_object_template",
+                "parameters": [
+                    {
+                        "description": "GetObjectTokenReq",
+                        "name": "share",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/template_service.GetObjectTokenReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetObjectTokenRes",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/template_service.GetObjectTokenRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/action-permission/{role_id}/{table_slug}": {
             "get": {
                 "security": [
@@ -3544,6 +3627,108 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/api-reference/select-versions/{api_reference_id}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Select Api Reference",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiReference"
+                ],
+                "summary": "Select Api Reference",
+                "operationId": "insert_many_api_reference",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "api_reference_id",
+                        "name": "api_reference_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api_reference_service.ApiManyVersions"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response Body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api_reference_service.ApiReference"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/api-reference/{api_reference_id}": {
             "get": {
                 "security": [
@@ -3596,7 +3781,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.ApiReference"
+                                            "$ref": "#/definitions/api_reference_service.ApiReference"
                                         }
                                     }
                                 }
@@ -15638,113 +15823,6 @@ const docTemplate = `{
             }
         },
         "/v1/release": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get all releases",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Release"
-                ],
-                "summary": "Get all releases",
-                "operationId": "get_all_releases",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "created_at",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "environment_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "search",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "ReleaseBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/versioning_service.GetReleaseListResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -15765,18 +15843,25 @@ const docTemplate = `{
                 "operationId": "create_release",
                 "parameters": [
                     {
-                        "description": "CreateReleaseRequestBody",
+                        "description": "Request Body",
                         "name": "release",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/versioning_service.CreateReleaseRequest"
+                            "$ref": "#/definitions/versioning_service.ApiCreateReleaseRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Release data",
+                        "description": "Response Body",
                         "schema": {
                             "allOf": [
                                 {
@@ -15786,7 +15871,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/versioning_service.ReleaseWithCommit"
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -15853,18 +15938,25 @@ const docTemplate = `{
                 "operationId": "set_current_release",
                 "parameters": [
                     {
-                        "description": "SetCurrentReleaseRequestBody",
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
                         "name": "release",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/versioning_service.SetCurrentReleaseRequest"
+                            "$ref": "#/definitions/versioning_service.ApiSetCurrentReleaseRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Release data",
+                        "description": "Response Body",
                         "schema": {
                             "allOf": [
                                 {
@@ -16006,7 +16098,112 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/release/{id}": {
+        "/v1/release/{project_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all releases",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Release"
+                ],
+                "summary": "Get all releases",
+                "operationId": "get_all_releases",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response Body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/versioning_service.GetReleaseListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/release/{project_id}/{version_id}": {
             "get": {
                 "security": [
                     {
@@ -16028,8 +16225,22 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id",
-                        "name": "id",
+                        "description": "version_id",
+                        "name": "version_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
                         "in": "path",
                         "required": true
                     }
@@ -16090,7 +16301,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/v1/release/{version_id}": {
             "put": {
                 "security": [
                     {
@@ -16112,24 +16325,31 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id",
-                        "name": "id",
+                        "description": "version_id",
+                        "name": "version_id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "UpdateReleaseRequestBody",
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
                         "name": "release",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/versioning_service.UpdateReleaseRequest"
+                            "$ref": "#/definitions/versioning_service.ApiUpdateReleaseRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Release data",
+                        "description": "Response Body",
                         "schema": {
                             "allOf": [
                                 {
@@ -16205,10 +16425,26 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id",
-                        "name": "id",
+                        "description": "version_id",
+                        "name": "version_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "release",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/versioning_service.ApiDeleteReleaseRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -17872,6 +18108,740 @@ const docTemplate = `{
                         "type": "string",
                         "description": "template-folder-id",
                         "name": "template-folder-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/template-note/share": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update share template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template"
+                ],
+                "summary": "Update share template",
+                "operationId": "update_share_template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "UpdateTokenReq",
+                        "name": "share",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/template_service.UpdateTokenReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "UpdateTokenRes data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/template_service.UpdateTokenRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create share template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template"
+                ],
+                "summary": "Create share template",
+                "operationId": "create_share_template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateTokenReq",
+                        "name": "share",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/template_service.CreateTokenReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CreateTokenRes data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/template_service.CreateTokenRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/template-note/users": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get List user template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template"
+                ],
+                "summary": "Get List user template",
+                "operationId": "get_list_user_template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "object-id",
+                        "name": "object-id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetListUserPermissionResBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/template_service.GetListUserPermissionRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update user template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template"
+                ],
+                "summary": "Update user template",
+                "operationId": "update_user_template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "UpdateUserPermissionReq",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/template_service.UpdateUserPermissionReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "UserPermission data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/template_service.UserPermission"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create user template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template"
+                ],
+                "summary": "Create user template",
+                "operationId": "create_user_template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateUserPermissionReq",
+                        "name": "template",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/template_service.CreateUserPermissionReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "UserPermission data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/template_service.UserPermission"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/template-note/users/{user-permission-id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get single user template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template"
+                ],
+                "summary": "Get single user template",
+                "operationId": "get_single_user_template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "user-permission-id",
+                        "name": "user-permission-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "UserPermissionBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/template_service.UserPermission"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete user template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template"
+                ],
+                "summary": "Delete user template",
+                "operationId": "delete_user_template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "user-permission-id",
+                        "name": "user-permission-id",
                         "in": "path",
                         "required": true
                     }
@@ -21194,6 +22164,23 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api_reference_service.ApiManyVersions": {
+            "type": "object",
+            "properties": {
+                "oldcommit_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "api_reference_service.ApiReference": {
             "type": "object",
             "properties": {
@@ -25523,6 +26510,81 @@ const docTemplate = `{
                 }
             }
         },
+        "template_service.CreateTokenReq": {
+            "type": "object",
+            "properties": {
+                "is_private": {
+                    "type": "boolean"
+                },
+                "object_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "template_service.CreateTokenRes": {
+            "type": "object",
+            "properties": {
+                "is_private": {
+                    "type": "boolean"
+                },
+                "object_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "template_service.CreateUserPermissionReq": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "is_deleted": {
+                    "type": "boolean"
+                },
+                "object_id": {
+                    "type": "string"
+                },
+                "photo_url": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "template_service.Folder": {
             "type": "object",
             "properties": {
@@ -25622,6 +26684,42 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/template_service.Template"
                     }
+                }
+            }
+        },
+        "template_service.GetListUserPermissionRes": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/template_service.UserPermission"
+                    }
+                }
+            }
+        },
+        "template_service.GetObjectTokenReq": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "template_service.GetObjectTokenRes": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "role": {
+                    "type": "string"
                 }
             }
         },
@@ -25891,6 +26989,169 @@ const docTemplate = `{
                 }
             }
         },
+        "template_service.UpdateTokenReq": {
+            "type": "object",
+            "properties": {
+                "is_private": {
+                    "type": "boolean"
+                },
+                "object_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "template_service.UpdateTokenRes": {
+            "type": "object",
+            "properties": {
+                "is_private": {
+                    "type": "boolean"
+                },
+                "object_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "template_service.UpdateUserPermissionReq": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_deleted": {
+                    "type": "boolean"
+                },
+                "object_id": {
+                    "type": "string"
+                },
+                "photo_url": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "template_service.UserPermission": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_deleted": {
+                    "type": "boolean"
+                },
+                "object_id": {
+                    "type": "string"
+                },
+                "photo_url": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "versioning_service.ApiCreateReleaseRequest": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "is_current": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "release_type": {
+                    "$ref": "#/definitions/versioning_service.ReleaseType"
+                }
+            }
+        },
+        "versioning_service.ApiDeleteReleaseRequest": {
+            "type": "object",
+            "properties": {
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "versioning_service.ApiSetCurrentReleaseRequest": {
+            "type": "object",
+            "properties": {
+                "project_id": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "versioning_service.ApiUpdateReleaseRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
         "versioning_service.CommitWithRelease": {
             "type": "object",
             "properties": {
@@ -25951,32 +27212,6 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
-                }
-            }
-        },
-        "versioning_service.CreateReleaseRequest": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "string"
-                },
-                "commit_id": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "is_current": {
-                    "type": "boolean"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "release_type": {
-                    "$ref": "#/definitions/versioning_service.ReleaseType"
                 }
             }
         },
@@ -26073,37 +27308,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "versioning_service.SetCurrentReleaseRequest": {
-            "type": "object",
-            "properties": {
-                "environment_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "version_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "versioning_service.UpdateReleaseRequest": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "project_id": {
                     "type": "string"
                 }
             }
