@@ -12,8 +12,10 @@ definitions:
       commit_id:
         type: string
       commit_info:
-        $ref: '#/definitions/api_reference_service.ApiReference_CommitInfo'
+        $ref: '#/definitions/api_reference_service.CommitInfo'
       desc:
+        type: string
+      environment_id:
         type: string
       external_url:
         type: string
@@ -31,18 +33,23 @@ definitions:
         type: string
       version_id:
         type: string
-      version_info:
-        $ref: '#/definitions/api_reference_service.ApiReference_VersionInfo'
     type: object
-  api_reference_service.ApiReference_CommitInfo:
+  api_reference_service.ApiRevertApiReferenceRequest:
+    properties:
+      commit_id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  api_reference_service.CommitInfo:
     properties:
       author_id:
-        type: string
-      commit_id:
         type: string
       commit_type:
         type: string
       created_at:
+        type: string
+      guid:
         type: string
       name:
         type: string
@@ -50,14 +57,42 @@ definitions:
         type: string
       updated_at:
         type: string
-      version_id:
+      version_ids:
+        items:
+          type: string
+        type: array
+      version_infos:
+        items:
+          $ref: '#/definitions/api_reference_service.VersionInfo'
+        type: array
+    type: object
+  api_reference_service.GetListApiReferenceChangesResponse:
+    properties:
+      api_references:
+        items:
+          $ref: '#/definitions/api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange'
+        type: array
+      count:
+        type: integer
+      guid:
         type: string
     type: object
-  api_reference_service.ApiReference_VersionInfo:
+  api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange:
+    properties:
+      commit_info:
+        $ref: '#/definitions/api_reference_service.CommitInfo'
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      version_infos:
+        additionalProperties:
+          $ref: '#/definitions/api_reference_service.VersionInfo'
+        type: object
+    type: object
+  api_reference_service.VersionInfo:
     properties:
       author_id:
-        type: string
-      commit_id:
         type: string
       created_at:
         type: string
@@ -71,22 +106,6 @@ definitions:
         type: string
       version_id:
         type: string
-    type: object
-  api_reference_service.ApiRevertApiReferenceRequest:
-    properties:
-      commit_id:
-        type: string
-      project_id:
-        type: string
-    type: object
-  api_reference_service.GetListApiReferenceChangesResponse:
-    properties:
-      api_references:
-        items:
-          $ref: '#/definitions/api_reference_service.ApiReference'
-        type: array
-      count:
-        type: integer
     type: object
   auth_service.AddSessionToIntegrationRequest:
     properties:
@@ -2769,39 +2788,13 @@ definitions:
         type: string
       folder_id:
         type: string
-      html:
-        type: string
+      json:
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
-      size:
-        type: string
-      tables:
-        items:
-          $ref: '#/definitions/template_service.CreateNoteReq_Table'
-        type: array
       title:
         type: string
       version_id:
-        type: string
-    type: object
-  template_service.CreateNoteReq_Table:
-    properties:
-      filter:
-        type: string
-      object_id:
-        type: string
-      relations:
-        items:
-          $ref: '#/definitions/template_service.CreateNoteReq_Table_Relation'
-        type: array
-      table_id:
-        type: string
-      type:
-        type: string
-    type: object
-  template_service.CreateNoteReq_Table_Relation:
-    properties:
-      relation_id:
         type: string
     type: object
   template_service.CreateTemplateReq:
@@ -2935,41 +2928,15 @@ definitions:
         type: string
       folder_id:
         type: string
-      html:
-        type: string
       id:
         type: string
+      json:
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
-      size:
-        type: string
-      tables:
-        items:
-          $ref: '#/definitions/template_service.Note_Table'
-        type: array
       title:
         type: string
       version_id:
-        type: string
-    type: object
-  template_service.Note_Table:
-    properties:
-      filter:
-        type: string
-      object_id:
-        type: string
-      relations:
-        items:
-          $ref: '#/definitions/template_service.Note_Table_Relation'
-        type: array
-      table_id:
-        type: string
-      type:
-        type: string
-    type: object
-  template_service.Note_Table_Relation:
-    properties:
-      relation_id:
         type: string
     type: object
   template_service.PdfBody:
@@ -3056,41 +3023,15 @@ definitions:
         type: string
       folder_id:
         type: string
-      html:
-        type: string
       id:
         type: string
+      json:
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
-      size:
-        type: string
-      tables:
-        items:
-          $ref: '#/definitions/template_service.UpdateNoteReq_Table'
-        type: array
       title:
         type: string
       version_id:
-        type: string
-    type: object
-  template_service.UpdateNoteReq_Table:
-    properties:
-      filter:
-        type: string
-      object_id:
-        type: string
-      relations:
-        items:
-          $ref: '#/definitions/template_service.UpdateNoteReq_Table_Relation'
-        type: array
-      table_id:
-        type: string
-      type:
-        type: string
-    type: object
-  template_service.UpdateNoteReq_Table_Relation:
-    properties:
-      relation_id:
         type: string
     type: object
   template_service.UpdateTemplateReq:
@@ -3263,16 +3204,20 @@ definitions:
     properties:
       environment_id:
         type: string
-      id:
-        type: string
       project_id:
+        type: string
+      version_id:
         type: string
     type: object
   versioning_service.UpdateReleaseRequest:
     properties:
       description:
         type: string
+      environment_id:
+        type: string
       id:
+        type: string
+      project_id:
         type: string
     type: object
 info:

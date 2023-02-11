@@ -21213,9 +21213,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "commit_info": {
-                    "$ref": "#/definitions/api_reference_service.ApiReference_CommitInfo"
+                    "$ref": "#/definitions/api_reference_service.CommitInfo"
                 },
                 "desc": {
+                    "type": "string"
+                },
+                "environment_id": {
                     "type": "string"
                 },
                 "external_url": {
@@ -21241,25 +21244,33 @@ const docTemplate = `{
                 },
                 "version_id": {
                     "type": "string"
-                },
-                "version_info": {
-                    "$ref": "#/definitions/api_reference_service.ApiReference_VersionInfo"
                 }
             }
         },
-        "api_reference_service.ApiReference_CommitInfo": {
+        "api_reference_service.ApiRevertApiReferenceRequest": {
+            "type": "object",
+            "properties": {
+                "commit_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "api_reference_service.CommitInfo": {
             "type": "object",
             "properties": {
                 "author_id": {
-                    "type": "string"
-                },
-                "commit_id": {
                     "type": "string"
                 },
                 "commit_type": {
                     "type": "string"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "guid": {
                     "type": "string"
                 },
                 "name": {
@@ -21271,18 +21282,61 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "string"
                 },
-                "version_id": {
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "version_infos": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api_reference_service.VersionInfo"
+                    }
+                }
+            }
+        },
+        "api_reference_service.GetListApiReferenceChangesResponse": {
+            "type": "object",
+            "properties": {
+                "api_references": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "guid": {
                     "type": "string"
                 }
             }
         },
-        "api_reference_service.ApiReference_VersionInfo": {
+        "api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange": {
+            "type": "object",
+            "properties": {
+                "commit_info": {
+                    "$ref": "#/definitions/api_reference_service.CommitInfo"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "version_infos": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/api_reference_service.VersionInfo"
+                    }
+                }
+            }
+        },
+        "api_reference_service.VersionInfo": {
             "type": "object",
             "properties": {
                 "author_id": {
-                    "type": "string"
-                },
-                "commit_id": {
                     "type": "string"
                 },
                 "created_at": {
@@ -21302,31 +21356,6 @@ const docTemplate = `{
                 },
                 "version_id": {
                     "type": "string"
-                }
-            }
-        },
-        "api_reference_service.ApiRevertApiReferenceRequest": {
-            "type": "object",
-            "properties": {
-                "commit_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "api_reference_service.GetListApiReferenceChangesResponse": {
-            "type": "object",
-            "properties": {
-                "api_references": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/api_reference_service.ApiReference"
-                    }
-                },
-                "count": {
-                    "type": "integer"
                 }
             }
         },
@@ -25417,56 +25446,16 @@ const docTemplate = `{
                 "folder_id": {
                     "type": "string"
                 },
-                "html": {
-                    "type": "string"
+                "json": {
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
-                },
-                "size": {
-                    "type": "string"
-                },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/template_service.CreateNoteReq_Table"
-                    }
                 },
                 "title": {
                     "type": "string"
                 },
                 "version_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "template_service.CreateNoteReq_Table": {
-            "type": "object",
-            "properties": {
-                "filter": {
-                    "type": "string"
-                },
-                "object_id": {
-                    "type": "string"
-                },
-                "relations": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/template_service.CreateNoteReq_Table_Relation"
-                    }
-                },
-                "table_id": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "template_service.CreateNoteReq_Table_Relation": {
-            "type": "object",
-            "properties": {
-                "relation_id": {
                     "type": "string"
                 }
             }
@@ -25673,59 +25662,19 @@ const docTemplate = `{
                 "folder_id": {
                     "type": "string"
                 },
-                "html": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
+                "json": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "project_id": {
                     "type": "string"
-                },
-                "size": {
-                    "type": "string"
-                },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/template_service.Note_Table"
-                    }
                 },
                 "title": {
                     "type": "string"
                 },
                 "version_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "template_service.Note_Table": {
-            "type": "object",
-            "properties": {
-                "filter": {
-                    "type": "string"
-                },
-                "object_id": {
-                    "type": "string"
-                },
-                "relations": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/template_service.Note_Table_Relation"
-                    }
-                },
-                "table_id": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "template_service.Note_Table_Relation": {
-            "type": "object",
-            "properties": {
-                "relation_id": {
                     "type": "string"
                 }
             }
@@ -25859,59 +25808,19 @@ const docTemplate = `{
                 "folder_id": {
                     "type": "string"
                 },
-                "html": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
+                "json": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "project_id": {
                     "type": "string"
-                },
-                "size": {
-                    "type": "string"
-                },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/template_service.UpdateNoteReq_Table"
-                    }
                 },
                 "title": {
                     "type": "string"
                 },
                 "version_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "template_service.UpdateNoteReq_Table": {
-            "type": "object",
-            "properties": {
-                "filter": {
-                    "type": "string"
-                },
-                "object_id": {
-                    "type": "string"
-                },
-                "relations": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/template_service.UpdateNoteReq_Table_Relation"
-                    }
-                },
-                "table_id": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "template_service.UpdateNoteReq_Table_Relation": {
-            "type": "object",
-            "properties": {
-                "relation_id": {
                     "type": "string"
                 }
             }
@@ -26174,10 +26083,10 @@ const docTemplate = `{
                 "environment_id": {
                     "type": "string"
                 },
-                "id": {
+                "project_id": {
                     "type": "string"
                 },
-                "project_id": {
+                "version_id": {
                     "type": "string"
                 }
             }
@@ -26188,7 +26097,13 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "id": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 }
             }

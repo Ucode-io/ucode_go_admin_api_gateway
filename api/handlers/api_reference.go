@@ -436,66 +436,66 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 		return
 	}
 
-	var (
-		commitIds  []string
-		versionIds []string
-	)
-	for _, item := range resp.GetApiReferences() {
-		commitIds = append(commitIds, item.GetCommitId())
-		versionIds = append(versionIds, item.GetVersionId())
-	}
+	// var (
+	// 	commitIds  []string
+	// 	versionIds []string
+	// )
+	// for _, item := range resp.GetApiReferences() {
+	// 	// commitIds = append(commitIds, item.GetCommitId())
+	// 	// versionIds = append(versionIds, item.GetVersionId())
+	// }
 
-	multipleCommitResp, err := services.VersioningService().Commit().GetMultipleCommitInfo(
-		c.Request.Context(),
-		&vcs.GetMultipleCommitInfoRequest{
-			CommitIds: commitIds,
-			ProjectId: project_id,
-		},
-	)
-	if err != nil {
-		h.log.Error("error getting multiple commit infos", logger.Error(err))
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// multipleCommitResp, err := services.VersioningService().Commit().GetMultipleCommitInfo(
+	// 	c.Request.Context(),
+	// 	&vcs.GetMultipleCommitInfoRequest{
+	// 		CommitIds: commitIds,
+	// 		ProjectId: project_id,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.log.Error("error getting multiple commit infos", logger.Error(err))
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	multipleVersionResp, err := services.VersioningService().Release().GetMultipleVersionInfo(
-		c.Request.Context(),
-		&vcs.GetMultipleVersionInfoRequest{
-			VersionIds: versionIds,
-			ProjectId:  project_id,
-		},
-	)
+	// multipleVersionResp, err := services.VersioningService().Release().GetMultipleVersionInfo(
+	// 	c.Request.Context(),
+	// 	&vcs.GetMultipleVersionInfoRequest{
+	// 		VersionIds: versionIds,
+	// 		ProjectId:  project_id,
+	// 	},
+	// )
 	if err != nil {
 		h.log.Error("error getting multiple version infos", logger.Error(err))
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	for _, item := range resp.GetApiReferences() {
-		commitInfo := multipleCommitResp.GetCommits()[item.GetCommitId()]
+	// for _, item := range resp.GetApiReferences() {
+	// 	commitInfo := multipleCommitResp.GetCommits()[item.GetCommitId()]
 
-		item.CommitInfo = &ars.ApiReference_CommitInfo{
-			CommitId:   commitInfo.GetCommitId(),
-			VersionId:  commitInfo.GetVersionId(),
-			ProjectId:  commitInfo.GetProjectId(),
-			AuthorId:   commitInfo.GetAuthorId(),
-			Name:       commitInfo.GetName(),
-			CommitType: commitInfo.GetCommitType(),
-			CreatedAt:  commitInfo.GetCreatedAt(),
-			UpdatedAt:  commitInfo.GetUpdatedAt(),
-		}
+	// 	item.CommitInfo = &ars.ApiReference_CommitInfo{
+	// 		CommitId:   commitInfo.GetCommitId(),
+	// 		VersionId:  commitInfo.GetVersionId(),
+	// 		ProjectId:  commitInfo.GetProjectId(),
+	// 		AuthorId:   commitInfo.GetAuthorId(),
+	// 		Name:       commitInfo.GetName(),
+	// 		CommitType: commitInfo.GetCommitType(),
+	// 		CreatedAt:  commitInfo.GetCreatedAt(),
+	// 		UpdatedAt:  commitInfo.GetUpdatedAt(),
+	// 	}
 
-		versionInfo := multipleVersionResp.GetVersionInfos()[item.GetVersionId()]
+	// 	versionInfo := multipleVersionResp.GetVersionInfos()[item.GetVersionId()]
 
-		item.VersionInfo = &ars.ApiReference_VersionInfo{
-			VersionId: versionInfo.GetVersionId(),
-			Version:   versionInfo.GetVersion(),
-			Desc:      versionInfo.GetDesc(),
-			IsCurrent: versionInfo.GetIsCurrent(),
-			CreatedAt: versionInfo.GetCreatedAt(),
-			UpdatedAt: versionInfo.GetUpdatedAt(),
-		}
-	}
+	// 	item.VersionInfo = &ars.ApiReference_VersionInfo{
+	// 		VersionId: versionInfo.GetVersionId(),
+	// 		Version:   versionInfo.GetVersion(),
+	// 		Desc:      versionInfo.GetDesc(),
+	// 		IsCurrent: versionInfo.GetIsCurrent(),
+	// 		CreatedAt: versionInfo.GetCreatedAt(),
+	// 		UpdatedAt: versionInfo.GetUpdatedAt(),
+	// 	}
+	// }
 
 	h.handleResponse(c, status_http.OK, resp)
 }

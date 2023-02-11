@@ -73,3 +73,16 @@ message GetMultipleCommitInfoResponse {
     map<string, CommitInfo> commits = 1;
     int64 count = 2;
 }
+
+// message CreateMultipleVersionWithOneCommitRequest {
+//     string project_id = 1;
+//     string environment_id = 2;
+//     string author_id = 3;
+//     string name = 4;
+//     string commit_type = 5;
+//     repeated string version_ids = 6;
+// }
+
+// message CreateMultipleVersionWithOneCommitResponse {
+//     string commit_id = 1;
+// }

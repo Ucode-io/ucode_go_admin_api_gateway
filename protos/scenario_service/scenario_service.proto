@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package  scenario_service;
+
+option go_package = "genproto/scenario_service";
+
+import "common.proto";
+import "dag.proto";
+import "dag_step.proto";
