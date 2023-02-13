@@ -28,6 +28,42 @@ service ResourceService {
     rpc GetListResourceEnvironment(GetListResourceEnvironmentReq) returns (GetListResourceEnvironmentRes) {}
     rpc GetListConfiguredResourceEnvironment(GetListConfiguredResourceEnvironmentReq) returns (GetListConfiguredResourceEnvironmentRes) {}
     rpc GetResourceByEnvID(GetResourceByEnvIDRequest) returns (GetResourceByEnvIDResponse) {}
+    rpc GetServiceResources(GetServiceResourcesReq) returns (GetServiceResourcesRes) {}
+    rpc SetDefaultResource(SetDefaultResourceReq) returns(SetDefaultResourceRes) {}
+}
+
+message SetDefaultResourceReq {
+    string project_id = 1;
+    string environment_id = 2;
+    string resource_id = 3;
+    ServiceType service_type = 4;
+}
+
+message SetDefaultResourceRes {
+    string project_id = 1;
+    string environment_id = 2;
+    string resource_id = 3;
+    ServiceType service_type = 4;
+}
+
+message GetServiceResourcesReq {
+    string project_id = 1;
+    string environment_id = 2;
+}
+
+message GetServiceResourcesRes {
+    message ServiceTypeResources {
+        message ServiceResources {
+            string resource_id = 1;
+            bool is_configured = 2;
+            bool default = 3;
+            string title = 4;
+            ResourceType resource_type = 5;
+        }
+        ServiceType service_type = 1;
+        repeated ServiceResources resource = 2;
+    }
+    repeated ServiceTypeResources service_resources = 1;
 }
 
 message GetDefaultResourceEnvironmentReq {
