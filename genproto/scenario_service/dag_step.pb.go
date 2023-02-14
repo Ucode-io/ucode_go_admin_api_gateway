@@ -79,15 +79,15 @@ type DAGStep struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id              string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Slug            string             `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug"`
-	ParentId        string             `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	DagId           string             `protobuf:"bytes,4,opt,name=dag_id,json=dagId,proto3" json:"dag_id"`
-	Type            DAG_STEP_TYPE      `protobuf:"varint,5,opt,name=type,proto3,enum=scenario_service.DAG_STEP_TYPE" json:"type"`
-	ConnectInfo     *structpb.Struct   `protobuf:"bytes,6,opt,name=connect_info,json=connectInfo,proto3" json:"connect_info"`
-	RequestInfo     *structpb.Struct   `protobuf:"bytes,7,opt,name=request_info,json=requestInfo,proto3" json:"request_info"`
-	ConditionAction []*structpb.Struct `protobuf:"bytes,8,rep,name=condition_action,json=conditionAction,proto3" json:"condition_action"`
-	IsParallel      bool               `protobuf:"varint,9,opt,name=is_parallel,json=isParallel,proto3" json:"is_parallel"`
+	Id              string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Slug            string             `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
+	ParentId        string             `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	DagId           string             `protobuf:"bytes,4,opt,name=dag_id,json=dagId,proto3" json:"dag_id,omitempty"`
+	Type            DAG_STEP_TYPE      `protobuf:"varint,5,opt,name=type,proto3,enum=scenario_service.DAG_STEP_TYPE" json:"type,omitempty"`
+	ConnectInfo     *structpb.Struct   `protobuf:"bytes,6,opt,name=connect_info,json=connectInfo,proto3" json:"connect_info,omitempty"`
+	RequestInfo     *structpb.Struct   `protobuf:"bytes,7,opt,name=request_info,json=requestInfo,proto3" json:"request_info,omitempty"`
+	ConditionAction []*structpb.Struct `protobuf:"bytes,8,rep,name=condition_action,json=conditionAction,proto3" json:"condition_action,omitempty"`
+	IsParallel      bool               `protobuf:"varint,9,opt,name=is_parallel,json=isParallel,proto3" json:"is_parallel,omitempty"`
 }
 
 func (x *DAGStep) Reset() {
@@ -190,14 +190,14 @@ type CreateDAGStepRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Slug            string             `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug"`
-	ParentId        string             `protobuf:"bytes,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	DagId           string             `protobuf:"bytes,3,opt,name=dag_id,json=dagId,proto3" json:"dag_id"`
-	Type            DAG_STEP_TYPE      `protobuf:"varint,4,opt,name=type,proto3,enum=scenario_service.DAG_STEP_TYPE" json:"type"`
-	ConnectInfo     *structpb.Struct   `protobuf:"bytes,5,opt,name=connect_info,json=connectInfo,proto3" json:"connect_info"`
-	RequestInfo     *structpb.Struct   `protobuf:"bytes,6,opt,name=request_info,json=requestInfo,proto3" json:"request_info"`
-	ConditionAction []*structpb.Struct `protobuf:"bytes,7,rep,name=condition_action,json=conditionAction,proto3" json:"condition_action"`
-	IsParallel      bool               `protobuf:"varint,8,opt,name=is_parallel,json=isParallel,proto3" json:"is_parallel"`
+	Slug            string             `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
+	ParentId        string             `protobuf:"bytes,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	DagId           string             `protobuf:"bytes,3,opt,name=dag_id,json=dagId,proto3" json:"dag_id,omitempty"`
+	Type            DAG_STEP_TYPE      `protobuf:"varint,4,opt,name=type,proto3,enum=scenario_service.DAG_STEP_TYPE" json:"type,omitempty"`
+	ConnectInfo     *structpb.Struct   `protobuf:"bytes,5,opt,name=connect_info,json=connectInfo,proto3" json:"connect_info,omitempty"`
+	RequestInfo     *structpb.Struct   `protobuf:"bytes,6,opt,name=request_info,json=requestInfo,proto3" json:"request_info,omitempty"`
+	ConditionAction []*structpb.Struct `protobuf:"bytes,7,rep,name=condition_action,json=conditionAction,proto3" json:"condition_action,omitempty"`
+	IsParallel      bool               `protobuf:"varint,8,opt,name=is_parallel,json=isParallel,proto3" json:"is_parallel,omitempty"`
 }
 
 func (x *CreateDAGStepRequest) Reset() {
@@ -293,7 +293,7 @@ type GetDAGStepRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *GetDAGStepRequest) Reset() {
@@ -340,7 +340,7 @@ type DeleteDAGStepRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *DeleteDAGStepRequest) Reset() {
@@ -387,7 +387,7 @@ type DAGStepList struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DagSteps []*DAGStep `protobuf:"bytes,1,rep,name=dag_steps,json=dagSteps,proto3" json:"dag_steps"`
+	DagSteps []*DAGStep `protobuf:"bytes,1,rep,name=dag_steps,json=dagSteps,proto3" json:"dag_steps,omitempty"`
 }
 
 func (x *DAGStepList) Reset() {
@@ -434,7 +434,7 @@ type UpdateDAGStepRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DagStep *DAGStep `protobuf:"bytes,1,opt,name=dag_step,json=dagStep,proto3" json:"dag_step"`
+	DagStep *DAGStep `protobuf:"bytes,1,opt,name=dag_step,json=dagStep,proto3" json:"dag_step,omitempty"`
 }
 
 func (x *UpdateDAGStepRequest) Reset() {
@@ -481,7 +481,7 @@ type GetAllDAGStepRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Filters *Filters `protobuf:"bytes,1,opt,name=filters,proto3" json:"filters"`
+	Filters *Filters `protobuf:"bytes,1,opt,name=filters,proto3" json:"filters,omitempty"`
 }
 
 func (x *GetAllDAGStepRequest) Reset() {

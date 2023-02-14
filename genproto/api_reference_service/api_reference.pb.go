@@ -27,21 +27,21 @@ type CreateApiReferenceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name             string           `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`
-	AdditionalUrl    string           `protobuf:"bytes,2,opt,name=additional_url,json=additionalUrl,proto3" json:"additional_url"`
-	Title            string           `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
-	Desc             string           `protobuf:"bytes,4,opt,name=desc,proto3" json:"desc"`
-	Method           string           `protobuf:"bytes,5,opt,name=method,proto3" json:"method"`
-	CategoryId       string           `protobuf:"bytes,6,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
-	ExternalUrl      string           `protobuf:"bytes,7,opt,name=external_url,json=externalUrl,proto3" json:"external_url"`
-	Authentification bool             `protobuf:"varint,8,opt,name=authentification,proto3" json:"authentification"`
-	NewWindow        bool             `protobuf:"varint,9,opt,name=new_window,json=newWindow,proto3" json:"new_window"`
-	Attributes       *structpb.Struct `protobuf:"bytes,10,opt,name=attributes,proto3" json:"attributes"`
-	ProjectId        string           `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	CommitId         string           `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId        string           `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	EnvironmentId    string           `protobuf:"bytes,14,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	CommitInfo       *CommitInfo      `protobuf:"bytes,15,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
+	Name             string           `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	AdditionalUrl    string           `protobuf:"bytes,2,opt,name=additional_url,json=additionalUrl,proto3" json:"additional_url,omitempty"`
+	Title            string           `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Desc             string           `protobuf:"bytes,4,opt,name=desc,proto3" json:"desc,omitempty"`
+	Method           string           `protobuf:"bytes,5,opt,name=method,proto3" json:"method,omitempty"`
+	CategoryId       string           `protobuf:"bytes,6,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
+	ExternalUrl      string           `protobuf:"bytes,7,opt,name=external_url,json=externalUrl,proto3" json:"external_url,omitempty"`
+	Authentification bool             `protobuf:"varint,8,opt,name=authentification,proto3" json:"authentification,omitempty"`
+	NewWindow        bool             `protobuf:"varint,9,opt,name=new_window,json=newWindow,proto3" json:"new_window,omitempty"`
+	Attributes       *structpb.Struct `protobuf:"bytes,10,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	ProjectId        string           `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CommitId         string           `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId        string           `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	EnvironmentId    string           `protobuf:"bytes,14,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	CommitInfo       *CommitInfo      `protobuf:"bytes,15,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
 }
 
 func (x *CreateApiReferenceRequest) Reset() {
@@ -186,22 +186,22 @@ type ApiReference struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid             string           `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
-	Name             string           `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
-	AdditionalUrl    string           `protobuf:"bytes,3,opt,name=additional_url,json=additionalUrl,proto3" json:"additional_url"`
-	Title            string           `protobuf:"bytes,4,opt,name=title,proto3" json:"title"`
-	Desc             string           `protobuf:"bytes,5,opt,name=desc,proto3" json:"desc"`
-	Method           string           `protobuf:"bytes,6,opt,name=method,proto3" json:"method"`
-	CategoryId       string           `protobuf:"bytes,7,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
-	ExternalUrl      string           `protobuf:"bytes,8,opt,name=external_url,json=externalUrl,proto3" json:"external_url"`
-	Authentification bool             `protobuf:"varint,9,opt,name=authentification,proto3" json:"authentification"`
-	NewWindow        bool             `protobuf:"varint,10,opt,name=new_window,json=newWindow,proto3" json:"new_window"`
-	Attributes       *structpb.Struct `protobuf:"bytes,11,opt,name=attributes,proto3" json:"attributes"`
-	ProjectId        string           `protobuf:"bytes,12,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId        string           `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	CommitId         string           `protobuf:"bytes,14,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	CommitInfo       *CommitInfo      `protobuf:"bytes,15,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
-	EnvironmentId    string           `protobuf:"bytes,16,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	Guid             string           `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
+	Name             string           `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	AdditionalUrl    string           `protobuf:"bytes,3,opt,name=additional_url,json=additionalUrl,proto3" json:"additional_url,omitempty"`
+	Title            string           `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	Desc             string           `protobuf:"bytes,5,opt,name=desc,proto3" json:"desc,omitempty"`
+	Method           string           `protobuf:"bytes,6,opt,name=method,proto3" json:"method,omitempty"`
+	CategoryId       string           `protobuf:"bytes,7,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
+	ExternalUrl      string           `protobuf:"bytes,8,opt,name=external_url,json=externalUrl,proto3" json:"external_url,omitempty"`
+	Authentification bool             `protobuf:"varint,9,opt,name=authentification,proto3" json:"authentification,omitempty"`
+	NewWindow        bool             `protobuf:"varint,10,opt,name=new_window,json=newWindow,proto3" json:"new_window,omitempty"`
+	Attributes       *structpb.Struct `protobuf:"bytes,11,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	ProjectId        string           `protobuf:"bytes,12,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId        string           `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	CommitId         string           `protobuf:"bytes,14,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	CommitInfo       *CommitInfo      `protobuf:"bytes,15,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
+	EnvironmentId    string           `protobuf:"bytes,16,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
 }
 
 func (x *ApiReference) Reset() {
@@ -353,9 +353,9 @@ type GetApiReferenceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
-	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	CommitId  string `protobuf:"bytes,3,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
+	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	CommitId  string `protobuf:"bytes,3,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
 }
 
 func (x *GetApiReferenceRequest) Reset() {
@@ -416,12 +416,12 @@ type GetListApiReferenceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit      int64  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
-	Offset     int64  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
-	CategoryId string `protobuf:"bytes,3,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
-	ProjectId  string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId  string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	CommitId   string `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	Limit      int64  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset     int64  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	CategoryId string `protobuf:"bytes,3,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
+	ProjectId  string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId  string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	CommitId   string `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
 }
 
 func (x *GetListApiReferenceRequest) Reset() {
@@ -503,8 +503,8 @@ type GetListApiReferenceResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count         int64           `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
-	ApiReferences []*ApiReference `protobuf:"bytes,2,rep,name=api_references,json=apiReferences,proto3" json:"api_references"`
+	Count         int64           `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	ApiReferences []*ApiReference `protobuf:"bytes,2,rep,name=api_references,json=apiReferences,proto3" json:"api_references,omitempty"`
 }
 
 func (x *GetListApiReferenceResponse) Reset() {
@@ -558,8 +558,8 @@ type DeleteApiReferenceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
-	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
+	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *DeleteApiReferenceRequest) Reset() {
@@ -613,10 +613,10 @@ type GetListApiReferenceChangesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Limit     int64  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit"`
-	Offset    int64  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset"`
+	Guid      string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Limit     int64  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset    int64  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
 }
 
 func (x *GetListApiReferenceChangesRequest) Reset() {
@@ -684,9 +684,9 @@ type GetListApiReferenceChangesResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count         int64                                                    `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
-	Guid          string                                                   `protobuf:"bytes,2,opt,name=guid,proto3" json:"guid"`
-	ApiReferences []*GetListApiReferenceChangesResponse_ApiReferenceChange `protobuf:"bytes,3,rep,name=api_references,json=apiReferences,proto3" json:"api_references"`
+	Count         int64                                                    `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	Guid          string                                                   `protobuf:"bytes,2,opt,name=guid,proto3" json:"guid,omitempty"`
+	ApiReferences []*GetListApiReferenceChangesResponse_ApiReferenceChange `protobuf:"bytes,3,rep,name=api_references,json=apiReferences,proto3" json:"api_references,omitempty"`
 }
 
 func (x *GetListApiReferenceChangesResponse) Reset() {
@@ -747,13 +747,13 @@ type RevertApiReferenceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	NewcommitId   string      `protobuf:"bytes,1,opt,name=newcommit_id,json=newcommitId,proto3" json:"newcommit_id"`
-	VersionId     string      `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	Guid          string      `protobuf:"bytes,3,opt,name=guid,proto3" json:"guid"`
-	OldcommitId   string      `protobuf:"bytes,4,opt,name=oldcommit_id,json=oldcommitId,proto3" json:"oldcommit_id"`
-	ProjectId     string      `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	EnvironmentId string      `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	CommitInfo    *CommitInfo `protobuf:"bytes,7,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
+	NewcommitId   string      `protobuf:"bytes,1,opt,name=newcommit_id,json=newcommitId,proto3" json:"newcommit_id,omitempty"`
+	VersionId     string      `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	Guid          string      `protobuf:"bytes,3,opt,name=guid,proto3" json:"guid,omitempty"`
+	OldcommitId   string      `protobuf:"bytes,4,opt,name=oldcommit_id,json=oldcommitId,proto3" json:"oldcommit_id,omitempty"`
+	ProjectId     string      `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	EnvironmentId string      `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	CommitInfo    *CommitInfo `protobuf:"bytes,7,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
 }
 
 func (x *RevertApiReferenceRequest) Reset() {
@@ -842,8 +842,8 @@ type ApiRevertApiReferenceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommitId  string `protobuf:"bytes,1,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	CommitId  string `protobuf:"bytes,1,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *ApiRevertApiReferenceRequest) Reset() {
@@ -897,7 +897,7 @@ type CreateManyApiReferenceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ApiReferences []*ApiReference `protobuf:"bytes,1,rep,name=api_references,json=apiReferences,proto3" json:"api_references"`
+	ApiReferences []*ApiReference `protobuf:"bytes,1,rep,name=api_references,json=apiReferences,proto3" json:"api_references,omitempty"`
 }
 
 func (x *CreateManyApiReferenceRequest) Reset() {
@@ -944,14 +944,14 @@ type ManyVersions struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	VersionIds    []string    `protobuf:"bytes,1,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
-	NewcommitId   string      `protobuf:"bytes,2,opt,name=newcommit_id,json=newcommitId,proto3" json:"newcommit_id"`
-	ProjectId     string      `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	EnvironmentId string      `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	Guid          string      `protobuf:"bytes,5,opt,name=guid,proto3" json:"guid"`
-	OldcommitId   string      `protobuf:"bytes,6,opt,name=oldcommit_id,json=oldcommitId,proto3" json:"oldcommit_id"`
-	CommitInfo    *CommitInfo `protobuf:"bytes,7,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
-	VersionId     string      `protobuf:"bytes,8,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	VersionIds    []string    `protobuf:"bytes,1,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
+	NewcommitId   string      `protobuf:"bytes,2,opt,name=newcommit_id,json=newcommitId,proto3" json:"newcommit_id,omitempty"`
+	ProjectId     string      `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	EnvironmentId string      `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	Guid          string      `protobuf:"bytes,5,opt,name=guid,proto3" json:"guid,omitempty"`
+	OldcommitId   string      `protobuf:"bytes,6,opt,name=oldcommit_id,json=oldcommitId,proto3" json:"oldcommit_id,omitempty"`
+	CommitInfo    *CommitInfo `protobuf:"bytes,7,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
+	VersionId     string      `protobuf:"bytes,8,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *ManyVersions) Reset() {
@@ -1047,9 +1047,9 @@ type ApiManyVersions struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	VersionIds  []string `protobuf:"bytes,1,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
-	ProjectId   string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	OldcommitId string   `protobuf:"bytes,3,opt,name=oldcommit_id,json=oldcommitId,proto3" json:"oldcommit_id"`
+	VersionIds  []string `protobuf:"bytes,1,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
+	ProjectId   string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	OldcommitId string   `protobuf:"bytes,3,opt,name=oldcommit_id,json=oldcommitId,proto3" json:"oldcommit_id,omitempty"`
 }
 
 func (x *ApiManyVersions) Reset() {
@@ -1110,10 +1110,10 @@ type GetListApiReferenceChangesResponse_ApiReferenceChange struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommitInfo   *CommitInfo             `protobuf:"bytes,1,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
-	VersionInfos map[string]*VersionInfo `protobuf:"bytes,2,rep,name=version_infos,json=versionInfos,proto3" json:"version_infos" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	CreatedAt    string                  `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UpdatedAt    string                  `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	CommitInfo   *CommitInfo             `protobuf:"bytes,1,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
+	VersionInfos map[string]*VersionInfo `protobuf:"bytes,2,rep,name=version_infos,json=versionInfos,proto3" json:"version_infos,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	CreatedAt    string                  `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt    string                  `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 }
 
 func (x *GetListApiReferenceChangesResponse_ApiReferenceChange) Reset() {

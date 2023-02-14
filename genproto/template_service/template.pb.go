@@ -27,9 +27,9 @@ type GetTemplateFolderObjectCommitsReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetTemplateFolderObjectCommitsReq) Reset() {
@@ -90,9 +90,9 @@ type GetTemplateObjectCommitsReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetTemplateObjectCommitsReq) Reset() {
@@ -153,9 +153,9 @@ type DeleteTemplateReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *DeleteTemplateReq) Reset() {
@@ -216,15 +216,15 @@ type UpdateTemplateReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string                     `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Title     string                     `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
-	Html      string                     `protobuf:"bytes,4,opt,name=html,proto3" json:"html"`
-	FolderId  string                     `protobuf:"bytes,5,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	Size      string                     `protobuf:"bytes,6,opt,name=size,proto3" json:"size"`
-	Tables    []*UpdateTemplateReq_Table `protobuf:"bytes,7,rep,name=tables,proto3" json:"tables"`
-	CommitId  string                     `protobuf:"bytes,8,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId string                     `protobuf:"bytes,9,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id        string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string                     `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string                     `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Html      string                     `protobuf:"bytes,4,opt,name=html,proto3" json:"html,omitempty"`
+	FolderId  string                     `protobuf:"bytes,5,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	Size      string                     `protobuf:"bytes,6,opt,name=size,proto3" json:"size,omitempty"`
+	Tables    []*UpdateTemplateReq_Table `protobuf:"bytes,7,rep,name=tables,proto3" json:"tables,omitempty"`
+	CommitId  string                     `protobuf:"bytes,8,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId string                     `protobuf:"bytes,9,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *UpdateTemplateReq) Reset() {
@@ -327,9 +327,9 @@ type GetSingleTemplateReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetSingleTemplateReq) Reset() {
@@ -390,11 +390,11 @@ type GetListTemplateReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	FolderId  string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	Limit     int32  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit"`
-	Offset    int32  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset"`
-	VersionId string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	FolderId  string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	Limit     int32  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset    int32  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
+	VersionId string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetListTemplateReq) Reset() {
@@ -469,8 +469,8 @@ type GetListTemplateRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Templates []*Template `protobuf:"bytes,1,rep,name=templates,proto3" json:"templates"`
-	Count     int32       `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Templates []*Template `protobuf:"bytes,1,rep,name=templates,proto3" json:"templates,omitempty"`
+	Count     int32       `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetListTemplateRes) Reset() {
@@ -524,14 +524,14 @@ type CreateTemplateReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string                     `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Title     string                     `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
-	Html      string                     `protobuf:"bytes,3,opt,name=html,proto3" json:"html"`
-	FolderId  string                     `protobuf:"bytes,4,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	Size      string                     `protobuf:"bytes,5,opt,name=size,proto3" json:"size"`
-	Tables    []*CreateTemplateReq_Table `protobuf:"bytes,6,rep,name=tables,proto3" json:"tables"`
-	CommitId  string                     `protobuf:"bytes,7,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId string                     `protobuf:"bytes,8,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string                     `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string                     `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Html      string                     `protobuf:"bytes,3,opt,name=html,proto3" json:"html,omitempty"`
+	FolderId  string                     `protobuf:"bytes,4,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	Size      string                     `protobuf:"bytes,5,opt,name=size,proto3" json:"size,omitempty"`
+	Tables    []*CreateTemplateReq_Table `protobuf:"bytes,6,rep,name=tables,proto3" json:"tables,omitempty"`
+	CommitId  string                     `protobuf:"bytes,7,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId string                     `protobuf:"bytes,8,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *CreateTemplateReq) Reset() {
@@ -627,15 +627,15 @@ type Template struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string            `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string            `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Title     string            `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
-	Html      string            `protobuf:"bytes,4,opt,name=html,proto3" json:"html"`
-	FolderId  string            `protobuf:"bytes,5,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	Size      string            `protobuf:"bytes,6,opt,name=size,proto3" json:"size"`
-	Tables    []*Template_Table `protobuf:"bytes,7,rep,name=tables,proto3" json:"tables"`
-	CommitId  string            `protobuf:"bytes,8,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId string            `protobuf:"bytes,9,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id        string            `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string            `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string            `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Html      string            `protobuf:"bytes,4,opt,name=html,proto3" json:"html,omitempty"`
+	FolderId  string            `protobuf:"bytes,5,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	Size      string            `protobuf:"bytes,6,opt,name=size,proto3" json:"size,omitempty"`
+	Tables    []*Template_Table `protobuf:"bytes,7,rep,name=tables,proto3" json:"tables,omitempty"`
+	CommitId  string            `protobuf:"bytes,8,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId string            `protobuf:"bytes,9,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *Template) Reset() {
@@ -738,11 +738,11 @@ type CreateFolderReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
-	ParentId  string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	CommitId  string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	ParentId  string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	CommitId  string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *CreateFolderReq) Reset() {
@@ -817,12 +817,12 @@ type Folder struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Title     string `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
-	ParentId  string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	CommitId  string `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId string `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	ParentId  string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	CommitId  string `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId string `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *Folder) Reset() {
@@ -904,10 +904,10 @@ type GetListFolderReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
-	Offset    int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset"`
-	VersionId string `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset    int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
+	VersionId string `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetListFolderReq) Reset() {
@@ -975,8 +975,8 @@ type GetListFolderRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Folders []*Folder `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders"`
-	Count   int32     `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Folders []*Folder `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders,omitempty"`
+	Count   int32     `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetListFolderRes) Reset() {
@@ -1030,9 +1030,9 @@ type GetSingleFolderReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetSingleFolderReq) Reset() {
@@ -1093,8 +1093,8 @@ type GetSingleFolderRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Folders []*Folder `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders"`
-	Count   int32     `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Folders []*Folder `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders,omitempty"`
+	Count   int32     `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetSingleFolderRes) Reset() {
@@ -1148,12 +1148,12 @@ type UpdateFolderReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Title     string `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
-	ParentId  string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	CommitId  string `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId string `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	ParentId  string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	CommitId  string `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId string `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *UpdateFolderReq) Reset() {
@@ -1235,9 +1235,9 @@ type DeleteFolderReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *DeleteFolderReq) Reset() {
@@ -1298,9 +1298,9 @@ type HtmlBody struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Html      string           `protobuf:"bytes,1,opt,name=html,proto3" json:"html"`
-	Data      *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
-	ProjectId string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Html      string           `protobuf:"bytes,1,opt,name=html,proto3" json:"html,omitempty"`
+	Data      *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	ProjectId string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *HtmlBody) Reset() {
@@ -1361,7 +1361,7 @@ type PdfBody struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Link string `protobuf:"bytes,1,opt,name=link,proto3" json:"link"`
+	Link string `protobuf:"bytes,1,opt,name=link,proto3" json:"link,omitempty"`
 }
 
 func (x *PdfBody) Reset() {
@@ -1408,11 +1408,11 @@ type UpdateTemplateReq_Table struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableId   string                              `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id"`
-	Type      string                              `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
-	ObjectId  string                              `protobuf:"bytes,3,opt,name=object_id,json=objectId,proto3" json:"object_id"`
-	Filter    string                              `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter"`
-	Relations []*UpdateTemplateReq_Table_Relation `protobuf:"bytes,5,rep,name=relations,proto3" json:"relations"`
+	TableId   string                              `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	Type      string                              `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	ObjectId  string                              `protobuf:"bytes,3,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	Filter    string                              `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
+	Relations []*UpdateTemplateReq_Table_Relation `protobuf:"bytes,5,rep,name=relations,proto3" json:"relations,omitempty"`
 }
 
 func (x *UpdateTemplateReq_Table) Reset() {
@@ -1487,7 +1487,7 @@ type UpdateTemplateReq_Table_Relation struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RelationId string `protobuf:"bytes,1,opt,name=relation_id,json=relationId,proto3" json:"relation_id"`
+	RelationId string `protobuf:"bytes,1,opt,name=relation_id,json=relationId,proto3" json:"relation_id,omitempty"`
 }
 
 func (x *UpdateTemplateReq_Table_Relation) Reset() {
@@ -1534,11 +1534,11 @@ type CreateTemplateReq_Table struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableId   string                              `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id"`
-	Type      string                              `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
-	ObjectId  string                              `protobuf:"bytes,3,opt,name=object_id,json=objectId,proto3" json:"object_id"`
-	Filter    string                              `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter"`
-	Relations []*CreateTemplateReq_Table_Relation `protobuf:"bytes,5,rep,name=relations,proto3" json:"relations"`
+	TableId   string                              `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	Type      string                              `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	ObjectId  string                              `protobuf:"bytes,3,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	Filter    string                              `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
+	Relations []*CreateTemplateReq_Table_Relation `protobuf:"bytes,5,rep,name=relations,proto3" json:"relations,omitempty"`
 }
 
 func (x *CreateTemplateReq_Table) Reset() {
@@ -1613,7 +1613,7 @@ type CreateTemplateReq_Table_Relation struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RelationId string `protobuf:"bytes,1,opt,name=relation_id,json=relationId,proto3" json:"relation_id"`
+	RelationId string `protobuf:"bytes,1,opt,name=relation_id,json=relationId,proto3" json:"relation_id,omitempty"`
 }
 
 func (x *CreateTemplateReq_Table_Relation) Reset() {
@@ -1660,11 +1660,11 @@ type Template_Table struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableId   string                     `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id"`
-	Type      string                     `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
-	ObjectId  string                     `protobuf:"bytes,3,opt,name=object_id,json=objectId,proto3" json:"object_id"`
-	Filter    string                     `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter"`
-	Relations []*Template_Table_Relation `protobuf:"bytes,5,rep,name=relations,proto3" json:"relations"`
+	TableId   string                     `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	Type      string                     `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	ObjectId  string                     `protobuf:"bytes,3,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	Filter    string                     `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
+	Relations []*Template_Table_Relation `protobuf:"bytes,5,rep,name=relations,proto3" json:"relations,omitempty"`
 }
 
 func (x *Template_Table) Reset() {
@@ -1739,7 +1739,7 @@ type Template_Table_Relation struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RelationId string `protobuf:"bytes,1,opt,name=relation_id,json=relationId,proto3" json:"relation_id"`
+	RelationId string `protobuf:"bytes,1,opt,name=relation_id,json=relationId,proto3" json:"relation_id,omitempty"`
 }
 
 func (x *Template_Table_Relation) Reset() {

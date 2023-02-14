@@ -26,11 +26,11 @@ type CreateTokenReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ObjectId  string `protobuf:"bytes,1,opt,name=object_id,json=objectId,proto3" json:"object_id"`
-	Type      string `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Role      string `protobuf:"bytes,4,opt,name=role,proto3" json:"role"`
-	IsPrivate bool   `protobuf:"varint,5,opt,name=is_private,json=isPrivate,proto3" json:"is_private"`
+	ObjectId  string `protobuf:"bytes,1,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	Type      string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Role      string `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
+	IsPrivate bool   `protobuf:"varint,5,opt,name=is_private,json=isPrivate,proto3" json:"is_private,omitempty"`
 }
 
 func (x *CreateTokenReq) Reset() {
@@ -105,12 +105,12 @@ type CreateTokenRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Token     string `protobuf:"bytes,1,opt,name=token,proto3" json:"token"`
-	ObjectId  string `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id"`
-	Type      string `protobuf:"bytes,3,opt,name=type,proto3" json:"type"`
-	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Role      string `protobuf:"bytes,5,opt,name=role,proto3" json:"role"`
-	IsPrivate bool   `protobuf:"varint,6,opt,name=is_private,json=isPrivate,proto3" json:"is_private"`
+	Token     string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	ObjectId  string `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	Type      string `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Role      string `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
+	IsPrivate bool   `protobuf:"varint,6,opt,name=is_private,json=isPrivate,proto3" json:"is_private,omitempty"`
 }
 
 func (x *CreateTokenRes) Reset() {
@@ -192,11 +192,11 @@ type UpdateTokenReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ObjectId  string `protobuf:"bytes,1,opt,name=object_id,json=objectId,proto3" json:"object_id"`
-	Type      string `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Role      string `protobuf:"bytes,4,opt,name=role,proto3" json:"role"`
-	IsPrivate bool   `protobuf:"varint,5,opt,name=is_private,json=isPrivate,proto3" json:"is_private"`
+	ObjectId  string `protobuf:"bytes,1,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	Type      string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Role      string `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
+	IsPrivate bool   `protobuf:"varint,5,opt,name=is_private,json=isPrivate,proto3" json:"is_private,omitempty"`
 }
 
 func (x *UpdateTokenReq) Reset() {
@@ -271,12 +271,12 @@ type UpdateTokenRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Token     string `protobuf:"bytes,1,opt,name=token,proto3" json:"token"`
-	ObjectId  string `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id"`
-	Type      string `protobuf:"bytes,3,opt,name=type,proto3" json:"type"`
-	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Role      string `protobuf:"bytes,5,opt,name=role,proto3" json:"role"`
-	IsPrivate bool   `protobuf:"varint,6,opt,name=is_private,json=isPrivate,proto3" json:"is_private"`
+	Token     string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	ObjectId  string `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	Type      string `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Role      string `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
+	IsPrivate bool   `protobuf:"varint,6,opt,name=is_private,json=isPrivate,proto3" json:"is_private,omitempty"`
 }
 
 func (x *UpdateTokenRes) Reset() {
@@ -358,8 +358,8 @@ type GetObjectTokenReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Token     string `protobuf:"bytes,1,opt,name=token,proto3" json:"token"`
-	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Token     string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetObjectTokenReq) Reset() {
@@ -413,8 +413,8 @@ type GetObjectTokenRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Data *structpb.Struct `protobuf:"bytes,1,opt,name=data,proto3" json:"data"`
-	Role string           `protobuf:"bytes,2,opt,name=role,proto3" json:"role"`
+	Data *structpb.Struct `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	Role string           `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
 }
 
 func (x *GetObjectTokenRes) Reset() {

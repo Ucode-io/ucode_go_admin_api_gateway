@@ -27,9 +27,9 @@ type GetNoteObjectCommitsReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetNoteObjectCommitsReq) Reset() {
@@ -90,9 +90,9 @@ type GetNoteFolderObjectCommitsReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetNoteFolderObjectCommitsReq) Reset() {
@@ -153,9 +153,9 @@ type DeleteNoteReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *DeleteNoteReq) Reset() {
@@ -216,13 +216,13 @@ type UpdateNoteReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string           `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Title     string           `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
-	Json      *structpb.Struct `protobuf:"bytes,4,opt,name=json,proto3" json:"json"`
-	FolderId  string           `protobuf:"bytes,5,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	CommitId  string           `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId string           `protobuf:"bytes,7,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id        string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string           `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string           `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Json      *structpb.Struct `protobuf:"bytes,4,opt,name=json,proto3" json:"json,omitempty"`
+	FolderId  string           `protobuf:"bytes,5,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	CommitId  string           `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId string           `protobuf:"bytes,7,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *UpdateNoteReq) Reset() {
@@ -311,9 +311,9 @@ type GetSingleNoteReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetSingleNoteReq) Reset() {
@@ -374,11 +374,11 @@ type GetListNoteReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	FolderId  string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	Limit     int32  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit"`
-	Offset    int32  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset"`
-	VersionId string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	FolderId  string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	Limit     int32  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset    int32  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
+	VersionId string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetListNoteReq) Reset() {
@@ -453,8 +453,8 @@ type GetListNoteRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Notes []*Note `protobuf:"bytes,1,rep,name=notes,proto3" json:"notes"`
-	Count int32   `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Notes []*Note `protobuf:"bytes,1,rep,name=notes,proto3" json:"notes,omitempty"`
+	Count int32   `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetListNoteRes) Reset() {
@@ -508,12 +508,12 @@ type CreateNoteReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string           `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Title     string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
-	Json      *structpb.Struct `protobuf:"bytes,3,opt,name=json,proto3" json:"json"`
-	FolderId  string           `protobuf:"bytes,4,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	CommitId  string           `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId string           `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string           `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Json      *structpb.Struct `protobuf:"bytes,3,opt,name=json,proto3" json:"json,omitempty"`
+	FolderId  string           `protobuf:"bytes,4,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	CommitId  string           `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId string           `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *CreateNoteReq) Reset() {
@@ -595,13 +595,13 @@ type Note struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string           `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Title     string           `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
-	Json      *structpb.Struct `protobuf:"bytes,4,opt,name=json,proto3" json:"json"`
-	FolderId  string           `protobuf:"bytes,5,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	CommitId  string           `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId string           `protobuf:"bytes,7,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id        string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string           `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string           `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Json      *structpb.Struct `protobuf:"bytes,4,opt,name=json,proto3" json:"json,omitempty"`
+	FolderId  string           `protobuf:"bytes,5,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	CommitId  string           `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId string           `protobuf:"bytes,7,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *Note) Reset() {
@@ -690,11 +690,11 @@ type CreateFolderNoteReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
-	ParentId  string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	CommitId  string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	ParentId  string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	CommitId  string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *CreateFolderNoteReq) Reset() {
@@ -769,12 +769,12 @@ type FolderNote struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Title     string `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
-	ParentId  string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	CommitId  string `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId string `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	ParentId  string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	CommitId  string `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId string `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *FolderNote) Reset() {
@@ -856,10 +856,10 @@ type GetListFolderNoteReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
-	Offset    int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset"`
-	VersionId string `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset    int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
+	VersionId string `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetListFolderNoteReq) Reset() {
@@ -927,8 +927,8 @@ type GetListFolderNoteRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Folders []*FolderNote `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders"`
-	Count   int32         `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Folders []*FolderNote `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders,omitempty"`
+	Count   int32         `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetListFolderNoteRes) Reset() {
@@ -982,9 +982,9 @@ type GetSingleFolderNoteReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *GetSingleFolderNoteReq) Reset() {
@@ -1045,8 +1045,8 @@ type GetSingleFolderNoteRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Folders []*FolderNote `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders"`
-	Count   int32         `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Folders []*FolderNote `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders,omitempty"`
+	Count   int32         `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetSingleFolderNoteRes) Reset() {
@@ -1100,12 +1100,12 @@ type UpdateFolderNoteReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Title     string `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
-	ParentId  string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
-	CommitId  string `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	VersionId string `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	ParentId  string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	CommitId  string `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	VersionId string `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *UpdateFolderNoteReq) Reset() {
@@ -1187,9 +1187,9 @@ type DeleteFolderNoteReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 }
 
 func (x *DeleteFolderNoteReq) Reset() {

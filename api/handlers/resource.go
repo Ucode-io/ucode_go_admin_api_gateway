@@ -371,3 +371,83 @@ func (h *Handler) GetResourceEnvironment(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, resp)
 }
+
+// GetServiceResources godoc
+// @Security ApiKeyAuth
+// @Param Environment-Id header string true "Environment-Id"
+// @ID get_service_resources
+// @Router /v1/company/project/resource-default [GET]
+// @Summary Get Service Resource
+// @Description Get Service Resource
+// @Tags Company Resource
+// @Accept json
+// @Produce json
+// @Param project-id query string true "project-id"
+// @Success 200 {object} status_http.Response{data=company_service.GetServiceResourcesRes} "Resource data"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetServiceResources(c *gin.Context) {
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	res, err := h.companyServices.CompanyService().Resource().GetServiceResources(c.Request.Context(), &company_service.GetServiceResourcesReq{
+		ProjectId:     c.DefaultQuery("project-id", ""),
+		EnvironmentId: environmentId.(string),
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, res)
+}
+
+// SetDefaultResource godoc
+// @Security ApiKeyAuth
+// @Param Environment-Id header string true "Environment-Id"
+// @ID set_default_resource
+// @Router /v1/company/project/resource-default [PUT]
+// @Summary Set Default Resource
+// @Description Set Default Resource
+// @Tags Company Resource
+// @Accept json
+// @Produce json
+// @Param project-id query string true "project-id"
+// @Param data body company_service.SetDefaultResourceReq true "data"
+// @Success 200 {object} status_http.Response{data=company_service.SetDefaultResourceRes} "Resource data"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) SetDefaultResource(c *gin.Context) {
+	var (
+		req company_service.SetDefaultResourceReq
+	)
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	res, err := h.companyServices.CompanyService().Resource().SetDefaultResource(c.Request.Context(), &company_service.SetDefaultResourceReq{
+		ProjectId:     c.DefaultQuery("project-id", ""),
+		EnvironmentId: environmentId.(string),
+		ServiceType:   req.GetServiceType(),
+		ResourceId:    req.GetResourceId(),
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, res)
+}

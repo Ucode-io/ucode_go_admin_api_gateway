@@ -83,6 +83,18 @@ message RoleWithAppTablePermissions {
                 string object_field = 2;
                 string custom_field = 3;
             }
+            message ActionPermission {
+                string guid = 1;
+                string custom_event_id = 2;
+                bool permission = 3;
+                string label = 4;
+            }
+            message AutomaticFilterWithMethod {
+                repeated AutomaticFilter read = 1;
+                repeated AutomaticFilter write = 2;
+                repeated AutomaticFilter update = 3;
+                repeated AutomaticFilter delete = 4;
+            }
 
             string label = 1;
             string slug = 2;
@@ -97,7 +109,8 @@ message RoleWithAppTablePermissions {
             RecordPermission record_permissions = 11;
             repeated FieldPermission field_permissions = 12;
             repeated ViewPermission view_permissions = 13;
-            repeated AutomaticFilter automatic_filters = 14;
+            AutomaticFilterWithMethod automatic_filters = 14;
+            repeated ActionPermission action_permissions = 15;
         }
         string name = 1;
         string description = 2;

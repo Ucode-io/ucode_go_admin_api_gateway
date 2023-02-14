@@ -7,7 +7,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	obs "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
-
 	"ucode/ucode_go_api_gateway/pkg/util"
 )
 
@@ -755,7 +754,7 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param share body tmp.GetObjectTokenReq true "GetObjectTokenReq"
-// @Success 200 {object} status_http.Response{data=tmp.GetObjectTokenRes} "GetObjectTokenResBody"
+// @Success 200 {object} status_http.Response{data=tmp.GetObjectTokenRes} "GetObjectTokenRes"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetObjectToken(c *gin.Context) {

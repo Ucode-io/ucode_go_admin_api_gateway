@@ -119,11 +119,11 @@ type DAG struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id     string     `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Title  string     `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
-	Slug   string     `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug"`
-	Type   DAG_TYPE   `protobuf:"varint,4,opt,name=type,proto3,enum=scenario_service.DAG_TYPE" json:"type"`
-	Status DAG_STATUS `protobuf:"varint,5,opt,name=status,proto3,enum=scenario_service.DAG_STATUS" json:"status"`
+	Id     string     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title  string     `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Slug   string     `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
+	Type   DAG_TYPE   `protobuf:"varint,4,opt,name=type,proto3,enum=scenario_service.DAG_TYPE" json:"type,omitempty"`
+	Status DAG_STATUS `protobuf:"varint,5,opt,name=status,proto3,enum=scenario_service.DAG_STATUS" json:"status,omitempty"`
 }
 
 func (x *DAG) Reset() {
@@ -198,7 +198,7 @@ type CreateDAGRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Dag *DAG `protobuf:"bytes,1,opt,name=dag,proto3" json:"dag"`
+	Dag *DAG `protobuf:"bytes,1,opt,name=dag,proto3" json:"dag,omitempty"`
 }
 
 func (x *CreateDAGRequest) Reset() {
@@ -245,7 +245,7 @@ type GetDAGRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *GetDAGRequest) Reset() {
@@ -292,7 +292,7 @@ type GetAllDAGRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Filter *Filters `protobuf:"bytes,1,opt,name=filter,proto3" json:"filter"`
+	Filter *Filters `protobuf:"bytes,1,opt,name=filter,proto3" json:"filter,omitempty"`
 }
 
 func (x *GetAllDAGRequest) Reset() {
@@ -339,8 +339,8 @@ type DAGList struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DAGs  []*DAG `protobuf:"bytes,1,rep,name=DAGs,proto3" json:"DAGs"`
-	Count int64  `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	DAGs  []*DAG `protobuf:"bytes,1,rep,name=DAGs,proto3" json:"DAGs,omitempty"`
+	Count int64  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *DAGList) Reset() {
@@ -394,7 +394,7 @@ type DeleteDAGRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *DeleteDAGRequest) Reset() {
@@ -441,7 +441,7 @@ type UpdateDAGRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Dag *DAG `protobuf:"bytes,1,opt,name=dag,proto3" json:"dag"`
+	Dag *DAG `protobuf:"bytes,1,opt,name=dag,proto3" json:"dag,omitempty"`
 }
 
 func (x *UpdateDAGRequest) Reset() {

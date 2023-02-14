@@ -25,8 +25,8 @@ type BarcodeGenerateReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	TableSlug string `protobuf:"bytes,1,opt,name=table_slug,json=tableSlug,proto3" json:"table_slug,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *BarcodeGenerateReq) Reset() {
@@ -80,7 +80,7 @@ type BarcodeGenerateRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Number string `protobuf:"bytes,1,opt,name=number,proto3" json:"number"`
+	Number string `protobuf:"bytes,1,opt,name=number,proto3" json:"number,omitempty"`
 }
 
 func (x *BarcodeGenerateRes) Reset() {

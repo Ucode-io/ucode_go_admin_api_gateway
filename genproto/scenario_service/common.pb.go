@@ -25,11 +25,11 @@ type Filters struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit  string `protobuf:"bytes,1,opt,name=limit,proto3" json:"limit"`
-	Offset string `protobuf:"bytes,2,opt,name=offset,proto3" json:"offset"`
-	Sort   string `protobuf:"bytes,3,opt,name=sort,proto3" json:"sort"`
-	Order  string `protobuf:"bytes,4,opt,name=order,proto3" json:"order"`
-	Search string `protobuf:"bytes,5,opt,name=search,proto3" json:"search"`
+	Limit  string `protobuf:"bytes,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset string `protobuf:"bytes,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Sort   string `protobuf:"bytes,3,opt,name=sort,proto3" json:"sort,omitempty"`
+	Order  string `protobuf:"bytes,4,opt,name=order,proto3" json:"order,omitempty"`
+	Search string `protobuf:"bytes,5,opt,name=search,proto3" json:"search,omitempty"`
 }
 
 func (x *Filters) Reset() {
