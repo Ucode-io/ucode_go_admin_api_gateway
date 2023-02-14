@@ -338,6 +338,13 @@ func (h *Handler) DeleteRelease(c *gin.Context) {
 func (h *Handler) SetCurrentRelease(c *gin.Context) {
 	var release obs.SetCurrentReleaseRequest
 
+	err := c.ShouldBindJSON(&release)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+
 	environmentID, ok := c.Get("environment_id")
 	if !ok {
 		err := errors.New("error getting environment id")
@@ -356,12 +363,6 @@ func (h *Handler) SetCurrentRelease(c *gin.Context) {
 
 	if !util.IsValidUUID(release.GetVersionId()) {
 		h.handleResponse(c, status_http.InvalidArgument, "version_id is an invalid uuid")
-		return
-	}
-
-	err := c.ShouldBindJSON(&release)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
