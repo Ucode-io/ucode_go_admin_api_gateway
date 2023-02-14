@@ -1277,7 +1277,7 @@ func (h *Handler) GetTemplateCommits(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
-// @Param project-id body string true "project-id"
+// @Param project-id query string true "project-id"
 // @Param template body models.HtmlBody true "HtmlBody"
 // @Success 201 {object} status_http.Response{data=tmp.PdfBody} "PdfBody data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"

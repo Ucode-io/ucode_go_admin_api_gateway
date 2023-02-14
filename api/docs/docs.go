@@ -6782,6 +6782,199 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/company/project/resource-default": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Service Resource",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Resource"
+                ],
+                "summary": "Get Service Resource",
+                "operationId": "get_service_resources",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resource data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.GetServiceResourcesRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Set Default Resource",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company Resource"
+                ],
+                "summary": "Set Default Resource",
+                "operationId": "set_default_resource",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.SetDefaultResourceReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resource data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.SetDefaultResourceRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/company/project/resource-environment/{resource_id}": {
             "get": {
                 "security": [
@@ -11833,13 +12026,11 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "description": "HtmlBody",
@@ -23067,6 +23258,51 @@ const docTemplate = `{
                 }
             }
         },
+        "company_service.GetServiceResourcesRes": {
+            "type": "object",
+            "properties": {
+                "service_resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources"
+                    }
+                }
+            }
+        },
+        "company_service.GetServiceResourcesRes_ServiceTypeResources": {
+            "type": "object",
+            "properties": {
+                "resource": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources"
+                    }
+                },
+                "service_type": {
+                    "$ref": "#/definitions/company_service.ServiceType"
+                }
+            }
+        },
+        "company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources": {
+            "type": "object",
+            "properties": {
+                "default": {
+                    "type": "boolean"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/company_service.ResourceType"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "company_service.NewResource": {
             "type": "object",
             "properties": {
@@ -23276,6 +23512,40 @@ const docTemplate = `{
                 "ServiceType_BUILDER_SERVICE",
                 "ServiceType_ANALYTICS_SERVICE"
             ]
+        },
+        "company_service.SetDefaultResourceReq": {
+            "type": "object",
+            "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "service_type": {
+                    "$ref": "#/definitions/company_service.ServiceType"
+                }
+            }
+        },
+        "company_service.SetDefaultResourceRes": {
+            "type": "object",
+            "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "service_type": {
+                    "$ref": "#/definitions/company_service.ServiceType"
+                }
+            }
         },
         "company_service.UpdateResourceRequest": {
             "type": "object",

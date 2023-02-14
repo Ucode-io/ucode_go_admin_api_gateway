@@ -589,6 +589,35 @@ definitions:
           $ref: '#/definitions/company_service.NewResource'
         type: array
     type: object
+  company_service.GetServiceResourcesRes:
+    properties:
+      service_resources:
+        items:
+          $ref: '#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources'
+        type: array
+    type: object
+  company_service.GetServiceResourcesRes_ServiceTypeResources:
+    properties:
+      resource:
+        items:
+          $ref: '#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources'
+        type: array
+      service_type:
+        $ref: '#/definitions/company_service.ServiceType'
+    type: object
+  company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources:
+    properties:
+      default:
+        type: boolean
+      is_configured:
+        type: boolean
+      resource_id:
+        type: string
+      resource_type:
+        $ref: '#/definitions/company_service.ResourceType'
+      title:
+        type: string
+    type: object
   company_service.NewResource:
     properties:
       id:
@@ -729,6 +758,28 @@ definitions:
     - ServiceType_NOT_SPECIFIED
     - ServiceType_BUILDER_SERVICE
     - ServiceType_ANALYTICS_SERVICE
+  company_service.SetDefaultResourceReq:
+    properties:
+      environment_id:
+        type: string
+      project_id:
+        type: string
+      resource_id:
+        type: string
+      service_type:
+        $ref: '#/definitions/company_service.ServiceType'
+    type: object
+  company_service.SetDefaultResourceRes:
+    properties:
+      environment_id:
+        type: string
+      project_id:
+        type: string
+      resource_id:
+        type: string
+      service_type:
+        $ref: '#/definitions/company_service.ServiceType'
+    type: object
   company_service.UpdateResourceRequest:
     properties:
       credentials:
@@ -7390,6 +7441,115 @@ paths:
       summary: Add ProjectResource
       tags:
       - Company Resource
+  /v1/company/project/resource-default:
+    get:
+      consumes:
+      - application/json
+      description: Get Service Resource
+      operationId: get_service_resources
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetServiceResourcesRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Service Resource
+      tags:
+      - Company Resource
+    put:
+      consumes:
+      - application/json
+      description: Set Default Resource
+      operationId: set_default_resource
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.SetDefaultResourceReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.SetDefaultResourceRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Set Default Resource
+      tags:
+      - Company Resource
   /v1/company/project/resource-environment/{resource_id}:
     get:
       consumes:
@@ -10111,11 +10271,10 @@ paths:
         required: true
         type: string
       - description: project-id
-        in: body
+        in: query
         name: project-id
         required: true
-        schema:
-          type: string
+        type: string
       - description: HtmlBody
         in: body
         name: template
