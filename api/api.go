@@ -248,6 +248,19 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.DELETE("/template-note/users/:user-permission-id", h.DeleteUserTemplate)
 		v1.POST("/template-note/share", h.CreateSharingToken)
 		v1.PUT("/template-note/share", h.UpdateSharingToken)
+
+		// query service
+		v1.POST("/query-folder", h.CreateQueryRequestFolder)
+		v1.PUT("/query-folder", h.UpdateQueryRequestFolder)
+		v1.GET("/query-folder", h.GetListQueryRequestFolder)
+		v1.GET("/query-folder/:query-folder-id", h.GetSingleQueryRequestFolder)
+		v1.DELETE("/query-folder/:query-folder-id", h.DeleteQueryRequestFolder)
+
+		v1.POST("/query-request", h.CreateQueryRequest)
+		v1.PUT("/query-request", h.UpdateQueryRequestFolder)
+		v1.GET("/query-request", h.GetListQueryRequest)
+		v1.GET("/query-request/:query-id", h.GetSingleQueryRequest)
+		v1.DELETE("/query-request/:query-id", h.DeleteQueryRequest)
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
