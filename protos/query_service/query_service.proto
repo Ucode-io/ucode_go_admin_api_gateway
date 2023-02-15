@@ -1,0 +1,8 @@
+syntax="proto3";
+
+package query_service;
+option go_package="genproto/query_service";
+
+import "commit.proto";
+import "folder.proto";
+import "query.proto";
