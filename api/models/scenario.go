@@ -15,3 +15,12 @@ type DAGStep struct {
 	ConditionAction map[string]interface{} `json:"condition_action"`
 	IsParallel      bool                   `json:"is_parallel"`
 }
+
+type RunScenarioRequest struct {
+	DagId     string                 `json:"dag_id"`
+	Header    map[string]string      `json:"header"`
+	Body      map[string]interface{} `json:"body"`
+	Url       string                 `json:"url"`
+	DagStepId string                 `json:"dag_step_id"`
+	Method    string                 `json:"method"`
+}

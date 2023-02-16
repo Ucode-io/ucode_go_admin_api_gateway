@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/scenario_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -14,8 +16,8 @@ import (
 // @Param Environment-Id header string true "Environment-Id"
 // @ID run_scenario
 // @Router /v1/scenario/run [POST]
-// @Summary Run scenario 
-// @Description Run scenario 
+// @Summary Run scenario
+// @Description Run scenario
 // @Tags Section
 // @Accept json
 // @Produce json
@@ -27,9 +29,8 @@ import (
 func (h *Handler) RunScenario(c *gin.Context) {
 
 	var (
-		req pb.RunScenarioRequest
+		req models.RunScenarioRequest
 	)
-
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -55,7 +56,22 @@ func (h *Handler) RunScenario(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.ScenarioService().RunService().RunScenario(c.Request.Context(), &req)
+	bodyStrct, err := helper.ConvertMapToStruct(req.Body)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	runScenarioStrct := &pb.RunScenarioRequest{
+		DagId:     req.DagId,
+		Header:    req.Header,
+		Body:      bodyStrct,
+		Url:       req.Url,
+		DagStepId: req.DagStepId,
+		Method:    req.Method,
+	}
+
+	resp, err := services.ScenarioService().RunService().RunScenario(c.Request.Context(), runScenarioStrct)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
 		return
