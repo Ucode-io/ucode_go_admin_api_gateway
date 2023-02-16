@@ -261,6 +261,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/query-request", h.GetListQueryRequest)
 		v1.GET("/query-request/:query-id", h.GetSingleQueryRequest)
 		v1.DELETE("/query-request/:query-id", h.DeleteQueryRequest)
+		v1.POST("/query-request/run", h.QueryRun)
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
@@ -343,7 +344,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/new/function", h.GetAllNewFunctions)
 		v1Admin.PUT("/new/function", h.UpdateNewFunction)
 		v1Admin.DELETE("/new/function/:function_id", h.DeleteNewFunction)
-		
+
 		// scenario service
 		v1Admin.POST("/scenario/dag", h.CreateDAG)
 		v1Admin.GET("/scenario/dag/:id", h.GetDAG)

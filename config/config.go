@@ -173,7 +173,7 @@ func Load() Config {
 	config.ScenarioGRPCPort = cast.ToString(GetOrReturnDefaultValue("SCENARIO_GRPC_PORT", ":9108"))
 
 	config.QueryServiceHost = cast.ToString(GetOrReturnDefaultValue("QUERY_SERVICE_HOST", "localhost"))
-	config.QueryServicePort = cast.ToString(GetOrReturnDefaultValue("QUERY_SERVICE_PORT", ":8228"))
+	config.QueryServicePort = cast.ToString(GetOrReturnDefaultValue("QUERY_GRPC_PORT", ":8228"))
 
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = "Here$houldBe$ome$ecretKey"

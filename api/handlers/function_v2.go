@@ -33,7 +33,6 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateNewFunction(c *gin.Context) {
 	var function models.CreateFunctionRequest
-
 	err := c.ShouldBindJSON(&function)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())

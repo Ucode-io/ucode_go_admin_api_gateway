@@ -40,7 +40,7 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
@@ -50,9 +50,9 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 		return
 	}
 
-	ProjectId, _ := c.Get("project_id")
-	if !util.IsValidUUID(ProjectId.(string)) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	ProjectId := c.Query("project-id")
+	if !util.IsValidUUID(ProjectId) {
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
 
@@ -77,7 +77,7 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 		&reqStrct,
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
@@ -114,7 +114,7 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
@@ -124,9 +124,9 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 		return
 	}
 
-	ProjectId, _ := c.Get("project_id")
-	if !util.IsValidUUID(ProjectId.(string)) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	ProjectId := c.Query("project-id")
+	if !util.IsValidUUID(ProjectId) {
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
 
@@ -135,7 +135,7 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 		&req,
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
@@ -180,7 +180,7 @@ func (h *Handler) GetDagStep(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
@@ -190,9 +190,9 @@ func (h *Handler) GetDagStep(c *gin.Context) {
 		return
 	}
 
-	ProjectId, _ := c.Get("project_id")
-	if !util.IsValidUUID(ProjectId.(string)) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	ProjectId := c.Query("project-id")
+	if !util.IsValidUUID(ProjectId) {
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
 
@@ -201,7 +201,7 @@ func (h *Handler) GetDagStep(c *gin.Context) {
 		&req,
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
@@ -243,7 +243,7 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
@@ -253,15 +253,15 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 		return
 	}
 
-	ProjectId, _ := c.Get("project_id")
-	if !util.IsValidUUID(ProjectId.(string)) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	ProjectId := c.Query("project-id")
+	if !util.IsValidUUID(ProjectId) {
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
 
 	requestInfoStrct, err := helper.ConvertMapToStruct(dagStep.RequestInfo)
 	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err)
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -285,7 +285,7 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
@@ -319,7 +319,7 @@ func (h *Handler) DeleteDagStep(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
@@ -329,9 +329,9 @@ func (h *Handler) DeleteDagStep(c *gin.Context) {
 		return
 	}
 
-	ProjectId, _ := c.Get("project_id")
-	if !util.IsValidUUID(ProjectId.(string)) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	ProjectId := c.Query("project-id")
+	if !util.IsValidUUID(ProjectId) {
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
 
@@ -342,7 +342,7 @@ func (h *Handler) DeleteDagStep(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 

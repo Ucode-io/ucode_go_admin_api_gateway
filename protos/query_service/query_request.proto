@@ -14,6 +14,8 @@ service QueryService {
   rpc GetSingleQuery(GetSingleQueryReq) returns (Query) {}
   rpc UpdateQuery(UpdateQueryReq) returns (Query) {}
   rpc DeleteQuery(DeleteQueryReq) returns (google.protobuf.Empty) {}
+
+  rpc RunQuery(Query) returns (RunQueryRes) {}
 }
 
 message Query {
@@ -100,4 +102,8 @@ message DeleteQueryReq {
   string project_id = 1;
   string id = 2;
   string version_id = 3;
+}
+
+message RunQueryRes {
+  string res = 1;
 }
