@@ -330,7 +330,20 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/category", h.GetAllCategories)
 		v1Admin.DELETE("/category/:category_id", h.DeleteCategory)
 
-		
+		// scenario service
+		v1Admin.POST("/scenario/dag", h.CreateDAG)
+		v1Admin.GET("/scenario/dag/:id", h.GetDAG)
+		v1Admin.GET("/scenario/dag", h.GetAllDAG)
+		v1Admin.PUT("/scenario/dag", h.UpdateDAG)
+		v1Admin.DELETE("/scenario/dag/:id", h.DeleteDAG)
+
+		v1Admin.POST("/scenario/dag-step", h.CreateDagStep)
+		v1Admin.GET("/scenario/dag-step/:id", h.GetDagStep)
+		v1Admin.GET("/scenario/dag-step", h.GetAllDagStep)
+		v1Admin.PUT("/scenario/dag-step", h.UpdateDagStep)
+		v1Admin.DELETE("/scenario/dag-step/:id", h.DeleteDAG)
+
+		v1Admin.POST("/scenario/run", h.RunScenario)
 	}
 
 	// v3 for ucode version 2

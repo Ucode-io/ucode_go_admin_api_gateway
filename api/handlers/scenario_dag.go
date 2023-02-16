@@ -24,7 +24,7 @@ import (
 // @Success 200 {object} status_http.Response{data=pb.DAG} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) Create(c *gin.Context) {
+func (h *Handler) CreateDAG(c *gin.Context) {
 	var (
 		req pb.CreateDAGRequest
 	)
@@ -84,7 +84,7 @@ func (h *Handler) Create(c *gin.Context) {
 // @Success 200 {object} status_http.Response{data=pb.DAGList} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) GetAll(c *gin.Context) {
+func (h *Handler) GetAllDAG(c *gin.Context) {
 
 	filter := &pb.Filters{
 		Order:  "created_at",
@@ -164,7 +164,7 @@ func (h *Handler) GetAll(c *gin.Context) {
 // @Success 200 {object} status_http.Response{data=pb.DAG} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) Get(c *gin.Context) {
+func (h *Handler) GetDAG(c *gin.Context) {
 	var (
 		req pb.GetDAGRequest
 	)
@@ -232,7 +232,7 @@ func (h *Handler) Get(c *gin.Context) {
 // @Success 200 {object} status_http.Response{data=pb.DAG} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) Update(c *gin.Context) {
+func (h *Handler) UpdateDAG(c *gin.Context) {
 	var (
 		dag pb.DAG
 	)
@@ -296,7 +296,7 @@ func (h *Handler) Update(c *gin.Context) {
 // @Success 200 {object} status_http.Response{data=string} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) Delete(c *gin.Context) {
+func (h *Handler) DeleteDAG(c *gin.Context) {
 
 	id := c.Param("id")
 	if !util.IsValidUUID(id) {
