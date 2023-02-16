@@ -18,7 +18,7 @@ import (
 // @Router /v1/scenario/run [POST]
 // @Summary Run scenario
 // @Description Run scenario
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"

@@ -13956,7 +13956,7 @@ paths:
       - ApiKeyAuth: []
       summary: Get all scenario dag
       tags:
-      - Section
+      - Scenario
     post:
       consumes:
       - application/json
@@ -14017,7 +14017,7 @@ paths:
       - ApiKeyAuth: []
       summary: Create scenario dag
       tags:
-      - Section
+      - Scenario
     put:
       consumes:
       - application/json
@@ -14078,7 +14078,7 @@ paths:
       - ApiKeyAuth: []
       summary: Update scenario dag
       tags:
-      - Section
+      - Scenario
   /v1/scenario/dag-step:
     get:
       consumes:
@@ -14140,7 +14140,7 @@ paths:
       - ApiKeyAuth: []
       summary: Get All scenario dag step
       tags:
-      - Section
+      - Scenario
     post:
       consumes:
       - application/json
@@ -14201,7 +14201,7 @@ paths:
       - ApiKeyAuth: []
       summary: Create scenario dag step
       tags:
-      - Section
+      - Scenario
     put:
       consumes:
       - application/json
@@ -14262,7 +14262,7 @@ paths:
       - ApiKeyAuth: []
       summary: Update scenario dag step
       tags:
-      - Section
+      - Scenario
   /v1/scenario/dag-step/{id}:
     delete:
       consumes:
@@ -14323,7 +14323,7 @@ paths:
       - ApiKeyAuth: []
       summary: Delete scenario dag step
       tags:
-      - Section
+      - Scenario
     get:
       consumes:
       - application/json
@@ -14389,7 +14389,7 @@ paths:
       - ApiKeyAuth: []
       summary: Get scenario dag step
       tags:
-      - Section
+      - Scenario
   /v1/scenario/dag/{id}:
     delete:
       consumes:
@@ -14450,7 +14450,7 @@ paths:
       - ApiKeyAuth: []
       summary: Delete scenario dag
       tags:
-      - Section
+      - Scenario
     get:
       consumes:
       - application/json
@@ -14516,7 +14516,7 @@ paths:
       - ApiKeyAuth: []
       summary: Get all scenario dag
       tags:
-      - Section
+      - Scenario
   /v1/scenario/run:
     post:
       consumes:
@@ -14578,7 +14578,7 @@ paths:
       - ApiKeyAuth: []
       summary: Run scenario
       tags:
-      - Section
+      - Scenario
   /v1/section:
     get:
       consumes:

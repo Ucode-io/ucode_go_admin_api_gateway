@@ -17737,7 +17737,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Section"
+                    "Scenario"
                 ],
                 "summary": "Get all scenario dag",
                 "operationId": "get_all_scenario_dag",
@@ -17858,7 +17858,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Section"
+                    "Scenario"
                 ],
                 "summary": "Update scenario dag",
                 "operationId": "update_scenario_dag",
@@ -17964,7 +17964,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Section"
+                    "Scenario"
                 ],
                 "summary": "Create scenario dag",
                 "operationId": "create_scenario_dag",
@@ -18072,7 +18072,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Section"
+                    "Scenario"
                 ],
                 "summary": "Get All scenario dag step",
                 "operationId": "get_all_scenario_dag_step",
@@ -18178,7 +18178,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Section"
+                    "Scenario"
                 ],
                 "summary": "Update scenario dag step",
                 "operationId": "update_scenario_dag_step",
@@ -18284,7 +18284,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Section"
+                    "Scenario"
                 ],
                 "summary": "Create scenario dag step",
                 "operationId": "create_scenario_dag_step",
@@ -18392,7 +18392,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Section"
+                    "Scenario"
                 ],
                 "summary": "Get scenario dag step",
                 "operationId": "get_scenario_dag_step",
@@ -18505,7 +18505,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Section"
+                    "Scenario"
                 ],
                 "summary": "Delete scenario dag step",
                 "operationId": "delete_scenario_dag_step",
@@ -18611,7 +18611,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Section"
+                    "Scenario"
                 ],
                 "summary": "Get all scenario dag",
                 "operationId": "get_scenario_dag",
@@ -18724,7 +18724,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Section"
+                    "Scenario"
                 ],
                 "summary": "Delete scenario dag",
                 "operationId": "delete_scenario_dag",
@@ -18830,7 +18830,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Section"
+                    "Scenario"
                 ],
                 "summary": "Run scenario",
                 "operationId": "run_scenario",

@@ -16,7 +16,7 @@ import (
 // @Router /v1/scenario/dag [POST]
 // @Summary Create scenario dag
 // @Description Create scenario dag
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -73,7 +73,7 @@ func (h *Handler) CreateDAG(c *gin.Context) {
 // @Router /v1/scenario/dag [GET]
 // @Summary Get all scenario dag
 // @Description Get all scenario dag
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -155,7 +155,7 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 // @Router /v1/scenario/dag/{id} [GET]
 // @Summary Get all scenario dag
 // @Description Get all scenario dag
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
@@ -224,7 +224,7 @@ func (h *Handler) GetDAG(c *gin.Context) {
 // @Router /v1/scenario/dag [PUT]
 // @Summary Update scenario dag
 // @Description Update scenario dag
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -288,7 +288,7 @@ func (h *Handler) UpdateDAG(c *gin.Context) {
 // @Router /v1/scenario/dag/{id} [DELETE]
 // @Summary Delete scenario dag
 // @Description Delete scenario dag
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param id path string true "id"

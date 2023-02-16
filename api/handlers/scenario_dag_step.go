@@ -18,7 +18,7 @@ import (
 // @Router /v1/scenario/dag-step [POST]
 // @Summary Create scenario dag step
 // @Description Create scenario dag step
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -92,7 +92,7 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 // @Router /v1/scenario/dag-step [GET]
 // @Summary Get All scenario dag step
 // @Description Get All scenario dag step
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -150,7 +150,7 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 // @Router /v1/scenario/dag-step/{id} [GET]
 // @Summary Get scenario dag step
 // @Description Get scenario dag step
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -216,7 +216,7 @@ func (h *Handler) GetDagStep(c *gin.Context) {
 // @Router /v1/scenario/dag-step [PUT]
 // @Summary Update scenario dag step
 // @Description Update scenario dag step
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -300,7 +300,7 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 // @Router /v1/scenario/dag-step/{id} [DELETE]
 // @Summary Delete scenario dag step
 // @Description Delete scenario dag step
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
