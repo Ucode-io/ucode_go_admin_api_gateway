@@ -3112,6 +3112,25 @@ definitions:
       type:
         type: string
     type: object
+  scenario_service.RunScenarioRequest:
+    properties:
+      body:
+        $ref: '#/definitions/structpb.Struct'
+      dag_id:
+        type: string
+      dag_step_id:
+        type: string
+      header:
+        additionalProperties:
+          type: string
+        type: object
+      method:
+        type: string
+      url:
+        type: string
+    type: object
+  scenario_service.RunScenarioResponse:
+    type: object
   status_http.Response:
     properties:
       data: {}
@@ -14496,6 +14515,68 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get all scenario dag
+      tags:
+      - Section
+  /v1/scenario/run:
+    post:
+      consumes:
+      - application/json
+      description: Run scenario
+      operationId: run_scenario
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.RunScenarioRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.RunScenarioResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Run scenario
       tags:
       - Section
   /v1/section:
