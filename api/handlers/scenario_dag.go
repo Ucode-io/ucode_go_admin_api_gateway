@@ -153,8 +153,8 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get_scenario_dag
 // @Router /v1/scenario/dag/{id} [GET]
-// @Summary Get all scenario dag
-// @Description Get all scenario dag
+// @Summary Get scenario dag
+// @Description Get scenario dag
 // @Tags Scenario
 // @Accept json
 // @Produce json
