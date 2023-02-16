@@ -1,4 +1,123 @@
 definitions:
+  api_reference_service.ApiManyVersions:
+    properties:
+      oldcommit_id:
+        type: string
+      project_id:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+    type: object
+  api_reference_service.ApiReference:
+    properties:
+      additional_url:
+        type: string
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      authentification:
+        type: boolean
+      category_id:
+        type: string
+      commit_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/api_reference_service.CommitInfo'
+      desc:
+        type: string
+      environment_id:
+        type: string
+      external_url:
+        type: string
+      guid:
+        type: string
+      method:
+        type: string
+      name:
+        type: string
+      new_window:
+        type: boolean
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  api_reference_service.ApiRevertApiReferenceRequest:
+    properties:
+      commit_id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  api_reference_service.CommitInfo:
+    properties:
+      author_id:
+        type: string
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      guid:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      updated_at:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+      version_infos:
+        items:
+          $ref: '#/definitions/api_reference_service.VersionInfo'
+        type: array
+    type: object
+  api_reference_service.GetListApiReferenceChangesResponse:
+    properties:
+      api_references:
+        items:
+          $ref: '#/definitions/api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange'
+        type: array
+      count:
+        type: integer
+      guid:
+        type: string
+    type: object
+  api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange:
+    properties:
+      commit_info:
+        $ref: '#/definitions/api_reference_service.CommitInfo'
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      version_infos:
+        additionalProperties:
+          $ref: '#/definitions/api_reference_service.VersionInfo'
+        type: object
+    type: object
+  api_reference_service.VersionInfo:
+    properties:
+      author_id:
+        type: string
+      created_at:
+        type: string
+      desc:
+        type: string
+      is_current:
+        type: boolean
+      updated_at:
+        type: string
+      version:
+        type: string
+      version_id:
+        type: string
+    type: object
   auth_service.AddSessionToIntegrationRequest:
     properties:
       data:
@@ -275,34 +394,6 @@ definitions:
       id:
         type: string
     type: object
-  company_service.CommitWithRelease:
-    properties:
-      author_id:
-        type: string
-      commit_type:
-        type: string
-      created_at:
-        type: string
-      environment_id:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      release_info:
-        $ref: '#/definitions/company_service.CommitWithRelease_Release'
-    type: object
-  company_service.CommitWithRelease_Release:
-    properties:
-      id:
-        type: string
-      is_current:
-        type: boolean
-      version:
-        type: string
-    type: object
   company_service.Company:
     properties:
       description:
@@ -363,19 +454,6 @@ definitions:
       id:
         type: string
     type: object
-  company_service.CreateCommitRequest:
-    properties:
-      author_id:
-        type: string
-      commit_type:
-        type: string
-      environment_id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-    type: object
   company_service.CreateEnvironmentRequest:
     properties:
       description:
@@ -399,23 +477,6 @@ definitions:
         type: array
       title:
         type: string
-    type: object
-  company_service.CreateReleaseRequest:
-    properties:
-      author_id:
-        type: string
-      commit_id:
-        type: string
-      description:
-        type: string
-      environment_id:
-        type: string
-      is_current:
-        type: boolean
-      project_id:
-        type: string
-      release_type:
-        $ref: '#/definitions/company_service.ReleaseType'
     type: object
   company_service.CreateResourceReq:
     properties:
@@ -487,24 +548,10 @@ definitions:
       count:
         type: integer
     type: object
-  company_service.GetCommitListResponse:
-    properties:
-      commits:
-        items:
-          $ref: '#/definitions/company_service.CommitWithRelease'
-        type: array
-      count:
-        type: integer
-    type: object
   company_service.GetCompanyByIdResponse:
     properties:
       company:
         $ref: '#/definitions/company_service.Company'
-    type: object
-  company_service.GetCurrentReleaseResponse:
-    properties:
-      commit_id:
-        type: string
     type: object
   company_service.GetEnvironmentListResponse:
     properties:
@@ -533,15 +580,6 @@ definitions:
           $ref: '#/definitions/company_service.Project'
         type: array
     type: object
-  company_service.GetReleaseListResponse:
-    properties:
-      count:
-        type: integer
-      releases:
-        items:
-          $ref: '#/definitions/company_service.ReleaseWithCommit'
-        type: array
-    type: object
   company_service.GetReourceListResponse:
     properties:
       count:
@@ -550,6 +588,35 @@ definitions:
         items:
           $ref: '#/definitions/company_service.NewResource'
         type: array
+    type: object
+  company_service.GetServiceResourcesRes:
+    properties:
+      service_resources:
+        items:
+          $ref: '#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources'
+        type: array
+    type: object
+  company_service.GetServiceResourcesRes_ServiceTypeResources:
+    properties:
+      resource:
+        items:
+          $ref: '#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources'
+        type: array
+      service_type:
+        $ref: '#/definitions/company_service.ServiceType'
+    type: object
+  company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources:
+    properties:
+      default:
+        type: boolean
+      is_configured:
+        type: boolean
+      resource_id:
+        type: string
+      resource_type:
+        $ref: '#/definitions/company_service.ResourceType'
+      title:
+        type: string
     type: object
   company_service.NewResource:
     properties:
@@ -591,48 +658,6 @@ definitions:
   company_service.ReconnectResourceRequest:
     properties:
       id:
-        type: string
-    type: object
-  company_service.ReleaseType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ReleaseType_UNDEFINED
-    - ReleaseType_MAJOR
-    - ReleaseType_MINOR
-    - ReleaseType_PATCH
-  company_service.ReleaseWithCommit:
-    properties:
-      author_id:
-        type: string
-      commit_info:
-        $ref: '#/definitions/company_service.ReleaseWithCommit_Commit'
-      created_at:
-        type: string
-      description:
-        type: string
-      environment_id:
-        type: string
-      id:
-        type: string
-      is_current:
-        type: boolean
-      project_id:
-        type: string
-      updated_at:
-        type: string
-      version:
-        type: string
-    type: object
-  company_service.ReleaseWithCommit_Commit:
-    properties:
-      id:
-        type: string
-      name:
         type: string
     type: object
   company_service.RemoveResourceRequest:
@@ -733,21 +758,27 @@ definitions:
     - ServiceType_NOT_SPECIFIED
     - ServiceType_BUILDER_SERVICE
     - ServiceType_ANALYTICS_SERVICE
-  company_service.SetCurrentReleaseRequest:
+  company_service.SetDefaultResourceReq:
     properties:
       environment_id:
         type: string
-      id:
+      project_id:
+        type: string
+      resource_id:
+        type: string
+      service_type:
+        $ref: '#/definitions/company_service.ServiceType'
+    type: object
+  company_service.SetDefaultResourceRes:
+    properties:
+      environment_id:
         type: string
       project_id:
         type: string
-    type: object
-  company_service.UpdateReleaseRequest:
-    properties:
-      description:
+      resource_id:
         type: string
-      id:
-        type: string
+      service_type:
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.UpdateResourceRequest:
     properties:
@@ -770,13 +801,19 @@ definitions:
     type: object
   config.Config:
     properties:
+      adminHost:
+        type: string
       analyticsGRPCPort:
         type: string
       analyticsServiceHost:
         type: string
+      apiHost:
+        type: string
       apiReferenceServiceHost:
         type: string
       apiReferenceServicePort:
+        type: string
+      appHost:
         type: string
       authGRPCPort:
         type: string
@@ -815,6 +852,8 @@ definitions:
         type: string
       httpscheme:
         type: string
+      localhost:
+        type: string
       minioAccessKeyID:
         type: string
       minioEndpoint:
@@ -826,6 +865,10 @@ definitions:
       objectBuilderGRPCPort:
         type: string
       objectBuilderServiceHost:
+        type: string
+      pathToClone:
+        type: string
+      platformType:
         type: string
       posGRPCPort:
         type: string
@@ -844,6 +887,14 @@ definitions:
           username:
             type: string
         type: object
+      queryServiceHost:
+        type: string
+      queryServicePort:
+        type: string
+      scenarioGRPCPort:
+        type: string
+      scenarioServiceHost:
+        type: string
       secretKey:
         type: string
       serviceHost:
@@ -856,9 +907,17 @@ definitions:
         type: string
       superadmin_HOST:
         type: string
+      templateGRPCPort:
+        type: string
+      templateServiceHost:
+        type: string
       ucodeNamespace:
         type: string
       version:
+        type: string
+      versioningGRPCPort:
+        type: string
+      versioningServiceHost:
         type: string
     type: object
   handlers.Path:
@@ -922,11 +981,15 @@ definitions:
         type: object
       base_url:
         type: string
+      commit_id:
+        type: string
       guid:
         type: string
       name:
         type: string
       project_id:
+        type: string
+      version_id:
         type: string
     type: object
   models.CommonInput:
@@ -1744,6 +1807,62 @@ definitions:
       when:
         $ref: '#/definitions/object_builder_service.When'
     type: object
+  object_builder_service.CreateFieldRequest:
+    properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      autofill_field:
+        type: string
+      autofill_table:
+        type: string
+      automatic:
+        type: boolean
+      commit_id:
+        type: string
+      default:
+        type: string
+      id:
+        type: string
+      index:
+        type: string
+      is_visible:
+        type: boolean
+      label:
+        type: string
+      project_id:
+        type: string
+      slug:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      unique:
+        type: boolean
+      version_id:
+        type: string
+    type: object
+  object_builder_service.CreateFieldsAndRelationsRequest:
+    properties:
+      commit_id:
+        type: string
+      fields:
+        items:
+          $ref: '#/definitions/object_builder_service.CreateFieldRequest'
+        type: array
+      project_id:
+        type: string
+      relations:
+        items:
+          $ref: '#/definitions/object_builder_service.CreateRelationRequest'
+        type: array
+      table_id:
+        type: string
+      version_id:
+        type: string
+    type: object
+  object_builder_service.CreateFieldsAndRelationsResponse:
+    type: object
   object_builder_service.CreateHtmlTemplateRequest:
     properties:
       html:
@@ -2044,6 +2163,8 @@ definitions:
         type: string
       project_id:
         type: string
+      version_id:
+        type: string
     type: object
   object_builder_service.FieldForSection:
     properties:
@@ -2178,6 +2299,8 @@ definitions:
       table_from:
         type: string
       table_to:
+        type: string
+      version_id:
         type: string
     type: object
   object_builder_service.MatchField:
@@ -2729,6 +2852,355 @@ definitions:
           type: string
         type: array
     type: object
+  query_service.CommitInfo:
+    properties:
+      author_id:
+        type: string
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      guid:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      updated_at:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+      version_infos:
+        items:
+          $ref: '#/definitions/query_service.VersionInfo'
+        type: array
+    type: object
+  query_service.CreateFolderReq:
+    properties:
+      commit_id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  query_service.CreateQueryReq:
+    properties:
+      body:
+        $ref: '#/definitions/structpb.Struct'
+      commit_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/query_service.CommitInfo'
+      description:
+        type: string
+      environment_id:
+        type: string
+      folder_id:
+        type: string
+      project_id:
+        type: string
+      query_type:
+        type: string
+      resource_id:
+        type: string
+      timeout:
+        type: string
+      title:
+        type: string
+      variables:
+        items:
+          $ref: '#/definitions/query_service.Variable'
+        type: array
+      version_id:
+        type: string
+    type: object
+  query_service.Folder:
+    properties:
+      commit_id:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  query_service.GetListFolderRes:
+    properties:
+      count:
+        type: integer
+      folders:
+        items:
+          $ref: '#/definitions/query_service.Folder'
+        type: array
+    type: object
+  query_service.GetListQueryRes:
+    properties:
+      count:
+        type: integer
+      queries:
+        items:
+          $ref: '#/definitions/query_service.Query'
+        type: array
+    type: object
+  query_service.GetSingleFolderRes:
+    properties:
+      count:
+        type: integer
+      folders:
+        items:
+          $ref: '#/definitions/query_service.Folder'
+        type: array
+    type: object
+  query_service.Query:
+    properties:
+      body:
+        $ref: '#/definitions/structpb.Struct'
+      commit_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/query_service.CommitInfo'
+      description:
+        type: string
+      environment_id:
+        type: string
+      folder_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      query_type:
+        type: string
+      resource_id:
+        type: string
+      timeout:
+        type: string
+      title:
+        type: string
+      variables:
+        items:
+          $ref: '#/definitions/query_service.Variable'
+        type: array
+      version_id:
+        type: string
+    type: object
+  query_service.UpdateFolderReq:
+    properties:
+      commit_id:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  query_service.UpdateQueryReq:
+    properties:
+      body:
+        $ref: '#/definitions/structpb.Struct'
+      commit_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/query_service.CommitInfo'
+      description:
+        type: string
+      environment_id:
+        type: string
+      folder_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      query_type:
+        type: string
+      resource_id:
+        type: string
+      timeout:
+        type: string
+      title:
+        type: string
+      variables:
+        items:
+          $ref: '#/definitions/query_service.Variable'
+        type: array
+      version_id:
+        type: string
+    type: object
+  query_service.Variable:
+    properties:
+      default:
+        type: string
+      id:
+        type: string
+      key:
+        type: string
+      query_id:
+        type: string
+      type:
+        type: string
+      value:
+        type: string
+    type: object
+  query_service.VersionInfo:
+    properties:
+      author_id:
+        type: string
+      created_at:
+        type: string
+      desc:
+        type: string
+      is_current:
+        type: boolean
+      updated_at:
+        type: string
+      version:
+        type: string
+      version_id:
+        type: string
+    type: object
+  scenario_service.ConnectInfo:
+    properties:
+      method:
+        type: string
+      url:
+        type: string
+    type: object
+  scenario_service.CreateDAGRequest:
+    properties:
+      dag:
+        $ref: '#/definitions/scenario_service.DAG'
+    type: object
+  scenario_service.CreateDAGStepRequest:
+    properties:
+      condition_action:
+        items:
+          $ref: '#/definitions/structpb.Struct'
+        type: array
+      connect_info:
+        $ref: '#/definitions/scenario_service.ConnectInfo'
+      dag_id:
+        type: string
+      is_parallel:
+        type: boolean
+      parent_id:
+        type: string
+      request_info:
+        $ref: '#/definitions/structpb.Struct'
+      slug:
+        type: string
+      type:
+        type: string
+    type: object
+  scenario_service.DAG:
+    properties:
+      id:
+        type: string
+      slug:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  scenario_service.DAGList:
+    properties:
+      DAGs:
+        items:
+          $ref: '#/definitions/scenario_service.DAG'
+        type: array
+      count:
+        type: integer
+    type: object
+  scenario_service.DAGStep:
+    properties:
+      condition_action:
+        items:
+          $ref: '#/definitions/structpb.Struct'
+        type: array
+      connect_info:
+        $ref: '#/definitions/scenario_service.ConnectInfo'
+      dag_id:
+        type: string
+      id:
+        type: string
+      is_parallel:
+        type: boolean
+      parent_id:
+        type: string
+      request_info:
+        $ref: '#/definitions/structpb.Struct'
+      slug:
+        type: string
+      type:
+        type: string
+    type: object
+  scenario_service.DAGStepList:
+    properties:
+      dag_steps:
+        items:
+          $ref: '#/definitions/scenario_service.DAGStep'
+        type: array
+    type: object
+  scenario_service.Filters:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
+      order:
+        type: string
+      page:
+        type: integer
+      search:
+        type: string
+      sort:
+        type: string
+    type: object
+  scenario_service.GetAllDAGStepRequest:
+    properties:
+      dag_id:
+        type: string
+      filters:
+        $ref: '#/definitions/scenario_service.Filters'
+      parent_id:
+        type: string
+      type:
+        type: string
+    type: object
+  scenario_service.GetDAGRequest:
+    properties:
+      id:
+        type: string
+    type: object
+  scenario_service.GetDAGStepRequest:
+    properties:
+      dag_id:
+        type: string
+      id:
+        type: string
+      type:
+        type: string
+    type: object
   status_http.Response:
     properties:
       data: {}
@@ -2749,6 +3221,611 @@ definitions:
     properties:
       kind:
         description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+    type: object
+  template_service.CreateFolderNoteReq:
+    properties:
+      commit_id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.CreateFolderReq:
+    properties:
+      commit_id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.CreateNoteReq:
+    properties:
+      commit_id:
+        type: string
+      folder_id:
+        type: string
+      json:
+        $ref: '#/definitions/structpb.Struct'
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.CreateTemplateReq:
+    properties:
+      commit_id:
+        type: string
+      folder_id:
+        type: string
+      html:
+        type: string
+      project_id:
+        type: string
+      size:
+        type: string
+      tables:
+        items:
+          $ref: '#/definitions/template_service.CreateTemplateReq_Table'
+        type: array
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.CreateTemplateReq_Table:
+    properties:
+      filter:
+        type: string
+      object_id:
+        type: string
+      relations:
+        items:
+          $ref: '#/definitions/template_service.CreateTemplateReq_Table_Relation'
+        type: array
+      table_id:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.CreateTemplateReq_Table_Relation:
+    properties:
+      relation_id:
+        type: string
+    type: object
+  template_service.CreateTokenReq:
+    properties:
+      is_private:
+        type: boolean
+      object_id:
+        type: string
+      project_id:
+        type: string
+      role:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.CreateTokenRes:
+    properties:
+      is_private:
+        type: boolean
+      object_id:
+        type: string
+      project_id:
+        type: string
+      role:
+        type: string
+      token:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.CreateUserPermissionReq:
+    properties:
+      email:
+        type: string
+      is_deleted:
+        type: boolean
+      object_id:
+        type: string
+      photo_url:
+        type: string
+      project_id:
+        type: string
+      role:
+        type: string
+      type:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  template_service.Folder:
+    properties:
+      commit_id:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.FolderNote:
+    properties:
+      commit_id:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.GetListFolderNoteRes:
+    properties:
+      count:
+        type: integer
+      folders:
+        items:
+          $ref: '#/definitions/template_service.FolderNote'
+        type: array
+    type: object
+  template_service.GetListFolderRes:
+    properties:
+      count:
+        type: integer
+      folders:
+        items:
+          $ref: '#/definitions/template_service.Folder'
+        type: array
+    type: object
+  template_service.GetListNoteRes:
+    properties:
+      count:
+        type: integer
+      notes:
+        items:
+          $ref: '#/definitions/template_service.Note'
+        type: array
+    type: object
+  template_service.GetListTemplateRes:
+    properties:
+      count:
+        type: integer
+      templates:
+        items:
+          $ref: '#/definitions/template_service.Template'
+        type: array
+    type: object
+  template_service.GetListUserPermissionRes:
+    properties:
+      count:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/template_service.UserPermission'
+        type: array
+    type: object
+  template_service.GetObjectTokenReq:
+    properties:
+      token:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.GetObjectTokenRes:
+    properties:
+      data:
+        $ref: '#/definitions/structpb.Struct'
+      role:
+        type: string
+    type: object
+  template_service.GetSingleFolderNoteRes:
+    properties:
+      count:
+        type: integer
+      folders:
+        items:
+          $ref: '#/definitions/template_service.FolderNote'
+        type: array
+    type: object
+  template_service.GetSingleFolderRes:
+    properties:
+      count:
+        type: integer
+      folders:
+        items:
+          $ref: '#/definitions/template_service.Folder'
+        type: array
+    type: object
+  template_service.Note:
+    properties:
+      commit_id:
+        type: string
+      folder_id:
+        type: string
+      id:
+        type: string
+      json:
+        $ref: '#/definitions/structpb.Struct'
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.PdfBody:
+    properties:
+      link:
+        type: string
+    type: object
+  template_service.Template:
+    properties:
+      commit_id:
+        type: string
+      folder_id:
+        type: string
+      html:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      size:
+        type: string
+      tables:
+        items:
+          $ref: '#/definitions/template_service.Template_Table'
+        type: array
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.Template_Table:
+    properties:
+      filter:
+        type: string
+      object_id:
+        type: string
+      relations:
+        items:
+          $ref: '#/definitions/template_service.Template_Table_Relation'
+        type: array
+      table_id:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.Template_Table_Relation:
+    properties:
+      relation_id:
+        type: string
+    type: object
+  template_service.UpdateFolderNoteReq:
+    properties:
+      commit_id:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.UpdateFolderReq:
+    properties:
+      commit_id:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.UpdateNoteReq:
+    properties:
+      commit_id:
+        type: string
+      folder_id:
+        type: string
+      id:
+        type: string
+      json:
+        $ref: '#/definitions/structpb.Struct'
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.UpdateTemplateReq:
+    properties:
+      commit_id:
+        type: string
+      folder_id:
+        type: string
+      html:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      size:
+        type: string
+      tables:
+        items:
+          $ref: '#/definitions/template_service.UpdateTemplateReq_Table'
+        type: array
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  template_service.UpdateTemplateReq_Table:
+    properties:
+      filter:
+        type: string
+      object_id:
+        type: string
+      relations:
+        items:
+          $ref: '#/definitions/template_service.UpdateTemplateReq_Table_Relation'
+        type: array
+      table_id:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.UpdateTemplateReq_Table_Relation:
+    properties:
+      relation_id:
+        type: string
+    type: object
+  template_service.UpdateTokenReq:
+    properties:
+      is_private:
+        type: boolean
+      object_id:
+        type: string
+      project_id:
+        type: string
+      role:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.UpdateTokenRes:
+    properties:
+      is_private:
+        type: boolean
+      object_id:
+        type: string
+      project_id:
+        type: string
+      role:
+        type: string
+      token:
+        type: string
+      type:
+        type: string
+    type: object
+  template_service.UpdateUserPermissionReq:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      is_deleted:
+        type: boolean
+      object_id:
+        type: string
+      photo_url:
+        type: string
+      project_id:
+        type: string
+      role:
+        type: string
+      type:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  template_service.UserPermission:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      is_deleted:
+        type: boolean
+      object_id:
+        type: string
+      photo_url:
+        type: string
+      project_id:
+        type: string
+      role:
+        type: string
+      type:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  versioning_service.ApiCreateReleaseRequest:
+    properties:
+      author_id:
+        type: string
+      description:
+        type: string
+      is_current:
+        type: boolean
+      project_id:
+        type: string
+      release_type:
+        $ref: '#/definitions/versioning_service.ReleaseType'
+    type: object
+  versioning_service.ApiDeleteReleaseRequest:
+    properties:
+      project_id:
+        type: string
+    type: object
+  versioning_service.ApiSetCurrentReleaseRequest:
+    properties:
+      project_id:
+        type: string
+      version_id:
+        type: string
+    type: object
+  versioning_service.ApiUpdateReleaseRequest:
+    properties:
+      description:
+        type: string
+      project_id:
+        type: string
+    type: object
+  versioning_service.CommitWithRelease:
+    properties:
+      author_id:
+        type: string
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      release_info:
+        $ref: '#/definitions/versioning_service.CommitWithRelease_Release'
+    type: object
+  versioning_service.CommitWithRelease_Release:
+    properties:
+      id:
+        type: string
+      is_current:
+        type: boolean
+      version:
+        type: string
+    type: object
+  versioning_service.CreateCommitRequest:
+    properties:
+      author_id:
+        type: string
+      commit_type:
+        type: string
+      environment_id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+    type: object
+  versioning_service.GetCommitListResponse:
+    properties:
+      commits:
+        items:
+          $ref: '#/definitions/versioning_service.CommitWithRelease'
+        type: array
+      count:
+        type: integer
+    type: object
+  versioning_service.GetCurrentReleaseResponse:
+    properties:
+      version_id:
+        type: string
+    type: object
+  versioning_service.GetReleaseListResponse:
+    properties:
+      count:
+        type: integer
+      releases:
+        items:
+          $ref: '#/definitions/versioning_service.ReleaseWithCommit'
+        type: array
+    type: object
+  versioning_service.ReleaseType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ReleaseType_UNDEFINED
+    - ReleaseType_MAJOR
+    - ReleaseType_MINOR
+    - ReleaseType_PATCH
+  versioning_service.ReleaseWithCommit:
+    properties:
+      author_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/versioning_service.ReleaseWithCommit_Commit'
+      created_at:
+        type: string
+      description:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      is_current:
+        type: boolean
+      project_id:
+        type: string
+      updated_at:
+        type: string
+      version:
+        type: string
+    type: object
+  versioning_service.ReleaseWithCommit_Commit:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
     type: object
 info:
   contact: {}
@@ -3405,6 +4482,52 @@ paths:
       summary: Send Message To Email
       tags:
       - Email
+  /template-note/share-get:
+    post:
+      consumes:
+      - application/json
+      description: Get single object template
+      operationId: get_single_object_template
+      parameters:
+      - description: GetObjectTokenReq
+        in: body
+        name: share
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.GetObjectTokenReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetObjectTokenRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetObjectTokenRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get single object template
+      tags:
+      - Template
   /v1/action-permission/{role_id}/{table_slug}:
     get:
       consumes:
@@ -4628,6 +5751,61 @@ paths:
       tags:
       - ApiReference
   /v1/api-reference/{api_reference_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get api reference by id
+      operationId: get_api_reference_by_id
+      parameters:
+      - description: api_reference_id
+        in: path
+        name: api_reference_id
+        required: true
+        type: string
+      - description: commit_id
+        in: query
+        name: commit_id
+        type: string
+      - description: version_id
+        in: query
+        name: version_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: AppBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api_reference_service.ApiReference'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get api reference by id
+      tags:
+      - ApiReference
+  /v1/api-reference/{project_id}/{api_reference_id}:
     delete:
       consumes:
       - application/json
@@ -4667,31 +5845,53 @@ paths:
       summary: Delete App
       tags:
       - ApiReference
+  /v1/api-reference/history/{project_id}/{api_reference_id}:
     get:
       consumes:
       - application/json
-      description: Get api reference by id
-      operationId: get_api_reference_by_id
+      description: Get Api Reference Changes
+      operationId: get_api_reference_changes
       parameters:
       - description: api_reference_id
         in: path
         name: api_reference_id
         required: true
         type: string
+      - description: project_id
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: per_page
+        in: query
+        name: per_page
+        type: integer
+      - description: sort
+        in: query
+        name: sort
+        type: string
+      - description: order
+        in: query
+        name: order
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: AppBody
+          description: Api Reference Changes
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.ApiReference'
+                  $ref: '#/definitions/api_reference_service.GetListApiReferenceChangesResponse'
               type: object
         "400":
-          description: Invalid Argument
+          description: Bad Request
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
@@ -4710,7 +5910,139 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-      summary: Get api reference by id
+      summary: Get Api Reference Changes
+      tags:
+      - ApiReference
+  /v1/api-reference/revert/{api_reference_id}:
+    post:
+      consumes:
+      - application/json
+      description: Revert Api Reference
+      operationId: revert_api_reference
+      parameters:
+      - description: api_reference_id
+        in: path
+        name: api_reference_id
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: per_page
+        in: query
+        name: per_page
+        type: integer
+      - description: sort
+        in: query
+        name: sort
+        type: string
+      - description: order
+        in: query
+        name: order
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: revert_api_reference
+        required: true
+        schema:
+          $ref: '#/definitions/api_reference_service.ApiRevertApiReferenceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api_reference_service.ApiReference'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Revert Api Reference
+      tags:
+      - ApiReference
+  /v1/api-reference/select-versions/{api_reference_id}:
+    post:
+      consumes:
+      - application/json
+      description: Select Api Reference
+      operationId: insert_many_api_reference
+      parameters:
+      - description: api_reference_id
+        in: path
+        name: api_reference_id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api_reference_service.ApiManyVersions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api_reference_service.ApiReference'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Select Api Reference
       tags:
       - ApiReference
   /v1/app:
@@ -5567,7 +6899,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.GetCommitListResponse'
+                  $ref: '#/definitions/versioning_service.GetCommitListResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -5603,7 +6935,7 @@ paths:
         name: commit
         required: true
         schema:
-          $ref: '#/definitions/company_service.CreateCommitRequest'
+          $ref: '#/definitions/versioning_service.CreateCommitRequest'
       produces:
       - application/json
       responses:
@@ -5614,7 +6946,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.CommitWithRelease'
+                  $ref: '#/definitions/versioning_service.CommitWithRelease'
               type: object
         "400":
           description: Bad Request
@@ -5661,7 +6993,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.CommitWithRelease'
+                  $ref: '#/definitions/versioning_service.CommitWithRelease'
               type: object
         "400":
           description: Invalid Argument
@@ -6513,6 +7845,115 @@ paths:
       summary: Add ProjectResource
       tags:
       - Company Resource
+  /v1/company/project/resource-default:
+    get:
+      consumes:
+      - application/json
+      description: Get Service Resource
+      operationId: get_service_resources
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetServiceResourcesRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Service Resource
+      tags:
+      - Company Resource
+    put:
+      consumes:
+      - application/json
+      description: Set Default Resource
+      operationId: set_default_resource
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.SetDefaultResourceReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.SetDefaultResourceRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Set Default Resource
+      tags:
+      - Company Resource
   /v1/company/project/resource-environment/{resource_id}:
     get:
       consumes:
@@ -6770,6 +8211,9 @@ paths:
         type: string
       - in: query
         name: table_slug
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json
@@ -8470,6 +9914,64 @@ paths:
       summary: Delete Field
       tags:
       - Field
+  /v1/fields-relations:
+    post:
+      consumes:
+      - application/json
+      description: Create field
+      operationId: create_fields_and_relations
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateFieldsAndRelationsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.CreateFieldsAndRelationsResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create field
+      tags:
+      - Field
   /v1/function:
     get:
       consumes:
@@ -9155,6 +10657,69 @@ paths:
       summary: Convert html to pdf
       tags:
       - View
+  /v1/html-to-pdfV2:
+    post:
+      consumes:
+      - application/json
+      description: Convert html to pdf
+      operationId: convert_html_to_pdfV2
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: HtmlBody
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/models.HtmlBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: PdfBody data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.PdfBody'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Convert html to pdf
+      tags:
+      - Template
   /v1/import-from-json:
     post:
       consumes:
@@ -9823,6 +11388,737 @@ paths:
       summary: Get Function by id
       tags:
       - Function
+  /v1/note:
+    get:
+      consumes:
+      - application/json
+      description: Get List Note
+      operationId: get_list_Note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: folder-id
+        in: query
+        name: folder-id
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: NoteBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListNoteRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List Note
+      tags:
+      - Note
+    post:
+      consumes:
+      - application/json
+      description: Create Note
+      operationId: create_note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateNoteReq
+        in: body
+        name: Note
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.CreateNoteReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Note data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Note'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Note
+      tags:
+      - Note
+    put:
+      consumes:
+      - application/json
+      description: Update Note
+      operationId: update_note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateNoteReqBody
+        in: body
+        name: Note
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.UpdateNoteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Note data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Note'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Note
+      tags:
+      - Note
+  /v1/note-folder:
+    get:
+      consumes:
+      - application/json
+      description: Get List Note Folder
+      operationId: get_list_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FolderNoteBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListFolderNoteRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List Note Folder
+      tags:
+      - Note
+    post:
+      consumes:
+      - application/json
+      description: Create Note Folder
+      operationId: create_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateFolderNoteReq
+        in: body
+        name: Note_Folder
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.CreateFolderNoteReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Note Folder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.FolderNote'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Note Folder
+      tags:
+      - Note
+    put:
+      consumes:
+      - application/json
+      description: Update Note Folder
+      operationId: update_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateFolderNoteReqBody
+        in: body
+        name: FolderNote
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.UpdateFolderNoteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FolderNote data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.FolderNote'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Note Folder
+      tags:
+      - Note
+  /v1/note-folder/{note-folder-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Note Folder
+      operationId: delete_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-folder-id
+        in: path
+        name: note-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Note Folder
+      tags:
+      - Note
+    get:
+      consumes:
+      - application/json
+      description: Get single Note Folder
+      operationId: get_single_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-folder-id
+        in: path
+        name: note-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: NoteFolderBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetSingleFolderNoteRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single Note Folder
+      tags:
+      - Note
+  /v1/note-folder/commits/{note-folder-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Commits note folder
+      operationId: get_commits_note_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-folder-id
+        in: path
+        name: note-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListFolderNoteRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListFolderNoteRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Commits note folder
+      tags:
+      - Note
+  /v1/note/{note-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Note
+      operationId: delete_note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-id
+        in: path
+        name: note-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Note
+      tags:
+      - Note
+    get:
+      consumes:
+      - application/json
+      description: Get single Note
+      operationId: get_single_note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-id
+        in: path
+        name: note-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: NoteBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Note'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single Note
+      tags:
+      - Note
+  /v1/note/commits/{note-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Commits note
+      operationId: get_commits_note
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: note-id
+        in: path
+        name: note-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListNoteRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListNoteRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Commits note
+      tags:
+      - Note
   /v1/object-upsert/{table_slug}:
     post:
       consumes:
@@ -10870,6 +13166,613 @@ paths:
       summary: Get all query rows
       tags:
       - Query
+  /v1/query-folder:
+    get:
+      consumes:
+      - application/json
+      description: Get List query folder
+      operationId: get_list_query_request_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FolderBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.GetListFolderRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List query folder
+      tags:
+      - Query
+    post:
+      consumes:
+      - application/json
+      description: Create query request folder
+      operationId: create_query_request_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateFolderReq
+        in: body
+        name: query_folder
+        required: true
+        schema:
+          $ref: '#/definitions/query_service.CreateFolderReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Query folder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.Folder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create query request folder
+      tags:
+      - Query
+    put:
+      consumes:
+      - application/json
+      description: Update query folder
+      operationId: update_query_request_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateFolderReq
+        in: body
+        name: folder
+        required: true
+        schema:
+          $ref: '#/definitions/query_service.UpdateFolderReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Folder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.Folder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update query request folder
+      tags:
+      - Query
+  /v1/query-folder/{query-folder-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete query folder
+      operationId: delete_query_request_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: query-folder-id
+        in: path
+        name: query-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete query folder
+      tags:
+      - Query
+    get:
+      consumes:
+      - application/json
+      description: Get single query request folder
+      operationId: get_single_query_request_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: query-folder-id
+        in: path
+        name: query-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetSingleFolderRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.GetSingleFolderRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single query request folder
+      tags:
+      - Query
+  /v1/query-request:
+    get:
+      consumes:
+      - application/json
+      description: Get List query
+      operationId: get_list_query_request
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: folder-id
+        in: query
+        name: folder-id
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListQueryRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.GetListQueryRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List query
+      tags:
+      - Query
+    post:
+      consumes:
+      - application/json
+      description: Create query
+      operationId: create_query_request
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateQueryReq
+        in: body
+        name: query
+        required: true
+        schema:
+          $ref: '#/definitions/query_service.CreateQueryReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Query data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.Query'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create query
+      tags:
+      - Query
+    put:
+      consumes:
+      - application/json
+      description: Update query
+      operationId: update_query_request
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateQueryReq
+        in: body
+        name: query
+        required: true
+        schema:
+          $ref: '#/definitions/query_service.UpdateQueryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Query data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.Query'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update query
+      tags:
+      - Query
+  /v1/query-request/{query-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete query
+      operationId: delete_query_request
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: query-id
+        in: path
+        name: query-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete query
+      tags:
+      - Query
+    get:
+      consumes:
+      - application/json
+      description: Get single query
+      operationId: get_single_query_request
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: query-id
+        in: path
+        name: query-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Query
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.Query'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single query
+      tags:
+      - Query
   /v1/relation:
     get:
       consumes:
@@ -11141,88 +14044,34 @@ paths:
       tags:
       - Relation
   /v1/release:
-    get:
-      consumes:
-      - application/json
-      description: Get all releases
-      operationId: get_all_releases
-      parameters:
-      - in: query
-        name: created_at
-        type: string
-      - in: query
-        name: environment_id
-        type: string
-      - in: query
-        name: limit
-        type: integer
-      - in: query
-        name: offset
-        type: integer
-      - in: query
-        name: project_id
-        type: string
-      - in: query
-        name: search
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ReleaseBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.GetReleaseListResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all releases
-      tags:
-      - Release
     post:
       consumes:
       - application/json
       description: Create release
       operationId: create_release
       parameters:
-      - description: CreateReleaseRequestBody
+      - description: Request Body
         in: body
         name: release
         required: true
         schema:
-          $ref: '#/definitions/company_service.CreateReleaseRequest'
+          $ref: '#/definitions/versioning_service.ApiCreateReleaseRequest'
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "201":
-          description: Release data
+          description: Response Body
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.ReleaseWithCommit'
+                  type: string
               type: object
         "400":
           description: Bad Request
@@ -11247,18 +14096,146 @@ paths:
       summary: Create release
       tags:
       - Release
-  /v1/release/{id}:
+  /v1/release/{project_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all releases
+      operationId: get_all_releases
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/versioning_service.GetReleaseListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all releases
+      tags:
+      - Release
+  /v1/release/{project_id}/{version_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get release by id
+      operationId: get_release_by_id
+      parameters:
+      - description: version_id
+        in: path
+        name: version_id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ReleaseBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/versioning_service.ReleaseWithCommit'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get release by id
+      tags:
+      - Release
+  /v1/release/{version_id}:
     delete:
       consumes:
       - application/json
       description: Delete Release
       operationId: delete_release
       parameters:
-      - description: id
+      - description: version_id
         in: path
-        name: id
+        name: version_id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: release
+        required: true
+        schema:
+          $ref: '#/definitions/versioning_service.ApiDeleteReleaseRequest'
       produces:
       - application/json
       responses:
@@ -11287,80 +14264,39 @@ paths:
       summary: Delete Release
       tags:
       - Release
-    get:
-      consumes:
-      - application/json
-      description: Get release by id
-      operationId: get_release_by_id
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ReleaseBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.ReleaseWithCommit'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get release by id
-      tags:
-      - Release
     put:
       consumes:
       - application/json
       description: Update release
       operationId: update_release
       parameters:
-      - description: id
+      - description: version_id
         in: path
-        name: id
+        name: version_id
         required: true
         type: string
-      - description: UpdateReleaseRequestBody
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
         in: body
         name: release
         required: true
         schema:
-          $ref: '#/definitions/company_service.UpdateReleaseRequest'
+          $ref: '#/definitions/versioning_service.ApiUpdateReleaseRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Release data
+          description: Response Body
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.ReleaseWithCommit'
+                  $ref: '#/definitions/versioning_service.ReleaseWithCommit'
               type: object
         "400":
           description: Bad Request
@@ -11392,17 +14328,22 @@ paths:
       description: SetCurrent release
       operationId: set_current_release
       parameters:
-      - description: SetCurrentReleaseRequestBody
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
         in: body
         name: release
         required: true
         schema:
-          $ref: '#/definitions/company_service.SetCurrentReleaseRequest'
+          $ref: '#/definitions/versioning_service.ApiSetCurrentReleaseRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Release data
+          description: Response Body
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
@@ -11455,7 +14396,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.GetCurrentReleaseResponse'
+                  $ref: '#/definitions/versioning_service.GetCurrentReleaseResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -11480,6 +14421,638 @@ paths:
       summary: Get release by id
       tags:
       - GetRelease
+  /v1/scenario/dag:
+    get:
+      consumes:
+      - application/json
+      description: Get all scenario dag
+      operationId: get_all_scenario_dag
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: order
+        in: query
+        name: order
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAGList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all scenario dag
+      tags:
+      - Section
+    post:
+      consumes:
+      - application/json
+      description: Create scenario dag
+      operationId: create_scenario_dag
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.CreateDAGRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAG'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create scenario dag
+      tags:
+      - Section
+    put:
+      consumes:
+      - application/json
+      description: Update scenario dag
+      operationId: update_scenario_dag
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.DAG'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAG'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update scenario dag
+      tags:
+      - Section
+  /v1/scenario/dag-step:
+    get:
+      consumes:
+      - application/json
+      description: Get All scenario dag step
+      operationId: get_all_scenario_dag_step
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.GetAllDAGStepRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAGStepList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get All scenario dag step
+      tags:
+      - Section
+    post:
+      consumes:
+      - application/json
+      description: Create scenario dag step
+      operationId: create_scenario_dag_step
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.CreateDAGStepRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAGStep'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create scenario dag step
+      tags:
+      - Section
+    put:
+      consumes:
+      - application/json
+      description: Update scenario dag step
+      operationId: update_scenario_dag_step
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.DAGStep'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAGStep'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update scenario dag step
+      tags:
+      - Section
+  /v1/scenario/dag-step/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete scenario dag step
+      operationId: delete_scenario_dag_step
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete scenario dag step
+      tags:
+      - Section
+    get:
+      consumes:
+      - application/json
+      description: Get scenario dag step
+      operationId: get_scenario_dag_step
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.GetDAGStepRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAGStep'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get scenario dag step
+      tags:
+      - Section
+  /v1/scenario/dag/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete scenario dag
+      operationId: delete_scenario_dag
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete scenario dag
+      tags:
+      - Section
+    get:
+      consumes:
+      - application/json
+      description: Get all scenario dag
+      operationId: get_scenario_dag
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.GetDAGRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAG'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all scenario dag
+      tags:
+      - Section
   /v1/section:
     get:
       consumes:
@@ -11508,6 +15081,9 @@ paths:
         type: string
       - in: query
         name: table_slug
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json
@@ -11885,6 +15461,986 @@ paths:
       summary: Get table by id
       tags:
       - Table
+  /v1/template:
+    get:
+      consumes:
+      - application/json
+      description: Get List template
+      operationId: get_list_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: folder-id
+        in: query
+        name: folder-id
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FolderBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListFolderRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List template
+      tags:
+      - Template
+    post:
+      consumes:
+      - application/json
+      description: Create template
+      operationId: create_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateTemplateReq
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.CreateTemplateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Template data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Template'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create template
+      tags:
+      - Template
+    put:
+      consumes:
+      - application/json
+      description: Update template
+      operationId: update_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateTemplateReqBody
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.UpdateTemplateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Template data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Template'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update template
+      tags:
+      - Template
+  /v1/template-folder:
+    get:
+      consumes:
+      - application/json
+      description: Get List template folder
+      operationId: get_list_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FolderBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListFolderRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List template folder
+      tags:
+      - Template
+    post:
+      consumes:
+      - application/json
+      description: Create template folder
+      operationId: create_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateFolderReq
+        in: body
+        name: template_folder
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.CreateFolderReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Template folder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Folder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create template folder
+      tags:
+      - Template
+    put:
+      consumes:
+      - application/json
+      description: Update template folder
+      operationId: update_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateFolderReqBody
+        in: body
+        name: folder
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.UpdateFolderReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Folder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Folder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update template folder
+      tags:
+      - Template
+  /v1/template-folder/{template-folder-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete template folder
+      operationId: delete_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-folder-id
+        in: path
+        name: template-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete template folder
+      tags:
+      - Template
+    get:
+      consumes:
+      - application/json
+      description: Get single template folder
+      operationId: get_single_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-folder-id
+        in: path
+        name: template-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TemplateFolderBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetSingleFolderRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single template folder
+      tags:
+      - Template
+  /v1/template-folder/commits/{template-folder-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Commits template folder
+      operationId: get_commits_template_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-folder-id
+        in: path
+        name: template-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListTemplateRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListTemplateRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Commits template folder
+      tags:
+      - Template
+  /v1/template-note/share:
+    post:
+      consumes:
+      - application/json
+      description: Create share template
+      operationId: create_share_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateTokenReq
+        in: body
+        name: share
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.CreateTokenReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CreateTokenRes data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.CreateTokenRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create share template
+      tags:
+      - Template
+    put:
+      consumes:
+      - application/json
+      description: Update share template
+      operationId: update_share_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateTokenReq
+        in: body
+        name: share
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.UpdateTokenReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: UpdateTokenRes data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.UpdateTokenRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update share template
+      tags:
+      - Template
+  /v1/template-note/users:
+    get:
+      consumes:
+      - application/json
+      description: Get List user template
+      operationId: get_list_user_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: object-id
+        in: query
+        name: object-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListUserPermissionResBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListUserPermissionRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List user template
+      tags:
+      - Template
+    post:
+      consumes:
+      - application/json
+      description: Create user template
+      operationId: create_user_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateUserPermissionReq
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.CreateUserPermissionReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: UserPermission data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.UserPermission'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create user template
+      tags:
+      - Template
+    put:
+      consumes:
+      - application/json
+      description: Update user template
+      operationId: update_user_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateUserPermissionReq
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/template_service.UpdateUserPermissionReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: UserPermission data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.UserPermission'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update user template
+      tags:
+      - Template
+  /v1/template-note/users/{user-permission-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user template
+      operationId: delete_user_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: user-permission-id
+        in: path
+        name: user-permission-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete user template
+      tags:
+      - Template
+    get:
+      consumes:
+      - application/json
+      description: Get single user template
+      operationId: get_single_user_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: user-permission-id
+        in: path
+        name: user-permission-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: UserPermissionBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.UserPermission'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single user template
+      tags:
+      - Template
   /v1/template-to-html:
     post:
       consumes:
@@ -11943,6 +16499,247 @@ paths:
       summary: Convert template to html
       tags:
       - View
+  /v1/template-to-htmlV2:
+    post:
+      consumes:
+      - application/json
+      description: Convert template to html
+      operationId: convert_template_to_htmlV2
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: TemplateBody
+        in: body
+        name: view
+        required: true
+        schema:
+          $ref: '#/definitions/models.HtmlBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: HtmlBody data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.HtmlBody'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Convert template to html
+      tags:
+      - Template
+  /v1/template/{template-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete template
+      operationId: delete_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-id
+        in: path
+        name: template-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete template
+      tags:
+      - Template
+    get:
+      consumes:
+      - application/json
+      description: Get single template
+      operationId: get_single_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-id
+        in: path
+        name: template-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TemplateBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.Template'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single template
+      tags:
+      - Template
+  /v1/template/commits/{template-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Commits template
+      operationId: get_commits_template
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: template-id
+        in: path
+        name: template-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListTemplateRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/template_service.GetListTemplateRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Commits template
+      tags:
+      - Template
   /v1/upload:
     post:
       consumes:
@@ -12444,6 +17241,9 @@ paths:
         type: string
       - in: query
         name: table_slug
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json

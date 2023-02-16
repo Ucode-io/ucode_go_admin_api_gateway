@@ -59,6 +59,7 @@ message GetCustomEventsListRequest {
     string project_id = 2;
     string method = 3;
     string role_id = 4;
+    string version_id = 5;
 }   
 
 message CustomEventPrimaryKey {

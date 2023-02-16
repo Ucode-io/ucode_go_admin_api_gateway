@@ -1,0 +1,103 @@
+syntax="proto3";
+
+package query_service;
+option go_package="genproto/query_service";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "commit.proto";
+
+
+service QueryService {
+  rpc CreateQuery(CreateQueryReq) returns (Query) {}
+  rpc GetListQuery(GetListQueryReq) returns (GetListQueryRes) {}
+  rpc GetSingleQuery(GetSingleQueryReq) returns (Query) {}
+  rpc UpdateQuery(UpdateQueryReq) returns (Query) {}
+  rpc DeleteQuery(DeleteQueryReq) returns (google.protobuf.Empty) {}
+}
+
+message Query {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string timeout = 4;
+  string project_id = 5;
+  string environment_id = 6;
+  string folder_id = 7;
+  string query_type = 8;
+  string resource_id = 9;
+  google.protobuf.Struct body = 10;
+  repeated Variable variables = 11;
+  string commit_id = 12;
+  string version_id = 13;
+  CommitInfo commit_info = 14;
+}
+
+message Variable {
+  string id = 1;
+  string key = 2;
+  string value = 3;
+  string type = 4;
+  string default = 5;
+  string query_id = 6;
+}
+
+message CreateQueryReq {
+  string title = 1;
+  string description = 2;
+  string timeout = 3;
+  string project_id = 4;
+  string environment_id = 5;
+  string folder_id = 6;
+  string query_type = 7;
+  string resource_id = 8;
+  google.protobuf.Struct body = 9;
+  repeated Variable variables = 10;
+  string commit_id = 11;
+  string version_id = 12;
+  CommitInfo commit_info = 13;
+}
+
+message GetListQueryReq {
+  string project_id = 1;
+  string folder_id = 2;
+  string version_id = 3;
+  string commit_id = 4;
+  int32 limit = 5;
+  int32 offset = 6;
+}
+
+message GetListQueryRes {
+  repeated Query queries = 1;
+  int32 count = 2;
+}
+
+message GetSingleQueryReq {
+  string project_id = 1;
+  string id = 2;
+  string version_id = 3;
+  string commit_id = 4;
+}
+
+message UpdateQueryReq {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string timeout = 4;
+  string project_id = 5;
+  string environment_id = 6;
+  string folder_id = 7;
+  string query_type = 8;
+  string resource_id = 9;
+  google.protobuf.Struct body = 10;
+  repeated Variable variables = 11;
+  string commit_id = 12;
+  string version_id = 13;
+  CommitInfo commit_info = 14;
+}
+
+message DeleteQueryReq {
+  string project_id = 1;
+  string id = 2;
+  string version_id = 3;
+}

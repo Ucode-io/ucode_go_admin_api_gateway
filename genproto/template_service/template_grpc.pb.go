@@ -29,12 +29,17 @@ type TemplateFolderServiceClient interface {
 	GetSingleTemplate(ctx context.Context, in *GetSingleTemplateReq, opts ...grpc.CallOption) (*Template, error)
 	UpdateTemplate(ctx context.Context, in *UpdateTemplateReq, opts ...grpc.CallOption) (*Template, error)
 	DeleteTemplate(ctx context.Context, in *DeleteTemplateReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetTemplateObjectCommits(ctx context.Context, in *GetTemplateObjectCommitsReq, opts ...grpc.CallOption) (*GetListTemplateRes, error)
 	// folder rpc methods
 	CreateFolder(ctx context.Context, in *CreateFolderReq, opts ...grpc.CallOption) (*Folder, error)
 	GetListFolder(ctx context.Context, in *GetListFolderReq, opts ...grpc.CallOption) (*GetListFolderRes, error)
 	GetSingleFolder(ctx context.Context, in *GetSingleFolderReq, opts ...grpc.CallOption) (*GetSingleFolderRes, error)
 	UpdateFolder(ctx context.Context, in *UpdateFolderReq, opts ...grpc.CallOption) (*Folder, error)
 	DeleteFolder(ctx context.Context, in *DeleteFolderReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetTemplateFolderObjectCommits(ctx context.Context, in *GetTemplateFolderObjectCommitsReq, opts ...grpc.CallOption) (*GetListFolderRes, error)
+	// generate html and pdf document
+	ConvertHtmlToPdf(ctx context.Context, in *HtmlBody, opts ...grpc.CallOption) (*PdfBody, error)
+	ConvertTemplateToHtml(ctx context.Context, in *HtmlBody, opts ...grpc.CallOption) (*HtmlBody, error)
 }
 
 type templateFolderServiceClient struct {
@@ -90,6 +95,15 @@ func (c *templateFolderServiceClient) DeleteTemplate(ctx context.Context, in *De
 	return out, nil
 }
 
+func (c *templateFolderServiceClient) GetTemplateObjectCommits(ctx context.Context, in *GetTemplateObjectCommitsReq, opts ...grpc.CallOption) (*GetListTemplateRes, error) {
+	out := new(GetListTemplateRes)
+	err := c.cc.Invoke(ctx, "/template_service.TemplateFolderService/GetTemplateObjectCommits", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *templateFolderServiceClient) CreateFolder(ctx context.Context, in *CreateFolderReq, opts ...grpc.CallOption) (*Folder, error) {
 	out := new(Folder)
 	err := c.cc.Invoke(ctx, "/template_service.TemplateFolderService/CreateFolder", in, out, opts...)
@@ -135,6 +149,33 @@ func (c *templateFolderServiceClient) DeleteFolder(ctx context.Context, in *Dele
 	return out, nil
 }
 
+func (c *templateFolderServiceClient) GetTemplateFolderObjectCommits(ctx context.Context, in *GetTemplateFolderObjectCommitsReq, opts ...grpc.CallOption) (*GetListFolderRes, error) {
+	out := new(GetListFolderRes)
+	err := c.cc.Invoke(ctx, "/template_service.TemplateFolderService/GetTemplateFolderObjectCommits", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *templateFolderServiceClient) ConvertHtmlToPdf(ctx context.Context, in *HtmlBody, opts ...grpc.CallOption) (*PdfBody, error) {
+	out := new(PdfBody)
+	err := c.cc.Invoke(ctx, "/template_service.TemplateFolderService/ConvertHtmlToPdf", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *templateFolderServiceClient) ConvertTemplateToHtml(ctx context.Context, in *HtmlBody, opts ...grpc.CallOption) (*HtmlBody, error) {
+	out := new(HtmlBody)
+	err := c.cc.Invoke(ctx, "/template_service.TemplateFolderService/ConvertTemplateToHtml", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TemplateFolderServiceServer is the server API for TemplateFolderService service.
 // All implementations must embed UnimplementedTemplateFolderServiceServer
 // for forward compatibility
@@ -145,12 +186,17 @@ type TemplateFolderServiceServer interface {
 	GetSingleTemplate(context.Context, *GetSingleTemplateReq) (*Template, error)
 	UpdateTemplate(context.Context, *UpdateTemplateReq) (*Template, error)
 	DeleteTemplate(context.Context, *DeleteTemplateReq) (*emptypb.Empty, error)
+	GetTemplateObjectCommits(context.Context, *GetTemplateObjectCommitsReq) (*GetListTemplateRes, error)
 	// folder rpc methods
 	CreateFolder(context.Context, *CreateFolderReq) (*Folder, error)
 	GetListFolder(context.Context, *GetListFolderReq) (*GetListFolderRes, error)
 	GetSingleFolder(context.Context, *GetSingleFolderReq) (*GetSingleFolderRes, error)
 	UpdateFolder(context.Context, *UpdateFolderReq) (*Folder, error)
 	DeleteFolder(context.Context, *DeleteFolderReq) (*emptypb.Empty, error)
+	GetTemplateFolderObjectCommits(context.Context, *GetTemplateFolderObjectCommitsReq) (*GetListFolderRes, error)
+	// generate html and pdf document
+	ConvertHtmlToPdf(context.Context, *HtmlBody) (*PdfBody, error)
+	ConvertTemplateToHtml(context.Context, *HtmlBody) (*HtmlBody, error)
 	mustEmbedUnimplementedTemplateFolderServiceServer()
 }
 
@@ -173,6 +219,9 @@ func (UnimplementedTemplateFolderServiceServer) UpdateTemplate(context.Context, 
 func (UnimplementedTemplateFolderServiceServer) DeleteTemplate(context.Context, *DeleteTemplateReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTemplate not implemented")
 }
+func (UnimplementedTemplateFolderServiceServer) GetTemplateObjectCommits(context.Context, *GetTemplateObjectCommitsReq) (*GetListTemplateRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTemplateObjectCommits not implemented")
+}
 func (UnimplementedTemplateFolderServiceServer) CreateFolder(context.Context, *CreateFolderReq) (*Folder, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFolder not implemented")
 }
@@ -187,6 +236,15 @@ func (UnimplementedTemplateFolderServiceServer) UpdateFolder(context.Context, *U
 }
 func (UnimplementedTemplateFolderServiceServer) DeleteFolder(context.Context, *DeleteFolderReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFolder not implemented")
+}
+func (UnimplementedTemplateFolderServiceServer) GetTemplateFolderObjectCommits(context.Context, *GetTemplateFolderObjectCommitsReq) (*GetListFolderRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTemplateFolderObjectCommits not implemented")
+}
+func (UnimplementedTemplateFolderServiceServer) ConvertHtmlToPdf(context.Context, *HtmlBody) (*PdfBody, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConvertHtmlToPdf not implemented")
+}
+func (UnimplementedTemplateFolderServiceServer) ConvertTemplateToHtml(context.Context, *HtmlBody) (*HtmlBody, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConvertTemplateToHtml not implemented")
 }
 func (UnimplementedTemplateFolderServiceServer) mustEmbedUnimplementedTemplateFolderServiceServer() {}
 
@@ -291,6 +349,24 @@ func _TemplateFolderService_DeleteTemplate_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TemplateFolderService_GetTemplateObjectCommits_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTemplateObjectCommitsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TemplateFolderServiceServer).GetTemplateObjectCommits(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/template_service.TemplateFolderService/GetTemplateObjectCommits",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TemplateFolderServiceServer).GetTemplateObjectCommits(ctx, req.(*GetTemplateObjectCommitsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TemplateFolderService_CreateFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateFolderReq)
 	if err := dec(in); err != nil {
@@ -381,6 +457,60 @@ func _TemplateFolderService_DeleteFolder_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TemplateFolderService_GetTemplateFolderObjectCommits_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTemplateFolderObjectCommitsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TemplateFolderServiceServer).GetTemplateFolderObjectCommits(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/template_service.TemplateFolderService/GetTemplateFolderObjectCommits",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TemplateFolderServiceServer).GetTemplateFolderObjectCommits(ctx, req.(*GetTemplateFolderObjectCommitsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TemplateFolderService_ConvertHtmlToPdf_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HtmlBody)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TemplateFolderServiceServer).ConvertHtmlToPdf(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/template_service.TemplateFolderService/ConvertHtmlToPdf",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TemplateFolderServiceServer).ConvertHtmlToPdf(ctx, req.(*HtmlBody))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TemplateFolderService_ConvertTemplateToHtml_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HtmlBody)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TemplateFolderServiceServer).ConvertTemplateToHtml(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/template_service.TemplateFolderService/ConvertTemplateToHtml",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TemplateFolderServiceServer).ConvertTemplateToHtml(ctx, req.(*HtmlBody))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TemplateFolderService_ServiceDesc is the grpc.ServiceDesc for TemplateFolderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -409,6 +539,10 @@ var TemplateFolderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TemplateFolderService_DeleteTemplate_Handler,
 		},
 		{
+			MethodName: "GetTemplateObjectCommits",
+			Handler:    _TemplateFolderService_GetTemplateObjectCommits_Handler,
+		},
+		{
 			MethodName: "CreateFolder",
 			Handler:    _TemplateFolderService_CreateFolder_Handler,
 		},
@@ -427,6 +561,18 @@ var TemplateFolderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteFolder",
 			Handler:    _TemplateFolderService_DeleteFolder_Handler,
+		},
+		{
+			MethodName: "GetTemplateFolderObjectCommits",
+			Handler:    _TemplateFolderService_GetTemplateFolderObjectCommits_Handler,
+		},
+		{
+			MethodName: "ConvertHtmlToPdf",
+			Handler:    _TemplateFolderService_ConvertHtmlToPdf_Handler,
+		},
+		{
+			MethodName: "ConvertTemplateToHtml",
+			Handler:    _TemplateFolderService_ConvertTemplateToHtml_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

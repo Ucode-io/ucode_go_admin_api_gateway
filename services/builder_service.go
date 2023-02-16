@@ -36,6 +36,7 @@ type BuilderServiceI interface {
 	WebPage() object_builder_service.WebPageServiceClient
 	Cascading() object_builder_service.CascadingServiceClient
 	TableHelpers() object_builder_service.TableHelpersServiceClient
+	FieldsAndRelations() object_builder_service.FieldAndRelationServiceClient
 }
 
 func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderServiceI, error) {
@@ -76,6 +77,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		webPageService:           object_builder_service.NewWebPageServiceClient(connObjectBuilderService),
 		cascadingService:         object_builder_service.NewCascadingServiceClient(connObjectBuilderService),
 		tableHelpersService:      object_builder_service.NewTableHelpersServiceClient(connObjectBuilderService),
+		fieldsAndRelations:       object_builder_service.NewFieldAndRelationServiceClient(connObjectBuilderService),
 	}, nil
 }
 
@@ -106,6 +108,7 @@ type builderServiceClient struct {
 	webPageService           object_builder_service.WebPageServiceClient
 	cascadingService         object_builder_service.CascadingServiceClient
 	tableHelpersService      object_builder_service.TableHelpersServiceClient
+	fieldsAndRelations       object_builder_service.FieldAndRelationServiceClient
 }
 
 func (g *builderServiceClient) Table() object_builder_service.TableServiceClient {
@@ -209,4 +212,8 @@ func (g *builderServiceClient) WebPage() object_builder_service.WebPageServiceCl
 
 func (g *builderServiceClient) Cascading() object_builder_service.CascadingServiceClient {
 	return g.cascadingService
+}
+
+func (g *builderServiceClient) FieldsAndRelations() object_builder_service.FieldAndRelationServiceClient {
+	return g.fieldsAndRelations
 }

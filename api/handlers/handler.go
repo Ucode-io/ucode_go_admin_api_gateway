@@ -71,7 +71,12 @@ func (h *Handler) getOffsetParam(c *gin.Context) (offset int, err error) {
 	return strconv.Atoi(offsetStr)
 }
 
-func (h *Handler) getLimitParam(c *gin.Context) (offset int, err error) {
-	offsetStr := c.DefaultQuery("limit", h.cfg.DefaultLimit)
-	return strconv.Atoi(offsetStr)
+func (h *Handler) getLimitParam(c *gin.Context) (limit int, err error) {
+	limitStr := c.DefaultQuery("limit", h.cfg.DefaultLimit)
+	return strconv.Atoi(limitStr)
+}
+
+func (h *Handler) getPageParam(c *gin.Context) (page int, err error) {
+	pageStr := c.DefaultQuery("page", "1")
+	return strconv.Atoi(pageStr)
 }

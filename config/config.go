@@ -43,6 +43,9 @@ type Config struct {
 	ObjectBuilderServiceHost string
 	ObjectBuilderGRPCPort    string
 
+	TemplateServiceHost string
+	TemplateGRPCPort    string
+
 	AuthServiceHost string
 	AuthGRPCPort    string
 
@@ -55,6 +58,9 @@ type Config struct {
 	SmsServiceHost string
 	SmsGRPCPort    string
 
+	VersioningServiceHost string
+	VersioningGRPCPort    string
+
 	CompanyServiceHost string
 	CompanyServicePort string
 
@@ -63,6 +69,8 @@ type Config struct {
 
 	FunctionServiceHost string
 	FunctionServicePort string
+	QueryServiceHost    string
+	QueryServicePort    string
 
 	MinioEndpoint        string
 	MinioAccessKeyID     string
@@ -71,7 +79,10 @@ type Config struct {
 
 	UcodeNamespace string
 
-	SecretKey string
+	AdminHost string
+	AppHost   string
+	ApiHost   string
+	Localhost string
 
 	CLIENT_HOST            string
 	SUPERADMIN_HOST        string
@@ -80,6 +91,11 @@ type Config struct {
 	GitlabGroupId          int
 	GitlabProjectId        int
 	PathToClone            string
+	SecretKey              string
+	PlatformType           string
+
+	ScenarioServiceHost string
+	ScenarioGRPCPort    string
 }
 
 // Load ...
@@ -122,6 +138,9 @@ func Load() Config {
 	config.ObjectBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HOST", "localhost"))
 	config.ObjectBuilderGRPCPort = cast.ToString(GetOrReturnDefaultValue("OBJECT_BUILDER_GRPC_PORT", ":9102"))
 
+	config.TemplateServiceHost = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_SERVICE_HOST", "localhost"))
+	config.TemplateGRPCPort = cast.ToString(GetOrReturnDefaultValue("TEMPLATE_GRPC_PORT", ":9119"))
+
 	config.AuthServiceHost = cast.ToString(GetOrReturnDefaultValue("AUTH_SERVICE_HOST", "0.0.0.0"))
 	config.AuthGRPCPort = cast.ToString(GetOrReturnDefaultValue("AUTH_GRPC_PORT", ":9103"))
 
@@ -137,22 +156,32 @@ func Load() Config {
 	config.SmsServiceHost = cast.ToString(GetOrReturnDefaultValue("SMS_SERVICE_HOST", "go-sms-service"))
 	config.SmsGRPCPort = cast.ToString(GetOrReturnDefaultValue("SMS_GRPC_PORT", ":80"))
 
+	config.VersioningServiceHost = cast.ToString(GetOrReturnDefaultValue("VERSIONING_SERVICE_HOST", "go-versioning-service"))
+	config.VersioningGRPCPort = cast.ToString(GetOrReturnDefaultValue("VERSIONING_GRPC_PORT", ":80"))
+
 	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_SERVICE_HOST", "localhost"))
 	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", ":8099"))
 
 	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", "localhost"))
 	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_PORT", ":8100"))
-	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("gitlab_token", "glpat-8pVhpBeeBXxcoQdVef2R"))
+	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", "glpat-8pVhpBeeBXxcoQdVef2R"))
 	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", "https://gitlab.udevs.io"))
 	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 2008))
 	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 1467))
-	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "app"))
+	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "./app"))
+	config.ScenarioServiceHost = cast.ToString(GetOrReturnDefaultValue("SCENARIO_SERVICE_HOST", "localhost"))
+	config.ScenarioGRPCPort = cast.ToString(GetOrReturnDefaultValue("SCENARIO_GRPC_PORT", ":9108"))
+
+	config.QueryServiceHost = cast.ToString(GetOrReturnDefaultValue("QUERY_SERVICE_HOST", "localhost"))
+	config.QueryServicePort = cast.ToString(GetOrReturnDefaultValue("QUERY_SERVICE_PORT", ":8228"))
 
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = "Here$houldBe$ome$ecretKey"
 
-	config.CLIENT_HOST = cast.ToString(GetOrReturnDefaultValue("CLIENT_HOST", "https://test.app.u-code.i"))
-	config.SUPERADMIN_HOST = cast.ToString(GetOrReturnDefaultValue("SUPERADMIN_HOST", "https://test.admin.u-code.io"))
+	config.AdminHost = cast.ToString(GetOrReturnDefaultValue("ADMIN_HOST", "test.admin.u-code.io"))
+	config.AppHost = cast.ToString(GetOrReturnDefaultValue("APP_HOST", "test.app.u-code.io"))
+	config.ApiHost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "test.admin.api.u-code.io"))
+	config.PlatformType = cast.ToString(GetOrReturnDefaultValue("PLATFORM_TYPE", "super-admin"))
 	return config
 }
 

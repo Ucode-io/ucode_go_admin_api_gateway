@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -72,15 +71,16 @@ func (h *Handler) CreateApp(c *gin.Context) {
 	}
 
 	app.ProjectId = resourceEnvironment.GetId()
+	fmt.Println("PROJECT_ID", app.ProjectId)
 
-	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_APP)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-		return
-	}
+	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_APP)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+	// 	return
+	// }
 
-	app.CommitId = commitID
-	app.CommitGuid = commitGuid
+	// app.CommitId = commitID
+	// app.CommitGuid = commitGuid
 
 	resp, err := services.BuilderService().App().Create(
 		context.Background(),

@@ -184,4 +184,5 @@ message GetAllSectionsRequest {
     string table_slug = 2;
     string role_id = 3;
     string project_id = 4;
+    string version_id = 5;
 }

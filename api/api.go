@@ -36,7 +36,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	v1.Use(h.AuthMiddleware())
+	v1.Use(h.AuthMiddleware(cfg))
 	{
 		v1.POST("/upload", h.Upload)
 		v1.POST("/upload-file/:table_slug/:object_id", h.UploadFile)
@@ -55,6 +55,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/field", h.GetAllFields)
 		v1.PUT("/field", h.UpdateField)
 		v1.DELETE("/field/:field_id", h.DeleteField)
+		v1.POST("/fields-relations", h.CreateFieldsAndRelations)
 
 		//relation
 		v1.POST("/relation", h.CreateRelation)
@@ -145,10 +146,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/close-cashbox", h.GetCloseCashboxInfo)
 		v1.GET("/open-cashbox", h.GetOpenCashboxInfo)
 
-		// HTML TO PDF CONVERTER
-		v1.POST("/html-to-pdf", h.ConvertHtmlToPdf)
-		v1.POST("/template-to-html", h.ConvertTemplateToHtml)
-
 		// ANALYTICS_SERVICE
 		// CASHBOX TRANSACTION
 		v1.POST("/cashbox_transaction", h.CashboxTransaction)
@@ -210,10 +207,65 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/export-to-json", h.ExportToJSON)
 		v1.POST("import-from-json", h.ImportFromJSON)
 
+		// template
+		v1.POST("/template-folder", h.CreateTemplateFolder)
+		v1.GET("/template-folder/:template-folder-id", h.GetSingleTemplateFolder)
+		v1.PUT("/template-folder", h.UpdateTemplateFolder)
+		v1.DELETE("/template-folder/:template-folder-id", h.DeleteTemplateFolder)
+		v1.GET("/template-folder", h.GetListTemplateFolder)
+		v1.GET("/template-folder/commits/:template-folder-id", h.GetTemplateFolderCommits)
+		v1.POST("/template", h.CreateTemplate)
+		v1.GET("/template/:template-id", h.GetSingleTemplate)
+		v1.PUT("/template", h.UpdateTemplate)
+		v1.DELETE("/template/:template-id", h.DeleteTemplate)
+		v1.GET("/template", h.GetListTemplate)
+		v1.GET("/template/commits/:template-id", h.GetTemplateCommits)
+
+		// HTML TO PDF CONVERTER
+		v1.POST("/html-to-pdfV2", h.ConvertHtmlToPdfV2)
+		v1.POST("/template-to-htmlV2", h.ConvertTemplateToHtmlV2)
+
+		// HTML TO PDF CONVERTER
+		v1.POST("/html-to-pdf", h.ConvertHtmlToPdf)
+		v1.POST("/template-to-html", h.ConvertTemplateToHtml)
+
+		// note
+		v1.POST("/note-folder", h.CreateNoteFolder)
+		v1.GET("/note-folder/:note-folder-id", h.GetSingleNoteFolder)
+		v1.PUT("/note-folder", h.UpdateNoteFolder)
+		v1.DELETE("/note-folder/:note-folder-id", h.DeleteNoteFolder)
+		v1.GET("/note-folder", h.GetListNoteFolder)
+		v1.GET("/note-folder/commits/:note-folder-id", h.GetNoteFolderCommits)
+		v1.POST("/note", h.CreateNote)
+		v1.GET("/note/:note-id", h.GetSingleNote)
+		v1.PUT("/note", h.UpdateNote)
+		v1.DELETE("/note/:note-id", h.DeleteNote)
+		v1.GET("/note", h.GetListNote)
+		v1.GET("/note/commits/:note-id", h.GetNoteCommits)
+		v1.POST("/template-note/users", h.CreateUserTemplate)
+		v1.GET("/template-note/users", h.GetListUserTemplate)
+		v1.PUT("/template-note/users", h.UpdateUserTemplate)
+		v1.DELETE("/template-note/users/:user-permission-id", h.DeleteUserTemplate)
+		v1.POST("/template-note/share", h.CreateSharingToken)
+		v1.PUT("/template-note/share", h.UpdateSharingToken)
+
+		// query service
+		v1.POST("/query-folder", h.CreateQueryRequestFolder)
+		v1.PUT("/query-folder", h.UpdateQueryRequestFolder)
+		v1.GET("/query-folder", h.GetListQueryRequestFolder)
+		v1.GET("/query-folder/:query-folder-id", h.GetSingleQueryRequestFolder)
+		v1.DELETE("/query-folder/:query-folder-id", h.DeleteQueryRequestFolder)
+
+		v1.POST("/query-request", h.CreateQueryRequest)
+		v1.PUT("/query-request", h.UpdateQueryRequestFolder)
+		v1.GET("/query-request", h.GetListQueryRequest)
+		v1.GET("/query-request/:query-id", h.GetSingleQueryRequest)
+		v1.DELETE("/query-request/:query-id", h.DeleteQueryRequest)
 	}
+	r.POST("/template-note/share-get", h.GetObjectToken)
 
 	v1Admin := r.Group("/v1")
-	v1Admin.Use(h.AdminAuthMiddleware())
+	// v1Admin.Use(h.AdminAuthMiddleware())
 	{
 		// company service
 		// v1.POST("/company", h.CreateCompany)
@@ -238,6 +290,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.PUT("/company/project/resource/:resource_id", h.UpdateResource)
 		v1Admin.POST("/company/project/configure-resource", h.ConfigureProjectResource)
 		v1Admin.GET("/company/project/resource-environment/:resource_id", h.GetResourceEnvironment)
+		v1Admin.GET("/company/project/resource-default", h.GetServiceResources)
+		v1Admin.PUT("/company/project/resource-default", h.SetDefaultResource)
 
 		// environment service
 		v1Admin.POST("/environment", h.CreateEnvironment)
@@ -248,12 +302,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		// release service
 		v1Admin.POST("/release", h.CreateRelease)
-		v1Admin.GET("/release/:id", h.GetReleaseByID)
-		v1Admin.GET("/release", h.GetAllReleases)
-		v1Admin.PUT("/release/:id", h.UpdateRelease)
-		v1Admin.DELETE("/release/:id", h.DeleteRelease)
+		v1Admin.GET("/release/:project_id/:version_id", h.GetReleaseByID)
+		v1Admin.GET("/release/:project_id", h.GetAllReleases)
+		v1Admin.PUT("/release/:version_id", h.UpdateRelease)
+		v1Admin.DELETE("/release/:project_id/:version_id", h.DeleteRelease)
 		v1Admin.POST("/release/current", h.SetCurrentRelease)
-		v1Admin.GET("/release/current/:environment-id", h.GetCurrentRelease)
+		v1Admin.GET("/release/current/:project_id", h.GetCurrentRelease)
 
 		// commit service
 		v1Admin.POST("/commit", h.CreateCommit)
@@ -265,7 +319,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.PUT("/api-reference", h.UpdateApiReference)
 		v1Admin.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
 		v1Admin.GET("/api-reference", h.GetAllApiReferences)
-		v1Admin.DELETE("/api-reference/:api_reference_id", h.DeleteApiReference)
+		v1Admin.DELETE("/api-reference/:project_id/:api_reference_id", h.DeleteApiReference)
+		v1Admin.GET("/api-reference/history/:project_id/:api_reference_id", h.GetApiReferenceChanges)
+		v1Admin.POST("/api-reference/revert/:api_reference_id", h.RevertApiReference)
+		v1Admin.POST("/api-reference/select-versions/:api_reference_id", h.InsertManyVersionForApiReference)
 
 		v1Admin.POST("/category", h.CreateCategory)
 		v1Admin.PUT("/category", h.UpdateCategory)
@@ -323,7 +380,7 @@ func customCORSMiddleware() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, Platform-Type")
 		c.Header("Access-Control-Max-Age", "3600")
 
 		if c.Request.Method == "OPTIONS" {

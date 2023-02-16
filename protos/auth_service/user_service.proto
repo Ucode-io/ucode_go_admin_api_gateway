@@ -31,6 +31,17 @@ service UserService {
     rpc V2DeleteUser(UserPrimaryKey) returns (google.protobuf.Empty) {}
     rpc AddUserToProject(AddUserToProjectReq) returns (AddUserToProjectRes) {}
     rpc GetProjectsByUserId(GetProjectsByUserIdReq) returns (GetProjectsByUserIdRes) {}
+    rpc V2GetUserByLoginTypes(GetUserByLoginTypesRequest) returns (GetUserByLoginTypesResponse) {}
+}
+
+message GetUserByLoginTypesResponse {
+    string user_id = 1;
+}
+
+message GetUserByLoginTypesRequest {
+   string email = 1;
+   string phone = 2;
+   string login = 3;
 }
 
 message GetProjectsByUserIdReq {

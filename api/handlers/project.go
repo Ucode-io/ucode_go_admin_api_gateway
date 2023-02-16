@@ -124,6 +124,7 @@ func (h *Handler) UpdateCompanyProject(c *gin.Context) {
 			CompanyId:    project.CompanyId,
 			Title:        project.Title,
 			K8SNamespace: project.K8SNamespace,
+			Logo:         project.GetLogo(),
 		},
 	)
 

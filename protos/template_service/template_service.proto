@@ -5,3 +5,6 @@ package template_service;
 option go_package="genproto/template_service";
 
 import "template.proto";
+import "note.proto";
+import "user_permission.proto";
+import "share.proto";

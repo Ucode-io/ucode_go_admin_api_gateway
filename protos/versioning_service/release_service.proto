@@ -14,6 +14,7 @@ service ReleaseService {
     rpc Delete(ReleasePrimaryKey) returns (google.protobuf.Empty) {}
     rpc GetCurrentActive(GetCurrentReleaseRequest) returns (GetCurrentReleaseResponse) {}
     rpc SetCurrentActive(SetCurrentReleaseRequest) returns (google.protobuf.Empty) {}
+    rpc GetMultipleVersionInfo(GetMultipleVersionInfoRequest) returns (GetMultipleVersionInfoResponse) {}
 }
 
 enum ReleaseType {
@@ -35,6 +36,17 @@ message CreateReleaseRequest {
 
 message ReleasePrimaryKey {
     string id = 1;
+    string project_id = 2;
+    string environment_id = 3;
+    
+}
+
+message ApiCreateReleaseRequest {
+    string project_id = 1;
+    bool is_current = 2;
+    string author_id = 3;
+    string description = 4;
+    ReleaseType release_type = 5;
 }
 
 message GetReleaseListRequest {
@@ -54,6 +66,13 @@ message GetReleaseListResponse {
 message UpdateReleaseRequest {
     string id = 1;
     string description = 2;
+    string project_id = 3;
+    string environment_id = 4;
+}
+
+message ApiUpdateReleaseRequest {
+    string description = 2;
+    string project_id = 3;
 }
 
 message GetCurrentReleaseRequest {
@@ -67,5 +86,35 @@ message GetCurrentReleaseResponse {
 message SetCurrentReleaseRequest {
     string project_id = 1;
     string environment_id = 2;
-    string id = 3;
+    string version_id = 3;
+}
+
+message ApiSetCurrentReleaseRequest {
+    string version_id = 1;
+    string project_id = 2;
+}
+
+message GetMultipleVersionInfoRequest {
+    repeated string version_ids = 1;
+    string project_id = 2;
+}
+
+message VersionInfo {
+    string version_id = 1;
+    string commit_id = 2;
+    string author_id = 3;
+    string created_at = 4;
+    string updated_at = 5;
+    string desc = 6;
+    bool is_current = 7;
+    string version = 8;
+}
+
+message GetMultipleVersionInfoResponse {
+    map<string, VersionInfo> version_infos = 1;
+    int64 count = 2;
+}
+
+message ApiDeleteReleaseRequest {
+    string project_id = 1;
 }

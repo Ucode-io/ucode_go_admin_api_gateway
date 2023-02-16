@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -41,11 +40,11 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		return
 	}
 
-	// structData, err := helper.ConvertMapToStruct(function.Body)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
-	// 	return
-	// }
+	structData, err := helper.ConvertMapToStruct(function.Body)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -54,52 +53,16 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	// resourceId, ok := c.Get("resource_id")
-	// if !ok {
-	// 	err = errors.New("error getting resource id")
-	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
-	// 	return
-	// }
-
-	// environmentId, ok := c.Get("environment_id")
-	// if !ok {
-	// 	err = errors.New("error getting environment id")
-	// 	h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-	// 	return
-	// }
-
-	// resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	// 	context.Background(),
-	// 	&company_service.GetResEnvByResIdEnvIdRequest{
-	// 		EnvironmentId: environmentId.(string),
-	// 		ResourceId:    resourceId.(string),
-	// 	},
-	// )
-	// if err != nil {
-	// 	err = errors.New("error getting resource environment id")
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
+	if !util.IsValidFunctionName(function.Path) {
+		h.handleResponse(c, status_http.InvalidArgument, "function path must be contains [a-z] and hyphen")
+		return
+	}
 	project, err := services.CompanyService().Project().GetById(context.Background(), &company_service.GetProjectByIdRequest{
 		ProjectId: c.DefaultQuery("project_id", ""),
 	})
 
-	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FUNCTION)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-	// 	return
-	// }
-
-	// function.CommitId = commitID
-	// function.CommitGuid = commitGuid
 	if project.Title == "" {
-		err = errors.New("error project name is requires")
+		err = errors.New("error project name is required")
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -112,27 +75,28 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		return
 	}
 	err = gitlab_integration.CloneForkToPath(resp.Message["http_url_to_repo"].(string), h.cfg)
-	fmt.Println(resp.Code)
-	fmt.Println(resp.Message["http_url_to_repo"].(string))
-	fmt.Println(err)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
 
-	// resp, err := services.FunctionService().FunctionService().Create(
-	// 	context.Background(),
-	// 	&fc.CreateFunctionRequest{
-	// 		Path:        function.Path,
-	// 		Name:        function.Name,
-	// 		Description: function.Description,
-	// 		Body:        structData,
-	// 		ProjectId:   resourceEnvironment.GetId(),
-	// 	},
-	// )
+	response, err := services.FunctionService().FunctionService().Create(
+		context.Background(),
+		&fc.CreateFunctionRequest{
+			Path:        function.Path,
+			Name:        function.Name,
+			Description: function.Description,
+			Body:        structData,
+			ProjectId:   project.ProjectId,
+		},
+	)
 
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
-	h.handleResponse(c, status_http.Created, "resp")
+	h.handleResponse(c, status_http.Created, response)
 }
 
 // GetNewFunctionByID godoc

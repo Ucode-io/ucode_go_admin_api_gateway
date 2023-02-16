@@ -108,6 +108,9 @@ func (h *Handler) CreateField(c *gin.Context) {
 	// field.CommitId = commitID
 	// field.CommitGuid = commitGuid
 
+	field.ProjectId = resourceEnvironment.GetId()
+	// field.CommitId = commitGuid
+	// field.VersionId = versionGuid
 	resp, err := services.BuilderService().Field().Create(
 		context.Background(),
 		&field,

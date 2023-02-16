@@ -5,14 +5,21 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
+
+// const (
+// 	SUPERADMIN_HOST string = "test.admin.u-code.io"
+// 	CLIENT_HOST     string = "test.app.u-code.io"
+// )
 
 func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -22,16 +29,16 @@ func (h *Handler) NodeMiddleware() gin.HandlerFunc {
 	}
 }
 
-func (h *Handler) AuthMiddleware() gin.HandlerFunc {
+func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
-			res    = &auth_service.V2HasAccessUserRes{}
-			ok     bool
-			origin = c.GetHeader("Origin")
+			res          = &auth_service.V2HasAccessUserRes{}
+			ok           bool
+			platformType = c.GetHeader("Platform-Type")
 		)
 
-		fmt.Println("--origin--", origin)
+		fmt.Println("--platform-type--", platformType)
 		bearerToken := c.GetHeader("Authorization")
 		strArr := strings.Split(bearerToken, " ")
 
@@ -39,10 +46,9 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
 			return
 		}
-
 		switch strArr[0] {
 		case "Bearer":
-			if strings.Contains(origin, h.cfg.CLIENT_HOST) {
+			if platformType != cfg.PlatformType {
 				res, ok = h.hasAccess(c)
 				if !ok {
 					c.Abort()
@@ -61,6 +67,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 					},
 				)
 				if err != nil {
+					h.log.Error("--ERR-->GetResourceByEnvID->", logger.Error(err))
 					h.handleResponse(c, status_http.BadRequest, err.Error())
 					c.Abort()
 					return
@@ -98,7 +105,11 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			}
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
-
+		default:
+			err := errors.New("error invalid authorization method")
+			h.log.Error("--AuthMiddleware--", logger.Error(err))
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			c.Abort()
 		}
 
 		c.Set("Auth", res)

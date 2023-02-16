@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -122,6 +123,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 
 	apiKeys, err := h.authService.ApiKey().GetList(context.Background(), &auth_service.GetListReq{
 		EnvironmentId: environmentId.(string),
+		ProjectId:     resourceEnvironment.ProjectId,
 	})
 	if err != nil {
 		err = errors.New("error getting api keys by environment id")
@@ -144,14 +146,16 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		if err != nil {
 			return customEvent.Functions[0].Name, err
 		}
+		fmt.Println("idsssss::", request.IDs)
+		fmt.Println("dataaa::", request.ObjectData)
 		data["object_ids"] = request.IDs
 		data["table_slug"] = request.TableSlug
 		data["object_data"] = request.ObjectData
 		data["method"] = request.Method
-		data["api_key"] = appId
+		data["app_id"] = appId
 		invokeFunction.Data = data
 
-		resp, err := util.DoRequest("https://ofs.u-code.io/ucode/ucode_functions/"+customEvent.Functions[0].Path, "POST", invokeFunction)
+		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.Functions[0].Path, "POST", invokeFunction)
 		if err != nil {
 			return customEvent.Functions[0].Name, err
 		} else if resp.Status == "error" {
@@ -161,15 +165,15 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 			}
 			return customEvent.Functions[0].Name, errors.New(errStr)
 		}
-		_, err = services.BuilderService().CustomEvent().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
-			FunctionId: customEvent.Functions[0].Id,
-			ObjectIds:  request.IDs,
-			FieldSlug:  customEvent.Functions[0].Path + "_disable",
-			ProjectId:  resourceEnvironment.GetId(),
-		})
-		if err != nil {
-			return customEvent.Functions[0].Name, err
-		}
+		// _, err = services.BuilderService().CustomEvent().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
+		// 	FunctionId: customEvent.Functions[0].Id,
+		// 	ObjectIds:  request.IDs,
+		// 	FieldSlug:  customEvent.Functions[0].Path + "_disable",
+		// 	ProjectId:  resourceEnvironment.GetId(),
+		// })
+		// if err != nil {
+		// 	return customEvent.Functions[0].Name, err
+		// }
 	}
 	return
 }

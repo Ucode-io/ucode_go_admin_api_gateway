@@ -4,7 +4,7 @@ package template_service;
 option go_package="genproto/template_service";
 
 import "google/protobuf/empty.proto";
-// import "google/protobuf/struct.proto";
+import "google/protobuf/struct.proto";
 
 
 service TemplateFolderService {
@@ -14,6 +14,7 @@ service TemplateFolderService {
     rpc GetSingleTemplate(GetSingleTemplateReq) returns (Template) {}
     rpc UpdateTemplate(UpdateTemplateReq) returns (Template) {}
     rpc DeleteTemplate(DeleteTemplateReq) returns (google.protobuf.Empty) {}
+    rpc GetTemplateObjectCommits(GetTemplateObjectCommitsReq) returns (GetListTemplateRes) {}
 
     // folder rpc methods
     rpc CreateFolder(CreateFolderReq) returns (Folder) {}
@@ -21,6 +22,23 @@ service TemplateFolderService {
     rpc GetSingleFolder(GetSingleFolderReq) returns (GetSingleFolderRes) {}
     rpc UpdateFolder(UpdateFolderReq) returns (Folder) {}
     rpc DeleteFolder(DeleteFolderReq) returns (google.protobuf.Empty) {}
+    rpc GetTemplateFolderObjectCommits(GetTemplateFolderObjectCommitsReq) returns (GetListFolderRes) {}
+
+    // generate html and pdf document
+    rpc ConvertHtmlToPdf(HtmlBody) returns (PdfBody) {}
+    rpc ConvertTemplateToHtml(HtmlBody) returns (HtmlBody) {}
+}
+
+message GetTemplateFolderObjectCommitsReq {
+    string project_id = 1;
+    string id = 2;
+    string version_id = 3;
+}
+
+message GetTemplateObjectCommitsReq {
+    string project_id = 1;
+    string id = 2;
+    string version_id = 3;
 }
 
 message DeleteTemplateReq {
@@ -45,7 +63,7 @@ message UpdateTemplateReq {
     string title = 3;
     string html = 4;
     string folder_id = 5;
-    repeated string size = 6;
+    string size = 6;
     repeated Table tables = 7;
     string commit_id = 8;
     string version_id = 9;
@@ -85,7 +103,7 @@ message CreateTemplateReq {
     string title = 2;
     string html = 3;
     string folder_id = 4;
-    repeated string size = 5;
+    string size = 5;
     repeated Table tables = 6;
     string commit_id = 7;
     string version_id = 8;
@@ -107,7 +125,7 @@ message Template {
     string title = 3;
     string html = 4;
     string folder_id = 5;
-    repeated string size = 6;
+    string size = 6;
     repeated Table tables = 7;
     string commit_id = 8;
     string version_id = 9;
@@ -166,4 +184,14 @@ message DeleteFolderReq {
     string id = 1;
     string project_id = 2;
     string version_id = 3;
+}
+
+message HtmlBody {
+    string html = 1;
+    google.protobuf.Struct data = 2;
+    string project_id = 3;
+}
+
+message PdfBody {
+    string link = 1;
 }

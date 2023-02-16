@@ -265,6 +265,7 @@ message GetResourceManyWithPathResponse {
         string title = 7;
         string resource_id = 8;
         string environment_id = 9;
+        string version_id = 10;
     }
     repeated ResourceEnvironment res = 1;
 }

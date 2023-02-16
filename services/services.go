@@ -14,6 +14,10 @@ type ServiceManagerI interface {
 	SmsService() SmsServiceI
 	PosService() PosServiceI
 	FunctionService() FunctionServiceI
+	TemplateService() TemplateServiceI
+	VersioningService() VersioningServiceI
+	ScenarioService() ScenarioServiceI
+	QueryService() QueryServiceI
 }
 
 type grpcClients struct {
@@ -25,6 +29,10 @@ type grpcClients struct {
 	smsService          SmsServiceI
 	posService          PosServiceI
 	functionService     FunctionServiceI
+	templateService     TemplateServiceI
+	versioningService   VersioningServiceI
+	scenarioService     ScenarioServiceI
+	queryService        QueryServiceI
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -67,6 +75,26 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
+	templateServiceClient, err := NewTemplateServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	queryServiceClient, err := NewQueryServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	versioningServiceClient, err := NewVersioningServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	scenarioServiceClient, err := NewScenarioServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return grpcClients{
 		apiReferenceService: apiReferenceClient,
 		analyticsService:    analyticsServiceClient,
@@ -76,6 +104,10 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		smsService:          smsServiceClient,
 		companyService:      companyServiceClient,
 		functionService:     functionServiceClient,
+		templateService:     templateServiceClient,
+		versioningService:   versioningServiceClient,
+		scenarioService:     scenarioServiceClient,
+		queryService:        queryServiceClient,
 	}, nil
 }
 
@@ -109,4 +141,19 @@ func (g grpcClients) PosService() PosServiceI {
 
 func (g grpcClients) FunctionService() FunctionServiceI {
 	return g.functionService
+}
+func (g grpcClients) TemplateService() TemplateServiceI {
+	return g.templateService
+}
+
+func (g grpcClients) VersioningService() VersioningServiceI {
+	return g.versioningService
+}
+
+func (g grpcClients) ScenarioService() ScenarioServiceI {
+	return g.scenarioService
+}
+
+func (g grpcClients) QueryService() QueryServiceI {
+	return g.queryService
 }

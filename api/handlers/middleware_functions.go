@@ -6,9 +6,12 @@ import (
 	"strings"
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/genproto/versioning_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
@@ -19,6 +22,7 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 	bearerToken := c.GetHeader("Authorization")
 	projectId := c.DefaultQuery("project_id", "")
 
+	fmt.Println("---hasAccess->-project_id---" + projectId)
 	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
@@ -56,7 +60,6 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 
 func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessUserRes, err error) {
 	data, ok := c.Get("Auth")
-
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		c.Abort()
@@ -70,32 +73,97 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessU
 		return nil, errors.New("token error: wrong format")
 	}
 
+	fmt.Println(":::::accessResponse", accessResponse)
+
 	return accessResponse, nil
 }
 
-func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType string) (commitID int64, commitGuid string, err error) {
+func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType string) (versionId, commitGuid string, err error) {
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
 	fmt.Println("auethInfo.GetUsrId()", authInfo.GetUserId())
 	fmt.Println("authInfo.GetProjectId()", authInfo.GetProjectId())
 	fmt.Println("environmentID", environmentID)
 
-	commit, err := h.companyServices.CompanyService().Commit().Insert(
+	if !util.IsValidUUID(authInfo.GetUserId()) {
+		err := errors.New("invalid or missing user id")
+		h.log.Error("--CreateAutoCommit--", logger.Error(err))
+		return "", "", err
+	}
+
+	if !util.IsValidUUID(authInfo.GetProjectId()) {
+		err := errors.New("invalid or missing project id")
+		h.log.Error("--CreateAutoCommit--", logger.Error(err))
+		return "", "", err
+	}
+
+	if !util.IsValidUUID(environmentID) {
+		err := errors.New("invalid or missing environment id")
+		h.log.Error("--CreateAutoCommit--", logger.Error(err))
+		return "", "", err
+	}
+
+	commit, err := h.companyServices.VersioningService().Commit().Insert(
 		c.Request.Context(),
-		&company_service.CreateCommitRequest{
+		&versioning_service.CreateCommitRequest{
 			AuthorId:      authInfo.GetUserId(),
 			ProjectId:     authInfo.GetProjectId(),
 			EnvironmentId: environmentID,
-			CommitType:    commitType,
+			CommitType:    config.COMMIT_TYPE_APP,
 			Name:          fmt.Sprintf("Auto Created Commit - %s", time.Now().Format(time.RFC1123)),
 		},
 	)
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
-	return commit.GetCommitId(), commit.GetId(), nil
+	return commit.GetVersionId(), commit.GetCommitId(), nil
+}
+
+func (h *Handler) CreateAutoCommitForAdminChange(c *gin.Context, environmentID, commitType string, project_id string) (versionId, commitGuid string, err error) {
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		return "", "", err
+	}
+
+	fmt.Println("auethInfo.GetUsrId()", authInfo.GetUserId())
+	fmt.Println("authInfo.GetProjectId()", project_id)
+	fmt.Println("environmentID", environmentID)
+
+	if !util.IsValidUUID(authInfo.GetUserId()) {
+		err := errors.New("invalid or missing user id")
+		h.log.Error("--CreateAutoCommit--", logger.Error(err))
+		return "", "", err
+	}
+
+	if !util.IsValidUUID(project_id) {
+		err := errors.New("invalid or missing project id")
+		h.log.Error("--CreateAutoCommit--", logger.Error(err))
+		return "", "", err
+	}
+
+	if !util.IsValidUUID(environmentID) {
+		err := errors.New("invalid or missing environment id")
+		h.log.Error("--CreateAutoCommit--", logger.Error(err))
+		return "", "", err
+	}
+
+	commit, err := h.companyServices.VersioningService().Commit().Insert(
+		c.Request.Context(),
+		&versioning_service.CreateCommitRequest{
+			AuthorId:      authInfo.GetUserId(),
+			ProjectId:     project_id,
+			EnvironmentId: environmentID,
+			CommitType:    config.COMMIT_TYPE_APP,
+			Name:          fmt.Sprintf("Auto Created Commit - %s", time.Now().Format(time.RFC1123)),
+		},
+	)
+	if err != nil {
+		return "", "", err
+	}
+
+	return commit.GetVersionId(), commit.GetCommitId(), nil
 }

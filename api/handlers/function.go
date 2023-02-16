@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
-	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -86,14 +86,14 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
-	commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FUNCTION)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-		return
-	}
+	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FUNCTION)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+	// 	return
+	// }
 
-	function.CommitId = commitID
-	function.CommitGuid = commitGuid
+	// function.CommitId = commitID
+	// function.CommitGuid = commitGuid
 
 	resp, err := services.BuilderService().Function().Create(
 		context.Background(),
@@ -516,10 +516,34 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	resp, err := util.DoRequest("https://ofs.u-code.io/ucode/ucode_functions/"+function.Path, "POST", invokeFunction)
+	apiKeys, err := services.AuthService().ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+		EnvironmentId: environmentId.(string),
+		ProjectId:     resourceEnvironment.ProjectId,
+	})
 	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	if len(apiKeys.Data) < 1 {
+		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
+		return
+	}
+
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.InvokeFunctionRequestWithAppId{
+		ObjectIDs: invokeFunction.ObjectIDs,
+		AppID:     apiKeys.GetData()[0].GetAppId(),
+	})
+	if err != nil {
+		fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	} else if resp.Status == "error" {
+		fmt.Println("error in response status", err)
+		var errStr = resp.Status
+		if resp.Data != nil && resp.Data["message"] != nil {
+			errStr = resp.Data["message"].(string)
+		}
+		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
 	_, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
@@ -528,7 +552,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 			FunctionId: invokeFunction.FunctionID,
 			ObjectIds:  invokeFunction.ObjectIDs,
 			FieldSlug:  function.Path + "_disable",
-			ProjectId:  resourceId.(string),
+			ProjectId:  resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
