@@ -47,8 +47,8 @@ func (h *Handler) CreateDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId, _ := c.Get("project_id")
-	if !util.IsValidUUID(ProjectId.(string)) {
+	ProjectId := c.Query("project-id")
+	if !util.IsValidUUID(ProjectId) {
 		h.handleResponse(c, status_http.BadRequest, "project_id not found")
 		return
 	}
@@ -127,8 +127,8 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId, _ := c.Get("project_id")
-	if !util.IsValidUUID(ProjectId.(string)) {
+	ProjectId := c.Query("project_id")
+	if !util.IsValidUUID(ProjectId) {
 		h.handleResponse(c, status_http.BadRequest, "project_id not found")
 		return
 	}
@@ -198,8 +198,8 @@ func (h *Handler) GetDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId, _ := c.Get("project_id")
-	if !util.IsValidUUID(ProjectId.(string)) {
+	ProjectId := c.Query("project_id")
+	if !util.IsValidUUID(ProjectId) {
 		h.handleResponse(c, status_http.BadRequest, "project_id not found")
 		return
 	}
@@ -260,8 +260,8 @@ func (h *Handler) UpdateDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId, _ := c.Get("project_id")
-	if !util.IsValidUUID(ProjectId.(string)) {
+	ProjectId := c.Query("project_id")
+	if !util.IsValidUUID(ProjectId) {
 		h.handleResponse(c, status_http.BadRequest, "project_id not found")
 		return
 	}
@@ -317,8 +317,8 @@ func (h *Handler) DeleteDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId, _ := c.Get("project_id")
-	if !util.IsValidUUID(ProjectId.(string)) {
+	ProjectId := c.Query("project_id")
+	if !util.IsValidUUID(ProjectId) {
 		h.handleResponse(c, status_http.BadRequest, "project_id not found")
 		return
 	}
