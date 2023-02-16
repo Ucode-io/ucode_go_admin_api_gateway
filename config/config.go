@@ -67,8 +67,10 @@ type Config struct {
 	ApiReferenceServiceHost string
 	ApiReferenceServicePort string
 
-	QueryServiceHost string
-	QueryServicePort string
+	FunctionServiceHost string
+	FunctionServicePort string
+	QueryServiceHost    string
+	QueryServicePort    string
 
 	MinioEndpoint        string
 	MinioAccessKeyID     string
@@ -82,8 +84,15 @@ type Config struct {
 	ApiHost   string
 	Localhost string
 
-	SecretKey    string
-	PlatformType string
+	CLIENT_HOST            string
+	SUPERADMIN_HOST        string
+	GitlabIntegrationToken string
+	GitlabIntegrationURL   string
+	GitlabGroupId          int
+	GitlabProjectId        int
+	PathToClone            string
+	SecretKey              string
+	PlatformType           string
 
 	ScenarioServiceHost string
 	ScenarioGRPCPort    string
@@ -153,9 +162,16 @@ func Load() Config {
 	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_SERVICE_HOST", "localhost"))
 	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", ":8099"))
 
+	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", "localhost"))
+	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_PORT", ":8100"))
+	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", "glpat-8pVhpBeeBXxcoQdVef2R"))
+	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", "https://gitlab.udevs.io"))
+	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 2008))
+	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 1467))
+	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "./app"))
 	config.ScenarioServiceHost = cast.ToString(GetOrReturnDefaultValue("SCENARIO_SERVICE_HOST", "localhost"))
 	config.ScenarioGRPCPort = cast.ToString(GetOrReturnDefaultValue("SCENARIO_GRPC_PORT", ":9108"))
-	
+
 	config.QueryServiceHost = cast.ToString(GetOrReturnDefaultValue("QUERY_SERVICE_HOST", "localhost"))
 	config.QueryServicePort = cast.ToString(GetOrReturnDefaultValue("QUERY_SERVICE_PORT", ":8228"))
 

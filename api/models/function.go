@@ -17,6 +17,7 @@ type CreateFunctionRequest struct {
 	Url         string                 `json:"url"`
 	CommitId    int64                  `json:"-"`
 	CommitGuid  string                 `json:"-"`
+	VersionId     string                 `json:"-"`
 }
 
 type InvokeFunctionRequest struct {

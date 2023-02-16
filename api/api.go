@@ -265,7 +265,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
 	v1Admin := r.Group("/v1")
-	v1Admin.Use(h.AdminAuthMiddleware())
+	// v1Admin.Use(h.AdminAuthMiddleware())
 	{
 		// company service
 		// v1.POST("/company", h.CreateCompany)
@@ -330,6 +330,20 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/category", h.GetAllCategories)
 		v1Admin.DELETE("/category/:category_id", h.DeleteCategory)
 
+		// custom event
+		v1Admin.POST("/new/custom-event", h.CreateNewCustomEvent)
+		v1Admin.GET("/new/custom-event/:custom_event_id", h.GetNewCustomEventByID)
+		v1Admin.GET("/new/custom-event", h.GetAllNewCustomEvents)
+		v1Admin.PUT("/new/custom-event", h.UpdateNewCustomEvent)
+		v1Admin.DELETE("/new/custom-event/:custom_event_id", h.DeleteNewCustomEvent)
+
+		// function
+		v1Admin.POST("/new/function", h.CreateNewFunction)
+		v1Admin.GET("/new/function/:function_id", h.GetNewFunctionByID)
+		v1Admin.GET("/new/function", h.GetAllNewFunctions)
+		v1Admin.PUT("/new/function", h.UpdateNewFunction)
+		v1Admin.DELETE("/new/function/:function_id", h.DeleteNewFunction)
+		
 		// scenario service
 		v1Admin.POST("/scenario/dag", h.CreateDAG)
 		v1Admin.GET("/scenario/dag/:id", h.GetDAG)

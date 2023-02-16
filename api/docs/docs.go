@@ -370,7 +370,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -698,7 +698,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -1983,7 +1983,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2571,7 +2571,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3062,7 +3062,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3857,7 +3857,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4360,7 +4360,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4775,7 +4775,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": ""
+                        "description": "Created"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -5206,7 +5206,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -7626,7 +7626,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8127,7 +8127,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8628,7 +8628,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -9124,7 +9124,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -9820,7 +9820,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10652,7 +10652,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10908,7 +10908,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Update function",
+                "description": "Update new function",
                 "consumes": [
                     "application/json"
                 ],
@@ -10918,8 +10918,8 @@ const docTemplate = `{
                 "tags": [
                     "Function"
                 ],
-                "summary": "Update function",
-                "operationId": "update_function",
+                "summary": "Update new function",
+                "operationId": "update_new_function",
                 "parameters": [
                     {
                         "type": "string",
@@ -11219,7 +11219,7 @@ const docTemplate = `{
                     "Function"
                 ],
                 "summary": "Delete Function",
-                "operationId": "delete_function",
+                "operationId": "delete_new_function",
                 "parameters": [
                     {
                         "type": "string",
@@ -11245,7 +11245,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -11848,7 +11848,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -12436,7 +12436,804 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/new/custom-event": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all custom events",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomEvent"
+                ],
+                "summary": "Get all custom events",
+                "operationId": "get_new_all_custom_events",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "method",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "table_slug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomEventBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update new custom event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NewCustomEvent"
+                ],
+                "summary": "Update New Customevent",
+                "operationId": "update_new_custom_event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "UpdateCustomEventRequestBody",
+                        "name": "Customevent",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CustomEvent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomEvent data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create New CustomEvent",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NewCustomEvent"
+                ],
+                "summary": "Create New CustomEvent",
+                "operationId": "create_new_custom_event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateCustomEventRequestBody",
+                        "name": "Customevent",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/new_function_service.CreateCustomEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CustomEvent data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/new/custom-event/{custom_event_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get CustomEvent by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NewCustomEvent"
+                ],
+                "summary": "Get CustomEvent by id",
+                "operationId": "get_new_custom_event_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "custom_event_id",
+                        "name": "custom_event_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomEventBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete CustomEvent",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NewCustomEvent"
+                ],
+                "summary": "Delete CustomEvent",
+                "operationId": "delete_new_custom_event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "custom_event_id",
+                        "name": "custom_event_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/new/function": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all functions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Function"
+                ],
+                "summary": "Get all functions",
+                "operationId": "get_all_new_functions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FunctionBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create New Function",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Function"
+                ],
+                "summary": "Create New Function",
+                "operationId": "create_new_function",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateFunctionRequestBody",
+                        "name": "Function",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateFunctionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Function data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Function"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/new/function/{function_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Function by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Function"
+                ],
+                "summary": "Get Function by id",
+                "operationId": "get_new_function_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "function_id",
+                        "name": "function_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FunctionBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Function"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13387,7 +14184,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13691,7 +14488,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -14769,7 +15566,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -16019,7 +16816,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -16549,7 +17346,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -17013,7 +17810,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -17681,7 +18478,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -19596,7 +20393,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -20547,7 +21344,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -21281,7 +22078,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -21796,7 +22593,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -22614,7 +23411,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -23340,7 +24137,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -23848,7 +24645,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -24346,7 +25143,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -24817,7 +25614,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/auth_service.ConfirmStrategies"
                 },
                 "id": {
                     "type": "string"
@@ -24841,6 +25638,19 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "auth_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
         },
         "auth_service.CreateIntegrationRequest": {
             "type": "object",
@@ -25165,10 +25975,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
@@ -25257,10 +26067,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
@@ -25342,10 +26152,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -25508,7 +26318,7 @@ const docTemplate = `{
                     }
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -25525,7 +26335,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -25615,15 +26425,30 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
                 }
             }
+        },
+        "company_service.ResourceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ResourceType_NOT_DECIDED",
+                "ResourceType_MONGODB",
+                "ResourceType_CLICKHOUSE",
+                "ResourceType_POSTGRESQL"
+            ]
         },
         "company_service.ResourceWithoutPassword": {
             "type": "object",
@@ -25644,7 +26469,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -25714,6 +26539,19 @@ const docTemplate = `{
                 }
             }
         },
+        "company_service.ServiceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ServiceType_NOT_SPECIFIED",
+                "ServiceType_BUILDER_SERVICE",
+                "ServiceType_ANALYTICS_SERVICE"
+            ]
+        },
         "company_service.SetDefaultResourceReq": {
             "type": "object",
             "properties": {
@@ -25727,7 +26565,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -25744,7 +26582,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -25770,7 +26608,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -25807,6 +26645,9 @@ const docTemplate = `{
                 "authServiceHost": {
                     "type": "string"
                 },
+                "client_HOST": {
+                    "type": "string"
+                },
                 "companyServiceHost": {
                     "type": "string"
                 },
@@ -25828,6 +26669,24 @@ const docTemplate = `{
                 "environment": {
                     "description": "debug, test, release",
                     "type": "string"
+                },
+                "functionServiceHost": {
+                    "type": "string"
+                },
+                "functionServicePort": {
+                    "type": "string"
+                },
+                "gitlabGroupId": {
+                    "type": "integer"
+                },
+                "gitlabIntegrationToken": {
+                    "type": "string"
+                },
+                "gitlabIntegrationURL": {
+                    "type": "string"
+                },
+                "gitlabProjectId": {
+                    "type": "integer"
                 },
                 "httpport": {
                     "type": "string"
@@ -25854,6 +26713,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "objectBuilderServiceHost": {
+                    "type": "string"
+                },
+                "pathToClone": {
                     "type": "string"
                 },
                 "platformType": {
@@ -25910,6 +26772,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "smsServiceHost": {
+                    "type": "string"
+                },
+                "superadmin_HOST": {
                     "type": "string"
                 },
                 "templateGRPCPort": {
@@ -26952,6 +27817,50 @@ const docTemplate = `{
                 }
             }
         },
+        "new_function_service.CreateCustomEventRequest": {
+            "type": "object",
+            "properties": {
+                "action_type": {
+                    "type": "string"
+                },
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "commit_guid": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "string"
+                },
+                "disable": {
+                    "type": "boolean"
+                },
+                "event_path": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.ActionRelation": {
             "type": "object",
             "properties": {
@@ -27072,7 +27981,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
                 },
                 "guid": {
                     "type": "string"
@@ -27107,6 +28016,19 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "object_builder_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
         },
         "object_builder_service.CreateAppResponse": {
             "type": "object",
@@ -30152,7 +31074,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/versioning_service.ReleaseType"
                 }
             }
         },
@@ -30284,6 +31206,21 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "versioning_service.ReleaseType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ReleaseType_UNDEFINED",
+                "ReleaseType_MAJOR",
+                "ReleaseType_MINOR",
+                "ReleaseType_PATCH"
+            ]
         },
         "versioning_service.ReleaseWithCommit": {
             "type": "object",
