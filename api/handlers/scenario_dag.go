@@ -37,7 +37,7 @@ func (h *Handler) CreateDAG(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
@@ -49,7 +49,7 @@ func (h *Handler) CreateDAG(c *gin.Context) {
 
 	ProjectId := c.Query("project-id")
 	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
 
@@ -58,7 +58,7 @@ func (h *Handler) CreateDAG(c *gin.Context) {
 		&req,
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
@@ -117,7 +117,7 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
@@ -127,9 +127,9 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project_id")
+	ProjectId := c.Query("project-id")
 	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
 
@@ -140,7 +140,7 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
@@ -158,27 +158,16 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param id path string true "id"
 // @Param project-id query string true "project-id"
 // @Param table body pb.GetDAGRequest  true "Request body"
-// @Success 200 {object} status_http.Response{data=pb.DAG} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetDAG(c *gin.Context) {
 	var (
 		req pb.GetDAGRequest
 	)
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
 
 	id := c.Param("id")
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
 	if !util.IsValidUUID(id) {
 		h.handleResponse(c, status_http.BadRequest, "id not valid uuid")
 		return
@@ -188,7 +177,7 @@ func (h *Handler) GetDAG(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
@@ -198,9 +187,9 @@ func (h *Handler) GetDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project_id")
+	ProjectId := c.Query("project-id")
 	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
 
@@ -209,7 +198,7 @@ func (h *Handler) GetDAG(c *gin.Context) {
 		&req,
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
@@ -260,9 +249,9 @@ func (h *Handler) UpdateDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project_id")
+	ProjectId := c.Query("project-id")
 	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
 
@@ -273,7 +262,7 @@ func (h *Handler) UpdateDAG(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
@@ -317,9 +306,9 @@ func (h *Handler) DeleteDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project_id")
+	ProjectId := c.Query("project-id")
 	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
 
@@ -330,7 +319,7 @@ func (h *Handler) DeleteDAG(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 

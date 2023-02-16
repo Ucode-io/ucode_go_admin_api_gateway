@@ -40,7 +40,7 @@ func (h *Handler) RunScenario(c *gin.Context) {
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
+		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
@@ -50,8 +50,8 @@ func (h *Handler) RunScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId, _ := c.Get("project_id")
-	if !util.IsValidUUID(ProjectId.(string)) {
+	ProjectId := c.Query("project-id")
+	if !util.IsValidUUID(ProjectId) {
 		h.handleResponse(c, status_http.BadRequest, "project_id not found")
 		return
 	}
@@ -73,7 +73,7 @@ func (h *Handler) RunScenario(c *gin.Context) {
 
 	resp, err := services.ScenarioService().RunService().RunScenario(c.Request.Context(), runScenarioStrct)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err)
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
