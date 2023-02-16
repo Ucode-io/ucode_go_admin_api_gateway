@@ -143,7 +143,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/auth_service.ConfirmStrategies'
+        type: integer
       id:
         type: string
       name:
@@ -159,16 +159,6 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
-  auth_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -381,9 +371,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -441,9 +431,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -496,9 +486,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.EmptyProto:
     type: object
@@ -603,7 +593,7 @@ definitions:
           $ref: '#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources'
         type: array
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources:
     properties:
@@ -614,7 +604,7 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -672,9 +662,9 @@ definitions:
       id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
     type: object
@@ -691,18 +681,6 @@ definitions:
       username:
         type: string
     type: object
-  company_service.ResourceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ResourceType_NOT_DECIDED
-    - ResourceType_MONGODB
-    - ResourceType_CLICKHOUSE
-    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -716,7 +694,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -748,16 +726,6 @@ definitions:
       resource_environment_id:
         type: string
     type: object
-  company_service.ServiceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ServiceType_NOT_SPECIFIED
-    - ServiceType_BUILDER_SERVICE
-    - ServiceType_ANALYTICS_SERVICE
   company_service.SetDefaultResourceReq:
     properties:
       environment_id:
@@ -767,7 +735,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.SetDefaultResourceRes:
     properties:
@@ -778,7 +746,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.UpdateResourceRequest:
     properties:
@@ -795,7 +763,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -871,6 +839,10 @@ definitions:
           username:
             type: string
         type: object
+      scenarioGRPCPort:
+        type: string
+      scenarioServiceHost:
+        type: string
       secretKey:
         type: string
       serviceHost:
@@ -1643,7 +1615,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
+        type: integer
       guid:
         type: string
       name:
@@ -1666,16 +1638,6 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
-  object_builder_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -2797,6 +2759,131 @@ definitions:
           type: string
         type: array
     type: object
+  scenario_service.ConnectInfo:
+    properties:
+      method:
+        type: string
+      url:
+        type: string
+    type: object
+  scenario_service.CreateDAGRequest:
+    properties:
+      dag:
+        $ref: '#/definitions/scenario_service.DAG'
+    type: object
+  scenario_service.CreateDAGStepRequest:
+    properties:
+      condition_action:
+        items:
+          $ref: '#/definitions/structpb.Struct'
+        type: array
+      connect_info:
+        $ref: '#/definitions/scenario_service.ConnectInfo'
+      dag_id:
+        type: string
+      is_parallel:
+        type: boolean
+      parent_id:
+        type: string
+      request_info:
+        $ref: '#/definitions/structpb.Struct'
+      slug:
+        type: string
+      type:
+        type: string
+    type: object
+  scenario_service.DAG:
+    properties:
+      id:
+        type: string
+      slug:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  scenario_service.DAGList:
+    properties:
+      DAGs:
+        items:
+          $ref: '#/definitions/scenario_service.DAG'
+        type: array
+      count:
+        type: integer
+    type: object
+  scenario_service.DAGStep:
+    properties:
+      condition_action:
+        items:
+          $ref: '#/definitions/structpb.Struct'
+        type: array
+      connect_info:
+        $ref: '#/definitions/scenario_service.ConnectInfo'
+      dag_id:
+        type: string
+      id:
+        type: string
+      is_parallel:
+        type: boolean
+      parent_id:
+        type: string
+      request_info:
+        $ref: '#/definitions/structpb.Struct'
+      slug:
+        type: string
+      type:
+        type: string
+    type: object
+  scenario_service.DAGStepList:
+    properties:
+      dag_steps:
+        items:
+          $ref: '#/definitions/scenario_service.DAGStep'
+        type: array
+    type: object
+  scenario_service.Filters:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
+      order:
+        type: string
+      page:
+        type: integer
+      search:
+        type: string
+      sort:
+        type: string
+    type: object
+  scenario_service.GetAllDAGStepRequest:
+    properties:
+      dag_id:
+        type: string
+      filters:
+        $ref: '#/definitions/scenario_service.Filters'
+      parent_id:
+        type: string
+      type:
+        type: string
+    type: object
+  scenario_service.GetDAGRequest:
+    properties:
+      id:
+        type: string
+    type: object
+  scenario_service.GetDAGStepRequest:
+    properties:
+      dag_id:
+        type: string
+      id:
+        type: string
+      type:
+        type: string
+    type: object
   status_http.Response:
     properties:
       data: {}
@@ -3296,7 +3383,7 @@ definitions:
       project_id:
         type: string
       release_type:
-        $ref: '#/definitions/versioning_service.ReleaseType'
+        type: integer
     type: object
   versioning_service.ApiDeleteReleaseRequest:
     properties:
@@ -3381,18 +3468,6 @@ definitions:
           $ref: '#/definitions/versioning_service.ReleaseWithCommit'
         type: array
     type: object
-  versioning_service.ReleaseType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ReleaseType_UNDEFINED
-    - ReleaseType_MAJOR
-    - ReleaseType_MINOR
-    - ReleaseType_PATCH
   versioning_service.ReleaseWithCommit:
     properties:
       author_id:
@@ -3588,7 +3663,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -3770,7 +3845,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4495,7 +4570,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -4773,7 +4848,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -5112,7 +5187,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -5417,7 +5492,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -5850,7 +5925,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -6144,7 +6219,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: ""
         "400":
           description: Bad Request
           schema:
@@ -6335,7 +6410,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7005,7 +7080,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7986,7 +8061,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8273,7 +8348,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8557,7 +8632,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -9010,7 +9085,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -9486,7 +9561,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -9769,7 +9844,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10115,7 +10190,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10449,7 +10524,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10936,7 +11011,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11114,7 +11189,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11487,7 +11562,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12553,7 +12628,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12775,7 +12850,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12956,6 +13031,638 @@ paths:
       summary: Get release by id
       tags:
       - GetRelease
+  /v1/scenario/dag:
+    get:
+      consumes:
+      - application/json
+      description: Get all scenario dag
+      operationId: get_all_scenario_dag
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: order
+        in: query
+        name: order
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAGList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all scenario dag
+      tags:
+      - Section
+    post:
+      consumes:
+      - application/json
+      description: Create scenario dag
+      operationId: create_scenario_dag
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.CreateDAGRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAG'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create scenario dag
+      tags:
+      - Section
+    put:
+      consumes:
+      - application/json
+      description: Update scenario dag
+      operationId: update_scenario_dag
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.DAG'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAG'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update scenario dag
+      tags:
+      - Section
+  /v1/scenario/dag-step:
+    get:
+      consumes:
+      - application/json
+      description: Get All scenario dag step
+      operationId: get_all_scenario_dag_step
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.GetAllDAGStepRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAGStepList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get All scenario dag step
+      tags:
+      - Section
+    post:
+      consumes:
+      - application/json
+      description: Create scenario dag step
+      operationId: create_scenario_dag_step
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.CreateDAGStepRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAGStep'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create scenario dag step
+      tags:
+      - Section
+    put:
+      consumes:
+      - application/json
+      description: Update scenario dag step
+      operationId: update_scenario_dag_step
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.DAGStep'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAGStep'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update scenario dag step
+      tags:
+      - Section
+  /v1/scenario/dag-step/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete scenario dag step
+      operationId: delete_scenario_dag_step
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete scenario dag step
+      tags:
+      - Section
+    get:
+      consumes:
+      - application/json
+      description: Get scenario dag step
+      operationId: get_scenario_dag_step
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.GetDAGStepRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAGStep'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get scenario dag step
+      tags:
+      - Section
+  /v1/scenario/dag/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete scenario dag
+      operationId: delete_scenario_dag
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete scenario dag
+      tags:
+      - Section
+    get:
+      consumes:
+      - application/json
+      description: Get all scenario dag
+      operationId: get_scenario_dag
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.GetDAGRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.DAG'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all scenario dag
+      tags:
+      - Section
   /v1/section:
     get:
       consumes:
@@ -13284,7 +13991,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -13770,7 +14477,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -14259,7 +14966,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -14496,7 +15203,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -15034,7 +15741,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -15390,7 +16097,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -15682,7 +16389,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -15968,7 +16675,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:

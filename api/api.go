@@ -316,6 +316,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/category/:category_id", h.GetApiCategoryByID)
 		v1Admin.GET("/category", h.GetAllCategories)
 		v1Admin.DELETE("/category/:category_id", h.DeleteCategory)
+
+		
 	}
 
 	// v3 for ucode version 2

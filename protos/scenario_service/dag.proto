@@ -4,7 +4,6 @@ package  scenario_service;
 
 option go_package = "genproto/scenario_service";
 
-import "google/protobuf/struct.proto";
 import "common.proto";
 import "google/protobuf/empty.proto";
 
@@ -16,22 +15,13 @@ service DAGService {
     rpc Update(UpdateDAGRequest) returns (DAG);
 }
 
-enum DAG_TYPE {
-    HTTP = 0;
-    CRON_JOB = 1;
-}
-
-enum DAG_STATUS {
-    ACTIVE = 0;
-    INACTIVE = 1;
-}
 
 message DAG {
     string id = 1;
     string title = 2;
     string slug = 3;
-    DAG_TYPE type = 4;
-    DAG_STATUS status = 5;
+    string type = 4;
+    string status = 5;
 }
 
 message CreateDAGRequest {

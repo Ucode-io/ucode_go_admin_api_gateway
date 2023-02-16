@@ -81,6 +81,9 @@ type Config struct {
 
 	SecretKey    string
 	PlatformType string
+
+	ScenarioServiceHost string
+	ScenarioGRPCPort    string
 }
 
 // Load ...
@@ -146,6 +149,9 @@ func Load() Config {
 
 	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_SERVICE_HOST", "localhost"))
 	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", ":8099"))
+
+	config.ScenarioServiceHost = cast.ToString(GetOrReturnDefaultValue("SCENARIO_SERVICE_HOST", "localhost"))
+	config.ScenarioGRPCPort = cast.ToString(GetOrReturnDefaultValue("SCENARIO_GRPC_PORT", ":9108"))
 
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = "Here$houldBe$ome$ecretKey"

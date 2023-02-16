@@ -14,13 +14,12 @@ service DAGStepService {
     rpc GetAll(GetAllDAGStepRequest) returns (DAGStepList);
     rpc Delete(DeleteDAGStepRequest) returns (google.protobuf.Empty);
     rpc Update(UpdateDAGStepRequest) returns (DAGStep);
+    rpc DagStepRun(DAGStepRunRequest) returns (DAGStepRunResponse);
 }
 
-enum DAG_STEP_TYPE {
-    START = 0;
-    FUNCTION = 1;
-    QUERY = 2;
-    FINISH = 3;
+message ConnectInfo {
+    string method = 1;
+    string url = 2;
 }
 
 message DAGStep {
@@ -28,8 +27,8 @@ message DAGStep {
     string slug = 2;
     string parent_id = 3;
     string dag_id = 4;
-    DAG_STEP_TYPE type = 5;
-    google.protobuf.Struct connect_info = 6;
+    string type = 5;
+    ConnectInfo connect_info = 6;
     google.protobuf.Struct request_info = 7;
     repeated google.protobuf.Struct condition_action = 8; 
     bool is_parallel = 9;
@@ -39,8 +38,8 @@ message CreateDAGStepRequest {
     string slug = 1;
     string parent_id = 2;
     string dag_id = 3;
-    DAG_STEP_TYPE type = 4;
-    google.protobuf.Struct connect_info = 5;
+    string type = 4;
+    ConnectInfo connect_info = 5;
     google.protobuf.Struct request_info = 6;
     repeated google.protobuf.Struct condition_action = 7; 
     bool is_parallel = 8;
@@ -48,6 +47,8 @@ message CreateDAGStepRequest {
 
 message GetDAGStepRequest {
     string id = 1;
+    string type = 2;
+    string dag_id = 3;
 }
 
 message DeleteDAGStepRequest {
@@ -64,4 +65,16 @@ message UpdateDAGStepRequest {
 
 message GetAllDAGStepRequest {
     Filters filters = 1;
+    string type = 2;
+    string dag_id = 3;
+    string parent_id = 4;
+}
+
+message DAGStepRunRequest {
+    string type = 1;
+    string dag_step_id = 2;
+}
+
+message DAGStepRunResponse {
+    string result = 1;
 }
