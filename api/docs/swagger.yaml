@@ -839,15 +839,13 @@ definitions:
           username:
             type: string
         type: object
-<<<<<<< HEAD
-      scenarioGRPCPort:
-        type: string
-      scenarioServiceHost:
-=======
       queryServiceHost:
         type: string
       queryServicePort:
->>>>>>> acc10518e551d383b56a2c604fc158e16d2ded45
+        type: string
+      scenarioGRPCPort:
+        type: string
+      scenarioServiceHost:
         type: string
       secretKey:
         type: string
@@ -2765,131 +2763,6 @@ definitions:
           type: string
         type: array
     type: object
-<<<<<<< HEAD
-  scenario_service.ConnectInfo:
-    properties:
-      method:
-        type: string
-      url:
-        type: string
-    type: object
-  scenario_service.CreateDAGRequest:
-    properties:
-      dag:
-        $ref: '#/definitions/scenario_service.DAG'
-    type: object
-  scenario_service.CreateDAGStepRequest:
-    properties:
-      condition_action:
-        items:
-          $ref: '#/definitions/structpb.Struct'
-        type: array
-      connect_info:
-        $ref: '#/definitions/scenario_service.ConnectInfo'
-      dag_id:
-        type: string
-      is_parallel:
-        type: boolean
-      parent_id:
-        type: string
-      request_info:
-        $ref: '#/definitions/structpb.Struct'
-      slug:
-        type: string
-      type:
-        type: string
-    type: object
-  scenario_service.DAG:
-    properties:
-      id:
-        type: string
-      slug:
-        type: string
-      status:
-        type: string
-      title:
-        type: string
-      type:
-        type: string
-    type: object
-  scenario_service.DAGList:
-    properties:
-      DAGs:
-        items:
-          $ref: '#/definitions/scenario_service.DAG'
-        type: array
-      count:
-        type: integer
-    type: object
-  scenario_service.DAGStep:
-    properties:
-      condition_action:
-        items:
-          $ref: '#/definitions/structpb.Struct'
-        type: array
-      connect_info:
-        $ref: '#/definitions/scenario_service.ConnectInfo'
-      dag_id:
-        type: string
-      id:
-        type: string
-      is_parallel:
-        type: boolean
-      parent_id:
-        type: string
-      request_info:
-        $ref: '#/definitions/structpb.Struct'
-      slug:
-        type: string
-      type:
-        type: string
-    type: object
-  scenario_service.DAGStepList:
-    properties:
-      dag_steps:
-        items:
-          $ref: '#/definitions/scenario_service.DAGStep'
-        type: array
-    type: object
-  scenario_service.Filters:
-    properties:
-      limit:
-        type: integer
-      offset:
-        type: integer
-      order:
-        type: string
-      page:
-        type: integer
-      search:
-        type: string
-      sort:
-        type: string
-    type: object
-  scenario_service.GetAllDAGStepRequest:
-    properties:
-      dag_id:
-        type: string
-      filters:
-        $ref: '#/definitions/scenario_service.Filters'
-      parent_id:
-        type: string
-      type:
-        type: string
-    type: object
-  scenario_service.GetDAGRequest:
-    properties:
-      id:
-        type: string
-    type: object
-  scenario_service.GetDAGStepRequest:
-    properties:
-      dag_id:
-        type: string
-      id:
-        type: string
-      type:
-=======
   query_service.CommitInfo:
     properties:
       author_id:
@@ -3112,7 +2985,131 @@ definitions:
       version:
         type: string
       version_id:
->>>>>>> acc10518e551d383b56a2c604fc158e16d2ded45
+        type: string
+    type: object
+  scenario_service.ConnectInfo:
+    properties:
+      method:
+        type: string
+      url:
+        type: string
+    type: object
+  scenario_service.CreateDAGRequest:
+    properties:
+      dag:
+        $ref: '#/definitions/scenario_service.DAG'
+    type: object
+  scenario_service.CreateDAGStepRequest:
+    properties:
+      condition_action:
+        items:
+          $ref: '#/definitions/structpb.Struct'
+        type: array
+      connect_info:
+        $ref: '#/definitions/scenario_service.ConnectInfo'
+      dag_id:
+        type: string
+      is_parallel:
+        type: boolean
+      parent_id:
+        type: string
+      request_info:
+        $ref: '#/definitions/structpb.Struct'
+      slug:
+        type: string
+      type:
+        type: string
+    type: object
+  scenario_service.DAG:
+    properties:
+      id:
+        type: string
+      slug:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  scenario_service.DAGList:
+    properties:
+      DAGs:
+        items:
+          $ref: '#/definitions/scenario_service.DAG'
+        type: array
+      count:
+        type: integer
+    type: object
+  scenario_service.DAGStep:
+    properties:
+      condition_action:
+        items:
+          $ref: '#/definitions/structpb.Struct'
+        type: array
+      connect_info:
+        $ref: '#/definitions/scenario_service.ConnectInfo'
+      dag_id:
+        type: string
+      id:
+        type: string
+      is_parallel:
+        type: boolean
+      parent_id:
+        type: string
+      request_info:
+        $ref: '#/definitions/structpb.Struct'
+      slug:
+        type: string
+      type:
+        type: string
+    type: object
+  scenario_service.DAGStepList:
+    properties:
+      dag_steps:
+        items:
+          $ref: '#/definitions/scenario_service.DAGStep'
+        type: array
+    type: object
+  scenario_service.Filters:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
+      order:
+        type: string
+      page:
+        type: integer
+      search:
+        type: string
+      sort:
+        type: string
+    type: object
+  scenario_service.GetAllDAGStepRequest:
+    properties:
+      dag_id:
+        type: string
+      filters:
+        $ref: '#/definitions/scenario_service.Filters'
+      parent_id:
+        type: string
+      type:
+        type: string
+    type: object
+  scenario_service.GetDAGRequest:
+    properties:
+      id:
+        type: string
+    type: object
+  scenario_service.GetDAGStepRequest:
+    properties:
+      dag_id:
+        type: string
+      id:
+        type: string
+      type:
         type: string
     type: object
   status_http.Response:
