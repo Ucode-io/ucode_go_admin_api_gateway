@@ -18603,7 +18603,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get all scenario dag",
+                "description": "Get scenario dag",
                 "consumes": [
                     "application/json"
                 ],
@@ -18613,7 +18613,7 @@ const docTemplate = `{
                 "tags": [
                     "Scenario"
                 ],
-                "summary": "Get all scenario dag",
+                "summary": "Get scenario dag",
                 "operationId": "get_scenario_dag",
                 "parameters": [
                     {
