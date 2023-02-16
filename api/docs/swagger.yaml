@@ -839,9 +839,15 @@ definitions:
           username:
             type: string
         type: object
+<<<<<<< HEAD
       scenarioGRPCPort:
         type: string
       scenarioServiceHost:
+=======
+      queryServiceHost:
+        type: string
+      queryServicePort:
+>>>>>>> acc10518e551d383b56a2c604fc158e16d2ded45
         type: string
       secretKey:
         type: string
@@ -2759,6 +2765,7 @@ definitions:
           type: string
         type: array
     type: object
+<<<<<<< HEAD
   scenario_service.ConnectInfo:
     properties:
       method:
@@ -2882,6 +2889,230 @@ definitions:
       id:
         type: string
       type:
+=======
+  query_service.CommitInfo:
+    properties:
+      author_id:
+        type: string
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      guid:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      updated_at:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+      version_infos:
+        items:
+          $ref: '#/definitions/query_service.VersionInfo'
+        type: array
+    type: object
+  query_service.CreateFolderReq:
+    properties:
+      commit_id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  query_service.CreateQueryReq:
+    properties:
+      body:
+        $ref: '#/definitions/structpb.Struct'
+      commit_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/query_service.CommitInfo'
+      description:
+        type: string
+      environment_id:
+        type: string
+      folder_id:
+        type: string
+      project_id:
+        type: string
+      query_type:
+        type: string
+      resource_id:
+        type: string
+      timeout:
+        type: string
+      title:
+        type: string
+      variables:
+        items:
+          $ref: '#/definitions/query_service.Variable'
+        type: array
+      version_id:
+        type: string
+    type: object
+  query_service.Folder:
+    properties:
+      commit_id:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  query_service.GetListFolderRes:
+    properties:
+      count:
+        type: integer
+      folders:
+        items:
+          $ref: '#/definitions/query_service.Folder'
+        type: array
+    type: object
+  query_service.GetListQueryRes:
+    properties:
+      count:
+        type: integer
+      queries:
+        items:
+          $ref: '#/definitions/query_service.Query'
+        type: array
+    type: object
+  query_service.GetSingleFolderRes:
+    properties:
+      count:
+        type: integer
+      folders:
+        items:
+          $ref: '#/definitions/query_service.Folder'
+        type: array
+    type: object
+  query_service.Query:
+    properties:
+      body:
+        $ref: '#/definitions/structpb.Struct'
+      commit_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/query_service.CommitInfo'
+      description:
+        type: string
+      environment_id:
+        type: string
+      folder_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      query_type:
+        type: string
+      resource_id:
+        type: string
+      timeout:
+        type: string
+      title:
+        type: string
+      variables:
+        items:
+          $ref: '#/definitions/query_service.Variable'
+        type: array
+      version_id:
+        type: string
+    type: object
+  query_service.UpdateFolderReq:
+    properties:
+      commit_id:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+      version_id:
+        type: string
+    type: object
+  query_service.UpdateQueryReq:
+    properties:
+      body:
+        $ref: '#/definitions/structpb.Struct'
+      commit_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/query_service.CommitInfo'
+      description:
+        type: string
+      environment_id:
+        type: string
+      folder_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      query_type:
+        type: string
+      resource_id:
+        type: string
+      timeout:
+        type: string
+      title:
+        type: string
+      variables:
+        items:
+          $ref: '#/definitions/query_service.Variable'
+        type: array
+      version_id:
+        type: string
+    type: object
+  query_service.Variable:
+    properties:
+      default:
+        type: string
+      id:
+        type: string
+      key:
+        type: string
+      query_id:
+        type: string
+      type:
+        type: string
+      value:
+        type: string
+    type: object
+  query_service.VersionInfo:
+    properties:
+      author_id:
+        type: string
+      created_at:
+        type: string
+      desc:
+        type: string
+      is_current:
+        type: boolean
+      updated_at:
+        type: string
+      version:
+        type: string
+      version_id:
+>>>>>>> acc10518e551d383b56a2c604fc158e16d2ded45
         type: string
     type: object
   status_http.Response:
@@ -12381,6 +12612,613 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get all query rows
+      tags:
+      - Query
+  /v1/query-folder:
+    get:
+      consumes:
+      - application/json
+      description: Get List query folder
+      operationId: get_list_query_request_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FolderBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.GetListFolderRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List query folder
+      tags:
+      - Query
+    post:
+      consumes:
+      - application/json
+      description: Create query request folder
+      operationId: create_query_request_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateFolderReq
+        in: body
+        name: query_folder
+        required: true
+        schema:
+          $ref: '#/definitions/query_service.CreateFolderReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Query folder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.Folder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create query request folder
+      tags:
+      - Query
+    put:
+      consumes:
+      - application/json
+      description: Update query folder
+      operationId: update_query_request_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateFolderReq
+        in: body
+        name: folder
+        required: true
+        schema:
+          $ref: '#/definitions/query_service.UpdateFolderReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Folder data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.Folder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update query request folder
+      tags:
+      - Query
+  /v1/query-folder/{query-folder-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete query folder
+      operationId: delete_query_request_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: query-folder-id
+        in: path
+        name: query-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete query folder
+      tags:
+      - Query
+    get:
+      consumes:
+      - application/json
+      description: Get single query request folder
+      operationId: get_single_query_request_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: query-folder-id
+        in: path
+        name: query-folder-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetSingleFolderRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.GetSingleFolderRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single query request folder
+      tags:
+      - Query
+  /v1/query-request:
+    get:
+      consumes:
+      - application/json
+      description: Get List query
+      operationId: get_list_query_request
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: folder-id
+        in: query
+        name: folder-id
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListQueryRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.GetListQueryRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List query
+      tags:
+      - Query
+    post:
+      consumes:
+      - application/json
+      description: Create query
+      operationId: create_query_request
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateQueryReq
+        in: body
+        name: query
+        required: true
+        schema:
+          $ref: '#/definitions/query_service.CreateQueryReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Query data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.Query'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create query
+      tags:
+      - Query
+    put:
+      consumes:
+      - application/json
+      description: Update query
+      operationId: update_query_request
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateQueryReq
+        in: body
+        name: query
+        required: true
+        schema:
+          $ref: '#/definitions/query_service.UpdateQueryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Query data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.Query'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update query
+      tags:
+      - Query
+  /v1/query-request/{query-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete query
+      operationId: delete_query_request
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: query-id
+        in: path
+        name: query-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete query
+      tags:
+      - Query
+    get:
+      consumes:
+      - application/json
+      description: Get single query
+      operationId: get_single_query_request
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: query-id
+        in: path
+        name: query-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Query
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.Query'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single query
       tags:
       - Query
   /v1/relation:
