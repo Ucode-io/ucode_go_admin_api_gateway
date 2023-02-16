@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/scenario_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +18,7 @@ import (
 // @Router /v1/scenario/dag-step [POST]
 // @Summary Create scenario dag step
 // @Description Create scenario dag step
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -26,7 +28,7 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateDagStep(c *gin.Context) {
 	var (
-		req pb.CreateDAGStepRequest
+		req models.DAGStep
 	)
 
 	err := c.ShouldBindJSON(&req)
@@ -54,9 +56,25 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 		return
 	}
 
+	requestInfoStrct, err := helper.ConvertMapToStruct(req.RequestInfo)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	reqStrct := pb.CreateDAGStepRequest{
+		Slug:        req.Slug,
+		ParentId:    req.ParentId,
+		DagId:       req.DagId,
+		Type:        req.Type,
+		ConnectInfo: &req.ConnectInfo,
+		RequestInfo: requestInfoStrct,
+		IsParallel:  true,
+	}
+
 	resp, err := services.ScenarioService().DagStepService().Create(
 		c.Request.Context(),
-		&req,
+		&reqStrct,
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.InternalServerError, err)
@@ -74,7 +92,7 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 // @Router /v1/scenario/dag-step [GET]
 // @Summary Get All scenario dag step
 // @Description Get All scenario dag step
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -132,7 +150,7 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 // @Router /v1/scenario/dag-step/{id} [GET]
 // @Summary Get scenario dag step
 // @Description Get scenario dag step
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -198,7 +216,7 @@ func (h *Handler) GetDagStep(c *gin.Context) {
 // @Router /v1/scenario/dag-step [PUT]
 // @Summary Update scenario dag step
 // @Description Update scenario dag step
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -208,7 +226,7 @@ func (h *Handler) GetDagStep(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateDagStep(c *gin.Context) {
 	var (
-		dagStep pb.DAGStep
+		dagStep models.DAGStep
 	)
 
 	err := c.ShouldBindJSON(&dagStep)
@@ -217,7 +235,7 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(dagStep.GetId()) {
+	if !util.IsValidUUID(dagStep.Id) {
 		h.handleResponse(c, status_http.BadRequest, "dagStepID not valid uuid")
 		return
 	}
@@ -241,10 +259,29 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 		return
 	}
 
+	requestInfoStrct, err := helper.ConvertMapToStruct(dagStep.RequestInfo)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	// conditionActionStrct, err := helper.ConvertMapToStruct(dagStep.ConditionAction)
+
+	dagStepStrct := pb.DAGStep{
+		Id:          dagStep.Id,
+		Slug:        dagStep.Slug,
+		ParentId:    dagStep.ParentId,
+		DagId:       dagStep.DagId,
+		Type:        dagStep.Type,
+		ConnectInfo: &dagStep.ConnectInfo,
+		RequestInfo: requestInfoStrct,
+		// ConditionAction: conditionActionStrct,
+	}
+
 	resp, err := services.ScenarioService().DagStepService().Update(
 		c.Request.Context(),
 		&pb.UpdateDAGStepRequest{
-			DagStep: &dagStep,
+			DagStep: &dagStepStrct,
 		},
 	)
 	if err != nil {
@@ -263,7 +300,7 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 // @Router /v1/scenario/dag-step/{id} [DELETE]
 // @Summary Delete scenario dag step
 // @Description Delete scenario dag step
-// @Tags Section
+// @Tags Scenario
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
