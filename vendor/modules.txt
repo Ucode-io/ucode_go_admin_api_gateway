@@ -17,6 +17,9 @@ github.com/gin-gonic/gin/binding
 github.com/gin-gonic/gin/internal/bytesconv
 github.com/gin-gonic/gin/internal/json
 github.com/gin-gonic/gin/render
+# github.com/go-cmd/cmd v1.4.1
+## explicit; go 1.17
+github.com/go-cmd/cmd
 # github.com/go-openapi/jsonpointer v0.19.5
 ## explicit; go 1.13
 github.com/go-openapi/jsonpointer
