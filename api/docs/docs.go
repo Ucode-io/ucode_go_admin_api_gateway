@@ -19025,8 +19025,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "id",
                         "name": "id",
-                        "in": "path",
-                        "required": true
+                        "in": "path"
                     }
                 ],
                 "responses": {
