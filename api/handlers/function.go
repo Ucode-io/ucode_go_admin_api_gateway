@@ -529,9 +529,11 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.InvokeFunctionRequestWithAppId{
-		ObjectIDs: invokeFunction.ObjectIDs,
-		AppID:     apiKeys.GetData()[0].GetAppId(),
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.NewInvokeFunctionRequest{
+		Data: map[string]interface{}{
+			"object_ids": invokeFunction.ObjectIDs,
+			"app_id":     apiKeys.GetData()[0].GetAppId(),
+		},
 	})
 	if err != nil {
 		fmt.Println("error in do request", err)
