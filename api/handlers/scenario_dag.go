@@ -81,7 +81,7 @@ func (h *Handler) CreateDAG(c *gin.Context) {
 // @Param offset query int false "offset"
 // @Param order query string false "order"
 // @Param page query int false "page"
-// @Param id path string true "id"
+// @Param id path string false "id"
 // @Success 200 {object} status_http.Response{data=pb.DAGList} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
