@@ -18,7 +18,7 @@ import (
 // @Router /v1/scenario/category [POST]
 // @Summary Create category
 // @Description Create category
-// @Tags Scenario/category
+// @Tags Scenario-category
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -80,7 +80,7 @@ func (H *Handler) CreateCategoryScenario(c *gin.Context) {
 // @Router /v1/scenario/category/{id} [GET]
 // @Summary Get single category
 // @Description Get single category
-// @Tags Scenario/category
+// @Tags Scenario-category
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -139,7 +139,7 @@ func (h *Handler) GetCategoryScenario(c *gin.Context) {
 // @Router /v1/scenario/category [GET]
 // @Summary Get list category
 // @Description Get list category
-// @Tags Scenario/category
+// @Tags Scenario-category
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
