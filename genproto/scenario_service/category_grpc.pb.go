@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.12
-// source: categories.proto
+// source: category.proto
 
-package api_reference_service
+package scenario_service
 
 import (
 	context "context"
@@ -40,7 +40,7 @@ func NewCategoryServiceClient(cc grpc.ClientConnInterface) CategoryServiceClient
 
 func (c *categoryServiceClient) Create(ctx context.Context, in *CreateCategoryRequest, opts ...grpc.CallOption) (*Category, error) {
 	out := new(Category)
-	err := c.cc.Invoke(ctx, "/api_reference_service.CategoryService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/scenario_service.CategoryService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *categoryServiceClient) Create(ctx context.Context, in *CreateCategoryRe
 
 func (c *categoryServiceClient) Update(ctx context.Context, in *Category, opts ...grpc.CallOption) (*Category, error) {
 	out := new(Category)
-	err := c.cc.Invoke(ctx, "/api_reference_service.CategoryService/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/scenario_service.CategoryService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (c *categoryServiceClient) Update(ctx context.Context, in *Category, opts .
 
 func (c *categoryServiceClient) Get(ctx context.Context, in *GetCategoryRequest, opts ...grpc.CallOption) (*Category, error) {
 	out := new(Category)
-	err := c.cc.Invoke(ctx, "/api_reference_service.CategoryService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/scenario_service.CategoryService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (c *categoryServiceClient) Get(ctx context.Context, in *GetCategoryRequest,
 
 func (c *categoryServiceClient) GetList(ctx context.Context, in *GetListCategoryRequest, opts ...grpc.CallOption) (*GetListCategoryResponse, error) {
 	out := new(GetListCategoryResponse)
-	err := c.cc.Invoke(ctx, "/api_reference_service.CategoryService/GetList", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/scenario_service.CategoryService/GetList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (c *categoryServiceClient) GetList(ctx context.Context, in *GetListCategory
 
 func (c *categoryServiceClient) Delete(ctx context.Context, in *DeleteCategoryRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/api_reference_service.CategoryService/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/scenario_service.CategoryService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func _CategoryService_Create_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api_reference_service.CategoryService/Create",
+		FullMethod: "/scenario_service.CategoryService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CategoryServiceServer).Create(ctx, req.(*CreateCategoryRequest))
@@ -155,7 +155,7 @@ func _CategoryService_Update_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api_reference_service.CategoryService/Update",
+		FullMethod: "/scenario_service.CategoryService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CategoryServiceServer).Update(ctx, req.(*Category))
@@ -173,7 +173,7 @@ func _CategoryService_Get_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api_reference_service.CategoryService/Get",
+		FullMethod: "/scenario_service.CategoryService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CategoryServiceServer).Get(ctx, req.(*GetCategoryRequest))
@@ -191,7 +191,7 @@ func _CategoryService_GetList_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api_reference_service.CategoryService/GetList",
+		FullMethod: "/scenario_service.CategoryService/GetList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CategoryServiceServer).GetList(ctx, req.(*GetListCategoryRequest))
@@ -209,7 +209,7 @@ func _CategoryService_Delete_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api_reference_service.CategoryService/Delete",
+		FullMethod: "/scenario_service.CategoryService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CategoryServiceServer).Delete(ctx, req.(*DeleteCategoryRequest))
@@ -221,7 +221,7 @@ func _CategoryService_Delete_Handler(srv interface{}, ctx context.Context, dec f
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var CategoryService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api_reference_service.CategoryService",
+	ServiceName: "scenario_service.CategoryService",
 	HandlerType: (*CategoryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -246,5 +246,5 @@ var CategoryService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "categories.proto",
+	Metadata: "category.proto",
 }

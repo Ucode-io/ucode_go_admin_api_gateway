@@ -13,12 +13,14 @@ type ScenarioServiceI interface {
 	DagService() scenario_service.DAGServiceClient
 	DagStepService() scenario_service.DAGStepServiceClient
 	RunService() scenario_service.RunServiceClient
+	CategoryService() scenario_service.CategoryServiceClient
 }
 
 type scenarioServiceClient struct {
-	dagServiceClient     scenario_service.DAGServiceClient
-	dagStepServiceClient scenario_service.DAGStepServiceClient
-	runServiceClient     scenario_service.RunServiceClient
+	dagServiceClient      scenario_service.DAGServiceClient
+	dagStepServiceClient  scenario_service.DAGStepServiceClient
+	runServiceClient      scenario_service.RunServiceClient
+	categoryServiceClient scenario_service.CategoryServiceClient
 }
 
 func NewScenarioServiceClient(ctx context.Context, cfg config.Config) (ScenarioServiceI, error) {
@@ -33,9 +35,10 @@ func NewScenarioServiceClient(ctx context.Context, cfg config.Config) (ScenarioS
 	}
 
 	return &scenarioServiceClient{
-		dagServiceClient:     scenario_service.NewDAGServiceClient(connScenarioService),
-		dagStepServiceClient: scenario_service.NewDAGStepServiceClient(connScenarioService),
-		runServiceClient:     scenario_service.NewRunServiceClient(connScenarioService),
+		dagServiceClient:      scenario_service.NewDAGServiceClient(connScenarioService),
+		dagStepServiceClient:  scenario_service.NewDAGStepServiceClient(connScenarioService),
+		runServiceClient:      scenario_service.NewRunServiceClient(connScenarioService),
+		categoryServiceClient: scenario_service.NewCategoryServiceClient(connScenarioService),
 	}, nil
 }
 
@@ -49,4 +52,8 @@ func (g *scenarioServiceClient) DagStepService() scenario_service.DAGStepService
 
 func (g *scenarioServiceClient) RunService() scenario_service.RunServiceClient {
 	return g.runServiceClient
+}
+
+func (g *scenarioServiceClient) CategoryService() scenario_service.CategoryServiceClient {
+	return g.categoryServiceClient
 }

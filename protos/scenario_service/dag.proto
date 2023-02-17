@@ -22,6 +22,7 @@ message DAG {
     string slug = 3;
     string type = 4;
     string status = 5;
+    string category_id = 6;
 }
 
 message CreateDAGRequest {
@@ -35,6 +36,7 @@ message GetDAGRequest {
 
 message GetAllDAGRequest {
     Filters filter = 1;
+    string category_id = 2;
 }
 
 message DAGList {
@@ -48,5 +50,4 @@ message DeleteDAGRequest {
 
 message UpdateDAGRequest {
     DAG dag = 1;
-    
 }

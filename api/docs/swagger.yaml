@@ -3074,6 +3074,8 @@ definitions:
     type: object
   scenario_service.DAG:
     properties:
+      category_id:
+        type: string
       id:
         type: string
       slug:
@@ -14454,7 +14456,136 @@ paths:
       summary: Get release by id
       tags:
       - GetRelease
-  /v1/scenario/dag:
+  /v1/scenario/category:
+    get:
+      consumes:
+      - application/json
+      description: Get list category
+      operationId: get_list_category_for_scenario
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetAllCategoriesResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get list category
+      tags:
+      - Scenario/category
+    post:
+      consumes:
+      - application/json
+      description: Create category
+      operationId: create_category_for_scenario
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: app
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCategory'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create category
+      tags:
+      - Scenario/category
+  /v1/scenario/category/{category_id}/dag:
     get:
       consumes:
       - application/json
@@ -14491,6 +14622,11 @@ paths:
         in: query
         name: page
         type: integer
+      - description: category-id
+        in: path
+        name: category-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -14526,6 +14662,68 @@ paths:
       summary: Get all scenario dag
       tags:
       - Scenario
+  /v1/scenario/category/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get single category
+      operationId: get_single_category_for_scenario
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single category
+      tags:
+      - Scenario/category
+  /v1/scenario/dag:
     post:
       consumes:
       - application/json
@@ -15035,11 +15233,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
       - description: project-id
         in: query
         name: project-id
@@ -15054,15 +15247,6 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: Response body
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/scenario_service.DAG'
-              type: object
         "400":
           description: Bad Request
           schema:
