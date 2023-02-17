@@ -135,10 +135,6 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 	}
 
 	CategoryId := c.Param("id")
-	if !util.IsValidUUID(CategoryId) {
-		h.handleResponse(c, status_http.BadRequest, "category_id not found")
-		return
-	}
 
 	resp, err := services.ScenarioService().DagService().GetAll(
 		c.Request.Context(),
