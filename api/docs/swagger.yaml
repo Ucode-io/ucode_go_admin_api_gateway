@@ -14523,7 +14523,7 @@ paths:
       - ApiKeyAuth: []
       summary: Get list category
       tags:
-      - Scenario/category
+      - Scenario-category
     post:
       consumes:
       - application/json
@@ -14584,7 +14584,7 @@ paths:
       - ApiKeyAuth: []
       summary: Create category
       tags:
-      - Scenario/category
+      - Scenario-category
   /v1/scenario/category/{id}:
     get:
       consumes:
@@ -14645,7 +14645,7 @@ paths:
       - ApiKeyAuth: []
       summary: Get single category
       tags:
-      - Scenario/category
+      - Scenario-category
   /v1/scenario/category/{id}/dag:
     get:
       consumes:

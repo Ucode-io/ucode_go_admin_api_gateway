@@ -18643,7 +18643,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Scenario/category"
+                    "Scenario-category"
                 ],
                 "summary": "Get list category",
                 "operationId": "get_list_category_for_scenario",
@@ -18758,7 +18758,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Scenario/category"
+                    "Scenario-category"
                 ],
                 "summary": "Create category",
                 "operationId": "create_category_for_scenario",
@@ -18866,7 +18866,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Scenario/category"
+                    "Scenario-category"
                 ],
                 "summary": "Get single category",
                 "operationId": "get_single_category_for_scenario",
