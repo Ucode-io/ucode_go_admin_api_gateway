@@ -18957,7 +18957,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/scenario/category/{id}/dag": {
+        "/v1/scenario/dag": {
             "get": {
                 "security": [
                     {
@@ -19023,9 +19023,9 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path"
+                        "description": "category_id",
+                        "name": "category_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -19084,9 +19084,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/v1/scenario/dag": {
+            },
             "put": {
                 "security": [
                     {

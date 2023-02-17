@@ -348,7 +348,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// scenario service
 		v1Admin.POST("/scenario/dag", h.CreateDAG)
 		v1Admin.GET("/scenario/dag/:id", h.GetDAG)
-		v1Admin.GET("/scenario/category/:id/dag", h.GetAllDAG)
+		v1Admin.GET("/scenario/dag", h.GetAllDAG)
 		v1Admin.PUT("/scenario/dag", h.UpdateDAG)
 		v1Admin.DELETE("/scenario/dag/:id", h.DeleteDAG)
 

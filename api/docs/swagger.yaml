@@ -14646,7 +14646,7 @@ paths:
       summary: Get single category
       tags:
       - Scenario-category
-  /v1/scenario/category/{id}/dag:
+  /v1/scenario/dag:
     get:
       consumes:
       - application/json
@@ -14683,9 +14683,9 @@ paths:
         in: query
         name: page
         type: integer
-      - description: id
-        in: path
-        name: id
+      - description: category_id
+        in: query
+        name: category_id
         type: string
       produces:
       - application/json
@@ -14722,7 +14722,6 @@ paths:
       summary: Get all scenario dag
       tags:
       - Scenario
-  /v1/scenario/dag:
     post:
       consumes:
       - application/json

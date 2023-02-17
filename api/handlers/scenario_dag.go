@@ -70,7 +70,7 @@ func (h *Handler) CreateDAG(c *gin.Context) {
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_scenario_dag
-// @Router /v1/scenario/category/{id}/dag [GET]
+// @Router /v1/scenario/dag [GET]
 // @Summary Get all scenario dag
 // @Description Get all scenario dag
 // @Tags Scenario
@@ -81,7 +81,7 @@ func (h *Handler) CreateDAG(c *gin.Context) {
 // @Param offset query int false "offset"
 // @Param order query string false "order"
 // @Param page query int false "page"
-// @Param id path string false "id"
+// @Param category_id query string false "category_id"
 // @Success 200 {object} status_http.Response{data=pb.DAGList} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -134,7 +134,7 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 		return
 	}
 
-	CategoryId := c.Param("id")
+	CategoryId := c.Query("category_id")
 
 	resp, err := services.ScenarioService().DagService().GetAll(
 		c.Request.Context(),
