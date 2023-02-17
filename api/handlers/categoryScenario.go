@@ -189,7 +189,7 @@ func (h *Handler) GetListCategoryScenario(c *gin.Context) {
 	}
 
 	resp, err := services.ScenarioService().CategoryService().GetList(
-		context.Background(),
+		c.Request.Context(),
 		&pb.GetListCategoryRequest{
 			ProjectId:     ProjectId,
 			EnvironmentId: EnvironmentId.(string),
