@@ -3082,6 +3082,10 @@ definitions:
     type: object
   scenario_service.ConnectInfo:
     properties:
+      header:
+        additionalProperties:
+          type: string
+        type: object
       method:
         type: string
       url:

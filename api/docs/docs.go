@@ -30748,6 +30748,12 @@ var doc = `{
         "scenario_service.ConnectInfo": {
             "type": "object",
             "properties": {
+                "header": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "method": {
                     "type": "string"
                 },

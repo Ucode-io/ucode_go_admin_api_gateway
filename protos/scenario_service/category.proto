@@ -24,6 +24,7 @@ message CreateCategoryRequest {
     string commit_id = 5;
     string version_id = 6;
     string environment_id = 7;
+    string parent_id = 8;
 }
 
 message Category {
@@ -36,6 +37,7 @@ message Category {
     string version_id = 7;
     string created_at = 8;
     string updated_at = 9;
+    string parent_id = 10;
 }
 
 message GetCategoryRequest {
