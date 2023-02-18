@@ -107,7 +107,7 @@ volumes:
     accessModes:
       - ReadWriteMany
   configMaps:
-    name: config
+    name: code-server-kubeconfig
     mountPath: /kubeconfig
 
 service:
