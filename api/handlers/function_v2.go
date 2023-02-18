@@ -90,6 +90,10 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	responseMap := map[string]string{
+		"password": password,
+		"url":      "https://" + uuid.String() + ".u-code.io",
+	}
 
 	// response, err := services.FunctionService().FunctionService().Create(
 	// 	context.Background(),
@@ -107,7 +111,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 	// 	return
 	// }
 
-	h.handleResponse(c, status_http.Created, password)
+	h.handleResponse(c, status_http.Created, responseMap)
 }
 
 // GetNewFunctionByID godoc
