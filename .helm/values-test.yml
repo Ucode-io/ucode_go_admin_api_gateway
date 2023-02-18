@@ -88,13 +88,15 @@ vault:
     VAULT_TOKEN: vault_token
     SECRETS_PATH: vault_path
 
-environment: {}
+environment:
+  KUBECONFIG: /kubeconfig/config
 volumes:
   enabled: true
   hostpath:
-    enable: true
+    enabled: true
     name: code-server
     path: /functions
+    mountPath: /functions
     type: Directory
   pvc:
     enabled: false
@@ -106,8 +108,8 @@ volumes:
     accessModes:
       - ReadWriteMany
   configMaps:
-    name: config
-    mountPath: /app
+    name: code-server-kubeconfig
+    mountPath: /kubeconfig
 
 service:
   type: ClusterIP
@@ -181,7 +183,7 @@ affinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
         - matchExpressions:
-            - key: kubernetes.io/env-test
+            - key: kubernetes.io/ucode-prod
               operator: In
               values:
                 - "true"
