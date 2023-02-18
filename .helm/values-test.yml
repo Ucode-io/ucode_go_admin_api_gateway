@@ -88,7 +88,8 @@ vault:
     VAULT_TOKEN: vault_token
     SECRETS_PATH: vault_path
 
-environment: {}
+environment:
+  KUBECONFIG: /kubeconfig/config
 volumes:
   enabled: true
   hostpath:
