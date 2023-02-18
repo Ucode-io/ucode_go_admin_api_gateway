@@ -34,14 +34,14 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	}
 	fmt.Println("test helm install code server")
 
-	cmd = exec.Command("kubectl", "get", "secret", " --namespace", "test", functionName, "-o", "jsonpath=\"{.data.password}\"", "|", "base64", "-d")
+	output, err := exec.Command("kubectl", "get", "secret", " --namespace", "test", functionName, "-o", "jsonpath=\"{.data.password}\"", "|", "base64", "-d").Output()
 	if err != nil {
 		return "", errors.New("error while get password 0::" + err.Error())
 	}
-	output, err := cmd.Output()
-	if err != nil {
-		return "", errors.New("error while get password 1::" + err.Error())
-	}
+	// output, err := cmd.Output()
+	// if err != nil {
+	// 	return "", errors.New("error while get password 1::" + err.Error())
+	// }
 
 	fmt.Println("Finish", string(output))
 
