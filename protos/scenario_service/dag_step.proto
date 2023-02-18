@@ -33,6 +33,7 @@ message DAGStep {
     google.protobuf.Struct request_info = 7;
     repeated google.protobuf.Struct condition_action = 8; 
     bool is_parallel = 9;
+    google.protobuf.Struct ui_component = 10;
 }
 
 message CreateDAGStepRequest {

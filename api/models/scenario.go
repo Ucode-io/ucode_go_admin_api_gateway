@@ -4,7 +4,7 @@ import (
 	pb "ucode/ucode_go_api_gateway/genproto/scenario_service"
 )
 
-type DAGStep struct {
+type DAGStepConfig struct {
 	Id              string                 `json:"id"`
 	Slug            string                 `json:"slug"`
 	ParentId        string                 `json:"parent_id"`
@@ -14,6 +14,11 @@ type DAGStep struct {
 	RequestInfo     map[string]interface{} `json:"request_info"`
 	ConditionAction map[string]interface{} `json:"condition_action"`
 	IsParallel      bool                   `json:"is_parallel"`
+}
+
+type DAGStep struct {
+	Config      DAGStepConfig          `json:"config"`
+	UiComponent map[string]interface{} `json:"ui_component"`
 }
 
 type RunScenarioRequest struct {

@@ -1270,6 +1270,14 @@ definitions:
     type: object
   models.DAGStep:
     properties:
+      config:
+        $ref: '#/definitions/models.DAGStepConfig'
+      ui_component:
+        additionalProperties: true
+        type: object
+    type: object
+  models.DAGStepConfig:
+    properties:
       condition_action:
         additionalProperties: true
         type: object
@@ -3210,6 +3218,8 @@ definitions:
         type: string
       type:
         type: string
+      ui_component:
+        $ref: '#/definitions/structpb.Struct'
     type: object
   scenario_service.DAGStepList:
     properties:

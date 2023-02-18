@@ -28067,6 +28067,18 @@
         "models.DAGStep": {
             "type": "object",
             "properties": {
+                "config": {
+                    "$ref": "#/definitions/models.DAGStepConfig"
+                },
+                "ui_component": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "models.DAGStepConfig": {
+            "type": "object",
+            "properties": {
                 "condition_action": {
                     "type": "object",
                     "additionalProperties": true
@@ -31031,6 +31043,9 @@
                 },
                 "type": {
                     "type": "string"
+                },
+                "ui_component": {
+                    "$ref": "#/definitions/structpb.Struct"
                 }
             }
         },
