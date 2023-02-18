@@ -27,8 +27,9 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	hostName := fmt.Sprintf("--set=ingress.hosts[0].host=%s.u-code.io", id)
 	hostNameTls := fmt.Sprintf("--set=ingress.tls[0].hosts[0]=%s.u-code.io", id)
 	secretName := fmt.Sprintf("--set=ingress.tls[0].secretName=%s-tls", id)
+	path := "--set ingress.hosts[0].paths[0]=/"
 
-	cmd = exec.Command("helm", "install", functionName, "code-server/code-server", "-n", "test", hostName, hostNameTls, secretName)
+	cmd = exec.Command("helm", "install", functionName, "code-server/code-server", "-n", "test", hostName, hostNameTls, secretName, path)
 	err = cmd.Run()
 	if err != nil {
 		return "", errors.New("error while install code server::" + err.Error())
