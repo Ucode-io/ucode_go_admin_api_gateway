@@ -24,3 +24,17 @@ type RunScenarioRequest struct {
 	DagStepId string                 `json:"dag_step_id"`
 	Method    string                 `json:"method"`
 }
+
+type DAG struct {
+	Id         string `json:"id"`
+	Title      string `json:"title"`
+	Slug       string `json:"slug"`
+	Type       string `json:"type"`
+	Status     string `json:"status"`
+	CategoryId string `json:"category_id"`
+}
+
+type CreateScenarioRequest struct {
+	Dag   DAG        `json:"dag"`
+	Steps []*DAGStep `json:"steps"`
+}
