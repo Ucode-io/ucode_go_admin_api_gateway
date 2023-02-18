@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab_integration"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -16,6 +17,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateNewFunction godoc
@@ -81,7 +83,13 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	uuid, _ := uuid.NewRandom()
 	fmt.Println("test after clone")
+	password, err := code_server.CreateCodeServer(projectName+"-"+function.Path, h.cfg, uuid.String())
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
 
 	// response, err := services.FunctionService().FunctionService().Create(
 	// 	context.Background(),
@@ -99,7 +107,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 	// 	return
 	// }
 
-	h.handleResponse(c, status_http.Created, "ok")
+	h.handleResponse(c, status_http.Created, password)
 }
 
 // GetNewFunctionByID godoc
