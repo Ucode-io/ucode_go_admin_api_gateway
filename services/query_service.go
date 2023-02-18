@@ -11,11 +11,13 @@ import (
 type QueryServiceI interface {
 	Query() tmp.QueryServiceClient
 	Folder() tmp.FolderServiceClient
+	Log() tmp.LogServiceClient
 }
 
 type QueryServiceClient struct {
 	queryService  tmp.QueryServiceClient
 	folderService tmp.FolderServiceClient
+	logService    tmp.LogServiceClient
 }
 
 func NewQueryServiceClient(ctx context.Context, cfg config.Config) (QueryServiceI, error) {
@@ -32,6 +34,7 @@ func NewQueryServiceClient(ctx context.Context, cfg config.Config) (QueryService
 	return &QueryServiceClient{
 		queryService:  tmp.NewQueryServiceClient(connQueryService),
 		folderService: tmp.NewFolderServiceClient(connQueryService),
+		logService:    tmp.NewLogServiceClient(connQueryService),
 	}, nil
 }
 
@@ -41,4 +44,8 @@ func (g *QueryServiceClient) Query() tmp.QueryServiceClient {
 
 func (g *QueryServiceClient) Folder() tmp.FolderServiceClient {
 	return g.folderService
+}
+
+func (g *QueryServiceClient) Log() tmp.LogServiceClient {
+	return g.logService
 }

@@ -264,6 +264,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/query-request/run", h.QueryRun)
 		v1.GET("/query-request/:query-id/history", h.GetQueryHistory)
 		v1.POST("/query-request/:query-id/revert", h.RevertQuery)
+		v1.GET("/query-request/:query-id/log", h.GetListQueryLog)
+		v1.GET("/query-request/:query-id/log/:log-id", h.GetSingleQueryLog)
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
