@@ -1164,10 +1164,6 @@ definitions:
     properties:
       dag:
         $ref: '#/definitions/models.DAG'
-      environment_id:
-        type: string
-      project_id:
-        type: string
       steps:
         items:
           $ref: '#/definitions/models.DAGStep'

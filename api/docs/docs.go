@@ -27702,12 +27702,6 @@ const docTemplate = `{
                 "dag": {
                     "$ref": "#/definitions/models.DAG"
                 },
-                "environment_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
                 "steps": {
                     "type": "array",
                     "items": {
