@@ -13,10 +13,12 @@ func CloneForkToPath(path string, cfg config.Config) error {
 	command := fmt.Sprintf("https://oauth:%s@%s", cfg.GitlabIntegrationToken, path)
 	cmd := exec.Command("git", "clone", command)
 	cmd.Dir = cfg.PathToClone
+	fmt.Println("test clone")
 	err := cmd.Run()
 	if err != nil {
 		return errors.New("could not clone repo into given path::" + err.Error())
 	}
+	fmt.Println("test clone 22")
 	fmt.Println("Output::")
 
 	return nil

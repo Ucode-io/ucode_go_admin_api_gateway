@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -73,11 +74,14 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	fmt.Println("test before clone")
 	err = gitlab_integration.CloneForkToPath(resp.Message["http_url_to_repo"].(string), h.cfg)
+	fmt.Println("clone err::", err)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	fmt.Println("test after clone")
 
 	// response, err := services.FunctionService().FunctionService().Create(
 	// 	context.Background(),
