@@ -85,6 +85,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 	}
 	uuid, _ := uuid.NewRandom()
 	fmt.Println("test after clone")
+	fmt.Println("uuid::", uuid.String())
 	password, err := code_server.CreateCodeServer(projectName+"-"+function.Path, h.cfg, uuid.String())
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
