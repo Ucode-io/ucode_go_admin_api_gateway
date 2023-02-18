@@ -1160,6 +1160,15 @@ definitions:
       title:
         type: string
     type: object
+  models.CreateScenarioRequest:
+    properties:
+      dag:
+        $ref: '#/definitions/models.DAG'
+      steps:
+        items:
+          $ref: '#/definitions/models.DAGStep'
+        type: array
+    type: object
   models.CreateTableRequest:
     properties:
       app_id:
@@ -1242,6 +1251,44 @@ definitions:
       table_slug:
         type: string
       url:
+        type: string
+    type: object
+  models.DAG:
+    properties:
+      category_id:
+        type: string
+      id:
+        type: string
+      slug:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  models.DAGStep:
+    properties:
+      condition_action:
+        additionalProperties: true
+        type: object
+      connect_info:
+        $ref: '#/definitions/scenario_service.ConnectInfo'
+      dag_id:
+        type: string
+      id:
+        type: string
+      is_parallel:
+        type: boolean
+      parent_id:
+        type: string
+      request_info:
+        additionalProperties: true
+        type: object
+      slug:
+        type: string
+      type:
         type: string
     type: object
   models.Dashboard:
@@ -14783,6 +14830,68 @@ paths:
       summary: Get release by id
       tags:
       - GetRelease
+  /v1/scenario:
+    post:
+      consumes:
+      - application/json
+      description: Create scenario
+      operationId: create_scenario
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateScenarioRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DAG'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create scenario
+      tags:
+      - Scenario
   /v1/scenario/category:
     get:
       consumes:

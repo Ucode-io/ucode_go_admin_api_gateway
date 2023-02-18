@@ -90,16 +90,24 @@ vault:
 
 environment: {}
 volumes:
-  enabled: false
+  enabled: true
+  hostpath:
+    enable: true
+    name: code-server
+    path: /functions
+    type: Directory
   pvc:
     enabled: false
     existing_claim:
     name: pvc
-    mountPath: /pv
+    mountPath: /functions
     size: 1G
     class:
     accessModes:
-      - ReadWriteOnce
+      - ReadWriteMany
+  configMaps:
+    name: config
+    mountPath: /app
 
 service:
   type: ClusterIP
