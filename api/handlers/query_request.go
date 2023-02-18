@@ -970,3 +970,168 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 //
 //	h.handleResponse(c, status_http.OK, resp)
 //}
+
+// GetSingleQueryLog godoc
+// @Security ApiKeyAuth
+// @Param Environment-Id header string true "Environment-Id"
+// @ID get_single_query_log
+// @Router /v1/query-request/{query-id}/log/{log-id} [GET]
+// @Summary get single log
+// @Description get single log
+// @Tags query
+// @Accept json
+// @Produce json
+// @Param query-id path string true "query-id"
+// @Param log-id path string true "log-id"
+// @Param project-id query string true "project-id"
+// @Success 200 {object} status_http.Response{data=tmp.Log} "Response Body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetSingleQueryLog(c *gin.Context) {
+
+	queryId := c.Param("query-id")
+	if !util.IsValidUUID(queryId) {
+		err := errors.New("query id is an invalid uuid")
+		h.log.Error("query is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "query is an invalid uuid")
+		return
+	}
+
+	logId := c.Param("log-id")
+	if !util.IsValidUUID(logId) {
+		err := errors.New("log id is an invalid uuid")
+		h.log.Error("log is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "log is an invalid uuid")
+		return
+	}
+
+	projectId := c.DefaultQuery("project-id", "")
+	if !util.IsValidUUID(projectId) {
+		err := errors.New("project_id is an invalid uuid")
+		h.log.Error("project_id is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.log.Error("error getting service", logger.Error(err))
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
+		return
+	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
+
+	resp, err := services.QueryService().Log().GetSingleLog(
+		context.Background(),
+		&tmp.GetSingleLogReq{
+			Id:            logId,
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+		},
+	)
+	if err != nil {
+		h.log.Error("error reverting query", logger.Error(err))
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// GetListQueryLog godoc
+// @Security ApiKeyAuth
+// @Param Environment-Id header string true "Environment-Id"
+// @ID get_list_query_log
+// @Router /v1/query-request/{query-id}/log [GET]
+// @Summary get list log
+// @Description get list log
+// @Tags query
+// @Accept json
+// @Produce json
+// @Param query-id path string true "query-id"
+// @Param project-id query string true "project-id"
+// @Param limit query string true "limit"
+// @Param offset query string true "offset"
+// @Success 200 {object} status_http.Response{data=tmp.GetListLogRes} "Response Body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetListQueryLog(c *gin.Context) {
+
+	queryId := c.Param("query-id")
+	if !util.IsValidUUID(queryId) {
+		err := errors.New("query id is an invalid uuid")
+		h.log.Error("query is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "query is an invalid uuid")
+		return
+	}
+
+	projectId := c.DefaultQuery("project-id", "")
+	if !util.IsValidUUID(projectId) {
+		err := errors.New("project_id is an invalid uuid")
+		h.log.Error("project_id is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.log.Error("error getting limit param", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.log.Error("error getting offset param", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.log.Error("error getting service", logger.Error(err))
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
+		return
+	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
+
+	resp, err := services.QueryService().Log().GetListLog(
+		context.Background(),
+		&tmp.GetListLogReq{
+			QueryId:       queryId,
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			Limit:         int64(limit),
+			Offset:        int64(offset),
+		},
+	)
+	if err != nil {
+		h.log.Error("error reverting query", logger.Error(err))
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}

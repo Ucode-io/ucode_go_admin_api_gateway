@@ -2958,6 +2958,15 @@ definitions:
           $ref: '#/definitions/query_service.Folder'
         type: array
     type: object
+  query_service.GetListLogRes:
+    properties:
+      count:
+        type: integer
+      log:
+        items:
+          $ref: '#/definitions/query_service.Log'
+        type: array
+    type: object
   query_service.GetListQueryRes:
     properties:
       count:
@@ -2999,6 +3008,25 @@ definitions:
         items:
           $ref: '#/definitions/query_service.Folder'
         type: array
+    type: object
+  query_service.Log:
+    properties:
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      query_id:
+        type: string
+      request:
+        $ref: '#/definitions/structpb.Struct'
+      response:
+        type: string
+      user_id:
+        type: string
     type: object
   query_service.Query:
     properties:
@@ -13909,6 +13937,135 @@ paths:
       summary: Get Api query history
       tags:
       - Query
+  /v1/query-request/{query-id}/log:
+    get:
+      consumes:
+      - application/json
+      description: get list log
+      operationId: get_list_query_log
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: query-id
+        in: path
+        name: query-id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.GetListLogRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: get list log
+      tags:
+      - query
+  /v1/query-request/{query-id}/log/{log-id}:
+    get:
+      consumes:
+      - application/json
+      description: get single log
+      operationId: get_single_query_log
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: query-id
+        in: path
+        name: query-id
+        required: true
+        type: string
+      - description: log-id
+        in: path
+        name: log-id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.Log'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: get single log
+      tags:
+      - query
   /v1/query-request/{query-id}/revert:
     post:
       consumes:
