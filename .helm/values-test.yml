@@ -95,6 +95,7 @@ volumes:
     enable: true
     name: code-server
     path: /functions
+    mountPath: /functions
     type: Directory
   pvc:
     enabled: false
