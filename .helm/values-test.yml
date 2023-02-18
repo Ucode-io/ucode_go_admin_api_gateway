@@ -92,7 +92,7 @@ environment: {}
 volumes:
   enabled: true
   hostpath:
-    enable: true
+    enabled: true
     name: code-server
     path: /functions
     mountPath: /functions
@@ -108,7 +108,7 @@ volumes:
       - ReadWriteMany
   configMaps:
     name: config
-    mountPath: /app
+    mountPath: /kubeconfig
 
 service:
   type: ClusterIP
