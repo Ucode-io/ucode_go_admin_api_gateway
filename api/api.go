@@ -363,6 +363,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/scenario/category", h.GetListCategoryScenario)
 
 		v1Admin.POST("/scenario/run", h.RunScenario)
+		v1Admin.POST("/scenario", h.CreateFullScenario)
 	}
 
 	// v3 for ucode version 2

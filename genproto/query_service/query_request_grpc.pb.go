@@ -28,6 +28,9 @@ type QueryServiceClient interface {
 	GetSingleQuery(ctx context.Context, in *GetSingleQueryReq, opts ...grpc.CallOption) (*Query, error)
 	UpdateQuery(ctx context.Context, in *UpdateQueryReq, opts ...grpc.CallOption) (*Query, error)
 	DeleteQuery(ctx context.Context, in *DeleteQueryReq, opts ...grpc.CallOption) (*empty.Empty, error)
+	GetQueryHistory(ctx context.Context, in *GetQueryHistoryReq, opts ...grpc.CallOption) (*GetQueryHistoryRes, error)
+	RevertQuery(ctx context.Context, in *RevertQueryReq, opts ...grpc.CallOption) (*Query, error)
+	CreateManyQuery(ctx context.Context, in *ManyVersions, opts ...grpc.CallOption) (*empty.Empty, error)
 	RunQuery(ctx context.Context, in *Query, opts ...grpc.CallOption) (*RunQueryRes, error)
 }
 
@@ -84,6 +87,33 @@ func (c *queryServiceClient) DeleteQuery(ctx context.Context, in *DeleteQueryReq
 	return out, nil
 }
 
+func (c *queryServiceClient) GetQueryHistory(ctx context.Context, in *GetQueryHistoryReq, opts ...grpc.CallOption) (*GetQueryHistoryRes, error) {
+	out := new(GetQueryHistoryRes)
+	err := c.cc.Invoke(ctx, "/query_service.QueryService/GetQueryHistory", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryServiceClient) RevertQuery(ctx context.Context, in *RevertQueryReq, opts ...grpc.CallOption) (*Query, error) {
+	out := new(Query)
+	err := c.cc.Invoke(ctx, "/query_service.QueryService/RevertQuery", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryServiceClient) CreateManyQuery(ctx context.Context, in *ManyVersions, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/query_service.QueryService/CreateManyQuery", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *queryServiceClient) RunQuery(ctx context.Context, in *Query, opts ...grpc.CallOption) (*RunQueryRes, error) {
 	out := new(RunQueryRes)
 	err := c.cc.Invoke(ctx, "/query_service.QueryService/RunQuery", in, out, opts...)
@@ -102,6 +132,9 @@ type QueryServiceServer interface {
 	GetSingleQuery(context.Context, *GetSingleQueryReq) (*Query, error)
 	UpdateQuery(context.Context, *UpdateQueryReq) (*Query, error)
 	DeleteQuery(context.Context, *DeleteQueryReq) (*empty.Empty, error)
+	GetQueryHistory(context.Context, *GetQueryHistoryReq) (*GetQueryHistoryRes, error)
+	RevertQuery(context.Context, *RevertQueryReq) (*Query, error)
+	CreateManyQuery(context.Context, *ManyVersions) (*empty.Empty, error)
 	RunQuery(context.Context, *Query) (*RunQueryRes, error)
 	mustEmbedUnimplementedQueryServiceServer()
 }
@@ -124,6 +157,15 @@ func (UnimplementedQueryServiceServer) UpdateQuery(context.Context, *UpdateQuery
 }
 func (UnimplementedQueryServiceServer) DeleteQuery(context.Context, *DeleteQueryReq) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteQuery not implemented")
+}
+func (UnimplementedQueryServiceServer) GetQueryHistory(context.Context, *GetQueryHistoryReq) (*GetQueryHistoryRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetQueryHistory not implemented")
+}
+func (UnimplementedQueryServiceServer) RevertQuery(context.Context, *RevertQueryReq) (*Query, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevertQuery not implemented")
+}
+func (UnimplementedQueryServiceServer) CreateManyQuery(context.Context, *ManyVersions) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateManyQuery not implemented")
 }
 func (UnimplementedQueryServiceServer) RunQuery(context.Context, *Query) (*RunQueryRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RunQuery not implemented")
@@ -231,6 +273,60 @@ func _QueryService_DeleteQuery_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _QueryService_GetQueryHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetQueryHistoryReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServiceServer).GetQueryHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/query_service.QueryService/GetQueryHistory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServiceServer).GetQueryHistory(ctx, req.(*GetQueryHistoryReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _QueryService_RevertQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevertQueryReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServiceServer).RevertQuery(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/query_service.QueryService/RevertQuery",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServiceServer).RevertQuery(ctx, req.(*RevertQueryReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _QueryService_CreateManyQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ManyVersions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServiceServer).CreateManyQuery(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/query_service.QueryService/CreateManyQuery",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServiceServer).CreateManyQuery(ctx, req.(*ManyVersions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _QueryService_RunQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Query)
 	if err := dec(in); err != nil {
@@ -275,6 +371,18 @@ var QueryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteQuery",
 			Handler:    _QueryService_DeleteQuery_Handler,
+		},
+		{
+			MethodName: "GetQueryHistory",
+			Handler:    _QueryService_GetQueryHistory_Handler,
+		},
+		{
+			MethodName: "RevertQuery",
+			Handler:    _QueryService_RevertQuery_Handler,
+		},
+		{
+			MethodName: "CreateManyQuery",
+			Handler:    _QueryService_CreateManyQuery_Handler,
 		},
 		{
 			MethodName: "RunQuery",

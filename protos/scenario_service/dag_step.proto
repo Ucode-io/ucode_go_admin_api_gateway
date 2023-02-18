@@ -20,6 +20,7 @@ service DAGStepService {
 message ConnectInfo {
     string method = 1;
     string url = 2;
+    map<string,string> header = 3;
 }
 
 message DAGStep {

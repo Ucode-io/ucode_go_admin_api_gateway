@@ -6,3 +6,4 @@ option go_package="genproto/query_service";
 import "commit.proto";
 import "folder.proto";
 import "query_request.proto";
+import "log.proto";
