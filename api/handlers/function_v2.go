@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -39,11 +40,11 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(function.Body)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+	// structData, err := helper.ConvertMapToStruct(function.Body)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
+	// 	return
+	// }
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -73,29 +74,32 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	fmt.Println("test before clone")
 	err = gitlab_integration.CloneForkToPath(resp.Message["http_url_to_repo"].(string), h.cfg)
+	fmt.Println("clone err::", err)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	fmt.Println("test after clone")
 
-	response, err := services.FunctionService().FunctionService().Create(
-		context.Background(),
-		&fc.CreateFunctionRequest{
-			Path:        function.Path,
-			Name:        function.Name,
-			Description: function.Description,
-			Body:        structData,
-			ProjectId:   project.ProjectId,
-		},
-	)
+	// response, err := services.FunctionService().FunctionService().Create(
+	// 	context.Background(),
+	// 	&fc.CreateFunctionRequest{
+	// 		Path:        function.Path,
+	// 		Name:        function.Name,
+	// 		Description: function.Description,
+	// 		Body:        structData,
+	// 		ProjectId:   project.ProjectId,
+	// 	},
+	// )
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	h.handleResponse(c, status_http.Created, response)
+	h.handleResponse(c, status_http.Created, "ok")
 }
 
 // GetNewFunctionByID godoc

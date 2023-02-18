@@ -15,5 +15,6 @@ RUN export CGO_ENABLED=0 && \
     mv ./bin/ucode_go_admin_api_gateway /
 
 FROM alpine
+RUN apk add git && mkdir /functions && chmod 777 /functions
 COPY --from=builder ucode_go_admin_api_gateway .
 ENTRYPOINT ["/ucode_go_admin_api_gateway"]

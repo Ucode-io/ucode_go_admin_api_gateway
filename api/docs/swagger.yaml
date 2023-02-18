@@ -2959,6 +2959,30 @@ definitions:
           $ref: '#/definitions/query_service.Query'
         type: array
     type: object
+  query_service.GetQueryHistoryRes:
+    properties:
+      count:
+        type: integer
+      id:
+        type: string
+      queries:
+        items:
+          $ref: '#/definitions/query_service.GetQueryHistoryRes_QueryHistory'
+        type: array
+    type: object
+  query_service.GetQueryHistoryRes_QueryHistory:
+    properties:
+      commit_info:
+        $ref: '#/definitions/query_service.CommitInfo'
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      version_infos:
+        additionalProperties:
+          $ref: '#/definitions/query_service.VersionInfo'
+        type: object
+    type: object
   query_service.GetSingleFolderRes:
     properties:
       count:
@@ -2998,6 +3022,23 @@ definitions:
         items:
           $ref: '#/definitions/query_service.Variable'
         type: array
+      version_id:
+        type: string
+    type: object
+  query_service.RevertQueryReq:
+    properties:
+      commit_info:
+        $ref: '#/definitions/query_service.CommitInfo'
+      environment_id:
+        type: string
+      id:
+        type: string
+      new_commit_id:
+        type: string
+      old_commit_id:
+        type: string
+      project_id:
+        type: string
       version_id:
         type: string
     type: object
@@ -13796,6 +13837,131 @@ paths:
       summary: Get single query
       tags:
       - Query
+  /v1/query-request/{query-id}/history:
+    get:
+      consumes:
+      - application/json
+      description: Get query history
+      operationId: get_query_history
+      parameters:
+      - description: query-id
+        in: path
+        name: query-id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: QueryHistory
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.GetQueryHistoryRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Api query history
+      tags:
+      - Query
+  /v1/query-request/{query-id}/revert:
+    post:
+      consumes:
+      - application/json
+      description: Revert query
+      operationId: revert_query
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: query-id
+        in: path
+        name: query-id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: RevertQueryReq
+        required: true
+        schema:
+          $ref: '#/definitions/query_service.RevertQueryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/query_service.Query'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Revert query
+      tags:
+      - query
   /v1/query-request/run:
     post:
       consumes:
