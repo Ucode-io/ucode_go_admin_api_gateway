@@ -42,7 +42,7 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	cmd.Stdout = &out
 	err = cmd.Run()
 	if err != nil {
-		return "", errors.New("error while install code server::" + err.Error())
+		return "", errors.New("error running get password command::" + err.Error())
 	}
 	// output, err := cmd.Output()
 	// if err != nil {
