@@ -59,7 +59,13 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 	dagSteps := make([]*pb.DAGStep, 0)
 	for _, step := range req.Steps {
 
-		requestInfo, err := helper.ConvertMapToStruct(step.RequestInfo)
+		requestInfo, err := helper.ConvertMapToStruct(step.Config.RequestInfo)
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		uiComponent, err := helper.ConvertMapToStruct(step.UiComponent)
 		if err != nil {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
@@ -72,11 +78,12 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 		// }
 
 		dagSteps = append(dagSteps, &pb.DAGStep{
-			Slug:        step.Slug,
-			Type:        step.Type,
-			ConnectInfo: &step.ConnectInfo,
+			Slug:        step.Config.Slug,
+			Type:        step.Config.Type,
+			ConnectInfo: &step.Config.ConnectInfo,
 			RequestInfo: requestInfo,
-			IsParallel:  step.IsParallel,
+			IsParallel:  step.Config.IsParallel,
+			UiComponent: uiComponent,
 		})
 	}
 

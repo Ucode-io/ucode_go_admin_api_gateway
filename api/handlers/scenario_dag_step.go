@@ -56,18 +56,18 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 		return
 	}
 
-	requestInfoStrct, err := helper.ConvertMapToStruct(req.RequestInfo)
+	requestInfoStrct, err := helper.ConvertMapToStruct(req.Config.RequestInfo)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	reqStrct := pb.CreateDAGStepRequest{
-		Slug:        req.Slug,
-		ParentId:    req.ParentId,
-		DagId:       req.DagId,
-		Type:        req.Type,
-		ConnectInfo: &req.ConnectInfo,
+		Slug:        req.Config.Slug,
+		ParentId:    req.Config.ParentId,
+		DagId:       req.Config.DagId,
+		Type:        req.Config.Type,
+		ConnectInfo: &req.Config.ConnectInfo,
 		RequestInfo: requestInfoStrct,
 		IsParallel:  true,
 	}
@@ -235,7 +235,7 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(dagStep.Id) {
+	if !util.IsValidUUID(dagStep.Config.Id) {
 		h.handleResponse(c, status_http.BadRequest, "dagStepID not valid uuid")
 		return
 	}
@@ -259,7 +259,7 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 		return
 	}
 
-	requestInfoStrct, err := helper.ConvertMapToStruct(dagStep.RequestInfo)
+	requestInfoStrct, err := helper.ConvertMapToStruct(dagStep.Config.RequestInfo)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -268,12 +268,12 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 	// conditionActionStrct, err := helper.ConvertMapToStruct(dagStep.ConditionAction)
 
 	dagStepStrct := pb.DAGStep{
-		Id:          dagStep.Id,
-		Slug:        dagStep.Slug,
-		ParentId:    dagStep.ParentId,
-		DagId:       dagStep.DagId,
-		Type:        dagStep.Type,
-		ConnectInfo: &dagStep.ConnectInfo,
+		Id:          dagStep.Config.Id,
+		Slug:        dagStep.Config.Slug,
+		ParentId:    dagStep.Config.ParentId,
+		DagId:       dagStep.Config.DagId,
+		Type:        dagStep.Config.Type,
+		ConnectInfo: &dagStep.Config.ConnectInfo,
 		RequestInfo: requestInfoStrct,
 		// ConditionAction: conditionActionStrct,
 	}
