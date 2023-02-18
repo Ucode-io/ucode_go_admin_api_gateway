@@ -1,6 +1,7 @@
 package code_server
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os/exec"
@@ -33,17 +34,22 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 		return "", errors.New("error while install code server::" + err.Error())
 	}
 	fmt.Println("test helm install code server")
-
-	output, err := exec.Command("kubectl", "get", "secret", " --namespace", "test", functionName, "-o", "jsonpath=\"{.data.password}\"", "|", "base64", "-d").Output()
+	var out bytes.Buffer
+	cmd = exec.Command("kubectl", "get", "secret", " --namespace", "test", functionName, "-o", "jsonpath=\"{.data.password}\"", "|", "base64", "-d")
 	if err != nil {
 		return "", errors.New("error while get password 0::" + err.Error())
+	}
+	cmd.Stdout = &out
+	err = cmd.Run()
+	if err != nil {
+		return "", errors.New("error while install code server::" + err.Error())
 	}
 	// output, err := cmd.Output()
 	// if err != nil {
 	// 	return "", errors.New("error while get password 1::" + err.Error())
 	// }
 
-	fmt.Println("Finish", string(output))
+	fmt.Println("Finish", out.String())
 
-	return string(output), nil
+	return out.String(), nil
 }
