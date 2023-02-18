@@ -77,7 +77,7 @@ message GetMultipleCommitInfoRequest {
 }
 
 message CommitInfo {
-  string guid = 1;
+  string id = 1;
   repeated string version_ids = 2;
   string project_id = 3;
   string author_id = 4;

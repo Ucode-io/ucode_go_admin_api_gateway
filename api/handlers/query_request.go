@@ -3,11 +3,15 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	tmp "ucode/ucode_go_api_gateway/genproto/query_service"
+	vcs "ucode/ucode_go_api_gateway/genproto/versioning_service"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 )
 
@@ -665,3 +669,304 @@ func (h *Handler) QueryRun(c *gin.Context) {
 
 	h.handleResponse(c, status_http.Created, res)
 }
+
+// GetQueryHistory godoc
+// @Security ApiKeyAuth
+// @ID get_query_history
+// @Router /v1/query-request/{query-id}/history [GET]
+// @Summary Get Api query history
+// @Description Get query history
+// @Tags Query
+// @Accept json
+// @Produce json
+// @Param query-id path string true "query-id"
+// @Param project-id query string true "project-id"
+// @Param limit query string true "limit"
+// @Param offset query string true "offset"
+// @Success 200 {object} status_http.Response{data=tmp.GetQueryHistoryRes} "QueryHistory"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetQueryHistory(c *gin.Context) {
+	id := c.Param("query-id")
+	projectId := c.Param("project-id")
+
+	if !util.IsValidUUID(id) {
+		err := errors.New("query is an invalid uuid")
+		h.log.Error("query is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "query is an invalid uuid")
+		return
+	}
+
+	if !util.IsValidUUID(projectId) {
+		err := errors.New("project_id is an invalid uuid")
+		h.log.Error("project_id is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.log.Error("error getting service", logger.Error(err))
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.log.Error("error getting limit param", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.log.Error("error getting offset param", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := services.QueryService().Query().GetQueryHistory(
+		context.Background(),
+		&tmp.GetQueryHistoryReq{
+			Id:        id,
+			ProjectId: projectId,
+			Offset:    int64(offset),
+			Limit:     int64(limit),
+		},
+	)
+	if err != nil {
+		h.log.Error("error getting query history", logger.Error(err))
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	var (
+		versionIds []string
+		// autherGuids []string
+	)
+	for _, item := range resp.GetQueries() {
+		versionIds = append(versionIds, item.GetCommitInfo().GetVersionIds()...)
+	}
+
+	multipleVersionResp, err := services.VersioningService().Release().GetMultipleVersionInfo(
+		c.Request.Context(),
+		&vcs.GetMultipleVersionInfoRequest{
+			VersionIds: versionIds,
+			ProjectId:  projectId,
+		},
+	)
+	if err != nil {
+		h.log.Error("error getting multiple version infos", logger.Error(err))
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	for _, item := range resp.GetQueries() {
+		for key := range item.GetVersionInfos() {
+
+			versionInfoData := multipleVersionResp.GetVersionInfos()[key]
+
+			item.VersionInfos[key] = &tmp.VersionInfo{
+				VersionId: versionInfoData.GetVersionId(),
+				AuthorId:  versionInfoData.GetAuthorId(),
+				Version:   versionInfoData.GetVersion(),
+				Desc:      versionInfoData.GetDesc(),
+				CreatedAt: versionInfoData.GetCreatedAt(),
+				UpdatedAt: versionInfoData.GetUpdatedAt(),
+				IsCurrent: versionInfoData.GetIsCurrent(),
+			}
+		}
+	}
+	// reqAutherGuids, err := helper.ConvertMapToStruct(map[string]interface{}{
+	// 	"guid": []string{},
+	// })
+	// if err != nil {
+	// 	h.log.Error("error converting map to struct", logger.Error(err))
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
+
+	// // Get User Data
+	// respAuthersData, err := services.BuilderService().ObjectBuilder().GetList(
+	// 	c.Request.Context(),
+
+	// 	&builder.CommonMessage{
+	// 		TableSlug: "users",
+	// 		Data:      reqAutherGuids,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.log.Error("error getting user data", logger.Error(err))
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// RevertQuery godoc
+// @Security ApiKeyAuth
+// @Param Environment-Id header string true "Environment-Id"
+// @ID revert_query
+// @Router /v1/query-request/{query-id}/revert [POST]
+// @Summary Revert query
+// @Description Revert query
+// @Tags query
+// @Accept json
+// @Produce json
+// @Param query-id path string true "query-id"
+// @Param project-id query string true "project-id"
+// @Param RevertQueryReq body tmp.RevertQueryReq true "Request Body"
+// @Success 200 {object} status_http.Response{data=tmp.Query} "Response Body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) RevertQuery(c *gin.Context) {
+
+	var body tmp.RevertQueryReq
+
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		h.log.Error("error binding json", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	id := c.Param("query-id")
+
+	if !util.IsValidUUID(id) {
+		err := errors.New("query id is an invalid uuid")
+		h.log.Error("query is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "query is an invalid uuid")
+		return
+	}
+
+	if !util.IsValidUUID(body.GetProjectId()) {
+		err := errors.New("project_id is an invalid uuid")
+		h.log.Error("project_id is an invalid uuid", logger.Error(err))
+		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.log.Error("error getting service", logger.Error(err))
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
+		return
+	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
+
+	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
+		return
+	}
+
+	resp, err := services.QueryService().Query().RevertQuery(
+		context.Background(),
+		&tmp.RevertQueryReq{
+			Id:          id,
+			VersionId:   versionGuid,
+			OldCommitId: body.GetOldCommitId(),
+			NewCommitId: commitGuid,
+		},
+	)
+	if err != nil {
+		h.log.Error("error reverting query", logger.Error(err))
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+//// InsertManyVersionForApiReference godoc
+//// @Security ApiKeyAuth
+//// @ID insert_many_api_reference
+//// @Router /v1/api-reference/select-versions/{api_reference_id} [POST]
+//// @Summary Select Api Reference
+//// @Description Select Api Reference
+//// @Tags ApiReference
+//// @Accept json
+//// @Produce json
+//// @Param api_reference_id path string true "api_reference_id"
+//// @Param Environment-Id header string true "Environment-Id"
+//// @Param body body api_reference_service.ApiManyVersions true "Request Body"
+//// @Success 200 {object} status_http.Response{data=ars.ApiReference} "Response Body"
+//// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+//// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+//func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
+//
+//	body := ars.ManyVersions{}
+//	err := c.ShouldBindJSON(&body)
+//	if err != nil {
+//		h.handleResponse(c, status_http.BadRequest, err.Error())
+//		return
+//	}
+//
+//	log.Printf("API->body: %+v", body)
+//
+//	environmentID, ok := c.Get("environment_id")
+//	if !ok {
+//		err = errors.New("error getting environment id")
+//		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
+//		return
+//	}
+//
+//	if !util.IsValidUUID(environmentID.(string)) {
+//		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+//		return
+//	}
+//
+//	api_reference_id := c.Param("api_reference_id")
+//	if !util.IsValidUUID(api_reference_id) {
+//		err := errors.New("api_reference_id is an invalid uuid")
+//		h.log.Error("api_reference_id is an invalid uuid", logger.Error(err))
+//		h.handleResponse(c, status_http.InvalidArgument, "api_reference_id is an invalid uuid")
+//		return
+//	}
+//
+//	if !util.IsValidUUID(body.GetProjectId()) {
+//		err := errors.New("project_id is an invalid uuid")
+//		h.log.Error("project_id is an invalid uuid", logger.Error(err))
+//		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+//		return
+//	}
+//
+//	namespace := c.GetString("namespace")
+//	services, err := h.GetService(namespace)
+//	if err != nil {
+//		h.log.Error("error getting service", logger.Error(err))
+//		h.handleResponse(c, status_http.Forbidden, err)
+//		return
+//	}
+//
+//	body.EnvironmentId = environmentID.(string)
+//	body.Guid = api_reference_id
+//
+//	// _, commitId, err := h.CreateAutoCommitForAdminChange(c, environmentID.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
+//	// if err != nil {
+//	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
+//	// 	return
+//	// }
+//
+//	resp, err := services.ApiReferenceService().ApiReference().CreateManyApiReference(c.Request.Context(), &body)
+//	if err != nil {
+//		h.handleResponse(c, status_http.GRPCError, err.Error())
+//
+//		return
+//	}
+//
+//	h.handleResponse(c, status_http.OK, resp)
+//}
