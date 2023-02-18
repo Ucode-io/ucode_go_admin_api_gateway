@@ -39,11 +39,11 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(function.Body)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+	// structData, err := helper.ConvertMapToStruct(function.Body)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
+	// 	return
+	// }
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -79,23 +79,23 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		return
 	}
 
-	response, err := services.FunctionService().FunctionService().Create(
-		context.Background(),
-		&fc.CreateFunctionRequest{
-			Path:        function.Path,
-			Name:        function.Name,
-			Description: function.Description,
-			Body:        structData,
-			ProjectId:   project.ProjectId,
-		},
-	)
+	// response, err := services.FunctionService().FunctionService().Create(
+	// 	context.Background(),
+	// 	&fc.CreateFunctionRequest{
+	// 		Path:        function.Path,
+	// 		Name:        function.Name,
+	// 		Description: function.Description,
+	// 		Body:        structData,
+	// 		ProjectId:   project.ProjectId,
+	// 	},
+	// )
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	h.handleResponse(c, status_http.Created, response)
+	h.handleResponse(c, status_http.Created, "ok")
 }
 
 // GetNewFunctionByID godoc
