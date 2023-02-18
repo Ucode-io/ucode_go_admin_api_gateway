@@ -10,7 +10,7 @@ import (
 func CreateCodeServer(functionName string, cfg config.Config, id string) (string, error) {
 
 	// command := fmt.Sprintf("--username udevs --password %s code-server https://gitlab.udevs.io/api/v4/projects/1512/packages/helm/stable", cfg.GitlabIntegrationToken)
-	cmd := exec.Command("helm", "repo", "add" , "--username", "udevs", "--password", cfg.GitlabIntegrationToken, "code-server", "https://gitlab.udevs.io/api/v4/projects/1512/packages/helm/stable")
+	cmd := exec.Command("helm", "repo", "add", "--username", "udevs", "--password", cfg.GitlabIntegrationToken, "code-server", "https://gitlab.udevs.io/api/v4/projects/1512/packages/helm/stable")
 	err := cmd.Run()
 	if err != nil {
 		return "", errors.New("error while adding repo:" + err.Error())
@@ -23,17 +23,18 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 		return "", errors.New("error while repo update helm::" + err.Error())
 	}
 
-	installCommand := fmt.Sprintf("%s --set=ingress.hosts[0].host=%s.u-code.io --set ingress.tls[0].hosts[0]=%s.u-code.io --set ingress.tls[0].secretName=%s-tls",
-		functionName, id, id, id)
+	hostName := fmt.Sprintf("--set=ingress.hosts[0].host=%s.u-code.io", id)
+	hostNameTls := fmt.Sprintf("--set=ingress.tls[0].hosts[0]=%s.u-code.io", id)
+	secretName := fmt.Sprintf("--set=ingress.tls[0].secretName=%s-tls", id)
 
-	cmd = exec.Command("helm", "install", installCommand)
+	cmd = exec.Command("helm", "install", functionName, hostName, hostNameTls, secretName)
 	err = cmd.Run()
 	if err != nil {
 		return "", errors.New("error while install code server::" + err.Error())
 	}
 	fmt.Println("test helm install code server")
 
-	cmd = exec.Command("echo", "$(kubectl get secret --namespace test %s -o jsonpath=\"{.data.password}\" | base64 -d)", functionName)
+	cmd = exec.Command("kubectl", "get", "secret", " --namespace", "test", functionName, "-o", "jsonpath=\"{.data.password}\"", "|", "base64", "-d")
 	if err != nil {
 		return "", errors.New("error while get password 0::" + err.Error())
 	}
