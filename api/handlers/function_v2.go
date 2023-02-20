@@ -11,7 +11,6 @@ import (
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab_integration"
-	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -23,6 +22,8 @@ import (
 // CreateNewFunction godoc
 // @Security ApiKeyAuth
 // @ID create_new_function
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v1/new/function [POST]
 // @Summary Create New Function
 // @Description Create New Function
@@ -42,12 +43,6 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		return
 	}
 
-	// structData, err := helper.ConvertMapToStruct(function.Body)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
-	// 	return
-	// }
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -57,6 +52,12 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 
 	if !util.IsValidFunctionName(function.Path) {
 		h.handleResponse(c, status_http.InvalidArgument, "function path must be contains [a-z] and hyphen")
+		return
+	}
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
 	project, err := services.CompanyService().Project().GetById(context.Background(), &company_service.GetProjectByIdRequest{
@@ -70,8 +71,9 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 	}
 	projectName := strings.TrimSpace(project.Title)
 	projectName = strings.ToLower(projectName)
+	var functionPath = projectName + "-" + function.Path
 
-	resp, err := gitlab_integration.CreateProjectFork(h.cfg, projectName+"-"+function.Path)
+	resp, err := gitlab_integration.CreateProjectFork(h.cfg, functionPath)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -92,21 +94,21 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		return
 	}
 
-	// response, err := services.FunctionService().FunctionService().Create(
-	// 	context.Background(),
-	// 	&fc.CreateFunctionRequest{
-	// 		Path:        function.Path,
-	// 		Name:        function.Name,
-	// 		Description: function.Description,
-	// 		Body:        structData,
-	// 		ProjectId:   project.ProjectId,
-	// 	},
-	// )
+	_, err = services.FunctionService().FunctionService().Create(
+		context.Background(),
+		&fc.CreateFunctionRequest{
+			Path:          functionPath,
+			Name:          function.Name,
+			Description:   function.Description,
+			ProjectId:     project.ProjectId,
+			EnvironmentId: environmentId.(string),
+		},
+	)
 
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, status_http.Created, models.ResponseCreateFunction{
 		Password: password,
@@ -180,8 +182,8 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 	resp, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
 		&fc.FunctionPrimaryKey{
-			Id:        functionID,
-			ProjectId: resourceEnvironment.GetId(),
+			Id:            functionID,
+			EnvironmentId: resourceEnvironment.GetEnvironmentId(),
 		},
 	)
 	if err != nil {
@@ -295,13 +297,6 @@ func (h *Handler) UpdateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
-	structData, err := helper.ConvertMapToStruct(function.Body)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -349,8 +344,7 @@ func (h *Handler) UpdateNewFunction(c *gin.Context) {
 			Description: function.Description,
 			Name:        function.Name,
 			Path:        function.Path,
-			Body:        structData,
-			ProjectId:   resourceEnvironment.GetId(),
+			ProjectId:   resourceEnvironment.GetEnvironmentId(),
 		},
 	)
 

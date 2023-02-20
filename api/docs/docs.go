@@ -12513,6 +12513,11 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "name": "environment_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "method",
                         "in": "query"
                     },
@@ -13013,6 +13018,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "name": "project_id",
                         "in": "query"
@@ -13099,6 +13109,20 @@ const docTemplate = `{
                 "summary": "Create New Function",
                 "operationId": "create_new_function",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "project_id",
@@ -28811,7 +28835,7 @@ const docTemplate = `{
         "models.ResponseCreateFunction": {
             "type": "object",
             "properties": {
-                "string": {
+                "password": {
                     "type": "string"
                 },
                 "url": {
@@ -28905,6 +28929,9 @@ const docTemplate = `{
                 },
                 "disable": {
                     "type": "boolean"
+                },
+                "environment_id": {
+                    "type": "string"
                 },
                 "event_path": {
                     "type": "string"

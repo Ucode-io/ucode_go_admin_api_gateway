@@ -181,8 +181,8 @@ func (h *Handler) GetNewCustomEventByID(c *gin.Context) {
 	resp, err := services.FunctionService().CustomEventService().GetSingle(
 		context.Background(),
 		&fc.CustomEventPrimaryKey{
-			Id:        customeventID,
-			ProjectId: resourceEnvironment.GetId(),
+			Id:            customeventID,
+			EnvironmentId: resourceEnvironment.GetEnvironmentId(),
 		},
 	)
 	if err != nil {
@@ -424,8 +424,8 @@ func (h *Handler) DeleteNewCustomEvent(c *gin.Context) {
 	resp, err := services.FunctionService().CustomEventService().Delete(
 		context.Background(),
 		&fc.CustomEventPrimaryKey{
-			Id:        customeventID,
-			ProjectId: resourceEnvironment.GetId(),
+			Id:            customeventID,
+			EnvironmentId: resourceEnvironment.GetEnvironmentId(),
 		},
 	)
 
