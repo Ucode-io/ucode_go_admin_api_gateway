@@ -44,8 +44,9 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	cmd.Stdout = &out
 	fmt.Println("aa::", cmd.Stderr)
 	cmd.Stderr = &stderr
-	fmt.Println("ss::", cmd.Stdout)
 	err = cmd.Run()
+	fmt.Println("ss::", cmd.Stdout)
+	fmt.Println("ff::", out.String())
 	if err != nil {
 		return "", errors.New("error running get password command::" + stderr.String())
 	}
