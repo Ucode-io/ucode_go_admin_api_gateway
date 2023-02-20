@@ -5,6 +5,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/scenario_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -67,7 +68,7 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 		ParentId:    req.Config.ParentId,
 		DagId:       req.Config.DagId,
 		Type:        req.Config.Type,
-		ConnectInfo: &req.Config.ConnectInfo,
+		ConnectInfo: req.Config.ConnectInfo,
 		RequestInfo: requestInfoStrct,
 		IsParallel:  true,
 		Title:       req.Config.Title,
@@ -99,24 +100,18 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param dag-id query string true "dag-id"
-// @Param body body pb.GetAllDAGStepRequest  true "Request body"
-// @Success 200 {object} status_http.Response{data=pb.DAGStepList} "Response body"
+// @Success 200 {object} status_http.Response{data=models.GetAllDAGStepResponse} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllDagStep(c *gin.Context) {
-	var (
-		req pb.GetAllDAGStepRequest
-	)
-
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
+	req := pb.GetAllDAGStepRequest{
+		Filters: &pb.Filters{},
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
+		h.log.Error("error when get service", logger.Error(err))
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
@@ -138,6 +133,7 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "dag-id not found")
 		return
 	}
+	req.DagId = DagId
 
 	resp, err := services.ScenarioService().DagStepService().GetAll(
 		c.Request.Context(),
@@ -148,7 +144,42 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
+	respStrct := []*models.DAGStep{}
+
+	for _, v := range resp.DagSteps {
+
+		reqInfo, err := helper.ConvertStructToResponse(v.RequestInfo)
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+		dagStepConfig := models.DAGStepConfig{
+			Id:          v.Id,
+			Slug:        v.Slug,
+			ParentId:    v.ParentId,
+			DagId:       v.DagId,
+			Type:        v.Type,
+			ConnectInfo: v.ConnectInfo,
+			RequestInfo: reqInfo,
+			IsParallel:  v.IsParallel,
+			Title:       v.Title,
+			Description: v.Description,
+		}
+		uiComponent, err := helper.ConvertStructToResponse(v.UiComponent)
+		if err != nil {
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			return
+		}
+
+		respStrct = append(respStrct, &models.DAGStep{
+			Config:      dagStepConfig,
+			UiComponent: uiComponent,
+		})
+	}
+
+	h.handleResponse(c, status_http.OK, models.GetAllDAGStepResponse{
+		Steps: respStrct,
+	})
 }
 
 // ScenarioDAG godoc
@@ -282,7 +313,7 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 		ParentId:    dagStep.Config.ParentId,
 		DagId:       dagStep.Config.DagId,
 		Type:        dagStep.Config.Type,
-		ConnectInfo: &dagStep.Config.ConnectInfo,
+		ConnectInfo: dagStep.Config.ConnectInfo,
 		RequestInfo: requestInfoStrct,
 		// ConditionAction: conditionActionStrct,
 	}
