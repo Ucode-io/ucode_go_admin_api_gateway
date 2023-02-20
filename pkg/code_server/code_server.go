@@ -2,6 +2,7 @@ package code_server
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os/exec"
@@ -41,7 +42,7 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	if err != nil {
 		return "", errors.New("error while get password 0::" + err.Error())
 	}
-	// cmd.Stdout = &out
+	cmd.Stdout = &out
 	fmt.Println("aa::", cmd.Stderr)
 	cmd.Stderr = &stderr
 	err = cmd.Run()
@@ -50,11 +51,12 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	if err != nil {
 		return "", errors.New("error running get password command::" + stderr.String())
 	}
-	output, err := cmd.Output()
+	resp := map[string]interface{}{}
+	err = json.Unmarshal(out.Bytes(), &resp)
 	if err != nil {
-		return "", errors.New("error while get password 1::" + err.Error())
+		return "", err
 	}
-	fmt.Println("str::", string(output))
+	fmt.Println("respp::", resp)
 
 	fmt.Println("Finish", out.String())
 
