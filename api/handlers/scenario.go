@@ -28,7 +28,6 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateFullScenario(c *gin.Context) {
-	h.log.Info("CreateFullScenario", logger.String("body", ""))
 	var (
 		req models.CreateScenarioRequest
 	)
