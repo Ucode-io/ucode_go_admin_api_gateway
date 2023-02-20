@@ -70,6 +70,8 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 		ConnectInfo: &req.Config.ConnectInfo,
 		RequestInfo: requestInfoStrct,
 		IsParallel:  true,
+		Title:       req.Config.Title,
+		Description: req.Config.Description,
 	}
 
 	resp, err := services.ScenarioService().DagStepService().Create(
@@ -96,6 +98,7 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
+// @Param dag-id query string true "dag-id"
 // @Param body body pb.GetAllDAGStepRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=pb.DAGStepList} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -127,6 +130,12 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 	ProjectId := c.Query("project-id")
 	if !util.IsValidUUID(ProjectId) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
+		return
+	}
+
+	DagId := c.Query("dag-id")
+	if !util.IsValidUUID(DagId) {
+		h.handleResponse(c, status_http.BadRequest, "dag-id not found")
 		return
 	}
 

@@ -1317,6 +1317,8 @@ definitions:
         $ref: '#/definitions/scenario_service.ConnectInfo'
       dag_id:
         type: string
+      description:
+        type: string
       id:
         type: string
       is_parallel:
@@ -1327,6 +1329,8 @@ definitions:
         additionalProperties: true
         type: object
       slug:
+        type: string
+      title:
         type: string
       type:
         type: string
@@ -3231,6 +3235,8 @@ definitions:
         $ref: '#/definitions/scenario_service.ConnectInfo'
       dag_id:
         type: string
+      description:
+        type: string
       is_parallel:
         type: boolean
       parent_id:
@@ -3238,6 +3244,8 @@ definitions:
       request_info:
         $ref: '#/definitions/structpb.Struct'
       slug:
+        type: string
+      title:
         type: string
       type:
         type: string
@@ -3276,6 +3284,8 @@ definitions:
         $ref: '#/definitions/scenario_service.ConnectInfo'
       dag_id:
         type: string
+      description:
+        type: string
       id:
         type: string
       is_parallel:
@@ -3285,6 +3295,8 @@ definitions:
       request_info:
         $ref: '#/definitions/structpb.Struct'
       slug:
+        type: string
+      title:
         type: string
       type:
         type: string
@@ -15363,6 +15375,11 @@ paths:
       - description: project-id
         in: query
         name: project-id
+        required: true
+        type: string
+      - description: dag-id
+        in: query
+        name: dag-id
         required: true
         type: string
       - description: Request body
