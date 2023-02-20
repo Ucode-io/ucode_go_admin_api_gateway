@@ -5,6 +5,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/scenario_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -33,6 +34,7 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 	)
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
+		h.log.Error("ShouldBindJSON", logger.Error(err))
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
@@ -61,12 +63,14 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 
 		requestInfo, err := helper.ConvertMapToStruct(step.Config.RequestInfo)
 		if err != nil {
+			h.log.Error("ConvertMapToStruct requestInfo", logger.Error(err))
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
 		}
 
 		uiComponent, err := helper.ConvertMapToStruct(step.UiComponent)
 		if err != nil {
+			h.log.Error("ConvertMapToStruct uiComponent", logger.Error(err))
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return
 		}
@@ -80,7 +84,7 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 		dagSteps = append(dagSteps, &pb.DAGStep{
 			Slug:        step.Config.Slug,
 			Type:        step.Config.Type,
-			ConnectInfo: &step.Config.ConnectInfo,
+			ConnectInfo: step.Config.ConnectInfo,
 			RequestInfo: requestInfo,
 			IsParallel:  step.Config.IsParallel,
 			UiComponent: uiComponent,

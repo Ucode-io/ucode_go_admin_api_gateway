@@ -10,7 +10,7 @@ type DAGStepConfig struct {
 	ParentId        string                 `json:"parent_id"`
 	DagId           string                 `json:"dag_id"`
 	Type            string                 `json:"type"`
-	ConnectInfo     pb.ConnectInfo         `json:"connect_info"`
+	ConnectInfo     *pb.ConnectInfo         `json:"connect_info"`
 	RequestInfo     map[string]interface{} `json:"request_info"`
 	ConditionAction map[string]interface{} `json:"condition_action"`
 	IsParallel      bool                   `json:"is_parallel"`
@@ -43,5 +43,9 @@ type DAG struct {
 
 type CreateScenarioRequest struct {
 	Dag   DAG        `json:"dag"`
+	Steps []*DAGStep `json:"steps"`
+}
+
+type GetAllDAGStepResponse struct {
 	Steps []*DAGStep `json:"steps"`
 }
