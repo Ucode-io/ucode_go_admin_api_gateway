@@ -133,6 +133,7 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "dag-id not found")
 		return
 	}
+	req.DagId = DagId
 
 	resp, err := services.ScenarioService().DagStepService().GetAll(
 		c.Request.Context(),
