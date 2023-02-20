@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"strings"
 	"ucode/ucode_go_api_gateway/config"
 )
 
@@ -52,8 +53,11 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 		return "", errors.New("error running get password command::" + stderr.String())
 	}
 
-	fmt.Println("Finish", out.String())
-	str, err := base64.StdEncoding.DecodeString(out.String())
+	s := strings.ReplaceAll(out.String(), `"`, "")
+	str, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return "", errors.New("error while base64 to string::" + stderr.String())
+	}
 	pass := fmt.Sprintf("%s", str)
 	fmt.Println("pass:", pass)
 
