@@ -54,7 +54,8 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 
 	fmt.Println("Finish", out.String())
 	str, err := base64.StdEncoding.DecodeString(out.String())
-	fmt.Println("str::", string(str))
+	pass := fmt.Sprintf("%s", str)
+	fmt.Println("pass:", pass)
 
-	return string(str), nil
+	return pass, nil
 }
