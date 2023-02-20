@@ -37,7 +37,7 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	fmt.Println("test helm install code server")
 	var out bytes.Buffer
 	var stderr bytes.Buffer
-	cmd = exec.Command("kubectl", "get", "secret", " --namespace", "test", functionName, "-o", "jsonpath=\"{.data.password}\"")
+	cmd = exec.Command("kubectl", "get", "secret", "--namespace", "test", functionName, "-o", "jsonpath=\"{.data.password}\"")
 	if err != nil {
 		return "", errors.New("error while get password 0::" + err.Error())
 	}
