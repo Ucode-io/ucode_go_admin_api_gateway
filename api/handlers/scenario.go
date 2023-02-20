@@ -28,7 +28,7 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateFullScenario(c *gin.Context) {
-
+	h.log.Info("CreateFullScenario", logger.String("body", ""))
 	var (
 		req models.CreateScenarioRequest
 	)
@@ -60,6 +60,10 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 
 	dagSteps := make([]*pb.DAGStep, 0)
 	for _, step := range req.Steps {
+
+		if step.Config.RequestInfo == nil {
+			step.Config.RequestInfo = make(map[string]interface{})
+		}
 
 		requestInfo, err := helper.ConvertMapToStruct(step.Config.RequestInfo)
 		if err != nil {
