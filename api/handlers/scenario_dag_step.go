@@ -100,7 +100,7 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param dag-id query string true "dag-id"
-// @Param body body pb.GetAllDAGStepRequest  true "Request body"
+// @Param body body pb.GetAllDAGStepRequest  false "Request body"
 // @Success 200 {object} status_http.Response{data=models.GetAllDAGStepResponse} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -108,7 +108,7 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 	req := pb.GetAllDAGStepRequest{
 		Filters: &pb.Filters{},
 	}
-	
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
