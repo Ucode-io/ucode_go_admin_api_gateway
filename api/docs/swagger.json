@@ -13116,7 +13116,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Function"
+                                            "$ref": "#/definitions/models.ResponseCreateFunction"
                                         }
                                     }
                                 }
@@ -28793,6 +28793,17 @@
                 "data": {
                     "type": "object",
                     "additionalProperties": true
+                }
+            }
+        },
+        "models.ResponseCreateFunction": {
+            "type": "object",
+            "properties": {
+                "string": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },

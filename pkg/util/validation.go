@@ -27,7 +27,7 @@ func IsValidUUID(uuid string) bool {
 }
 
 // IsValidLogin ...
-func IsValidFunctionName(login string) bool {
-	r := regexp.MustCompile(`^[a-z-]*$`)
-	return r.MatchString(login)
+func IsValidFunctionName(functionName string) bool {
+	r := regexp.MustCompile(`^[a-z0-9-]*$`)
+	return r.MatchString(functionName)
 }

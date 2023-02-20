@@ -13128,7 +13128,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Function"
+                                            "$ref": "#/definitions/models.ResponseCreateFunction"
                                         }
                                     }
                                 }
@@ -28805,6 +28805,17 @@ const docTemplate = `{
                 "data": {
                     "type": "object",
                     "additionalProperties": true
+                }
+            }
+        },
+        "models.ResponseCreateFunction": {
+            "type": "object",
+            "properties": {
+                "string": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },

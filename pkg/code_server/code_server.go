@@ -2,9 +2,11 @@ package code_server
 
 import (
 	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"os/exec"
+	"strings"
 	"ucode/ucode_go_api_gateway/config"
 )
 
@@ -36,23 +38,28 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	}
 	fmt.Println("test helm install code server")
 	var out bytes.Buffer
-	cmd = exec.Command("kubectl", "get", "secret", " --namespace", "test", functionName, "-o", "jsonpath=\"{.data.password}\"", "|", "base64", "-d")
+	var stderr bytes.Buffer
+	cmd = exec.Command("kubectl", "get", "secret", "--namespace", "test", functionName+"-code-server", "-o", "jsonpath=\"{.data.password}\"")
 	if err != nil {
 		return "", errors.New("error while get password 0::" + err.Error())
 	}
 	cmd.Stdout = &out
 	fmt.Println("aa::", cmd.Stderr)
-	fmt.Println("ss::", cmd.Stdout)
+	cmd.Stderr = &stderr
 	err = cmd.Run()
+	fmt.Println("ss::", cmd.Stdout)
+	fmt.Println("ff::", out.String())
 	if err != nil {
-		return "", errors.New("error running get password command::" + err.Error())
+		return "", errors.New("error running get password command::" + stderr.String())
 	}
-	// output, err := cmd.Output()
-	// if err != nil {
-	// 	return "", errors.New("error while get password 1::" + err.Error())
-	// }
 
-	fmt.Println("Finish", out.String())
+	s := strings.ReplaceAll(out.String(), `"`, "")
+	str, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return "", errors.New("error while base64 to string::" + stderr.String())
+	}
+	pass := fmt.Sprintf("%s", str)
+	fmt.Println("pass:", pass)
 
-	return out.String(), nil
+	return pass, nil
 }

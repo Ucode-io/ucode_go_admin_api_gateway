@@ -31,7 +31,7 @@ import (
 // @Produce json
 // @Param project_id query string true "project_id"
 // @Param Function body models.CreateFunctionRequest true "CreateFunctionRequestBody"
-// @Success 201 {object} status_http.Response{data=models.Function} "Function data"
+// @Success 201 {object} status_http.Response{data=models.ResponseCreateFunction} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateNewFunction(c *gin.Context) {
@@ -91,10 +91,6 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	responseMap := map[string]string{
-		"password": password,
-		"url":      "https://" + uuid.String() + ".u-code.io",
-	}
 
 	// response, err := services.FunctionService().FunctionService().Create(
 	// 	context.Background(),
@@ -112,7 +108,10 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 	// 	return
 	// }
 
-	h.handleResponse(c, status_http.Created, responseMap)
+	h.handleResponse(c, status_http.Created, models.ResponseCreateFunction{
+		Password: password,
+		URL:      "https://" + uuid.String() + ".u-code.io",
+	})
 }
 
 // GetNewFunctionByID godoc
