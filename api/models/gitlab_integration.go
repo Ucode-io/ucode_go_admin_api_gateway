@@ -13,3 +13,8 @@ type GitlabIntegrationResponse struct {
 	Code    int                    `json:"code"`
 	Message map[string]interface{} `json:""`
 }
+
+type ResponseCreateFunction struct {
+	Password string `json:"string"`
+	URL      string `json:"url"`
+}

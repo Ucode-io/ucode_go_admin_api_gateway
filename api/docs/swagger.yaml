@@ -1605,6 +1605,13 @@ definitions:
         additionalProperties: true
         type: object
     type: object
+  models.ResponseCreateFunction:
+    properties:
+      string:
+        type: string
+      url:
+        type: string
+    type: object
   models.SendCodeResponse:
     properties:
       data:
@@ -11474,7 +11481,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.Function'
+                  $ref: '#/definitions/models.ResponseCreateFunction'
               type: object
         "400":
           description: Bad Request
