@@ -84,6 +84,8 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 			RequestInfo: requestInfo,
 			IsParallel:  step.Config.IsParallel,
 			UiComponent: uiComponent,
+			Title:       step.Config.Title,
+			Description: step.Config.Description,
 		})
 	}
 

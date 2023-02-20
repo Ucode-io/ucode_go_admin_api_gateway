@@ -14,6 +14,8 @@ type DAGStepConfig struct {
 	RequestInfo     map[string]interface{} `json:"request_info"`
 	ConditionAction map[string]interface{} `json:"condition_action"`
 	IsParallel      bool                   `json:"is_parallel"`
+	Title           string                 `json:"title"`
+	Description     string                 `json:"description"`
 }
 
 type DAGStep struct {

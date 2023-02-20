@@ -19884,6 +19884,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "dag-id",
+                        "name": "dag-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "Request body",
                         "name": "body",
                         "in": "body",
@@ -28363,6 +28370,9 @@ const docTemplate = `{
                 "dag_id": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -28377,6 +28387,9 @@ const docTemplate = `{
                     "additionalProperties": true
                 },
                 "slug": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 },
                 "type": {
@@ -31287,6 +31300,9 @@ const docTemplate = `{
                 "dag_id": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "is_parallel": {
                     "type": "boolean"
                 },
@@ -31297,6 +31313,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/structpb.Struct"
                 },
                 "slug": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 },
                 "type": {
@@ -31356,6 +31375,9 @@ const docTemplate = `{
                 "dag_id": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -31369,6 +31391,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/structpb.Struct"
                 },
                 "slug": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 },
                 "type": {
