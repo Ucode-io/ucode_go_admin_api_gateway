@@ -15,6 +15,6 @@ type GitlabIntegrationResponse struct {
 }
 
 type ResponseCreateFunction struct {
-	Password string `json:"string"`
+	Password string `json:"password"`
 	URL      string `json:"url"`
 }

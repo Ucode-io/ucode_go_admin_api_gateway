@@ -41,7 +41,7 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	if err != nil {
 		return "", errors.New("error while get password 0::" + err.Error())
 	}
-	cmd.Stdout = &out
+	// cmd.Stdout = &out
 	fmt.Println("aa::", cmd.Stderr)
 	cmd.Stderr = &stderr
 	err = cmd.Run()
@@ -50,10 +50,11 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	if err != nil {
 		return "", errors.New("error running get password command::" + stderr.String())
 	}
-	// output, err := cmd.Output()
-	// if err != nil {
-	// 	return "", errors.New("error while get password 1::" + err.Error())
-	// }
+	output, err := cmd.Output()
+	if err != nil {
+		return "", errors.New("error while get password 1::" + err.Error())
+	}
+	fmt.Println("str::", string(output))
 
 	fmt.Println("Finish", out.String())
 
