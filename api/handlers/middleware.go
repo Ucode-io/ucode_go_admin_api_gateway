@@ -72,6 +72,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 					c.Abort()
 					return
 				}
+				fmt.Println(resource)
 
 				resourceId = resource.GetResource().Id
 			}
