@@ -5,6 +5,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/scenario_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -99,24 +100,18 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param dag-id query string true "dag-id"
-// @Param body body pb.GetAllDAGStepRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=models.GetAllDAGStepResponse} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllDagStep(c *gin.Context) {
-	var (
-		req pb.GetAllDAGStepRequest
-	)
-
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
+	req := pb.GetAllDAGStepRequest{
+		Filters: &pb.Filters{},
 	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
+		h.log.Error("error when get service", logger.Error(err))
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
