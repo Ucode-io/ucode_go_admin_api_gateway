@@ -36,7 +36,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	// v1.Use(h.AuthMiddleware(cfg))
+	v1.Use(h.AuthMiddleware(cfg))
 	{
 		v1.POST("/upload", h.Upload)
 		v1.POST("/upload-file/:table_slug/:object_id", h.UploadFile)
