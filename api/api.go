@@ -349,6 +349,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.PUT("/new/function", h.UpdateNewFunction)
 		v1Admin.DELETE("/new/function/:function_id", h.DeleteNewFunction)
 
+		// function folder
+		v1Admin.POST("/function-folder", h.CreateFunctionFolder)
+		v1Admin.GET("/function-folder/:function_ifolder_d", h.GetFunctionFolderById)
+		v1Admin.GET("/function-folder", h.GetAllFunctionFolder)
+		v1Admin.PUT("/function-folder", h.UpdateFunctionFolder)
+		v1Admin.DELETE("/function-folder/:function_folder_id", h.DeleteFunctionFolder)
+
 		// scenario service
 		v1Admin.POST("/scenario/dag", h.CreateDAG)
 		v1Admin.GET("/scenario/dag/:id", h.GetDAG)
