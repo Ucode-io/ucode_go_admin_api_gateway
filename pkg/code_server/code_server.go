@@ -2,10 +2,10 @@ package code_server
 
 import (
 	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"os/exec"
-	"strings"
 	"ucode/ucode_go_api_gateway/config"
 )
 
@@ -53,8 +53,8 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	}
 
 	fmt.Println("Finish", out.String())
-	str := strings.ReplaceAll(out.String(), `"`, "")
-	fmt.Println("str::", str)
+	str, err := base64.StdEncoding.DecodeString(out.String())
+	fmt.Println("str::", string(str))
 
-	return str, nil
+	return string(str), nil
 }
