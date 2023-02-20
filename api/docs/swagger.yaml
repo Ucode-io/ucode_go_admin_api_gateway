@@ -1143,10 +1143,9 @@ definitions:
     type: object
   models.CreateFunctionRequest:
     properties:
-      body:
-        additionalProperties: true
-        type: object
       description:
+        type: string
+      function_folder_id:
         type: string
       name:
         type: string
@@ -1400,10 +1399,9 @@ definitions:
     type: object
   models.Function:
     properties:
-      body:
-        additionalProperties: true
-        type: object
       description:
+        type: string
+      function_folder_id:
         type: string
       id:
         type: string

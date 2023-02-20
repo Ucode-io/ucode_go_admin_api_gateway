@@ -28131,11 +28131,10 @@ const docTemplate = `{
         "models.CreateFunctionRequest": {
             "type": "object",
             "properties": {
-                "body": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
                 "description": {
+                    "type": "string"
+                },
+                "function_folder_id": {
                     "type": "string"
                 },
                 "name": {
@@ -28520,11 +28519,10 @@ const docTemplate = `{
         "models.Function": {
             "type": "object",
             "properties": {
-                "body": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
                 "description": {
+                    "type": "string"
+                },
+                "function_folder_id": {
                     "type": "string"
                 },
                 "id": {

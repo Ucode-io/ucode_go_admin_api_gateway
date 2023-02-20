@@ -1,23 +1,23 @@
 package models
 
 type Function struct {
-	ID          string                 `json:"id"`
-	Path        string                 `json:"path"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Body        map[string]interface{} `json:"body"`
-	Url         string                 `json:"url"`
+	ID               string `json:"id"`
+	Path             string `json:"path"`
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	Url              string `json:"url"`
+	FuncitonFolderId string `json:"function_folder_id"`
 }
 
 type CreateFunctionRequest struct {
-	Path        string                 `json:"path"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Body        map[string]interface{} `json:"body"`
-	Url         string                 `json:"url"`
-	CommitId    int64                  `json:"-"`
-	CommitGuid  string                 `json:"-"`
-	VersionId   string                 `json:"-"`
+	Path             string `json:"path"`
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	Url              string `json:"url"`
+	CommitId         int64  `json:"-"`
+	CommitGuid       string `json:"-"`
+	VersionId        string `json:"-"`
+	FuncitonFolderId string `json:"function_folder_id"`
 }
 
 type InvokeFunctionRequest struct {

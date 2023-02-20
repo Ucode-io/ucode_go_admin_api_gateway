@@ -97,11 +97,12 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 	_, err = services.FunctionService().FunctionService().Create(
 		context.Background(),
 		&fc.CreateFunctionRequest{
-			Path:          functionPath,
-			Name:          function.Name,
-			Description:   function.Description,
-			ProjectId:     project.ProjectId,
-			EnvironmentId: environmentId.(string),
+			Path:             functionPath,
+			Name:             function.Name,
+			Description:      function.Description,
+			ProjectId:        project.ProjectId,
+			EnvironmentId:    environmentId.(string),
+			FunctionFolderId: function.FuncitonFolderId,
 		},
 	)
 
