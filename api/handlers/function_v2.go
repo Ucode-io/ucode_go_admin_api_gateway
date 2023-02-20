@@ -59,8 +59,15 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
+	environment, err := services.CompanyService().Environment().GetById(context.Background(), &company_service.EnvironmentPrimaryKey{
+		Id: environmentId.(string),
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	project, err := services.CompanyService().Project().GetById(context.Background(), &company_service.GetProjectByIdRequest{
-		ProjectId: c.DefaultQuery("project_id", ""),
+		ProjectId: environment.GetProjectId(),
 	})
 	if project.GetTitle() == "" {
 		err = errors.New("error project name is required")
