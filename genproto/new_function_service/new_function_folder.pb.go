@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.28.1
 // 	protoc        v3.21.5
-// source: new_funciton_folder.proto
+// source: new_function_folder.proto
 
 package new_function_service
 
@@ -36,7 +36,7 @@ type CreateFunctionFolderRequest struct {
 func (x *CreateFunctionFolderRequest) Reset() {
 	*x = CreateFunctionFolderRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_new_funciton_folder_proto_msgTypes[0]
+		mi := &file_new_function_folder_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -49,7 +49,7 @@ func (x *CreateFunctionFolderRequest) String() string {
 func (*CreateFunctionFolderRequest) ProtoMessage() {}
 
 func (x *CreateFunctionFolderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_new_funciton_folder_proto_msgTypes[0]
+	mi := &file_new_function_folder_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +62,7 @@ func (x *CreateFunctionFolderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateFunctionFolderRequest.ProtoReflect.Descriptor instead.
 func (*CreateFunctionFolderRequest) Descriptor() ([]byte, []int) {
-	return file_new_funciton_folder_proto_rawDescGZIP(), []int{0}
+	return file_new_function_folder_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *CreateFunctionFolderRequest) GetTitle() string {
@@ -108,7 +108,7 @@ type FunctionFolder struct {
 func (x *FunctionFolder) Reset() {
 	*x = FunctionFolder{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_new_funciton_folder_proto_msgTypes[1]
+		mi := &file_new_function_folder_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -121,7 +121,7 @@ func (x *FunctionFolder) String() string {
 func (*FunctionFolder) ProtoMessage() {}
 
 func (x *FunctionFolder) ProtoReflect() protoreflect.Message {
-	mi := &file_new_funciton_folder_proto_msgTypes[1]
+	mi := &file_new_function_folder_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -134,7 +134,7 @@ func (x *FunctionFolder) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FunctionFolder.ProtoReflect.Descriptor instead.
 func (*FunctionFolder) Descriptor() ([]byte, []int) {
-	return file_new_funciton_folder_proto_rawDescGZIP(), []int{1}
+	return file_new_function_folder_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *FunctionFolder) GetId() string {
@@ -186,7 +186,7 @@ type GetAllFunctionFoldersRequest struct {
 func (x *GetAllFunctionFoldersRequest) Reset() {
 	*x = GetAllFunctionFoldersRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_new_funciton_folder_proto_msgTypes[2]
+		mi := &file_new_function_folder_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -199,7 +199,7 @@ func (x *GetAllFunctionFoldersRequest) String() string {
 func (*GetAllFunctionFoldersRequest) ProtoMessage() {}
 
 func (x *GetAllFunctionFoldersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_new_funciton_folder_proto_msgTypes[2]
+	mi := &file_new_function_folder_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -212,7 +212,7 @@ func (x *GetAllFunctionFoldersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAllFunctionFoldersRequest.ProtoReflect.Descriptor instead.
 func (*GetAllFunctionFoldersRequest) Descriptor() ([]byte, []int) {
-	return file_new_funciton_folder_proto_rawDescGZIP(), []int{2}
+	return file_new_function_folder_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetAllFunctionFoldersRequest) GetSearch() string {
@@ -255,7 +255,7 @@ type GetAllFunctionFoldersResponse struct {
 func (x *GetAllFunctionFoldersResponse) Reset() {
 	*x = GetAllFunctionFoldersResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_new_funciton_folder_proto_msgTypes[3]
+		mi := &file_new_function_folder_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -268,7 +268,7 @@ func (x *GetAllFunctionFoldersResponse) String() string {
 func (*GetAllFunctionFoldersResponse) ProtoMessage() {}
 
 func (x *GetAllFunctionFoldersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_new_funciton_folder_proto_msgTypes[3]
+	mi := &file_new_function_folder_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -281,7 +281,7 @@ func (x *GetAllFunctionFoldersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAllFunctionFoldersResponse.ProtoReflect.Descriptor instead.
 func (*GetAllFunctionFoldersResponse) Descriptor() ([]byte, []int) {
-	return file_new_funciton_folder_proto_rawDescGZIP(), []int{3}
+	return file_new_function_folder_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetAllFunctionFoldersResponse) GetFunctionFolders() []*FunctionFolder {
@@ -310,7 +310,7 @@ type FunctionFolderPrimaryKey struct {
 func (x *FunctionFolderPrimaryKey) Reset() {
 	*x = FunctionFolderPrimaryKey{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_new_funciton_folder_proto_msgTypes[4]
+		mi := &file_new_function_folder_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -323,7 +323,7 @@ func (x *FunctionFolderPrimaryKey) String() string {
 func (*FunctionFolderPrimaryKey) ProtoMessage() {}
 
 func (x *FunctionFolderPrimaryKey) ProtoReflect() protoreflect.Message {
-	mi := &file_new_funciton_folder_proto_msgTypes[4]
+	mi := &file_new_function_folder_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -336,7 +336,7 @@ func (x *FunctionFolderPrimaryKey) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FunctionFolderPrimaryKey.ProtoReflect.Descriptor instead.
 func (*FunctionFolderPrimaryKey) Descriptor() ([]byte, []int) {
-	return file_new_funciton_folder_proto_rawDescGZIP(), []int{4}
+	return file_new_function_folder_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *FunctionFolderPrimaryKey) GetId() string {
@@ -353,10 +353,10 @@ func (x *FunctionFolderPrimaryKey) GetEnvironmentId() string {
 	return ""
 }
 
-var File_new_funciton_folder_proto protoreflect.FileDescriptor
+var File_new_function_folder_proto protoreflect.FileDescriptor
 
-var file_new_funciton_folder_proto_rawDesc = []byte{
-	0x0a, 0x19, 0x6e, 0x65, 0x77, 0x5f, 0x66, 0x75, 0x6e, 0x63, 0x69, 0x74, 0x6f, 0x6e, 0x5f, 0x66,
+var file_new_function_folder_proto_rawDesc = []byte{
+	0x0a, 0x19, 0x6e, 0x65, 0x77, 0x5f, 0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x66,
 	0x6f, 0x6c, 0x64, 0x65, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x14, 0x6e, 0x65, 0x77,
 	0x5f, 0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63,
 	0x65, 0x1a, 0x1b, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
@@ -443,19 +443,19 @@ var file_new_funciton_folder_proto_rawDesc = []byte{
 }
 
 var (
-	file_new_funciton_folder_proto_rawDescOnce sync.Once
-	file_new_funciton_folder_proto_rawDescData = file_new_funciton_folder_proto_rawDesc
+	file_new_function_folder_proto_rawDescOnce sync.Once
+	file_new_function_folder_proto_rawDescData = file_new_function_folder_proto_rawDesc
 )
 
-func file_new_funciton_folder_proto_rawDescGZIP() []byte {
-	file_new_funciton_folder_proto_rawDescOnce.Do(func() {
-		file_new_funciton_folder_proto_rawDescData = protoimpl.X.CompressGZIP(file_new_funciton_folder_proto_rawDescData)
+func file_new_function_folder_proto_rawDescGZIP() []byte {
+	file_new_function_folder_proto_rawDescOnce.Do(func() {
+		file_new_function_folder_proto_rawDescData = protoimpl.X.CompressGZIP(file_new_function_folder_proto_rawDescData)
 	})
-	return file_new_funciton_folder_proto_rawDescData
+	return file_new_function_folder_proto_rawDescData
 }
 
-var file_new_funciton_folder_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_new_funciton_folder_proto_goTypes = []interface{}{
+var file_new_function_folder_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_new_function_folder_proto_goTypes = []interface{}{
 	(*CreateFunctionFolderRequest)(nil),   // 0: new_function_service.CreateFunctionFolderRequest
 	(*FunctionFolder)(nil),                // 1: new_function_service.FunctionFolder
 	(*GetAllFunctionFoldersRequest)(nil),  // 2: new_function_service.GetAllFunctionFoldersRequest
@@ -463,7 +463,7 @@ var file_new_funciton_folder_proto_goTypes = []interface{}{
 	(*FunctionFolderPrimaryKey)(nil),      // 4: new_function_service.FunctionFolderPrimaryKey
 	(*emptypb.Empty)(nil),                 // 5: google.protobuf.Empty
 }
-var file_new_funciton_folder_proto_depIdxs = []int32{
+var file_new_function_folder_proto_depIdxs = []int32{
 	1, // 0: new_function_service.GetAllFunctionFoldersResponse.function_folders:type_name -> new_function_service.FunctionFolder
 	0, // 1: new_function_service.FunctionFolderService.Create:input_type -> new_function_service.CreateFunctionFolderRequest
 	2, // 2: new_function_service.FunctionFolderService.GetList:input_type -> new_function_service.GetAllFunctionFoldersRequest
@@ -482,13 +482,13 @@ var file_new_funciton_folder_proto_depIdxs = []int32{
 	0, // [0:1] is the sub-list for field type_name
 }
 
-func init() { file_new_funciton_folder_proto_init() }
-func file_new_funciton_folder_proto_init() {
-	if File_new_funciton_folder_proto != nil {
+func init() { file_new_function_folder_proto_init() }
+func file_new_function_folder_proto_init() {
+	if File_new_function_folder_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_new_funciton_folder_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_new_function_folder_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CreateFunctionFolderRequest); i {
 			case 0:
 				return &v.state
@@ -500,7 +500,7 @@ func file_new_funciton_folder_proto_init() {
 				return nil
 			}
 		}
-		file_new_funciton_folder_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_new_function_folder_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*FunctionFolder); i {
 			case 0:
 				return &v.state
@@ -512,7 +512,7 @@ func file_new_funciton_folder_proto_init() {
 				return nil
 			}
 		}
-		file_new_funciton_folder_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_new_function_folder_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetAllFunctionFoldersRequest); i {
 			case 0:
 				return &v.state
@@ -524,7 +524,7 @@ func file_new_funciton_folder_proto_init() {
 				return nil
 			}
 		}
-		file_new_funciton_folder_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_new_function_folder_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetAllFunctionFoldersResponse); i {
 			case 0:
 				return &v.state
@@ -536,7 +536,7 @@ func file_new_funciton_folder_proto_init() {
 				return nil
 			}
 		}
-		file_new_funciton_folder_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_new_function_folder_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*FunctionFolderPrimaryKey); i {
 			case 0:
 				return &v.state
@@ -553,18 +553,18 @@ func file_new_funciton_folder_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_new_funciton_folder_proto_rawDesc,
+			RawDescriptor: file_new_function_folder_proto_rawDesc,
 			NumEnums:      0,
 			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_new_funciton_folder_proto_goTypes,
-		DependencyIndexes: file_new_funciton_folder_proto_depIdxs,
-		MessageInfos:      file_new_funciton_folder_proto_msgTypes,
+		GoTypes:           file_new_function_folder_proto_goTypes,
+		DependencyIndexes: file_new_function_folder_proto_depIdxs,
+		MessageInfos:      file_new_function_folder_proto_msgTypes,
 	}.Build()
-	File_new_funciton_folder_proto = out.File
-	file_new_funciton_folder_proto_rawDesc = nil
-	file_new_funciton_folder_proto_goTypes = nil
-	file_new_funciton_folder_proto_depIdxs = nil
+	File_new_function_folder_proto = out.File
+	file_new_function_folder_proto_rawDesc = nil
+	file_new_function_folder_proto_goTypes = nil
+	file_new_function_folder_proto_depIdxs = nil
 }

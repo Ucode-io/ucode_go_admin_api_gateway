@@ -42,6 +42,7 @@ message GetAllFunctionsRequest {
     int32 limit = 2;
     int32 offset = 3;
     string project_id = 4;
+    string environment_id = 5;
 }
 
 message GetAllFunctionsResponse {

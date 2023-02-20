@@ -11387,18 +11387,16 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - in: query
+      - description: limit
+        in: query
         name: limit
-        type: integer
-      - in: query
+        required: true
+        type: number
+      - description: offset
+        in: query
         name: offset
-        type: integer
-      - in: query
-        name: project_id
-        type: string
-      - in: query
-        name: search
-        type: string
+        required: true
+        type: number
       produces:
       - application/json
       responses:
@@ -11448,11 +11446,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project_id
-        in: query
-        name: project_id
         required: true
         type: string
       - description: CreateFunctionRequestBody

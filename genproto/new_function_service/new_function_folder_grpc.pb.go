@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.5
-// source: new_funciton_folder.proto
+// source: new_function_folder.proto
 
 package new_function_service
 
@@ -246,5 +246,5 @@ var FunctionFolderService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "new_funciton_folder.proto",
+	Metadata: "new_function_folder.proto",
 }
