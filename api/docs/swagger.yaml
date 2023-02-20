@@ -11397,6 +11397,10 @@ paths:
         name: offset
         required: true
         type: number
+      - description: search
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:

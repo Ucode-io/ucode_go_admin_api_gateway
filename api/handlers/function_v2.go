@@ -3,16 +3,20 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/code_server"
+	"ucode/ucode_go_api_gateway/pkg/gitlab_integration"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateNewFunction godoc
@@ -67,26 +71,26 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 	projectName = strings.ToLower(projectName)
 	var functionPath = projectName + "-" + function.Path
 
-	// resp, err := gitlab_integration.CreateProjectFork(h.cfg, functionPath)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InvalidArgument, err.Error())
-	// 	return
-	// }
-	// fmt.Println("test before clone")
-	// err = gitlab_integration.CloneForkToPath(resp.Message["http_url_to_repo"].(string), h.cfg)
-	// fmt.Println("clone err::", err)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InvalidArgument, err.Error())
-	// 	return
-	// }
-	// uuid, _ := uuid.NewRandom()
-	// fmt.Println("test after clone")
-	// fmt.Println("uuid::", uuid.String())
-	// password, err := code_server.CreateCodeServer(projectName+"-"+function.Path, h.cfg, uuid.String())
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InvalidArgument, err.Error())
-	// 	return
-	// }
+	resp, err := gitlab_integration.CreateProjectFork(h.cfg, functionPath)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	fmt.Println("test before clone")
+	err = gitlab_integration.CloneForkToPath(resp.Message["http_url_to_repo"].(string), h.cfg)
+	fmt.Println("clone err::", err)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	uuid, _ := uuid.NewRandom()
+	fmt.Println("test after clone")
+	fmt.Println("uuid::", uuid.String())
+	password, err := code_server.CreateCodeServer(projectName+"-"+function.Path, h.cfg, uuid.String())
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
 
 	_, err = services.FunctionService().FunctionService().Create(
 		context.Background(),
@@ -106,8 +110,8 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.Created, models.ResponseCreateFunction{
-		Password: "password",
-		URL:      "https://" + "uuid.String()" + ".u-code.io",
+		Password: password,
+		URL:      "https://" + uuid.String() + ".u-code.io",
 	})
 }
 
