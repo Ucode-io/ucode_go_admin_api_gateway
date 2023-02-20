@@ -13463,15 +13463,13 @@
                         "type": "number",
                         "description": "limit",
                         "name": "limit",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "number",
                         "description": "offset",
                         "name": "offset",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "string",

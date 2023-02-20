@@ -211,8 +211,8 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 // @Tags Function
 // @Accept json
 // @Produce json
-// @Param limit query number true "limit"
-// @Param offset query number true "offset"
+// @Param limit query number false "limit"
+// @Param offset query number false "offset"
 // @Param search query string false "search"
 // @Success 200 {object} status_http.Response{data=string} "FunctionBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
