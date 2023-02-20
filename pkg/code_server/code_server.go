@@ -2,10 +2,10 @@ package code_server
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os/exec"
+	"strings"
 	"ucode/ucode_go_api_gateway/config"
 )
 
@@ -51,14 +51,10 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	if err != nil {
 		return "", errors.New("error running get password command::" + stderr.String())
 	}
-	resp := map[string]interface{}{}
-	err = json.Unmarshal(out.Bytes(), &resp)
-	if err != nil {
-		return "", err
-	}
-	fmt.Println("respp::", resp)
 
 	fmt.Println("Finish", out.String())
+	str := strings.ReplaceAll(out.String(), `"`, "")
+	fmt.Println("str::", str)
 
-	return out.String(), nil
+	return str, nil
 }
