@@ -204,7 +204,7 @@ func (h *Handler) GetNewCustomEventByID(c *gin.Context) {
 // @Tags CustomEvent
 // @Accept json
 // @Produce json
-// @Param filters query new_function_service.GetCustomEventsListRequest true "filters"
+// @Param filters query new_function_service.GetCustomEventsListRequest false "filters"
 // @Success 200 {object} status_http.Response{data=string} "CustomEventBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
