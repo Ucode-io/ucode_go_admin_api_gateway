@@ -110,10 +110,9 @@ volumes:
   configMaps:
   - name: code-server-kubeconfig
     mountPath: /kubeconfig
-  - name: private-key
+  secret:
+  - name: ssh-key-secret
     mountPath: /key
-    defaultMode: 400
-
 service:
   type: ClusterIP
   annotations: {}
