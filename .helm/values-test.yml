@@ -108,8 +108,10 @@ volumes:
     accessModes:
       - ReadWriteMany
   configMaps:
-    name: code-server-kubeconfig
-    mountPath: /kubeconfig
+    - name: code-server-kubeconfig
+      mountPath: /kubeconfig
+    - name: private-key
+      mountPath: /key
 
 service:
   type: ClusterIP
