@@ -812,7 +812,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 // @Router /v1/query-request/{query-id}/revert [POST]
 // @Summary Revert query
 // @Description Revert query
-// @Tags query
+// @Tags Query
 // @Accept json
 // @Produce json
 // @Param query-id path string true "query-id"
@@ -978,7 +978,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 // @Router /v1/query-request/{query-id}/log/{log-id} [GET]
 // @Summary get single log
 // @Description get single log
-// @Tags query
+// @Tags Query
 // @Accept json
 // @Produce json
 // @Param query-id path string true "query-id"
@@ -1056,7 +1056,7 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 // @Router /v1/query-request/{query-id}/log [GET]
 // @Summary get list log
 // @Description get list log
-// @Tags query
+// @Tags Query
 // @Accept json
 // @Produce json
 // @Param query-id path string true "query-id"
