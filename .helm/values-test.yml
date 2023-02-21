@@ -108,9 +108,11 @@ volumes:
     accessModes:
       - ReadWriteMany
   configMaps:
-    name: code-server-kubeconfig
+  - name: code-server-kubeconfig
     mountPath: /kubeconfig
-
+  secret:
+  - name: ssh-key-secret
+    mountPath: /key
 service:
   type: ClusterIP
   annotations: {}
