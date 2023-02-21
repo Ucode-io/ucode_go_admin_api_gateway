@@ -1834,6 +1834,11 @@ definitions:
           $ref: '#/definitions/object_builder_service.TableClientType'
         type: array
     type: object
+  object_builder_service.CodeGenerateRes:
+    properties:
+      code:
+        type: string
+    type: object
   object_builder_service.Condition:
     properties:
       match_fields:
@@ -7043,6 +7048,68 @@ paths:
       summary: Get close cashbox
       tags:
       - Appointment
+  /v1/code-generator/{table_slug}/{field_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Code with prefix
+      operationId: generate_new_code_with_prefix
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: field_id
+        in: path
+        name: field_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Code
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.CodeGenerateRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: get code with prefix
+      tags:
+      - Barcode
   /v1/commit:
     get:
       consumes:

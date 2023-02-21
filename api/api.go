@@ -199,6 +199,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/excel/excel_to_db/:excel_id", h.ExcelToDb)
 
 		v1.GET("/barcode-generator/:table_slug", h.GetNewGeneratedBarCode)
+		v1.GET("/code-generator/:table_slug/:field_id", h.GetNewGeneratedCode)
 
 		// Integration with AlfaLab
 		v1.POST("/alfalab/directions", h.CreateDirections)

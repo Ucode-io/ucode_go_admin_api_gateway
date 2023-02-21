@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BarcodeServiceClient interface {
 	Generate(ctx context.Context, in *BarcodeGenerateReq, opts ...grpc.CallOption) (*BarcodeGenerateRes, error)
+	GenerateCodeWithPrefix(ctx context.Context, in *CodeGenerateReq, opts ...grpc.CallOption) (*CodeGenerateRes, error)
 }
 
 type barcodeServiceClient struct {
@@ -42,11 +43,21 @@ func (c *barcodeServiceClient) Generate(ctx context.Context, in *BarcodeGenerate
 	return out, nil
 }
 
+func (c *barcodeServiceClient) GenerateCodeWithPrefix(ctx context.Context, in *CodeGenerateReq, opts ...grpc.CallOption) (*CodeGenerateRes, error) {
+	out := new(CodeGenerateRes)
+	err := c.cc.Invoke(ctx, "/object_builder_service.BarcodeService/GenerateCodeWithPrefix", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BarcodeServiceServer is the server API for BarcodeService service.
 // All implementations must embed UnimplementedBarcodeServiceServer
 // for forward compatibility
 type BarcodeServiceServer interface {
 	Generate(context.Context, *BarcodeGenerateReq) (*BarcodeGenerateRes, error)
+	GenerateCodeWithPrefix(context.Context, *CodeGenerateReq) (*CodeGenerateRes, error)
 	mustEmbedUnimplementedBarcodeServiceServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedBarcodeServiceServer struct {
 
 func (UnimplementedBarcodeServiceServer) Generate(context.Context, *BarcodeGenerateReq) (*BarcodeGenerateRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Generate not implemented")
+}
+func (UnimplementedBarcodeServiceServer) GenerateCodeWithPrefix(context.Context, *CodeGenerateReq) (*CodeGenerateRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateCodeWithPrefix not implemented")
 }
 func (UnimplementedBarcodeServiceServer) mustEmbedUnimplementedBarcodeServiceServer() {}
 
@@ -88,6 +102,24 @@ func _BarcodeService_Generate_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BarcodeService_GenerateCodeWithPrefix_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CodeGenerateReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BarcodeServiceServer).GenerateCodeWithPrefix(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.BarcodeService/GenerateCodeWithPrefix",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BarcodeServiceServer).GenerateCodeWithPrefix(ctx, req.(*CodeGenerateReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BarcodeService_ServiceDesc is the grpc.ServiceDesc for BarcodeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var BarcodeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Generate",
 			Handler:    _BarcodeService_Generate_Handler,
+		},
+		{
+			MethodName: "GenerateCodeWithPrefix",
+			Handler:    _BarcodeService_GenerateCodeWithPrefix_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
