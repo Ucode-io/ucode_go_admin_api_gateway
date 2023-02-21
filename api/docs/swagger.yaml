@@ -1614,6 +1614,24 @@ definitions:
       url:
         type: string
     type: object
+  models.RunScenarioRequest:
+    properties:
+      body:
+        additionalProperties: true
+        type: object
+      dag_id:
+        type: string
+      dag_step_id:
+        type: string
+      header:
+        additionalProperties:
+          type: string
+        type: object
+      method:
+        type: string
+      url:
+        type: string
+    type: object
   models.SendCodeResponse:
     properties:
       data:
@@ -3316,23 +3334,6 @@ definitions:
       id:
         type: string
       type:
-        type: string
-    type: object
-  scenario_service.RunScenarioRequest:
-    properties:
-      body:
-        $ref: '#/definitions/structpb.Struct'
-      dag_id:
-        type: string
-      dag_step_id:
-        type: string
-      header:
-        additionalProperties:
-          type: string
-        type: object
-      method:
-        type: string
-      url:
         type: string
     type: object
   scenario_service.RunScenarioResponse:
@@ -15857,7 +15858,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/scenario_service.RunScenarioRequest'
+          $ref: '#/definitions/models.RunScenarioRequest'
       produces:
       - application/json
       responses:

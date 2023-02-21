@@ -20796,7 +20796,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/scenario_service.RunScenarioRequest"
+                            "$ref": "#/definitions/models.RunScenarioRequest"
                         }
                     }
                 ],
@@ -29464,6 +29464,33 @@ var doc = `{
                 }
             }
         },
+        "models.RunScenarioRequest": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "dag_id": {
+                    "type": "string"
+                },
+                "dag_step_id": {
+                    "type": "string"
+                },
+                "header": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "method": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "models.SendCodeResponse": {
             "type": "object",
             "properties": {
@@ -32068,32 +32095,6 @@ var doc = `{
                     "type": "string"
                 },
                 "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "scenario_service.RunScenarioRequest": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/structpb.Struct"
-                },
-                "dag_id": {
-                    "type": "string"
-                },
-                "dag_step_id": {
-                    "type": "string"
-                },
-                "header": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "method": {
-                    "type": "string"
-                },
-                "url": {
                     "type": "string"
                 }
             }
