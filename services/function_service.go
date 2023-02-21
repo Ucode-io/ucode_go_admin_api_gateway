@@ -12,11 +12,13 @@ import (
 type FunctionServiceI interface {
 	FunctionService() function_service.FunctionServiceV2Client
 	CustomEventService() function_service.CustomEventServiceV2Client
+	FunctionFolderService() function_service.FunctionFolderServiceClient
 }
 
 type functionServiceClient struct {
-	functionService function_service.FunctionServiceV2Client
-	categoryService function_service.CustomEventServiceV2Client
+	functionService       function_service.FunctionServiceV2Client
+	customEventService    function_service.CustomEventServiceV2Client
+	functionFolderService function_service.FunctionFolderServiceClient
 }
 
 func NewFunctionServiceClient(ctx context.Context, cfg config.Config) (FunctionServiceI, error) {
@@ -32,8 +34,9 @@ func NewFunctionServiceClient(ctx context.Context, cfg config.Config) (FunctionS
 	}
 
 	return &functionServiceClient{
-		functionService: function_service.NewFunctionServiceV2Client(connFunctionService),
-		categoryService: function_service.NewCustomEventServiceV2Client(connFunctionService),
+		functionService:       function_service.NewFunctionServiceV2Client(connFunctionService),
+		customEventService:    function_service.NewCustomEventServiceV2Client(connFunctionService),
+		functionFolderService: function_service.NewFunctionFolderServiceClient(connFunctionService),
 	}, nil
 }
 
@@ -42,5 +45,8 @@ func (g *functionServiceClient) FunctionService() function_service.FunctionServi
 }
 
 func (g *functionServiceClient) CustomEventService() function_service.CustomEventServiceV2Client {
-	return g.categoryService
+	return g.customEventService
+}
+func (g *functionServiceClient) FunctionFolderService() function_service.FunctionFolderServiceClient {
+	return g.functionFolderService
 }

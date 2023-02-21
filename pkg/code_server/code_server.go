@@ -2,12 +2,15 @@ package code_server
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/new_function_service"
+	"ucode/ucode_go_api_gateway/services"
 )
 
 func CreateCodeServer(functionName string, cfg config.Config, id string) (string, error) {
@@ -62,4 +65,23 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	fmt.Println("pass:", pass)
 
 	return pass, nil
+}
+
+func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg config.Config) error {
+
+	functions, err := srvs.FunctionService().FunctionService().GetList(context.Background(), &new_function_service.GetAllFunctionsRequest{})
+	if err != nil {
+		return err
+	}
+	for _, function := range functions.GetFunctions() {
+		cmd := exec.Command("helm", "uninstall", function.Path)
+		err = cmd.Run()
+		var stderr bytes.Buffer
+		cmd.Stderr = &stderr
+		if err != nil {
+			return errors.New("error while uninstalling " + function.GetPath() + "error: " + stderr.String())
+		}
+	}
+
+	return nil
 }

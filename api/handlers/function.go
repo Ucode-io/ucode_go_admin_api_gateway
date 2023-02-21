@@ -8,7 +8,6 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -40,7 +39,7 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(function.Body)
+	// structData, err := helper.ConvertMapToStruct(function.Body)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -101,8 +100,8 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 			Path:        function.Path,
 			Name:        function.Name,
 			Description: function.Description,
-			Body:        structData,
-			ProjectId:   resourceEnvironment.GetId(),
+			// Body:        structData,
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -296,11 +295,11 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(function.Body)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+	// structData, err := helper.ConvertMapToStruct(function.Body)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
+	// 	return
+	// }
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -349,8 +348,8 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 			Description: function.Description,
 			Name:        function.Name,
 			Path:        function.Path,
-			Body:        structData,
-			ProjectId:   resourceEnvironment.GetId(),
+			// Body:        structData,
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 

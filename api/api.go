@@ -342,12 +342,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.PUT("/new/custom-event", h.UpdateNewCustomEvent)
 		v1Admin.DELETE("/new/custom-event/:custom_event_id", h.DeleteNewCustomEvent)
 
-		// function
-		v1Admin.POST("/new/function", h.CreateNewFunction)
-		v1Admin.GET("/new/function/:function_id", h.GetNewFunctionByID)
-		v1Admin.GET("/new/function", h.GetAllNewFunctions)
-		v1Admin.PUT("/new/function", h.UpdateNewFunction)
-		v1Admin.DELETE("/new/function/:function_id", h.DeleteNewFunction)
+		// function folder
+		v1Admin.POST("/function-folder", h.CreateFunctionFolder)
+		v1Admin.GET("/function-folder/:function_ifolder_d", h.GetFunctionFolderById)
+		v1Admin.GET("/function-folder", h.GetAllFunctionFolder)
+		v1Admin.PUT("/function-folder", h.UpdateFunctionFolder)
+		v1Admin.DELETE("/function-folder/:function_folder_id", h.DeleteFunctionFolder)
 
 		// scenario service
 		v1Admin.POST("/scenario/dag", h.CreateDAG)
@@ -368,6 +368,17 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		v1Admin.POST("/scenario/run", h.RunScenario)
 		v1Admin.POST("/scenario", h.CreateFullScenario)
+	}
+	v2Admin := r.Group("/v2")
+	v2Admin.Use(h.AdminAuthMiddleware())
+	{
+
+		// function
+		v2Admin.POST("/function", h.CreateNewFunction)
+		v2Admin.GET("/function/:function_id", h.GetNewFunctionByID)
+		v2Admin.GET("/function", h.GetAllNewFunctions)
+		v2Admin.PUT("/function", h.UpdateNewFunction)
+		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
 	}
 
 	// v3 for ucode version 2

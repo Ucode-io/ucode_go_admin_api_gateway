@@ -1,23 +1,21 @@
 package models
 
 type Function struct {
-	ID          string                 `json:"id"`
-	Path        string                 `json:"path"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Body        map[string]interface{} `json:"body"`
-	Url         string                 `json:"url"`
+	ID               string `json:"id"`
+	Path             string `json:"path"`
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	FuncitonFolderId string `json:"function_folder_id"`
 }
 
 type CreateFunctionRequest struct {
-	Path        string                 `json:"path"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Body        map[string]interface{} `json:"body"`
-	Url         string                 `json:"url"`
-	CommitId    int64                  `json:"-"`
-	CommitGuid  string                 `json:"-"`
-	VersionId     string                 `json:"-"`
+	Path             string `json:"path"`
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	CommitId         int64  `json:"-"`
+	CommitGuid       string `json:"-"`
+	VersionId        string `json:"-"`
+	FuncitonFolderId string `json:"function_folder_id"`
 }
 
 type InvokeFunctionRequest struct {
@@ -37,4 +35,14 @@ type NewInvokeFunctionRequest struct {
 type InvokeFunctionRequestWithAppId struct {
 	ObjectIDs []string `json:"object_ids"`
 	AppID     string   `json:"app_id"`
+}
+
+type GetByIdFunctionResponse struct {
+	Password         string `json:"password"`
+	URL              string `json:"url"`
+	ID               string `json:"id"`
+	Path             string `json:"path"`
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	FuncitonFolderId string `json:"function_folder_id"`
 }
