@@ -195,7 +195,7 @@ func (h *Handler) GetAllFunctionFolder(c *gin.Context) {
 			Search:        c.DefaultQuery("search", ""),
 			Limit:         int32(limit),
 			Offset:        int32(offset),
-			ProjectId:     environment.GetProjectId(),
+			// ProjectId:     environment.GetProjectId(),
 			EnvironmentId: environment.GetId(),
 		},
 	)
