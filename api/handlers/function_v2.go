@@ -23,7 +23,7 @@ import (
 // @ID create_new_function
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Router /v1/new/function [POST]
+// @Router /v2/function [POST]
 // @Summary Create New Function
 // @Description Create New Function
 // @Tags Function
@@ -125,7 +125,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get_new_function_by_id
-// @Router /v1/new/function/{function_id} [GET]
+// @Router /v2/function/{function_id} [GET]
 // @Summary Get Function by id
 // @Description Get Function by id
 // @Tags Function
@@ -210,7 +210,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_new_functions
-// @Router /v1/new/function [GET]
+// @Router /v2/function [GET]
 // @Summary Get all functions
 // @Description Get all functions
 // @Tags Function
@@ -282,7 +282,7 @@ func (h *Handler) GetAllNewFunctions(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Environment-Id header string true "Environment-Id"
 // @ID update_new_function
-// @Router /v1/new/function [PUT]
+// @Router /v2/function [PUT]
 // @Summary Update new function
 // @Description Update new function
 // @Tags Function
@@ -341,7 +341,7 @@ func (h *Handler) UpdateNewFunction(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Environment-Id header string true "Environment-Id"
 // @ID delete_new_function
-// @Router /v1/new/function/{function_id} [DELETE]
+// @Router /v2/function/{function_id} [DELETE]
 // @Summary Delete New Function
 // @Description Delete New Function
 // @Tags Function
