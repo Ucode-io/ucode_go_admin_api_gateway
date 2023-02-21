@@ -16,7 +16,7 @@ func CloneForkToPath(path string, cfg config.Config) error {
 	fmt.Println("ssh url::", path)
 	// cmd := exec.Command("git", "-c", "core.sshCommand=\"ssh -i /key/ssh-privatekey\"", "clone", path)
 	// sshCommand := "GIT_SSH_COMMAND='ssh -i /key/ssh-privatekey -o IdentitiesOnly=yes'"
-	cmd := exec.Command("GIT_SSH_COMMAND='ssh", "-i", "/key/ssh-privatekey", "-o", "IdentitiesOnly=yes'", "git", "clone", path) //path ssh url
+	cmd := exec.Command("git", "clone", path) //path ssh url
 	fmt.Println("path clone:::", cfg.PathToClone)
 	cmd.Dir = cfg.PathToClone
 	fmt.Println("test clone")
@@ -24,6 +24,7 @@ func CloneForkToPath(path string, cfg config.Config) error {
 	cmd.Stderr = &stderr
 	err := cmd.Run()
 	if err != nil {
+		fmt.Println("err:::", err)
 		return errors.New("could not clone repo into given path::" + stderr.String())
 	}
 	fmt.Println("test clone 22")
