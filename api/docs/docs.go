@@ -19889,15 +19889,6 @@ const docTemplate = `{
                         "name": "dag-id",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "description": "Request body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/scenario_service.GetAllDAGStepRequest"
-                        }
                     }
                 ],
                 "responses": {
@@ -20629,7 +20620,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/scenario_service.RunScenarioRequest"
+                            "$ref": "#/definitions/models.RunScenarioRequest"
                         }
                     }
                 ],
@@ -28789,6 +28780,33 @@ const docTemplate = `{
                 }
             }
         },
+        "models.RunScenarioRequest": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "dag_id": {
+                    "type": "string"
+                },
+                "dag_step_id": {
+                    "type": "string"
+                },
+                "header": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "method": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "models.SendCodeResponse": {
             "type": "object",
             "properties": {
@@ -31372,46 +31390,6 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.Filters": {
-            "type": "object",
-            "properties": {
-                "limit": {
-                    "type": "integer"
-                },
-                "offset": {
-                    "type": "integer"
-                },
-                "order": {
-                    "type": "string"
-                },
-                "page": {
-                    "type": "integer"
-                },
-                "search": {
-                    "type": "string"
-                },
-                "sort": {
-                    "type": "string"
-                }
-            }
-        },
-        "scenario_service.GetAllDAGStepRequest": {
-            "type": "object",
-            "properties": {
-                "dag_id": {
-                    "type": "string"
-                },
-                "filters": {
-                    "$ref": "#/definitions/scenario_service.Filters"
-                },
-                "parent_id": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
         "scenario_service.GetDAGRequest": {
             "type": "object",
             "properties": {
@@ -31430,32 +31408,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "scenario_service.RunScenarioRequest": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/structpb.Struct"
-                },
-                "dag_id": {
-                    "type": "string"
-                },
-                "dag_step_id": {
-                    "type": "string"
-                },
-                "header": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "method": {
-                    "type": "string"
-                },
-                "url": {
                     "type": "string"
                 }
             }

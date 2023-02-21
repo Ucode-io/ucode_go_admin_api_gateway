@@ -22,7 +22,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param body body pb.RunScenarioRequest true "Request body"
+// @Param body body models.RunScenarioRequest true "Request body"
 // @Success 200 {object} status_http.Response{data=pb.RunScenarioResponse} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -54,6 +54,10 @@ func (h *Handler) RunScenario(c *gin.Context) {
 	if !util.IsValidUUID(ProjectId) {
 		h.handleResponse(c, status_http.BadRequest, "project_id not found")
 		return
+	}
+
+	if req.Body == nil {
+		req.Body = make(map[string]interface{})
 	}
 
 	bodyStrct, err := helper.ConvertMapToStruct(req.Body)

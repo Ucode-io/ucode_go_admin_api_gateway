@@ -1587,6 +1587,24 @@ definitions:
       url:
         type: string
     type: object
+  models.RunScenarioRequest:
+    properties:
+      body:
+        additionalProperties: true
+        type: object
+      dag_id:
+        type: string
+      dag_step_id:
+        type: string
+      header:
+        additionalProperties:
+          type: string
+        type: object
+      method:
+        type: string
+      url:
+        type: string
+    type: object
   models.SendCodeResponse:
     properties:
       data:
@@ -3275,32 +3293,6 @@ definitions:
       ui_component:
         $ref: '#/definitions/structpb.Struct'
     type: object
-  scenario_service.Filters:
-    properties:
-      limit:
-        type: integer
-      offset:
-        type: integer
-      order:
-        type: string
-      page:
-        type: integer
-      search:
-        type: string
-      sort:
-        type: string
-    type: object
-  scenario_service.GetAllDAGStepRequest:
-    properties:
-      dag_id:
-        type: string
-      filters:
-        $ref: '#/definitions/scenario_service.Filters'
-      parent_id:
-        type: string
-      type:
-        type: string
-    type: object
   scenario_service.GetDAGRequest:
     properties:
       id:
@@ -3313,23 +3305,6 @@ definitions:
       id:
         type: string
       type:
-        type: string
-    type: object
-  scenario_service.RunScenarioRequest:
-    properties:
-      body:
-        $ref: '#/definitions/structpb.Struct'
-      dag_id:
-        type: string
-      dag_step_id:
-        type: string
-      header:
-        additionalProperties:
-          type: string
-        type: object
-      method:
-        type: string
-      url:
         type: string
     type: object
   scenario_service.RunScenarioResponse:
@@ -15335,12 +15310,6 @@ paths:
         name: dag-id
         required: true
         type: string
-      - description: Request body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/scenario_service.GetAllDAGStepRequest'
       produces:
       - application/json
       responses:
@@ -15764,7 +15733,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/scenario_service.RunScenarioRequest'
+          $ref: '#/definitions/models.RunScenarioRequest'
       produces:
       - application/json
       responses:
