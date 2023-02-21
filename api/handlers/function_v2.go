@@ -21,7 +21,7 @@ import (
 // CreateNewFunction godoc
 // @Security ApiKeyAuth
 // @ID create_new_function
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /v1/new/function [POST]
 // @Summary Create New Function
