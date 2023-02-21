@@ -14,9 +14,9 @@ func CloneForkToPath(path string, cfg config.Config) error {
 	// path = strings.TrimPrefix(path, "https://")
 	// command := fmt.Sprintf("https://oauth:%s@%s", cfg.GitlabIntegrationToken, path)
 	fmt.Println("ssh url::", path)
-	cmd := exec.Command("git", "-c", "core.sshCommand=\"ssh -i /key/ssh-privatekey\"", "clone", path)
+	// cmd := exec.Command("git", "-c", "core.sshCommand=\"ssh -i /key/ssh-privatekey\"", "clone", path)
 	// sshCommand := "GIT_SSH_COMMAND='ssh -i /key/ssh-privatekey -o IdentitiesOnly=yes'"
-	cmd = exec.Command("GIT_SSH_COMMAND='ssh", "-i", "/key/ssh-privatekey", "-o", "IdentitiesOnly=yes'", "git", "clone", path) //path ssh url
+	cmd := exec.Command("GIT_SSH_COMMAND='ssh", "-i", "/key/ssh-privatekey", "-o", "IdentitiesOnly=yes'", "git", "clone", path) //path ssh url
 	fmt.Println("path clone:::", cfg.PathToClone)
 	cmd.Dir = cfg.PathToClone
 	fmt.Println("test clone")
