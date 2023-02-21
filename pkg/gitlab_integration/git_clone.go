@@ -4,14 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
-	"strings"
 	"ucode/ucode_go_api_gateway/config"
 )
 
 func CloneForkToPath(path string, cfg config.Config) error {
-	path = strings.TrimPrefix(path, "https://")
-	command := fmt.Sprintf("https://oauth:%s@%s", cfg.GitlabIntegrationToken, path)
-	cmd := exec.Command("git", "clone", command)
+
+	//git -c core.sshCommand="ssh -i /key/ssh-privatekey” clone git@gitlab.udevs.io:ucode/ucode_go_admin_api_gateway.git
+	// path = strings.TrimPrefix(path, "https://")
+	// command := fmt.Sprintf("https://oauth:%s@%s", cfg.GitlabIntegrationToken, path)
+	fmt.Println("ssh url::", path)
+	cmd := exec.Command("git", "-c", `core.sshCommand="ssh -i /key/ssh-privatekey”`, "clone", path)
 	fmt.Println("path clone:::", cfg.PathToClone)
 	cmd.Dir = cfg.PathToClone
 	fmt.Println("test clone")

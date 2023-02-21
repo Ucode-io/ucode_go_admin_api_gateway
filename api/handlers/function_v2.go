@@ -83,7 +83,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		return
 	}
 	fmt.Println("test before clone")
-	err = gitlab_integration.CloneForkToPath(resp.Message["http_url_to_repo"].(string), h.cfg)
+	err = gitlab_integration.CloneForkToPath(resp.Message["ssh_url_to_repo"].(string), h.cfg)
 	fmt.Println("clone err::", err)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
