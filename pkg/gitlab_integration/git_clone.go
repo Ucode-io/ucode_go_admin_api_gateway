@@ -19,7 +19,7 @@ func CloneForkToPath(path string, cfg config.Config) error {
 	fmt.Println("test clone")
 	err := cmd.Run()
 	if err != nil {
-		return errors.New("could not clone repo into given path::" + err.Error())
+		return errors.New("could not clone repo into given path::" + cmd.Start().Error())
 	}
 	fmt.Println("test clone 22")
 	fmt.Println("Output::")
