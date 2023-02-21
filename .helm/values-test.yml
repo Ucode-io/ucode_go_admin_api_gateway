@@ -90,6 +90,7 @@ vault:
 
 environment:
   KUBECONFIG: /kubeconfig/config
+  GIT_SSH_COMMAND: "ssh -i /key/ssh-privatekey -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 volumes:
   enabled: true
   hostpath:
@@ -108,12 +109,12 @@ volumes:
     accessModes:
       - ReadWriteMany
   configMaps:
-  - name: code-server-kubeconfig
-    mountPath: /kubeconfig
+    - name: code-server-kubeconfig
+      mountPath: /kubeconfig
   secrets:
-  - name: ssh-key-secret
-    mountPath: /key
-    defaultMode: 256
+    - name: ssh-key-secret
+      mountPath: /key
+      defaultMode: 256
 
 service:
   type: ClusterIP
