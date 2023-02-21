@@ -112,6 +112,7 @@ volumes:
     mountPath: /kubeconfig
   - name: private-key
     mountPath: /key
+    defaultMode: 400
 
 service:
   type: ClusterIP
