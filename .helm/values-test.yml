@@ -113,7 +113,7 @@ volumes:
   secrets:
   - name: ssh-key-secret
     mountPath: /key
-    defaultMode: 600
+    defaultMode: 256
 
 service:
   type: ClusterIP
