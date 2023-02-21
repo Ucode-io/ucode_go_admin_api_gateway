@@ -374,11 +374,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	{
 
 		// function
-		v1Admin.POST("/function", h.CreateNewFunction)
-		v1Admin.GET("/function/:function_id", h.GetNewFunctionByID)
-		v1Admin.GET("/function", h.GetAllNewFunctions)
-		v1Admin.PUT("/function", h.UpdateNewFunction)
-		v1Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
+		v2Admin.POST("/function", h.CreateNewFunction)
+		v2Admin.GET("/function/:function_id", h.GetNewFunctionByID)
+		v2Admin.GET("/function", h.GetAllNewFunctions)
+		v2Admin.PUT("/function", h.UpdateNewFunction)
+		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
 	}
 
 	// v3 for ucode version 2
