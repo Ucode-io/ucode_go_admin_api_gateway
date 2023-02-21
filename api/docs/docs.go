@@ -11322,8 +11322,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -13787,7 +13786,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.ResponseCreateFunction"
+                                            "$ref": "#/definitions/models.GetByIdFunctionResponse"
                                         }
                                     }
                                 }
@@ -28755,9 +28754,6 @@ const docTemplate = `{
                 },
                 "path": {
                     "type": "string"
-                },
-                "url": {
-                    "type": "string"
                 }
             }
         },
@@ -29146,9 +29142,6 @@ const docTemplate = `{
                 },
                 "path": {
                     "type": "string"
-                },
-                "url": {
-                    "type": "string"
                 }
             }
         },
@@ -29248,6 +29241,32 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.Panel"
                     }
+                }
+            }
+        },
+        "models.GetByIdFunctionResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "function_folder_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },

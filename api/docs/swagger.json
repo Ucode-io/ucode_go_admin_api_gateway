@@ -11310,8 +11310,7 @@
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -13775,7 +13774,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.ResponseCreateFunction"
+                                            "$ref": "#/definitions/models.GetByIdFunctionResponse"
                                         }
                                     }
                                 }
@@ -28743,9 +28742,6 @@
                 },
                 "path": {
                     "type": "string"
-                },
-                "url": {
-                    "type": "string"
                 }
             }
         },
@@ -29134,9 +29130,6 @@
                 },
                 "path": {
                     "type": "string"
-                },
-                "url": {
-                    "type": "string"
                 }
             }
         },
@@ -29236,6 +29229,32 @@
                     "items": {
                         "$ref": "#/definitions/models.Panel"
                     }
+                }
+            }
+        },
+        "models.GetByIdFunctionResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "function_folder_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },

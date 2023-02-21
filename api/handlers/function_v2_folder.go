@@ -16,7 +16,7 @@ import (
 // CreateFunctionFolder godoc
 // @Security ApiKeyAuth
 // @ID create_function_folder
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /v1/function-folder [POST]
 // @Summary Create Function Folder

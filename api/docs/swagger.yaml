@@ -1158,8 +1158,6 @@ definitions:
         type: string
       path:
         type: string
-      url:
-        type: string
     type: object
   models.CreatePanelRequest:
     properties:
@@ -1416,8 +1414,6 @@ definitions:
         type: string
       path:
         type: string
-      url:
-        type: string
     type: object
   models.FunctionFolder:
     properties:
@@ -1482,6 +1478,23 @@ definitions:
         items:
           $ref: '#/definitions/models.Panel'
         type: array
+    type: object
+  models.GetByIdFunctionResponse:
+    properties:
+      description:
+        type: string
+      function_folder_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      path:
+        type: string
+      url:
+        type: string
     type: object
   models.HtmlBody:
     properties:
@@ -10380,7 +10393,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -11888,7 +11900,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.ResponseCreateFunction'
+                  $ref: '#/definitions/models.GetByIdFunctionResponse'
               type: object
         "400":
           description: Invalid Argument

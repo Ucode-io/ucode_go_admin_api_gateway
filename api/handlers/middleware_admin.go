@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -17,6 +18,7 @@ import (
 func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		res, ok := h.adminHasAccess(c)
+		fmt.Println(res)
 		if !ok {
 			_ = c.AbortWithError(401, errors.New("unauthorized"))
 			return

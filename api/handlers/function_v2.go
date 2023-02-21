@@ -132,7 +132,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param function_id path string true "function_id"
-// @Success 200 {object} status_http.Response{data=models.ResponseCreateFunction} "FunctionBody"
+// @Success 200 {object} status_http.Response{data=models.GetByIdFunctionResponse} "FunctionBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetNewFunctionByID(c *gin.Context) {
@@ -195,9 +195,14 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, status_http.OK, models.ResponseCreateFunction{
-		Password: password,
-		URL:      "https://" + uuid.String() + ".u-code.io",
+	h.handleResponse(c, status_http.OK, models.GetByIdFunctionResponse{
+		Password:         password,
+		URL:              "https://" + uuid.String() + ".u-code.io",
+		ID:               function.Id,
+		Path:             function.Path,
+		Name:             function.Name,
+		Description:      function.Description,
+		FuncitonFolderId: function.FunctionFolderId,
 	})
 }
 
