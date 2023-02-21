@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package integration_service;
+option go_package="genproto/integration_service";
+import "google/protobuf/struct.proto";
+
+service TransactionService {
+    rpc CreateTransaction(Transaction) returns (TransactionCreateResponse){}
+    rpc GetTransactionByClientID(TransactionRequestByClient) returns (TransactionResponse){}
+    rpc Find(TransactionFindRequest) returns (TransactionResponse){}
+    rpc UpdateStatus(TransactionStatusUpdate) returns (TransactionStatusUpdateResponse){}
+    rpc GetTransactionByID(TransactionRequest) returns (TransactionGetResponse){}
+}
+
+message Transaction {
+    string id = 1;
+    string client_id = 2;
+    string status = 3;
+    string created_at = 4;
+    string updated_at = 5;
+    string deleted_at = 6;
+    google.protobuf.Struct data = 7;
+}
+
+message TransactionResponse {
+   repeated Transaction transactions = 1;
+   int32 count = 2;
+}
+
+message TransactionCreateResponse {
+    string id = 1;
+}
+
+message TransactionRequest {
+    string id = 1;
+}
+
+message TransactionGetResponse {
+    Transaction transaction = 1;
+}
+
+message TransactionStatusUpdate {
+    string id = 1;
+    string status = 2;
+}
+
+message TransactionStatusUpdateResponse {
+    string id = 1;
+    string status = 2;
+}
+
+message TransactionRequestByClient {
+    string client_id = 1;
+    int32 page = 2;
+    int32 limit = 3;
+}
+
+message TransactionFindRequest {
+    int32 page = 1;
+    int32 limit = 2;
+    string search = 3;
+    bool active = 4;
+}

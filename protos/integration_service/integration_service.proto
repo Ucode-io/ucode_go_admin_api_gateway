@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package integration_service;
+option go_package="genproto/integration_service";
+
+
+import "transaction.proto";
+import "order.proto";
+import "payze.proto";
