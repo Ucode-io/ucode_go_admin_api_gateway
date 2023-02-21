@@ -11662,269 +11662,6 @@ paths:
       summary: Get CustomEvent by id
       tags:
       - NewCustomEvent
-  /v1/new/function:
-    get:
-      consumes:
-      - application/json
-      description: Get all functions
-      operationId: get_all_new_functions
-      parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: limit
-        in: query
-        name: limit
-        type: number
-      - description: offset
-        in: query
-        name: offset
-        type: number
-      - description: search
-        in: query
-        name: search
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: FunctionBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all functions
-      tags:
-      - Function
-    post:
-      consumes:
-      - application/json
-      description: Create New Function
-      operationId: create_new_function
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: CreateFunctionRequestBody
-        in: body
-        name: Function
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateFunctionRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Function data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.ResponseCreateFunction'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create New Function
-      tags:
-      - Function
-    put:
-      consumes:
-      - application/json
-      description: Update new function
-      operationId: update_new_function
-      parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: UpdateFunctionRequestBody
-        in: body
-        name: Function
-        required: true
-        schema:
-          $ref: '#/definitions/models.Function'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Function data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.Function'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Update new function
-      tags:
-      - Function
-  /v1/new/function/{function_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete New Function
-      operationId: delete_new_function
-      parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: function_id
-        in: path
-        name: function_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete New Function
-      tags:
-      - Function
-    get:
-      consumes:
-      - application/json
-      description: Get Function by id
-      operationId: get_new_function_by_id
-      parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: function_id
-        in: path
-        name: function_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: FunctionBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.GetByIdFunctionResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get Function by id
-      tags:
-      - Function
   /v1/note:
     get:
       consumes:
@@ -18494,6 +18231,269 @@ paths:
       summary: Upsert view relation
       tags:
       - ViewRelation
+  /v2/function:
+    get:
+      consumes:
+      - application/json
+      description: Get all functions
+      operationId: get_all_new_functions
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: number
+      - description: offset
+        in: query
+        name: offset
+        type: number
+      - description: search
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FunctionBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all functions
+      tags:
+      - Function
+    post:
+      consumes:
+      - application/json
+      description: Create New Function
+      operationId: create_new_function
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: CreateFunctionRequestBody
+        in: body
+        name: Function
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateFunctionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Function data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ResponseCreateFunction'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create New Function
+      tags:
+      - Function
+    put:
+      consumes:
+      - application/json
+      description: Update new function
+      operationId: update_new_function
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: UpdateFunctionRequestBody
+        in: body
+        name: Function
+        required: true
+        schema:
+          $ref: '#/definitions/models.Function'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Function data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Function'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update new function
+      tags:
+      - Function
+  /v2/function/{function_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete New Function
+      operationId: delete_new_function
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: function_id
+        in: path
+        name: function_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete New Function
+      tags:
+      - Function
+    get:
+      consumes:
+      - application/json
+      description: Get Function by id
+      operationId: get_new_function_by_id
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: function_id
+        in: path
+        name: function_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FunctionBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetByIdFunctionResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Function by id
+      tags:
+      - Function
   /v3/query:
     get:
       consumes:
