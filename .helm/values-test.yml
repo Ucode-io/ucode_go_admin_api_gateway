@@ -110,7 +110,7 @@ volumes:
   configMaps:
   - name: code-server-kubeconfig
     mountPath: /kubeconfig
-  secret:
+  secrets:
   - name: ssh-key-secret
     mountPath: /key
 
