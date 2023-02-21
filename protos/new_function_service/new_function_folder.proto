@@ -35,6 +35,7 @@ message GetAllFunctionFoldersRequest {
     int32 limit = 2;
     int32 offset = 3;
     string environment_id = 4;
+    string project_id = 5;
 }
 
 message GetAllFunctionFoldersResponse {
