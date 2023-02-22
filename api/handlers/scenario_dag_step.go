@@ -135,7 +135,7 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 	}
 	req.DagId = DagId
 
-	resp, err := services.ScenarioService().DagStepService().GetAll(
+	resp, err := services.ScenarioService().DagStepService().GetAllDagStepsWithDAG(
 		c.Request.Context(),
 		&req,
 	)
