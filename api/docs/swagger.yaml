@@ -3293,6 +3293,8 @@ definitions:
     type: object
   scenario_service.CreateDAGStepRequest:
     properties:
+      callback_type:
+        type: string
       condition_action:
         items:
           $ref: '#/definitions/structpb.Struct'
@@ -3342,6 +3344,8 @@ definitions:
     type: object
   scenario_service.DAGStep:
     properties:
+      callback_type:
+        type: string
       condition_action:
         items:
           $ref: '#/definitions/structpb.Struct'

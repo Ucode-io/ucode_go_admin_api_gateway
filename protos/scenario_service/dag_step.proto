@@ -36,6 +36,7 @@ message DAGStep {
     google.protobuf.Struct ui_component = 10;
     string title = 11;
     string description = 12;
+    string callback_type = 13;
 }
 
 message CreateDAGStepRequest {
@@ -49,6 +50,7 @@ message CreateDAGStepRequest {
     bool is_parallel = 8;
     string title = 9;
     string description = 10;
+    string callback_type = 11;
 }
 
 message GetDAGStepRequest {

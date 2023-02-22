@@ -32123,6 +32123,9 @@ const docTemplate = `{
         "scenario_service.CreateDAGStepRequest": {
             "type": "object",
             "properties": {
+                "callback_type": {
+                    "type": "string"
+                },
                 "condition_action": {
                     "type": "array",
                     "items": {
@@ -32198,6 +32201,9 @@ const docTemplate = `{
         "scenario_service.DAGStep": {
             "type": "object",
             "properties": {
+                "callback_type": {
+                    "type": "string"
+                },
                 "condition_action": {
                     "type": "array",
                     "items": {

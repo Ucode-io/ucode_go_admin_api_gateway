@@ -32111,6 +32111,9 @@
         "scenario_service.CreateDAGStepRequest": {
             "type": "object",
             "properties": {
+                "callback_type": {
+                    "type": "string"
+                },
                 "condition_action": {
                     "type": "array",
                     "items": {
@@ -32186,6 +32189,9 @@
         "scenario_service.DAGStep": {
             "type": "object",
             "properties": {
+                "callback_type": {
+                    "type": "string"
+                },
                 "condition_action": {
                     "type": "array",
                     "items": {
