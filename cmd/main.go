@@ -65,26 +65,26 @@ func main() {
 	h := handlers.NewHandler(cfg, log, serviceNodes, grpcSvcs, authSrvc)
 
 	api.SetUpAPI(r, h, cfg)
-	cronjobs := crons.ExecuteCron()
-	for _, cronjob := range cronjobs {
-		go func(ctx context.Context, cronjob crons.Cronjob) {
-			for {
-				// tc := time.NewTicker(cronjob.Interval)
-				select {
-				case <-time.After(cronjob.Interval):
-					err := cronjob.Function(ctx, grpcSvcs, cfg)
-					if err != nil {
-						fmt.Println("test ::   " + time.Now().Format(time.RFC3339))
-						fmt.Println("err  :: ", err.Error())
-					}
-				case <-ctx.Done():
-					fmt.Println("ctx done ::   " + time.Now().Format(time.RFC3339))
-					return
-				}
-			}
-		}(ctx, cronjob)
+	// cronjobs := crons.ExecuteCron()
+	// for _, cronjob := range cronjobs {
+	// 	go func(ctx context.Context, cronjob crons.Cronjob) {
+	// 		for {
+	// 			// tc := time.NewTicker(cronjob.Interval)
+	// 			select {
+	// 			case <-time.After(cronjob.Interval):
+	// 				err := cronjob.Function(ctx, grpcSvcs, cfg)
+	// 				if err != nil {
+	// 					fmt.Println("test ::   " + time.Now().Format(time.RFC3339))
+	// 					fmt.Println("err  :: ", err.Error())
+	// 				}
+	// 			case <-ctx.Done():
+	// 				fmt.Println("ctx done ::   " + time.Now().Format(time.RFC3339))
+	// 				return
+	// 			}
+	// 		}
+	// 	}(ctx, cronjob)
 
-	}
+	// }
 
 	log.Info("server is running...")
 	if err := r.Run(cfg.HTTPPort); err != nil {
