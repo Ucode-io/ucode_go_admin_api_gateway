@@ -135,7 +135,7 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 	}
 	req.DagId = DagId
 
-	resp, err := services.ScenarioService().DagStepService().GetAll(
+	resp, err := services.ScenarioService().DagStepService().GetAllDagStepsWithDAG(
 		c.Request.Context(),
 		&req,
 	)
@@ -146,6 +146,20 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 
 	respStrct := []*models.DAGStep{}
 
+	attributesMap, err := helper.ConvertStructToResponse(resp.GetDag().GetAttributes())
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	DagM := models.DAG{
+		Id:         resp.GetDag().GetId(),
+		Slug:       resp.GetDag().GetSlug(),
+		Title:      resp.GetDag().GetTitle(),
+		Type:       resp.GetDag().GetType(),
+		CategoryId: resp.GetDag().GetCategoryId(),
+		Attributes: attributesMap,
+	}
+
 	for _, v := range resp.DagSteps {
 
 		reqInfo, err := helper.ConvertStructToResponse(v.RequestInfo)
@@ -154,16 +168,17 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 			return
 		}
 		dagStepConfig := models.DAGStepConfig{
-			Id:          v.Id,
-			Slug:        v.Slug,
-			ParentId:    v.ParentId,
-			DagId:       v.DagId,
-			Type:        v.Type,
-			ConnectInfo: v.ConnectInfo,
-			RequestInfo: reqInfo,
-			IsParallel:  v.IsParallel,
-			Title:       v.Title,
-			Description: v.Description,
+			Id:           v.Id,
+			Slug:         v.Slug,
+			ParentId:     v.ParentId,
+			DagId:        v.DagId,
+			Type:         v.Type,
+			ConnectInfo:  v.ConnectInfo,
+			RequestInfo:  reqInfo,
+			IsParallel:   v.IsParallel,
+			Title:        v.Title,
+			Description:  v.Description,
+			CallbackType: v.CallbackType,
 		}
 		uiComponent, err := helper.ConvertStructToResponse(v.UiComponent)
 		if err != nil {
@@ -178,6 +193,7 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, models.GetAllDAGStepResponse{
+		DAG:   DagM,
 		Steps: respStrct,
 	})
 }
