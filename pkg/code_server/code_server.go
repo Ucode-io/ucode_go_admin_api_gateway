@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strings"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/services"
 
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -83,6 +84,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 	if err != nil {
 		return err
 	}
+	var ids = make([]string, 0, functions.GetCount())
 	for _, function := range functions.GetFunctions() {
 		cmd := exec.Command("helm", "uninstall", function.Path)
 		err = cmd.Run()
@@ -90,8 +92,18 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 		cmd.Stderr = &stderr
 		if err != nil {
 			fmt.Println("error while uninstalling " + function.GetPath() + "error: " + stderr.String())
+			continue
 		}
-		// fmt.Println(function.Path)
+		ids = append(ids, function.GetId())
+		fmt.Println(function.GetPath())
+	}
+	if len(ids) > 0 {
+		_, err = srvs.FunctionService().FunctionService().UpdateManyByRequestTime(context.Background(), &new_function_service.UpdateManyUrlAndPassword{
+			Ids: ids,
+		})
+		if err != nil {
+			return err
+		}
 	}
 	fmt.Println("finish")
 

@@ -29,6 +29,7 @@ type FunctionServiceV2Client interface {
 	Update(ctx context.Context, in *Function, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Delete(ctx context.Context, in *FunctionPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetListByRequestTime(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAllFunctionsResponse, error)
+	UpdateManyByRequestTime(ctx context.Context, in *UpdateManyUrlAndPassword, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type functionServiceV2Client struct {
@@ -93,6 +94,15 @@ func (c *functionServiceV2Client) GetListByRequestTime(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *functionServiceV2Client) UpdateManyByRequestTime(ctx context.Context, in *UpdateManyUrlAndPassword, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/new_function_service.FunctionServiceV2/UpdateManyByRequestTime", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FunctionServiceV2Server is the server API for FunctionServiceV2 service.
 // All implementations must embed UnimplementedFunctionServiceV2Server
 // for forward compatibility
@@ -103,6 +113,7 @@ type FunctionServiceV2Server interface {
 	Update(context.Context, *Function) (*emptypb.Empty, error)
 	Delete(context.Context, *FunctionPrimaryKey) (*emptypb.Empty, error)
 	GetListByRequestTime(context.Context, *emptypb.Empty) (*GetAllFunctionsResponse, error)
+	UpdateManyByRequestTime(context.Context, *UpdateManyUrlAndPassword) (*emptypb.Empty, error)
 	mustEmbedUnimplementedFunctionServiceV2Server()
 }
 
@@ -127,6 +138,9 @@ func (UnimplementedFunctionServiceV2Server) Delete(context.Context, *FunctionPri
 }
 func (UnimplementedFunctionServiceV2Server) GetListByRequestTime(context.Context, *emptypb.Empty) (*GetAllFunctionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListByRequestTime not implemented")
+}
+func (UnimplementedFunctionServiceV2Server) UpdateManyByRequestTime(context.Context, *UpdateManyUrlAndPassword) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateManyByRequestTime not implemented")
 }
 func (UnimplementedFunctionServiceV2Server) mustEmbedUnimplementedFunctionServiceV2Server() {}
 
@@ -249,6 +263,24 @@ func _FunctionServiceV2_GetListByRequestTime_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FunctionServiceV2_UpdateManyByRequestTime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateManyUrlAndPassword)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FunctionServiceV2Server).UpdateManyByRequestTime(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/new_function_service.FunctionServiceV2/UpdateManyByRequestTime",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FunctionServiceV2Server).UpdateManyByRequestTime(ctx, req.(*UpdateManyUrlAndPassword))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FunctionServiceV2_ServiceDesc is the grpc.ServiceDesc for FunctionServiceV2 service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -279,6 +311,10 @@ var FunctionServiceV2_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetListByRequestTime",
 			Handler:    _FunctionServiceV2_GetListByRequestTime_Handler,
+		},
+		{
+			MethodName: "UpdateManyByRequestTime",
+			Handler:    _FunctionServiceV2_UpdateManyByRequestTime_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

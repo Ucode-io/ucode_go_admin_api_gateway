@@ -14,6 +14,7 @@ service FunctionServiceV2 {
     rpc Update(Function) returns (google.protobuf.Empty) {}
     rpc Delete(FunctionPrimaryKey) returns (google.protobuf.Empty) {}
     rpc GetListByRequestTime(google.protobuf.Empty) returns (GetAllFunctionsResponse) {}
+    rpc UpdateManyByRequestTime(UpdateManyUrlAndPassword) returns (google.protobuf.Empty) {}
 }
 
 message CreateFunctionRequest {
@@ -58,4 +59,8 @@ message GetAllFunctionsResponse {
 message FunctionPrimaryKey {
     string id = 1;
     string environment_id = 2;
+}
+
+message UpdateManyUrlAndPassword {
+    repeated string ids = 1;
 }
