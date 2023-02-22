@@ -40,8 +40,9 @@ message Purchase{
     string product_type = 4;
     string product_name = 5;
     string status = 6;
-    string created_at = 7;
-    string updated_at = 8;
+    int32 price = 7;
+    string created_at = 8;
+    string updated_at = 9;
 }
 
 message CreatePurchaseRequest {

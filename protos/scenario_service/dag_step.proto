@@ -7,6 +7,8 @@ option go_package = "genproto/scenario_service";
 import "google/protobuf/struct.proto";
 import "google/protobuf/empty.proto";
 import "common.proto";
+import "scenario_commit.proto";
+import "dag_dag_steps.proto";
 
 service DAGStepService {
     rpc Create(CreateDAGStepRequest) returns (DAGStep);
@@ -15,72 +17,4 @@ service DAGStepService {
     rpc Delete(DeleteDAGStepRequest) returns (google.protobuf.Empty);
     rpc Update(UpdateDAGStepRequest) returns (DAGStep);
     rpc DagStepRun(DAGStepRunRequest) returns (DAGStepRunResponse);
-}
-
-message ConnectInfo {
-    string method = 1;
-    string url = 2;
-    map<string,string> header = 3;
-}
-
-message DAGStep {
-    string id = 1;
-    string slug = 2;
-    string parent_id = 3;
-    string dag_id = 4;
-    string type = 5;
-    ConnectInfo connect_info = 6;
-    google.protobuf.Struct request_info = 7;
-    repeated google.protobuf.Struct condition_action = 8; 
-    bool is_parallel = 9;
-    google.protobuf.Struct ui_component = 10;
-    string title = 11;
-    string description = 12;
-}
-
-message CreateDAGStepRequest {
-    string slug = 1;
-    string parent_id = 2;
-    string dag_id = 3;
-    string type = 4;
-    ConnectInfo connect_info = 5;
-    google.protobuf.Struct request_info = 6;
-    repeated google.protobuf.Struct condition_action = 7; 
-    bool is_parallel = 8;
-    string title = 9;
-    string description = 10;
-}
-
-message GetDAGStepRequest {
-    string id = 1;
-    string type = 2;
-    string dag_id = 3;
-}
-
-message DeleteDAGStepRequest {
-    string id = 1;
-}
-
-message DAGStepList {
-    repeated DAGStep dag_steps = 1;
-}
-
-message UpdateDAGStepRequest {
-    DAGStep dag_step = 1;
-}
-
-message GetAllDAGStepRequest {
-    Filters filters = 1;
-    string type = 2;
-    string dag_id = 3;
-    string parent_id = 4;
-}
-
-message DAGStepRunRequest {
-    string type = 1;
-    string dag_step_id = 2;
-}
-
-message DAGStepRunResponse {
-    string result = 1;
 }

@@ -4,10 +4,10 @@ package  scenario_service;
 
 option go_package = "genproto/scenario_service";
 
-import "common.proto";
+import "google/protobuf/struct.proto";
 import "google/protobuf/empty.proto";
-import "dag_step.proto";
-import "scenario_commit.proto";
+import "common.proto";
+import "dag_dag_steps.proto";
 
 service DAGService {
     rpc Create(CreateDAGRequest) returns (DAG);
@@ -18,47 +18,3 @@ service DAGService {
     rpc CreateScenario(CreateScenarioRequest) returns (DAG);
 }
 
-
-message DAG {
-    string id = 1;
-    string title = 2;
-    string slug = 3;
-    string type = 4;
-    string status = 5;
-    string category_id = 6;
-}
-
-message CreateDAGRequest {
-    DAG dag = 1;
-}
-
-
-message GetDAGRequest {
-    string id = 1;
-}
-
-message GetAllDAGRequest {
-    Filters filter = 1;
-    string category_id = 2;
-}
-
-message DAGList {
-    repeated DAG DAGs = 1;
-    int64 count = 2;
-}
-
-message DeleteDAGRequest {
-    string id = 1;
-}
-
-message UpdateDAGRequest {
-    DAG dag = 1;
-}
-
-message CreateScenarioRequest {
-    DAG dag = 1;
-    repeated DAGStep steps = 2;
-    CommitInfo commit_info = 3;
-    string project_id = 4;
-    string environment_id = 5;
-}

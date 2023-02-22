@@ -85,15 +85,26 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 		// }
 
 		dagSteps = append(dagSteps, &pb.DAGStep{
-			Slug:        step.Config.Slug,
-			Type:        step.Config.Type,
-			ConnectInfo: step.Config.ConnectInfo,
-			RequestInfo: requestInfo,
-			IsParallel:  step.Config.IsParallel,
-			UiComponent: uiComponent,
-			Title:       step.Config.Title,
-			Description: step.Config.Description,
+			Slug:         step.Config.Slug,
+			Type:         step.Config.Type,
+			ConnectInfo:  step.Config.ConnectInfo,
+			RequestInfo:  requestInfo,
+			IsParallel:   step.Config.IsParallel,
+			UiComponent:  uiComponent,
+			Title:        step.Config.Title,
+			Description:  step.Config.Description,
+			CallbackType: step.Config.CallbackType,
 		})
+	}
+
+	if req.Dag.Attributes == nil {
+		req.Dag.Attributes = make(map[string]interface{})
+	}
+	attributes, err := helper.ConvertMapToStruct(req.Dag.Attributes)
+	if err != nil {
+		h.log.Error("ConvertMapToStruct attributes", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
 	}
 
 	dag := &pb.DAG{
@@ -103,6 +114,7 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 		Type:       req.Dag.Type,
 		Status:     req.Dag.Status,
 		CategoryId: req.Dag.CategoryId,
+		Attributes: attributes,
 	}
 
 	serviceReq := pb.CreateScenarioRequest{
