@@ -10,12 +10,21 @@ service PayzeService {
 }
 
 message PayzeLinkRequest {
-    string order_id = 1;
-    int32 price = 2; 
-    string product_id = 3;
-    string lang = 4;
-    string redirect_url = 5;
-    string product_name = 6;
+    string method = 1;
+    string apiKey = 2;
+    string apiSecret = 3;
+    PayzeLinkRequestData data = 4;
+}
+
+message PayzeLinkRequestData {
+    int32 amount = 1;
+    string currency = 2;
+    string callback = 3;
+    string callbackError = 4;
+    bool preauthorize = 5;
+    string lang = 6;
+    string hookUrl = 7;
+    bool hookRefund = 8;
 }
 
 message PayzeLinkResponse {
@@ -23,10 +32,8 @@ message PayzeLinkResponse {
 }
 
 message PayzeLinkRequestSvod {
-    string order_id = 1;
-    int32 price = 2; 
-    string product_id = 3;
-    string lang = 4;
-    string redirect_url = 5;
-    string product_name = 6;
+   string method = 1;
+    string apiKey = 2;
+    string apiSecret = 3;
+    PayzeLinkRequestData data = 4;
 }

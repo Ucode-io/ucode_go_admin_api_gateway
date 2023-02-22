@@ -13,6 +13,7 @@ service FunctionServiceV2 {
     rpc GetSingle(FunctionPrimaryKey) returns (Function) {}
     rpc Update(Function) returns (google.protobuf.Empty) {}
     rpc Delete(FunctionPrimaryKey) returns (google.protobuf.Empty) {}
+    rpc GetListByRequestTime(google.protobuf.Empty) returns (GetAllFunctionsResponse) {}
 }
 
 message CreateFunctionRequest {

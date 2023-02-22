@@ -9,8 +9,9 @@ import (
 	"os/exec"
 	"strings"
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/services"
+
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func CreateCodeServer(functionName string, cfg config.Config, id string) (string, error) {
@@ -78,7 +79,7 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 
 func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg config.Config) error {
 
-	functions, err := srvs.FunctionService().FunctionService().GetList(context.Background(), &new_function_service.GetAllFunctionsRequest{})
+	functions, err := srvs.FunctionService().FunctionService().GetListByRequestTime(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return err
 	}
