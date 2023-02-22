@@ -30,7 +30,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param Function body models.CreateFunctionRequest true "CreateFunctionRequestBody"
-// @Success 201 {object} status_http.Response{data=models.ResponseCreateFunction} "Function data"
+// @Success 201 {object} status_http.Response{data=new_function_service.Function} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateNewFunction(c *gin.Context) {
@@ -99,7 +99,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 	}
 	var url = "https://" + uuid.String() + ".u-code.io"
 
-	_, err = services.FunctionService().FunctionService().Create(
+	response, err := services.FunctionService().FunctionService().Create(
 		context.Background(),
 		&fc.CreateFunctionRequest{
 			Path:             functionPath,
@@ -118,10 +118,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, status_http.Created, models.ResponseCreateFunction{
-		Password: password,
-		URL:      url,
-	})
+	h.handleResponse(c, status_http.Created, response)
 }
 
 // GetNewFunctionByID godoc

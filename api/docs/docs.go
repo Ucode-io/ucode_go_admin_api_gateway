@@ -25158,7 +25158,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.ResponseCreateFunction"
+                                            "$ref": "#/definitions/new_function_service.Function"
                                         }
                                     }
                                 }
@@ -29565,17 +29565,6 @@ const docTemplate = `{
                 "data": {
                     "type": "object",
                     "additionalProperties": true
-                }
-            }
-        },
-        "models.ResponseCreateFunction": {
-            "type": "object",
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
                 }
             }
         },

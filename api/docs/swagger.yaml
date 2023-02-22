@@ -1622,13 +1622,6 @@ definitions:
         additionalProperties: true
         type: object
     type: object
-  models.ResponseCreateFunction:
-    properties:
-      password:
-        type: string
-      url:
-        type: string
-    type: object
   models.RunScenarioRequest:
     properties:
       body:
@@ -18402,7 +18395,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.ResponseCreateFunction'
+                  $ref: '#/definitions/new_function_service.Function'
               type: object
         "400":
           description: Bad Request
