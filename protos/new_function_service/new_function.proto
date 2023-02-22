@@ -25,6 +25,8 @@ message CreateFunctionRequest {
     string commit_guid = 7;
     string environment_id = 8;
     string function_folder_id = 9;
+    string url = 10;
+    string password = 11;
 }
 
 message Function {
@@ -35,6 +37,8 @@ message Function {
     string project_id = 5;
     string function_folder_id = 7;
     string environment_id = 8;
+    string url = 9;
+    string password = 10;
 }
 
 message GetAllFunctionsRequest {

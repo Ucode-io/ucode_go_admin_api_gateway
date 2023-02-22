@@ -17,4 +17,5 @@ service DAGStepService {
     rpc Delete(DeleteDAGStepRequest) returns (google.protobuf.Empty);
     rpc Update(UpdateDAGStepRequest) returns (DAGStep);
     rpc DagStepRun(DAGStepRunRequest) returns (DAGStepRunResponse);
+    rpc GetAllDagStepsWithDAG(GetAllDAGStepRequest) returns (DAGStepList);
 }

@@ -1454,23 +1454,6 @@ definitions:
           $ref: '#/definitions/models.Panel'
         type: array
     type: object
-  models.GetByIdFunctionResponse:
-    properties:
-      description:
-        type: string
-      function_folder_id:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-      path:
-        type: string
-      url:
-        type: string
-    type: object
   models.HtmlBody:
     properties:
       data:
@@ -1614,13 +1597,6 @@ definitions:
         additionalProperties: true
         type: object
     type: object
-  models.ResponseCreateFunction:
-    properties:
-      password:
-        type: string
-      url:
-        type: string
-    type: object
   models.RunScenarioRequest:
     properties:
       body:
@@ -1713,6 +1689,27 @@ definitions:
       url:
         type: string
       version_id:
+        type: string
+    type: object
+  new_function_service.Function:
+    properties:
+      description:
+        type: string
+      environment_id:
+        type: string
+      function_folder_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      path:
+        type: string
+      project_id:
+        type: string
+      url:
         type: string
     type: object
   object_builder_service.ActionRelation:
@@ -18351,7 +18348,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.ResponseCreateFunction'
+                  $ref: '#/definitions/new_function_service.Function'
               type: object
         "400":
           description: Bad Request
@@ -18499,7 +18496,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.GetByIdFunctionResponse'
+                  $ref: '#/definitions/new_function_service.Function'
               type: object
         "400":
           description: Invalid Argument

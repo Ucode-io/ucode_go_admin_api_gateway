@@ -25158,7 +25158,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.ResponseCreateFunction"
+                                            "$ref": "#/definitions/new_function_service.Function"
                                         }
                                     }
                                 }
@@ -25251,7 +25251,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.GetByIdFunctionResponse"
+                                            "$ref": "#/definitions/new_function_service.Function"
                                         }
                                     }
                                 }
@@ -29320,32 +29320,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.GetByIdFunctionResponse": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "function_folder_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
         "models.HtmlBody": {
             "type": "object",
             "properties": {
@@ -29563,17 +29537,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.ResponseCreateFunction": {
-            "type": "object",
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
         "models.RunScenarioRequest": {
             "type": "object",
             "properties": {
@@ -29713,6 +29676,38 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "new_function_service.Function": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "function_folder_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
