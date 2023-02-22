@@ -89,7 +89,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
 		if err != nil {
-			return errors.New("error while uninstalling " + function.GetPath() + "error: " + stderr.String())
+			fmt.Println("error while uninstalling " + function.GetPath() + "error: " + stderr.String())
 		}
 	}
 
