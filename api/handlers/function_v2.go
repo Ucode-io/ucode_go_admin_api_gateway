@@ -305,12 +305,13 @@ func (h *Handler) UpdateNewFunction(c *gin.Context) {
 	resp, err := services.FunctionService().FunctionService().Update(
 		context.Background(),
 		&fc.Function{
-			Id:            function.ID,
-			Description:   function.Description,
-			Name:          function.Name,
-			Path:          function.Path,
-			EnvironmentId: environment.GetId(),
-			ProjectId:     environment.GetProjectId(),
+			Id:               function.ID,
+			Description:      function.Description,
+			Name:             function.Name,
+			Path:             function.Path,
+			EnvironmentId:    environment.GetId(),
+			ProjectId:        environment.GetProjectId(),
+			FunctionFolderId: function.FuncitonFolderId,
 		},
 	)
 
