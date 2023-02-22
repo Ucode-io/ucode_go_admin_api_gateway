@@ -21,7 +21,7 @@ message RunScenarioRequest {
 }
 
 message RunScenarioResponse {
-    google.protobuf.Struct body = 1;
+    google.protobuf.Struct response = 1;
 }
 
 /*

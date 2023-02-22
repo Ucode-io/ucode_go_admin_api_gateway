@@ -25239,7 +25239,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.GetByIdFunctionResponse"
+                                            "$ref": "#/definitions/new_function_service.Function"
                                         }
                                     }
                                 }
@@ -29339,32 +29339,6 @@
                 }
             }
         },
-        "models.GetByIdFunctionResponse": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "function_folder_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
         "models.HtmlBody": {
             "type": "object",
             "properties": {
@@ -29732,6 +29706,38 @@
                     "type": "string"
                 },
                 "version_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "new_function_service.Function": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "function_folder_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -32152,6 +32158,9 @@
         "scenario_service.DAG": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "category_id": {
                     "type": "string"
                 },
@@ -32258,7 +32267,7 @@
         "scenario_service.RunScenarioResponse": {
             "type": "object",
             "properties": {
-                "body": {
+                "response": {
                     "$ref": "#/definitions/structpb.Struct"
                 }
             }

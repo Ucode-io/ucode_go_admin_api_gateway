@@ -97,6 +97,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	var url = "https://" + uuid.String() + ".u-code.io"
 
 	_, err = services.FunctionService().FunctionService().Create(
 		context.Background(),
@@ -107,6 +108,8 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 			ProjectId:        project.ProjectId,
 			EnvironmentId:    environmentId.(string),
 			FunctionFolderId: function.FuncitonFolderId,
+			Url:              url,
+			Password:         password,
 		},
 	)
 
@@ -117,7 +120,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 
 	h.handleResponse(c, status_http.Created, models.ResponseCreateFunction{
 		Password: password,
-		URL:      "https://" + uuid.String() + ".u-code.io",
+		URL:      url,
 	})
 }
 
@@ -132,7 +135,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param function_id path string true "function_id"
-// @Success 200 {object} status_http.Response{data=models.GetByIdFunctionResponse} "FunctionBody"
+// @Success 200 {object} status_http.Response{data=new_function_service.Function} "FunctionBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetNewFunctionByID(c *gin.Context) {
@@ -175,35 +178,20 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	//
-	project, err := services.CompanyService().Project().GetById(context.Background(), &company_service.GetProjectByIdRequest{
-		ProjectId: environment.GetProjectId(),
-	})
-	if project.GetTitle() == "" {
-		err = errors.New("error project name is required")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-	projectName := strings.TrimSpace(project.Title)
-	projectName = strings.ToLower(projectName)
 
-	uuid, _ := uuid.NewRandom()
-	fmt.Println("uuid::", uuid.String())
-	password, err := code_server.CreateCodeServer(function.Path, h.cfg, uuid.String())
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
+	if function.Url == "" && function.Password == "" {
+		uuid, _ := uuid.NewRandom()
+		fmt.Println("uuid::", uuid.String())
+		password, err := code_server.CreateCodeServer(function.Path, h.cfg, uuid.String())
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
+		function.Url = "https://" + uuid.String() + ".u-code.io"
+		function.Password = password
 	}
 
-	h.handleResponse(c, status_http.OK, models.GetByIdFunctionResponse{
-		Password:         password,
-		URL:              "https://" + uuid.String() + ".u-code.io",
-		ID:               function.Id,
-		Path:             function.Path,
-		Name:             function.Name,
-		Description:      function.Description,
-		FuncitonFolderId: function.FunctionFolderId,
-	})
+	h.handleResponse(c, status_http.OK, function)
 }
 
 // GetAllFunctions godoc
