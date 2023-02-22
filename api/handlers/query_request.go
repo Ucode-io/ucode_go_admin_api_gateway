@@ -688,7 +688,7 @@ func (h *Handler) QueryRun(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetQueryHistory(c *gin.Context) {
 	id := c.Param("query-id")
-	projectId := c.Param("project-id")
+	projectId := c.Query("project-id")
 
 	if !util.IsValidUUID(id) {
 		err := errors.New("query is an invalid uuid")
