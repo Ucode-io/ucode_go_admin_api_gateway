@@ -87,7 +87,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 	var ids = make([]string, 0, functions.GetCount())
 	for _, function := range functions.GetFunctions() {
 		var stdout bytes.Buffer
-		cmd := exec.Command("helm", "uninstall", function.Path)
+		cmd := exec.Command("helm", "uninstall", function.Path + "-n", "test")
 		err = cmd.Run()
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
