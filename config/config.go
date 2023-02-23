@@ -94,8 +94,9 @@ type Config struct {
 	SecretKey              string
 	PlatformType           string
 
-	ScenarioServiceHost string
-	ScenarioGRPCPort    string
+	ScenarioServiceHost    string
+	ScenarioGRPCPort       string
+	AdminHostForCodeServer string
 }
 
 // Load ...
@@ -182,6 +183,7 @@ func Load() Config {
 	config.AppHost = cast.ToString(GetOrReturnDefaultValue("APP_HOST", "test.app.u-code.io"))
 	config.ApiHost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "test.admin.api.u-code.io"))
 	config.PlatformType = cast.ToString(GetOrReturnDefaultValue("PLATFORM_TYPE", "super-admin"))
+	config.AdminHostForCodeServer = cast.ToString(GetOrReturnDefaultValue("HOST_FOR_CODE_SERVER", "test.admin"))
 	return config
 }
 

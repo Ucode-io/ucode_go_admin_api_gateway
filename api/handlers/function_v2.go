@@ -97,7 +97,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	var url = "https://" + uuid.String() + ".u-code.io"
+	var url = "https://" + h.cfg.AdminHostForCodeServer + ".u-code.io/function/"+ uuid.String()
 
 	response, err := services.FunctionService().FunctionService().Create(
 		context.Background(),
@@ -184,7 +184,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
-		function.Url = "https://" + uuid.String() + ".u-code.io"
+		function.Url = "https://" + h.cfg.AdminHostForCodeServer + ".u-code.io/function/"+ uuid.String()
 		function.Password = password
 	}
 
