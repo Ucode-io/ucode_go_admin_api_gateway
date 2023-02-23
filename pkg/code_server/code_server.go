@@ -86,12 +86,15 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 	}
 	var ids = make([]string, 0, functions.GetCount())
 	for _, function := range functions.GetFunctions() {
+		var stdout bytes.Buffer
 		cmd := exec.Command("helm", "uninstall", function.Path)
 		err = cmd.Run()
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
+		cmd.Stdout = &stdout
 		if err != nil {
-			fmt.Println("err "+ function.GetPath(), ":: " ,  err)
+			fmt.Println(stdout.String())
+			fmt.Println("err "+function.GetPath(), ":: ", err)
 			fmt.Println("error while uninstalling " + function.GetPath() + " error: " + stderr.String())
 			continue
 		}
