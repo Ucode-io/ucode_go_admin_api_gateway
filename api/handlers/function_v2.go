@@ -187,6 +187,13 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		function.Url = "https://" + uuid.String() + ".u-code.io"
 		function.Password = password
 	}
+	var status int
+	for {
+		status, err = util.DoRequestCheckCodeServer(function.Url+"/?folder=/functions/"+function.Path, "GET", nil)
+		if status == 200 {
+			break
+		}
+	}
 
 	h.handleResponse(c, status_http.OK, function)
 }
