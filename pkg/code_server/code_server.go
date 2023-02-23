@@ -36,12 +36,12 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 		return "", errors.New("error while repo update helm::" + stderr.String())
 	}
 
-	hostName := fmt.Sprintf("--set=ingress.hosts[0].host=%s.u-code.io", cfg.AdminHostForCodeServer)
-	// hostNameTls := fmt.Sprintf("--set=ingress.tls[0].hosts[0]=%s.u-code.io", id)
-	// secretName := fmt.Sprintf("--set=ingress.tls[0].secretName=%s-tls", id)
-	path := fmt.Sprintf("--set=ingress.hosts[0].paths[0]=/function/%s", id)
+	hostName := fmt.Sprintf("--set=ingress.hosts[0].host=%s.u-code.io", id)
+	hostNameTls := fmt.Sprintf("--set=ingress.tls[0].hosts[0]=%s.u-code.io", id)
+	secretName := fmt.Sprintf("--set=ingress.tls[0].secretName=%s-tls", id)
+	path := "--set=ingress.hosts[0].paths[0]=/"
 
-	cmd = exec.Command("helm", "install", functionName, "code-server/code-server", "-n", "test", hostName, path)
+	cmd = exec.Command("helm", "install", functionName, "code-server/code-server", "-n", "test", hostName, hostNameTls, secretName, path)
 	err = cmd.Run()
 	if err != nil {
 		fmt.Println("err 2::", err)
