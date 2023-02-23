@@ -194,6 +194,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 			break
 		}
 	}
+	services.FunctionService().FunctionService().Update(context.Background(), function)
 
 	h.handleResponse(c, status_http.OK, function)
 }
