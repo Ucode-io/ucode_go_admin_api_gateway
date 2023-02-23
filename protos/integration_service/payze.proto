@@ -6,7 +6,7 @@ option go_package="genproto/integration_service";
 service PayzeService {
     rpc GeneratePayzeLink(PayzeLinkRequest) returns (PayzeLinkResponse){}
     rpc GeneratePayzeLinkSvod(PayzeLinkRequestSvod) returns (PayzeLinkResponse){}
-
+    rpc PayzeSaveCard(PayzeLinkRequest) returns (PayzeLinkResponse){}
 }
 
 message PayzeLinkRequest {
