@@ -28324,6 +28324,9 @@ const docTemplate = `{
                 "adminHost": {
                     "type": "string"
                 },
+                "adminHostForCodeServer": {
+                    "type": "string"
+                },
                 "analyticsGRPCPort": {
                     "type": "string"
                 },
@@ -28395,6 +28398,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "httpscheme": {
+                    "type": "string"
+                },
+                "integrationGRPCPort": {
+                    "type": "string"
+                },
+                "integrationServiceHost": {
                     "type": "string"
                 },
                 "localhost": {

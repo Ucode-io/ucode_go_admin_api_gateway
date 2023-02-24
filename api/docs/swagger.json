@@ -28312,6 +28312,9 @@
                 "adminHost": {
                     "type": "string"
                 },
+                "adminHostForCodeServer": {
+                    "type": "string"
+                },
                 "analyticsGRPCPort": {
                     "type": "string"
                 },
@@ -28383,6 +28386,12 @@
                     "type": "string"
                 },
                 "httpscheme": {
+                    "type": "string"
+                },
+                "integrationGRPCPort": {
+                    "type": "string"
+                },
+                "integrationServiceHost": {
                     "type": "string"
                 },
                 "localhost": {
