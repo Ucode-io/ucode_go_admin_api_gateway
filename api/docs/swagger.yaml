@@ -1582,6 +1582,13 @@ definitions:
       title:
         type: string
     type: object
+  models.QueryRevertRequest:
+    properties:
+      commit_id:
+        type: string
+      project_id:
+        type: string
+    type: object
   models.Referral:
     properties:
       cito:
@@ -3180,23 +3187,6 @@ definitions:
         items:
           $ref: '#/definitions/query_service.Variable'
         type: array
-      version_id:
-        type: string
-    type: object
-  query_service.RevertQueryReq:
-    properties:
-      commit_info:
-        $ref: '#/definitions/query_service.CommitInfo'
-      environment_id:
-        type: string
-      id:
-        type: string
-      new_commit_id:
-        type: string
-      old_commit_id:
-        type: string
-      project_id:
-        type: string
       version_id:
         type: string
     type: object
@@ -11462,293 +11452,6 @@ paths:
       summary: Update many-to-many
       tags:
       - Object
-  /v1/new/custom-event:
-    get:
-      consumes:
-      - application/json
-      description: Get all custom events
-      operationId: get_new_all_custom_events
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - in: query
-        name: environment_id
-        type: string
-      - in: query
-        name: method
-        type: string
-      - in: query
-        name: project_id
-        type: string
-      - in: query
-        name: role_id
-        type: string
-      - in: query
-        name: table_slug
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: CustomEventBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all custom events
-      tags:
-      - CustomEvent
-    post:
-      consumes:
-      - application/json
-      description: Create New CustomEvent
-      operationId: create_new_custom_event
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: CreateCustomEventRequestBody
-        in: body
-        name: Customevent
-        required: true
-        schema:
-          $ref: '#/definitions/new_function_service.CreateCustomEventRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: CustomEvent data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create New CustomEvent
-      tags:
-      - NewCustomEvent
-    put:
-      consumes:
-      - application/json
-      description: Update new custom event
-      operationId: update_new_custom_event
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: UpdateCustomEventRequestBody
-        in: body
-        name: Customevent
-        required: true
-        schema:
-          $ref: '#/definitions/models.CustomEvent'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: CustomEvent data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Update New Customevent
-      tags:
-      - NewCustomEvent
-  /v1/new/custom-event/{custom_event_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete CustomEvent
-      operationId: delete_new_custom_event
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: custom_event_id
-        in: path
-        name: custom_event_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete CustomEvent
-      tags:
-      - NewCustomEvent
-    get:
-      consumes:
-      - application/json
-      description: Get CustomEvent by id
-      operationId: get_new_custom_event_by_id
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: custom_event_id
-        in: path
-        name: custom_event_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: CustomEventBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get CustomEvent by id
-      tags:
-      - NewCustomEvent
   /v1/note:
     get:
       consumes:
@@ -14352,7 +14055,7 @@ paths:
         name: RevertQueryReq
         required: true
         schema:
-          $ref: '#/definitions/query_service.RevertQueryReq'
+          $ref: '#/definitions/models.QueryRevertRequest'
       produces:
       - application/json
       responses:
@@ -18318,6 +18021,293 @@ paths:
       summary: Upsert view relation
       tags:
       - ViewRelation
+  /v2/custom-event:
+    get:
+      consumes:
+      - application/json
+      description: Get all custom events
+      operationId: get_new_all_custom_events
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - in: query
+        name: environment_id
+        type: string
+      - in: query
+        name: method
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: role_id
+        type: string
+      - in: query
+        name: table_slug
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CustomEventBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all custom events
+      tags:
+      - CustomEvent
+    post:
+      consumes:
+      - application/json
+      description: Create New CustomEvent
+      operationId: create_new_custom_event
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: CreateCustomEventRequestBody
+        in: body
+        name: Customevent
+        required: true
+        schema:
+          $ref: '#/definitions/new_function_service.CreateCustomEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CustomEvent data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create New CustomEvent
+      tags:
+      - NewCustomEvent
+    put:
+      consumes:
+      - application/json
+      description: Update new custom event
+      operationId: update_new_custom_event
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: UpdateCustomEventRequestBody
+        in: body
+        name: Customevent
+        required: true
+        schema:
+          $ref: '#/definitions/models.CustomEvent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CustomEvent data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update New Customevent
+      tags:
+      - NewCustomEvent
+  /v2/custom-event/{custom_event_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete CustomEvent
+      operationId: delete_new_custom_event
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: custom_event_id
+        in: path
+        name: custom_event_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete CustomEvent
+      tags:
+      - NewCustomEvent
+    get:
+      consumes:
+      - application/json
+      description: Get CustomEvent by id
+      operationId: get_new_custom_event_by_id
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: custom_event_id
+        in: path
+        name: custom_event_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CustomEventBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get CustomEvent by id
+      tags:
+      - NewCustomEvent
   /v2/function:
     get:
       consumes:

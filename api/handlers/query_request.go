@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	tmp "ucode/ucode_go_api_gateway/genproto/query_service"
@@ -821,13 +822,13 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 // @Produce json
 // @Param query-id path string true "query-id"
 // @Param project-id query string true "project-id"
-// @Param RevertQueryReq body tmp.RevertQueryReq true "Request Body"
+// @Param RevertQueryReq body models.QueryRevertRequest true "Request Body"
 // @Success 200 {object} status_http.Response{data=tmp.Query} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) RevertQuery(c *gin.Context) {
 
-	var body tmp.RevertQueryReq
+	var body models.QueryRevertRequest
 
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
@@ -845,7 +846,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(body.GetProjectId()) {
+	if !util.IsValidUUID(body.ProjectId) {
 		err := errors.New("project_id is an invalid uuid")
 		h.log.Error("project_id is an invalid uuid", logger.Error(err))
 		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
@@ -871,7 +872,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 		return
 	}
 	fmt.Println("test 1")
-	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
+	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, body.ProjectId)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 		return
@@ -882,7 +883,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 		&tmp.RevertQueryReq{
 			Id:          id,
 			VersionId:   versionGuid,
-			OldCommitId: body.GetOldCommitId(),
+			OldCommitId: body.CommitId,
 			NewCommitId: commitGuid,
 		},
 	)
