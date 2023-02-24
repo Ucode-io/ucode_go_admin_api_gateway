@@ -28,6 +28,20 @@ func CreateProjectFork(cfg config.Config, projectName string) (response models.G
 	} else if resp.Code >= 500 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.InternalServerError.Description)
 	}
-	
+
 	return resp, err
+}
+
+func DeleteForkedProject(repoName string, cfg config.Config) (response models.GitlabIntegrationResponse, err error) {
+
+	resp, err := DoRequest(cfg.GitlabIntegrationURL+"/api/v4/projects/ucode_functions_group%2"+"F"+repoName, cfg.GitlabIntegrationToken, "DELETE", nil)
+	if resp.Code >= 400 {
+		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
+	} else if resp.Code >= 500 {
+		return models.GitlabIntegrationResponse{}, errors.New(status_http.InternalServerError.Description)
+	}
+	return models.GitlabIntegrationResponse{
+		Code:    200,
+		Message: map[string]interface{}{"message": "Successfully deleted"},
+	}, nil
 }

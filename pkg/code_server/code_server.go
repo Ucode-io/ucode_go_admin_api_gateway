@@ -113,3 +113,21 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 
 	return nil
 }
+
+func DeleteCodeServerByPath(path string, cfg config.Config) error {
+
+	var stdout bytes.Buffer
+	cmd := exec.Command("helm", "uninstall", path, "-n", "test")
+	err := cmd.Run()
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	cmd.Stdout = &stdout
+	if err != nil {
+		fmt.Println(stdout.String())
+		fmt.Println("err "+path, ":: ", err)
+		fmt.Println("error while uninstalling " + path + " error: " + stderr.String())
+		return err
+	}
+
+	return nil
+}
