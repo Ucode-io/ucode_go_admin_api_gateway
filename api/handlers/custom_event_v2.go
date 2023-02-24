@@ -19,7 +19,7 @@ import (
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID create_new_custom_event
-// @Router /v1/new/custom-event [POST]
+// @Router /v2/custom-event [POST]
 // @Summary Create New CustomEvent
 // @Description Create New CustomEvent
 // @Tags NewCustomEvent
@@ -120,7 +120,7 @@ func (h *Handler) CreateNewCustomEvent(c *gin.Context) {
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get_new_custom_event_by_id
-// @Router /v1/new/custom-event/{custom_event_id} [GET]
+// @Router /v2/custom-event/{custom_event_id} [GET]
 // @Summary Get CustomEvent by id
 // @Description Get CustomEvent by id
 // @Tags NewCustomEvent
@@ -198,7 +198,7 @@ func (h *Handler) GetNewCustomEventByID(c *gin.Context) {
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get_new_all_custom_events
-// @Router /v1/new/custom-event [GET]
+// @Router /v2/custom-event [GET]
 // @Summary Get all custom events
 // @Description Get all custom events
 // @Tags CustomEvent
@@ -270,7 +270,7 @@ func (h *Handler) GetAllNewCustomEvents(c *gin.Context) {
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID update_new_custom_event
-// @Router /v1/new/custom-event [PUT]
+// @Router /v2/custom-event [PUT]
 // @Summary Update New Customevent
 // @Description Update new custom event
 // @Tags NewCustomEvent
@@ -364,7 +364,7 @@ func (h *Handler) UpdateNewCustomEvent(c *gin.Context) {
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID delete_new_custom_event
-// @Router /v1/new/custom-event/{custom_event_id} [DELETE]
+// @Router /v2/custom-event/{custom_event_id} [DELETE]
 // @Summary Delete CustomEvent
 // @Description Delete CustomEvent
 // @Tags NewCustomEvent

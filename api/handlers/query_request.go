@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -13,6 +11,9 @@ import (
 	vcs "ucode/ucode_go_api_gateway/genproto/versioning_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateQueryRequest godoc
@@ -748,7 +749,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 	for _, item := range resp.GetQueries() {
 		versionIds = append(versionIds, item.GetCommitInfo().GetVersionIds()...)
 	}
-
+	fmt.Println("test")
 	multipleVersionResp, err := services.VersioningService().Release().GetMultipleVersionInfo(
 		c.Request.Context(),
 		&vcs.GetMultipleVersionInfoRequest{
@@ -756,12 +757,14 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 			ProjectId:  projectId,
 		},
 	)
+	fmt.Println("", err)
+	fmt.Println("test 2 2")
 	if err != nil {
 		h.log.Error("error getting multiple version infos", logger.Error(err))
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
+	fmt.Println("test 2 4")
 	for _, item := range resp.GetQueries() {
 		for key := range item.GetVersionInfos() {
 
@@ -778,6 +781,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 			}
 		}
 	}
+	fmt.Println("Test test")
 	// reqAutherGuids, err := helper.ConvertMapToStruct(map[string]interface{}{
 	// 	"guid": []string{},
 	// })
@@ -866,13 +870,13 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
 	}
-
+	fmt.Println("test 1")
 	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 		return
 	}
-
+	fmt.Println("test 2")
 	resp, err := services.QueryService().Query().RevertQuery(
 		context.Background(),
 		&tmp.RevertQueryReq{
