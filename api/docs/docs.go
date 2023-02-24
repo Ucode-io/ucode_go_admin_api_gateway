@@ -17121,6 +17121,12 @@ const docTemplate = `{
                         "name": "query-id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "commit-id",
+                        "name": "commit-id",
+                        "in": "query"
                     }
                 ],
                 "responses": {

@@ -143,6 +143,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param query-id path string true "query-id"
+// @Param commit-id query string false "commit-id"
 // @Success 200 {object} status_http.Response{data=tmp.Query} "Query"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -221,6 +222,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 			Id:        queryId,
 			ProjectId: projectId,
 			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			CommitId:  c.DefaultQuery("commit-id", ""),
 		},
 	)
 

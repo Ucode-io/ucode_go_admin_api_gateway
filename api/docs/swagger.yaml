@@ -13802,6 +13802,10 @@ paths:
         name: query-id
         required: true
         type: string
+      - description: commit-id
+        in: query
+        name: commit-id
+        type: string
       produces:
       - application/json
       responses:
