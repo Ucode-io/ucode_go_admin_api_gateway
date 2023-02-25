@@ -4,15 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"strconv"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	tmp "ucode/ucode_go_api_gateway/genproto/query_service"
 	vcs "ucode/ucode_go_api_gateway/genproto/versioning_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateQueryRequest godoc
@@ -141,6 +143,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param query-id path string true "query-id"
+// @Param commit-id query string false "commit-id"
 // @Success 200 {object} status_http.Response{data=tmp.Query} "Query"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -219,6 +222,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 			Id:        queryId,
 			ProjectId: projectId,
 			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			CommitId:  c.DefaultQuery("commit-id", ""),
 		},
 	)
 
@@ -748,7 +752,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 	for _, item := range resp.GetQueries() {
 		versionIds = append(versionIds, item.GetCommitInfo().GetVersionIds()...)
 	}
-
+	fmt.Println("test")
 	multipleVersionResp, err := services.VersioningService().Release().GetMultipleVersionInfo(
 		c.Request.Context(),
 		&vcs.GetMultipleVersionInfoRequest{
@@ -756,12 +760,14 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 			ProjectId:  projectId,
 		},
 	)
+	fmt.Println("", err)
+	fmt.Println("test 2 2")
 	if err != nil {
 		h.log.Error("error getting multiple version infos", logger.Error(err))
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
+	fmt.Println("test 2 4")
 	for _, item := range resp.GetQueries() {
 		for key := range item.GetVersionInfos() {
 
@@ -778,6 +784,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 			}
 		}
 	}
+	fmt.Println("Test test")
 	// reqAutherGuids, err := helper.ConvertMapToStruct(map[string]interface{}{
 	// 	"guid": []string{},
 	// })
@@ -817,13 +824,13 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 // @Produce json
 // @Param query-id path string true "query-id"
 // @Param project-id query string true "project-id"
-// @Param RevertQueryReq body tmp.RevertQueryReq true "Request Body"
+// @Param RevertQueryReq body models.QueryRevertRequest true "Request Body"
 // @Success 200 {object} status_http.Response{data=tmp.Query} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) RevertQuery(c *gin.Context) {
 
-	var body tmp.RevertQueryReq
+	var body models.QueryRevertRequest
 
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
@@ -841,7 +848,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(body.GetProjectId()) {
+	if !util.IsValidUUID(body.ProjectId) {
 		err := errors.New("project_id is an invalid uuid")
 		h.log.Error("project_id is an invalid uuid", logger.Error(err))
 		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
@@ -866,19 +873,19 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
 	}
-
-	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
+	fmt.Println("test 1")
+	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, body.ProjectId)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 		return
 	}
-
+	fmt.Println("test 2")
 	resp, err := services.QueryService().Query().RevertQuery(
 		context.Background(),
 		&tmp.RevertQueryReq{
 			Id:          id,
 			VersionId:   versionGuid,
-			OldCommitId: body.GetOldCommitId(),
+			OldCommitId: body.CommitId,
 			NewCommitId: commitGuid,
 		},
 	)

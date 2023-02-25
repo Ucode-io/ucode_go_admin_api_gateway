@@ -64,6 +64,9 @@ type Config struct {
 	CompanyServiceHost string
 	CompanyServicePort string
 
+	IntegrationServiceHost string
+	IntegrationGRPCPort    string
+
 	ApiReferenceServiceHost string
 	ApiReferenceServicePort string
 
@@ -94,8 +97,9 @@ type Config struct {
 	SecretKey              string
 	PlatformType           string
 
-	ScenarioServiceHost string
-	ScenarioGRPCPort    string
+	ScenarioServiceHost    string
+	ScenarioGRPCPort       string
+	AdminHostForCodeServer string
 }
 
 // Load ...
@@ -147,6 +151,9 @@ func Load() Config {
 	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", "localhost"))
 	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", ":8092"))
 
+	config.IntegrationServiceHost = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_SERVICE_HOST", "localhost"))
+	config.IntegrationGRPCPort = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_GRPC_PORT", ":9109"))
+
 	config.PosServiceHost = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_HOST", "localhost"))
 	config.PosGRPCPort = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_GRPC_PORT", ":8000"))
 
@@ -182,6 +189,7 @@ func Load() Config {
 	config.AppHost = cast.ToString(GetOrReturnDefaultValue("APP_HOST", "test.app.u-code.io"))
 	config.ApiHost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "test.admin.api.u-code.io"))
 	config.PlatformType = cast.ToString(GetOrReturnDefaultValue("PLATFORM_TYPE", "super-admin"))
+	config.AdminHostForCodeServer = cast.ToString(GetOrReturnDefaultValue("HOST_FOR_CODE_SERVER", "test.admin"))
 	return config
 }
 

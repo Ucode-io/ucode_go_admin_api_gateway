@@ -24,7 +24,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 		log.Printf("AUTH OBJECT: %+v", res)
-		c.Set("Auth", res)
+		c.Set("Auth_Admin", res)
 		c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Set("environment_id", c.GetHeader("Environment-Id"))
 		c.Set("resource_id", c.GetHeader("Resource-Id"))
@@ -68,7 +68,8 @@ func (h *Handler) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuperAd
 }
 
 func (h *Handler) adminAuthInfo(c *gin.Context) (result *auth_service.HasAccessSuperAdminRes, err error) {
-	data, ok := c.Get("Auth")
+	data, ok := c.Get("Auth_Admin")
+	fmt.Println("Data:::", data)
 
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")

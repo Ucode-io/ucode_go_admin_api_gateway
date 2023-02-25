@@ -11,6 +11,8 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/services"
+
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func CreateCodeServer(functionName string, cfg config.Config, id string) (string, error) {
@@ -78,18 +80,53 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 
 func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg config.Config) error {
 
-	functions, err := srvs.FunctionService().FunctionService().GetList(context.Background(), &new_function_service.GetAllFunctionsRequest{})
+	functions, err := srvs.FunctionService().FunctionService().GetListByRequestTime(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return err
 	}
+	var ids = make([]string, 0, functions.GetCount())
 	for _, function := range functions.GetFunctions() {
-		cmd := exec.Command("helm", "uninstall", function.Path)
+		var stdout bytes.Buffer
+		cmd := exec.Command("helm", "uninstall", function.Path, "-n", "test")
 		err = cmd.Run()
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
+		cmd.Stdout = &stdout
 		if err != nil {
-			return errors.New("error while uninstalling " + function.GetPath() + "error: " + stderr.String())
+			fmt.Println(stdout.String())
+			fmt.Println("err "+function.GetPath(), ":: ", err)
+			fmt.Println("error while uninstalling " + function.GetPath() + " error: " + stderr.String())
+			continue
 		}
+		ids = append(ids, function.GetId())
+		fmt.Println(function.GetPath())
+	}
+	if len(ids) > 0 {
+		_, err = srvs.FunctionService().FunctionService().UpdateManyByRequestTime(context.Background(), &new_function_service.UpdateManyUrlAndPassword{
+			Ids: ids,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	fmt.Println("finish")
+
+	return nil
+}
+
+func DeleteCodeServerByPath(path string, cfg config.Config) error {
+
+	var stdout bytes.Buffer
+	cmd := exec.Command("helm", "uninstall", path, "-n", "test")
+	err := cmd.Run()
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	cmd.Stdout = &stdout
+	if err != nil {
+		fmt.Println(stdout.String())
+		fmt.Println("err "+path, ":: ", err)
+		fmt.Println("error while uninstalling " + path + " error: " + stderr.String())
+		return err
 	}
 
 	return nil

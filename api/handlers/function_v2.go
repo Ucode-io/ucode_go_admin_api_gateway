@@ -187,6 +187,14 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		function.Url = "https://" + uuid.String() + ".u-code.io"
 		function.Password = password
 	}
+	var status int
+	for {
+		status, err = util.DoRequestCheckCodeServer(function.Url+"/?folder=/functions/"+function.Path, "GET", nil)
+		if status == 200 {
+			break
+		}
+	}
+	services.FunctionService().FunctionService().Update(context.Background(), function)
 
 	h.handleResponse(c, status_http.OK, function)
 }
@@ -305,12 +313,13 @@ func (h *Handler) UpdateNewFunction(c *gin.Context) {
 	resp, err := services.FunctionService().FunctionService().Update(
 		context.Background(),
 		&fc.Function{
-			Id:            function.ID,
-			Description:   function.Description,
-			Name:          function.Name,
-			Path:          function.Path,
-			EnvironmentId: environment.GetId(),
-			ProjectId:     environment.GetProjectId(),
+			Id:               function.ID,
+			Description:      function.Description,
+			Name:             function.Name,
+			Path:             function.Path,
+			EnvironmentId:    environment.GetId(),
+			ProjectId:        environment.GetProjectId(),
+			FunctionFolderId: function.FuncitonFolderId,
 		},
 	)
 
@@ -356,8 +365,40 @@ func (h *Handler) DeleteNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
+	resp, err := services.FunctionService().FunctionService().GetSingle(
+		context.Background(),
+		&fc.FunctionPrimaryKey{
+			Id:            functionID,
+			EnvironmentId: environmentId.(string),
+		},
+	)
 
-	resp, err := services.FunctionService().FunctionService().Delete(
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	// delete code server
+	err = code_server.DeleteCodeServerByPath(resp.Path, h.cfg)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	
+	// delete cloned repo
+	err = gitlab_integration.DeletedClonedRepoByPath(resp.Path, h.cfg)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	// delete repo by path from gitlab
+	_, err = gitlab_integration.DeleteForkedProject(resp.Path, h.cfg)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	_, err = services.FunctionService().FunctionService().Delete(
 		context.Background(),
 		&fc.FunctionPrimaryKey{
 			Id:            functionID,
