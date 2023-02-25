@@ -4,7 +4,7 @@
 // - protoc             v3.21.12
 // source: order.proto
 
-package integration_service_v2
+package integration_service
 
 import (
 	context "context"
@@ -38,7 +38,7 @@ func NewOrderServiceClient(cc grpc.ClientConnInterface) OrderServiceClient {
 
 func (c *orderServiceClient) Create(ctx context.Context, in *CreatePurchaseRequest, opts ...grpc.CallOption) (*CreatePurchaseResponse, error) {
 	out := new(CreatePurchaseResponse)
-	err := c.cc.Invoke(ctx, "/integration_service_v2.OrderService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/integration_service.OrderService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (c *orderServiceClient) Create(ctx context.Context, in *CreatePurchaseReque
 
 func (c *orderServiceClient) Get(ctx context.Context, in *GetPurchaseRequest, opts ...grpc.CallOption) (*GetPurchaseResponse, error) {
 	out := new(GetPurchaseResponse)
-	err := c.cc.Invoke(ctx, "/integration_service_v2.OrderService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/integration_service.OrderService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (c *orderServiceClient) Get(ctx context.Context, in *GetPurchaseRequest, op
 
 func (c *orderServiceClient) GetList(ctx context.Context, in *GetPurchaseListRequest, opts ...grpc.CallOption) (*GetPurchaseListResponse, error) {
 	out := new(GetPurchaseListResponse)
-	err := c.cc.Invoke(ctx, "/integration_service_v2.OrderService/GetList", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/integration_service.OrderService/GetList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (c *orderServiceClient) GetList(ctx context.Context, in *GetPurchaseListReq
 
 func (c *orderServiceClient) CheckHasAccess(ctx context.Context, in *CheckHasAccessRequest, opts ...grpc.CallOption) (*CheckHasAccessResponse, error) {
 	out := new(CheckHasAccessResponse)
-	err := c.cc.Invoke(ctx, "/integration_service_v2.OrderService/CheckHasAccess", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/integration_service.OrderService/CheckHasAccess", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func _OrderService_Create_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/integration_service_v2.OrderService/Create",
+		FullMethod: "/integration_service.OrderService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrderServiceServer).Create(ctx, req.(*CreatePurchaseRequest))
@@ -140,7 +140,7 @@ func _OrderService_Get_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/integration_service_v2.OrderService/Get",
+		FullMethod: "/integration_service.OrderService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrderServiceServer).Get(ctx, req.(*GetPurchaseRequest))
@@ -158,7 +158,7 @@ func _OrderService_GetList_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/integration_service_v2.OrderService/GetList",
+		FullMethod: "/integration_service.OrderService/GetList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrderServiceServer).GetList(ctx, req.(*GetPurchaseListRequest))
@@ -176,7 +176,7 @@ func _OrderService_CheckHasAccess_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/integration_service_v2.OrderService/CheckHasAccess",
+		FullMethod: "/integration_service.OrderService/CheckHasAccess",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrderServiceServer).CheckHasAccess(ctx, req.(*CheckHasAccessRequest))
@@ -188,7 +188,7 @@ func _OrderService_CheckHasAccess_Handler(srv interface{}, ctx context.Context, 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var OrderService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "integration_service_v2.OrderService",
+	ServiceName: "integration_service.OrderService",
 	HandlerType: (*OrderServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
