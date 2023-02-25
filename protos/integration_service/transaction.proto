@@ -6,6 +6,7 @@ import "google/protobuf/struct.proto";
 import "google/protobuf/empty.proto";
 
 service TransactionService {
+    rpc CreateTransactionSaveCard(TransactionSaveCard) returns (TransactionCreateResponse){}
     rpc CreateTransaction(Transaction) returns (TransactionCreateResponse){}
     rpc GetAllTransactions(TransactionFindRequest) returns (TransactionResponse){}
     rpc UpdateStatus(TransactionStatusUpdate) returns (TransactionStatusUpdateResponse){}
@@ -30,6 +31,25 @@ message Transaction {
     int32 amount = 14;
     string resp_id = 15;
 }
+message TransactionSaveCard {
+    string id = 1;
+    string order_id = 2;
+    string status = 3;
+    string transaction_id = 4;
+    int32 action = 5;
+    string currency = 6;
+    float price = 7;
+    string created_date = 8;
+    string created_at = 9;
+    string updated_at = 10;
+    string deleted_at = 11;
+    google.protobuf.Struct data = 12;
+    string product_id = 13;
+    int32 amount = 14;
+    string resp_id = 15;
+    string card_id = 16;
+}
+
 
 message TransactionResponse {
    repeated Transaction transactions = 1;

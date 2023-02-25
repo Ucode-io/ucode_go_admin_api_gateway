@@ -71,6 +71,8 @@ message GetAllDAGStepRequest {
     string type = 2;
     string dag_id = 3;
     string parent_id = 4;
+    string callback_type = 5;
+    string step_id = 6;
 }
 
 message DAGStepRunRequest {
