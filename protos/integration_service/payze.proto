@@ -1,12 +1,13 @@
 syntax="proto3";
 
-package integration_service_v2;
-option go_package="genproto/integration_service_v2";
+package integration_service;
+option go_package="genproto/integration_service";
+import "google/protobuf/struct.proto";
 
 service PayzeService {
     rpc GeneratePayzeLink(PayzeLinkRequest) returns (PayzeLinkResponse){}
-    rpc GeneratePayzeLinkSvod(PayzeLinkRequestSvod) returns (PayzeLinkResponse){}
-    rpc PayzeSaveCard(PayzeLinkRequest) returns (PayzeLinkResponse){}
+    rpc GeneratePayzeLinkSvod(PayzeLinkRequestSvod) returns (PayzeLinkResponseSvod){}
+    rpc PayzeSaveCard(PayzeLinkRequest) returns (PayzeLinkResponseSaveCard){}
 }
 
 message PayzeLinkRequest {
@@ -27,8 +28,45 @@ message PayzeLinkRequestData {
     bool hookRefund = 8;
 }
 
-message PayzeLinkResponse {
+message PayzeLinkResponse{
+    string id = 1;
+    string order_id = 2;
+    string status = 3;
+    string transaction_id = 4;
+    int32 action = 5;
+    string currency = 6;
+    float price = 7;
+    string created_date = 8;
+    string created_at = 9;
+    string updated_at = 10;
+    string deleted_at = 11;
+    google.protobuf.Struct data = 12;
+    string product_id = 13;
+    int32 amount = 14;
+    string resp_id = 15;
+}
+
+message PayzeLinkResponseSvod {
     string link = 1;
+}
+
+message PayzeLinkResponseSaveCard { 
+    string id = 1;
+    string order_id = 2;
+    string status = 3;
+    string transaction_id = 4;
+    int32 action = 5;
+    string currency = 6;
+    float price = 7;
+    string created_date = 8;
+    string created_at = 9;
+    string updated_at = 10;
+    string deleted_at = 11;
+    google.protobuf.Struct data = 12;
+    string product_id = 13;
+    int32 amount = 14;
+    string resp_id = 15;
+    string card_id = 16;
 }
 
 message PayzeLinkRequestSvod {

@@ -1,8 +1,7 @@
 syntax="proto3";
 
-package integration_service_v2;
-option go_package="genproto/integration_service_v2";
-import "google/protobuf/struct.proto";
+package integration_service;
+option go_package="genproto/integration_service";
 
 service OrderService {
     rpc Create (CreatePurchaseRequest) returns (CreatePurchaseResponse) {};
