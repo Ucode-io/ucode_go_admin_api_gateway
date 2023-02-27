@@ -53,7 +53,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			fmt.Println("pl;::", platformType)
 			fmt.Println("pla::::", cfg.PlatformType)
 			if platformType != cfg.PlatformType {
-				fmt.Println("origin----->", origin)
+				fmt.Println(origin)
 				res, ok = h.hasAccess(c)
 				fmt.Println("a::::::::::", res)
 				if !ok {
