@@ -3,10 +3,8 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
 	vcs "ucode/ucode_go_api_gateway/genproto/versioning_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -14,6 +12,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateCategory godoc
@@ -60,19 +59,17 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(
-		c, environmentId.(string),
-		config.COMMIT_TYPE_FIELD, category.GetProjectId(),
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
-		return
-	}
+	// versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(
+	// 	c, environmentId.(string),
+	// 	config.COMMIT_TYPE_FIELD, category.GetProjectId(),
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
+	// 	return
+	// }
 
-	fmt.Println("VERSION", versionGuid, "COMMIT_ID", commitGuid)
-
-	category.CommitId = commitGuid
-	category.VersionId = versionGuid
+	category.CommitId = uuid.NewString()
+	category.VersionId = uuid.NewString()
 
 	resp, err := services.ApiReferenceService().Category().Create(
 		context.Background(), &category,
@@ -270,17 +267,17 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(
-		c, environmentId.(string),
-		config.COMMIT_TYPE_FIELD, category.ProjectID,
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
-		return
-	}
+	// versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(
+	// 	c, environmentId.(string),
+	// 	config.COMMIT_TYPE_FIELD, category.ProjectID,
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
+	// 	return
+	// }
 
-	category.CommitId = commitGuid
-	category.VersionId = versionGuid
+	category.CommitId = uuid.NewString()
+	category.VersionId = uuid.NewString()
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)

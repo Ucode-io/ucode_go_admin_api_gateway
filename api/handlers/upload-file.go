@@ -27,10 +27,6 @@ type UploadResponse struct {
 	Filename string `json:"filename"`
 }
 
-var (
-	defaultBucket = "ucode"
-)
-
 type File struct {
 	File *multipart.FileHeader `form:"file" binding:"required"`
 }
@@ -58,6 +54,7 @@ type Path struct {
 func (h *Handler) Upload(c *gin.Context) {
 	var (
 		file File
+		defaultBucket = "ucode"
 	)
 	err := c.ShouldBind(&file)
 	if err != nil {
@@ -91,7 +88,7 @@ func (h *Handler) Upload(c *gin.Context) {
 	if splitedContentType[0] != "image" && splitedContentType[0] != "video" {
 		defaultBucket = "docs"
 	}
-
+	fmt.Println("content-type", splitedContentType)
 	_, err = minioClient.FPutObject(
 		context.Background(),
 		defaultBucket,

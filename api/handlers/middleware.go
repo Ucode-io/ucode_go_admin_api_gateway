@@ -35,26 +35,34 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		var (
 			res          = &auth_service.V2HasAccessUserRes{}
 			ok           bool
+			origin       = c.GetHeader("Origin")
 			platformType = c.GetHeader("Platform-Type")
 		)
 
-		fmt.Println("--platform-type--", platformType)
 		bearerToken := c.GetHeader("Authorization")
 		strArr := strings.Split(bearerToken, " ")
 
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
+			h.log.Error("---ERR->Unexpected token format")
 			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
 			return
 		}
 		switch strArr[0] {
 		case "Bearer":
+			fmt.Println("aa")
+			fmt.Println("pl;::", platformType)
+			fmt.Println("pla::::", cfg.PlatformType)
 			if platformType != cfg.PlatformType {
+				fmt.Println("origin----->", origin)
 				res, ok = h.hasAccess(c)
+				fmt.Println("a::::::::::", res)
 				if !ok {
+					h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
 					c.Abort()
 					return
 				}
 			}
+			fmt.Println("bb")
 
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
@@ -112,11 +120,12 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			c.Abort()
 		}
-
+		fmt.Println("res::::", res)
 		c.Set("Auth", res)
 		c.Set("namespace", h.cfg.UcodeNamespace)
 
 		c.Next()
+
 	}
 }
 

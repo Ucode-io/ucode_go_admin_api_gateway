@@ -17,6 +17,210 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/GeneratePayzeLink": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Generate IntegrationPayze",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "IntegrationPayze"
+                ],
+                "summary": "Generate IntegrationPayze",
+                "operationId": "GeneratePayzeLink",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "PayzeLinkRequestBody",
+                        "name": "Integration",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/integration_service_v2.PayzeLinkRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Generate Card Integration data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/integration_service_v2.PayzeLinkResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/PayzeSaveCard": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "SaveCard IntegrationPayze",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "IntegrationPayze"
+                ],
+                "summary": "SaveCard IntegrationPayze",
+                "operationId": "PayzeSaveCard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "PayzeLinkRequestBody",
+                        "name": "Integration",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/integration_service_v2.PayzeLinkRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Save Card Integration data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/integration_service_v2.PayzeLinkResponseSaveCard"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/config": {
             "get": {
                 "description": "show service config data when the service environment set to debug mode",
@@ -13049,507 +13253,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/new/custom-event": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get all custom events",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "CustomEvent"
-                ],
-                "summary": "Get all custom events",
-                "operationId": "get_new_all_custom_events",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "environment_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "method",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "role_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "table_slug",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "CustomEventBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Update new custom event",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NewCustomEvent"
-                ],
-                "summary": "Update New Customevent",
-                "operationId": "update_new_custom_event",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateCustomEventRequestBody",
-                        "name": "Customevent",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CustomEvent"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "CustomEvent data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Create New CustomEvent",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NewCustomEvent"
-                ],
-                "summary": "Create New CustomEvent",
-                "operationId": "create_new_custom_event",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateCustomEventRequestBody",
-                        "name": "Customevent",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/new_function_service.CreateCustomEventRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "CustomEvent data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/new/custom-event/{custom_event_id}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get CustomEvent by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NewCustomEvent"
-                ],
-                "summary": "Get CustomEvent by id",
-                "operationId": "get_new_custom_event_by_id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "custom_event_id",
-                        "name": "custom_event_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "CustomEventBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Delete CustomEvent",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NewCustomEvent"
-                ],
-                "summary": "Delete CustomEvent",
-                "operationId": "delete_new_custom_event",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "custom_event_id",
-                        "name": "custom_event_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/v1/note": {
             "get": {
                 "security": [
@@ -17575,6 +17278,108 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/query-request/select-versions/{query-id}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Insert Many query",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Query"
+                ],
+                "summary": "Insert Many query",
+                "operationId": "insert_many_query_reference",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "query-id",
+                        "name": "query-id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/query_service.QueryManyVersions"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response Body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/query-request/{query-id}": {
             "get": {
                 "security": [
@@ -17622,6 +17427,12 @@ const docTemplate = `{
                         "name": "query-id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "commit-id",
+                        "name": "commit-id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -18147,7 +17958,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/query_service.RevertQueryReq"
+                            "$ref": "#/definitions/models.QueryRevertRequest"
                         }
                     }
                 ],
@@ -24908,6 +24719,507 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/custom-event": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all custom events",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomEvent"
+                ],
+                "summary": "Get all custom events",
+                "operationId": "get_new_all_custom_events",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "environment_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "method",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "table_slug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomEventBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update new custom event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NewCustomEvent"
+                ],
+                "summary": "Update New Customevent",
+                "operationId": "update_new_custom_event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "UpdateCustomEventRequestBody",
+                        "name": "Customevent",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CustomEvent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomEvent data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create New CustomEvent",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NewCustomEvent"
+                ],
+                "summary": "Create New CustomEvent",
+                "operationId": "create_new_custom_event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateCustomEventRequestBody",
+                        "name": "Customevent",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/new_function_service.CreateCustomEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CustomEvent data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/custom-event/{custom_event_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get CustomEvent by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NewCustomEvent"
+                ],
+                "summary": "Get CustomEvent by id",
+                "operationId": "get_new_custom_event_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "custom_event_id",
+                        "name": "custom_event_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomEventBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete CustomEvent",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NewCustomEvent"
+                ],
+                "summary": "Delete CustomEvent",
+                "operationId": "delete_new_custom_event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "custom_event_id",
+                        "name": "custom_event_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/function": {
             "get": {
                 "security": [
@@ -27121,7 +27433,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "authentification": {
                     "type": "boolean"
@@ -27564,7 +27876,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -28324,6 +28636,9 @@ const docTemplate = `{
                 "adminHost": {
                     "type": "string"
                 },
+                "adminHostForCodeServer": {
+                    "type": "string"
+                },
                 "analyticsGRPCPort": {
                     "type": "string"
                 },
@@ -28395,6 +28710,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "httpscheme": {
+                    "type": "string"
+                },
+                "integrationGRPCPort": {
+                    "type": "string"
+                },
+                "integrationPayzeServiceHost": {
+                    "type": "string"
+                },
+                "integrationPayzeServicePort": {
+                    "type": "string"
+                },
+                "integrationServiceHost": {
                     "type": "string"
                 },
                 "localhost": {
@@ -28500,6 +28827,26 @@ const docTemplate = `{
                 }
             }
         },
+        "google_golang_org_protobuf_types_known_structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
+                    }
+                }
+            }
+        },
+        "google_golang_org_protobuf_types_known_structpb.Value": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+                }
+            }
+        },
         "handlers.Path": {
             "type": "object",
             "properties": {
@@ -28507,6 +28854,155 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "integration_service_v2.PayzeLinkRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/integration_service_v2.PayzeLinkRequestData"
+                },
+                "environment": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "integration_service_v2.PayzeLinkRequestData": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "callback": {
+                    "type": "string"
+                },
+                "callbackError": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "hookRefund": {
+                    "type": "boolean"
+                },
+                "hookUrl": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "preauthorize": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "integration_service_v2.PayzeLinkResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "integer"
+                },
+                "amount": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_date": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "resp_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "transaction_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "integration_service_v2.PayzeLinkResponseSaveCard": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "integer"
+                },
+                "amount": {
+                    "type": "integer"
+                },
+                "card_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_date": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "resp_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "transaction_id": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -29498,6 +29994,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.QueryRevertRequest": {
+            "type": "object",
+            "properties": {
+                "commit_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Referral": {
             "type": "object",
             "properties": {
@@ -29681,7 +30188,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -29960,7 +30467,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -30050,7 +30557,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "autofill_field": {
                     "type": "string"
@@ -30330,7 +30837,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -30985,7 +31492,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -31315,7 +31822,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -31706,7 +32213,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -31884,7 +32391,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "request": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "response": {
                     "type": "string"
@@ -31898,7 +32405,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -31944,29 +32451,20 @@ const docTemplate = `{
                 }
             }
         },
-        "query_service.RevertQueryReq": {
+        "query_service.QueryManyVersions": {
             "type": "object",
             "properties": {
-                "commit_info": {
-                    "$ref": "#/definitions/query_service.CommitInfo"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "new_commit_id": {
-                    "type": "string"
-                },
-                "old_commit_id": {
+                "oldcommit_id": {
                     "type": "string"
                 },
                 "project_id": {
                     "type": "string"
                 },
-                "version_id": {
-                    "type": "string"
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -32005,7 +32503,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -32134,7 +32632,7 @@ const docTemplate = `{
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/structpb.Struct"
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                     }
                 },
                 "connect_info": {
@@ -32153,7 +32651,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -32170,7 +32668,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "category_id": {
                     "type": "string"
@@ -32215,7 +32713,7 @@ const docTemplate = `{
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/structpb.Struct"
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                     }
                 },
                 "connect_info": {
@@ -32237,7 +32735,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -32249,7 +32747,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "ui_component": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 }
             }
         },
@@ -32279,7 +32777,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "response": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 }
             }
         },
@@ -32292,26 +32790,6 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "string"
-                }
-            }
-        },
-        "structpb.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
-                    }
-                }
-            }
-        },
-        "structpb.Value": {
-            "type": "object",
-            "properties": {
-                "kind": {
-                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
                 }
             }
         },
@@ -32365,7 +32843,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -32647,7 +33125,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "role": {
                     "type": "string"
@@ -32695,7 +33173,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -32841,7 +33319,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"

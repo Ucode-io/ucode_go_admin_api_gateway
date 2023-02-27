@@ -414,17 +414,17 @@ func (h *Handler) DeleteApiReference(c *gin.Context) {
 		return
 	}
 
-	versionGuid, _, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, projectId)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
-		return
-	}
+	// versionGuid, _, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, projectId)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
+	// 	return
+	// }
 
 	resp, err := services.ApiReferenceService().ApiReference().Delete(
 		c.Request.Context(),
 		&ars.DeleteApiReferenceRequest{
 			Guid:      id,
-			VersionId: versionGuid,
+			VersionId: uuid.NewString(),
 		},
 	)
 
@@ -638,19 +638,19 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 		return
 	}
 
-	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
-		return
-	}
+	// versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
+	// 	return
+	// }
 
 	resp, err := services.ApiReferenceService().ApiReference().RevertApiReference(
 		context.Background(),
 		&ars.RevertApiReferenceRequest{
 			Guid:        id,
-			VersionId:   versionGuid,
+			VersionId:   uuid.NewString(),
 			OldcommitId: body.GetCommitId(),
-			NewcommitId: commitGuid,
+			NewcommitId: uuid.NewString(),
 		},
 	)
 	if err != nil {

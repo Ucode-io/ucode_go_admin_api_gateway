@@ -250,23 +250,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/template-note/share", h.CreateSharingToken)
 		v1.PUT("/template-note/share", h.UpdateSharingToken)
 
-		// query service
-		v1.POST("/query-folder", h.CreateQueryRequestFolder)
-		v1.PUT("/query-folder", h.UpdateQueryRequestFolder)
-		v1.GET("/query-folder", h.GetListQueryRequestFolder)
-		v1.GET("/query-folder/:query-folder-id", h.GetSingleQueryRequestFolder)
-		v1.DELETE("/query-folder/:query-folder-id", h.DeleteQueryRequestFolder)
-
-		v1.POST("/query-request", h.CreateQueryRequest)
-		v1.PUT("/query-request", h.UpdateQueryRequest)
-		v1.GET("/query-request", h.GetListQueryRequest)
-		v1.GET("/query-request/:query-id", h.GetSingleQueryRequest)
-		v1.DELETE("/query-request/:query-id", h.DeleteQueryRequest)
-		v1.POST("/query-request/run", h.QueryRun)
-		v1.GET("/query-request/:query-id/history", h.GetQueryHistory)
-		v1.POST("/query-request/:query-id/revert", h.RevertQuery)
-		v1.GET("/query-request/:query-id/log", h.GetListQueryLog)
-		v1.GET("/query-request/:query-id/log/:log-id", h.GetSingleQueryLog)
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
@@ -320,6 +303,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/commit/:id", h.GetCommitByID)
 		v1Admin.GET("/commit", h.GetAllCommits)
 
+		// integration service
+		v1Admin.POST("/GeneratePayzeLink", h.GeneratePayzeLink)
+		v1Admin.POST("/PayzeSaveCard", h.PayzeSaveCard)
+
 		//api-reference service
 		v1Admin.POST("/api-reference", h.CreateApiReference)
 		v1Admin.PUT("/api-reference", h.UpdateApiReference)
@@ -335,13 +322,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/category/:category_id", h.GetApiCategoryByID)
 		v1Admin.GET("/category", h.GetAllCategories)
 		v1Admin.DELETE("/category/:category_id", h.DeleteCategory)
-
-		// custom event
-		v1Admin.POST("/new/custom-event", h.CreateNewCustomEvent)
-		v1Admin.GET("/new/custom-event/:custom_event_id", h.GetNewCustomEventByID)
-		v1Admin.GET("/new/custom-event", h.GetAllNewCustomEvents)
-		v1Admin.PUT("/new/custom-event", h.UpdateNewCustomEvent)
-		v1Admin.DELETE("/new/custom-event/:custom_event_id", h.DeleteNewCustomEvent)
 
 		// function folder
 		v1Admin.POST("/function-folder", h.CreateFunctionFolder)
@@ -369,6 +349,25 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		v1Admin.POST("/scenario/run", h.RunScenario)
 		v1Admin.POST("/scenario", h.CreateFullScenario)
+
+		// query service
+		v1Admin.POST("/query-folder", h.CreateQueryRequestFolder)
+		v1Admin.PUT("/query-folder", h.UpdateQueryRequestFolder)
+		v1Admin.GET("/query-folder", h.GetListQueryRequestFolder)
+		v1Admin.GET("/query-folder/:query-folder-id", h.GetSingleQueryRequestFolder)
+		v1Admin.DELETE("/query-folder/:query-folder-id", h.DeleteQueryRequestFolder)
+
+		v1Admin.POST("/query-request", h.CreateQueryRequest)
+		v1Admin.PUT("/query-request", h.UpdateQueryRequest)
+		v1Admin.GET("/query-request", h.GetListQueryRequest)
+		v1Admin.GET("/query-request/:query-id", h.GetSingleQueryRequest)
+		v1Admin.DELETE("/query-request/:query-id", h.DeleteQueryRequest)
+		v1Admin.POST("/query-request/select-versions/:query-id", h.InsertManyVersionForQueryService)
+		v1Admin.POST("/query-request/run", h.QueryRun)
+		v1Admin.GET("/query-request/:query-id/history", h.GetQueryHistory)
+		v1Admin.POST("/query-request/:query-id/revert", h.RevertQuery)
+		v1Admin.GET("/query-request/:query-id/log", h.GetListQueryLog)
+		v1Admin.GET("/query-request/:query-id/log/:log-id", h.GetSingleQueryLog)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())
@@ -380,6 +379,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2Admin.GET("/function", h.GetAllNewFunctions)
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
+
+		// custom event
+		v2Admin.POST("/custom-event", h.CreateNewCustomEvent)
+		v2Admin.GET("/custom-event/:custom_event_id", h.GetNewCustomEventByID)
+		v2Admin.GET("/custom-event", h.GetAllNewCustomEvents)
+		v2Admin.PUT("/custom-event", h.UpdateNewCustomEvent)
+		v2Admin.DELETE("/custom-event/:custom_event_id", h.DeleteNewCustomEvent)
 	}
 
 	// v3 for ucode version 2

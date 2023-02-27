@@ -116,7 +116,7 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
-	}
+	}	
 
 	if &company.ServiceType == nil || company.ServiceType == company_service.ServiceType_NOT_SPECIFIED {
 		fmt.Println("[company.ServiceType] nil", company.ProjectId)

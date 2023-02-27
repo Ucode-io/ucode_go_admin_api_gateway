@@ -25,6 +25,7 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 	fmt.Println("---hasAccess->-project_id---" + projectId)
 	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
+		h.log.Error("---ERR->HasAccess->Unexpected token format")
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
 		return nil, false
 	}
@@ -43,14 +44,17 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 	if err != nil {
 		errr := status.Error(codes.PermissionDenied, "Permission denied")
 		if errr.Error() == err.Error() {
+			h.log.Error("---ERR->HasAccess->Permission--->", logger.Error(err))
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			return nil, false
 		}
 		errr = status.Error(codes.InvalidArgument, "User has been expired")
 		if errr.Error() == err.Error() {
+			h.log.Error("---ERR->HasAccess->User Expired-->")
 			h.handleResponse(c, status_http.Forbidden, err.Error())
 			return nil, false
 		}
+		h.log.Error("---ERR->HasAccess->Session->V2HasAccessUser--->", logger.Error(err))
 		h.handleResponse(c, status_http.Unauthorized, err.Error())
 		return nil, false
 	}
@@ -125,9 +129,11 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType str
 
 func (h *Handler) CreateAutoCommitForAdminChange(c *gin.Context, environmentID, commitType string, project_id string) (versionId, commitGuid string, err error) {
 	authInfo, err := h.adminAuthInfo(c)
+	fmt.Println("Test tese test tes 00")
 	if err != nil {
 		return "", "", err
 	}
+	fmt.Println("Test tese test tes")
 
 	fmt.Println("auethInfo.GetUsrId()", authInfo.GetUserId())
 	fmt.Println("authInfo.GetProjectId()", project_id)

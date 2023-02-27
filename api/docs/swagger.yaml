@@ -15,7 +15,7 @@ definitions:
       additional_url:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       authentification:
         type: boolean
       category_id:
@@ -306,7 +306,7 @@ definitions:
   auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       icon:
         type: string
       label:
@@ -803,6 +803,8 @@ definitions:
     properties:
       adminHost:
         type: string
+      adminHostForCodeServer:
+        type: string
       analyticsGRPCPort:
         type: string
       analyticsServiceHost:
@@ -851,6 +853,14 @@ definitions:
       httpport:
         type: string
       httpscheme:
+        type: string
+      integrationGRPCPort:
+        type: string
+      integrationPayzeServiceHost:
+        type: string
+      integrationPayzeServicePort:
+        type: string
+      integrationServiceHost:
         type: string
       localhost:
         type: string
@@ -920,11 +930,122 @@ definitions:
       versioningServiceHost:
         type: string
     type: object
+  google_golang_org_protobuf_types_known_structpb.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
+  google_golang_org_protobuf_types_known_structpb.Value:
+    properties:
+      kind:
+        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+    type: object
   handlers.Path:
     properties:
       filename:
         type: string
       hash:
+        type: string
+    type: object
+  integration_service_v2.PayzeLinkRequest:
+    properties:
+      data:
+        $ref: '#/definitions/integration_service_v2.PayzeLinkRequestData'
+      environment:
+        type: string
+      method:
+        type: string
+      project_id:
+        type: string
+    type: object
+  integration_service_v2.PayzeLinkRequestData:
+    properties:
+      amount:
+        type: integer
+      callback:
+        type: string
+      callbackError:
+        type: string
+      currency:
+        type: string
+      hookRefund:
+        type: boolean
+      hookUrl:
+        type: string
+      lang:
+        type: string
+      preauthorize:
+        type: boolean
+    type: object
+  integration_service_v2.PayzeLinkResponse:
+    properties:
+      action:
+        type: integer
+      amount:
+        type: integer
+      created_at:
+        type: string
+      created_date:
+        type: string
+      currency:
+        type: string
+      data:
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+      deleted_at:
+        type: string
+      id:
+        type: string
+      order_id:
+        type: string
+      price:
+        type: number
+      product_id:
+        type: string
+      resp_id:
+        type: string
+      status:
+        type: string
+      transaction_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  integration_service_v2.PayzeLinkResponseSaveCard:
+    properties:
+      action:
+        type: integer
+      amount:
+        type: integer
+      card_id:
+        type: string
+      created_at:
+        type: string
+      created_date:
+        type: string
+      currency:
+        type: string
+      data:
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+      deleted_at:
+        type: string
+      id:
+        type: string
+      order_id:
+        type: string
+      price:
+        type: number
+      product_id:
+        type: string
+      resp_id:
+        type: string
+      status:
+        type: string
+      transaction_id:
+        type: string
+      updated_at:
         type: string
     type: object
   models.ApiReference:
@@ -1576,6 +1697,13 @@ definitions:
       title:
         type: string
     type: object
+  models.QueryRevertRequest:
+    properties:
+      commit_id:
+        type: string
+      project_id:
+        type: string
+    type: object
   models.Referral:
     properties:
       cito:
@@ -1697,7 +1825,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -1880,7 +2008,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -1939,7 +2067,7 @@ definitions:
   object_builder_service.CreateFieldRequest:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       autofill_field:
         type: string
       autofill_table:
@@ -2124,7 +2252,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -2550,7 +2678,7 @@ definitions:
   object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       icon:
         type: string
       label:
@@ -2767,7 +2895,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -3022,7 +3150,7 @@ definitions:
   query_service.CreateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3138,7 +3266,7 @@ definitions:
       query_id:
         type: string
       request:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       response:
         type: string
       user_id:
@@ -3147,7 +3275,7 @@ definitions:
   query_service.Query:
     properties:
       body:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3177,22 +3305,16 @@ definitions:
       version_id:
         type: string
     type: object
-  query_service.RevertQueryReq:
+  query_service.QueryManyVersions:
     properties:
-      commit_info:
-        $ref: '#/definitions/query_service.CommitInfo'
-      environment_id:
-        type: string
-      id:
-        type: string
-      new_commit_id:
-        type: string
-      old_commit_id:
+      oldcommit_id:
         type: string
       project_id:
         type: string
-      version_id:
-        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
     type: object
   query_service.RunQueryRes:
     properties:
@@ -3217,7 +3339,7 @@ definitions:
   query_service.UpdateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3301,7 +3423,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/structpb.Struct'
+          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
@@ -3314,7 +3436,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       slug:
         type: string
       title:
@@ -3325,7 +3447,7 @@ definitions:
   scenario_service.DAG:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       category_id:
         type: string
       id:
@@ -3354,7 +3476,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/structpb.Struct'
+          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
@@ -3369,7 +3491,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       slug:
         type: string
       title:
@@ -3377,7 +3499,7 @@ definitions:
       type:
         type: string
       ui_component:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
     type: object
   scenario_service.GetDAGRequest:
     properties:
@@ -3396,7 +3518,7 @@ definitions:
   scenario_service.RunScenarioResponse:
     properties:
       response:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
     type: object
   status_http.Response:
     properties:
@@ -3405,19 +3527,6 @@ definitions:
         type: string
       status:
         type: string
-    type: object
-  structpb.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  structpb.Value:
-    properties:
-      kind:
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
     type: object
   template_service.CreateFolderNoteReq:
     properties:
@@ -3452,7 +3561,7 @@ definitions:
       folder_id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       project_id:
         type: string
       title:
@@ -3635,7 +3744,7 @@ definitions:
   template_service.GetObjectTokenRes:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       role:
         type: string
     type: object
@@ -3666,7 +3775,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       project_id:
         type: string
       title:
@@ -3761,7 +3870,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       project_id:
         type: string
       title:
@@ -4028,6 +4137,122 @@ info:
   contact: {}
   termsOfService: https://udevs.io
 paths:
+  /GeneratePayzeLink:
+    post:
+      consumes:
+      - application/json
+      description: Generate IntegrationPayze
+      operationId: GeneratePayzeLink
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: PayzeLinkRequestBody
+        in: body
+        name: Integration
+        required: true
+        schema:
+          $ref: '#/definitions/integration_service_v2.PayzeLinkRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Generate Card Integration data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/integration_service_v2.PayzeLinkResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Generate IntegrationPayze
+      tags:
+      - IntegrationPayze
+  /PayzeSaveCard:
+    post:
+      consumes:
+      - application/json
+      description: SaveCard IntegrationPayze
+      operationId: PayzeSaveCard
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: PayzeLinkRequestBody
+        in: body
+        name: Integration
+        required: true
+        schema:
+          $ref: '#/definitions/integration_service_v2.PayzeLinkRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Save Card Integration data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/integration_service_v2.PayzeLinkResponseSaveCard'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: SaveCard IntegrationPayze
+      tags:
+      - IntegrationPayze
   /config:
     get:
       consumes:
@@ -11456,293 +11681,6 @@ paths:
       summary: Update many-to-many
       tags:
       - Object
-  /v1/new/custom-event:
-    get:
-      consumes:
-      - application/json
-      description: Get all custom events
-      operationId: get_new_all_custom_events
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - in: query
-        name: environment_id
-        type: string
-      - in: query
-        name: method
-        type: string
-      - in: query
-        name: project_id
-        type: string
-      - in: query
-        name: role_id
-        type: string
-      - in: query
-        name: table_slug
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: CustomEventBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all custom events
-      tags:
-      - CustomEvent
-    post:
-      consumes:
-      - application/json
-      description: Create New CustomEvent
-      operationId: create_new_custom_event
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: CreateCustomEventRequestBody
-        in: body
-        name: Customevent
-        required: true
-        schema:
-          $ref: '#/definitions/new_function_service.CreateCustomEventRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: CustomEvent data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create New CustomEvent
-      tags:
-      - NewCustomEvent
-    put:
-      consumes:
-      - application/json
-      description: Update new custom event
-      operationId: update_new_custom_event
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: UpdateCustomEventRequestBody
-        in: body
-        name: Customevent
-        required: true
-        schema:
-          $ref: '#/definitions/models.CustomEvent'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: CustomEvent data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Update New Customevent
-      tags:
-      - NewCustomEvent
-  /v1/new/custom-event/{custom_event_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete CustomEvent
-      operationId: delete_new_custom_event
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: custom_event_id
-        in: path
-        name: custom_event_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete CustomEvent
-      tags:
-      - NewCustomEvent
-    get:
-      consumes:
-      - application/json
-      description: Get CustomEvent by id
-      operationId: get_new_custom_event_by_id
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: custom_event_id
-        in: path
-        name: custom_event_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: CustomEventBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get CustomEvent by id
-      tags:
-      - NewCustomEvent
   /v1/note:
     get:
       consumes:
@@ -14093,6 +14031,10 @@ paths:
         name: query-id
         required: true
         type: string
+      - description: commit-id
+        in: query
+        name: commit-id
+        type: string
       produces:
       - application/json
       responses:
@@ -14346,7 +14288,7 @@ paths:
         name: RevertQueryReq
         required: true
         schema:
-          $ref: '#/definitions/query_service.RevertQueryReq'
+          $ref: '#/definitions/models.QueryRevertRequest'
       produces:
       - application/json
       responses:
@@ -14443,6 +14385,64 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Run query
+      tags:
+      - Query
+  /v1/query-request/select-versions/{query-id}:
+    post:
+      consumes:
+      - application/json
+      description: Insert Many query
+      operationId: insert_many_query_reference
+      parameters:
+      - description: query-id
+        in: path
+        name: query-id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/query_service.QueryManyVersions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Insert Many query
       tags:
       - Query
   /v1/relation:
@@ -18312,6 +18312,293 @@ paths:
       summary: Upsert view relation
       tags:
       - ViewRelation
+  /v2/custom-event:
+    get:
+      consumes:
+      - application/json
+      description: Get all custom events
+      operationId: get_new_all_custom_events
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - in: query
+        name: environment_id
+        type: string
+      - in: query
+        name: method
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: role_id
+        type: string
+      - in: query
+        name: table_slug
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CustomEventBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all custom events
+      tags:
+      - CustomEvent
+    post:
+      consumes:
+      - application/json
+      description: Create New CustomEvent
+      operationId: create_new_custom_event
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: CreateCustomEventRequestBody
+        in: body
+        name: Customevent
+        required: true
+        schema:
+          $ref: '#/definitions/new_function_service.CreateCustomEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CustomEvent data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create New CustomEvent
+      tags:
+      - NewCustomEvent
+    put:
+      consumes:
+      - application/json
+      description: Update new custom event
+      operationId: update_new_custom_event
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: UpdateCustomEventRequestBody
+        in: body
+        name: Customevent
+        required: true
+        schema:
+          $ref: '#/definitions/models.CustomEvent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CustomEvent data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update New Customevent
+      tags:
+      - NewCustomEvent
+  /v2/custom-event/{custom_event_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete CustomEvent
+      operationId: delete_new_custom_event
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: custom_event_id
+        in: path
+        name: custom_event_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete CustomEvent
+      tags:
+      - NewCustomEvent
+    get:
+      consumes:
+      - application/json
+      description: Get CustomEvent by id
+      operationId: get_new_custom_event_by_id
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: custom_event_id
+        in: path
+        name: custom_event_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CustomEventBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get CustomEvent by id
+      tags:
+      - NewCustomEvent
   /v2/function:
     get:
       consumes:

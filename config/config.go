@@ -70,6 +70,9 @@ type Config struct {
 	ApiReferenceServiceHost string
 	ApiReferenceServicePort string
 
+	IntegrationPayzeServiceHost string
+	IntegrationPayzeServicePort string
+
 	FunctionServiceHost string
 	FunctionServicePort string
 	QueryServiceHost    string
@@ -168,6 +171,9 @@ func Load() Config {
 
 	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_SERVICE_HOST", "localhost"))
 	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", ":8099"))
+
+	config.IntegrationPayzeServiceHost = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_SERVICE_HOST", "localhost"))
+	config.IntegrationPayzeServicePort = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_SERVICE_PORT", "9104"))
 
 	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", "localhost"))
 	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_GRPC_PORT", ":8100"))
