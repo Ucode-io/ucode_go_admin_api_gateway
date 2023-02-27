@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/config"
@@ -35,26 +35,33 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		var (
 			res          = &auth_service.V2HasAccessUserRes{}
 			ok           bool
+			origin       = c.GetHeader("Origin")
 			platformType = c.GetHeader("Platform-Type")
 		)
 
-		fmt.Println("--platform-type--", platformType)
 		bearerToken := c.GetHeader("Authorization")
 		strArr := strings.Split(bearerToken, " ")
 
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
+			h.log.Error("---ERR->Unexpected token format")
 			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
 			return
 		}
 		switch strArr[0] {
 		case "Bearer":
+<<<<<<< HEAD
+			if "super-admin" != platformType {
+				log.Println("---AuthMiddleware->Contains--->", origin)
+=======
 			fmt.Println("aa")
 			fmt.Println("pl;::", platformType)
 			fmt.Println("pla::::", cfg.PlatformType)
 			if platformType != cfg.PlatformType {
+>>>>>>> fb5d60ad5cb11ef15e8d24626f9c3033f40ffc87
 				res, ok = h.hasAccess(c)
 				fmt.Println("a::::::::::", res)
 				if !ok {
+					h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
 					c.Abort()
 					return	
 				}
@@ -122,6 +129,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		c.Set("namespace", h.cfg.UcodeNamespace)
 
 		c.Next()
+
 	}
 }
 
