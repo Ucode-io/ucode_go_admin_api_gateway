@@ -1418,7 +1418,7 @@ var file_user_service_proto_rawDesc = []byte{
 	0x12, 0x19, 0x0a, 0x08, 0x62, 0x61, 0x73, 0x65, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01,
 	0x28, 0x09, 0x52, 0x07, 0x62, 0x61, 0x73, 0x65, 0x55, 0x72, 0x6c, 0x12, 0x14, 0x0a, 0x05, 0x74,
 	0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65,
-	0x6e, 0x32, 0xf8, 0x0c, 0x0a, 0x0b, 0x55, 0x73, 0x65, 0x72, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
+	0x6e, 0x32, 0xc7, 0x0d, 0x0a, 0x0b, 0x55, 0x73, 0x65, 0x72, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
 	0x65, 0x12, 0x43, 0x0a, 0x0a, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x12,
 	0x1f, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x43,
 	0x72, 0x65, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
@@ -1521,9 +1521,14 @@ var file_user_service_proto_rawDesc = []byte{
 	0x67, 0x69, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
 	0x29, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x47,
 	0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x42, 0x79, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x54, 0x79, 0x70,
-	0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x17, 0x5a, 0x15,
-	0x67, 0x65, 0x6e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x61, 0x75, 0x74, 0x68, 0x5f, 0x73, 0x65,
-	0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x4d, 0x0a, 0x14,
+	0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x56, 0x69, 0x61, 0x45,
+	0x6d, 0x61, 0x69, 0x6c, 0x12, 0x1f, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x5f, 0x73, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x12, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x5f, 0x73, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x22, 0x00, 0x42, 0x17, 0x5a, 0x15, 0x67,
+	0x65, 0x6e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x61, 0x75, 0x74, 0x68, 0x5f, 0x73, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1587,28 +1592,30 @@ var file_user_service_proto_depIdxs = []int32{
 	4,  // 19: auth_service.UserService.AddUserToProject:input_type -> auth_service.AddUserToProjectReq
 	2,  // 20: auth_service.UserService.GetProjectsByUserId:input_type -> auth_service.GetProjectsByUserIdReq
 	1,  // 21: auth_service.UserService.V2GetUserByLoginTypes:input_type -> auth_service.GetUserByLoginTypesRequest
-	19, // 22: auth_service.UserService.CreateUser:output_type -> auth_service.User
-	19, // 23: auth_service.UserService.GetUserByID:output_type -> auth_service.User
-	11, // 24: auth_service.UserService.GetUserListByIDs:output_type -> auth_service.GetUserListResponse
-	11, // 25: auth_service.UserService.GetUserList:output_type -> auth_service.GetUserListResponse
-	19, // 26: auth_service.UserService.UpdateUser:output_type -> auth_service.User
-	20, // 27: auth_service.UserService.DeleteUser:output_type -> google.protobuf.Empty
-	19, // 28: auth_service.UserService.ResetPassword:output_type -> auth_service.User
-	20, // 29: auth_service.UserService.SendMessageToEmail:output_type -> google.protobuf.Empty
-	21, // 30: auth_service.UserService.AddUserRelation:output_type -> auth_service.UserRelation
-	21, // 31: auth_service.UserService.RemoveUserRelation:output_type -> auth_service.UserRelation
-	22, // 32: auth_service.UserService.UpsertUserInfo:output_type -> auth_service.UserInfo
-	19, // 33: auth_service.UserService.V2CreateUser:output_type -> auth_service.User
-	19, // 34: auth_service.UserService.V2GetUserByID:output_type -> auth_service.User
-	11, // 35: auth_service.UserService.V2GetUserListByIDs:output_type -> auth_service.GetUserListResponse
-	11, // 36: auth_service.UserService.V2GetUserList:output_type -> auth_service.GetUserListResponse
-	19, // 37: auth_service.UserService.V2UpdateUser:output_type -> auth_service.User
-	20, // 38: auth_service.UserService.V2DeleteUser:output_type -> google.protobuf.Empty
-	5,  // 39: auth_service.UserService.AddUserToProject:output_type -> auth_service.AddUserToProjectRes
-	3,  // 40: auth_service.UserService.GetProjectsByUserId:output_type -> auth_service.GetProjectsByUserIdRes
-	0,  // 41: auth_service.UserService.V2GetUserByLoginTypes:output_type -> auth_service.GetUserByLoginTypesResponse
-	22, // [22:42] is the sub-list for method output_type
-	2,  // [2:22] is the sub-list for method input_type
+	7,  // 22: auth_service.UserService.RegisterUserViaEmail:input_type -> auth_service.CreateUserRequest
+	19, // 23: auth_service.UserService.CreateUser:output_type -> auth_service.User
+	19, // 24: auth_service.UserService.GetUserByID:output_type -> auth_service.User
+	11, // 25: auth_service.UserService.GetUserListByIDs:output_type -> auth_service.GetUserListResponse
+	11, // 26: auth_service.UserService.GetUserList:output_type -> auth_service.GetUserListResponse
+	19, // 27: auth_service.UserService.UpdateUser:output_type -> auth_service.User
+	20, // 28: auth_service.UserService.DeleteUser:output_type -> google.protobuf.Empty
+	19, // 29: auth_service.UserService.ResetPassword:output_type -> auth_service.User
+	20, // 30: auth_service.UserService.SendMessageToEmail:output_type -> google.protobuf.Empty
+	21, // 31: auth_service.UserService.AddUserRelation:output_type -> auth_service.UserRelation
+	21, // 32: auth_service.UserService.RemoveUserRelation:output_type -> auth_service.UserRelation
+	22, // 33: auth_service.UserService.UpsertUserInfo:output_type -> auth_service.UserInfo
+	19, // 34: auth_service.UserService.V2CreateUser:output_type -> auth_service.User
+	19, // 35: auth_service.UserService.V2GetUserByID:output_type -> auth_service.User
+	11, // 36: auth_service.UserService.V2GetUserListByIDs:output_type -> auth_service.GetUserListResponse
+	11, // 37: auth_service.UserService.V2GetUserList:output_type -> auth_service.GetUserListResponse
+	19, // 38: auth_service.UserService.V2UpdateUser:output_type -> auth_service.User
+	20, // 39: auth_service.UserService.V2DeleteUser:output_type -> google.protobuf.Empty
+	5,  // 40: auth_service.UserService.AddUserToProject:output_type -> auth_service.AddUserToProjectRes
+	3,  // 41: auth_service.UserService.GetProjectsByUserId:output_type -> auth_service.GetProjectsByUserIdRes
+	0,  // 42: auth_service.UserService.V2GetUserByLoginTypes:output_type -> auth_service.GetUserByLoginTypesResponse
+	19, // 43: auth_service.UserService.RegisterUserViaEmail:output_type -> auth_service.User
+	23, // [23:44] is the sub-list for method output_type
+	2,  // [2:23] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
 	2,  // [2:2] is the sub-list for extension extendee
 	0,  // [0:2] is the sub-list for field type_name

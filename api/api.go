@@ -362,7 +362,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/query-request", h.GetListQueryRequest)
 		v1Admin.GET("/query-request/:query-id", h.GetSingleQueryRequest)
 		v1Admin.DELETE("/query-request/:query-id", h.DeleteQueryRequest)
-		v1Admin.POST("/query-request/select-versions/:query-id", h.InsertManyVersionForApiReference)
+		v1Admin.POST("/query-request/select-versions/:query-id", h.InsertManyVersionForQueryService)
 		v1Admin.POST("/query-request/run", h.QueryRun)
 		v1Admin.GET("/query-request/:query-id/history", h.GetQueryHistory)
 		v1Admin.POST("/query-request/:query-id/revert", h.RevertQuery)

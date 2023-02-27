@@ -32,6 +32,7 @@ service UserService {
     rpc AddUserToProject(AddUserToProjectReq) returns (AddUserToProjectRes) {}
     rpc GetProjectsByUserId(GetProjectsByUserIdReq) returns (GetProjectsByUserIdRes) {}
     rpc V2GetUserByLoginTypes(GetUserByLoginTypesRequest) returns (GetUserByLoginTypesResponse) {}
+    rpc RegisterUserViaEmail(CreateUserRequest) returns (User) {}
 }
 
 message GetUserByLoginTypesResponse {

@@ -33,9 +33,9 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
-			res = &auth_service.V2HasAccessUserRes{}
-			ok  bool
-			// origin       = c.GetHeader("Origin")
+			res          = &auth_service.V2HasAccessUserRes{}
+			ok           bool
+			origin       = c.GetHeader("Origin")
 			platformType = c.GetHeader("Platform-Type")
 		)
 
@@ -53,6 +53,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			fmt.Println("pl;::", platformType)
 			fmt.Println("pla::::", cfg.PlatformType)
 			if platformType != cfg.PlatformType {
+				fmt.Println("origin----->", origin)
 				res, ok = h.hasAccess(c)
 				fmt.Println("a::::::::::", res)
 				if !ok {
