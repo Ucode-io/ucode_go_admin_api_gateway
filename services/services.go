@@ -18,21 +18,23 @@ type ServiceManagerI interface {
 	VersioningService() VersioningServiceI
 	ScenarioService() ScenarioServiceI
 	QueryService() QueryServiceI
+	IntegrationPayzeService() IntegrationServicePayzeI
 }
 
 type grpcClients struct {
-	builderService      BuilderServiceI
-	authService         AuthServiceI
-	companyService      CompanyServiceI
-	analyticsService    AnalyticsServiceI
-	apiReferenceService ApiReferenceServiceI
-	smsService          SmsServiceI
-	posService          PosServiceI
-	functionService     FunctionServiceI
-	templateService     TemplateServiceI
-	versioningService   VersioningServiceI
-	scenarioService     ScenarioServiceI
-	queryService        QueryServiceI
+	builderService           BuilderServiceI
+	authService              AuthServiceI
+	companyService           CompanyServiceI
+	analyticsService         AnalyticsServiceI
+	apiReferenceService      ApiReferenceServiceI
+	smsService               SmsServiceI
+	posService               PosServiceI
+	functionService          FunctionServiceI
+	templateService          TemplateServiceI
+	versioningService        VersioningServiceI
+	scenarioService          ScenarioServiceI
+	queryService             QueryServiceI
+	integrationPayzeServiceI IntegrationServicePayzeI
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -95,19 +97,25 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
+	integrationPayzeServiceClient, err := NewPayzeServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return grpcClients{
-		apiReferenceService: apiReferenceClient,
-		analyticsService:    analyticsServiceClient,
-		authService:         authServiceClient,
-		builderService:      builderServiceClient,
-		posService:          posServiceClient,
-		smsService:          smsServiceClient,
-		companyService:      companyServiceClient,
-		functionService:     functionServiceClient,
-		templateService:     templateServiceClient,
-		versioningService:   versioningServiceClient,
-		scenarioService:     scenarioServiceClient,
-		queryService:        queryServiceClient,
+		apiReferenceService:      apiReferenceClient,
+		analyticsService:         analyticsServiceClient,
+		authService:              authServiceClient,
+		builderService:           builderServiceClient,
+		posService:               posServiceClient,
+		smsService:               smsServiceClient,
+		companyService:           companyServiceClient,
+		functionService:          functionServiceClient,
+		templateService:          templateServiceClient,
+		versioningService:        versioningServiceClient,
+		scenarioService:          scenarioServiceClient,
+		queryService:             queryServiceClient,
+		integrationPayzeServiceI: integrationPayzeServiceClient,
 	}, nil
 }
 
@@ -156,4 +164,8 @@ func (g grpcClients) ScenarioService() ScenarioServiceI {
 
 func (g grpcClients) QueryService() QueryServiceI {
 	return g.queryService
+}
+
+func (g grpcClients) IntegrationPayzeService() IntegrationServicePayzeI {
+	return g.integrationPayzeServiceI
 }

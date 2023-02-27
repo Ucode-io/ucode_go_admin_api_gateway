@@ -303,6 +303,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/commit/:id", h.GetCommitByID)
 		v1Admin.GET("/commit", h.GetAllCommits)
 
+		// integration service
+		v1Admin.POST("/GeneratePayzeLink", h.GeneratePayzeLink)
+		v1Admin.POST("/PayzeSaveCard", h.PayzeSaveCard)
+
 		//api-reference service
 		v1Admin.POST("/api-reference", h.CreateApiReference)
 		v1Admin.PUT("/api-reference", h.UpdateApiReference)
