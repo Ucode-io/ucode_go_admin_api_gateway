@@ -49,15 +49,24 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		}
 		switch strArr[0] {
 		case "Bearer":
+<<<<<<< HEAD
 			if "super-admin" != platformType {
 				log.Println("---AuthMiddleware->Contains--->", origin)
+=======
+			fmt.Println("aa")
+			fmt.Println("pl;::", platformType)
+			fmt.Println("pla::::", cfg.PlatformType)
+			if platformType != cfg.PlatformType {
+>>>>>>> fb5d60ad5cb11ef15e8d24626f9c3033f40ffc87
 				res, ok = h.hasAccess(c)
+				fmt.Println("a::::::::::", res)
 				if !ok {
 					h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
 					c.Abort()
-					return
+					return	
 				}
 			}
+			fmt.Println("bb")
 
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
@@ -75,10 +84,10 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 					c.Abort()
 					return
 				}
+				fmt.Println(resource)
 
 				resourceId = resource.GetResource().Id
 			}
-
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
 
@@ -115,7 +124,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			c.Abort()
 		}
-
+		fmt.Println("res::::", res)
 		c.Set("Auth", res)
 		c.Set("namespace", h.cfg.UcodeNamespace)
 

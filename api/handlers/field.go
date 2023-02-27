@@ -98,15 +98,20 @@ func (h *Handler) CreateField(c *gin.Context) {
 		return
 	}
 
-	//versionGuid, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FIELD)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-	//	return
-	//}
+	field.ProjectId = resourceEnvironment.GetId()
+	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FIELD)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
+	// 	return
+	// }
+	// fmt.Println("create table -- commit_id ---->>", commitID)
+
+	// field.CommitId = commitID
+	// field.CommitGuid = commitGuid
 
 	field.ProjectId = resourceEnvironment.GetId()
-	//field.CommitId = commitGuid
-	//field.VersionId = versionGuid
+	// field.CommitId = commitGuid
+	// field.VersionId = versionGuid
 	resp, err := services.BuilderService().Field().Create(
 		context.Background(),
 		&field,

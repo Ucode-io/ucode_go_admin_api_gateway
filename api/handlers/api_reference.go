@@ -662,7 +662,7 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// InsertManyVersionForApiRef godoc
+// InsertManyVersionForApiReference godoc
 // @Security ApiKeyAuth
 // @ID insert_many_api_reference
 // @Router /v1/api-reference/select-versions/{api_reference_id} [POST]

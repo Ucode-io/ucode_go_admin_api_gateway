@@ -28,6 +28,7 @@ type DAGServiceClient interface {
 	GetAll(ctx context.Context, in *GetAllDAGRequest, opts ...grpc.CallOption) (*DAGList, error)
 	Delete(ctx context.Context, in *DeleteDAGRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Update(ctx context.Context, in *UpdateDAGRequest, opts ...grpc.CallOption) (*DAG, error)
+	CreateScenario(ctx context.Context, in *CreateScenarioRequest, opts ...grpc.CallOption) (*DAG, error)
 }
 
 type dAGServiceClient struct {
@@ -83,6 +84,15 @@ func (c *dAGServiceClient) Update(ctx context.Context, in *UpdateDAGRequest, opt
 	return out, nil
 }
 
+func (c *dAGServiceClient) CreateScenario(ctx context.Context, in *CreateScenarioRequest, opts ...grpc.CallOption) (*DAG, error) {
+	out := new(DAG)
+	err := c.cc.Invoke(ctx, "/scenario_service.DAGService/CreateScenario", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DAGServiceServer is the server API for DAGService service.
 // All implementations must embed UnimplementedDAGServiceServer
 // for forward compatibility
@@ -92,6 +102,7 @@ type DAGServiceServer interface {
 	GetAll(context.Context, *GetAllDAGRequest) (*DAGList, error)
 	Delete(context.Context, *DeleteDAGRequest) (*emptypb.Empty, error)
 	Update(context.Context, *UpdateDAGRequest) (*DAG, error)
+	CreateScenario(context.Context, *CreateScenarioRequest) (*DAG, error)
 	mustEmbedUnimplementedDAGServiceServer()
 }
 
@@ -113,6 +124,9 @@ func (UnimplementedDAGServiceServer) Delete(context.Context, *DeleteDAGRequest) 
 }
 func (UnimplementedDAGServiceServer) Update(context.Context, *UpdateDAGRequest) (*DAG, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+}
+func (UnimplementedDAGServiceServer) CreateScenario(context.Context, *CreateScenarioRequest) (*DAG, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateScenario not implemented")
 }
 func (UnimplementedDAGServiceServer) mustEmbedUnimplementedDAGServiceServer() {}
 
@@ -217,6 +231,24 @@ func _DAGService_Update_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DAGService_CreateScenario_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateScenarioRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DAGServiceServer).CreateScenario(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scenario_service.DAGService/CreateScenario",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DAGServiceServer).CreateScenario(ctx, req.(*CreateScenarioRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DAGService_ServiceDesc is the grpc.ServiceDesc for DAGService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -243,6 +275,10 @@ var DAGService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Update",
 			Handler:    _DAGService_Update_Handler,
+		},
+		{
+			MethodName: "CreateScenario",
+			Handler:    _DAGService_CreateScenario_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -55,6 +55,11 @@ podAnnotations:
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
+    {{- with secret "secret/data/k8s/ucode-test/gitlab" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
     {{- with secret "secret/data/k8s/ucode-test/go-admin-api-gateway" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
@@ -83,18 +88,33 @@ vault:
     VAULT_TOKEN: vault_token
     SECRETS_PATH: vault_path
 
-environment: {}
+environment:
+  KUBECONFIG: /kubeconfig/config
+  GIT_SSH_COMMAND: "ssh -i /key/ssh-privatekey -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 volumes:
-  enabled: false
+  enabled: true
+  hostpath:
+    enabled: true
+    name: code-server
+    path: /functions
+    mountPath: /functions
+    type: Directory
   pvc:
     enabled: false
     existing_claim:
     name: pvc
-    mountPath: /pv
+    mountPath: /functions
     size: 1G
     class:
     accessModes:
-      - ReadWriteOnce
+      - ReadWriteMany
+  configMaps:
+    - name: code-server-kubeconfig
+      mountPath: /kubeconfig
+  secrets:
+    - name: ssh-key-secret
+      mountPath: /key
+      defaultMode: 256
 
 service:
   type: ClusterIP
@@ -168,7 +188,7 @@ affinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
         - matchExpressions:
-            - key: kubernetes.io/env-test
+            - key: kubernetes.io/ucode-prod
               operator: In
               values:
                 - "true"

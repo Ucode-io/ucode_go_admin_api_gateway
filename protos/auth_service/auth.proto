@@ -149,7 +149,7 @@ message Passcode {
     string client_platform_id = 3;
     string client_type_id = 4;
     string user_id = 5;
-    ConfirmStrategies confirm_by = 6;
+    // ConfirmStrategies confirm_by = 6;
     string hashed_code = 7;
     int32 state = 8;
     string expires_at = 9;

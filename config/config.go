@@ -64,8 +64,16 @@ type Config struct {
 	CompanyServiceHost string
 	CompanyServicePort string
 
+	IntegrationServiceHost string
+	IntegrationGRPCPort    string
+
 	ApiReferenceServiceHost string
 	ApiReferenceServicePort string
+
+	FunctionServiceHost string
+	FunctionServicePort string
+	QueryServiceHost    string
+	QueryServicePort    string
 
 	MinioEndpoint        string
 	MinioAccessKeyID     string
@@ -79,8 +87,19 @@ type Config struct {
 	ApiHost   string
 	Localhost string
 
-	SecretKey    string
-	PlatformType string
+	CLIENT_HOST            string
+	SUPERADMIN_HOST        string
+	GitlabIntegrationToken string
+	GitlabIntegrationURL   string
+	GitlabGroupId          int
+	GitlabProjectId        int
+	PathToClone            string
+	SecretKey              string
+	PlatformType           string
+
+	ScenarioServiceHost    string
+	ScenarioGRPCPort       string
+	AdminHostForCodeServer string
 }
 
 // Load ...
@@ -132,6 +151,9 @@ func Load() Config {
 	config.CompanyServiceHost = cast.ToString(GetOrReturnDefaultValue("COMPANY_SERVICE_HOST", "localhost"))
 	config.CompanyServicePort = cast.ToString(GetOrReturnDefaultValue("COMPANY_GRPC_PORT", ":8092"))
 
+	config.IntegrationServiceHost = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_SERVICE_HOST", "localhost"))
+	config.IntegrationGRPCPort = cast.ToString(GetOrReturnDefaultValue("INTEGRATION_GRPC_PORT", ":9109"))
+
 	config.PosServiceHost = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_HOST", "localhost"))
 	config.PosGRPCPort = cast.ToString(GetOrReturnDefaultValue("POS_SERVICE_GRPC_PORT", ":8000"))
 
@@ -147,13 +169,27 @@ func Load() Config {
 	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_SERVICE_HOST", "localhost"))
 	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", ":8099"))
 
+	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", "localhost"))
+	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_GRPC_PORT", ":8100"))
+	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", ""))
+	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", ""))
+	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 0))
+	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 0))
+	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "./app"))
+	config.ScenarioServiceHost = cast.ToString(GetOrReturnDefaultValue("SCENARIO_SERVICE_HOST", "localhost"))
+	config.ScenarioGRPCPort = cast.ToString(GetOrReturnDefaultValue("SCENARIO_GRPC_PORT", ":9108"))
+
+	config.QueryServiceHost = cast.ToString(GetOrReturnDefaultValue("QUERY_SERVICE_HOST", "localhost"))
+	config.QueryServicePort = cast.ToString(GetOrReturnDefaultValue("QUERY_GRPC_PORT", ":8228"))
+
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = "Here$houldBe$ome$ecretKey"
 
-	config.AdminHost = cast.ToString(GetOrReturnDefaultValue("ADMIN_HOST", "admin.u-code.io"))
-	config.AppHost = cast.ToString(GetOrReturnDefaultValue("APP_HOST", "app.u-code.io"))
-	config.ApiHost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "api.admin.u-code.io"))
-	config.Localhost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "localhost:7777"))
+	config.AdminHost = cast.ToString(GetOrReturnDefaultValue("ADMIN_HOST", "test.admin.u-code.io"))
+	config.AppHost = cast.ToString(GetOrReturnDefaultValue("APP_HOST", "test.app.u-code.io"))
+	config.ApiHost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "test.admin.api.u-code.io"))
+	config.PlatformType = cast.ToString(GetOrReturnDefaultValue("PLATFORM_TYPE", "super-admin"))
+	config.AdminHostForCodeServer = cast.ToString(GetOrReturnDefaultValue("HOST_FOR_CODE_SERVER", "test.admin"))
 	return config
 }
 

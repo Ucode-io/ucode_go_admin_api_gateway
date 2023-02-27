@@ -42,6 +42,7 @@ type UserServiceClient interface {
 	V2DeleteUser(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	AddUserToProject(ctx context.Context, in *AddUserToProjectReq, opts ...grpc.CallOption) (*AddUserToProjectRes, error)
 	GetProjectsByUserId(ctx context.Context, in *GetProjectsByUserIdReq, opts ...grpc.CallOption) (*GetProjectsByUserIdRes, error)
+	V2GetUserByLoginTypes(ctx context.Context, in *GetUserByLoginTypesRequest, opts ...grpc.CallOption) (*GetUserByLoginTypesResponse, error)
 }
 
 type userServiceClient struct {
@@ -223,6 +224,15 @@ func (c *userServiceClient) GetProjectsByUserId(ctx context.Context, in *GetProj
 	return out, nil
 }
 
+func (c *userServiceClient) V2GetUserByLoginTypes(ctx context.Context, in *GetUserByLoginTypesRequest, opts ...grpc.CallOption) (*GetUserByLoginTypesResponse, error) {
+	out := new(GetUserByLoginTypesResponse)
+	err := c.cc.Invoke(ctx, "/auth_service.UserService/V2GetUserByLoginTypes", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -246,6 +256,7 @@ type UserServiceServer interface {
 	V2DeleteUser(context.Context, *UserPrimaryKey) (*emptypb.Empty, error)
 	AddUserToProject(context.Context, *AddUserToProjectReq) (*AddUserToProjectRes, error)
 	GetProjectsByUserId(context.Context, *GetProjectsByUserIdReq) (*GetProjectsByUserIdRes, error)
+	V2GetUserByLoginTypes(context.Context, *GetUserByLoginTypesRequest) (*GetUserByLoginTypesResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -309,6 +320,9 @@ func (UnimplementedUserServiceServer) AddUserToProject(context.Context, *AddUser
 }
 func (UnimplementedUserServiceServer) GetProjectsByUserId(context.Context, *GetProjectsByUserIdReq) (*GetProjectsByUserIdRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProjectsByUserId not implemented")
+}
+func (UnimplementedUserServiceServer) V2GetUserByLoginTypes(context.Context, *GetUserByLoginTypesRequest) (*GetUserByLoginTypesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method V2GetUserByLoginTypes not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -665,6 +679,24 @@ func _UserService_GetProjectsByUserId_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_V2GetUserByLoginTypes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserByLoginTypesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).V2GetUserByLoginTypes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.UserService/V2GetUserByLoginTypes",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).V2GetUserByLoginTypes(ctx, req.(*GetUserByLoginTypesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -747,6 +779,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetProjectsByUserId",
 			Handler:    _UserService_GetProjectsByUserId_Handler,
+		},
+		{
+			MethodName: "V2GetUserByLoginTypes",
+			Handler:    _UserService_V2GetUserByLoginTypes_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

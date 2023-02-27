@@ -28,6 +28,8 @@ type DAGStepServiceClient interface {
 	GetAll(ctx context.Context, in *GetAllDAGStepRequest, opts ...grpc.CallOption) (*DAGStepList, error)
 	Delete(ctx context.Context, in *DeleteDAGStepRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Update(ctx context.Context, in *UpdateDAGStepRequest, opts ...grpc.CallOption) (*DAGStep, error)
+	DagStepRun(ctx context.Context, in *DAGStepRunRequest, opts ...grpc.CallOption) (*DAGStepRunResponse, error)
+	GetAllDagStepsWithDAG(ctx context.Context, in *GetAllDAGStepRequest, opts ...grpc.CallOption) (*DAGStepList, error)
 }
 
 type dAGStepServiceClient struct {
@@ -83,6 +85,24 @@ func (c *dAGStepServiceClient) Update(ctx context.Context, in *UpdateDAGStepRequ
 	return out, nil
 }
 
+func (c *dAGStepServiceClient) DagStepRun(ctx context.Context, in *DAGStepRunRequest, opts ...grpc.CallOption) (*DAGStepRunResponse, error) {
+	out := new(DAGStepRunResponse)
+	err := c.cc.Invoke(ctx, "/scenario_service.DAGStepService/DagStepRun", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dAGStepServiceClient) GetAllDagStepsWithDAG(ctx context.Context, in *GetAllDAGStepRequest, opts ...grpc.CallOption) (*DAGStepList, error) {
+	out := new(DAGStepList)
+	err := c.cc.Invoke(ctx, "/scenario_service.DAGStepService/GetAllDagStepsWithDAG", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DAGStepServiceServer is the server API for DAGStepService service.
 // All implementations must embed UnimplementedDAGStepServiceServer
 // for forward compatibility
@@ -92,6 +112,8 @@ type DAGStepServiceServer interface {
 	GetAll(context.Context, *GetAllDAGStepRequest) (*DAGStepList, error)
 	Delete(context.Context, *DeleteDAGStepRequest) (*emptypb.Empty, error)
 	Update(context.Context, *UpdateDAGStepRequest) (*DAGStep, error)
+	DagStepRun(context.Context, *DAGStepRunRequest) (*DAGStepRunResponse, error)
+	GetAllDagStepsWithDAG(context.Context, *GetAllDAGStepRequest) (*DAGStepList, error)
 	mustEmbedUnimplementedDAGStepServiceServer()
 }
 
@@ -113,6 +135,12 @@ func (UnimplementedDAGStepServiceServer) Delete(context.Context, *DeleteDAGStepR
 }
 func (UnimplementedDAGStepServiceServer) Update(context.Context, *UpdateDAGStepRequest) (*DAGStep, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+}
+func (UnimplementedDAGStepServiceServer) DagStepRun(context.Context, *DAGStepRunRequest) (*DAGStepRunResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DagStepRun not implemented")
+}
+func (UnimplementedDAGStepServiceServer) GetAllDagStepsWithDAG(context.Context, *GetAllDAGStepRequest) (*DAGStepList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllDagStepsWithDAG not implemented")
 }
 func (UnimplementedDAGStepServiceServer) mustEmbedUnimplementedDAGStepServiceServer() {}
 
@@ -217,6 +245,42 @@ func _DAGStepService_Update_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DAGStepService_DagStepRun_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DAGStepRunRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DAGStepServiceServer).DagStepRun(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scenario_service.DAGStepService/DagStepRun",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DAGStepServiceServer).DagStepRun(ctx, req.(*DAGStepRunRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DAGStepService_GetAllDagStepsWithDAG_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllDAGStepRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DAGStepServiceServer).GetAllDagStepsWithDAG(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scenario_service.DAGStepService/GetAllDagStepsWithDAG",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DAGStepServiceServer).GetAllDagStepsWithDAG(ctx, req.(*GetAllDAGStepRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DAGStepService_ServiceDesc is the grpc.ServiceDesc for DAGStepService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -243,6 +307,14 @@ var DAGStepService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Update",
 			Handler:    _DAGStepService_Update_Handler,
+		},
+		{
+			MethodName: "DagStepRun",
+			Handler:    _DAGStepService_DagStepRun_Handler,
+		},
+		{
+			MethodName: "GetAllDagStepsWithDAG",
+			Handler:    _DAGStepService_GetAllDagStepsWithDAG_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

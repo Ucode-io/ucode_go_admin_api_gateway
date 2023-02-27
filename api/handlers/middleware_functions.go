@@ -77,6 +77,8 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessU
 		return nil, errors.New("token error: wrong format")
 	}
 
+	fmt.Println(":::::accessResponse", accessResponse)
+
 	return accessResponse, nil
 }
 
@@ -127,9 +129,11 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType str
 
 func (h *Handler) CreateAutoCommitForAdminChange(c *gin.Context, environmentID, commitType string, project_id string) (versionId, commitGuid string, err error) {
 	authInfo, err := h.adminAuthInfo(c)
+	fmt.Println("Test tese test tes 00")
 	if err != nil {
 		return "", "", err
 	}
+	fmt.Println("Test tese test tes")
 
 	fmt.Println("auethInfo.GetUsrId()", authInfo.GetUserId())
 	fmt.Println("authInfo.GetProjectId()", project_id)
