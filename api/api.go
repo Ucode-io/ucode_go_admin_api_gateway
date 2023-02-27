@@ -319,7 +319,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/category", h.GetAllCategories)
 		v1Admin.DELETE("/category/:category_id", h.DeleteCategory)
 
-
 		// function folder
 		v1Admin.POST("/function-folder", h.CreateFunctionFolder)
 		v1Admin.GET("/function-folder/:function_ifolder_d", h.GetFunctionFolderById)
@@ -347,7 +346,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.POST("/scenario/run", h.RunScenario)
 		v1Admin.POST("/scenario", h.CreateFullScenario)
 
-
 		// query service
 		v1Admin.POST("/query-folder", h.CreateQueryRequestFolder)
 		v1Admin.PUT("/query-folder", h.UpdateQueryRequestFolder)
@@ -360,6 +358,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/query-request", h.GetListQueryRequest)
 		v1Admin.GET("/query-request/:query-id", h.GetSingleQueryRequest)
 		v1Admin.DELETE("/query-request/:query-id", h.DeleteQueryRequest)
+		v1Admin.POST("/query-request/select-versions/:query-id", h.InsertManyVersionForApiReference)
 		v1Admin.POST("/query-request/run", h.QueryRun)
 		v1Admin.GET("/query-request/:query-id/history", h.GetQueryHistory)
 		v1Admin.POST("/query-request/:query-id/revert", h.RevertQuery)

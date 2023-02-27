@@ -3190,6 +3190,17 @@ definitions:
       version_id:
         type: string
     type: object
+  query_service.QueryManyVersions:
+    properties:
+      oldcommit_id:
+        type: string
+      project_id:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+    type: object
   query_service.RunQueryRes:
     properties:
       res:
@@ -14156,6 +14167,64 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Run query
+      tags:
+      - Query
+  /v1/query-request/select-versions/{query-id}:
+    post:
+      consumes:
+      - application/json
+      description: Insert Many query
+      operationId: insert_many_query_reference
+      parameters:
+      - description: query-id
+        in: path
+        name: query-id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/query_service.QueryManyVersions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Insert Many query
       tags:
       - Query
   /v1/relation:
