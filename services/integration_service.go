@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 	"ucode/ucode_go_api_gateway/config"
-	integration_service "ucode/ucode_go_api_gateway/genproto/integration_service"
+	integration_service "ucode/ucode_go_api_gateway/genproto/integration_service_v2"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

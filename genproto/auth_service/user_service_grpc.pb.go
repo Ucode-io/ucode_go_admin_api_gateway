@@ -43,6 +43,7 @@ type UserServiceClient interface {
 	AddUserToProject(ctx context.Context, in *AddUserToProjectReq, opts ...grpc.CallOption) (*AddUserToProjectRes, error)
 	GetProjectsByUserId(ctx context.Context, in *GetProjectsByUserIdReq, opts ...grpc.CallOption) (*GetProjectsByUserIdRes, error)
 	V2GetUserByLoginTypes(ctx context.Context, in *GetUserByLoginTypesRequest, opts ...grpc.CallOption) (*GetUserByLoginTypesResponse, error)
+	RegisterUserViaEmail(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 }
 
 type userServiceClient struct {
@@ -233,6 +234,15 @@ func (c *userServiceClient) V2GetUserByLoginTypes(ctx context.Context, in *GetUs
 	return out, nil
 }
 
+func (c *userServiceClient) RegisterUserViaEmail(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/auth_service.UserService/RegisterUserViaEmail", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -257,6 +267,7 @@ type UserServiceServer interface {
 	AddUserToProject(context.Context, *AddUserToProjectReq) (*AddUserToProjectRes, error)
 	GetProjectsByUserId(context.Context, *GetProjectsByUserIdReq) (*GetProjectsByUserIdRes, error)
 	V2GetUserByLoginTypes(context.Context, *GetUserByLoginTypesRequest) (*GetUserByLoginTypesResponse, error)
+	RegisterUserViaEmail(context.Context, *CreateUserRequest) (*User, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -323,6 +334,9 @@ func (UnimplementedUserServiceServer) GetProjectsByUserId(context.Context, *GetP
 }
 func (UnimplementedUserServiceServer) V2GetUserByLoginTypes(context.Context, *GetUserByLoginTypesRequest) (*GetUserByLoginTypesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2GetUserByLoginTypes not implemented")
+}
+func (UnimplementedUserServiceServer) RegisterUserViaEmail(context.Context, *CreateUserRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterUserViaEmail not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -697,6 +711,24 @@ func _UserService_V2GetUserByLoginTypes_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_RegisterUserViaEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).RegisterUserViaEmail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.UserService/RegisterUserViaEmail",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).RegisterUserViaEmail(ctx, req.(*CreateUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -783,6 +815,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "V2GetUserByLoginTypes",
 			Handler:    _UserService_V2GetUserByLoginTypes_Handler,
+		},
+		{
+			MethodName: "RegisterUserViaEmail",
+			Handler:    _UserService_RegisterUserViaEmail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

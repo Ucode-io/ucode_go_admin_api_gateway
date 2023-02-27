@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"errors"
-	"log"
+	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/config"
@@ -49,21 +49,17 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		}
 		switch strArr[0] {
 		case "Bearer":
-<<<<<<< HEAD
-			if "super-admin" != platformType {
-				log.Println("---AuthMiddleware->Contains--->", origin)
-=======
 			fmt.Println("aa")
 			fmt.Println("pl;::", platformType)
 			fmt.Println("pla::::", cfg.PlatformType)
 			if platformType != cfg.PlatformType {
->>>>>>> fb5d60ad5cb11ef15e8d24626f9c3033f40ffc87
+				fmt.Println("origin----->", origin)
 				res, ok = h.hasAccess(c)
 				fmt.Println("a::::::::::", res)
 				if !ok {
 					h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
 					c.Abort()
-					return	
+					return
 				}
 			}
 			fmt.Println("bb")
