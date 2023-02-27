@@ -32,6 +32,7 @@ service UserService {
     rpc AddUserToProject(AddUserToProjectReq) returns (AddUserToProjectRes) {}
     rpc GetProjectsByUserId(GetProjectsByUserIdReq) returns (GetProjectsByUserIdRes) {}
     rpc V2GetUserByLoginTypes(GetUserByLoginTypesRequest) returns (GetUserByLoginTypesResponse) {}
+    rpc RegisterUserViaEmail(CreateUserRequest) returns (User) {}
 }
 
 message GetUserByLoginTypesResponse {
@@ -87,6 +88,8 @@ message CreateUserRequest {
     int32 active = 12;
     string expires_at = 13;
     string resource_environment_id = 14;
+    string base_url = 15;
+    string year_of_birth = 16;
 }
 
 message UserPrimaryKey {

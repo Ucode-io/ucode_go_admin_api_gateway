@@ -155,3 +155,9 @@ message ManyVersions {
   CommitInfo commit_info = 7;
   string version_id = 8;
 }
+
+message QueryManyVersions {
+  repeated string version_ids = 1;
+  string project_id = 2;
+  string oldcommit_id = 3;
+}
