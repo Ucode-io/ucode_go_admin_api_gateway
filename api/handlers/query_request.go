@@ -79,7 +79,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 		return
 	}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -191,7 +191,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 	//	return
 	//}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -296,7 +296,7 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		return
 	}
 
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -407,7 +407,7 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 	//	return
 	//}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -517,7 +517,7 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 	//	return
 	//}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -623,7 +623,7 @@ func (h *Handler) QueryRun(c *gin.Context) {
 		return
 	}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{

@@ -71,7 +71,7 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -177,7 +177,7 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -280,7 +280,7 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -386,7 +386,7 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -487,7 +487,7 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -590,7 +590,7 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -698,7 +698,7 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -801,7 +801,7 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 	//	return
 	//}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{

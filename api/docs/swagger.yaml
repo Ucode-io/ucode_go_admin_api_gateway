@@ -16123,11 +16123,6 @@ paths:
       - in: query
         name: search
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:

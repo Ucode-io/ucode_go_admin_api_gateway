@@ -21047,13 +21047,6 @@ var doc = `{
                         "type": "string",
                         "name": "search",
                         "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
