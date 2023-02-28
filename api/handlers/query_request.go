@@ -48,9 +48,9 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 		return
 	}
 	fmt.Println("TEST:::::2")
-	authInfo, err := h.GetAuthInfo(c)
+	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err.Error())
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
 		return
 	}
 
@@ -301,9 +301,9 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.GetAuthInfo(c)
+	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err.Error())
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
 		return
 	}
 
