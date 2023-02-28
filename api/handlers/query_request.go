@@ -40,13 +40,14 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 		//resourceEnvironment *obs.ResourceEnvironment
 		query tmp.CreateQueryReq
 	)
+	fmt.Println("TEST:::::1")
 
 	err := c.ShouldBindJSON(&query)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
+	fmt.Println("TEST:::::2")
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
@@ -59,7 +60,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
+	fmt.Println("TEST:::::3")
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -73,6 +74,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	//	return
 	//}
 	//
+	fmt.Println("TEST:::::4")
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
@@ -106,7 +108,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	//	}
 	//}
 	//template.ProjectId = resourceEnvironment.GetId()
-
+	fmt.Println("TEST:::::5")
 	uuID, err := uuid.NewRandom()
 	if err != nil {
 		err = errors.New("error generating new id")
@@ -126,12 +128,12 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 		AuthorId:   authInfo.GetUserId(),
 		ProjectId:  query.GetProjectId(),
 	}
-
+	fmt.Println("TEST:::::6")
 	res, err := services.QueryService().Query().CreateQuery(
 		context.Background(),
 		&query,
 	)
-
+	fmt.Println("TEST:::::7")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
