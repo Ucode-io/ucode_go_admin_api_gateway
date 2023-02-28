@@ -21,7 +21,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "ApiKeyAuths": []
                     }
                 ],
                 "description": "Generate IntegrationPayze",
@@ -28713,12 +28713,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "integrationGRPCPort": {
-                    "type": "string"
-                },
-                "integrationPayzeServiceHost": {
-                    "type": "string"
-                },
-                "integrationPayzeServicePort": {
                     "type": "string"
                 },
                 "integrationServiceHost": {

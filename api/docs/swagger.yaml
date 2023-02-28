@@ -856,10 +856,6 @@ definitions:
         type: string
       integrationGRPCPort:
         type: string
-      integrationPayzeServiceHost:
-        type: string
-      integrationPayzeServicePort:
-        type: string
       integrationServiceHost:
         type: string
       localhost:
@@ -4191,7 +4187,7 @@ paths:
                   type: string
               type: object
       security:
-      - ApiKeyAuth: []
+      - ApiKeyAuths: []
       summary: Generate IntegrationPayze
       tags:
       - IntegrationPayze
