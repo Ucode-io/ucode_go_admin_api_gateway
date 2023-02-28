@@ -4133,12 +4133,36 @@ info:
   contact: {}
   termsOfService: https://udevs.io
 paths:
-  /GeneratePayzeLink:
+  /config:
+    get:
+      consumes:
+      - application/json
+      description: show service config data when the service environment set to debug
+        mode
+      operationId: get_config
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/config.Config'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/status_http.Response'
+      summary: get config data on the debug mode
+  /generate-payze-link:
     post:
       consumes:
       - application/json
       description: Generate IntegrationPayze
-      operationId: GeneratePayzeLink
+      operationId: generate-payze-link
       parameters:
       - description: Resource-Id
         in: header
@@ -4191,88 +4215,6 @@ paths:
       summary: Generate IntegrationPayze
       tags:
       - IntegrationPayze
-  /PayzeSaveCard:
-    post:
-      consumes:
-      - application/json
-      description: SaveCard IntegrationPayze
-      operationId: PayzeSaveCard
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: PayzeLinkRequestBody
-        in: body
-        name: Integration
-        required: true
-        schema:
-          $ref: '#/definitions/integration_service_v2.PayzeLinkRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Save Card Integration data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/integration_service_v2.PayzeLinkResponseSaveCard'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: SaveCard IntegrationPayze
-      tags:
-      - IntegrationPayze
-  /config:
-    get:
-      consumes:
-      - application/json
-      description: show service config data when the service environment set to debug
-        mode
-      operationId: get_config
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Response data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/config.Config'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/status_http.Response'
-      summary: get config data on the debug mode
   /integration:
     get:
       consumes:
@@ -4663,6 +4605,64 @@ paths:
       summary: Get Integration Token
       tags:
       - Integration
+  /payze-save-card:
+    post:
+      consumes:
+      - application/json
+      description: SaveCard IntegrationPayze
+      operationId: PayzeSaveCard
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: PayzeLinkRequestBody
+        in: body
+        name: Integration
+        required: true
+        schema:
+          $ref: '#/definitions/integration_service_v2.PayzeLinkRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Save Card Integration data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/integration_service_v2.PayzeLinkResponseSaveCard'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: SaveCard IntegrationPayze
+      tags:
+      - IntegrationPayze
   /ping:
     get:
       consumes:
