@@ -7,9 +7,9 @@
 package object_builder_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -724,7 +724,7 @@ var file_event_proto_goTypes = []interface{}{
 	(*GetEventsListResponse)(nil), // 6: object_builder_service.GetEventsListResponse
 	(*GetEventsListRequest)(nil),  // 7: object_builder_service.GetEventsListRequest
 	(*EventPrimaryKey)(nil),       // 8: object_builder_service.EventPrimaryKey
-	(*emptypb.Empty)(nil),         // 9: google.protobuf.Empty
+	(*empty.Empty)(nil),           // 9: google.protobuf.Empty
 }
 var file_event_proto_depIdxs = []int32{
 	1,  // 0: object_builder_service.CreateEventRequest.when:type_name -> object_builder_service.When

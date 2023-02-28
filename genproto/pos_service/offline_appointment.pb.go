@@ -7,9 +7,9 @@
 package pos_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -891,7 +891,7 @@ var file_offline_appointment_proto_goTypes = []interface{}{
 	(*OfflineAppointmentPrimaryKey)(nil),        // 10: pos_service.OfflineAppointmentPrimaryKey
 	(*Service)(nil),                             // 11: pos_service.Service
 	(*PaymentResponse)(nil),                     // 12: pos_service.PaymentResponse
-	(*emptypb.Empty)(nil),                       // 13: google.protobuf.Empty
+	(*empty.Empty)(nil),                         // 13: google.protobuf.Empty
 }
 var file_offline_appointment_proto_depIdxs = []int32{
 	3,  // 0: pos_service.CashboxResponse.overall_payments:type_name -> pos_service.OverallPayment

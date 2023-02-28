@@ -7,10 +7,10 @@
 package scenario_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
+	_ "github.com/golang/protobuf/ptypes/struct"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
-	_ "google.golang.org/protobuf/types/known/structpb"
 	reflect "reflect"
 )
 
@@ -73,7 +73,7 @@ var file_dag_proto_goTypes = []interface{}{
 	(*CreateScenarioRequest)(nil), // 5: scenario_service.CreateScenarioRequest
 	(*DAG)(nil),                   // 6: scenario_service.DAG
 	(*DAGList)(nil),               // 7: scenario_service.DAGList
-	(*emptypb.Empty)(nil),         // 8: google.protobuf.Empty
+	(*empty.Empty)(nil),           // 8: google.protobuf.Empty
 }
 var file_dag_proto_depIdxs = []int32{
 	0, // 0: scenario_service.DAGService.Create:input_type -> scenario_service.CreateDAGRequest

@@ -7,9 +7,9 @@
 package sms_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 )
 
@@ -45,7 +45,7 @@ var file_sms_message_service_proto_goTypes = []interface{}{
 	(*Sms)(nil),               // 0: genproto.Sms
 	(*ConfirmOtpRequest)(nil), // 1: genproto.ConfirmOtpRequest
 	(*GetSmsRequest)(nil),     // 2: genproto.GetSmsRequest
-	(*emptypb.Empty)(nil),     // 3: google.protobuf.Empty
+	(*empty.Empty)(nil),       // 3: google.protobuf.Empty
 }
 var file_sms_message_service_proto_depIdxs = []int32{
 	0, // 0: genproto.SmsService.Send:input_type -> genproto.Sms

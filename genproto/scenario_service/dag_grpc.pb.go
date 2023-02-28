@@ -8,10 +8,10 @@ package scenario_service
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -26,7 +26,7 @@ type DAGServiceClient interface {
 	Create(ctx context.Context, in *CreateDAGRequest, opts ...grpc.CallOption) (*DAG, error)
 	Get(ctx context.Context, in *GetDAGRequest, opts ...grpc.CallOption) (*DAG, error)
 	GetAll(ctx context.Context, in *GetAllDAGRequest, opts ...grpc.CallOption) (*DAGList, error)
-	Delete(ctx context.Context, in *DeleteDAGRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Delete(ctx context.Context, in *DeleteDAGRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Update(ctx context.Context, in *UpdateDAGRequest, opts ...grpc.CallOption) (*DAG, error)
 	CreateScenario(ctx context.Context, in *CreateScenarioRequest, opts ...grpc.CallOption) (*DAG, error)
 }
@@ -66,8 +66,8 @@ func (c *dAGServiceClient) GetAll(ctx context.Context, in *GetAllDAGRequest, opt
 	return out, nil
 }
 
-func (c *dAGServiceClient) Delete(ctx context.Context, in *DeleteDAGRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *dAGServiceClient) Delete(ctx context.Context, in *DeleteDAGRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/scenario_service.DAGService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ type DAGServiceServer interface {
 	Create(context.Context, *CreateDAGRequest) (*DAG, error)
 	Get(context.Context, *GetDAGRequest) (*DAG, error)
 	GetAll(context.Context, *GetAllDAGRequest) (*DAGList, error)
-	Delete(context.Context, *DeleteDAGRequest) (*emptypb.Empty, error)
+	Delete(context.Context, *DeleteDAGRequest) (*empty.Empty, error)
 	Update(context.Context, *UpdateDAGRequest) (*DAG, error)
 	CreateScenario(context.Context, *CreateScenarioRequest) (*DAG, error)
 	mustEmbedUnimplementedDAGServiceServer()
@@ -119,7 +119,7 @@ func (UnimplementedDAGServiceServer) Get(context.Context, *GetDAGRequest) (*DAG,
 func (UnimplementedDAGServiceServer) GetAll(context.Context, *GetAllDAGRequest) (*DAGList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
-func (UnimplementedDAGServiceServer) Delete(context.Context, *DeleteDAGRequest) (*emptypb.Empty, error) {
+func (UnimplementedDAGServiceServer) Delete(context.Context, *DeleteDAGRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedDAGServiceServer) Update(context.Context, *UpdateDAGRequest) (*DAG, error) {

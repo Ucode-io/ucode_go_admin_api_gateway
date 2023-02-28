@@ -7,9 +7,9 @@
 package object_builder_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -453,7 +453,7 @@ var file_html_template_proto_goTypes = []interface{}{
 	(*GetAllHtmlTemplateResponse)(nil), // 2: object_builder_service.GetAllHtmlTemplateResponse
 	(*GetAllHtmlTemplateRequest)(nil),  // 3: object_builder_service.GetAllHtmlTemplateRequest
 	(*HtmlTemplatePrimaryKey)(nil),     // 4: object_builder_service.HtmlTemplatePrimaryKey
-	(*emptypb.Empty)(nil),              // 5: google.protobuf.Empty
+	(*empty.Empty)(nil),                // 5: google.protobuf.Empty
 }
 var file_html_template_proto_depIdxs = []int32{
 	1, // 0: object_builder_service.GetAllHtmlTemplateResponse.htmlTemplates:type_name -> object_builder_service.HtmlTemplate

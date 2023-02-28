@@ -7,9 +7,9 @@
 package object_builder_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -654,9 +654,9 @@ var file_builder_project_proto_goTypes = []interface{}{
 	(*DeregisterManyProjectsRequest)(nil),      // 5: object_builder_service.DeregisterManyProjectsRequest
 	(*DeregisterManyProjectsResponse)(nil),     // 6: object_builder_service.DeregisterManyProjectsResponse
 	(*RegisterProjectRequest_Credentials)(nil), // 7: object_builder_service.RegisterProjectRequest.Credentials
-	nil,                   // 8: object_builder_service.RegisterManyProjectsResponse.ProjectsEntry
-	nil,                   // 9: object_builder_service.DeregisterManyProjectsResponse.ProjectsEntry
-	(*emptypb.Empty)(nil), // 10: google.protobuf.Empty
+	nil,                 // 8: object_builder_service.RegisterManyProjectsResponse.ProjectsEntry
+	nil,                 // 9: object_builder_service.DeregisterManyProjectsResponse.ProjectsEntry
+	(*empty.Empty)(nil), // 10: google.protobuf.Empty
 }
 var file_builder_project_proto_depIdxs = []int32{
 	7,  // 0: object_builder_service.RegisterProjectRequest.credentials:type_name -> object_builder_service.RegisterProjectRequest.Credentials

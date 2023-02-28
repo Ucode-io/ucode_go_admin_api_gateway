@@ -7,9 +7,9 @@
 package object_builder_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -737,7 +737,7 @@ var file_app_proto_goTypes = []interface{}{
 	(*GetAllAppsRequest)(nil),  // 6: object_builder_service.GetAllAppsRequest
 	(*UpdateTable)(nil),        // 7: object_builder_service.UpdateTable
 	(*Table)(nil),              // 8: object_builder_service.Table
-	(*emptypb.Empty)(nil),      // 9: google.protobuf.Empty
+	(*empty.Empty)(nil),        // 9: google.protobuf.Empty
 }
 var file_app_proto_depIdxs = []int32{
 	8, // 0: object_builder_service.App.tables:type_name -> object_builder_service.Table

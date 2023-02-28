@@ -7,10 +7,10 @@
 package new_function_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
+	_ "github.com/golang/protobuf/ptypes/struct"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
-	_ "google.golang.org/protobuf/types/known/structpb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -635,7 +635,7 @@ var file_new_function_proto_goTypes = []interface{}{
 	(*GetAllFunctionsResponse)(nil),  // 3: new_function_service.GetAllFunctionsResponse
 	(*FunctionPrimaryKey)(nil),       // 4: new_function_service.FunctionPrimaryKey
 	(*UpdateManyUrlAndPassword)(nil), // 5: new_function_service.UpdateManyUrlAndPassword
-	(*emptypb.Empty)(nil),            // 6: google.protobuf.Empty
+	(*empty.Empty)(nil),              // 6: google.protobuf.Empty
 }
 var file_new_function_proto_depIdxs = []int32{
 	1, // 0: new_function_service.GetAllFunctionsResponse.functions:type_name -> new_function_service.Function

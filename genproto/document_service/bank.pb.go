@@ -7,9 +7,9 @@
 package document_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -562,7 +562,7 @@ var file_bank_proto_goTypes = []interface{}{
 	(*ReloadBanksListRequest)(nil), // 5: document_service.ReloadBanksListRequest
 	(*DeleteBankRequest)(nil),      // 6: document_service.DeleteBankRequest
 	(*DeleteBank)(nil),             // 7: document_service.DeleteBank
-	(*emptypb.Empty)(nil),          // 8: google.protobuf.Empty
+	(*empty.Empty)(nil),            // 8: google.protobuf.Empty
 }
 var file_bank_proto_depIdxs = []int32{
 	1, // 0: document_service.GetListBanksResponse.banks:type_name -> document_service.Bank

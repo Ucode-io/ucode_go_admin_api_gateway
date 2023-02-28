@@ -7,9 +7,9 @@
 package document_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -617,7 +617,7 @@ var file_contract_proto_goTypes = []interface{}{
 	(*ContractDocs)(nil),        // 2: document_service.ContractDocs
 	(*Contract)(nil),            // 3: document_service.Contract
 	(*ContractPerson)(nil),      // 4: document_service.ContractPerson
-	(*emptypb.Empty)(nil),       // 5: google.protobuf.Empty
+	(*empty.Empty)(nil),         // 5: google.protobuf.Empty
 }
 var file_contract_proto_depIdxs = []int32{
 	2, // 0: document_service.Contract.contractDoc:type_name -> document_service.ContractDocs

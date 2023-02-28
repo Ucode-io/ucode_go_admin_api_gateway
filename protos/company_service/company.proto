@@ -57,6 +57,7 @@ message NewResource {
     string id = 1;
     string title = 2;
     string project_id = 3;
+    string resource_type = 4;
 }
 
 message ResourceEnvironment {

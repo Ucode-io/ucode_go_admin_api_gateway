@@ -7,9 +7,9 @@
 package versioning_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -1287,7 +1287,7 @@ var file_release_service_proto_goTypes = []interface{}{
 	(*ApiDeleteReleaseRequest)(nil),        // 15: versioning_service.ApiDeleteReleaseRequest
 	nil,                                    // 16: versioning_service.GetMultipleVersionInfoResponse.VersionInfosEntry
 	(*ReleaseWithCommit)(nil),              // 17: versioning_service.ReleaseWithCommit
-	(*emptypb.Empty)(nil),                  // 18: google.protobuf.Empty
+	(*empty.Empty)(nil),                    // 18: google.protobuf.Empty
 }
 var file_release_service_proto_depIdxs = []int32{
 	0,  // 0: versioning_service.CreateReleaseRequest.release_type:type_name -> versioning_service.ReleaseType
