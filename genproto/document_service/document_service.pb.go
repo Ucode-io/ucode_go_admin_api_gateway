@@ -7,9 +7,9 @@
 package document_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -1410,7 +1410,7 @@ var file_document_service_proto_goTypes = []interface{}{
 	(*CountDocument)(nil),    // 7: document_service.CountDocument
 	(*Document)(nil),         // 8: document_service.Document
 	(*Client)(nil),           // 9: document_service.Client
-	(*emptypb.Empty)(nil),    // 10: google.protobuf.Empty
+	(*empty.Empty)(nil),      // 10: google.protobuf.Empty
 }
 var file_document_service_proto_depIdxs = []int32{
 	8,  // 0: document_service.ListDocumentResp.documents:type_name -> document_service.Document

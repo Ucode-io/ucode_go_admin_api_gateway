@@ -7,9 +7,9 @@
 package auth_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -2385,7 +2385,7 @@ var file_permission_service_proto_goTypes = []interface{}{
 	(*Permission)(nil),                           // 31: auth_service.Permission
 	(*Role)(nil),                                 // 32: auth_service.Role
 	(*Scope)(nil),                                // 33: auth_service.Scope
-	(*emptypb.Empty)(nil),                        // 34: google.protobuf.Empty
+	(*empty.Empty)(nil),                          // 34: google.protobuf.Empty
 	(*RolePermission)(nil),                       // 35: auth_service.RolePermission
 	(*CommonMessage)(nil),                        // 36: auth_service.CommonMessage
 }

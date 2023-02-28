@@ -7,9 +7,9 @@
 package object_builder_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -1803,7 +1803,7 @@ var file_relation_proto_goTypes = []interface{}{
 	(*QuickFilter)(nil),             // 12: object_builder_service.QuickFilter
 	(*Table)(nil),                   // 13: object_builder_service.Table
 	(*Field)(nil),                   // 14: object_builder_service.Field
-	(*emptypb.Empty)(nil),           // 15: google.protobuf.Empty
+	(*empty.Empty)(nil),             // 15: google.protobuf.Empty
 }
 var file_relation_proto_depIdxs = []int32{
 	8,  // 0: object_builder_service.CreateRelationRequest.summaries:type_name -> object_builder_service.Summary

@@ -7,10 +7,10 @@
 package query_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
+	_ "github.com/golang/protobuf/ptypes/struct"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
-	_ "google.golang.org/protobuf/types/known/structpb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -707,7 +707,7 @@ var file_folder_proto_goTypes = []interface{}{
 	(*GetSingleFolderRes)(nil), // 5: query_service.GetSingleFolderRes
 	(*UpdateFolderReq)(nil),    // 6: query_service.UpdateFolderReq
 	(*DeleteFolderReq)(nil),    // 7: query_service.DeleteFolderReq
-	(*emptypb.Empty)(nil),      // 8: google.protobuf.Empty
+	(*empty.Empty)(nil),        // 8: google.protobuf.Empty
 }
 var file_folder_proto_depIdxs = []int32{
 	0, // 0: query_service.GetListFolderRes.folders:type_name -> query_service.Folder

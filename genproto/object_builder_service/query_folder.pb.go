@@ -7,9 +7,9 @@
 package object_builder_service
 
 import (
+	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -440,7 +440,7 @@ var file_query_folder_proto_goTypes = []interface{}{
 	(*QueryFolderId)(nil),             // 2: object_builder_service.QueryFolderId
 	(*GetAllQueryFolderRequest)(nil),  // 3: object_builder_service.GetAllQueryFolderRequest
 	(*GetAllQueryFolderResponse)(nil), // 4: object_builder_service.GetAllQueryFolderResponse
-	(*emptypb.Empty)(nil),             // 5: google.protobuf.Empty
+	(*empty.Empty)(nil),               // 5: google.protobuf.Empty
 }
 var file_query_folder_proto_depIdxs = []int32{
 	1, // 0: object_builder_service.GetAllQueryFolderResponse.folders:type_name -> object_builder_service.QueryFolder
