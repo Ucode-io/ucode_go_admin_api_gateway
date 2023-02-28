@@ -21,7 +21,7 @@ func NewPayzeServiceClient(ctx context.Context, cfg config.Config) (IntegrationS
 
 	connIntegrationPayzeService, err := grpc.DialContext(
 		ctx,
-		cfg.IntegrationPayzeServiceHost+cfg.IntegrationPayzeServicePort,
+		cfg.IntegrationServiceHost+cfg.IntegrationGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {

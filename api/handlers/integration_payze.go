@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/integration_service_v2"
@@ -10,12 +11,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GeneratePayzeLink godoc
-// @ID GeneratePayzeLink
+// generate-payze-link godoc
+// @ID generate-payze-link
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Router /GeneratePayzeLink [POST]
+// @Router /v1/generate-payze-link [POST]
 // @Summary Generate IntegrationPayze
 // @Description Generate IntegrationPayze
 // @Tags IntegrationPayze
@@ -27,6 +28,8 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GeneratePayzeLink(c *gin.Context) {
 	var payze integration_service_v2.PayzeLinkRequest
+
+	fmt.Println("GeneratePayzeLink")
 
 	err := c.ShouldBindJSON(&payze)
 	if err != nil {
@@ -51,6 +54,7 @@ func (h *Handler) GeneratePayzeLink(c *gin.Context) {
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
+
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
@@ -81,12 +85,12 @@ func (h *Handler) GeneratePayzeLink(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, resp)
 }
 
+// @Security ApiKeyAuth
 // PayzeSaveCard godoc
 // @ID PayzeSaveCard
-// @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Router /PayzeSaveCard [POST]
+// @Router /v1/payze-save-card [POST]
 // @Summary SaveCard IntegrationPayze
 // @Description SaveCard IntegrationPayze
 // @Tags IntegrationPayze
