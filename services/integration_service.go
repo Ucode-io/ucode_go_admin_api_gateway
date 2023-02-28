@@ -10,13 +10,11 @@ import (
 )
 
 type IntegrationServiceI interface {
-	TransactionService() integration_service.TransactionServiceClient
 	PayzeService() integration_service.PayzeServiceClient
 }
 
 type integrationServiceClient struct {
-	transactionServiceClient integration_service.TransactionServiceClient
-	payzeServiceClient       integration_service.PayzeServiceClient
+	payzeServiceClient integration_service.PayzeServiceClient
 }
 
 func NewIntegrationServiceClient(ctx context.Context, cfg config.Config) (IntegrationServiceI, error) {
@@ -31,13 +29,8 @@ func NewIntegrationServiceClient(ctx context.Context, cfg config.Config) (Integr
 	}
 
 	return &integrationServiceClient{
-		transactionServiceClient: integration_service.NewTransactionServiceClient(connIntegrationService),
-		payzeServiceClient:       integration_service.NewPayzeServiceClient(connIntegrationService),
+		payzeServiceClient: integration_service.NewPayzeServiceClient(connIntegrationService),
 	}, nil
-}
-
-func (g *integrationServiceClient) TransactionService() integration_service.TransactionServiceClient {
-	return g.transactionServiceClient
 }
 
 func (g *integrationServiceClient) PayzeService() integration_service.PayzeServiceClient {

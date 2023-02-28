@@ -10,9 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Security ApiKeyAuths
 // GeneratePayzeLink godoc
 // @ID GeneratePayzeLink
-// @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /GeneratePayzeLink [POST]
@@ -51,6 +51,7 @@ func (h *Handler) GeneratePayzeLink(c *gin.Context) {
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
+
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
@@ -81,9 +82,9 @@ func (h *Handler) GeneratePayzeLink(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, resp)
 }
 
+// @Security ApiKeyAuth
 // PayzeSaveCard godoc
 // @ID PayzeSaveCard
-// @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /PayzeSaveCard [POST]
