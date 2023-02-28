@@ -28341,6 +28341,9 @@
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 }
