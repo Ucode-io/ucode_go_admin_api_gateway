@@ -10,9 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Security ApiKeyAuths
 // GeneratePayzeLink godoc
 // @ID GeneratePayzeLink
+// @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /GeneratePayzeLink [POST]

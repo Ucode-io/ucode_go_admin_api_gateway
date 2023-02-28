@@ -21,7 +21,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuths": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Generate IntegrationPayze",
