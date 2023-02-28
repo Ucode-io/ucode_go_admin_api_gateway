@@ -16,7 +16,7 @@ import (
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Router /generate-payze-link [POST]
+// @Router /v1/generate-payze-link [POST]
 // @Summary Generate IntegrationPayze
 // @Description Generate IntegrationPayze
 // @Tags IntegrationPayze
@@ -90,7 +90,7 @@ func (h *Handler) GeneratePayzeLink(c *gin.Context) {
 // @ID PayzeSaveCard
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Router /payze-save-card [POST]
+// @Router /v1/payze-save-card [POST]
 // @Summary SaveCard IntegrationPayze
 // @Description SaveCard IntegrationPayze
 // @Tags IntegrationPayze
