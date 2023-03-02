@@ -353,10 +353,10 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(table.GetProjectId()) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
+	//if !util.IsValidUUID(table.GetProjectId()) {
+	//	h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+	//	return
+	//}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
