@@ -76,7 +76,7 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -185,7 +185,7 @@ func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -289,7 +289,7 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -398,7 +398,7 @@ func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -494,7 +494,7 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -589,7 +589,7 @@ func (h *Handler) GetTemplateFolderCommits(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -693,7 +693,7 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -802,7 +802,7 @@ func (h *Handler) GetSingleTemplate(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -906,7 +906,7 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -1015,7 +1015,7 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -1125,7 +1125,7 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -1223,7 +1223,7 @@ func (h *Handler) GetTemplateCommits(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -1332,7 +1332,7 @@ func (h *Handler) ConvertHtmlToPdfV2(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -1442,7 +1442,7 @@ func (h *Handler) ConvertTemplateToHtmlV2(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{

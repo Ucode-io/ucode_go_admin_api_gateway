@@ -71,7 +71,7 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 	//	return
 	//}
 
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -181,7 +181,7 @@ func (h *Handler) GetSingleQueryRequestFolder(c *gin.Context) {
 	//	return
 	//}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -285,7 +285,7 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 	//	return
 	//}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -395,7 +395,7 @@ func (h *Handler) DeleteQueryRequestFolder(c *gin.Context) {
 	//	return
 	//}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -491,7 +491,7 @@ func (h *Handler) GetListQueryRequestFolder(c *gin.Context) {
 	//	return
 	//}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{

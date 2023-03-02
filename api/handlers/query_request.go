@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -39,18 +40,19 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 		//resourceEnvironment *obs.ResourceEnvironment
 		query tmp.CreateQueryReq
 	)
+	fmt.Println("TEST:::::1")
 
 	err := c.ShouldBindJSON(&query)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	fmt.Println("TEST:::::2")
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
+		return
+	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -58,7 +60,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
+	fmt.Println("TEST:::::3")
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -72,6 +74,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	//	return
 	//}
 	//
+	fmt.Println("TEST:::::4")
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
@@ -79,7 +82,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 		return
 	}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -105,7 +108,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	//	}
 	//}
 	//template.ProjectId = resourceEnvironment.GetId()
-
+	fmt.Println("TEST:::::5")
 	uuID, err := uuid.NewRandom()
 	if err != nil {
 		err = errors.New("error generating new id")
@@ -118,11 +121,19 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	query.ProjectId = projectId
 	query.EnvironmentId = environmentId.(string)
 
+	query.CommitInfo = &tmp.CommitInfo{
+		Id:         "",
+		CommitType: config.COMMIT_TYPE_FIELD,
+		Name:       fmt.Sprintf("Auto Created Commit Create api reference - %s", time.Now().Format(time.RFC1123)),
+		AuthorId:   authInfo.GetUserId(),
+		ProjectId:  query.GetProjectId(),
+	}
+	fmt.Println("TEST:::::6")
 	res, err := services.QueryService().Query().CreateQuery(
 		context.Background(),
 		&query,
 	)
-
+	fmt.Println("TEST:::::7")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -153,6 +164,8 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 	//resourceEnvironment *obs.ResourceEnvironment
 	)
 	queryId := c.Param("query-id")
+	commitId := c.Query("commit_id")
+	versionId := c.Query("version_id")
 
 	if !util.IsValidUUID(queryId) {
 		h.handleResponse(c, status_http.InvalidArgument, "folder id is an invalid uuid")
@@ -191,7 +204,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 	//	return
 	//}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -222,15 +235,40 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 		&tmp.GetSingleQueryReq{
 			Id:        queryId,
 			ProjectId: projectId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
-			CommitId:  c.DefaultQuery("commit-id", ""),
+			VersionId: versionId,
+			CommitId:  commitId,
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	versions, err := services.VersioningService().Release().GetMultipleVersionInfo(context.Background(), &vcs.GetMultipleVersionInfoRequest{
+		VersionIds: res.CommitInfo.VersionIds,
+		ProjectId:  res.ProjectId,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	fmt.Println(versions.VersionInfos)
+	versionInfos := make([]*tmp.VersionInfo, 0, len(res.GetCommitInfo().GetVersionIds()))
+	for _, id := range res.CommitInfo.VersionIds {
+		versionInfo, ok := versions.VersionInfos[id]
+		if ok {
+			versionInfos = append(versionInfos, &tmp.VersionInfo{
+				AuthorId:  versionInfo.AuthorId,
+				CreatedAt: versionInfo.CreatedAt,
+				UpdatedAt: versionInfo.UpdatedAt,
+				Desc:      versionInfo.Desc,
+				IsCurrent: versionInfo.IsCurrent,
+				Version:   versionInfo.Version,
+				VersionId: versionInfo.VersionId,
+			})
+		}
+	}
+	res.CommitInfo.VersionInfos = versionInfos
 
 	h.handleResponse(c, status_http.OK, res)
 }
@@ -263,11 +301,11 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
+		return
+	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -296,7 +334,7 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		return
 	}
 
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -334,6 +372,25 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 	query.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
 	query.ProjectId = projectId
 	query.EnvironmentId = environmentId.(string)
+	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
+		c.Request.Context(),
+		&vcs.GetCurrentReleaseRequest{
+			EnvironmentId: environmentId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	query.VersionId = activeVersion.GetVersionId()
+	query.CommitInfo = &tmp.CommitInfo{
+		Id:         "",
+		CommitType: config.COMMIT_TYPE_FIELD,
+		Name:       fmt.Sprintf("Auto Created Commit Update api reference - %s", time.Now().Format(time.RFC1123)),
+		AuthorId:   authInfo.GetUserId(),
+		ProjectId:  query.GetProjectId(),
+	}
 
 	res, err := services.QueryService().Query().UpdateQuery(
 		context.Background(),
@@ -407,7 +464,7 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 	//	return
 	//}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -438,7 +495,7 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 		&tmp.DeleteQueryReq{
 			Id:        queryId,
 			ProjectId: projectId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			VersionId: uuid.NewString(),
 		},
 	)
 
@@ -517,7 +574,7 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 	//	return
 	//}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -547,7 +604,7 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 		context.Background(),
 		&tmp.GetListQueryReq{
 			ProjectId: projectId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			VersionId: "",
 			FolderId:  c.DefaultQuery("folder-id", ""),
 			Limit:     int32(limit),
 			Offset:    int32(offset),
@@ -623,7 +680,7 @@ func (h *Handler) QueryRun(c *gin.Context) {
 		return
 	}
 	//
-	//if util.IsValidUUID(resourceId.(string)) {
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -899,7 +956,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// InsertManyVersionForApiReference godoc
+// InsertManyVersionForQueryService godoc
 // @Security ApiKeyAuth
 // @ID insert_many_query_reference
 // @Router /v1/query-request/select-versions/{query-id} [POST]

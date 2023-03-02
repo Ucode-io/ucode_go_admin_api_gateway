@@ -74,7 +74,7 @@ func (h *Handler) CreateNoteFolder(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -183,7 +183,7 @@ func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -287,7 +287,7 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -396,7 +396,7 @@ func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -492,7 +492,7 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -587,7 +587,7 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -691,7 +691,7 @@ func (h *Handler) CreateNote(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -800,7 +800,7 @@ func (h *Handler) GetSingleNote(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -904,7 +904,7 @@ func (h *Handler) UpdateNote(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -1013,7 +1013,7 @@ func (h *Handler) DeleteNote(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -1123,7 +1123,7 @@ func (h *Handler) GetListNote(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{
@@ -1221,7 +1221,7 @@ func (h *Handler) GetNoteCommits(c *gin.Context) {
 		return
 	}
 
-	if util.IsValidUUID(resourceId.(string)) {
+	if util.IsValidUUID(environmentId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
 			&obs.GetResourceEnvironmentReq{

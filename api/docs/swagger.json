@@ -21028,13 +21028,6 @@
                         "type": "string",
                         "name": "search",
                         "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -28346,6 +28339,9 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_type": {
                     "type": "string"
                 },
                 "title": {
