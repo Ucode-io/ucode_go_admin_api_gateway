@@ -136,6 +136,8 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 
 	CategoryId := c.Query("category_id")
 
+	services.VersioningService().Release()
+
 	resp, err := services.ScenarioService().DagService().GetAll(
 		c.Request.Context(),
 		&pb.GetAllDAGRequest{

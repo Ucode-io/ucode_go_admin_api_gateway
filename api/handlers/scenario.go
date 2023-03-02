@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"fmt"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/scenario_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -122,6 +125,20 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 		EnvironmentId: EnvironmentId.(string),
 		Dag:           dag,
 		Steps:         dagSteps,
+	}
+
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
+		return
+	}
+
+	serviceReq.CommitInfo = &pb.CommitInfo{
+		Guid:       "",
+		CommitType: config.COMMIT_TYPE_SCENARIO,
+		Name:       fmt.Sprintf("Auto Created Commit Create Scenario - %s", time.Now().Format(time.RFC1123)),
+		AuthorId:   authInfo.GetUserId(),
+		ProjectId:  ProjectId,
 	}
 
 	resp, err := services.ScenarioService().DagService().CreateScenario(

@@ -24,4 +24,5 @@ const (
 	COMMIT_TYPE_VARIABLE                 = "VARIABLE"
 	COMMIT_TYPE_PANEL                    = "PANEL"
 	COMMIT_TYPE_FUNCTION                 = "FUNCTION"
+	COMMIT_TYPE_SCENARIO                 = "SCENARIO"
 )
