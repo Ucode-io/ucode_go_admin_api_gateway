@@ -429,7 +429,6 @@ func (h *Handler) SelectVersionsScenario(c *gin.Context) {
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param id path string true "dag-id"
 // @Param project-id query string true "project-id"
 // @Param body body pb.RevertScenarioRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=emptypb.Empty} "Response body"
@@ -472,7 +471,7 @@ func (h *Handler) RevertScenario(c *gin.Context) {
 		&req,
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
