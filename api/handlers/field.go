@@ -269,6 +269,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		AutofillTable: fieldRequest.AutoFillTable,
 		RelationId:    fieldRequest.RelationId,
 		Automatic:     fieldRequest.Automatic,
+		Unique:        fieldRequest.Unique,
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
