@@ -82,6 +82,7 @@ func (h *Handler) CreateDAG(c *gin.Context) {
 // @Param order query string false "order"
 // @Param page query int false "page"
 // @Param category_id query string false "category_id"
+// @Param commit-id query string false "commit-id"
 // @Success 200 {object} status_http.Response{data=pb.DAGList} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -141,6 +142,7 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 		&pb.GetAllDAGRequest{
 			Filter:     filter,
 			CategoryId: CategoryId,
+			CommitId:   c.Query("commit-id"),
 		},
 	)
 	if err != nil {
