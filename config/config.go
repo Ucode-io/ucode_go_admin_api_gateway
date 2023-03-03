@@ -74,6 +74,8 @@ type Config struct {
 	FunctionServicePort string
 	QueryServiceHost    string
 	QueryServicePort    string
+	WebPageServiceHost  string
+	WebPageServicePort  string
 
 	MinioEndpoint        string
 	MinioAccessKeyID     string
@@ -181,6 +183,8 @@ func Load() Config {
 
 	config.QueryServiceHost = cast.ToString(GetOrReturnDefaultValue("QUERY_SERVICE_HOST", "localhost"))
 	config.QueryServicePort = cast.ToString(GetOrReturnDefaultValue("QUERY_GRPC_PORT", ":8228"))
+	config.WebPageServiceHost = cast.ToString(GetOrReturnDefaultValue("WEB_PAGE_SERVICE_HOST", "localhost"))
+	config.WebPageServicePort = cast.ToString(GetOrReturnDefaultValue("WEB_PAGE_GRPC_PORT", ":8098"))
 
 	config.UcodeNamespace = "cp-region-type-id"
 	config.SecretKey = "Here$houldBe$ome$ecretKey"

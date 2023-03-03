@@ -372,6 +372,22 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.POST("/query-request/:query-id/revert", h.RevertQuery)
 		v1Admin.GET("/query-request/:query-id/log", h.GetListQueryLog)
 		v1Admin.GET("/query-request/:query-id/log/:log-id", h.GetSingleQueryLog)
+
+		// web page service
+		v1Admin.POST("/webpage-folder", h.CreateWebPageFolder)
+		v1Admin.PUT("/webpage-folder", h.UpdateWebPageFolder)
+		v1Admin.GET("/webpage-folder", h.GetListWebPageFolder)
+		v1Admin.GET("/webpage-folder/:webpage-folder-id", h.GetSingleWebPageFolder)
+		v1Admin.DELETE("/webpage-folder/:webpage-folder-id", h.DeleteWebPageFolder)
+
+		v1Admin.POST("/webpageV2", h.CreateWebPageV2)
+		v1Admin.PUT("/webpageV2", h.UpdateWebPageV2)
+		v1Admin.GET("/webpageV2", h.GetListWebPageV2)
+		v1Admin.GET("/webpageV2/:webpage-id", h.GetSingleWebPageV2)
+		v1Admin.DELETE("/webpageV2/:webpage-id", h.DeleteWebPageV2)
+		//v1Admin.POST("/webpageV2/select-versions/:webpage-id", h.InsertManyVersionForQueryService)
+		v1Admin.GET("/webpageV2/:webpage-id/history", h.GetWebPageHistory)
+		//v1Admin.POST("/webpageV2/:webpage-id/revert", h.RevertQuery)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())
