@@ -896,6 +896,8 @@ definitions:
       versioningServiceHost:
         type: string
     type: object
+  emptypb.Empty:
+    type: object
   handlers.Path:
     properties:
       filename:
@@ -3381,6 +3383,36 @@ definitions:
         items:
           $ref: '#/definitions/scenario_service.VersionInfo'
         type: array
+    type: object
+  scenario_service.CommitWithRelease:
+    properties:
+      author_id:
+        type: string
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      release_info:
+        $ref: '#/definitions/scenario_service.CommitWithRelease_Release'
+    type: object
+  scenario_service.CommitWithRelease_Release:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+      is_current:
+        type: boolean
+      version:
+        type: string
     type: object
   scenario_service.ConnectInfo:
     properties:
@@ -15238,6 +15270,140 @@ paths:
       summary: Update scenario
       tags:
       - Scenario
+  /v1/scenario/{id}/history/:
+    get:
+      consumes:
+      - application/json
+      description: Get History scenario
+      operationId: scenario_history
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: dag-id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateScenarioRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/scenario_service.GetScenarioHistoryResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get History scenario
+      tags:
+      - Scenario
+  /v1/scenario/{id}/select-versions:
+    put:
+      consumes:
+      - application/json
+      description: Select Versions scenario
+      operationId: select_version_scenario
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: dag-id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.CommitWithRelease'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/emptypb.Empty'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Select Versions scenario
+      tags:
+      - Scenario
   /v1/scenario/category:
     get:
       consumes:
@@ -16047,68 +16213,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get scenario dag
-      tags:
-      - Scenario
-  /v1/scenario/history/{dag_id}:
-    get:
-      consumes:
-      - application/json
-      description: Get History scenario
-      operationId: scenario_history
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: Request body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateScenarioRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Response body
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/scenario_service.GetScenarioHistoryResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get History scenario
       tags:
       - Scenario
   /v1/scenario/run:

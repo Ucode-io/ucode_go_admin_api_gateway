@@ -20767,7 +20767,115 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/scenario/history/{dag_id}": {
+        "/v1/scenario/run": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Run scenario",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Scenario"
+                ],
+                "summary": "Run scenario",
+                "operationId": "run_scenario",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "Request body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.RunScenarioRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/scenario_service.RunScenarioResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/scenario/{id}/history/": {
             "get": {
                 "security": [
                     {
@@ -20798,6 +20906,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "dag-id",
+                        "name": "id",
+                        "in": "path",
                         "required": true
                     },
                     {
@@ -20875,14 +20990,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/scenario/run": {
-            "post": {
+        "/v1/scenario/{id}/select-versions": {
+            "put": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Run scenario",
+                "description": "Select Versions scenario",
                 "consumes": [
                     "application/json"
                 ],
@@ -20892,8 +21007,8 @@ const docTemplate = `{
                 "tags": [
                     "Scenario"
                 ],
-                "summary": "Run scenario",
-                "operationId": "run_scenario",
+                "summary": "Select Versions scenario",
+                "operationId": "select_version_scenario",
                 "parameters": [
                     {
                         "type": "string",
@@ -20910,6 +21025,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "dag-id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
@@ -20921,7 +21043,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.RunScenarioRequest"
+                            "$ref": "#/definitions/scenario_service.CommitWithRelease"
                         }
                     }
                 ],
@@ -20937,7 +21059,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/scenario_service.RunScenarioResponse"
+                                            "$ref": "#/definitions/emptypb.Empty"
                                         }
                                     }
                                 }
@@ -28997,6 +29119,9 @@ const docTemplate = `{
                 }
             }
         },
+        "emptypb.Empty": {
+            "type": "object"
+        },
         "handlers.Path": {
             "type": "object",
             "properties": {
@@ -32790,6 +32915,52 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/scenario_service.VersionInfo"
                     }
+                }
+            }
+        },
+        "scenario_service.CommitWithRelease": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "commit_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "release_info": {
+                    "$ref": "#/definitions/scenario_service.CommitWithRelease_Release"
+                }
+            }
+        },
+        "scenario_service.CommitWithRelease_Release": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_current": {
+                    "type": "boolean"
+                },
+                "version": {
+                    "type": "string"
                 }
             }
         },
