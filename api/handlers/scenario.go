@@ -404,6 +404,7 @@ func (h *Handler) SelectVersionsScenario(c *gin.Context) {
 
 	req.ProjectId = ProjectId
 	req.EnvironmentId = EnvironmentId.(string)
+	req.Id = c.Param("id")
 
 	_, err = services.ScenarioService().DagService().SelectManyScenarioVersions(
 		c.Request.Context(),
