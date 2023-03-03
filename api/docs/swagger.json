@@ -20796,13 +20796,6 @@
                     },
                     {
                         "type": "string",
-                        "description": "dag-id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",

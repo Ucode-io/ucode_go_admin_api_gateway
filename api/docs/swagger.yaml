@@ -16428,11 +16428,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: dag-id
-        in: path
-        name: id
-        required: true
-        type: string
       - description: project-id
         in: query
         name: project-id
