@@ -19764,6 +19764,12 @@ const docTemplate = `{
                         "description": "category_id",
                         "name": "category_id",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "commit-id",
+                        "name": "commit-id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
