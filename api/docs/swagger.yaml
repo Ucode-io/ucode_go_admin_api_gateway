@@ -3469,6 +3469,8 @@ definitions:
         type: string
       commit_info:
         $ref: '#/definitions/scenario_service.CommitInfo'
+      created_at:
+        type: string
       id:
         type: string
       slug:
@@ -3501,6 +3503,8 @@ definitions:
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
+      created_at:
+        type: string
       dag_id:
         type: string
       description:
@@ -3549,6 +3553,23 @@ definitions:
       count:
         type: integer
       id:
+        type: string
+    type: object
+  scenario_service.RevertScenarioRequest:
+    properties:
+      commit_info:
+        $ref: '#/definitions/scenario_service.CommitInfo'
+      environment_id:
+        type: string
+      id:
+        type: string
+      new_commit_id:
+        type: string
+      old_commit_id:
+        type: string
+      project_id:
+        type: string
+      version_id:
         type: string
     type: object
   scenario_service.RunScenarioResponse:
@@ -16211,6 +16232,73 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get scenario dag
+      tags:
+      - Scenario
+  /v1/scenario/revert:
+    post:
+      consumes:
+      - application/json
+      description: Revert scenario
+      operationId: revert_scenario
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: dag-id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/scenario_service.RevertScenarioRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/emptypb.Empty'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Revert scenario
       tags:
       - Scenario
   /v1/scenario/run:

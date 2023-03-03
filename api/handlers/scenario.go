@@ -417,3 +417,64 @@ func (h *Handler) SelectVersionsScenario(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, &emptypb.Empty{})
 }
+
+// Scenario godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID revert_scenario
+// @Router /v1/scenario/revert [POST]
+// @Summary Revert scenario
+// @Description Revert scenario
+// @Tags Scenario
+// @Accept json
+// @Produce json
+// @Param id path string true "dag-id"
+// @Param project-id query string true "project-id"
+// @Param body body pb.RevertScenarioRequest  true "Request body"
+// @Success 200 {object} status_http.Response{data=emptypb.Empty} "Response body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) RevertScenario(c *gin.Context) {
+
+	req := pb.RevertScenarioRequest{}
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
+	EnvironmentId, _ := c.Get("environment_id")
+	if !util.IsValidUUID(EnvironmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
+		return
+	}
+
+	ProjectId := c.Query("project-id")
+	if !util.IsValidUUID(ProjectId) {
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
+		return
+	}
+
+	req.ProjectId = ProjectId
+	req.EnvironmentId = EnvironmentId.(string)
+
+	_, err = services.ScenarioService().DagService().RevertScenario(
+		c.Request.Context(),
+		&req,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, &emptypb.Empty{})
+}

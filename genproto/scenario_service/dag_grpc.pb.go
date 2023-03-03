@@ -31,6 +31,7 @@ type DAGServiceClient interface {
 	CreateScenario(ctx context.Context, in *CreateScenarioRequest, opts ...grpc.CallOption) (*DAG, error)
 	GetScenarioHistory(ctx context.Context, in *GetScenarioHistoryRequest, opts ...grpc.CallOption) (*GetScenarioHistoryResponse, error)
 	SelectManyScenarioVersions(ctx context.Context, in *CommitWithRelease, opts ...grpc.CallOption) (*CommitWithRelease, error)
+	RevertScenario(ctx context.Context, in *RevertScenarioRequest, opts ...grpc.CallOption) (*RevertScenarioResponse, error)
 }
 
 type dAGServiceClient struct {
@@ -113,6 +114,15 @@ func (c *dAGServiceClient) SelectManyScenarioVersions(ctx context.Context, in *C
 	return out, nil
 }
 
+func (c *dAGServiceClient) RevertScenario(ctx context.Context, in *RevertScenarioRequest, opts ...grpc.CallOption) (*RevertScenarioResponse, error) {
+	out := new(RevertScenarioResponse)
+	err := c.cc.Invoke(ctx, "/scenario_service.DAGService/RevertScenario", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DAGServiceServer is the server API for DAGService service.
 // All implementations must embed UnimplementedDAGServiceServer
 // for forward compatibility
@@ -125,6 +135,7 @@ type DAGServiceServer interface {
 	CreateScenario(context.Context, *CreateScenarioRequest) (*DAG, error)
 	GetScenarioHistory(context.Context, *GetScenarioHistoryRequest) (*GetScenarioHistoryResponse, error)
 	SelectManyScenarioVersions(context.Context, *CommitWithRelease) (*CommitWithRelease, error)
+	RevertScenario(context.Context, *RevertScenarioRequest) (*RevertScenarioResponse, error)
 	mustEmbedUnimplementedDAGServiceServer()
 }
 
@@ -155,6 +166,9 @@ func (UnimplementedDAGServiceServer) GetScenarioHistory(context.Context, *GetSce
 }
 func (UnimplementedDAGServiceServer) SelectManyScenarioVersions(context.Context, *CommitWithRelease) (*CommitWithRelease, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SelectManyScenarioVersions not implemented")
+}
+func (UnimplementedDAGServiceServer) RevertScenario(context.Context, *RevertScenarioRequest) (*RevertScenarioResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevertScenario not implemented")
 }
 func (UnimplementedDAGServiceServer) mustEmbedUnimplementedDAGServiceServer() {}
 
@@ -313,6 +327,24 @@ func _DAGService_SelectManyScenarioVersions_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DAGService_RevertScenario_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevertScenarioRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DAGServiceServer).RevertScenario(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scenario_service.DAGService/RevertScenario",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DAGServiceServer).RevertScenario(ctx, req.(*RevertScenarioRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DAGService_ServiceDesc is the grpc.ServiceDesc for DAGService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -351,6 +383,10 @@ var DAGService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SelectManyScenarioVersions",
 			Handler:    _DAGService_SelectManyScenarioVersions_Handler,
+		},
+		{
+			MethodName: "RevertScenario",
+			Handler:    _DAGService_RevertScenario_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
