@@ -19,6 +19,7 @@ type ServiceManagerI interface {
 	ScenarioService() ScenarioServiceI
 	QueryService() QueryServiceI
 	IntegrationPayzeService() IntegrationServicePayzeI
+	WebPageService() WebPageServiceI
 }
 
 type grpcClients struct {
@@ -35,6 +36,7 @@ type grpcClients struct {
 	scenarioService          ScenarioServiceI
 	queryService             QueryServiceI
 	integrationPayzeServiceI IntegrationServicePayzeI
+	webPageService           WebPageServiceI
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -102,6 +104,11 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
+	webPageServiceClient, err := NewWebPageServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return grpcClients{
 		apiReferenceService:      apiReferenceClient,
 		analyticsService:         analyticsServiceClient,
@@ -116,6 +123,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		scenarioService:          scenarioServiceClient,
 		queryService:             queryServiceClient,
 		integrationPayzeServiceI: integrationPayzeServiceClient,
+		webPageService:           webPageServiceClient,
 	}, nil
 }
 
@@ -168,4 +176,8 @@ func (g grpcClients) QueryService() QueryServiceI {
 
 func (g grpcClients) IntegrationPayzeService() IntegrationServicePayzeI {
 	return g.integrationPayzeServiceI
+}
+
+func (g grpcClients) WebPageService() WebPageServiceI {
+	return g.webPageService
 }

@@ -32,6 +32,7 @@ message DAGStep {
     string description = 12;
     string callback_type = 13;
     string commit_id = 14;
+    string created_at = 15;
 }
 
 message CreateDAGStepRequest {
@@ -75,6 +76,7 @@ message GetAllDAGStepRequest {
     string parent_id = 4;
     string callback_type = 5;
     string step_id = 6;
+    string commit_id = 7;
 }
 
 message DAGStepRunRequest {
@@ -96,6 +98,7 @@ message DAG {
     google.protobuf.Struct attributes = 7;
     string commit_id = 8;
     CommitInfo commit_info = 9;
+    string created_at = 10;
 }
 
 message CreateDAGRequest {
