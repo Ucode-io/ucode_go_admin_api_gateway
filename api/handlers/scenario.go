@@ -304,6 +304,7 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 // @Tags Scenario
 // @Accept json
 // @Produce json
+// @Param id path string true "dag-id"
 // @Param project-id query string true "project-id"
 // @Param body body models.CreateScenarioRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=pb.GetScenarioHistoryResponse} "Response body"
@@ -355,13 +356,14 @@ func (h *Handler) GetScenarioHistory(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID scenario_history
+// @ID select_version_scenario
 // @Router /v1/scenario/{id}/select-versions [PUT]
 // @Summary Select Versions scenario
 // @Description Select Versions scenario
 // @Tags Scenario
 // @Accept json
 // @Produce json
+// @Param id path string true "dag-id"
 // @Param project-id query string true "project-id"
 // @Param body body pb.CommitWithRelease  true "Request body"
 // @Success 200 {object} status_http.Response{data=emptypb.Empty} "Response body"
