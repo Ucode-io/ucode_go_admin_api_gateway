@@ -12,6 +12,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // Scenario godoc
@@ -297,7 +298,7 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID scenario_history
-// @Router /v1/scenario/history/{dag_id} [GET]
+// @Router /v1/scenario/{id}/history/ [GET]
 // @Summary Get History scenario
 // @Description Get History scenario
 // @Tags Scenario
@@ -329,8 +330,8 @@ func (h *Handler) GetScenarioHistory(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(c.Param("dag_id")) {
-		h.handleResponse(c, status_http.BadRequest, "dag_id not found")
+	if !util.IsValidUUID(c.Param("id")) {
+		h.handleResponse(c, status_http.BadRequest, "id not found")
 		return
 	}
 
@@ -339,7 +340,7 @@ func (h *Handler) GetScenarioHistory(c *gin.Context) {
 		&pb.GetScenarioHistoryRequest{
 			ProjectId:     ProjectId,
 			EnvironmentId: EnvironmentId.(string),
-			DagId:         c.Param("dag_id"),
+			DagId:         c.Param("id"),
 		},
 	)
 	if err != nil {
@@ -348,4 +349,69 @@ func (h *Handler) GetScenarioHistory(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
+}
+
+// Scenario godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID scenario_history
+// @Router /v1/scenario/{id}/select-versions [PUT]
+// @Summary Select Versions scenario
+// @Description Select Versions scenario
+// @Tags Scenario
+// @Accept json
+// @Produce json
+// @Param project-id query string true "project-id"
+// @Param body body pb.CommitWithRelease  true "Request body"
+// @Success 200 {object} status_http.Response{data=emptypb.Empty} "Response body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) SelectVersionsScenario(c *gin.Context) {
+
+	req := pb.CommitWithRelease{}
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
+	EnvironmentId, _ := c.Get("environment_id")
+	if !util.IsValidUUID(EnvironmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
+		return
+	}
+
+	ProjectId := c.Query("project-id")
+	if !util.IsValidUUID(ProjectId) {
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
+		return
+	}
+
+	if !util.IsValidUUID(c.Param("id")) {
+		h.handleResponse(c, status_http.BadRequest, "id not found")
+		return
+	}
+
+	req.ProjectId = ProjectId
+	req.EnvironmentId = EnvironmentId.(string)
+
+	_, err = services.ScenarioService().DagService().SelectManyScenarioVersions(
+		c.Request.Context(),
+		&req,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, &emptypb.Empty{})
 }
