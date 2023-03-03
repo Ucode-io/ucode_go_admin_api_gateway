@@ -15296,12 +15296,6 @@ paths:
         name: project-id
         required: true
         type: string
-      - description: Request body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateScenarioRequest'
       produces:
       - application/json
       responses:

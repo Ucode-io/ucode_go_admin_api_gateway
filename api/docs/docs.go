@@ -20927,15 +20927,6 @@ const docTemplate = `{
                         "name": "project-id",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "description": "Request body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateScenarioRequest"
-                        }
                     }
                 ],
                 "responses": {
