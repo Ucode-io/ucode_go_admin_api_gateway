@@ -3,6 +3,7 @@ package handlers
 import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/scenario_service"
+	vpb "ucode/ucode_go_api_gateway/genproto/versioning_service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/saidamir98/udevs_pkg/util"
@@ -136,13 +137,23 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 
 	CategoryId := c.Query("category_id")
 
-	services.VersioningService().Release()
+	releaseResp, err := services.VersioningService().Release().GetCurrentActive(
+		c.Request.Context(),
+		&vpb.GetCurrentReleaseRequest{
+			EnvironmentId: EnvironmentId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
 
 	resp, err := services.ScenarioService().DagService().GetAll(
 		c.Request.Context(),
 		&pb.GetAllDAGRequest{
 			Filter:     filter,
 			CategoryId: CategoryId,
+			VersionId:  releaseResp.GetVersionId(),
 		},
 	)
 	if err != nil {
@@ -263,7 +274,7 @@ func (h *Handler) UpdateDAG(c *gin.Context) {
 
 	resp, err := services.ScenarioService().DagService().Update(
 		c.Request.Context(),
-		&pb.UpdateDAGRequest{
+		&pb.CreateScenarioRequest{
 			Dag: &dag,
 		},
 	)

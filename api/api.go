@@ -349,6 +349,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		v1Admin.POST("/scenario/run", h.RunScenario)
 		v1Admin.POST("/scenario", h.CreateFullScenario)
+		v1Admin.PUT("/scenario", h.UpdateFullScenario) //--- update means also create but with new commit
 
 		// query service
 		v1Admin.POST("/query-folder", h.CreateQueryRequestFolder)

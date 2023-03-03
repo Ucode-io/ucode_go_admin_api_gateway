@@ -31,6 +31,7 @@ message DAGStep {
     string title = 11;
     string description = 12;
     string callback_type = 13;
+    string commit_id = 14;
 }
 
 message CreateDAGStepRequest {
@@ -45,6 +46,7 @@ message CreateDAGStepRequest {
     string title = 9;
     string description = 10;
     string callback_type = 11;
+    string commit_id = 12;
 }
 
 message GetDAGStepRequest {
@@ -92,6 +94,8 @@ message DAG {
     string status = 5;
     string category_id = 6;
     google.protobuf.Struct attributes = 7;
+    string commit_id = 8;
+    CommitInfo commit_info = 9;
 }
 
 message CreateDAGRequest {
@@ -101,11 +105,15 @@ message CreateDAGRequest {
 
 message GetDAGRequest {
     string id = 1;
+    string version_id = 2;
+    string commit_id = 3;
 }
 
 message GetAllDAGRequest {
     Filters filter = 1;
     string category_id = 2;
+    string version_id = 3;
+    string commit_id = 4;
 }
 
 message DAGList {
@@ -127,4 +135,24 @@ message CreateScenarioRequest {
     CommitInfo commit_info = 3;
     string project_id = 4;
     string environment_id = 5;
+    string commit_id = 6;
+}
+
+message GetScenarioHistoryRequest {
+    string project_id = 1;
+    string environment_id = 2;
+    string dag_id = 3;
+}
+
+message Commit {
+    CommitInfo commit_info = 1;
+    repeated string version_infos = 2;
+    string created_at  = 3;
+    string updated_at = 4;
+}
+
+message GetScenarioHistoryResponse {
+    repeated Commit commits = 1;
+    int64 count = 2;
+    string id = 3; 
 }

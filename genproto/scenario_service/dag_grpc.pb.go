@@ -27,8 +27,10 @@ type DAGServiceClient interface {
 	Get(ctx context.Context, in *GetDAGRequest, opts ...grpc.CallOption) (*DAG, error)
 	GetAll(ctx context.Context, in *GetAllDAGRequest, opts ...grpc.CallOption) (*DAGList, error)
 	Delete(ctx context.Context, in *DeleteDAGRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	Update(ctx context.Context, in *UpdateDAGRequest, opts ...grpc.CallOption) (*DAG, error)
+	Update(ctx context.Context, in *CreateScenarioRequest, opts ...grpc.CallOption) (*DAG, error)
 	CreateScenario(ctx context.Context, in *CreateScenarioRequest, opts ...grpc.CallOption) (*DAG, error)
+	GetScenarioHistory(ctx context.Context, in *GetScenarioHistoryRequest, opts ...grpc.CallOption) (*GetScenarioHistoryResponse, error)
+	SelectManyScenarioVersions(ctx context.Context, in *CommitWithRelease, opts ...grpc.CallOption) (*CommitWithRelease, error)
 }
 
 type dAGServiceClient struct {
@@ -75,7 +77,7 @@ func (c *dAGServiceClient) Delete(ctx context.Context, in *DeleteDAGRequest, opt
 	return out, nil
 }
 
-func (c *dAGServiceClient) Update(ctx context.Context, in *UpdateDAGRequest, opts ...grpc.CallOption) (*DAG, error) {
+func (c *dAGServiceClient) Update(ctx context.Context, in *CreateScenarioRequest, opts ...grpc.CallOption) (*DAG, error) {
 	out := new(DAG)
 	err := c.cc.Invoke(ctx, "/scenario_service.DAGService/Update", in, out, opts...)
 	if err != nil {
@@ -93,6 +95,24 @@ func (c *dAGServiceClient) CreateScenario(ctx context.Context, in *CreateScenari
 	return out, nil
 }
 
+func (c *dAGServiceClient) GetScenarioHistory(ctx context.Context, in *GetScenarioHistoryRequest, opts ...grpc.CallOption) (*GetScenarioHistoryResponse, error) {
+	out := new(GetScenarioHistoryResponse)
+	err := c.cc.Invoke(ctx, "/scenario_service.DAGService/GetScenarioHistory", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dAGServiceClient) SelectManyScenarioVersions(ctx context.Context, in *CommitWithRelease, opts ...grpc.CallOption) (*CommitWithRelease, error) {
+	out := new(CommitWithRelease)
+	err := c.cc.Invoke(ctx, "/scenario_service.DAGService/SelectManyScenarioVersions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DAGServiceServer is the server API for DAGService service.
 // All implementations must embed UnimplementedDAGServiceServer
 // for forward compatibility
@@ -101,8 +121,10 @@ type DAGServiceServer interface {
 	Get(context.Context, *GetDAGRequest) (*DAG, error)
 	GetAll(context.Context, *GetAllDAGRequest) (*DAGList, error)
 	Delete(context.Context, *DeleteDAGRequest) (*empty.Empty, error)
-	Update(context.Context, *UpdateDAGRequest) (*DAG, error)
+	Update(context.Context, *CreateScenarioRequest) (*DAG, error)
 	CreateScenario(context.Context, *CreateScenarioRequest) (*DAG, error)
+	GetScenarioHistory(context.Context, *GetScenarioHistoryRequest) (*GetScenarioHistoryResponse, error)
+	SelectManyScenarioVersions(context.Context, *CommitWithRelease) (*CommitWithRelease, error)
 	mustEmbedUnimplementedDAGServiceServer()
 }
 
@@ -122,11 +144,17 @@ func (UnimplementedDAGServiceServer) GetAll(context.Context, *GetAllDAGRequest) 
 func (UnimplementedDAGServiceServer) Delete(context.Context, *DeleteDAGRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedDAGServiceServer) Update(context.Context, *UpdateDAGRequest) (*DAG, error) {
+func (UnimplementedDAGServiceServer) Update(context.Context, *CreateScenarioRequest) (*DAG, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedDAGServiceServer) CreateScenario(context.Context, *CreateScenarioRequest) (*DAG, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateScenario not implemented")
+}
+func (UnimplementedDAGServiceServer) GetScenarioHistory(context.Context, *GetScenarioHistoryRequest) (*GetScenarioHistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetScenarioHistory not implemented")
+}
+func (UnimplementedDAGServiceServer) SelectManyScenarioVersions(context.Context, *CommitWithRelease) (*CommitWithRelease, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SelectManyScenarioVersions not implemented")
 }
 func (UnimplementedDAGServiceServer) mustEmbedUnimplementedDAGServiceServer() {}
 
@@ -214,7 +242,7 @@ func _DAGService_Delete_Handler(srv interface{}, ctx context.Context, dec func(i
 }
 
 func _DAGService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateDAGRequest)
+	in := new(CreateScenarioRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -226,7 +254,7 @@ func _DAGService_Update_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/scenario_service.DAGService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DAGServiceServer).Update(ctx, req.(*UpdateDAGRequest))
+		return srv.(DAGServiceServer).Update(ctx, req.(*CreateScenarioRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -245,6 +273,42 @@ func _DAGService_CreateScenario_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DAGServiceServer).CreateScenario(ctx, req.(*CreateScenarioRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DAGService_GetScenarioHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetScenarioHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DAGServiceServer).GetScenarioHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scenario_service.DAGService/GetScenarioHistory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DAGServiceServer).GetScenarioHistory(ctx, req.(*GetScenarioHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DAGService_SelectManyScenarioVersions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommitWithRelease)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DAGServiceServer).SelectManyScenarioVersions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scenario_service.DAGService/SelectManyScenarioVersions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DAGServiceServer).SelectManyScenarioVersions(ctx, req.(*CommitWithRelease))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -279,6 +343,14 @@ var DAGService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateScenario",
 			Handler:    _DAGService_CreateScenario_Handler,
+		},
+		{
+			MethodName: "GetScenarioHistory",
+			Handler:    _DAGService_GetScenarioHistory_Handler,
+		},
+		{
+			MethodName: "SelectManyScenarioVersions",
+			Handler:    _DAGService_SelectManyScenarioVersions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
