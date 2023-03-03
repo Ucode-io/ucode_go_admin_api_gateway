@@ -306,7 +306,6 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 // @Produce json
 // @Param id path string true "dag-id"
 // @Param project-id query string true "project-id"
-// @Param body body models.CreateScenarioRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=pb.GetScenarioHistoryResponse} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
