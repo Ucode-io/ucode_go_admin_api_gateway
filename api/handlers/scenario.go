@@ -466,6 +466,20 @@ func (h *Handler) RevertScenario(c *gin.Context) {
 	req.ProjectId = ProjectId
 	req.EnvironmentId = EnvironmentId.(string)
 
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
+		return
+	}
+
+	req.CommitInfo = &pb.CommitInfo{
+		Guid:       "",
+		CommitType: config.COMMIT_TYPE_SCENARIO,
+		Name:       fmt.Sprintf("Auto Created Commit revert Scenario - %s", time.Now().Format(time.RFC1123)),
+		AuthorId:   authInfo.GetUserId(),
+		ProjectId:  ProjectId,
+	}
+
 	_, err = services.ScenarioService().DagService().RevertScenario(
 		c.Request.Context(),
 		&req,
