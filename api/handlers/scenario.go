@@ -478,6 +478,7 @@ func (h *Handler) RevertScenario(c *gin.Context) {
 		Name:       fmt.Sprintf("Auto Created Commit revert Scenario - %s", time.Now().Format(time.RFC1123)),
 		AuthorId:   authInfo.GetUserId(),
 		ProjectId:  ProjectId,
+		VersionIds: req.GetVersionIds(),
 	}
 
 	_, err = services.ScenarioService().DagService().RevertScenario(

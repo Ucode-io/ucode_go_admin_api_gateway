@@ -168,6 +168,7 @@ message RevertScenarioRequest {
     string project_id = 5;
     string environment_id = 6;
     CommitInfo commit_info = 7;
+    repeated string version_ids = 8;
 }
 
 message RevertScenarioResponse {
