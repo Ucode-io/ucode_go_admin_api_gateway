@@ -1376,6 +1376,8 @@ definitions:
         type: object
       category_id:
         type: string
+      commit_info:
+        $ref: '#/definitions/scenario_service.CommitInfo'
       id:
         type: string
       slug:
@@ -3406,6 +3408,10 @@ definitions:
         type: string
       release_info:
         $ref: '#/definitions/scenario_service.CommitWithRelease_Release'
+      version_ids:
+        items:
+          type: string
+        type: array
     type: object
   scenario_service.CommitWithRelease_Release:
     properties:
@@ -3575,6 +3581,10 @@ definitions:
         type: string
       version_id:
         type: string
+      version_ids:
+        items:
+          type: string
+        type: array
     type: object
   scenario_service.RunScenarioResponse:
     properties:

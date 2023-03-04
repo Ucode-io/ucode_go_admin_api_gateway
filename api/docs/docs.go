@@ -31107,6 +31107,9 @@ const docTemplate = `{
                 "category_id": {
                     "type": "string"
                 },
+                "commit_info": {
+                    "$ref": "#/definitions/scenario_service.CommitInfo"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -34209,6 +34212,12 @@ const docTemplate = `{
                 },
                 "release_info": {
                     "$ref": "#/definitions/scenario_service.CommitWithRelease_Release"
+                },
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -34468,6 +34477,12 @@ const docTemplate = `{
                 },
                 "version_id": {
                     "type": "string"
+                },
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
