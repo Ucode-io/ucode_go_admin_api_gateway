@@ -9,7 +9,6 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // CreateRelation godoc
@@ -77,14 +76,14 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 	}
 
 	relation.ProjectId = resourceEnvironment.GetId()
-	// versionID, commitID, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_RELATION)
+	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_RELATION)
 	// if err != nil {
 	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
 	// 	return
 	// }
 
-	relation.CommitId = uuid.New().String()
-	relation.VersionId = uuid.New().String()
+	// relation.CommitId = commitID
+	// relation.CommitGuid = commitGuid
 
 	resp, err := services.BuilderService().Relation().Create(
 		context.Background(),

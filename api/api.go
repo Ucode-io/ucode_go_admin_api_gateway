@@ -199,6 +199,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/excel/excel_to_db/:excel_id", h.ExcelToDb)
 
 		v1.GET("/barcode-generator/:table_slug", h.GetNewGeneratedBarCode)
+		v1.GET("/code-generator/:table_slug/:field_id", h.GetNewGeneratedCode)
 
 		// Integration with AlfaLab
 		v1.POST("/alfalab/directions", h.CreateDirections)
@@ -248,6 +249,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.DELETE("/template-note/users/:user-permission-id", h.DeleteUserTemplate)
 		v1.POST("/template-note/share", h.CreateSharingToken)
 		v1.PUT("/template-note/share", h.UpdateSharingToken)
+
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
@@ -301,6 +303,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/commit/:id", h.GetCommitByID)
 		v1Admin.GET("/commit", h.GetAllCommits)
 
+		// integration service
+		v1Admin.POST("/generate-payze-link", h.GeneratePayzeLink)
+		v1Admin.POST("/payze-save-card", h.PayzeSaveCard)
+
 		//api-reference service
 		v1Admin.POST("/api-reference", h.CreateApiReference)
 		v1Admin.PUT("/api-reference", h.UpdateApiReference)
@@ -316,6 +322,90 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/category/:category_id", h.GetApiCategoryByID)
 		v1Admin.GET("/category", h.GetAllCategories)
 		v1Admin.DELETE("/category/:category_id", h.DeleteCategory)
+
+		// function folder
+		v1Admin.POST("/function-folder", h.CreateFunctionFolder)
+		v1Admin.GET("/function-folder/:function_ifolder_d", h.GetFunctionFolderById)
+		v1Admin.GET("/function-folder", h.GetAllFunctionFolder)
+		v1Admin.PUT("/function-folder", h.UpdateFunctionFolder)
+		v1Admin.DELETE("/function-folder/:function_folder_id", h.DeleteFunctionFolder)
+
+		// scenario service
+		v1Admin.POST("/scenario/dag", h.CreateDAG)
+		v1Admin.GET("/scenario/dag/:id", h.GetDAG)
+		v1Admin.GET("/scenario/dag", h.GetAllDAG)
+		v1Admin.PUT("/scenario/dag", h.UpdateDAG)
+		v1Admin.DELETE("/scenario/dag/:id", h.DeleteDAG)
+
+		v1Admin.POST("/scenario/dag-step", h.CreateDagStep)
+		v1Admin.GET("/scenario/dag-step/:id", h.GetDagStep)
+		v1Admin.GET("/scenario/dag-step", h.GetAllDagStep)
+		v1Admin.PUT("/scenario/dag-step", h.UpdateDagStep)
+		v1Admin.DELETE("/scenario/dag-step/:id", h.DeleteDAG)
+
+		v1Admin.POST("/scenario/category", h.CreateCategoryScenario)
+		v1Admin.GET("/scenario/category/:id", h.GetCategoryScenario)
+		v1Admin.GET("/scenario/category", h.GetListCategoryScenario)
+
+		v1Admin.POST("/scenario/run", h.RunScenario)
+		v1Admin.POST("/scenario", h.CreateFullScenario)
+		v1Admin.PUT("/scenario", h.UpdateFullScenario) //--- update means also create but with new commit
+		v1Admin.GET("/scenario/:id/history", h.GetScenarioHistory)
+		v1Admin.PUT("/scenario/:id/select-versions", h.SelectVersionsScenario)
+		v1Admin.POST("/scenario/revert", h.RevertScenario)
+
+		// query service
+		v1Admin.POST("/query-folder", h.CreateQueryRequestFolder)
+		v1Admin.PUT("/query-folder", h.UpdateQueryRequestFolder)
+		v1Admin.GET("/query-folder", h.GetListQueryRequestFolder)
+		v1Admin.GET("/query-folder/:query-folder-id", h.GetSingleQueryRequestFolder)
+		v1Admin.DELETE("/query-folder/:query-folder-id", h.DeleteQueryRequestFolder)
+
+		v1Admin.POST("/query-request", h.CreateQueryRequest)
+		v1Admin.PUT("/query-request", h.UpdateQueryRequest)
+		v1Admin.GET("/query-request", h.GetListQueryRequest)
+		v1Admin.GET("/query-request/:query-id", h.GetSingleQueryRequest)
+		v1Admin.DELETE("/query-request/:query-id", h.DeleteQueryRequest)
+		v1Admin.POST("/query-request/select-versions/:query-id", h.InsertManyVersionForQueryService)
+		v1Admin.POST("/query-request/run", h.QueryRun)
+		v1Admin.GET("/query-request/:query-id/history", h.GetQueryHistory)
+		v1Admin.POST("/query-request/:query-id/revert", h.RevertQuery)
+		v1Admin.GET("/query-request/:query-id/log", h.GetListQueryLog)
+		v1Admin.GET("/query-request/:query-id/log/:log-id", h.GetSingleQueryLog)
+
+		// web page service
+		v1Admin.POST("/webpage-folder", h.CreateWebPageFolder)
+		v1Admin.PUT("/webpage-folder", h.UpdateWebPageFolder)
+		v1Admin.GET("/webpage-folder", h.GetListWebPageFolder)
+		v1Admin.GET("/webpage-folder/:webpage-folder-id", h.GetSingleWebPageFolder)
+		v1Admin.DELETE("/webpage-folder/:webpage-folder-id", h.DeleteWebPageFolder)
+
+		v1Admin.POST("/webpageV2", h.CreateWebPageV2)
+		v1Admin.PUT("/webpageV2", h.UpdateWebPageV2)
+		v1Admin.GET("/webpageV2", h.GetListWebPageV2)
+		v1Admin.GET("/webpageV2/:webpage-id", h.GetSingleWebPageV2)
+		v1Admin.DELETE("/webpageV2/:webpage-id", h.DeleteWebPageV2)
+		//v1Admin.POST("/webpageV2/select-versions/:webpage-id", h.InsertManyVersionForQueryService)
+		v1Admin.GET("/webpageV2/:webpage-id/history", h.GetWebPageHistory)
+		//v1Admin.POST("/webpageV2/:webpage-id/revert", h.RevertQuery)
+	}
+	v2Admin := r.Group("/v2")
+	v2Admin.Use(h.AdminAuthMiddleware())
+	{
+
+		// function
+		v2Admin.POST("/function", h.CreateNewFunction)
+		v2Admin.GET("/function/:function_id", h.GetNewFunctionByID)
+		v2Admin.GET("/function", h.GetAllNewFunctions)
+		v2Admin.PUT("/function", h.UpdateNewFunction)
+		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
+
+		// custom event
+		v2Admin.POST("/custom-event", h.CreateNewCustomEvent)
+		v2Admin.GET("/custom-event/:custom_event_id", h.GetNewCustomEventByID)
+		v2Admin.GET("/custom-event", h.GetAllNewCustomEvents)
+		v2Admin.PUT("/custom-event", h.UpdateNewCustomEvent)
+		v2Admin.DELETE("/custom-event/:custom_event_id", h.DeleteNewCustomEvent)
 	}
 
 	// v3 for ucode version 2
@@ -352,7 +442,7 @@ func customCORSMiddleware() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, X-API-KEY, Platform-Type")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, Platform-Type, X-API-KEY")
 		c.Header("Access-Control-Max-Age", "3600")
 
 		if c.Request.Method == "OPTIONS" {

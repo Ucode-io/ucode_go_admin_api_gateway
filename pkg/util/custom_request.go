@@ -86,3 +86,27 @@ func DoXMLRequest(url string, method string, body interface{}) (responseModel mo
 
 	return
 }
+
+func DoRequestCheckCodeServer(url string, method string, body interface{}) (status int, err error) {
+	data, err := json.Marshal(&body)
+	if err != nil {
+		return
+	}
+	client := &http.Client{
+		Timeout: time.Duration(5 * time.Second),
+	}
+
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
+	if err != nil {
+		return
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	status = resp.StatusCode
+	defer resp.Body.Close()
+
+	return
+}

@@ -64,6 +64,7 @@ message RoleWithAppTablePermissions {
                 string delete = 4;
                 string guid = 5;
                 bool is_have_condition = 6;
+                bool is_public = 7;
             }
             message FieldPermission {
                 string field_id = 1;

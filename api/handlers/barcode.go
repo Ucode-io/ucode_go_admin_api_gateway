@@ -82,3 +82,79 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, resp)
 }
+
+// GetNewGeneratedBarCode godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID generate_new_code_with_prefix
+// @Router /v1/code-generator/{table_slug}/{field_id} [GET]
+// @Summary get code with prefix
+// @Description Get Code with prefix
+// @Tags Barcode
+// @Accept json
+// @Produce json
+// @Param table_slug path string true "table_slug"
+// @Param field_id path string true "field_id"
+// @Success 200 {object} status_http.Response{data=object_builder_service.CodeGenerateRes} "Code"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetNewGeneratedCode(c *gin.Context) {
+	tableSlug := c.Param("table_slug")
+	fieldId := c.Param("field_id")
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+		context.Background(),
+		&company_service.GetResEnvByResIdEnvIdRequest{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resp, err := services.BuilderService().Barcode().GenerateCodeWithPrefix(
+		context.Background(),
+		&obs.CodeGenerateReq{
+			TableSlug: tableSlug,
+			ProjectId: resourceEnvironment.GetId(),
+			FieldId:   fieldId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}

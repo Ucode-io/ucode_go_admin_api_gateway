@@ -48,6 +48,8 @@ message EmailOtpRequest {
     string email = 1;
     string client_type = 2;
     string project_id = 3;
+    string table_slug = 4;
+    string guid = 5;
 }
 
 message PhoneOtpRequst {

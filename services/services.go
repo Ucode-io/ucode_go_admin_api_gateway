@@ -13,20 +13,30 @@ type ServiceManagerI interface {
 	ApiReferenceService() ApiReferenceServiceI
 	SmsService() SmsServiceI
 	PosService() PosServiceI
+	FunctionService() FunctionServiceI
 	TemplateService() TemplateServiceI
 	VersioningService() VersioningServiceI
+	ScenarioService() ScenarioServiceI
+	QueryService() QueryServiceI
+	IntegrationPayzeService() IntegrationServicePayzeI
+	WebPageService() WebPageServiceI
 }
 
 type grpcClients struct {
-	builderService      BuilderServiceI
-	authService         AuthServiceI
-	companyService      CompanyServiceI
-	analyticsService    AnalyticsServiceI
-	apiReferenceService ApiReferenceServiceI
-	smsService          SmsServiceI
-	posService          PosServiceI
-	templateService     TemplateServiceI
-	versioningService   VersioningServiceI
+	builderService           BuilderServiceI
+	authService              AuthServiceI
+	companyService           CompanyServiceI
+	analyticsService         AnalyticsServiceI
+	apiReferenceService      ApiReferenceServiceI
+	smsService               SmsServiceI
+	posService               PosServiceI
+	functionService          FunctionServiceI
+	templateService          TemplateServiceI
+	versioningService        VersioningServiceI
+	scenarioService          ScenarioServiceI
+	queryService             QueryServiceI
+	integrationPayzeServiceI IntegrationServicePayzeI
+	webPageService           WebPageServiceI
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -64,8 +74,17 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	if err != nil {
 		return nil, err
 	}
+	functionServiceClient, err := NewFunctionServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
 
 	templateServiceClient, err := NewTemplateServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	queryServiceClient, err := NewQueryServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -75,16 +94,36 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
+	scenarioServiceClient, err := NewScenarioServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	integrationPayzeServiceClient, err := NewPayzeServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	webPageServiceClient, err := NewWebPageServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return grpcClients{
-		apiReferenceService: apiReferenceClient,
-		analyticsService:    analyticsServiceClient,
-		authService:         authServiceClient,
-		builderService:      builderServiceClient,
-		posService:          posServiceClient,
-		smsService:          smsServiceClient,
-		companyService:      companyServiceClient,
-		templateService:     templateServiceClient,
-		versioningService:   versioningServiceClient,
+		apiReferenceService:      apiReferenceClient,
+		analyticsService:         analyticsServiceClient,
+		authService:              authServiceClient,
+		builderService:           builderServiceClient,
+		posService:               posServiceClient,
+		smsService:               smsServiceClient,
+		companyService:           companyServiceClient,
+		functionService:          functionServiceClient,
+		templateService:          templateServiceClient,
+		versioningService:        versioningServiceClient,
+		scenarioService:          scenarioServiceClient,
+		queryService:             queryServiceClient,
+		integrationPayzeServiceI: integrationPayzeServiceClient,
+		webPageService:           webPageServiceClient,
 	}, nil
 }
 
@@ -116,10 +155,29 @@ func (g grpcClients) PosService() PosServiceI {
 	return g.posService
 }
 
+func (g grpcClients) FunctionService() FunctionServiceI {
+	return g.functionService
+}
 func (g grpcClients) TemplateService() TemplateServiceI {
 	return g.templateService
 }
 
 func (g grpcClients) VersioningService() VersioningServiceI {
 	return g.versioningService
+}
+
+func (g grpcClients) ScenarioService() ScenarioServiceI {
+	return g.scenarioService
+}
+
+func (g grpcClients) QueryService() QueryServiceI {
+	return g.queryService
+}
+
+func (g grpcClients) IntegrationPayzeService() IntegrationServicePayzeI {
+	return g.integrationPayzeServiceI
+}
+
+func (g grpcClients) WebPageService() WebPageServiceI {
+	return g.webPageService
 }
