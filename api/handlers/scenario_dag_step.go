@@ -158,6 +158,7 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 		Type:       resp.GetDag().GetType(),
 		CategoryId: resp.GetDag().GetCategoryId(),
 		Attributes: attributesMap,
+		CommitInfo: resp.GetDag().GetCommitInfo(),
 	}
 
 	for _, v := range resp.DagSteps {

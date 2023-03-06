@@ -19,5 +19,6 @@ service DAGService {
     rpc CreateScenario(CreateScenarioRequest) returns (DAG);
     rpc GetScenarioHistory(GetScenarioHistoryRequest) returns (GetScenarioHistoryResponse);
     rpc SelectManyScenarioVersions(CommitWithRelease) returns (CommitWithRelease);
+    rpc RevertScenario(RevertScenarioRequest) returns (RevertScenarioResponse);
 }
 

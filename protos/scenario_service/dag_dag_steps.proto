@@ -159,3 +159,19 @@ message GetScenarioHistoryResponse {
     int64 count = 2;
     string id = 3; 
 }
+
+message RevertScenarioRequest {
+    string new_commit_id = 1;
+    string version_id = 2;
+    string id = 3;
+    string old_commit_id = 4;
+    string project_id = 5;
+    string environment_id = 6;
+    CommitInfo commit_info = 7;
+    repeated string version_ids = 8;
+}
+
+message RevertScenarioResponse {
+    string id = 1;
+    string commit_id = 2;
+}

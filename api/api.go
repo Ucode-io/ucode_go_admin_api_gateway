@@ -352,6 +352,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.PUT("/scenario", h.UpdateFullScenario) //--- update means also create but with new commit
 		v1Admin.GET("/scenario/:id/history", h.GetScenarioHistory)
 		v1Admin.PUT("/scenario/:id/select-versions", h.SelectVersionsScenario)
+		v1Admin.POST("/scenario/revert", h.RevertScenario)
 
 		// query service
 		v1Admin.POST("/query-folder", h.CreateQueryRequestFolder)

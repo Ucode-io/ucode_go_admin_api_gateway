@@ -41,6 +41,7 @@ type DAG struct {
 	Status     string                 `json:"status"`
 	CategoryId string                 `json:"category_id"`
 	Attributes map[string]interface{} `json:"attributes"`
+	CommitInfo *pb.CommitInfo         `json:"commit_info"`
 }
 
 type CreateScenarioRequest struct {
