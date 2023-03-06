@@ -25279,6 +25279,13 @@ var doc = `{
                 "operationId": "update_web_page_folder",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateFolderReqModel",
                         "name": "folder",
                         "in": "body",
@@ -25364,6 +25371,13 @@ var doc = `{
                 "summary": "Create web page folder",
                 "operationId": "create_web_page_folder",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateFolderReqModel",
                         "name": "webpage_folder",
@@ -25746,6 +25760,13 @@ var doc = `{
                 "operationId": "update_web_pageV2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateWebPageReqModel",
                         "name": "webpage",
                         "in": "body",
@@ -25831,6 +25852,13 @@ var doc = `{
                 "summary": "Create webpage",
                 "operationId": "create_web_pageV2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateWebPageReqModel",
                         "name": "webpage",
@@ -25919,6 +25947,13 @@ var doc = `{
                 "summary": "Insert Many webpageV2",
                 "operationId": "insert_many_web_pageV2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "webpage-id",
@@ -26323,6 +26358,13 @@ var doc = `{
                 "summary": "Revert webpage",
                 "operationId": "revert_web_pageV2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "webpage-id",
@@ -30986,9 +31028,6 @@ var doc = `{
         "models.CreateFolderReqModel": {
             "type": "object",
             "properties": {
-                "environment_id": {
-                    "type": "string"
-                },
                 "project_id": {
                     "type": "string"
                 },
@@ -31173,9 +31212,6 @@ var doc = `{
             "properties": {
                 "components": {
                     "$ref": "#/definitions/google.golang.org_protobuf_types_known_structpb.Struct"
-                },
-                "environment_id": {
-                    "type": "string"
                 },
                 "folder_id": {
                     "type": "string"
@@ -31588,9 +31624,6 @@ var doc = `{
         "models.ManyVersionsModel": {
             "type": "object",
             "properties": {
-                "environment_id": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
@@ -31802,9 +31835,6 @@ var doc = `{
                 "commit_info": {
                     "$ref": "#/definitions/web_page_service.CommitInfo"
                 },
-                "environment_id": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
@@ -31874,9 +31904,6 @@ var doc = `{
         "models.UpdateFolderReqModel": {
             "type": "object",
             "properties": {
-                "environment_id": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
@@ -31893,9 +31920,6 @@ var doc = `{
             "properties": {
                 "components": {
                     "$ref": "#/definitions/google.golang.org_protobuf_types_known_structpb.Struct"
-                },
-                "environment_id": {
-                    "type": "string"
                 },
                 "folder_id": {
                     "type": "string"

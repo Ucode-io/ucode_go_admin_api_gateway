@@ -19,6 +19,7 @@ import (
 
 // CreateWebPageFolder godoc
 // @Security ApiKeyAuth
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_web_page_folder
 // @Router /v1/webpage-folder [POST]
 // @Summary Create web page folder
@@ -67,13 +68,14 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 	//	return
 	//}
 	//
-	//environmentId, ok := c.Get("environment_id")
-	//if !ok {
-	//	err = errors.New("error getting environment id")
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-	//	return
-	//}
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
 
+	folder.EnvironmentId = environmentId.(string)
 	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
@@ -217,6 +219,7 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 
 // UpdateWebPageFolder godoc
 // @Security ApiKeyAuth
+// @Param Environment-Id header string true "Environment-Id"
 // @ID update_web_page_folder
 // @Router /v1/webpage-folder [PUT]
 // @Summary Update webpage folder
@@ -265,13 +268,13 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 	//	return
 	//}
 	//
-	//environmentId, ok := c.Get("environment_id")
-	//if !ok {
-	//	err = errors.New("error getting environment id")
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-	//	return
-	//}
-	//
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+	folder.EnvironmentId = environmentId.(string)
 	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
@@ -509,6 +512,7 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 
 // CreateWebPageV2 godoc
 // @Security ApiKeyAuth
+// @Param Environment-Id header string true "Environment-Id"
 // @ID create_web_pageV2
 // @Router /v1/webpageV2 [POST]
 // @Summary Create webpage
@@ -559,13 +563,13 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	//}
 	//
 	fmt.Println("TEST:::::4")
-	//environmentId, ok := c.Get("environment_id")
-	//if !ok {
-	//	err = errors.New("error getting environment id")
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-	//	return
-	//}
-	//
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+	webpage.EnvironmentId = environmentId.(string)
 	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
@@ -758,6 +762,7 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 
 // UpdateWebPageV2 godoc
 // @Security ApiKeyAuth
+// @Param Environment-Id header string true "Environment-Id"
 // @ID update_web_pageV2
 // @Router /v1/webpageV2 [PUT]
 // @Summary Update web page
@@ -806,13 +811,13 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 	//	return
 	//}
 
-	//environmentId, ok := c.Get("environment_id")
-	//if !ok {
-	//	err = errors.New("error getting environment id")
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-	//	return
-	//}
-
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+	webPage.EnvironmentId = environmentId.(string)
 	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
@@ -1245,6 +1250,7 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 
 // RevertWebPage godoc
 // @Security ApiKeyAuth
+// @Param Environment-Id header string true "Environment-Id"
 // @ID revert_web_pageV2
 // @Router /v1/webpageV2/{webpage-id}/revert [POST]
 // @Summary Revert webpage
@@ -1277,7 +1283,7 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(body.ProjectId) {
+	if !util.IsValidUUID(body.GetProjectId()) {
 		err := errors.New("project_id is an invalid uuid")
 		h.log.Error("project_id is an invalid uuid", logger.Error(err))
 		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
@@ -1292,6 +1298,13 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+	body.EnvironmentId = environmentId.(string)
 	if !util.IsValidUUID(body.GetEnvironmentId()) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
@@ -1321,6 +1334,7 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 
 // InsertManyVersionForWebPageService godoc
 // @Security ApiKeyAuth
+// @Param Environment-Id header string true "Environment-Id"
 // @ID insert_many_web_pageV2
 // @Router /v1/webpageV2/select-versions/{webpage-id} [POST]
 // @Summary Insert Many webpageV2
@@ -1374,6 +1388,18 @@ func (h *Handler) InsertManyVersionForWebPageService(c *gin.Context) {
 		return
 	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+	body.EnvironmentId = environmentId.(string)
+	if !util.IsValidUUID(body.GetEnvironmentId()) {
+		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
+
 	// _, commitId, err := h.CreateAutoCommitForAdminChange(c, environmentID.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
 	// if err != nil {
 	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
@@ -1383,7 +1409,6 @@ func (h *Handler) InsertManyVersionForWebPageService(c *gin.Context) {
 	resp, err := services.WebPageService().WebPage().CreateManyWebPage(c.Request.Context(), &body)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
-
 		return
 	}
 

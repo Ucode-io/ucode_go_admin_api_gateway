@@ -1241,8 +1241,6 @@ definitions:
     type: object
   models.CreateFolderReqModel:
     properties:
-      environment_id:
-        type: string
       project_id:
         type: string
       title:
@@ -1364,8 +1362,6 @@ definitions:
     properties:
       components:
         $ref: '#/definitions/google.golang.org_protobuf_types_known_structpb.Struct'
-      environment_id:
-        type: string
       folder_id:
         type: string
       project_id:
@@ -1636,8 +1632,6 @@ definitions:
     type: object
   models.ManyVersionsModel:
     properties:
-      environment_id:
-        type: string
       id:
         type: string
       old_commit_id:
@@ -1777,8 +1771,6 @@ definitions:
     properties:
       commit_info:
         $ref: '#/definitions/web_page_service.CommitInfo'
-      environment_id:
-        type: string
       id:
         type: string
       old_commit_id:
@@ -1824,8 +1816,6 @@ definitions:
     type: object
   models.UpdateFolderReqModel:
     properties:
-      environment_id:
-        type: string
       id:
         type: string
       project_id:
@@ -1837,8 +1827,6 @@ definitions:
     properties:
       components:
         $ref: '#/definitions/google.golang.org_protobuf_types_known_structpb.Struct'
-      environment_id:
-        type: string
       folder_id:
         type: string
       id:
@@ -18931,6 +18919,11 @@ paths:
       description: Create web page folder
       operationId: create_web_page_folder
       parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateFolderReqModel
         in: body
         name: webpage_folder
@@ -18978,6 +18971,11 @@ paths:
       description: Update webpage folder
       operationId: update_web_page_folder
       parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: UpdateFolderReqModel
         in: body
         name: folder
@@ -19196,6 +19194,11 @@ paths:
       description: Create webpage
       operationId: create_web_pageV2
       parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateWebPageReqModel
         in: body
         name: webpage
@@ -19243,6 +19246,11 @@ paths:
       description: Update web page
       operationId: update_web_pageV2
       parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: UpdateWebPageReqModel
         in: body
         name: webpage
@@ -19472,6 +19480,11 @@ paths:
       description: Revert webpage
       operationId: revert_web_pageV2
       parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: webpage-id
         in: path
         name: webpage-id
@@ -19525,6 +19538,11 @@ paths:
       description: Insert Many webpageV2
       operationId: insert_many_web_pageV2
       parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: webpage-id
         in: path
         name: webpage-id
