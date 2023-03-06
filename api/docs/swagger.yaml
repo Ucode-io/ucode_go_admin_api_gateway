@@ -15,7 +15,7 @@ definitions:
       additional_url:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       authentification:
         type: boolean
       category_id:
@@ -296,7 +296,7 @@ definitions:
   auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       label:
@@ -900,7 +900,25 @@ definitions:
       webPageServicePort:
         type: string
     type: object
+  empty.Empty:
+    type: object
   emptypb.Empty:
+    type: object
+  github.com_golang_protobuf_ptypes_struct.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
+  google.golang.org_protobuf_types_known_structpb.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
     type: object
   handlers.Path:
     properties:
@@ -952,7 +970,7 @@ definitions:
       currency:
         type: string
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       deleted_at:
         type: string
       id:
@@ -987,7 +1005,7 @@ definitions:
       currency:
         type: string
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       deleted_at:
         type: string
       id:
@@ -1221,6 +1239,15 @@ definitions:
       unique:
         type: boolean
     type: object
+  models.CreateFolderReqModel:
+    properties:
+      environment_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+    type: object
   models.CreateFunctionFolderRequest:
     properties:
       description:
@@ -1331,6 +1358,19 @@ definitions:
       slug:
         type: string
       subtitle_field_slug:
+        type: string
+    type: object
+  models.CreateWebPageReqModel:
+    properties:
+      components:
+        $ref: '#/definitions/google.golang.org_protobuf_types_known_structpb.Struct'
+      environment_id:
+        type: string
+      folder_id:
+        type: string
+      project_id:
+        type: string
+      title:
         type: string
     type: object
   models.CreateWebPageRequest:
@@ -1594,6 +1634,21 @@ definitions:
           type: string
         type: array
     type: object
+  models.ManyVersionsModel:
+    properties:
+      environment_id:
+        type: string
+      id:
+        type: string
+      old_commit_id:
+        type: string
+      project_id:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+    type: object
   models.Panel:
     properties:
       attributes:
@@ -1718,6 +1773,21 @@ definitions:
         additionalProperties: true
         type: object
     type: object
+  models.RevertWebPageReqModel:
+    properties:
+      commit_info:
+        $ref: '#/definitions/web_page_service.CommitInfo'
+      environment_id:
+        type: string
+      id:
+        type: string
+      old_commit_id:
+        type: string
+      project_id:
+        type: string
+      version_id:
+        type: string
+    type: object
   models.RunScenarioRequest:
     properties:
       body:
@@ -1750,6 +1820,32 @@ definitions:
       recipient:
         type: string
       text:
+        type: string
+    type: object
+  models.UpdateFolderReqModel:
+    properties:
+      environment_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+    type: object
+  models.UpdateWebPageReqModel:
+    properties:
+      components:
+        $ref: '#/definitions/google.golang.org_protobuf_types_known_structpb.Struct'
+      environment_id:
+        type: string
+      folder_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      title:
         type: string
     type: object
   models.UpsertCommonMessage:
@@ -1786,7 +1882,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -1959,7 +2055,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -2018,7 +2114,7 @@ definitions:
   object_builder_service.CreateFieldRequest:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       autofill_field:
         type: string
       autofill_table:
@@ -2203,7 +2299,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -2629,7 +2725,7 @@ definitions:
   object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       label:
@@ -2846,7 +2942,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -3101,7 +3197,7 @@ definitions:
   query_service.CreateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3217,7 +3313,7 @@ definitions:
       query_id:
         type: string
       request:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       response:
         type: string
       user_id:
@@ -3226,7 +3322,7 @@ definitions:
   query_service.Query:
     properties:
       body:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3290,7 +3386,7 @@ definitions:
   query_service.UpdateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3448,7 +3544,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/structpb.Struct'
+          $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
@@ -3461,7 +3557,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       slug:
         type: string
       title:
@@ -3472,7 +3568,7 @@ definitions:
   scenario_service.DAG:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       category_id:
         type: string
       commit_id:
@@ -3509,7 +3605,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/structpb.Struct'
+          $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
@@ -3526,7 +3622,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       slug:
         type: string
       title:
@@ -3534,7 +3630,7 @@ definitions:
       type:
         type: string
       ui_component:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
     type: object
   scenario_service.GetDAGRequest:
     properties:
@@ -3589,7 +3685,7 @@ definitions:
   scenario_service.RunScenarioResponse:
     properties:
       response:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
     type: object
   scenario_service.VersionInfo:
     properties:
@@ -3615,14 +3711,6 @@ definitions:
         type: string
       status:
         type: string
-    type: object
-  structpb.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
     type: object
   structpb.Value:
     properties:
@@ -3662,7 +3750,7 @@ definitions:
       folder_id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       project_id:
         type: string
       title:
@@ -3845,7 +3933,7 @@ definitions:
   template_service.GetObjectTokenRes:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       role:
         type: string
     type: object
@@ -3876,7 +3964,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       project_id:
         type: string
       title:
@@ -3971,7 +4059,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       project_id:
         type: string
       title:
@@ -4247,38 +4335,6 @@ definitions:
           $ref: '#/definitions/web_page_service.VersionInfo'
         type: array
     type: object
-  web_page_service.CreateFolderReq:
-    properties:
-      environment_id:
-        type: string
-      project_id:
-        type: string
-      resource_id:
-        type: string
-      title:
-        type: string
-    type: object
-  web_page_service.CreateWebPageReq:
-    properties:
-      commit_id:
-        type: string
-      commit_info:
-        $ref: '#/definitions/web_page_service.CommitInfo'
-      components:
-        $ref: '#/definitions/structpb.Struct'
-      environment_id:
-        type: string
-      folder_id:
-        type: string
-      project_id:
-        type: string
-      resource_id:
-        type: string
-      title:
-        type: string
-      version_id:
-        type: string
-    type: object
   web_page_service.Folder:
     properties:
       environment_id:
@@ -4343,19 +4399,6 @@ definitions:
           $ref: '#/definitions/web_page_service.VersionInfo'
         type: object
     type: object
-  web_page_service.UpdateFolderReq:
-    properties:
-      environment_id:
-        type: string
-      id:
-        type: string
-      project_id:
-        type: string
-      resource_id:
-        type: string
-      title:
-        type: string
-    type: object
   web_page_service.VersionInfo:
     properties:
       author_id:
@@ -4380,7 +4423,7 @@ definitions:
       commit_info:
         $ref: '#/definitions/web_page_service.CommitInfo'
       components:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github.com_golang_protobuf_ptypes_struct.Struct'
       environment_id:
         type: string
       folder_id:
@@ -18837,11 +18880,6 @@ paths:
       description: Get List webpage folder
       operationId: get_list_web_page_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -18893,27 +18931,12 @@ paths:
       description: Create web page folder
       operationId: create_web_page_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: CreateFolderReq
+      - description: CreateFolderReqModel
         in: body
         name: webpage_folder
         required: true
         schema:
-          $ref: '#/definitions/web_page_service.CreateFolderReq'
+          $ref: '#/definitions/models.CreateFolderReqModel'
       produces:
       - application/json
       responses:
@@ -18955,27 +18978,12 @@ paths:
       description: Update webpage folder
       operationId: update_web_page_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: UpdateFolderReq
+      - description: UpdateFolderReqModel
         in: body
         name: folder
         required: true
         schema:
-          $ref: '#/definitions/web_page_service.UpdateFolderReq'
+          $ref: '#/definitions/models.UpdateFolderReqModel'
       produces:
       - application/json
       responses:
@@ -19018,11 +19026,6 @@ paths:
       description: Delete webpage folder
       operationId: delete_web_page_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -19072,11 +19075,6 @@ paths:
       description: Get single webpage folder
       operationId: get_single_web_page_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -19134,11 +19132,6 @@ paths:
       description: Get List web page
       operationId: get_list_web_pageV2
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -19203,27 +19196,12 @@ paths:
       description: Create webpage
       operationId: create_web_pageV2
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: CreateWebPageReq
+      - description: CreateWebPageReqModel
         in: body
         name: webpage
         required: true
         schema:
-          $ref: '#/definitions/web_page_service.CreateWebPageReq'
+          $ref: '#/definitions/models.CreateWebPageReqModel'
       produces:
       - application/json
       responses:
@@ -19265,27 +19243,12 @@ paths:
       description: Update web page
       operationId: update_web_pageV2
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: WebPage
+      - description: UpdateWebPageReqModel
         in: body
         name: webpage
         required: true
         schema:
-          $ref: '#/definitions/web_page_service.WebPage'
+          $ref: '#/definitions/models.UpdateWebPageReqModel'
       produces:
       - application/json
       responses:
@@ -19328,11 +19291,6 @@ paths:
       description: Delete webpage
       operationId: delete_web_pageV2
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -19382,11 +19340,6 @@ paths:
       description: Get single webpage
       operationId: get_single_web_pageV2
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -19405,6 +19358,10 @@ paths:
       - description: commit-id
         in: query
         name: commit-id
+        type: string
+      - description: version-id
+        in: query
+        name: version-id
         type: string
       produces:
       - application/json
@@ -19448,6 +19405,11 @@ paths:
       description: Get webpage history
       operationId: get_web_page_history
       parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: webpage-id
         in: path
         name: webpage-id
@@ -19501,6 +19463,112 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get Api webpage history
+      tags:
+      - WebPage
+  /v1/webpageV2/{webpage-id}/revert:
+    post:
+      consumes:
+      - application/json
+      description: Revert webpage
+      operationId: revert_web_pageV2
+      parameters:
+      - description: webpage-id
+        in: path
+        name: webpage-id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: RevertWebPageReq
+        required: true
+        schema:
+          $ref: '#/definitions/models.RevertWebPageReqModel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/web_page_service.WebPage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Revert webpage
+      tags:
+      - WebPage
+  /v1/webpageV2/select-versions/{webpage-id}:
+    post:
+      consumes:
+      - application/json
+      description: Insert Many webpageV2
+      operationId: insert_many_web_pageV2
+      parameters:
+      - description: webpage-id
+        in: path
+        name: webpage-id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: ManyVersionsModel
+        required: true
+        schema:
+          $ref: '#/definitions/models.ManyVersionsModel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/empty.Empty'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Insert Many webpageV2
       tags:
       - WebPage
   /v2/custom-event:
