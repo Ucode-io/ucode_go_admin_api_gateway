@@ -2,6 +2,7 @@ package gitlab_integration
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -14,6 +15,7 @@ func CreateProjectFork(cfg config.Config, projectName string) (response models.G
 
 	projectId := cfg.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
+	fmt.Println("config::::::", cfg.GitlabIntegrationURL, cfg.GitlabIntegrationToken)
 
 	resp, err := DoRequest(cfg.GitlabIntegrationURL+"/api/v4/projects/"+strProjectId+"/fork", cfg.GitlabIntegrationToken, "POST", models.CreateProject{
 		NamespaceID:          cfg.GitlabGroupId,
