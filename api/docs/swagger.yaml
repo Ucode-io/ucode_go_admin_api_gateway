@@ -323,6 +323,37 @@ definitions:
       updated_at:
         type: string
     type: object
+  auth_service.User:
+    properties:
+      active:
+        type: integer
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      company_id:
+        type: string
+      email:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      login:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      photo_url:
+        type: string
+      project_id:
+        type: string
+      role_id:
+        type: string
+    type: object
   auth_service.V2LoginResponse:
     properties:
       app_permissions:
@@ -351,6 +382,8 @@ definitions:
         type: array
       token:
         $ref: '#/definitions/auth_service.Token'
+      user:
+        $ref: '#/definitions/auth_service.User'
       user_found:
         type: boolean
       user_id:
@@ -837,6 +870,10 @@ definitions:
       minioProtocol:
         type: boolean
       minioSecretAccessKey:
+        type: string
+      notificationGRPCPort:
+        type: string
+      notificationServiceHost:
         type: string
       objectBuilderGRPCPort:
         type: string
@@ -1915,6 +1952,18 @@ definitions:
       project_id:
         type: string
       url:
+        type: string
+    type: object
+  notification_service.CreateUserTokenRequest:
+    properties:
+      token:
+        type: string
+      user_id:
+        type: string
+    type: object
+  notification_service.CreateUserTokenResponse:
+    properties:
+      user_token_id:
         type: string
     type: object
   object_builder_service.ActionRelation:
@@ -12648,6 +12697,63 @@ paths:
       summary: Get Commits note
       tags:
       - Note
+  /v1/notification/user-fcmtoken:
+    post:
+      consumes:
+      - application/json
+      description: Create User Token
+      operationId: create-user-token
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: Note_Folder
+        required: true
+        schema:
+          $ref: '#/definitions/notification_service.CreateUserTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/notification_service.CreateUserTokenResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create User Token
+      tags:
+      - Notification
   /v1/object-upsert/{table_slug}:
     post:
       consumes:

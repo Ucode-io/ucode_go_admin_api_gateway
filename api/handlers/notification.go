@@ -20,7 +20,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param Note_Folder body npb.CreateUserTokenRequest true "Request Body"
-// @Success 201 {object} status_http.Response{data=tmp.FolderNote} "Response Body"
+// @Success 201 {object} status_http.Response{data=npb.CreateUserTokenResponse} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateUserFCMToken(c *gin.Context) {
