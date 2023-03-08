@@ -199,7 +199,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, function)
 }
 
-// GetAllFunctions godoc
+// GetAllNewFunctions godoc
 // @Security ApiKeyAuth
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_new_functions
@@ -383,7 +383,7 @@ func (h *Handler) DeleteNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	
+
 	// delete cloned repo
 	err = gitlab_integration.DeletedClonedRepoByPath(resp.Path, h.cfg)
 	if err != nil {

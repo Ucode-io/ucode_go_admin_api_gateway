@@ -25170,13 +25170,6 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
@@ -25268,32 +25261,18 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateFolderReq",
+                        "description": "UpdateFolderReqModel",
                         "name": "folder",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/web_page_service.UpdateFolderReq"
+                            "$ref": "#/definitions/models.UpdateFolderReqModel"
                         }
                     }
                 ],
@@ -25375,32 +25354,18 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateFolderReq",
+                        "description": "CreateFolderReqModel",
                         "name": "webpage_folder",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/web_page_service.CreateFolderReq"
+                            "$ref": "#/definitions/models.CreateFolderReqModel"
                         }
                     }
                 ],
@@ -25482,13 +25447,6 @@
                 "summary": "Get single webpage folder",
                 "operationId": "get_single_web_page_folder",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Environment-Id",
@@ -25589,13 +25547,6 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
@@ -25679,13 +25630,6 @@
                 "summary": "Get List web page",
                 "operationId": "get_list_web_pageV2",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Environment-Id",
@@ -25798,32 +25742,18 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "WebPage",
+                        "description": "UpdateWebPageReqModel",
                         "name": "webpage",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/web_page_service.WebPage"
+                            "$ref": "#/definitions/models.UpdateWebPageReqModel"
                         }
                     }
                 ],
@@ -25905,32 +25835,18 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateWebPageReq",
+                        "description": "CreateWebPageReqModel",
                         "name": "webpage",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/web_page_service.CreateWebPageReq"
+                            "$ref": "#/definitions/models.CreateWebPageReqModel"
                         }
                     }
                 ],
@@ -25947,6 +25863,108 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/web_page_service.WebPage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/webpageV2/select-versions/{webpage-id}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Insert Many webpageV2",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WebPage"
+                ],
+                "summary": "Insert Many webpageV2",
+                "operationId": "insert_many_web_pageV2",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "webpage-id",
+                        "name": "webpage-id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "ManyVersionsModel",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ManyVersionsModel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response Body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/empty.Empty"
                                         }
                                     }
                                 }
@@ -26014,13 +26032,6 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
@@ -26044,6 +26055,12 @@
                         "type": "string",
                         "description": "commit-id",
                         "name": "commit-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "version-id",
+                        "name": "version-id",
                         "in": "query"
                     }
                 ],
@@ -26123,13 +26140,6 @@
                 "summary": "Delete webpage",
                 "operationId": "delete_web_pageV2",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Environment-Id",
@@ -26217,6 +26227,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "webpage-id",
                         "name": "webpage-id",
                         "in": "path",
@@ -26257,6 +26274,108 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/web_page_service.GetWebPageHistoryRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/webpageV2/{webpage-id}/revert": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Revert webpage",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WebPage"
+                ],
+                "summary": "Revert webpage",
+                "operationId": "revert_web_pageV2",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "webpage-id",
+                        "name": "webpage-id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "RevertWebPageReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.RevertWebPageReqModel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response Body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/web_page_service.WebPage"
                                         }
                                     }
                                 }
@@ -29016,7 +29135,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "authentification": {
                     "type": "boolean"
@@ -29446,7 +29565,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -30372,8 +30491,35 @@
                 }
             }
         },
+        "empty.Empty": {
+            "type": "object"
+        },
         "emptypb.Empty": {
             "type": "object"
+        },
+        "github.com_golang_protobuf_ptypes_struct.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/structpb.Value"
+                    }
+                }
+            }
+        },
+        "google.golang.org_protobuf_types_known_structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/structpb.Value"
+                    }
+                }
+            }
         },
         "handlers.Path": {
             "type": "object",
@@ -30451,7 +30597,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -30504,7 +30650,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -30860,6 +31006,17 @@
                 }
             }
         },
+        "models.CreateFolderReqModel": {
+            "type": "object",
+            "properties": {
+                "project_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CreateFunctionFolderRequest": {
             "type": "object",
             "properties": {
@@ -31027,6 +31184,23 @@
                     "type": "string"
                 },
                 "subtitle_field_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateWebPageReqModel": {
+            "type": "object",
+            "properties": {
+                "components": {
+                    "$ref": "#/definitions/google.golang.org_protobuf_types_known_structpb.Struct"
+                },
+                "folder_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -31428,6 +31602,26 @@
                 }
             }
         },
+        "models.ManyVersionsModel": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "old_commit_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "models.Panel": {
             "type": "object",
             "properties": {
@@ -31616,6 +31810,26 @@
                 }
             }
         },
+        "models.RevertWebPageReqModel": {
+            "type": "object",
+            "properties": {
+                "commit_info": {
+                    "$ref": "#/definitions/web_page_service.CommitInfo"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "old_commit_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
         "models.RunScenarioRequest": {
             "type": "object",
             "properties": {
@@ -31664,6 +31878,40 @@
                     "type": "string"
                 },
                 "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UpdateFolderReqModel": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UpdateWebPageReqModel": {
+            "type": "object",
+            "properties": {
+                "components": {
+                    "$ref": "#/definitions/google.golang.org_protobuf_types_known_structpb.Struct"
+                },
+                "folder_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -31719,7 +31967,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -31985,7 +32233,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -32075,7 +32323,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "autofill_field": {
                     "type": "string"
@@ -32355,7 +32603,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -33010,7 +33258,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -33340,7 +33588,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -33731,7 +33979,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -33909,7 +34157,7 @@
                     "type": "string"
                 },
                 "request": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "response": {
                     "type": "string"
@@ -33923,7 +34171,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -34021,7 +34269,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -34263,7 +34511,7 @@
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/structpb.Struct"
+                        "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                     }
                 },
                 "connect_info": {
@@ -34282,7 +34530,7 @@
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -34299,7 +34547,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "category_id": {
                     "type": "string"
@@ -34356,7 +34604,7 @@
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/structpb.Struct"
+                        "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                     }
                 },
                 "connect_info": {
@@ -34381,7 +34629,7 @@
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -34393,7 +34641,7 @@
                     "type": "string"
                 },
                 "ui_component": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
@@ -34478,7 +34726,7 @@
             "type": "object",
             "properties": {
                 "response": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
@@ -34517,18 +34765,6 @@
                 },
                 "status": {
                     "type": "string"
-                }
-            }
-        },
-        "structpb.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
-                    }
                 }
             }
         },
@@ -34590,7 +34826,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -34872,7 +35108,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "role": {
                     "type": "string"
@@ -34920,7 +35156,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -35066,7 +35302,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -35491,55 +35727,6 @@
                 }
             }
         },
-        "web_page_service.CreateFolderReq": {
-            "type": "object",
-            "properties": {
-                "environment_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "resource_id": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "web_page_service.CreateWebPageReq": {
-            "type": "object",
-            "properties": {
-                "commit_id": {
-                    "type": "string"
-                },
-                "commit_info": {
-                    "$ref": "#/definitions/web_page_service.CommitInfo"
-                },
-                "components": {
-                    "$ref": "#/definitions/structpb.Struct"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "folder_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "resource_id": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "version_id": {
-                    "type": "string"
-                }
-            }
-        },
         "web_page_service.Folder": {
             "type": "object",
             "properties": {
@@ -35639,26 +35826,6 @@
                 }
             }
         },
-        "web_page_service.UpdateFolderReq": {
-            "type": "object",
-            "properties": {
-                "environment_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "resource_id": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
         "web_page_service.VersionInfo": {
             "type": "object",
             "properties": {
@@ -35695,7 +35862,7 @@
                     "$ref": "#/definitions/web_page_service.CommitInfo"
                 },
                 "components": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "environment_id": {
                     "type": "string"

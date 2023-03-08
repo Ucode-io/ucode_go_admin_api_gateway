@@ -385,11 +385,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/webpageV2", h.GetListWebPageV2)
 		v1Admin.GET("/webpageV2/:webpage-id", h.GetSingleWebPageV2)
 		v1Admin.DELETE("/webpageV2/:webpage-id", h.DeleteWebPageV2)
-		//v1Admin.POST("/webpageV2/select-versions/:webpage-id", h.InsertManyVersionForQueryService)
+		v1Admin.POST("/webpageV2/select-versions/:webpage-id", h.InsertManyVersionForWebPageService)
 		v1Admin.GET("/webpageV2/:webpage-id/history", h.GetWebPageHistory)
-		//v1Admin.POST("/webpageV2/:webpage-id/revert", h.RevertQuery)
-
-		// notification service
+		v1Admin.POST("/webpageV2/:webpage-id/revert", h.RevertWebPage)
 		v1Admin.POST("/notification/user-fcmtoken", h.CreateUserFCMToken)
 	}
 	v2Admin := r.Group("/v2")
