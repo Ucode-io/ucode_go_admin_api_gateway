@@ -203,6 +203,7 @@ message V2LoginResponse {
     repeated RecordPermission app_permissions = 10;
     string resource_id = 11;
     string environment_id = 12;
+    User user = 13;
 }
 message V2LoginRequest {
     string username = 1;

@@ -388,6 +388,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		//v1Admin.POST("/webpageV2/select-versions/:webpage-id", h.InsertManyVersionForQueryService)
 		v1Admin.GET("/webpageV2/:webpage-id/history", h.GetWebPageHistory)
 		//v1Admin.POST("/webpageV2/:webpage-id/revert", h.RevertQuery)
+
+		// notification service
+		v1Admin.POST("/notification/user-fcmtoken", h.CreateUserFCMToken)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())

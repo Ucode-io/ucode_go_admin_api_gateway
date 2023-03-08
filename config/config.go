@@ -102,6 +102,9 @@ type Config struct {
 	ScenarioServiceHost    string
 	ScenarioGRPCPort       string
 	AdminHostForCodeServer string
+
+	NotificationServiceHost string
+	NotificationGRPCPort    string
 }
 
 // Load ...
@@ -194,6 +197,9 @@ func Load() Config {
 	config.ApiHost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "test.admin.api.u-code.io"))
 	config.PlatformType = cast.ToString(GetOrReturnDefaultValue("PLATFORM_TYPE", "super-admin"))
 	config.AdminHostForCodeServer = cast.ToString(GetOrReturnDefaultValue("HOST_FOR_CODE_SERVER", "test.admin"))
+
+	config.NotificationServiceHost = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_SERVICE_HOST", "localhost"))
+	config.NotificationGRPCPort = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_GRPC_PORT", ":8101"))
 	return config
 }
 
