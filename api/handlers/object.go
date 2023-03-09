@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -551,6 +552,21 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+	}
+
+	if c.Param("table_slug") == "user" {
+		log.Printf("\n\ndelete user -> userId: %s, projectId: %s\n\n", objectID, resourceEnvironment.GetProjectId())
+		_, err = services.AuthService().User().DeleteUser(
+			c.Request.Context(),
+			&authPb.UserPrimaryKey{
+				Id:        objectID,
+				ProjectId: resourceEnvironment.GetProjectId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	}
