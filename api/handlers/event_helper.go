@@ -11,6 +11,7 @@ import (
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
+	"encoding/json"
 
 	"github.com/gin-gonic/gin"
 )
@@ -154,6 +155,10 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		data["method"] = request.Method
 		data["app_id"] = appId
 		invokeFunction.Data = data
+
+		js, _ := json.Marshal(invokeFunction)
+		h.log.Info("function path: ", logger.Info(customEvent.Functions[0].Path))
+		h.log.Info("function body: ", logger.Info(string(js)))
 
 		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.Functions[0].Path, "POST", invokeFunction)
 		if err != nil {
