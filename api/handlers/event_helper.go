@@ -155,6 +155,10 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		data["app_id"] = appId
 		invokeFunction.Data = data
 
+		js, _ := json.Marshal(invokeFunction)
+		h.log.Info("function path: ", logger.Info(customEvent.Functions[0].Path))
+		h.log.Info("function body: ", logger.Info(string(js)))
+
 		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.Functions[0].Path, "POST", invokeFunction)
 		if err != nil {
 			return customEvent.Functions[0].Name, err
