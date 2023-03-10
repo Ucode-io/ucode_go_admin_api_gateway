@@ -11,10 +11,10 @@ import "user_token.proto";
 service NotificationService {
   rpc GetSingleNotification (GetSingleNotificationRequest) returns (Notification) {}
   rpc GetAllNotification (GetAllNotificationsRequest) returns (GetAllNotificationsResponse) {}
-  rpc CreateNotification (CreateNotificationRequest) returns (Notification) {}
+  rpc CreateNotification (Notification) returns (google.protobuf.Empty) {}
   rpc UpdateNotification (UpdateNotificationRequest) returns (Notification) {}
   rpc DeleteNotification (DeleteNotificationRequest) returns (google.protobuf.Empty) {}
-  rpc CreateManyNotification (CreateManyNotificationRequest) returns (google.protobuf.Empty) {}
+  rpc CreateNotificationUsers (CreateNotificationManyUserRequest) returns (NotificationUsers) {}
   rpc CreateUserToken(CreateUserTokenRequest) returns (CreateUserTokenResponse) {}
   rpc GetListUserToken(GetListUserTokenRequest) returns (ListUserToken) {}
   rpc DeleteUserToken(DeleteUserTokenRequest) returns (google.protobuf.Empty) {}
@@ -31,10 +31,12 @@ message GetAllNotificationsRequest {
   string sort = 4;
   int32 limit = 5;
   int32 offset = 6;
+  string environment_id = 7;
 }
 
 message GetAllNotificationsResponse {
   repeated Notification notifications = 1;
+  int32 count = 2;
 }
 
 message CreateNotificationRequest {
@@ -43,11 +45,13 @@ message CreateNotificationRequest {
   string status = 3;
   Notification data = 4;
   string token = 5;
+  string environment_id = 6;
 }
 
 message UpdateNotificationRequest {
   string id = 1;
   string notif_status_id = 2;
+  string notification_status_name = 3;
 }
 
 message DeleteNotificationRequest {
@@ -62,6 +66,7 @@ message Notification {
   string platform_id = 5;
   string notif_status_id = 6;
   string created_at = 7;
+  string environment_id = 8;
 }
 
 message NotificationUsers {
@@ -88,3 +93,21 @@ message ManyNotificationData {
 message CreateManyNotificationRequest {
   repeated ManyNotificationData notitication_data = 1;
 }
+
+message ManyNotifs {
+  string user_id = 1;
+  string scheduled_at = 2;
+}
+
+message CreateNotificationManyUserRequest {
+  repeated ManyNotifs notifs = 1;
+  Notification notificationData = 2;
+  string sender_id = 3;
+}
+
+
+message GetAllUsersNotifications{
+  repeated string user_ids = 1;
+  repeated string notification_ids = 2;
+}
+

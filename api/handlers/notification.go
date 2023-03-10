@@ -60,3 +60,66 @@ func (h *Handler) CreateUserFCMToken(c *gin.Context) {
 
 	h.handleResponse(c, status_http.Created, resp)
 }
+
+// CreateNotificationUsers godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID create-user-notifications
+// @Router /v1/notification/user [POST]
+// @Summary Create User Notifications
+// @Description Create User Notifications
+// @Tags Notification
+// @Accept json
+// @Produce json
+// @Param Note_Folder body npb.CreateNotificationManyUserRequest true "Request Body"
+// @Success 201 {object} status_http.Response{data=npb.NotificationUsers} "Response Body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) CreateNotificationUsers(c *gin.Context) {
+
+	req := &npb.CreateNotificationManyUserRequest{}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
+	EnvironmentId, _ := c.Get("environment_id")
+	if !util.IsValidUUID(EnvironmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
+		return
+	}
+
+	ProjectId := c.Query("project-id")
+	if !util.IsValidUUID(ProjectId) {
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
+		return
+	}
+
+	hasAccess, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+	req.SenderId = hasAccess.GetUserId()
+
+	err = c.ShouldBindJSON(req)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := services.NotificationService().Notification().CreateNotificationUsers(
+		c.Request.Context(),
+		req,
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.Created, resp)
+}

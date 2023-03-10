@@ -1954,6 +1954,17 @@ definitions:
       url:
         type: string
     type: object
+  notification_service.CreateNotificationManyUserRequest:
+    properties:
+      notificationData:
+        $ref: '#/definitions/notification_service.Notification'
+      notifs:
+        items:
+          $ref: '#/definitions/notification_service.ManyNotifs'
+        type: array
+      sender_id:
+        type: string
+    type: object
   notification_service.CreateUserTokenRequest:
     properties:
       token:
@@ -1964,6 +1975,49 @@ definitions:
   notification_service.CreateUserTokenResponse:
     properties:
       user_token_id:
+        type: string
+    type: object
+  notification_service.ManyNotifs:
+    properties:
+      scheduled_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  notification_service.Notification:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      notif_status_id:
+        type: string
+      platform_id:
+        type: string
+      sender_id:
+        type: string
+      title:
+        type: string
+    type: object
+  notification_service.NotificationUsers:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      notification_id:
+        type: string
+      scheduled_at:
+        type: string
+      sent_count:
+        type: integer
+      status:
+        type: string
+      user_id:
         type: string
     type: object
   object_builder_service.ActionRelation:
@@ -12697,6 +12751,63 @@ paths:
       summary: Get Commits note
       tags:
       - Note
+  /v1/notification/user:
+    post:
+      consumes:
+      - application/json
+      description: Create User Notifications
+      operationId: create-user-notifications
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: Note_Folder
+        required: true
+        schema:
+          $ref: '#/definitions/notification_service.CreateNotificationManyUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/notification_service.NotificationUsers'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create User Notifications
+      tags:
+      - Notification
   /v1/notification/user-fcmtoken:
     post:
       consumes:

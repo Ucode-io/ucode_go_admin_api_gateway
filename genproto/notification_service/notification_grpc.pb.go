@@ -25,10 +25,10 @@ const _ = grpc.SupportPackageIsVersion7
 type NotificationServiceClient interface {
 	GetSingleNotification(ctx context.Context, in *GetSingleNotificationRequest, opts ...grpc.CallOption) (*Notification, error)
 	GetAllNotification(ctx context.Context, in *GetAllNotificationsRequest, opts ...grpc.CallOption) (*GetAllNotificationsResponse, error)
-	CreateNotification(ctx context.Context, in *CreateNotificationRequest, opts ...grpc.CallOption) (*Notification, error)
+	CreateNotification(ctx context.Context, in *Notification, opts ...grpc.CallOption) (*empty.Empty, error)
 	UpdateNotification(ctx context.Context, in *UpdateNotificationRequest, opts ...grpc.CallOption) (*Notification, error)
 	DeleteNotification(ctx context.Context, in *DeleteNotificationRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	CreateManyNotification(ctx context.Context, in *CreateManyNotificationRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	CreateNotificationUsers(ctx context.Context, in *CreateNotificationManyUserRequest, opts ...grpc.CallOption) (*NotificationUsers, error)
 	CreateUserToken(ctx context.Context, in *CreateUserTokenRequest, opts ...grpc.CallOption) (*CreateUserTokenResponse, error)
 	GetListUserToken(ctx context.Context, in *GetListUserTokenRequest, opts ...grpc.CallOption) (*ListUserToken, error)
 	DeleteUserToken(ctx context.Context, in *DeleteUserTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -60,8 +60,8 @@ func (c *notificationServiceClient) GetAllNotification(ctx context.Context, in *
 	return out, nil
 }
 
-func (c *notificationServiceClient) CreateNotification(ctx context.Context, in *CreateNotificationRequest, opts ...grpc.CallOption) (*Notification, error) {
-	out := new(Notification)
+func (c *notificationServiceClient) CreateNotification(ctx context.Context, in *Notification, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/notification_service.NotificationService/CreateNotification", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -87,9 +87,9 @@ func (c *notificationServiceClient) DeleteNotification(ctx context.Context, in *
 	return out, nil
 }
 
-func (c *notificationServiceClient) CreateManyNotification(ctx context.Context, in *CreateManyNotificationRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/notification_service.NotificationService/CreateManyNotification", in, out, opts...)
+func (c *notificationServiceClient) CreateNotificationUsers(ctx context.Context, in *CreateNotificationManyUserRequest, opts ...grpc.CallOption) (*NotificationUsers, error) {
+	out := new(NotificationUsers)
+	err := c.cc.Invoke(ctx, "/notification_service.NotificationService/CreateNotificationUsers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -129,10 +129,10 @@ func (c *notificationServiceClient) DeleteUserToken(ctx context.Context, in *Del
 type NotificationServiceServer interface {
 	GetSingleNotification(context.Context, *GetSingleNotificationRequest) (*Notification, error)
 	GetAllNotification(context.Context, *GetAllNotificationsRequest) (*GetAllNotificationsResponse, error)
-	CreateNotification(context.Context, *CreateNotificationRequest) (*Notification, error)
+	CreateNotification(context.Context, *Notification) (*empty.Empty, error)
 	UpdateNotification(context.Context, *UpdateNotificationRequest) (*Notification, error)
 	DeleteNotification(context.Context, *DeleteNotificationRequest) (*empty.Empty, error)
-	CreateManyNotification(context.Context, *CreateManyNotificationRequest) (*empty.Empty, error)
+	CreateNotificationUsers(context.Context, *CreateNotificationManyUserRequest) (*NotificationUsers, error)
 	CreateUserToken(context.Context, *CreateUserTokenRequest) (*CreateUserTokenResponse, error)
 	GetListUserToken(context.Context, *GetListUserTokenRequest) (*ListUserToken, error)
 	DeleteUserToken(context.Context, *DeleteUserTokenRequest) (*empty.Empty, error)
@@ -149,7 +149,7 @@ func (UnimplementedNotificationServiceServer) GetSingleNotification(context.Cont
 func (UnimplementedNotificationServiceServer) GetAllNotification(context.Context, *GetAllNotificationsRequest) (*GetAllNotificationsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllNotification not implemented")
 }
-func (UnimplementedNotificationServiceServer) CreateNotification(context.Context, *CreateNotificationRequest) (*Notification, error) {
+func (UnimplementedNotificationServiceServer) CreateNotification(context.Context, *Notification) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateNotification not implemented")
 }
 func (UnimplementedNotificationServiceServer) UpdateNotification(context.Context, *UpdateNotificationRequest) (*Notification, error) {
@@ -158,8 +158,8 @@ func (UnimplementedNotificationServiceServer) UpdateNotification(context.Context
 func (UnimplementedNotificationServiceServer) DeleteNotification(context.Context, *DeleteNotificationRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteNotification not implemented")
 }
-func (UnimplementedNotificationServiceServer) CreateManyNotification(context.Context, *CreateManyNotificationRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateManyNotification not implemented")
+func (UnimplementedNotificationServiceServer) CreateNotificationUsers(context.Context, *CreateNotificationManyUserRequest) (*NotificationUsers, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateNotificationUsers not implemented")
 }
 func (UnimplementedNotificationServiceServer) CreateUserToken(context.Context, *CreateUserTokenRequest) (*CreateUserTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUserToken not implemented")
@@ -220,7 +220,7 @@ func _NotificationService_GetAllNotification_Handler(srv interface{}, ctx contex
 }
 
 func _NotificationService_CreateNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateNotificationRequest)
+	in := new(Notification)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func _NotificationService_CreateNotification_Handler(srv interface{}, ctx contex
 		FullMethod: "/notification_service.NotificationService/CreateNotification",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationServiceServer).CreateNotification(ctx, req.(*CreateNotificationRequest))
+		return srv.(NotificationServiceServer).CreateNotification(ctx, req.(*Notification))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -273,20 +273,20 @@ func _NotificationService_DeleteNotification_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _NotificationService_CreateManyNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateManyNotificationRequest)
+func _NotificationService_CreateNotificationUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateNotificationManyUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NotificationServiceServer).CreateManyNotification(ctx, in)
+		return srv.(NotificationServiceServer).CreateNotificationUsers(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/notification_service.NotificationService/CreateManyNotification",
+		FullMethod: "/notification_service.NotificationService/CreateNotificationUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationServiceServer).CreateManyNotification(ctx, req.(*CreateManyNotificationRequest))
+		return srv.(NotificationServiceServer).CreateNotificationUsers(ctx, req.(*CreateNotificationManyUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -373,8 +373,8 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _NotificationService_DeleteNotification_Handler,
 		},
 		{
-			MethodName: "CreateManyNotification",
-			Handler:    _NotificationService_CreateManyNotification_Handler,
+			MethodName: "CreateNotificationUsers",
+			Handler:    _NotificationService_CreateNotificationUsers_Handler,
 		},
 		{
 			MethodName: "CreateUserToken",

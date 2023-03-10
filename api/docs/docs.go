@@ -14406,6 +14406,107 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/notification/user": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create User Notifications",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notification"
+                ],
+                "summary": "Create User Notifications",
+                "operationId": "create-user-notifications",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "Note_Folder",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/notification_service.CreateNotificationManyUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Response Body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/notification_service.NotificationUsers"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/notification/user-fcmtoken": {
             "post": {
                 "security": [
@@ -32208,6 +32309,23 @@ const docTemplate = `{
                 }
             }
         },
+        "notification_service.CreateNotificationManyUserRequest": {
+            "type": "object",
+            "properties": {
+                "notificationData": {
+                    "$ref": "#/definitions/notification_service.Notification"
+                },
+                "notifs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/notification_service.ManyNotifs"
+                    }
+                },
+                "sender_id": {
+                    "type": "string"
+                }
+            }
+        },
         "notification_service.CreateUserTokenRequest": {
             "type": "object",
             "properties": {
@@ -32223,6 +32341,72 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "user_token_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "notification_service.ManyNotifs": {
+            "type": "object",
+            "properties": {
+                "scheduled_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "notification_service.Notification": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "notif_status_id": {
+                    "type": "string"
+                },
+                "platform_id": {
+                    "type": "string"
+                },
+                "sender_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "notification_service.NotificationUsers": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "notification_id": {
+                    "type": "string"
+                },
+                "scheduled_at": {
+                    "type": "string"
+                },
+                "sent_count": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
