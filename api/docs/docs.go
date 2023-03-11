@@ -32513,9 +32513,6 @@ const docTemplate = `{
         "notification_service.Notification": {
             "type": "object",
             "properties": {
-                "content": {
-                    "type": "string"
-                },
                 "created_at": {
                     "type": "string"
                 },
@@ -32528,6 +32525,12 @@ const docTemplate = `{
                 "notif_status_id": {
                     "type": "string"
                 },
+                "notification_info": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/notification_service.NotificationInfo"
+                    }
+                },
                 "platform_id": {
                     "type": "string"
                 },
@@ -32535,6 +32538,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "notification_service.NotificationInfo": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "notification_id": {
                     "type": "string"
                 },
                 "title": {

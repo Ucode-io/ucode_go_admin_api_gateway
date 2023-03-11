@@ -58,10 +58,19 @@ message DeleteNotificationRequest {
   string id = 1;
 }
 
+message NotificationInfo {
+  string title = 1;
+  string content = 2;
+  string language = 3;
+  string code = 4;
+  string created_at = 5;
+  string notification_id = 6;
+  string id = 7;
+} 
+
 message Notification {
   string id = 1;
-  string content = 2;
-  string title = 3;
+  repeated NotificationInfo notification_info = 2;
   string sender_id = 4;
   string platform_id = 5;
   string notif_status_id = 6;
@@ -113,3 +122,11 @@ message GetAllUsersNotifications{
   repeated string notification_ids = 2;
 }
 
+message GetNotificationInfoRequest {
+  string notification_id = 1;
+  string language = 2;
+}
+
+message GetNotificationInfoResponse {
+  repeated NotificationInfo notification_info = 1;
+}

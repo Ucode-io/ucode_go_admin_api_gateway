@@ -2014,8 +2014,6 @@ definitions:
     type: object
   notification_service.Notification:
     properties:
-      content:
-        type: string
       created_at:
         type: string
       environment_id:
@@ -2024,11 +2022,30 @@ definitions:
         type: string
       notif_status_id:
         type: string
+      notification_info:
+        items:
+          $ref: '#/definitions/notification_service.NotificationInfo'
+        type: array
       platform_id:
         type: string
       sender_id:
         type: string
       status:
+        type: string
+    type: object
+  notification_service.NotificationInfo:
+    properties:
+      code:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      language:
+        type: string
+      notification_id:
         type: string
       title:
         type: string
