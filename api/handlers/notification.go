@@ -196,3 +196,4 @@ func (h *Handler) GetAllNotifications(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, resp)
 }
+
