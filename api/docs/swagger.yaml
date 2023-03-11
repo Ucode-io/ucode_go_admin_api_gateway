@@ -1977,6 +1977,32 @@ definitions:
       user_token_id:
         type: string
     type: object
+  notification_service.GetAllNotificationsRequest:
+    properties:
+      environment_id:
+        type: string
+      limit:
+        type: integer
+      offset:
+        type: integer
+      sort:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+      user_id:
+        type: string
+    type: object
+  notification_service.GetAllNotificationsResponse:
+    properties:
+      count:
+        type: integer
+      notifications:
+        items:
+          $ref: '#/definitions/notification_service.Notification'
+        type: array
+    type: object
   notification_service.ManyNotifs:
     properties:
       scheduled_at:
@@ -12752,6 +12778,70 @@ paths:
       tags:
       - Note
   /v1/notification/user:
+    get:
+      consumes:
+      - application/json
+      description: Get All Notifications
+      operationId: get-all-notifications
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: Request Body
+        in: body
+        name: Note_Folder
+        required: true
+        schema:
+          $ref: '#/definitions/notification_service.GetAllNotificationsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/notification_service.GetAllNotificationsResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get All Notifications
+      tags:
+      - Notification
     post:
       consumes:
       - application/json
