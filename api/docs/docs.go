@@ -32423,6 +32423,9 @@ const docTemplate = `{
         "notification_service.CreateNotificationManyUserRequest": {
             "type": "object",
             "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
                 "notificationData": {
                     "$ref": "#/definitions/notification_service.Notification"
                 },
@@ -32529,6 +32532,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sender_id": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 },
                 "title": {

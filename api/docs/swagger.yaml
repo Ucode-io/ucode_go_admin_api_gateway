@@ -1956,6 +1956,8 @@ definitions:
     type: object
   notification_service.CreateNotificationManyUserRequest:
     properties:
+      environment_id:
+        type: string
       notificationData:
         $ref: '#/definitions/notification_service.Notification'
       notifs:
@@ -2025,6 +2027,8 @@ definitions:
       platform_id:
         type: string
       sender_id:
+        type: string
+      status:
         type: string
       title:
         type: string

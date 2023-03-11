@@ -32411,6 +32411,9 @@
         "notification_service.CreateNotificationManyUserRequest": {
             "type": "object",
             "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
                 "notificationData": {
                     "$ref": "#/definitions/notification_service.Notification"
                 },
@@ -32517,6 +32520,9 @@
                     "type": "string"
                 },
                 "sender_id": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 },
                 "title": {

@@ -26,9 +26,12 @@ type RegisterProjectRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	K8SNamespace string `protobuf:"bytes,1,opt,name=k8s_namespace,json=k8sNamespace,proto3" json:"k8s_namespace,omitempty"`
-	ProjectId    string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	SecretPath   string `protobuf:"bytes,3,opt,name=secret_path,json=secretPath,proto3" json:"secret_path,omitempty"`
+	K8SNamespace string                              `protobuf:"bytes,1,opt,name=k8s_namespace,json=k8sNamespace,proto3" json:"k8s_namespace,omitempty"`
+	ProjectId    string                              `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	SecretPath   string                              `protobuf:"bytes,3,opt,name=secret_path,json=secretPath,proto3" json:"secret_path,omitempty"`
+	Credentials  *RegisterProjectRequest_Credentials `protobuf:"bytes,4,opt,name=credentials,proto3" json:"credentials,omitempty"`
+	UserId       string                              `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ResourceId   string                              `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
 }
 
 func (x *RegisterProjectRequest) Reset() {
@@ -80,6 +83,27 @@ func (x *RegisterProjectRequest) GetProjectId() string {
 func (x *RegisterProjectRequest) GetSecretPath() string {
 	if x != nil {
 		return x.SecretPath
+	}
+	return ""
+}
+
+func (x *RegisterProjectRequest) GetCredentials() *RegisterProjectRequest_Credentials {
+	if x != nil {
+		return x.Credentials
+	}
+	return nil
+}
+
+func (x *RegisterProjectRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *RegisterProjectRequest) GetResourceId() string {
+	if x != nil {
+		return x.ResourceId
 	}
 	return ""
 }
@@ -390,6 +414,85 @@ func (x *DeregisterManyProjectsResponse) GetProjects() map[string]*RegisterDereg
 	return nil
 }
 
+type RegisterProjectRequest_Credentials struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Host     string `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	Port     string `protobuf:"bytes,2,opt,name=port,proto3" json:"port,omitempty"`
+	Username string `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
+	Password string `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
+	Database string `protobuf:"bytes,5,opt,name=database,proto3" json:"database,omitempty"`
+}
+
+func (x *RegisterProjectRequest_Credentials) Reset() {
+	*x = RegisterProjectRequest_Credentials{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_analytics_project_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RegisterProjectRequest_Credentials) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RegisterProjectRequest_Credentials) ProtoMessage() {}
+
+func (x *RegisterProjectRequest_Credentials) ProtoReflect() protoreflect.Message {
+	mi := &file_analytics_project_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RegisterProjectRequest_Credentials.ProtoReflect.Descriptor instead.
+func (*RegisterProjectRequest_Credentials) Descriptor() ([]byte, []int) {
+	return file_analytics_project_proto_rawDescGZIP(), []int{0, 0}
+}
+
+func (x *RegisterProjectRequest_Credentials) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *RegisterProjectRequest_Credentials) GetPort() string {
+	if x != nil {
+		return x.Port
+	}
+	return ""
+}
+
+func (x *RegisterProjectRequest_Credentials) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *RegisterProjectRequest_Credentials) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *RegisterProjectRequest_Credentials) GetDatabase() string {
+	if x != nil {
+		return x.Database
+	}
+	return ""
+}
+
 var File_analytics_project_proto protoreflect.FileDescriptor
 
 var file_analytics_project_proto_rawDesc = []byte{
@@ -397,15 +500,33 @@ var file_analytics_project_proto_rawDesc = []byte{
 	0x65, 0x63, 0x74, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x11, 0x61, 0x6e, 0x61, 0x6c, 0x79,
 	0x74, 0x69, 0x63, 0x73, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x1a, 0x1b, 0x67, 0x6f,
 	0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x65, 0x6d,
-	0x70, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x7d, 0x0a, 0x16, 0x52, 0x65, 0x67,
-	0x69, 0x73, 0x74, 0x65, 0x72, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x12, 0x23, 0x0a, 0x0d, 0x6b, 0x38, 0x73, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x73,
-	0x70, 0x61, 0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x6b, 0x38, 0x73, 0x4e,
-	0x61, 0x6d, 0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a,
-	0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x70, 0x72,
-	0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x1f, 0x0a, 0x0b, 0x73, 0x65, 0x63, 0x72, 0x65,
-	0x74, 0x5f, 0x70, 0x61, 0x74, 0x68, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x73, 0x65,
-	0x63, 0x72, 0x65, 0x74, 0x50, 0x61, 0x74, 0x68, 0x22, 0x5e, 0x0a, 0x18, 0x44, 0x65, 0x72, 0x65,
+	0x70, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x9c, 0x03, 0x0a, 0x16, 0x52, 0x65,
+	0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x23, 0x0a, 0x0d, 0x6b, 0x38, 0x73, 0x5f, 0x6e, 0x61, 0x6d, 0x65,
+	0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x6b, 0x38, 0x73,
+	0x4e, 0x61, 0x6d, 0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x72, 0x6f,
+	0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x70,
+	0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x1f, 0x0a, 0x0b, 0x73, 0x65, 0x63, 0x72,
+	0x65, 0x74, 0x5f, 0x70, 0x61, 0x74, 0x68, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x73,
+	0x65, 0x63, 0x72, 0x65, 0x74, 0x50, 0x61, 0x74, 0x68, 0x12, 0x57, 0x0a, 0x0b, 0x63, 0x72, 0x65,
+	0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x35,
+	0x2e, 0x61, 0x6e, 0x61, 0x6c, 0x79, 0x74, 0x69, 0x63, 0x73, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69,
+	0x63, 0x65, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x50, 0x72, 0x6f, 0x6a, 0x65,
+	0x63, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x43, 0x72, 0x65, 0x64, 0x65, 0x6e,
+	0x74, 0x69, 0x61, 0x6c, 0x73, 0x52, 0x0b, 0x63, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61,
+	0x6c, 0x73, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x05, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x1f, 0x0a, 0x0b, 0x72,
+	0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x0a, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x49, 0x64, 0x1a, 0x89, 0x01, 0x0a,
+	0x0b, 0x43, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x73, 0x12, 0x12, 0x0a, 0x04,
+	0x68, 0x6f, 0x73, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x6f, 0x73, 0x74,
+	0x12, 0x12, 0x0a, 0x04, 0x70, 0x6f, 0x72, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
+	0x70, 0x6f, 0x72, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65,
+	0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x12, 0x1a, 0x0a, 0x08,
+	0x64, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08,
+	0x64, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x22, 0x5e, 0x0a, 0x18, 0x44, 0x65, 0x72, 0x65,
 	0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x71,
 	0x75, 0x65, 0x73, 0x74, 0x12, 0x23, 0x0a, 0x0d, 0x6b, 0x38, 0x73, 0x5f, 0x6e, 0x61, 0x6d, 0x65,
 	0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x6b, 0x38, 0x73,
@@ -512,41 +633,43 @@ func file_analytics_project_proto_rawDescGZIP() []byte {
 	return file_analytics_project_proto_rawDescData
 }
 
-var file_analytics_project_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_analytics_project_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_analytics_project_proto_goTypes = []interface{}{
-	(*RegisterProjectRequest)(nil),            // 0: analytics_service.RegisterProjectRequest
-	(*DeregisterProjectRequest)(nil),          // 1: analytics_service.DeregisterProjectRequest
-	(*RegisterDeregisterProjectResponse)(nil), // 2: analytics_service.RegisterDeregisterProjectResponse
-	(*RegisterManyProjectsRequest)(nil),       // 3: analytics_service.RegisterManyProjectsRequest
-	(*RegisterManyProjectsResponse)(nil),      // 4: analytics_service.RegisterManyProjectsResponse
-	(*DeregisterManyProjectsRequest)(nil),     // 5: analytics_service.DeregisterManyProjectsRequest
-	(*DeregisterManyProjectsResponse)(nil),    // 6: analytics_service.DeregisterManyProjectsResponse
-	nil,                                       // 7: analytics_service.RegisterManyProjectsResponse.ProjectsEntry
-	nil,                                       // 8: analytics_service.DeregisterManyProjectsResponse.ProjectsEntry
-	(*empty.Empty)(nil),                       // 9: google.protobuf.Empty
+	(*RegisterProjectRequest)(nil),             // 0: analytics_service.RegisterProjectRequest
+	(*DeregisterProjectRequest)(nil),           // 1: analytics_service.DeregisterProjectRequest
+	(*RegisterDeregisterProjectResponse)(nil),  // 2: analytics_service.RegisterDeregisterProjectResponse
+	(*RegisterManyProjectsRequest)(nil),        // 3: analytics_service.RegisterManyProjectsRequest
+	(*RegisterManyProjectsResponse)(nil),       // 4: analytics_service.RegisterManyProjectsResponse
+	(*DeregisterManyProjectsRequest)(nil),      // 5: analytics_service.DeregisterManyProjectsRequest
+	(*DeregisterManyProjectsResponse)(nil),     // 6: analytics_service.DeregisterManyProjectsResponse
+	(*RegisterProjectRequest_Credentials)(nil), // 7: analytics_service.RegisterProjectRequest.Credentials
+	nil,                 // 8: analytics_service.RegisterManyProjectsResponse.ProjectsEntry
+	nil,                 // 9: analytics_service.DeregisterManyProjectsResponse.ProjectsEntry
+	(*empty.Empty)(nil), // 10: google.protobuf.Empty
 }
 var file_analytics_project_proto_depIdxs = []int32{
-	0,  // 0: analytics_service.RegisterManyProjectsRequest.projects:type_name -> analytics_service.RegisterProjectRequest
-	7,  // 1: analytics_service.RegisterManyProjectsResponse.projects:type_name -> analytics_service.RegisterManyProjectsResponse.ProjectsEntry
-	1,  // 2: analytics_service.DeregisterManyProjectsRequest.projects:type_name -> analytics_service.DeregisterProjectRequest
-	8,  // 3: analytics_service.DeregisterManyProjectsResponse.projects:type_name -> analytics_service.DeregisterManyProjectsResponse.ProjectsEntry
-	2,  // 4: analytics_service.RegisterManyProjectsResponse.ProjectsEntry.value:type_name -> analytics_service.RegisterDeregisterProjectResponse
-	2,  // 5: analytics_service.DeregisterManyProjectsResponse.ProjectsEntry.value:type_name -> analytics_service.RegisterDeregisterProjectResponse
-	0,  // 6: analytics_service.ProjectService.Register:input_type -> analytics_service.RegisterProjectRequest
-	1,  // 7: analytics_service.ProjectService.Deregister:input_type -> analytics_service.DeregisterProjectRequest
-	0,  // 8: analytics_service.ProjectService.Reconnect:input_type -> analytics_service.RegisterProjectRequest
-	3,  // 9: analytics_service.ProjectService.RegisterMany:input_type -> analytics_service.RegisterManyProjectsRequest
-	5,  // 10: analytics_service.ProjectService.DeregisterMany:input_type -> analytics_service.DeregisterManyProjectsRequest
-	9,  // 11: analytics_service.ProjectService.Register:output_type -> google.protobuf.Empty
-	9,  // 12: analytics_service.ProjectService.Deregister:output_type -> google.protobuf.Empty
-	9,  // 13: analytics_service.ProjectService.Reconnect:output_type -> google.protobuf.Empty
-	4,  // 14: analytics_service.ProjectService.RegisterMany:output_type -> analytics_service.RegisterManyProjectsResponse
-	6,  // 15: analytics_service.ProjectService.DeregisterMany:output_type -> analytics_service.DeregisterManyProjectsResponse
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	7,  // 0: analytics_service.RegisterProjectRequest.credentials:type_name -> analytics_service.RegisterProjectRequest.Credentials
+	0,  // 1: analytics_service.RegisterManyProjectsRequest.projects:type_name -> analytics_service.RegisterProjectRequest
+	8,  // 2: analytics_service.RegisterManyProjectsResponse.projects:type_name -> analytics_service.RegisterManyProjectsResponse.ProjectsEntry
+	1,  // 3: analytics_service.DeregisterManyProjectsRequest.projects:type_name -> analytics_service.DeregisterProjectRequest
+	9,  // 4: analytics_service.DeregisterManyProjectsResponse.projects:type_name -> analytics_service.DeregisterManyProjectsResponse.ProjectsEntry
+	2,  // 5: analytics_service.RegisterManyProjectsResponse.ProjectsEntry.value:type_name -> analytics_service.RegisterDeregisterProjectResponse
+	2,  // 6: analytics_service.DeregisterManyProjectsResponse.ProjectsEntry.value:type_name -> analytics_service.RegisterDeregisterProjectResponse
+	0,  // 7: analytics_service.ProjectService.Register:input_type -> analytics_service.RegisterProjectRequest
+	1,  // 8: analytics_service.ProjectService.Deregister:input_type -> analytics_service.DeregisterProjectRequest
+	0,  // 9: analytics_service.ProjectService.Reconnect:input_type -> analytics_service.RegisterProjectRequest
+	3,  // 10: analytics_service.ProjectService.RegisterMany:input_type -> analytics_service.RegisterManyProjectsRequest
+	5,  // 11: analytics_service.ProjectService.DeregisterMany:input_type -> analytics_service.DeregisterManyProjectsRequest
+	10, // 12: analytics_service.ProjectService.Register:output_type -> google.protobuf.Empty
+	10, // 13: analytics_service.ProjectService.Deregister:output_type -> google.protobuf.Empty
+	10, // 14: analytics_service.ProjectService.Reconnect:output_type -> google.protobuf.Empty
+	4,  // 15: analytics_service.ProjectService.RegisterMany:output_type -> analytics_service.RegisterManyProjectsResponse
+	6,  // 16: analytics_service.ProjectService.DeregisterMany:output_type -> analytics_service.DeregisterManyProjectsResponse
+	12, // [12:17] is the sub-list for method output_type
+	7,  // [7:12] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_analytics_project_proto_init() }
@@ -639,6 +762,18 @@ func file_analytics_project_proto_init() {
 				return nil
 			}
 		}
+		file_analytics_project_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RegisterProjectRequest_Credentials); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -646,7 +781,7 @@ func file_analytics_project_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_analytics_project_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

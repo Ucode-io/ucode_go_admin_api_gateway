@@ -16,9 +16,19 @@ service ProjectService {
 }
 
 message RegisterProjectRequest {
+    message Credentials {
+        string host = 1;
+        string port = 2;
+        string username = 3;
+        string password = 4;
+        string database = 5;
+    }
     string k8s_namespace = 1;
     string project_id = 2;
     string secret_path = 3;
+    Credentials credentials = 4;
+    string user_id = 5;
+    string resource_id = 6;
 }
 
 message DeregisterProjectRequest {

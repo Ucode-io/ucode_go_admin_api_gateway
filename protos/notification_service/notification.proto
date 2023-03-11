@@ -67,6 +67,7 @@ message Notification {
   string notif_status_id = 6;
   string created_at = 7;
   string environment_id = 8;
+  string status = 9;
 }
 
 message NotificationUsers {
@@ -103,6 +104,7 @@ message CreateNotificationManyUserRequest {
   repeated ManyNotifs notifs = 1;
   Notification notificationData = 2;
   string sender_id = 3;
+  string environment_id = 4;
 }
 
 
