@@ -19,7 +19,7 @@ import (
 // @Router /v1/notification/category [POST]
 // @Summary Create category
 // @Description Create category
-// @Tags Notification-category
+// @Tags Notification-Category
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -81,7 +81,7 @@ func (H *Handler) CreateCategoryNotification(c *gin.Context) {
 // @Router /v1/notification/category/{id} [GET]
 // @Summary Get single category
 // @Description Get single category
-// @Tags Notification-category
+// @Tags Notification-Category
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -140,7 +140,7 @@ func (h *Handler) GetCategoryNotification(c *gin.Context) {
 // @Router /v1/notification/category [GET]
 // @Summary Get list category
 // @Description Get list category
-// @Tags Notification-category
+// @Tags Notification-Category
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -194,7 +194,7 @@ func (h *Handler) GetListCategoryNotification(c *gin.Context) {
 // @Router /v1/notification/category [PUT]
 // @Summary Update category
 // @Description Update category
-// @Tags Notification-category
+// @Tags Notification-Category
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
@@ -262,7 +262,7 @@ func (h *Handler) UpdateCategoryNotification(c *gin.Context) {
 // @Router /v1/notification/category/{id} [DELETE]
 // @Summary Delete category
 // @Description Delete category
-// @Tags Notification-category
+// @Tags Notification-Category
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
