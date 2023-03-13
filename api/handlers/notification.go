@@ -104,13 +104,16 @@ func (h *Handler) CreateNotificationUsers(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
-	req.SenderId = hasAccess.GetUserId()
 
 	err = c.ShouldBindJSON(req)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
+	req.SenderId = hasAccess.GetUserId()
+	req.EnvironmentId = EnvironmentId.(string)
+	req.ProjectId = ProjectId
 
 	resp, err := services.NotificationService().Notification().CreateNotificationUsers(
 		c.Request.Context(),
