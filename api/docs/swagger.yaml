@@ -12964,11 +12964,6 @@ paths:
         name: project-id
         required: true
         type: string
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
       - description: body
         in: body
         name: body

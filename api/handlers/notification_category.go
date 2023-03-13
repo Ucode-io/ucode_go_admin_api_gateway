@@ -198,7 +198,6 @@ func (h *Handler) GetListCategoryNotification(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param id path string true "id"
 // @Param body body models.UpdateCategoryRequest true "body"
 // @Success 200 {object} status_http.Response{data=models.Category} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
