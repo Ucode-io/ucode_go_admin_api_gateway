@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.12
-// source: category.proto
+// source: notification_category.proto
 
 package notification_service
 
@@ -246,5 +246,5 @@ var CategoryService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "category.proto",
+	Metadata: "notification_category.proto",
 }
