@@ -12882,7 +12882,7 @@ paths:
       - ApiKeyAuth: []
       summary: Get list category
       tags:
-      - Notification-category
+      - Notification-Category
     post:
       consumes:
       - application/json
@@ -12943,7 +12943,7 @@ paths:
       - ApiKeyAuth: []
       summary: Create category
       tags:
-      - Notification-category
+      - Notification-Category
     put:
       consumes:
       - application/json
@@ -13009,7 +13009,7 @@ paths:
       - ApiKeyAuth: []
       summary: Update category
       tags:
-      - Notification-category
+      - Notification-Category
   /v1/notification/category/{id}:
     delete:
       consumes:
@@ -13070,7 +13070,7 @@ paths:
       - ApiKeyAuth: []
       summary: Delete category
       tags:
-      - Notification-category
+      - Notification-Category
     get:
       consumes:
       - application/json
@@ -13130,7 +13130,7 @@ paths:
       - ApiKeyAuth: []
       summary: Get single category
       tags:
-      - Notification-category
+      - Notification-Category
   /v1/notification/user:
     get:
       consumes:

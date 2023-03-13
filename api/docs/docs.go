@@ -14421,7 +14421,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Notification-category"
+                    "Notification-Category"
                 ],
                 "summary": "Get list category",
                 "operationId": "get_list_category_for_notification",
@@ -14536,7 +14536,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Notification-category"
+                    "Notification-Category"
                 ],
                 "summary": "Update category",
                 "operationId": "update_category_for_notification",
@@ -14649,7 +14649,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Notification-category"
+                    "Notification-Category"
                 ],
                 "summary": "Create category",
                 "operationId": "create_category_for_notification",
@@ -14757,7 +14757,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Notification-category"
+                    "Notification-Category"
                 ],
                 "summary": "Get single category",
                 "operationId": "get_single_category_for_notification",
@@ -14861,7 +14861,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Notification-category"
+                    "Notification-Category"
                 ],
                 "summary": "Delete category",
                 "operationId": "delete_category_for_notification",
