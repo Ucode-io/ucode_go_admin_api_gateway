@@ -31791,6 +31791,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "parent_id": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -31903,6 +31906,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "parent_id": {
                     "type": "string"
                 },
                 "project_id": {

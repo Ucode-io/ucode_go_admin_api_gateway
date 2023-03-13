@@ -38,7 +38,7 @@ message Category {
     string created_at = 8;
     string updated_at = 9;
     string parent_id = 10;
-    string res_env_id = 11;
+    string environment_id = 11;
 }
 
 message GetCategoryRequest {

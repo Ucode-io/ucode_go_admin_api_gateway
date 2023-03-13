@@ -63,6 +63,7 @@ func (H *Handler) CreateCategoryNotification(c *gin.Context) {
 			Name:          req.Name,
 			ProjectId:     ProjectId,
 			EnvironmentId: EnvironmentId.(string),
+			ParentId:      req.ParentID,
 		},
 	)
 	if err != nil {
@@ -239,10 +240,10 @@ func (h *Handler) UpdateCategoryNotification(c *gin.Context) {
 	resp, err := services.NotificationService().Category().Update(
 		context.Background(),
 		&pb.Category{
-			ProjectId: ProjectId,
-			ResEnvId:  EnvironmentId.(string),
-			Guid:      req.Id,
-			Name:      req.Name,
+			ProjectId:     ProjectId,
+			EnvironmentId: EnvironmentId.(string),
+			Guid:          req.Id,
+			Name:          req.Name,
 		},
 	)
 	if err != nil {
