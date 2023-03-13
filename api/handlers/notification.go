@@ -137,8 +137,7 @@ func (h *Handler) CreateNotificationUsers(c *gin.Context) {
 // @Produce json
 // @Param offset query int false "offset"
 // @Param limit query int false "limit"
-// @Param Note_Folder body npb.GetAllNotificationsRequest true "Request Body"
-// @Success 201 {object} status_http.Response{data=npb.GetAllNotificationsResponse} "Response Body"
+// @Success 200 {object} status_http.Response{data=npb.GetAllNotificationsResponse} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllNotifications(c *gin.Context) {
@@ -148,12 +147,6 @@ func (h *Handler) GetAllNotifications(c *gin.Context) {
 		offset int
 		limit  int
 	)
-
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
