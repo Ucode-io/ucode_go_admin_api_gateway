@@ -66,7 +66,7 @@ func (h *Handler) CreateUserFCMToken(c *gin.Context) {
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID create-user-notifications
-// @Router /v1/notification/user [POST]
+// @Router /v1/notification [POST]
 // @Summary Create User Notifications
 // @Description Create User Notifications
 // @Tags Notification
@@ -129,7 +129,7 @@ func (h *Handler) CreateNotificationUsers(c *gin.Context) {
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get-all-notifications
-// @Router /v1/notification/user [GET]
+// @Router /v1/notification [GET]
 // @Summary Get All Notifications
 // @Description Get All Notifications
 // @Tags Notification
@@ -197,3 +197,58 @@ func (h *Handler) GetAllNotifications(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
+// GetNotificationById godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID get-notification-by-id
+// @Router /v1/notification/{id} [GET]
+// @Summary Get Notification By Id
+// @Description Get Notification By Id
+// @Tags Notification
+// @Accept json
+// @Produce json
+// @Param id path string true "Notification Id"
+// @Success 201 {object} status_http.Response{data=npb.Notification} "Response Body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetNotificationById(c *gin.Context) {
+
+	// get notification
+	notificationId := c.Param("id")
+	if !util.IsValidUUID(notificationId) {
+		h.handleResponse(c, status_http.BadRequest, "notification id not found")
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
+	EnvironmentId, _ := c.Get("environment_id")
+	if !util.IsValidUUID(EnvironmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
+		return
+	}
+
+	ProjectId := c.Query("project-id")
+	if !util.IsValidUUID(ProjectId) {
+		h.handleResponse(c, status_http.BadRequest, "project-id not found")
+		return
+	}
+
+	req := &npb.GetSingleNotificationRequest{
+		Id: notificationId,
+	}
+
+	resp, err := services.NotificationService().Notification().GetSingleNotification(c.Request.Context(), req)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}

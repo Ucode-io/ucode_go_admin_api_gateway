@@ -12815,6 +12815,183 @@ paths:
       summary: Get Commits note
       tags:
       - Note
+  /v1/notification:
+    get:
+      consumes:
+      - application/json
+      description: Get All Notifications
+      operationId: get-all-notifications
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: Request Body
+        in: body
+        name: Note_Folder
+        required: true
+        schema:
+          $ref: '#/definitions/notification_service.GetAllNotificationsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/notification_service.GetAllNotificationsResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get All Notifications
+      tags:
+      - Notification
+    post:
+      consumes:
+      - application/json
+      description: Create User Notifications
+      operationId: create-user-notifications
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: Note_Folder
+        required: true
+        schema:
+          $ref: '#/definitions/notification_service.CreateNotificationManyUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/notification_service.NotificationUsers'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create User Notifications
+      tags:
+      - Notification
+  /v1/notification/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Notification By Id
+      operationId: get-notification-by-id
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Notification Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/notification_service.Notification'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Notification By Id
+      tags:
+      - Notification
   /v1/notification/category:
     get:
       consumes:
@@ -13126,127 +13303,6 @@ paths:
       summary: Get single category
       tags:
       - Notification-Category
-  /v1/notification/user:
-    get:
-      consumes:
-      - application/json
-      description: Get All Notifications
-      operationId: get-all-notifications
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: offset
-        in: query
-        name: offset
-        type: integer
-      - description: limit
-        in: query
-        name: limit
-        type: integer
-      - description: Request Body
-        in: body
-        name: Note_Folder
-        required: true
-        schema:
-          $ref: '#/definitions/notification_service.GetAllNotificationsRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Response Body
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/notification_service.GetAllNotificationsResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get All Notifications
-      tags:
-      - Notification
-    post:
-      consumes:
-      - application/json
-      description: Create User Notifications
-      operationId: create-user-notifications
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: Request Body
-        in: body
-        name: Note_Folder
-        required: true
-        schema:
-          $ref: '#/definitions/notification_service.CreateNotificationManyUserRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Response Body
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/notification_service.NotificationUsers'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create User Notifications
-      tags:
-      - Notification
   /v1/notification/user-fcmtoken:
     post:
       consumes:

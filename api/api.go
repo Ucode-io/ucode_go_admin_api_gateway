@@ -391,8 +391,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		// notification service
 		v1Admin.POST("/notification/user-fcmtoken", h.CreateUserFCMToken)
-		v1Admin.POST("/notification/user", h.CreateNotificationUsers)
-		v1Admin.GET("/notification/user", h.GetAllNotifications)
+		v1Admin.POST("/notification", h.CreateNotificationUsers)
+		v1Admin.GET("/notification", h.GetAllNotifications)
+		v1Admin.GET("/notification/:id", h.GetNotificationById)
 		v1Admin.GET("/notification/category", h.GetListCategoryNotification)
 		v1Admin.POST("/notification/category", h.CreateCategoryNotification)
 		v1Admin.GET("/notification/category/:id", h.GetCategoryNotification)
