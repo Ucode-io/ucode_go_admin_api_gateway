@@ -33,11 +33,15 @@ message GetAllNotificationsRequest {
   int32 offset = 6;
   string res_env_id = 7;
   string category_id = 8;
+  string project_id = 9;
+  string environment_id = 10;
 }
 
 message GetAllNotificationsResponse {
   repeated Notification notifications = 1;
   int32 count = 2;
+  string environment_id = 3;
+  string project_id = 4;
 }
 
 message CreateNotificationRequest {
@@ -120,6 +124,7 @@ message CreateNotificationManyUserRequest {
   string environment_id = 4;
   string category_id = 5;
   string title = 6;
+  string project_id = 7;
 }
 
 

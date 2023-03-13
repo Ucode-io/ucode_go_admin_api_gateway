@@ -24,7 +24,6 @@ message CreateCategoryRequest {
     string version_id = 6;
     string environment_id = 7;
     string parent_id = 8;
-    string res_env_id = 9;
 }
 
 message Category {

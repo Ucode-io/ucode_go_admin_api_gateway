@@ -14450,19 +14450,10 @@ const docTemplate = `{
                         "description": "limit",
                         "name": "limit",
                         "in": "query"
-                    },
-                    {
-                        "description": "Request Body",
-                        "name": "Note_Folder",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/notification_service.GetAllNotificationsRequest"
-                        }
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "Response Body",
                         "schema": {
                             "allOf": [
@@ -33093,6 +33084,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/notification_service.ManyNotifs"
                     }
                 },
+                "project_id": {
+                    "type": "string"
+                },
                 "sender_id": {
                     "type": "string"
                 },
@@ -33120,46 +33114,23 @@ const docTemplate = `{
                 }
             }
         },
-        "notification_service.GetAllNotificationsRequest": {
-            "type": "object",
-            "properties": {
-                "category_id": {
-                    "type": "string"
-                },
-                "limit": {
-                    "type": "integer"
-                },
-                "offset": {
-                    "type": "integer"
-                },
-                "res_env_id": {
-                    "type": "string"
-                },
-                "sort": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
         "notification_service.GetAllNotificationsResponse": {
             "type": "object",
             "properties": {
                 "count": {
                     "type": "integer"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "notifications": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/notification_service.Notification"
                     }
+                },
+                "project_id": {
+                    "type": "string"
                 }
             }
         },

@@ -180,6 +180,8 @@ func (h *Handler) GetAllNotifications(c *gin.Context) {
 	}
 	req.Limit = int32(limit)
 	req.Offset = int32(offset)
+	req.ProjectId = ProjectId
+	req.EnvironmentId = EnvironmentId.(string)
 
 	resp, err := services.NotificationService().Notification().GetAllNotification(c.Request.Context(), &req)
 	if err != nil {

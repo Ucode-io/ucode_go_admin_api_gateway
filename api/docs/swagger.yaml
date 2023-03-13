@@ -1977,6 +1977,8 @@ definitions:
         items:
           $ref: '#/definitions/notification_service.ManyNotifs'
         type: array
+      project_id:
+        type: string
       sender_id:
         type: string
       title:
@@ -1994,33 +1996,18 @@ definitions:
       user_token_id:
         type: string
     type: object
-  notification_service.GetAllNotificationsRequest:
-    properties:
-      category_id:
-        type: string
-      limit:
-        type: integer
-      offset:
-        type: integer
-      res_env_id:
-        type: string
-      sort:
-        type: string
-      status:
-        type: string
-      type:
-        type: string
-      user_id:
-        type: string
-    type: object
   notification_service.GetAllNotificationsResponse:
     properties:
       count:
         type: integer
+      environment_id:
+        type: string
       notifications:
         items:
           $ref: '#/definitions/notification_service.Notification'
         type: array
+      project_id:
+        type: string
     type: object
   notification_service.ManyNotifs:
     properties:
@@ -12843,16 +12830,10 @@ paths:
         in: query
         name: limit
         type: integer
-      - description: Request Body
-        in: body
-        name: Note_Folder
-        required: true
-        schema:
-          $ref: '#/definitions/notification_service.GetAllNotificationsRequest'
       produces:
       - application/json
       responses:
-        "201":
+        "200":
           description: Response Body
           schema:
             allOf:
