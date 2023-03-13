@@ -11,10 +11,12 @@ import (
 
 type NotificationServiceI interface {
 	Notification() notification_service.NotificationServiceClient
+	Category() notification_service.CategoryServiceClient
 }
 
 type notificationServiceClient struct {
 	notificationService notification_service.NotificationServiceClient
+	categoryService     notification_service.CategoryServiceClient
 }
 
 func NewNotificationServiceClient(ctx context.Context, cfg config.Config) (NotificationServiceI, error) {
@@ -30,9 +32,14 @@ func NewNotificationServiceClient(ctx context.Context, cfg config.Config) (Notif
 
 	return &notificationServiceClient{
 		notificationService: notification_service.NewNotificationServiceClient(connNotificationService),
+		categoryService:     notification_service.NewCategoryServiceClient(connNotificationService),
 	}, nil
 }
 
 func (g *notificationServiceClient) Notification() notification_service.NotificationServiceClient {
 	return g.notificationService
+}
+
+func (g *notificationServiceClient) Category() notification_service.CategoryServiceClient {
+	return g.categoryService
 }

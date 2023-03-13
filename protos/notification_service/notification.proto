@@ -31,7 +31,8 @@ message GetAllNotificationsRequest {
   string sort = 4;
   int32 limit = 5;
   int32 offset = 6;
-  string environment_id = 7;
+  string res_env_id = 7;
+  string category_id = 8;
 }
 
 message GetAllNotificationsResponse {
@@ -46,6 +47,7 @@ message CreateNotificationRequest {
   Notification data = 4;
   string token = 5;
   string environment_id = 6;
+  string category_id = 7;
 }
 
 message UpdateNotificationRequest {
@@ -77,6 +79,8 @@ message Notification {
   string created_at = 7;
   string environment_id = 8;
   string status = 9;
+  string category_id = 10;
+  string title = 11;
 }
 
 message NotificationUsers {
@@ -114,6 +118,8 @@ message CreateNotificationManyUserRequest {
   Notification notificationData = 2;
   string sender_id = 3;
   string environment_id = 4;
+  string category_id = 5;
+  string title = 6;
 }
 
 
