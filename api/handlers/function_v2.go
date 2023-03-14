@@ -73,7 +73,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	projectName := strings.TrimSpace(project.Title)
+	projectName := strings.ReplaceAll(strings.TrimSpace(project.Title), " ", "-")
 	projectName = strings.ToLower(projectName)
 	var functionPath = projectName + "-" + function.Path
 
