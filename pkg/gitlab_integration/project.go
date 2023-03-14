@@ -25,6 +25,7 @@ func CreateProjectFork(cfg config.Config, projectName string) (response models.G
 		DefaultBranch:        "master",
 		Visibility:           "private",
 	})
+	fmt.Println("resp::::::::::", resp)
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
 	} else if resp.Code >= 500 {
