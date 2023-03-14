@@ -14464,7 +14464,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14520,7 +14519,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14582,7 +14580,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14645,7 +14642,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14699,7 +14695,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14761,7 +14756,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14830,7 +14824,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14892,7 +14885,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14955,7 +14947,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -15009,7 +15000,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -15072,6 +15062,15 @@ paths:
       description: Get query history
       operationId: get_query_history
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: query-id
         in: path
         name: query-id
@@ -15134,6 +15133,10 @@ paths:
       description: get list log
       operationId: get_list_query_log
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -15201,6 +15204,10 @@ paths:
       description: get single log
       operationId: get_single_query_log
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -15263,6 +15270,10 @@ paths:
       description: Revert query
       operationId: revert_query
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -15329,7 +15340,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -15389,6 +15399,15 @@ paths:
       description: Insert Many query
       operationId: insert_many_query_reference
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: query-id
         in: path
         name: query-id
