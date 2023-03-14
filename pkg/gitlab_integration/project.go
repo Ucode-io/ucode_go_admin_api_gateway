@@ -2,6 +2,7 @@ package gitlab_integration
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -9,11 +10,12 @@ import (
 )
 
 func CreateProjectFork(cfg config.Config, projectName string) (response models.GitlabIntegrationResponse, err error) {
-
+	fmt.Println("projectName:::::::", projectName)
 	// this is create project by group_id in gitlab
 
 	projectId := cfg.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
+	fmt.Println("config::::::", cfg.GitlabIntegrationURL, cfg.GitlabIntegrationToken)
 
 	resp, err := DoRequest(cfg.GitlabIntegrationURL+"/api/v4/projects/"+strProjectId+"/fork", cfg.GitlabIntegrationToken, "POST", models.CreateProject{
 		NamespaceID:          cfg.GitlabGroupId,
@@ -23,6 +25,7 @@ func CreateProjectFork(cfg config.Config, projectName string) (response models.G
 		DefaultBranch:        "master",
 		Visibility:           "private",
 	})
+	fmt.Println("resp::::::::::", resp)
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
 	} else if resp.Code >= 500 {
