@@ -138,7 +138,7 @@ func (h *Handler) CreateNotificationUsers(c *gin.Context) {
 // @Tags Notification
 // @Accept json
 // @Produce json
-// @Param category_id query string false "category-id"
+// @Param category-id query string false "category-id"
 // @Param offset query int false "offset"
 // @Param limit query int false "limit"
 // @Success 200 {object} status_http.Response{data=npb.GetAllNotificationsResponse} "Response Body"
