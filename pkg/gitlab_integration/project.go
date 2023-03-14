@@ -10,7 +10,7 @@ import (
 )
 
 func CreateProjectFork(cfg config.Config, projectName string) (response models.GitlabIntegrationResponse, err error) {
-
+	fmt.Println("projectName:::::::", projectName)
 	// this is create project by group_id in gitlab
 
 	projectId := cfg.GitlabProjectId
