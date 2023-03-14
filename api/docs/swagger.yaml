@@ -12822,6 +12822,10 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: category-id
+        in: query
+        name: category_id
+        type: string
       - description: offset
         in: query
         name: offset

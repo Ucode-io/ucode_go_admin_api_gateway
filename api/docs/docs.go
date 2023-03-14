@@ -14440,6 +14440,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "category-id",
+                        "name": "category_id",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "description": "offset",
                         "name": "offset",

@@ -138,6 +138,7 @@ func (h *Handler) CreateNotificationUsers(c *gin.Context) {
 // @Tags Notification
 // @Accept json
 // @Produce json
+// @Param category_id query string false "category-id"
 // @Param offset query int false "offset"
 // @Param limit query int false "limit"
 // @Success 200 {object} status_http.Response{data=npb.GetAllNotificationsResponse} "Response Body"
@@ -185,6 +186,7 @@ func (h *Handler) GetAllNotifications(c *gin.Context) {
 	req.Offset = int32(offset)
 	req.ProjectId = ProjectId
 	req.EnvironmentId = EnvironmentId.(string)
+	req.CategoryId = c.Query("category-id")
 
 	resp, err := services.NotificationService().Notification().GetAllNotification(c.Request.Context(), &req)
 	if err != nil {
