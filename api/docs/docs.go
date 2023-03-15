@@ -14548,8 +14548,14 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query"
+                    },
+                    {
                         "description": "Request Body",
-                        "name": "Note_Folder",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {

@@ -72,7 +72,8 @@ func (h *Handler) CreateUserFCMToken(c *gin.Context) {
 // @Tags Notification
 // @Accept json
 // @Produce json
-// @Param Note_Folder body npb.CreateNotificationManyUserRequest true "Request Body"
+// @Param project-id query string false "project-id"
+// @Param body body npb.CreateNotificationManyUserRequest true "Request Body"
 // @Success 201 {object} status_http.Response{data=npb.NotificationUsers} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

@@ -12884,9 +12884,13 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
       - description: Request Body
         in: body
-        name: Note_Folder
+        name: body
         required: true
         schema:
           $ref: '#/definitions/notification_service.CreateNotificationManyUserRequest'

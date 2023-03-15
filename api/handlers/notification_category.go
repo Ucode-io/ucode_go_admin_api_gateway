@@ -308,7 +308,7 @@ func (h *Handler) DeleteCategoryNotification(c *gin.Context) {
 		c.Request.Context(),
 		&pb.DeleteCategoryRequest{
 			ProjectId: ProjectId,
-			ResEnvId:  EnvironmentId.(string),
+			EnvironmentId:  EnvironmentId.(string),
 			Guid:      id,
 		},
 	)
