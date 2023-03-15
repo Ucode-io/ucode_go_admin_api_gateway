@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -47,13 +49,14 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
-
+	start := time.Now()
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+	fmt.Println("GetService", time.Since(start))
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
@@ -69,6 +72,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 
+	start = time.Now()
 	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 		context.Background(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
@@ -81,10 +85,12 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("GetResEnvByResIdEnvId", time.Since(start))
 	id, _ := uuid.NewRandom()
 	objectRequest.Data["guid"] = id.String()
 
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
+	start = time.Now()
 	for key, value := range objectRequest.Data {
 		if key[0] == '$' {
 
@@ -116,6 +122,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 			objectRequest.Data[key[1:]+"_id"] = id
 		}
 	}
+	fmt.Println("Create child objects", time.Since(start))
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 
@@ -123,11 +130,14 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	start = time.Now()
 	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "CREATE", c, h)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	fmt.Println("GetListCustomEvents", time.Since(start))
+	start = time.Now()
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
@@ -144,7 +154,9 @@ func (h *Handler) CreateObject(c *gin.Context) {
 			return
 		}
 	}
+	fmt.Println("DoInvokeFuntion", time.Since(start))
 
+	start = time.Now()
 	resp, err := services.BuilderService().ObjectBuilder().Create(
 		context.Background(),
 		&obs.CommonMessage{
@@ -153,11 +165,13 @@ func (h *Handler) CreateObject(c *gin.Context) {
 			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("Create", time.Since(start))
+
+	start = time.Now()
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
@@ -175,6 +189,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 			return
 		}
 	}
+	fmt.Println("DoInvokeFuntion", time.Since(start))
 
 	h.handleResponse(c, status_http.Created, resp)
 }
