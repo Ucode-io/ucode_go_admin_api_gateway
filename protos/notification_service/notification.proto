@@ -58,6 +58,8 @@ message UpdateNotificationRequest {
   string id = 1;
   string notif_status_id = 2;
   string notification_status_name = 3;
+  int64 success_sends = 4;
+  int64 failed_sends = 5;  
 }
 
 message DeleteNotificationRequest {
@@ -86,6 +88,8 @@ message Notification {
   string category_id = 10;
   string title = 11;
   repeated ManyNotifs notifs = 12;
+  int64 success_sends = 13;
+  int64 failed_sends = 14;
 }
 
 message NotificationUsers {

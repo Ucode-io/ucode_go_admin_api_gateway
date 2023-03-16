@@ -33202,6 +33202,9 @@ const docTemplate = `{
                 "environment_id": {
                     "type": "string"
                 },
+                "failed_sends": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -33228,6 +33231,9 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "string"
+                },
+                "success_sends": {
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
