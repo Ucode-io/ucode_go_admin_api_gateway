@@ -56,7 +56,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-	fmt.Println("GetService", time.Since(start))
+	fmt.Println("TIME_MANAGEMENT_LOGGING:::GetService", time.Since(start))
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
@@ -85,7 +85,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("GetResEnvByResIdEnvId", time.Since(start))
+	fmt.Println("TIME_MANAGEMENT_LOGGING:::GetResEnvByResIdEnvId", time.Since(start))
 	id, _ := uuid.NewRandom()
 	objectRequest.Data["guid"] = id.String()
 
@@ -122,7 +122,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 			objectRequest.Data[key[1:]+"_id"] = id
 		}
 	}
-	fmt.Println("Create child objects", time.Since(start))
+	fmt.Println("TIME_MANAGEMENT_LOGGING:::Create child objects", time.Since(start))
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 
@@ -136,7 +136,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	fmt.Println("GetListCustomEvents", time.Since(start))
+	fmt.Println("TIME_MANAGEMENT_LOGGING:::GetListCustomEvents", time.Since(start))
 	start = time.Now()
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
@@ -154,7 +154,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Println("DoInvokeFuntion", time.Since(start))
+	fmt.Println("TIME_MANAGEMENT_LOGGING:::DoInvokeFuntion", time.Since(start))
 
 	start = time.Now()
 	resp, err := services.BuilderService().ObjectBuilder().Create(
@@ -169,7 +169,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("Create", time.Since(start))
+	fmt.Println("TIME_MANAGEMENT_LOGGING:::Create", time.Since(start))
 
 	start = time.Now()
 	if len(afterActions) > 0 {
@@ -189,7 +189,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Println("DoInvokeFuntion", time.Since(start))
+	fmt.Println("TIME_MANAGEMENT_LOGGING:::DoInvokeFuntion", time.Since(start))
 
 	h.handleResponse(c, status_http.Created, resp)
 }
