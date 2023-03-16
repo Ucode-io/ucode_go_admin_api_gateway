@@ -17,6 +17,7 @@ message UserToken {
 message CreateUserTokenRequest {
     string user_id = 1;
     string token = 2;
+    string platform_id = 3;
 }
 
 message CreateUserTokenResponse {

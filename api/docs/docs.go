@@ -33143,6 +33143,9 @@ const docTemplate = `{
         "notification_service.CreateUserTokenRequest": {
             "type": "object",
             "properties": {
+                "platform_id": {
+                    "type": "string"
+                },
                 "token": {
                     "type": "string"
                 },

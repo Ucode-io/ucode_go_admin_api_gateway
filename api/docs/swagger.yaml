@@ -1986,6 +1986,8 @@ definitions:
     type: object
   notification_service.CreateUserTokenRequest:
     properties:
+      platform_id:
+        type: string
       token:
         type: string
       user_id:
