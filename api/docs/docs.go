@@ -15195,7 +15195,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "Request Body",
-                        "name": "Note_Folder",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {

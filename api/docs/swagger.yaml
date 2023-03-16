@@ -13322,7 +13322,7 @@ paths:
         type: string
       - description: Request Body
         in: body
-        name: Note_Folder
+        name: body
         required: true
         schema:
           $ref: '#/definitions/notification_service.CreateUserTokenRequest'

@@ -19,7 +19,7 @@ import (
 // @Tags Notification
 // @Accept json
 // @Produce json
-// @Param Note_Folder body npb.CreateUserTokenRequest true "Request Body"
+// @Param body body npb.CreateUserTokenRequest true "Request Body"
 // @Success 201 {object} status_http.Response{data=npb.CreateUserTokenResponse} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -41,17 +41,17 @@ func (h *Handler) CreateUserFCMToken(c *gin.Context) {
 		return
 	}
 
-	EnvironmentId, _ := c.Get("environment_id")
-	if !util.IsValidUUID(EnvironmentId.(string)) {
-		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
-		return
-	}
+	// EnvironmentId, _ := c.Get("environment_id")
+	// if !util.IsValidUUID(EnvironmentId.(string)) {
+	// 	h.handleResponse(c, status_http.BadRequest, "environment_id not found")
+	// 	return
+	// }
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project-id not found")
-		return
-	}
+	// ProjectId := c.Query("project-id")
+	// if !util.IsValidUUID(ProjectId) {
+	// 	h.handleResponse(c, status_http.BadRequest, "project-id not found")
+	// 	return
+	// }
 	resp, err := services.NotificationService().Notification().CreateUserToken(c.Request.Context(), &req)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
