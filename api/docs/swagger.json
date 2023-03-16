@@ -33202,6 +33202,12 @@
                         "$ref": "#/definitions/notification_service.NotificationInfo"
                     }
                 },
+                "notifs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/notification_service.ManyNotifs"
+                    }
+                },
                 "platform_id": {
                     "type": "string"
                 },

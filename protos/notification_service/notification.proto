@@ -85,6 +85,7 @@ message Notification {
   string status = 9;
   string category_id = 10;
   string title = 11;
+  repeated ManyNotifs notifs = 12;
 }
 
 message NotificationUsers {

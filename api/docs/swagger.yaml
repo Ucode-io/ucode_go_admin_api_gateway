@@ -2032,6 +2032,10 @@ definitions:
         items:
           $ref: '#/definitions/notification_service.NotificationInfo'
         type: array
+      notifs:
+        items:
+          $ref: '#/definitions/notification_service.ManyNotifs'
+        type: array
       platform_id:
         type: string
       sender_id:
