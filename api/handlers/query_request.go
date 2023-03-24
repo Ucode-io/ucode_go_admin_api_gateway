@@ -119,7 +119,6 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 
 	query.CommitId = uuID.String()
 	query.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
-	query.ProjectId = projectId
 	query.EnvironmentId = environmentId.(string)
 
 	query.CommitInfo = &tmp.CommitInfo{
@@ -371,7 +370,6 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 
 	query.CommitId = uuID.String()
 	query.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
-	query.ProjectId = projectId
 	query.EnvironmentId = environmentId.(string)
 	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
 		c.Request.Context(),
@@ -717,7 +715,6 @@ func (h *Handler) QueryRun(c *gin.Context) {
 
 	query.CommitId = uuID.String()
 	query.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
-	query.ProjectId = projectId
 	query.EnvironmentId = environmentId.(string)
 
 	res, err := services.QueryService().Query().RunQuery(
