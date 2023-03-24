@@ -108,7 +108,6 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 
 	folder.CommitId = uuID.String()
 	folder.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
-	folder.ProjectId = projectId
 
 	res, err := services.QueryService().Folder().CreateFolder(
 		context.Background(),
@@ -322,7 +321,6 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 
 	folder.CommitId = uuID.String()
 	folder.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
-	folder.ProjectId = projectId
 
 	res, err := services.QueryService().Folder().UpdateFolder(
 		context.Background(),
