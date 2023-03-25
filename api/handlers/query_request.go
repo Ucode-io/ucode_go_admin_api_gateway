@@ -425,9 +425,8 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 		resourceEnvironment *obs.ResourceEnvironment
 	)
 	queryId := c.Param("query-id")
-
 	if !util.IsValidUUID(queryId) {
-		h.handleResponse(c, status_http.InvalidArgument, "view id is an invalid uuid")
+		h.handleResponse(c, status_http.InvalidArgument, "query id is an invalid uuid")
 		return
 	}
 
