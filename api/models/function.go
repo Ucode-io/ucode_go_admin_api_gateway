@@ -21,6 +21,7 @@ type CreateFunctionRequest struct {
 type InvokeFunctionRequest struct {
 	FunctionID string   `json:"function_id"`
 	ObjectIDs  []string `json:"object_ids"`
+	Attributes map[string]interface{}
 }
 
 type InvokeFunctionResponse struct {

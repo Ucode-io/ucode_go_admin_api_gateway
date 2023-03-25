@@ -32652,6 +32652,10 @@ const docTemplate = `{
         "models.InvokeFunctionRequest": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "function_id": {
                     "type": "string"
                 },
