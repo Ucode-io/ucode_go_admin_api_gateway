@@ -371,18 +371,18 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 	query.CommitId = uuID.String()
 	query.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
 	query.EnvironmentId = environmentId.(string)
-	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-		c.Request.Context(),
-		&vcs.GetCurrentReleaseRequest{
-			EnvironmentId: environmentId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	//activeVersion, err := services.VersioningService().Release().GetCurrentActive(
+	//	c.Request.Context(),
+	//	&vcs.GetCurrentReleaseRequest{
+	//		EnvironmentId: environmentId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
-	query.VersionId = activeVersion.GetVersionId()
+	//query.VersionId = activeVersion.GetVersionId()
 	query.CommitInfo = &tmp.CommitInfo{
 		Id:         "",
 		CommitType: config.COMMIT_TYPE_FIELD,
