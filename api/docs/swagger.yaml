@@ -1664,6 +1664,9 @@ definitions:
     type: object
   models.InvokeFunctionRequest:
     properties:
+      attributes:
+        additionalProperties: true
+        type: object
       function_id:
         type: string
       object_ids:
