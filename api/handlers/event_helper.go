@@ -11,7 +11,6 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
-	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -159,7 +158,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 
 		js, _ := json.Marshal(invokeFunction)
 		fmt.Println("function body ----", string(js))
-		h.log.Info("function path: ", logger.Any("", customEvent.Functions[0].Path))
+		// h.log.Info("function path: ", logger.Any("", customEvent.Functions[0].Path))
 
 		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.Functions[0].Path, "POST", invokeFunction)
 		if err != nil {
