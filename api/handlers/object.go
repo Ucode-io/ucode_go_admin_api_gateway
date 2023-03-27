@@ -1402,6 +1402,8 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		},
 	)
 
+	log.Println("----mulltiple_update ---->", resp.GetData().AsMap())
+
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
