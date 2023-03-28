@@ -70,6 +70,9 @@ type Config struct {
 	ApiReferenceServiceHost string
 	ApiReferenceServicePort string
 
+	ChatServiceGrpcHost string
+	ChatServiceGrpcPort string
+
 	FunctionServiceHost string
 	FunctionServicePort string
 	QueryServiceHost    string
@@ -198,6 +201,8 @@ func Load() Config {
 	config.PlatformType = cast.ToString(GetOrReturnDefaultValue("PLATFORM_TYPE", "super-admin"))
 	config.AdminHostForCodeServer = cast.ToString(GetOrReturnDefaultValue("HOST_FOR_CODE_SERVER", "test.admin"))
 
+	config.ChatServiceGrpcHost = cast.ToString(GetOrReturnDefaultValue("CHAT_SERVICE_HOST", "localhost"))
+	config.ChatServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CHAT_SERVICE_PORT", ":9001"))
 	config.NotificationServiceHost = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_SERVICE_HOST", "localhost"))
 	config.NotificationGRPCPort = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_GRPC_PORT", ":8101"))
 	return config
