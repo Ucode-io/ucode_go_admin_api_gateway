@@ -30,6 +30,7 @@ message WebPage {
   string commit_id = 8;
   CommitInfo commit_info = 9;
   string version_id = 10;
+  string icon = 11;
 }
 
 message CreateWebPageReq {
@@ -42,6 +43,7 @@ message CreateWebPageReq {
   google.protobuf.Struct components = 7;
   CommitInfo commit_info = 8;
   string version_id = 9;
+  string icon = 10;
 }
 
 message GetListWebPageReq {
