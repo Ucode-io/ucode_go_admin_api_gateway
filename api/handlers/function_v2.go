@@ -177,7 +177,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		return
 	}
 
-	log.Panicln("function::", function)
+	log.Println("function::", function)
 
 	if function.Url == "" && function.Password == "" {
 		uuid, _ := uuid.NewRandom()
