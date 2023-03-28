@@ -388,6 +388,18 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.POST("/webpageV2/select-versions/:webpage-id", h.InsertManyVersionForWebPageService)
 		v1Admin.GET("/webpageV2/:webpage-id/history", h.GetWebPageHistory)
 		v1Admin.POST("/webpageV2/:webpage-id/revert", h.RevertWebPage)
+
+		// notification service
+		v1Admin.POST("/notification/user-fcmtoken", h.CreateUserFCMToken)
+		v1Admin.POST("/notification", h.CreateNotificationUsers)
+		v1Admin.GET("/notification", h.GetAllNotifications)
+		v1Admin.GET("/notification/:id", h.GetNotificationById)
+		v1Admin.GET("/notification/category", h.GetListCategoryNotification)
+		v1Admin.POST("/notification/category", h.CreateCategoryNotification)
+		v1Admin.GET("/notification/category/:id", h.GetCategoryNotification)
+		v1Admin.PUT("/notification/category", h.UpdateCategoryNotification)
+		v1Admin.DELETE("/notification/category/:id", h.DeleteCategoryNotification)
+
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())

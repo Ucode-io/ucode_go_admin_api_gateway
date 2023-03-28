@@ -528,10 +528,15 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
+	if invokeFunction.Attributes == nil {
+		invokeFunction.Attributes = make(map[string]interface{}, 0)
+	}
+
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.NewInvokeFunctionRequest{
 		Data: map[string]interface{}{
 			"object_ids": invokeFunction.ObjectIDs,
 			"app_id":     apiKeys.GetData()[0].GetAppId(),
+			"attributes": invokeFunction.Attributes,
 		},
 	})
 	if err != nil {
@@ -547,18 +552,18 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
-	_, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
-		context.Background(),
-		&obs.UpdateByFunctionIdRequest{
-			FunctionId: invokeFunction.FunctionID,
-			ObjectIds:  invokeFunction.ObjectIDs,
-			FieldSlug:  function.Path + "_disable",
-			ProjectId:  resourceEnvironment.GetId(),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// _, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
+	// 	context.Background(),
+	// 	&obs.UpdateByFunctionIdRequest{
+	// 		FunctionId: invokeFunction.FunctionID,
+	// 		ObjectIds:  invokeFunction.ObjectIDs,
+	// 		FieldSlug:  function.Path + "_disable",
+	// 		ProjectId:  resourceEnvironment.GetId(),
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 	h.handleResponse(c, status_http.Created, resp)
 }

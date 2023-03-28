@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
+	obs "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/query_service"
 	vcs "ucode/ucode_go_api_gateway/genproto/versioning_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -21,7 +22,7 @@ import (
 
 // CreateQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID create_query_request
 // @Router /v1/query-request [POST]
@@ -37,8 +38,8 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	var (
-		//resourceEnvironment *obs.ResourceEnvironment
-		query tmp.CreateQueryReq
+		resourceEnvironment *obs.ResourceEnvironment
+		query               tmp.CreateQueryReq
 	)
 	fmt.Println("TEST:::::1")
 
@@ -67,13 +68,13 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-	//
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
 	fmt.Println("TEST:::::4")
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
@@ -81,33 +82,33 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	//
-	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
-	//template.ProjectId = resourceEnvironment.GetId()
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ProjectId:     projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+	query.ProjectId = resourceEnvironment.GetId()
 	fmt.Println("TEST:::::5")
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -118,7 +119,6 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 
 	query.CommitId = uuID.String()
 	query.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
-	query.ProjectId = projectId
 	query.EnvironmentId = environmentId.(string)
 
 	query.CommitInfo = &tmp.CommitInfo{
@@ -144,7 +144,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 
 // GetSingleQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_query_request
 // @Router /v1/query-request/{query-id} [GET]
@@ -161,7 +161,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 	var (
-	//resourceEnvironment *obs.ResourceEnvironment
+		resourceEnvironment *obs.ResourceEnvironment
 	)
 	queryId := c.Param("query-id")
 	commitId := c.Query("commit_id")
@@ -190,51 +190,51 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-	//
-	//environmentId, ok := c.Get("environment_id")
-	//if !ok {
-	//	err = errors.New("error getting environment id")
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-	//	return
-	//}
-	//
-	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ProjectId:     projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
 
 	res, err := services.QueryService().Query().GetSingleQuery(
 		context.Background(),
 		&tmp.GetSingleQueryReq{
 			Id:        queryId,
-			ProjectId: projectId,
+			ProjectId: resourceEnvironment.GetId(),
 			VersionId: versionId,
 			CommitId:  commitId,
 		},
@@ -275,7 +275,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 
 // UpdateQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID update_query_request
 // @Router /v1/query-request [PUT]
@@ -291,8 +291,8 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 	var (
-		//resourceEnvironment *obs.ResourceEnvironment
-		query tmp.UpdateQueryReq
+		resourceEnvironment *obs.ResourceEnvironment
+		query               tmp.UpdateQueryReq
 	)
 
 	err := c.ShouldBindJSON(&query)
@@ -320,12 +320,12 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
@@ -334,32 +334,32 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		return
 	}
 
-	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
-	//template.ProjectId = resourceEnvironment.GetId()
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ProjectId:     projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+	query.ProjectId = resourceEnvironment.GetId()
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -370,20 +370,19 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 
 	query.CommitId = uuID.String()
 	query.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
-	query.ProjectId = projectId
 	query.EnvironmentId = environmentId.(string)
-	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-		c.Request.Context(),
-		&vcs.GetCurrentReleaseRequest{
-			EnvironmentId: environmentId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	//activeVersion, err := services.VersioningService().Release().GetCurrentActive(
+	//	c.Request.Context(),
+	//	&vcs.GetCurrentReleaseRequest{
+	//		EnvironmentId: environmentId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
-	query.VersionId = activeVersion.GetVersionId()
+	//query.VersionId = activeVersion.GetVersionId()
 	query.CommitInfo = &tmp.CommitInfo{
 		Id:         "",
 		CommitType: config.COMMIT_TYPE_FIELD,
@@ -407,7 +406,7 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 
 // DeleteQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID delete_query_request
 // @Router /v1/query-request/{query-id} [DELETE]
@@ -423,7 +422,7 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 	var (
-	//resourceEnvironment *obs.ResourceEnvironment
+		resourceEnvironment *obs.ResourceEnvironment
 	)
 	queryId := c.Param("query-id")
 
@@ -450,51 +449,51 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-	//
-	//environmentId, ok := c.Get("environment_id")
-	//if !ok {
-	//	err = errors.New("error getting environment id")
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-	//	return
-	//}
-	//
-	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ProjectId:     projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
 
 	res, err := services.QueryService().Query().DeleteQuery(
 		context.Background(),
 		&tmp.DeleteQueryReq{
 			Id:        queryId,
-			ProjectId: projectId,
+			ProjectId: resourceEnvironment.GetId(),
 			VersionId: uuid.NewString(),
 		},
 	)
@@ -509,7 +508,7 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 
 // GetListQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_query_request
 // @Router /v1/query-request [GET]
@@ -527,7 +526,7 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetListQueryRequest(c *gin.Context) {
 	var (
-	//resourceEnvironment *obs.ResourceEnvironment
+		resourceEnvironment *obs.ResourceEnvironment
 	)
 
 	limit, err := strconv.Atoi(c.DefaultQuery("limit", "100"))
@@ -560,50 +559,50 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
 	//	return
 	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-	//
-	//environmentId, ok := c.Get("environment_id")
-	//if !ok {
-	//	err = errors.New("error getting environment id")
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-	//	return
-	//}
-	//
-	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ProjectId:     projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
 
 	res, err := services.QueryService().Query().GetListQuery(
 		context.Background(),
 		&tmp.GetListQueryReq{
-			ProjectId: projectId,
+			ProjectId: resourceEnvironment.GetId(),
 			VersionId: "",
 			FolderId:  c.DefaultQuery("folder-id", ""),
 			Limit:     int32(limit),
@@ -621,7 +620,7 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 
 // QueryRun godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID run_query_request
 // @Router /v1/query-request/run [POST]
@@ -637,8 +636,8 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) QueryRun(c *gin.Context) {
 	var (
-		//resourceEnvironment *obs.ResourceEnvironment
-		query tmp.Query
+		resourceEnvironment *obs.ResourceEnvironment
+		query               tmp.Query
 	)
 
 	err := c.ShouldBindJSON(&query)
@@ -666,46 +665,46 @@ func (h *Handler) QueryRun(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-	//
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	//
-	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
-	//template.ProjectId = resourceEnvironment.GetId()
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ProjectId:     projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+	query.ProjectId = resourceEnvironment.GetId()
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -716,7 +715,6 @@ func (h *Handler) QueryRun(c *gin.Context) {
 
 	query.CommitId = uuID.String()
 	query.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
-	query.ProjectId = projectId
 	query.EnvironmentId = environmentId.(string)
 
 	res, err := services.QueryService().Query().RunQuery(
@@ -734,6 +732,8 @@ func (h *Handler) QueryRun(c *gin.Context) {
 
 // GetQueryHistory godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID get_query_history
 // @Router /v1/query-request/{query-id}/history [GET]
 // @Summary Get Api query history
@@ -749,6 +749,10 @@ func (h *Handler) QueryRun(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetQueryHistory(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
+
 	id := c.Param("query-id")
 	projectId := c.Query("project-id")
 
@@ -788,11 +792,51 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 		return
 	}
 
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ProjectId:     projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
 	resp, err := services.QueryService().Query().GetQueryHistory(
 		context.Background(),
 		&tmp.GetQueryHistoryReq{
 			Id:        id,
-			ProjectId: projectId,
+			ProjectId: resourceEnvironment.GetId(),
 			Offset:    int64(offset),
 			Limit:     int64(limit),
 		},
@@ -872,6 +916,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 
 // RevertQuery godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID revert_query
 // @Router /v1/query-request/{query-id}/revert [POST]
@@ -887,8 +932,10 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) RevertQuery(c *gin.Context) {
-
-	var body models.QueryRevertRequest
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+		body                models.QueryRevertRequest
+	)
 
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
@@ -921,17 +968,46 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 		return
 	}
 
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	if !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
-		return
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  body.ProjectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
-	fmt.Println("test 1")
+
 	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, body.ProjectId)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
@@ -945,6 +1021,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 			VersionId:   versionGuid,
 			OldCommitId: body.CommitId,
 			NewCommitId: commitGuid,
+			ProjectId:   resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
@@ -958,6 +1035,8 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 
 // InsertManyVersionForQueryService godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID insert_many_query_reference
 // @Router /v1/query-request/select-versions/{query-id} [POST]
 // @Summary Insert Many query
@@ -972,7 +1051,9 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
-
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 	body := tmp.ManyVersions{}
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
@@ -1020,6 +1101,47 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 	body.EnvironmentId = environmentID.(string)
 	body.Id = queryId
 
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  body.ProjectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+	body.ProjectId = resourceEnvironment.GetId()
+
 	// _, commitId, err := h.CreateAutoCommitForAdminChange(c, environmentID.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
 	// if err != nil {
 	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
@@ -1038,6 +1160,7 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 
 // GetSingleQueryLog godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_query_log
 // @Router /v1/query-request/{query-id}/log/{log-id} [GET]
@@ -1053,7 +1176,9 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleQueryLog(c *gin.Context) {
-
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 	queryId := c.Param("query-id")
 	if !util.IsValidUUID(queryId) {
 		err := errors.New("query id is an invalid uuid")
@@ -1086,10 +1211,17 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 		return
 	}
 
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
 	if !util.IsValidUUID(environmentId.(string)) {
@@ -1097,11 +1229,37 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 		return
 	}
 
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ProjectId:     projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
 	resp, err := services.QueryService().Log().GetSingleLog(
 		context.Background(),
 		&tmp.GetSingleLogReq{
 			Id:            logId,
-			ProjectId:     projectId,
+			ProjectId:     resourceEnvironment.GetId(),
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -1116,6 +1274,7 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 
 // GetListQueryLog godoc
 // @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_query_log
 // @Router /v1/query-request/{query-id}/log [GET]
@@ -1132,7 +1291,9 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetListQueryLog(c *gin.Context) {
-
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 	queryId := c.Param("query-id")
 	if !util.IsValidUUID(queryId) {
 		err := errors.New("query id is an invalid uuid")
@@ -1171,10 +1332,17 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 		return
 	}
 
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
 	if !util.IsValidUUID(environmentId.(string)) {
@@ -1182,11 +1350,37 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 		return
 	}
 
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ProjectId:     projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
 	resp, err := services.QueryService().Log().GetListLog(
 		context.Background(),
 		&tmp.GetListLogReq{
 			QueryId:       queryId,
-			ProjectId:     projectId,
+			ProjectId:     resourceEnvironment.GetId(),
 			EnvironmentId: environmentId.(string),
 			Limit:         int64(limit),
 			Offset:        int64(offset),

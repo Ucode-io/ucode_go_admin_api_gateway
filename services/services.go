@@ -21,6 +21,7 @@ type ServiceManagerI interface {
 	IntegrationPayzeService() IntegrationServicePayzeI
 	WebPageService() WebPageServiceI
 	ChatService() ChatServiceI
+	NotificationService() NotificationServiceI
 }
 
 type grpcClients struct {
@@ -39,6 +40,7 @@ type grpcClients struct {
 	integrationPayzeServiceI IntegrationServicePayzeI
 	webPageService           WebPageServiceI
 	chatService              ChatServiceI
+	notificationService      NotificationServiceI
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -114,6 +116,11 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
+	notificationServiceClient, err := NewNotificationServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return grpcClients{
 		apiReferenceService:      apiReferenceClient,
 		analyticsService:         analyticsServiceClient,
@@ -130,6 +137,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		integrationPayzeServiceI: integrationPayzeServiceClient,
 		webPageService:           webPageServiceClient,
 		chatService:              chatServiceClient,
+		notificationService:      notificationServiceClient,
 	}, nil
 }
 
@@ -189,4 +197,8 @@ func (g grpcClients) IntegrationPayzeService() IntegrationServicePayzeI {
 
 func (g grpcClients) WebPageService() WebPageServiceI {
 	return g.webPageService
+}
+
+func (g grpcClients) NotificationService() NotificationServiceI {
+	return g.notificationService
 }

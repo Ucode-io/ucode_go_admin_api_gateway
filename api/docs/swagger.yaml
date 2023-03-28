@@ -907,6 +907,10 @@ definitions:
         type: boolean
       minioSecretAccessKey:
         type: string
+      notificationGRPCPort:
+        type: string
+      notificationServiceHost:
+        type: string
       objectBuilderGRPCPort:
         type: string
       objectBuilderServiceHost:
@@ -1159,6 +1163,8 @@ definitions:
         type: string
       name:
         type: string
+      parent_id:
+        type: string
       project_id:
         type: string
       version_id:
@@ -1252,6 +1258,8 @@ definitions:
       base_url:
         type: string
       name:
+        type: string
+      parent_id:
         type: string
       project_id:
         type: string
@@ -1733,6 +1741,9 @@ definitions:
     type: object
   models.InvokeFunctionRequest:
     properties:
+      attributes:
+        additionalProperties: true
+        type: object
       function_id:
         type: string
       object_ids:
@@ -1935,6 +1946,13 @@ definitions:
       text:
         type: string
     type: object
+  models.UpdateCategoryRequest:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   models.UpdateFolderReqModel:
     properties:
       id:
@@ -2036,6 +2054,126 @@ definitions:
       project_id:
         type: string
       url:
+        type: string
+    type: object
+  notification_service.CreateNotificationManyUserRequest:
+    properties:
+      category_id:
+        type: string
+      environment_id:
+        type: string
+      notificationData:
+        $ref: '#/definitions/notification_service.Notification'
+      notifs:
+        items:
+          $ref: '#/definitions/notification_service.ManyNotifs'
+        type: array
+      project_id:
+        type: string
+      sender_id:
+        type: string
+      title:
+        type: string
+    type: object
+  notification_service.CreateUserTokenRequest:
+    properties:
+      platform_id:
+        type: string
+      token:
+        type: string
+      user_id:
+        type: string
+    type: object
+  notification_service.CreateUserTokenResponse:
+    properties:
+      user_token_id:
+        type: string
+    type: object
+  notification_service.GetAllNotificationsResponse:
+    properties:
+      count:
+        type: integer
+      environment_id:
+        type: string
+      notifications:
+        items:
+          $ref: '#/definitions/notification_service.Notification'
+        type: array
+      project_id:
+        type: string
+    type: object
+  notification_service.ManyNotifs:
+    properties:
+      scheduled_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  notification_service.Notification:
+    properties:
+      category_id:
+        type: string
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      failed_sends:
+        type: integer
+      id:
+        type: string
+      notif_status_id:
+        type: string
+      notification_info:
+        items:
+          $ref: '#/definitions/notification_service.NotificationInfo'
+        type: array
+      notifs:
+        items:
+          $ref: '#/definitions/notification_service.ManyNotifs'
+        type: array
+      platform_id:
+        type: string
+      sender_id:
+        type: string
+      status:
+        type: string
+      success_sends:
+        type: integer
+      title:
+        type: string
+    type: object
+  notification_service.NotificationInfo:
+    properties:
+      code:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      language:
+        type: string
+      notification_id:
+        type: string
+      title:
+        type: string
+    type: object
+  notification_service.NotificationUsers:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      notification_id:
+        type: string
+      scheduled_at:
+        type: string
+      sent_count:
+        type: integer
+      status:
+        type: string
+      user_id:
         type: string
     type: object
   object_builder_service.ActionRelation:
@@ -12786,6 +12924,553 @@ paths:
       summary: Get Commits note
       tags:
       - Note
+  /v1/notification:
+    get:
+      consumes:
+      - application/json
+      description: Get All Notifications
+      operationId: get-all-notifications
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: category-id
+        in: query
+        name: category-id
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/notification_service.GetAllNotificationsResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get All Notifications
+      tags:
+      - Notification
+    post:
+      consumes:
+      - application/json
+      description: Create User Notifications
+      operationId: create-user-notifications
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      - description: Request Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/notification_service.CreateNotificationManyUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/notification_service.NotificationUsers'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create User Notifications
+      tags:
+      - Notification
+  /v1/notification/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Notification By Id
+      operationId: get-notification-by-id
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Notification Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/notification_service.Notification'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Notification By Id
+      tags:
+      - Notification
+  /v1/notification/category:
+    get:
+      consumes:
+      - application/json
+      description: Get list category
+      operationId: get_list_category_for_notification
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetAllCategoriesResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get list category
+      tags:
+      - Notification-Category
+    post:
+      consumes:
+      - application/json
+      description: Create category
+      operationId: create_category_for_notification
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: app
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCategory'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create category
+      tags:
+      - Notification-Category
+    put:
+      consumes:
+      - application/json
+      description: Update category
+      operationId: update_category_for_notification
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update category
+      tags:
+      - Notification-Category
+  /v1/notification/category/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete category
+      operationId: delete_category_for_notification
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete category
+      tags:
+      - Notification-Category
+    get:
+      consumes:
+      - application/json
+      description: Get single category
+      operationId: get_single_category_for_notification
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single category
+      tags:
+      - Notification-Category
+  /v1/notification/user-fcmtoken:
+    post:
+      consumes:
+      - application/json
+      description: Create User Token
+      operationId: create-user-token
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/notification_service.CreateUserTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response Body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/notification_service.CreateUserTokenResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create User Token
+      tags:
+      - Notification
   /v1/object-upsert/{table_slug}:
     post:
       consumes:
@@ -13901,7 +14586,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -13957,7 +14641,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14019,7 +14702,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14082,7 +14764,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14136,7 +14817,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14198,7 +14878,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14267,7 +14946,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14329,7 +15007,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14392,7 +15069,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14446,7 +15122,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14509,6 +15184,15 @@ paths:
       description: Get query history
       operationId: get_query_history
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: query-id
         in: path
         name: query-id
@@ -14571,6 +15255,10 @@ paths:
       description: get list log
       operationId: get_list_query_log
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -14638,6 +15326,10 @@ paths:
       description: get single log
       operationId: get_single_query_log
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -14700,6 +15392,10 @@ paths:
       description: Revert query
       operationId: revert_query
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -14766,7 +15462,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14826,6 +15521,15 @@ paths:
       description: Insert Many query
       operationId: insert_many_query_reference
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: query-id
         in: path
         name: query-id
