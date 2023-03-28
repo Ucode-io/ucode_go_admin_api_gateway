@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -175,6 +176,8 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	log.Panicln("function::", function)
 
 	if function.Url == "" && function.Password == "" {
 		uuid, _ := uuid.NewRandom()
