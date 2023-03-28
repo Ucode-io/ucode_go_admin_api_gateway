@@ -70,6 +70,9 @@ type Config struct {
 	ApiReferenceServiceHost string
 	ApiReferenceServicePort string
 
+	ChatServiceGrpcHost string
+	ChatServiceGrpcPort string
+
 	FunctionServiceHost string
 	FunctionServicePort string
 	QueryServiceHost    string
@@ -194,6 +197,9 @@ func Load() Config {
 	config.ApiHost = cast.ToString(GetOrReturnDefaultValue("API_HOST", "test.admin.api.u-code.io"))
 	config.PlatformType = cast.ToString(GetOrReturnDefaultValue("PLATFORM_TYPE", "super-admin"))
 	config.AdminHostForCodeServer = cast.ToString(GetOrReturnDefaultValue("HOST_FOR_CODE_SERVER", "test.admin"))
+
+	config.ChatServiceGrpcHost = cast.ToString(GetOrReturnDefaultValue("CHAT_SERVICE_HOST", "localhost"))
+	config.ChatServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CHAT_SERVICE_PORT", ":9001"))
 	return config
 }
 

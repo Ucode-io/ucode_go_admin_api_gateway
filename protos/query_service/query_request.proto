@@ -161,3 +161,9 @@ message QueryManyVersions {
   string project_id = 2;
   string oldcommit_id = 3;
 }
+
+message CommonInput {
+  string query = 1;
+  google.protobuf.Struct data = 2;
+  string project_id = 3;
+}

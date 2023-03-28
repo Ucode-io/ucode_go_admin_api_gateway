@@ -358,7 +358,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -686,7 +686,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -1971,7 +1971,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2559,7 +2559,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3050,7 +3050,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3845,7 +3845,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4348,7 +4348,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4763,7 +4763,7 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": ""
+                        "description": "Created"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -5194,7 +5194,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -7721,7 +7721,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8222,7 +8222,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8723,7 +8723,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -9219,7 +9219,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -9915,7 +9915,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10747,7 +10747,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -11622,7 +11622,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -11805,7 +11805,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -12510,7 +12510,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13098,7 +13098,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -14049,7 +14049,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -14353,7 +14353,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -15431,7 +15431,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -16783,7 +16783,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -17530,7 +17530,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -18431,7 +18431,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -19099,7 +19099,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -21871,7 +21871,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -22822,7 +22822,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -23556,7 +23556,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -24071,7 +24071,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -24889,7 +24889,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -25569,7 +25569,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -26164,7 +26164,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -26881,7 +26881,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -27346,7 +27346,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -27378,6 +27378,176 @@
                                     "properties": {
                                         "data": {
                                             "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v3/chat_service": {
+            "post": {
+                "description": "Creat a new chat_service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_service"
+                ],
+                "summary": "Creat Chat",
+                "parameters": [
+                    {
+                        "description": "Chat body",
+                        "name": "chat_service",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateChatModul"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.JSONResult"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Chat"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.JSONErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v3/chat_service/chatid/{chatid}": {
+            "get": {
+                "description": "GetListByChatId",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_service"
+                ],
+                "summary": "List chats by chat id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "0",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "100",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Chat id",
+                        "name": "chatid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.JSONResult"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Chat"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v3/chat_service/projectid/{projectid}": {
+            "get": {
+                "description": "GetListByProjectId",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_service"
+                ],
+                "summary": "List chats by project id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "0",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "100",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "projectid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.JSONResult"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Chat"
+                                            }
                                         }
                                     }
                                 }
@@ -27854,7 +28024,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -28362,7 +28532,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -28860,7 +29030,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -29135,7 +29305,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "authentification": {
                     "type": "boolean"
@@ -29331,7 +29501,7 @@
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/auth_service.ConfirmStrategies"
                 },
                 "id": {
                     "type": "string"
@@ -29355,6 +29525,19 @@
                     }
                 }
             }
+        },
+        "auth_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
         },
         "auth_service.CreateIntegrationRequest": {
             "type": "object",
@@ -29565,7 +29748,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -29603,6 +29786,53 @@
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.User": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "integer"
+                },
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "company_id": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "photo_url": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
                     "type": "string"
                 }
             }
@@ -29649,6 +29879,9 @@
                 "token": {
                     "$ref": "#/definitions/auth_service.Token"
                 },
+                "user": {
+                    "$ref": "#/definitions/auth_service.User"
+                },
                 "user_found": {
                     "type": "boolean"
                 },
@@ -29679,10 +29912,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
@@ -29771,10 +30004,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
@@ -29856,10 +30089,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -30022,7 +30255,7 @@
                     }
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -30039,7 +30272,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -30132,15 +30365,30 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
                 }
             }
+        },
+        "company_service.ResourceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ResourceType_NOT_DECIDED",
+                "ResourceType_MONGODB",
+                "ResourceType_CLICKHOUSE",
+                "ResourceType_POSTGRESQL"
+            ]
         },
         "company_service.ResourceWithoutPassword": {
             "type": "object",
@@ -30161,7 +30409,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -30231,6 +30479,19 @@
                 }
             }
         },
+        "company_service.ServiceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ServiceType_NOT_SPECIFIED",
+                "ServiceType_BUILDER_SERVICE",
+                "ServiceType_ANALYTICS_SERVICE"
+            ]
+        },
         "company_service.SetDefaultResourceReq": {
             "type": "object",
             "properties": {
@@ -30244,7 +30505,7 @@
                     "type": "string"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -30261,7 +30522,7 @@
                     "type": "string"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -30287,7 +30548,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -30325,6 +30586,12 @@
                     "type": "string"
                 },
                 "authServiceHost": {
+                    "type": "string"
+                },
+                "chatServiceGrpcHost": {
+                    "type": "string"
+                },
+                "chatServiceGrpcPort": {
                     "type": "string"
                 },
                 "client_HOST": {
@@ -30497,27 +30764,35 @@
         "emptypb.Empty": {
             "type": "object"
         },
-        "github.com_golang_protobuf_ptypes_struct.Struct": {
+        "github_com_golang_protobuf_ptypes_struct.Struct": {
             "type": "object",
             "properties": {
                 "fields": {
                     "description": "Unordered map of dynamically typed values.",
                     "type": "object",
                     "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
                     }
                 }
             }
         },
-        "google.golang.org_protobuf_types_known_structpb.Struct": {
+        "google_golang_org_protobuf_types_known_structpb.Struct": {
             "type": "object",
             "properties": {
                 "fields": {
                     "description": "Unordered map of dynamically typed values.",
                     "type": "object",
                     "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
                     }
+                }
+            }
+        },
+        "google_golang_org_protobuf_types_known_structpb.Value": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
                 }
             }
         },
@@ -30597,7 +30872,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -30650,7 +30925,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -30780,6 +31055,34 @@
                 }
             }
         },
+        "models.Chat": {
+            "type": "object",
+            "required": [
+                "chatid",
+                "message_sender_name",
+                "messages"
+            ],
+            "properties": {
+                "chatid": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "message_sender_name": {
+                    "type": "string"
+                },
+                "messages": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "types": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CommonInput": {
             "type": "object",
             "properties": {
@@ -30887,6 +31190,31 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateChatModul": {
+            "type": "object",
+            "required": [
+                "chatid",
+                "message_sender_name",
+                "messages"
+            ],
+            "properties": {
+                "chatid": {
+                    "type": "string"
+                },
+                "message_sender_name": {
+                    "type": "string"
+                },
+                "messages": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "types": {
                     "type": "string"
                 }
             }
@@ -31192,7 +31520,7 @@
             "type": "object",
             "properties": {
                 "components": {
-                    "$ref": "#/definitions/google.golang.org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "folder_id": {
                     "type": "string"
@@ -31602,6 +31930,23 @@
                 }
             }
         },
+        "models.JSONErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.JSONResult": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ManyVersionsModel": {
             "type": "object",
             "properties": {
@@ -31900,7 +32245,7 @@
             "type": "object",
             "properties": {
                 "components": {
-                    "$ref": "#/definitions/google.golang.org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "folder_id": {
                     "type": "string"
@@ -31967,7 +32312,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -32159,7 +32504,7 @@
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
                 },
                 "guid": {
                     "type": "string"
@@ -32203,6 +32548,19 @@
                 }
             }
         },
+        "object_builder_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
+        },
         "object_builder_service.CreateAppResponse": {
             "type": "object",
             "properties": {
@@ -32233,7 +32591,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -32323,7 +32681,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "autofill_field": {
                     "type": "string"
@@ -32603,7 +32961,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -33258,7 +33616,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -33588,7 +33946,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -33979,7 +34337,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -34157,7 +34515,7 @@
                     "type": "string"
                 },
                 "request": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "response": {
                     "type": "string"
@@ -34171,7 +34529,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -34269,7 +34627,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -34511,7 +34869,7 @@
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                        "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                     }
                 },
                 "connect_info": {
@@ -34530,7 +34888,7 @@
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -34547,7 +34905,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "category_id": {
                     "type": "string"
@@ -34604,7 +34962,7 @@
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                        "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                     }
                 },
                 "connect_info": {
@@ -34629,7 +34987,7 @@
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -34641,7 +34999,7 @@
                     "type": "string"
                 },
                 "ui_component": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
@@ -34726,7 +35084,7 @@
             "type": "object",
             "properties": {
                 "response": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
@@ -34765,14 +35123,6 @@
                 },
                 "status": {
                     "type": "string"
-                }
-            }
-        },
-        "structpb.Value": {
-            "type": "object",
-            "properties": {
-                "kind": {
-                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
                 }
             }
         },
@@ -34826,7 +35176,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -35108,7 +35458,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "role": {
                     "type": "string"
@@ -35156,7 +35506,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -35302,7 +35652,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -35510,7 +35860,7 @@
                     "type": "string"
                 },
                 "release_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/versioning_service.ReleaseType"
                 }
             }
         },
@@ -35642,6 +35992,21 @@
                     }
                 }
             }
+        },
+        "versioning_service.ReleaseType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ReleaseType_UNDEFINED",
+                "ReleaseType_MAJOR",
+                "ReleaseType_MINOR",
+                "ReleaseType_PATCH"
+            ]
         },
         "versioning_service.ReleaseWithCommit": {
             "type": "object",
@@ -35862,7 +36227,7 @@
                     "$ref": "#/definitions/web_page_service.CommitInfo"
                 },
                 "components": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "environment_id": {
                     "type": "string"
