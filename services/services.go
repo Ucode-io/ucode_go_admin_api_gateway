@@ -20,6 +20,7 @@ type ServiceManagerI interface {
 	QueryService() QueryServiceI
 	IntegrationPayzeService() IntegrationServicePayzeI
 	WebPageService() WebPageServiceI
+	ChatService() ChatServiceI
 	NotificationService() NotificationServiceI
 }
 
@@ -38,6 +39,7 @@ type grpcClients struct {
 	queryService             QueryServiceI
 	integrationPayzeServiceI IntegrationServicePayzeI
 	webPageService           WebPageServiceI
+	chatService              ChatServiceI
 	notificationService      NotificationServiceI
 }
 
@@ -51,7 +53,10 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	if err != nil {
 		return nil, err
 	}
-
+	chatServiceClient, err := NewChatServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
 	companyServiceClient, err := NewCompanyServiceClient(ctx, cfg)
 	if err != nil {
 		return nil, err
@@ -131,12 +136,16 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		queryService:             queryServiceClient,
 		integrationPayzeServiceI: integrationPayzeServiceClient,
 		webPageService:           webPageServiceClient,
+		chatService:              chatServiceClient,
 		notificationService:      notificationServiceClient,
 	}, nil
 }
 
 func (g grpcClients) BuilderService() BuilderServiceI {
 	return g.builderService
+}
+func (g grpcClients) ChatService() ChatServiceI {
+	return g.chatService
 }
 
 func (g grpcClients) AuthService() AuthServiceI {

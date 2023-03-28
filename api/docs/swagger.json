@@ -28374,6 +28374,176 @@
                 }
             }
         },
+        "/v3/chat_service": {
+            "post": {
+                "description": "Creat a new chat_service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_service"
+                ],
+                "summary": "Creat Chat",
+                "parameters": [
+                    {
+                        "description": "Chat body",
+                        "name": "chat_service",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateChatModul"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.JSONResult"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Chat"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.JSONErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v3/chat_service/chatid/{chatid}": {
+            "get": {
+                "description": "GetListByChatId",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_service"
+                ],
+                "summary": "List chats by chat id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "0",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "100",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Chat id",
+                        "name": "chatid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.JSONResult"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Chat"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v3/chat_service/projectid/{projectid}": {
+            "get": {
+                "description": "GetListByProjectId",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_service"
+                ],
+                "summary": "List chats by project id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "0",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "100",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "projectid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.JSONResult"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Chat"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v3/query": {
             "get": {
                 "security": [
@@ -30122,7 +30292,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "authentification": {
                     "type": "boolean"
@@ -30552,7 +30722,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -31364,6 +31534,12 @@
                 "authServiceHost": {
                     "type": "string"
                 },
+                "chatServiceGrpcHost": {
+                    "type": "string"
+                },
+                "chatServiceGrpcPort": {
+                    "type": "string"
+                },
                 "client_HOST": {
                     "type": "string"
                 },
@@ -31540,30 +31716,6 @@
         "emptypb.Empty": {
             "type": "object"
         },
-        "github.com_golang_protobuf_ptypes_struct.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
-                    }
-                }
-            }
-        },
-        "google.golang.org_protobuf_types_known_structpb.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
-                    }
-                }
-            }
-        },
         "handlers.Path": {
             "type": "object",
             "properties": {
@@ -31640,7 +31792,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -31693,7 +31845,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -31826,6 +31978,34 @@
                 }
             }
         },
+        "models.Chat": {
+            "type": "object",
+            "required": [
+                "chatid",
+                "message_sender_name",
+                "messages"
+            ],
+            "properties": {
+                "chatid": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "message_sender_name": {
+                    "type": "string"
+                },
+                "messages": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "types": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CommonInput": {
             "type": "object",
             "properties": {
@@ -31936,6 +32116,31 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateChatModul": {
+            "type": "object",
+            "required": [
+                "chatid",
+                "message_sender_name",
+                "messages"
+            ],
+            "properties": {
+                "chatid": {
+                    "type": "string"
+                },
+                "message_sender_name": {
+                    "type": "string"
+                },
+                "messages": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "types": {
                     "type": "string"
                 }
             }
@@ -32241,9 +32446,12 @@
             "type": "object",
             "properties": {
                 "components": {
-                    "$ref": "#/definitions/google.golang.org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "folder_id": {
+                    "type": "string"
+                },
+                "icon": {
                     "type": "string"
                 },
                 "project_id": {
@@ -32655,6 +32863,23 @@
                 }
             }
         },
+        "models.JSONErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.JSONResult": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ManyVersionsModel": {
             "type": "object",
             "properties": {
@@ -32964,9 +33189,12 @@
             "type": "object",
             "properties": {
                 "components": {
-                    "$ref": "#/definitions/google.golang.org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "folder_id": {
+                    "type": "string"
+                },
+                "icon": {
                     "type": "string"
                 },
                 "id": {
@@ -33031,7 +33259,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -33481,7 +33709,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -33571,7 +33799,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "autofill_field": {
                     "type": "string"
@@ -33851,7 +34079,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -34506,7 +34734,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -34836,7 +35064,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -35227,7 +35455,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -35405,7 +35633,7 @@
                     "type": "string"
                 },
                 "request": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "response": {
                     "type": "string"
@@ -35419,7 +35647,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -35517,7 +35745,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -35759,7 +35987,7 @@
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                        "$ref": "#/definitions/structpb.Struct"
                     }
                 },
                 "connect_info": {
@@ -35778,7 +36006,7 @@
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -35795,7 +36023,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "category_id": {
                     "type": "string"
@@ -35852,7 +36080,7 @@
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                        "$ref": "#/definitions/structpb.Struct"
                     }
                 },
                 "connect_info": {
@@ -35877,7 +36105,7 @@
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -35889,7 +36117,7 @@
                     "type": "string"
                 },
                 "ui_component": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 }
             }
         },
@@ -35974,7 +36202,7 @@
             "type": "object",
             "properties": {
                 "response": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 }
             }
         },
@@ -36013,6 +36241,18 @@
                 },
                 "status": {
                     "type": "string"
+                }
+            }
+        },
+        "structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/structpb.Value"
+                    }
                 }
             }
         },
@@ -36074,7 +36314,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -36356,7 +36596,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "role": {
                     "type": "string"
@@ -36404,7 +36644,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -36550,7 +36790,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -37110,12 +37350,15 @@
                     "$ref": "#/definitions/web_page_service.CommitInfo"
                 },
                 "components": {
-                    "$ref": "#/definitions/github.com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "environment_id": {
                     "type": "string"
                 },
                 "folder_id": {
+                    "type": "string"
+                },
+                "icon": {
                     "type": "string"
                 },
                 "id": {

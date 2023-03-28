@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	_ "github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
 	"log"
 	"strconv"

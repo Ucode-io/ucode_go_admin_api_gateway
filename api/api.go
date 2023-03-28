@@ -443,6 +443,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v3.PUT("/web_pages/:guid", h.UpdateWebPage)
 		v3.DELETE("/web_pages/:guid", h.DeleteWebPage)
 
+		v3.POST("/chat_service", h.CreatChat)
+		v3.GET("/chat_service/chatid/:chatid", h.GetListByChatId)
+		v3.GET("/chat_service/projectid/:projectid", h.GetListByProjectId)
+
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
