@@ -230,7 +230,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 
 // UpdateCategory godoc
 // @Security ApiKeyAuth
-// @ID update_reference
+// @ID update_reference_category
 // @Router /v1/category [PUT]
 // @Summary Update category
 // @Description Update category

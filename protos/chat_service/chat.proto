@@ -1,12 +1,14 @@
 syntax = "proto3";
 
 option go_package = "genproto/chat_service";
+import "google/protobuf/empty.proto";
 
 // The service definition.
 service ChatService {
     rpc CreateChat (CreateChatRequest) returns (CreateChatResponse) {}
     rpc GetChatByChatId (GetChatByChatIdRequest) returns (GetChatByChatIdResponse) {}
     rpc GetChatList (GetChatListRequest) returns (GetChatListResponse) {}
+    rpc CreateMessage(CreateMessageRequest) returns (google.protobuf.Empty) {}
 }
 
 // Chat ...
@@ -49,10 +51,20 @@ message GetChatListRequest {
     string environment_id = 1;
 }
 
-message GetChatListResponse {
-    string environment_id = 1;
-    repeated Chat chats = 2;
+message ChatWithLastMessageData {
+    string chat_id = 1;
+    string sender_name = 2;
+    UserMessage message = 3;
+    string environment_id = 4;
+    string created_at = 5;
 }
 
+message GetChatListResponse {
+    string environment_id = 1;
+    repeated ChatWithLastMessageData chats = 2;
+}
 
-
+message CreateMessageRequest {
+    string chat_id = 1;
+    UserMessage message = 2;
+}

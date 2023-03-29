@@ -1,22 +1,18 @@
 package models
 
-import "time"
-
-// Chat ..
+// Chat ...
 type Chat struct {
-	Chatid              string     `json:"chatid" binding:"required"`
-	Message_sender_name string     `json:"message_sender_name" binding:"required"`
-	Messages            string     `json:"messages" binding:"required"`
-	Types               string     `json:"types"`
-	Project_id          string     `json:"project_id"`
-	Created_at          *time.Time `json:"created_at"`
+	Sender_name string `json:"sender_name"`
+	Message     string `json:"message"`
+	Types       string `json:"types"`
 }
 
-// CreateChatModul ..
-type CreateChatModul struct {
-	Chatid              string `json:"chatid" binding:"required"`
-	Message_sender_name string `json:"message_sender_name" binding:"required"`
-	Messages            string `json:"messages" binding:"required"`
-	Types               string `json:"types"`
-	Project_id          string `json:"project_id"`
+// CreateChatModule
+type CreateChatRequest struct {
+	UserId string `json:"userid"`
+	Chat   Chat   `json:"chat"`
+}
+
+type ChatResponse struct {
+	Chat_id string `json:"chat_id"`
 }
