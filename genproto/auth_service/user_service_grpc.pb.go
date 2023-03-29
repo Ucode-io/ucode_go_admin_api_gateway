@@ -44,6 +44,7 @@ type UserServiceClient interface {
 	GetProjectsByUserId(ctx context.Context, in *GetProjectsByUserIdReq, opts ...grpc.CallOption) (*GetProjectsByUserIdRes, error)
 	V2GetUserByLoginTypes(ctx context.Context, in *GetUserByLoginTypesRequest, opts ...grpc.CallOption) (*GetUserByLoginTypesResponse, error)
 	RegisterUserViaEmail(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
+	RegisterWithGoogle(ctx context.Context, in *RegisterWithGoogleRequest, opts ...grpc.CallOption) (*User, error)
 }
 
 type userServiceClient struct {
@@ -243,6 +244,15 @@ func (c *userServiceClient) RegisterUserViaEmail(ctx context.Context, in *Create
 	return out, nil
 }
 
+func (c *userServiceClient) RegisterWithGoogle(ctx context.Context, in *RegisterWithGoogleRequest, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/auth_service.UserService/RegisterWithGoogle", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -268,6 +278,7 @@ type UserServiceServer interface {
 	GetProjectsByUserId(context.Context, *GetProjectsByUserIdReq) (*GetProjectsByUserIdRes, error)
 	V2GetUserByLoginTypes(context.Context, *GetUserByLoginTypesRequest) (*GetUserByLoginTypesResponse, error)
 	RegisterUserViaEmail(context.Context, *CreateUserRequest) (*User, error)
+	RegisterWithGoogle(context.Context, *RegisterWithGoogleRequest) (*User, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -337,6 +348,9 @@ func (UnimplementedUserServiceServer) V2GetUserByLoginTypes(context.Context, *Ge
 }
 func (UnimplementedUserServiceServer) RegisterUserViaEmail(context.Context, *CreateUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterUserViaEmail not implemented")
+}
+func (UnimplementedUserServiceServer) RegisterWithGoogle(context.Context, *RegisterWithGoogleRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterWithGoogle not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -729,6 +743,24 @@ func _UserService_RegisterUserViaEmail_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_RegisterWithGoogle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterWithGoogleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).RegisterWithGoogle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.UserService/RegisterWithGoogle",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).RegisterWithGoogle(ctx, req.(*RegisterWithGoogleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -819,6 +851,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RegisterUserViaEmail",
 			Handler:    _UserService_RegisterUserViaEmail_Handler,
+		},
+		{
+			MethodName: "RegisterWithGoogle",
+			Handler:    _UserService_RegisterWithGoogle_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

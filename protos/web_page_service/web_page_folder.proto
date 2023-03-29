@@ -10,7 +10,7 @@ import "google/protobuf/struct.proto";
 service FolderService {
   rpc CreateFolder(CreateFolderReq) returns (Folder) {}
   rpc GetListFolder(GetListFolderReq) returns (GetListFolderRes) {}
-  rpc GetSingleFolder(GetSingleFolderReq) returns (Folder) {}
+  rpc GetSingleFolder(GetSingleFolderReq) returns (GetSingleFolderRes) {}
   rpc UpdateFolder(UpdateFolderReq) returns (Folder) {}
   rpc DeleteFolder(DeleteFolderReq) returns (google.protobuf.Empty) {}
 }

@@ -2,19 +2,20 @@ package services
 
 import (
 	"context"
+
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/chat_ucode"
+	"ucode/ucode_go_api_gateway/genproto/chat_service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type ChatServiceI interface {
-	Chat() chat_ucode.ChatServiceClient
+	Chat() chat_service.ChatServiceClient
 }
 
 type chatServiceClient struct {
-	chat chat_ucode.ChatServiceClient
+	chat chat_service.ChatServiceClient
 }
 
 func NewChatServiceClient(ctx context.Context, cfg config.Config) (ChatServiceI, error) {
@@ -29,10 +30,14 @@ func NewChatServiceClient(ctx context.Context, cfg config.Config) (ChatServiceI,
 	}
 
 	return &chatServiceClient{
-		chat: chat_ucode.NewChatServiceClient(connChatService),
+		chat: chat_service.NewChatServiceClient(connChatService),
 	}, nil
+
+	// return &chatServiceClient{
+	// 	chat: chat_service.NewChatServiceClient(connChatService),
+	// }, nil
 }
 
-func (g *chatServiceClient) Chat() chat_ucode.ChatServiceClient {
+func (g *chatServiceClient) Chat() chat_service.ChatServiceClient {
 	return g.chat
 }

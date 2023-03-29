@@ -1,72 +1,70 @@
 syntax = "proto3";
 
-option go_package = "./chat_ucode";
-
+option go_package = "genproto/chat_service";
+import "google/protobuf/empty.proto";
 
 // The service definition.
 service ChatService {
     rpc CreateChat (CreateChatRequest) returns (CreateChatResponse) {}
-    // rpc GetChatById (GetChatByIDRequest) returns (GetChatByIDResponse) {} 
-    // rpc GetChatList (GetChatListRequest) returns (GetChatListResponse) {}
-    rpc GetListByChatId (GetListByChatIdRequest) returns (GetChatListResponse) {}
-    rpc GetListByProjectId (GetListByProjectIdRequest) returns (GetChatListResponse) {}
+    rpc GetChatByChatId (GetChatByChatIdRequest) returns (GetChatByChatIdResponse) {}
+    rpc GetChatList (GetChatListRequest) returns (GetChatListResponse) {}
+    rpc CreateMessage(CreateMessageRequest) returns (google.protobuf.Empty) {}
 }
 
 // Chat ...
 message Chat { 
-    string chatid = 1;
-    string message_sender_name = 2;
-    string messages = 3;
+    string chat_id = 1;
+    string sender_name = 2;
+    string message = 3;
     string types = 4;
-    string project_id = 5;
+    string environment_id = 5;
     string created_at = 6;
 }
 
 message CreateChatRequest{
-    string chatid = 1;
-    string message_sender_name = 2;
-    string messages = 3;
-    string types = 4;
-    string project_id = 5;
-    string created_at = 6;
+    string user_id = 1;
+    Chat chat = 2;
 }
 
 message CreateChatResponse{
-    string chatid = 1;
+    string chat_id = 1;
 }
 
-
-message GetChatByIDRequest{
-    string chatid = 1;
+message UserMessage {
+    string sender_name = 1;
+    string message = 2;
+    string created_at = 3;
+    string user_id = 4;
+    string type = 5;
 }
 
-// message GetChatByIDResponse{
-//     Chat chat =1;
-// }
-
-
-// message GetChatListRequest{
-//     int32 offset = 1;
-//     int32 limit = 2;
-//     string search = 3;
-// }
-
-message GetChatListResponse{
-    repeated Chat chats = 1;
+message GetChatByChatIdRequest {
+    string chat_id = 1;
 }
 
-message GetListByChatIdRequest{
-    int32 offset = 1;
-    int32 limit = 2;
-    string search = 3;
-    string chatid=4;
+message GetChatByChatIdResponse {
+    string chat_id = 1;
+    repeated UserMessage messages = 2;
 }
 
-message GetListByProjectIdRequest{
-    int32 offset = 1;
-    int32 limit = 2;
-    string search = 3;
-    string project=4;
+message GetChatListRequest {
+    string environment_id = 1;
 }
 
+message ChatWithLastMessageData {
+    string chat_id = 1;
+    string sender_name = 2;
+    UserMessage message = 3;
+    string environment_id = 4;
+    string created_at = 5;
+}
 
+message GetChatListResponse {
+    string environment_id = 1;
+    repeated ChatWithLastMessageData chats = 2;
+}
+
+message CreateMessageRequest {
+    string chat_id = 1;
+    UserMessage message = 2;
+}

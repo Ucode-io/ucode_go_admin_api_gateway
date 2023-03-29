@@ -1172,22 +1172,23 @@ definitions:
     type: object
   models.Chat:
     properties:
-      chatid:
+      chat_id:
         type: string
       created_at:
         type: string
-      message_sender_name:
+      environment_id:
         type: string
-      messages:
+      message:
         type: string
-      project_id:
+      sender_name:
         type: string
       types:
         type: string
-    required:
-    - chatid
-    - message_sender_name
-    - messages
+    type: object
+  models.ChatResponse:
+    properties:
+      chat_id:
+        type: string
     type: object
   models.CommonInput:
     properties:
@@ -1264,22 +1265,12 @@ definitions:
       project_id:
         type: string
     type: object
-  models.CreateChatModul:
+  models.CreateChatRequest:
     properties:
-      chatid:
+      chat:
+        $ref: '#/definitions/models.Chat'
+      userid:
         type: string
-      message_sender_name:
-        type: string
-      messages:
-        type: string
-      project_id:
-        type: string
-      types:
-        type: string
-    required:
-    - chatid
-    - message_sender_name
-    - messages
     type: object
   models.CreateDashboardRequest:
     properties:
@@ -1750,17 +1741,6 @@ definitions:
         items:
           type: string
         type: array
-    type: object
-  models.JSONErrorResponse:
-    properties:
-      error:
-        type: string
-    type: object
-  models.JSONResult:
-    properties:
-      data: {}
-      message:
-        type: string
     type: object
   models.ManyVersionsModel:
     properties:
@@ -4691,6 +4671,8 @@ definitions:
       environment_id:
         type: string
       folder_id:
+        type: string
+      icon:
         type: string
       id:
         type: string
@@ -20981,109 +20963,69 @@ paths:
       summary: Get Function by id
       tags:
       - Function
-  /v3/chat_service:
+  /v3/chat:
     post:
       consumes:
       - application/json
-      description: Creat a new chat_service
+      description: Create Chat
+      operationId: Create_Chat
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: Chat body
         in: body
         name: chat_service
         required: true
         schema:
-          $ref: '#/definitions/models.CreateChatModul'
+          $ref: '#/definitions/models.CreateChatRequest'
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateChatRequest'
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: Response body
           schema:
             allOf:
-            - $ref: '#/definitions/models.JSONResult'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.Chat'
+                  $ref: '#/definitions/models.ChatResponse'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.JSONErrorResponse'
-      summary: Creat Chat
-      tags:
-      - chat_service
-  /v3/chat_service/chatid/{chatid}:
-    get:
-      consumes:
-      - application/json
-      description: GetListByChatId
-      parameters:
-      - description: "0"
-        in: query
-        name: offset
-        type: integer
-      - description: "100"
-        in: query
-        name: limit
-        type: integer
-      - description: Chat id
-        in: path
-        name: chatid
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
             allOf:
-            - $ref: '#/definitions/models.JSONResult'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  items:
-                    $ref: '#/definitions/models.Chat'
-                  type: array
+                  type: string
               type: object
-      summary: List chats by chat id
-      tags:
-      - chat_service
-  /v3/chat_service/projectid/{projectid}:
-    get:
-      consumes:
-      - application/json
-      description: GetListByProjectId
-      parameters:
-      - description: "0"
-        in: query
-        name: offset
-        type: integer
-      - description: "100"
-        in: query
-        name: limit
-        type: integer
-      - description: Project id
-        in: path
-        name: projectid
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
+        "500":
+          description: Server Error
           schema:
             allOf:
-            - $ref: '#/definitions/models.JSONResult'
+            - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  items:
-                    $ref: '#/definitions/models.Chat'
-                  type: array
+                  type: string
               type: object
-      summary: List chats by project id
+      security:
+      - ApiKeyAuth: []
+      summary: Create Chat
       tags:
-      - chat_service
+      - Chat
   /v3/query:
     get:
       consumes:

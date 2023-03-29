@@ -4,10 +4,11 @@
 // - protoc             v3.6.1
 // source: chat.proto
 
-package chat_ucode
+package chat_service
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -23,10 +24,9 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatServiceClient interface {
 	CreateChat(ctx context.Context, in *CreateChatRequest, opts ...grpc.CallOption) (*CreateChatResponse, error)
-	// rpc GetChatById (GetChatByIDRequest) returns (GetChatByIDResponse) {}
-	// rpc GetChatList (GetChatListRequest) returns (GetChatListResponse) {}
-	GetListByChatId(ctx context.Context, in *GetListByChatIdRequest, opts ...grpc.CallOption) (*GetChatListResponse, error)
-	GetListByProjectId(ctx context.Context, in *GetListByProjectIdRequest, opts ...grpc.CallOption) (*GetChatListResponse, error)
+	GetChatByChatId(ctx context.Context, in *GetChatByChatIdRequest, opts ...grpc.CallOption) (*GetChatByChatIdResponse, error)
+	GetChatList(ctx context.Context, in *GetChatListRequest, opts ...grpc.CallOption) (*GetChatListResponse, error)
+	CreateMessage(ctx context.Context, in *CreateMessageRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type chatServiceClient struct {
@@ -46,18 +46,27 @@ func (c *chatServiceClient) CreateChat(ctx context.Context, in *CreateChatReques
 	return out, nil
 }
 
-func (c *chatServiceClient) GetListByChatId(ctx context.Context, in *GetListByChatIdRequest, opts ...grpc.CallOption) (*GetChatListResponse, error) {
-	out := new(GetChatListResponse)
-	err := c.cc.Invoke(ctx, "/ChatService/GetListByChatId", in, out, opts...)
+func (c *chatServiceClient) GetChatByChatId(ctx context.Context, in *GetChatByChatIdRequest, opts ...grpc.CallOption) (*GetChatByChatIdResponse, error) {
+	out := new(GetChatByChatIdResponse)
+	err := c.cc.Invoke(ctx, "/ChatService/GetChatByChatId", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *chatServiceClient) GetListByProjectId(ctx context.Context, in *GetListByProjectIdRequest, opts ...grpc.CallOption) (*GetChatListResponse, error) {
+func (c *chatServiceClient) GetChatList(ctx context.Context, in *GetChatListRequest, opts ...grpc.CallOption) (*GetChatListResponse, error) {
 	out := new(GetChatListResponse)
-	err := c.cc.Invoke(ctx, "/ChatService/GetListByProjectId", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ChatService/GetChatList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatServiceClient) CreateMessage(ctx context.Context, in *CreateMessageRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/ChatService/CreateMessage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,10 +78,9 @@ func (c *chatServiceClient) GetListByProjectId(ctx context.Context, in *GetListB
 // for forward compatibility
 type ChatServiceServer interface {
 	CreateChat(context.Context, *CreateChatRequest) (*CreateChatResponse, error)
-	// rpc GetChatById (GetChatByIDRequest) returns (GetChatByIDResponse) {}
-	// rpc GetChatList (GetChatListRequest) returns (GetChatListResponse) {}
-	GetListByChatId(context.Context, *GetListByChatIdRequest) (*GetChatListResponse, error)
-	GetListByProjectId(context.Context, *GetListByProjectIdRequest) (*GetChatListResponse, error)
+	GetChatByChatId(context.Context, *GetChatByChatIdRequest) (*GetChatByChatIdResponse, error)
+	GetChatList(context.Context, *GetChatListRequest) (*GetChatListResponse, error)
+	CreateMessage(context.Context, *CreateMessageRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedChatServiceServer()
 }
 
@@ -83,11 +91,14 @@ type UnimplementedChatServiceServer struct {
 func (UnimplementedChatServiceServer) CreateChat(context.Context, *CreateChatRequest) (*CreateChatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateChat not implemented")
 }
-func (UnimplementedChatServiceServer) GetListByChatId(context.Context, *GetListByChatIdRequest) (*GetChatListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetListByChatId not implemented")
+func (UnimplementedChatServiceServer) GetChatByChatId(context.Context, *GetChatByChatIdRequest) (*GetChatByChatIdResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetChatByChatId not implemented")
 }
-func (UnimplementedChatServiceServer) GetListByProjectId(context.Context, *GetListByProjectIdRequest) (*GetChatListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetListByProjectId not implemented")
+func (UnimplementedChatServiceServer) GetChatList(context.Context, *GetChatListRequest) (*GetChatListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetChatList not implemented")
+}
+func (UnimplementedChatServiceServer) CreateMessage(context.Context, *CreateMessageRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateMessage not implemented")
 }
 func (UnimplementedChatServiceServer) mustEmbedUnimplementedChatServiceServer() {}
 
@@ -120,38 +131,56 @@ func _ChatService_CreateChat_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ChatService_GetListByChatId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetListByChatIdRequest)
+func _ChatService_GetChatByChatId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChatByChatIdRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServiceServer).GetListByChatId(ctx, in)
+		return srv.(ChatServiceServer).GetChatByChatId(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ChatService/GetListByChatId",
+		FullMethod: "/ChatService/GetChatByChatId",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServiceServer).GetListByChatId(ctx, req.(*GetListByChatIdRequest))
+		return srv.(ChatServiceServer).GetChatByChatId(ctx, req.(*GetChatByChatIdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ChatService_GetListByProjectId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetListByProjectIdRequest)
+func _ChatService_GetChatList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChatListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServiceServer).GetListByProjectId(ctx, in)
+		return srv.(ChatServiceServer).GetChatList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ChatService/GetListByProjectId",
+		FullMethod: "/ChatService/GetChatList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServiceServer).GetListByProjectId(ctx, req.(*GetListByProjectIdRequest))
+		return srv.(ChatServiceServer).GetChatList(ctx, req.(*GetChatListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChatService_CreateMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServiceServer).CreateMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ChatService/CreateMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServiceServer).CreateMessage(ctx, req.(*CreateMessageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -168,12 +197,16 @@ var ChatService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ChatService_CreateChat_Handler,
 		},
 		{
-			MethodName: "GetListByChatId",
-			Handler:    _ChatService_GetListByChatId_Handler,
+			MethodName: "GetChatByChatId",
+			Handler:    _ChatService_GetChatByChatId_Handler,
 		},
 		{
-			MethodName: "GetListByProjectId",
-			Handler:    _ChatService_GetListByProjectId_Handler,
+			MethodName: "GetChatList",
+			Handler:    _ChatService_GetChatList_Handler,
+		},
+		{
+			MethodName: "CreateMessage",
+			Handler:    _ChatService_CreateMessage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

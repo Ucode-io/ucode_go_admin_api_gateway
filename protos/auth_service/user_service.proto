@@ -33,6 +33,17 @@ service UserService {
     rpc GetProjectsByUserId(GetProjectsByUserIdReq) returns (GetProjectsByUserIdRes) {}
     rpc V2GetUserByLoginTypes(GetUserByLoginTypesRequest) returns (GetUserByLoginTypesResponse) {}
     rpc RegisterUserViaEmail(CreateUserRequest) returns (User) {}
+    rpc RegisterWithGoogle(RegisterWithGoogleRequest) returns (User) {} 
+}
+
+message RegisterWithGoogleRequest {
+    string email = 1;
+    string project_id = 2;
+    string company_id = 3;
+    string client_type_id = 4;
+    string resource_environment_id = 5;
+    string name = 6;
+
 }
 
 message GetUserByLoginTypesResponse {

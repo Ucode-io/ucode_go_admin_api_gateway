@@ -28374,9 +28374,14 @@
                 }
             }
         },
-        "/v3/chat_service": {
+        "/v3/chat": {
             "post": {
-                "description": "Creat a new chat_service",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create Chat",
                 "consumes": [
                     "application/json"
                 ],
@@ -28384,33 +28389,56 @@
                     "application/json"
                 ],
                 "tags": [
-                    "chat_service"
+                    "Chat"
                 ],
-                "summary": "Creat Chat",
+                "summary": "Create Chat",
+                "operationId": "Create_Chat",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "Chat body",
                         "name": "chat_service",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreateChatModul"
+                            "$ref": "#/definitions/models.CreateChatRequest"
+                        }
+                    },
+                    {
+                        "description": "Request body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateChatRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "Response body",
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/models.JSONResult"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.Chat"
+                                            "$ref": "#/definitions/models.ChatResponse"
                                         }
                                     }
                                 }
@@ -28420,121 +28448,33 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.JSONErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/v3/chat_service/chatid/{chatid}": {
-            "get": {
-                "description": "GetListByChatId",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat_service"
-                ],
-                "summary": "List chats by chat id",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "0",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "100",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Chat id",
-                        "name": "chatid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/models.JSONResult"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/models.Chat"
-                                            }
+                                            "type": "string"
                                         }
                                     }
                                 }
                             ]
                         }
-                    }
-                }
-            }
-        },
-        "/v3/chat_service/projectid/{projectid}": {
-            "get": {
-                "description": "GetListByProjectId",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat_service"
-                ],
-                "summary": "List chats by project id",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "0",
-                        "name": "offset",
-                        "in": "query"
                     },
-                    {
-                        "type": "integer",
-                        "description": "100",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project id",
-                        "name": "projectid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                    "500": {
+                        "description": "Server Error",
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/models.JSONResult"
+                                    "$ref": "#/definitions/status_http.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/models.Chat"
-                                            }
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -32053,28 +31993,31 @@
         },
         "models.Chat": {
             "type": "object",
-            "required": [
-                "chatid",
-                "message_sender_name",
-                "messages"
-            ],
             "properties": {
-                "chatid": {
+                "chat_id": {
                     "type": "string"
                 },
                 "created_at": {
                     "type": "string"
                 },
-                "message_sender_name": {
+                "environment_id": {
                     "type": "string"
                 },
-                "messages": {
+                "message": {
                     "type": "string"
                 },
-                "project_id": {
+                "sender_name": {
                     "type": "string"
                 },
                 "types": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ChatResponse": {
+            "type": "object",
+            "properties": {
+                "chat_id": {
                     "type": "string"
                 }
             }
@@ -32193,27 +32136,13 @@
                 }
             }
         },
-        "models.CreateChatModul": {
+        "models.CreateChatRequest": {
             "type": "object",
-            "required": [
-                "chatid",
-                "message_sender_name",
-                "messages"
-            ],
             "properties": {
-                "chatid": {
-                    "type": "string"
+                "chat": {
+                    "$ref": "#/definitions/models.Chat"
                 },
-                "message_sender_name": {
-                    "type": "string"
-                },
-                "messages": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "types": {
+                "userid": {
                     "type": "string"
                 }
             }
@@ -32930,23 +32859,6 @@
                     "items": {
                         "type": "string"
                     }
-                }
-            }
-        },
-        "models.JSONErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.JSONResult": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "message": {
-                    "type": "string"
                 }
             }
         },
@@ -37431,6 +37343,9 @@
                     "type": "string"
                 },
                 "folder_id": {
+                    "type": "string"
+                },
+                "icon": {
                     "type": "string"
                 },
                 "id": {
