@@ -399,6 +399,50 @@ definitions:
       user_id:
         type: string
     type: object
+  chat_service.ChatWithLastMessageData:
+    properties:
+      chat_id:
+        type: string
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      message:
+        $ref: '#/definitions/chat_service.UserMessage'
+      sender_name:
+        type: string
+    type: object
+  chat_service.GetChatByChatIdResponse:
+    properties:
+      chat_id:
+        type: string
+      messages:
+        items:
+          $ref: '#/definitions/chat_service.UserMessage'
+        type: array
+    type: object
+  chat_service.GetChatListResponse:
+    properties:
+      chats:
+        items:
+          $ref: '#/definitions/chat_service.ChatWithLastMessageData'
+        type: array
+      environment_id:
+        type: string
+    type: object
+  chat_service.UserMessage:
+    properties:
+      created_at:
+        type: string
+      message:
+        type: string
+      sender_name:
+        type: string
+      type:
+        type: string
+      user_id:
+        type: string
+    type: object
   company_service.AddResourceRequest:
     properties:
       company_id:
@@ -1172,12 +1216,6 @@ definitions:
     type: object
   models.Chat:
     properties:
-      chat_id:
-        type: string
-      created_at:
-        type: string
-      environment_id:
-        type: string
       message:
         type: string
       sender_name:
@@ -7538,7 +7576,7 @@ paths:
       consumes:
       - application/json
       description: Update category
-      operationId: update_reference
+      operationId: update_reference_category
       parameters:
       - description: UpdateCategoryRequestBody
         in: body
@@ -20968,7 +21006,7 @@ paths:
       consumes:
       - application/json
       description: Create Chat
-      operationId: Create_Chat
+      operationId: CreateChat
       parameters:
       - description: Resource-Id
         in: header
@@ -20976,7 +21014,7 @@ paths:
         type: string
       - description: Environment-Id
         in: header
-        name: Environment-Id
+        name: environment-id
         required: true
         type: string
       - description: Chat body
@@ -21024,6 +21062,117 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create Chat
+      tags:
+      - Chat
+  /v3/chat/:
+    get:
+      consumes:
+      - application/json
+      description: GetChatlist
+      operationId: GetChatlist
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: environment-id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/chat_service.GetChatListResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: GetChatlist
+      tags:
+      - Chat
+  /v3/chat/{id}:
+    get:
+      consumes:
+      - application/json
+      description: GetChatByChatID
+      operationId: GetChatByChatID
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: chat-id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/chat_service.GetChatByChatIdResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: GetChatByChatID
       tags:
       - Chat
   /v3/query:

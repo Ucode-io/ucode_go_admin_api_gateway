@@ -2,12 +2,9 @@ package models
 
 // Chat ...
 type Chat struct {
-	Chat_id        string `json:"chat_id"`
-	Sender_name    string `json:"sender_name"`
-	Message        string `json:"message"`
-	Types          string `json:"types"`
-	Environment_id string `json:"environment_id"`
-	Created_at     string `json:"created_at"`
+	Sender_name string `json:"sender_name"`
+	Message     string `json:"message"`
+	Types       string `json:"types"`
 }
 
 // CreateChatModule
