@@ -42,7 +42,7 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	hostName := fmt.Sprintf("--set=ingress.hosts[0].host=%s.u-code.io", id)
 	hostNameTls := fmt.Sprintf("--set=ingress.tls[0].hosts[0]=%s.u-code.io", id)
 	// secretName := fmt.Sprintf("--set=ingress.tls[0].secretName=%s-tls", id)
-	secretName := "--set=ingress.tls[0].secretName=ucode-wildcard-tls"
+	secretName := "--set=ingress.tls[0].secretName=ucode-wildcard"
 
 	path := "--set=ingress.hosts[0].paths[0]=/"
 
