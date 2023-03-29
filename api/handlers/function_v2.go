@@ -188,7 +188,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 			return
 		}
 		function.Url = "https://" + uuid.String() + ".u-code.io"
-		log.Println("url")
+		log.Println("url", function.Url)
 		function.Password = password
 	}
 	var status int
