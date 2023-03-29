@@ -13,7 +13,7 @@ import (
 // CreateChat godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
-// @Param environment-id header string true "Environment-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID CreateChat
 // @Router /v3/chat [POST]
 // @Summary Create Chat
@@ -38,10 +38,10 @@ func (h *Handler) CreatChat(c *gin.Context) {
 		return
 	}
 
-	EnvironmentId := c.GetHeader("environment-id")
+	EnvironmentId := c.GetHeader("Environment-Id")
 
 	if !util.IsValidUUID(EnvironmentId) {
-		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
+		h.handleResponse(c, status_http.BadRequest, "Environment-Id not found")
 		return
 	}
 
@@ -66,9 +66,9 @@ func (h *Handler) CreatChat(c *gin.Context) {
 // GetChatlist godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
-// @Param environment-id header string true "Environment-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID GetChatlist
-// @Router /v3/chat/ [GET]
+// @Router /v3/chat [GET]
 // @Summary GetChatlist
 // @Description GetChatlist
 // @Tags Chat
@@ -80,10 +80,10 @@ func (h *Handler) CreatChat(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetChatList(c *gin.Context) {
 
-	EnvironmentId := c.GetHeader("environment-id")
+	EnvironmentId := c.GetHeader("Environment-Id")
 
 	if !util.IsValidUUID(EnvironmentId) {
-		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
+		h.handleResponse(c, status_http.BadRequest, "Environment-Id not found")
 		return
 	}
 
