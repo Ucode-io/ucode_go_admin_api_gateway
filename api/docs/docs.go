@@ -32721,6 +32721,9 @@ const docTemplate = `{
                 "folder_id": {
                     "type": "string"
                 },
+                "icon": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -33442,6 +33445,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "folder_id": {
+                    "type": "string"
+                },
+                "icon": {
                     "type": "string"
                 },
                 "id": {

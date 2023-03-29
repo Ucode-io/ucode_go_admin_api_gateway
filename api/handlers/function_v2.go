@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -176,6 +177,8 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		return
 	}
 
+	log.Println("function::", function)
+
 	if function.Url == "" && function.Password == "" {
 		uuid, _ := uuid.NewRandom()
 		fmt.Println("uuid::", uuid.String())
@@ -185,6 +188,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 			return
 		}
 		function.Url = "https://" + uuid.String() + ".u-code.io"
+		log.Println("url", function.Url)
 		function.Password = password
 	}
 	var status int

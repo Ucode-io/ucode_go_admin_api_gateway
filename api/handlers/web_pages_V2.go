@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"log"
 	"strconv"
 	"time"
@@ -15,6 +13,10 @@ import (
 	tmp "ucode/ucode_go_api_gateway/genproto/web_page_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/golang/protobuf/ptypes/empty"
+	"github.com/google/uuid"
 )
 
 // CreateWebPageFolder godoc
@@ -530,12 +532,15 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 		webpage tmp.CreateWebPageReq
 	)
 
+	log.Println("---CreateWebPageV2->1---")
+
 	err := c.ShouldBindJSON(&webpage)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
+	log.Println("---CreateWebPageV2->2---")
 	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
@@ -548,7 +553,7 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-	fmt.Println("TEST:::::3")
+	log.Println("---CreateWebPageV2->3---")
 
 	if !util.IsValidUUID(webpage.GetProjectId()) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -562,7 +567,7 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	//	return
 	//}
 	//
-	fmt.Println("TEST:::::4")
+	log.Println("---CreateWebPageV2->4---")
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		err = errors.New("error getting environment id")
@@ -596,7 +601,8 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	//	}
 	//}
 	//template.ProjectId = resourceEnvironment.GetId()
-	fmt.Println("TEST:::::5")
+
+	log.Println("---CreateWebPageV2->5---")
 	uuID, err := uuid.NewRandom()
 	if err != nil {
 		err = errors.New("error generating new id")
@@ -614,12 +620,14 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 		AuthorId:   authInfo.GetUserId(),
 		ProjectId:  webpage.GetProjectId(),
 	}
-	fmt.Println("TEST:::::6")
+	
+	log.Println("---CreateWebPageV2->6---")
 	res, err := services.WebPageService().WebPage().CreateWebPage(
 		context.Background(),
 		&webpage,
 	)
-	fmt.Println("TEST:::::7")
+	
+	log.Println("---CreateWebPageV2->7---")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -855,18 +863,18 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 	webPage.CommitId = uuID.String()
 	webPage.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
 
-	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-		c.Request.Context(),
-		&vcs.GetCurrentReleaseRequest{
-			EnvironmentId: webPage.GetEnvironmentId(),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	//activeVersion, err := services.VersioningService().Release().GetCurrentActive(
+	//	c.Request.Context(),
+	//	&vcs.GetCurrentReleaseRequest{
+	//		EnvironmentId: webPage.GetEnvironmentId(),
+	//	},
+	//)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
-	webPage.VersionId = activeVersion.GetVersionId()
+	//webPage.VersionId = activeVersion.GetVersionId()
 	webPage.CommitInfo = &tmp.CommitInfo{
 		Id:         "",
 		CommitType: config.COMMIT_TYPE_FIELD,

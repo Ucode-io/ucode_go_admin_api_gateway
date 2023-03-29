@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -256,8 +257,8 @@ func (h *Handler) GetAllNewCustomEvents(c *gin.Context) {
 			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
-
 	if err != nil {
+		log.Println("error getting custom events list: ", err)
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
