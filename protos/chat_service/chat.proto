@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+option go_package = "genproto/chat_service";
+
+// The service definition.
+service ChatService {
+    rpc CreateChat (CreateChatRequest) returns (CreateChatResponse) {}
+    rpc GetChatByChatId (GetChatByChatIdRequest) returns (GetChatByChatIdResponse) {}
+    rpc GetChatList (GetChatListRequest) returns (GetChatListResponse) {}
+}
+
+// Chat ...
+message Chat { 
+    string chat_id = 1;
+    string sender_name = 2;
+    string message = 3;
+    string types = 4;
+    string environment_id = 5;
+    string created_at = 6;
+}
+
+message CreateChatRequest{
+    string user_id = 1;
+    Chat chat = 2;
+}
+
+message CreateChatResponse{
+    string chat_id = 1;
+}
+
+message UserMessage {
+    string sender_name = 1;
+    string message = 2;
+    string created_at = 3;
+    string user_id = 4;
+    string type = 5;
+}
+
+message GetChatByChatIdRequest {
+    string chat_id = 1;
+}
+
+message GetChatByChatIdResponse {
+    string chat_id = 1;
+    repeated UserMessage messages = 2;
+}
+
+message GetChatListRequest {
+    string environment_id = 1;
+}
+
+message GetChatListResponse {
+    string environment_id = 1;
+    repeated Chat chats = 2;
+}
+
+
+
