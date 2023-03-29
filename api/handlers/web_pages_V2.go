@@ -856,18 +856,18 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 	webPage.CommitId = uuID.String()
 	webPage.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
 
-	activeVersion, err := services.VersioningService().Release().GetCurrentActive(
-		c.Request.Context(),
-		&vcs.GetCurrentReleaseRequest{
-			EnvironmentId: webPage.GetEnvironmentId(),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	//activeVersion, err := services.VersioningService().Release().GetCurrentActive(
+	//	c.Request.Context(),
+	//	&vcs.GetCurrentReleaseRequest{
+	//		EnvironmentId: webPage.GetEnvironmentId(),
+	//	},
+	//)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
-	webPage.VersionId = activeVersion.GetVersionId()
+	//webPage.VersionId = activeVersion.GetVersionId()
 	webPage.CommitInfo = &tmp.CommitInfo{
 		Id:         "",
 		CommitType: config.COMMIT_TYPE_FIELD,
