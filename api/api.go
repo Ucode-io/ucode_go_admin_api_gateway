@@ -444,7 +444,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v3.DELETE("/web_pages/:guid", h.DeleteWebPage)
 
 		v3.POST("/chat", h.CreatChat)
-		v3.GET("/chat/", h.GetChatList)
+		v3.GET("/chat", h.GetChatList)
 		v3.GET("/chat/:id", h.GetChatByChatID)
 
 	}

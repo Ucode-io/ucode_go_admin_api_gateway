@@ -33,9 +33,6 @@ func NewChatServiceClient(ctx context.Context, cfg config.Config) (ChatServiceI,
 		chat: chat_service.NewChatServiceClient(connChatService),
 	}, nil
 
-	// return &chatServiceClient{
-	// 	chat: chat_service.NewChatServiceClient(connChatService),
-	// }, nil
 }
 
 func (g *chatServiceClient) Chat() chat_service.ChatServiceClient {

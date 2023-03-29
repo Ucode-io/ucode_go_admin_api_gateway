@@ -55,7 +55,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	}
 	chatServiceClient, err := NewChatServiceClient(ctx, cfg)
 	if err != nil {
-		return nil, err
+		return nil, err	
 	}
 	companyServiceClient, err := NewCompanyServiceClient(ctx, cfg)
 	if err != nil {
