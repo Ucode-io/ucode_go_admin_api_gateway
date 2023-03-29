@@ -188,12 +188,12 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 			return
 		}
 		function.Url = "https://" + uuid.String() + ".u-code.io"
-		log.Println("url", function.Url)
+		log.Println("url")
 		function.Password = password
 	}
 	var status int
 	for {
-		status, err = util.DoReques	tCheckCodeServer(function.Url+"/?folder=/functions/"+function.Path, "GET", nil)
+		status, err = util.DoRequestCheckCodeServer(function.Url+"/?folder=/functions/"+function.Path, "GET", nil)
 		if status == 200 {
 			break
 		}
