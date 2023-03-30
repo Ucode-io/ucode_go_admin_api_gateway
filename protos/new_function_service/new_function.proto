@@ -58,7 +58,7 @@ message GetAllFunctionsResponse {
 
 message FunctionPrimaryKey {
     string id = 1;
-    string environment_id = 2;
+    string project_id = 2;
 }
 
 message UpdateManyUrlAndPassword {

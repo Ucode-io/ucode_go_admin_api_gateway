@@ -186,7 +186,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// function
 		v1.POST("/function", h.CreateFunction)
 		v1.GET("/function/:function_id", h.GetFunctionByID)
-		v1.GET("/function", h.GetAllFunctions)
+		v1.GET("/function", h.GetAllNewFunctionsForApp)
 		v1.PUT("/function", h.UpdateFunction)
 		v1.DELETE("/function/:function_id", h.DeleteFunction)
 
@@ -250,6 +250,16 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/template-note/share", h.CreateSharingToken)
 		v1.PUT("/template-note/share", h.UpdateSharingToken)
 
+	}
+	v2 := r.Group("/v2")
+	v2.Use(h.AuthMiddleware(cfg))
+	{
+		// custom event
+		v2.POST("/custom-event", h.CreateNewCustomEvent)
+		v2.GET("/custom-event/:custom_event_id", h.GetNewCustomEventByID)
+		v2.GET("/custom-event", h.GetAllNewCustomEvents)
+		v2.PUT("/custom-event", h.UpdateNewCustomEvent)
+		v2.DELETE("/custom-event/:custom_event_id", h.DeleteNewCustomEvent)
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
@@ -412,12 +422,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
 
-		// custom event
-		v2Admin.POST("/custom-event", h.CreateNewCustomEvent)
-		v2Admin.GET("/custom-event/:custom_event_id", h.GetNewCustomEventByID)
-		v2Admin.GET("/custom-event", h.GetAllNewCustomEvents)
-		v2Admin.PUT("/custom-event", h.UpdateNewCustomEvent)
-		v2Admin.DELETE("/custom-event/:custom_event_id", h.DeleteNewCustomEvent)
 	}
 
 	// v3 for ucode version 2

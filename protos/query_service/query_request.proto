@@ -109,6 +109,8 @@ message DeleteQueryReq {
 
 message RunQueryRes {
   string res = 1;
+  string status = 2;
+  int32 status_code = 3;
 }
 
 message GetQueryHistoryReq {
