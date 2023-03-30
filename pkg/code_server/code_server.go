@@ -50,8 +50,10 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 
 	cmd = exec.Command("helm", "install", functionName, "code-server/code-server", "-n", "test", hostName, hostNameTls, secretName, path)
 
+	// helm install newnewnew-sdfsdfsdf-doupdate code-server/code-server -n test --set=ingress.hosts[0].host=7a759e6b-d8d5-4a3a-8427-9da68b0983f5.u-code.io --set=ingress.tls[0].hosts[0]=7a759e6b-d8d5-4a3a-8427-9da68b0983f5.u-code.io --set=ingress.tls[0].secretName=ucode-wildcard --set=ingress.hosts[0].paths[0]=/
 	err = cmd.Run()
-	if err != nil {
+	isErr := !strings.HasPrefix(stderr.String(), "WARNING:")
+	if err != nil && isErr {
 		fmt.Println("err 2::", err)
 		log.Println("error exec command:", cmd.String())
 		return "", errors.New("error while install code server::" + stderr.String())
