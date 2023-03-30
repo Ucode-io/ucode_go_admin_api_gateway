@@ -28387,6 +28387,102 @@ const docTemplate = `{
             }
         },
         "/v3/chat": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "GetChatlist",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "GetChatlist",
+                "operationId": "GetChatlist",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/chat_service.GetChatListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -28415,22 +28511,13 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Environment-Id",
-                        "name": "environment-id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
                     {
                         "description": "Chat body",
                         "name": "chat_service",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateChatRequest"
-                        }
-                    },
-                    {
-                        "description": "Request body",
-                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -28496,14 +28583,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/v3/chat/": {
-            "get": {
+        "/v3/chat/message": {
+            "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "GetChatlist",
+                "description": "Create Chat",
                 "consumes": [
                     "application/json"
                 ],
@@ -28513,8 +28600,8 @@ const docTemplate = `{
                 "tags": [
                     "Chat"
                 ],
-                "summary": "GetChatlist",
-                "operationId": "GetChatlist",
+                "summary": "Create Chat",
+                "operationId": "CreateMessage",
                 "parameters": [
                     {
                         "type": "string",
@@ -28525,15 +28612,18 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Environment-Id",
-                        "name": "environment-id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query"
+                        "description": "Chat body",
+                        "name": "chat_service",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateMessageRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -28548,7 +28638,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/chat_service.GetChatListResponse"
+                                            "$ref": "#/definitions/models.ChatResponse"
                                         }
                                     }
                                 }
@@ -32410,7 +32500,7 @@ const docTemplate = `{
                 "chat": {
                     "$ref": "#/definitions/models.Chat"
                 },
-                "userid": {
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -32565,6 +32655,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateMessageRequest": {
+            "type": "object",
+            "properties": {
+                "chat": {
+                    "$ref": "#/definitions/models.UserMessage"
+                },
+                "chatid": {
                     "type": "string"
                 }
             }
@@ -33473,6 +33574,26 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "models.UserMessage": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "sender_name": {
+                    "type": "string"
+                },
+                "types": {
+                    "type": "string"
+                },
+                "userid": {
+                    "type": "string"
                 }
             }
         },
@@ -35981,6 +36102,12 @@ const docTemplate = `{
             "properties": {
                 "res": {
                     "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
                 }
             }
         },
