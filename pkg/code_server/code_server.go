@@ -29,8 +29,8 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 		return "", errors.New("error while adding repo:" + stderr.String())
 	}
 
-	log.Println("----exec command-----", cmd.String())
 	cmd = exec.Command("helm", "repo", "update")
+	log.Println("----exec command-----", cmd.String())
 	err = cmd.Run()
 	if err != nil {
 		fmt.Println("err 1::", err)
@@ -45,10 +45,10 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 
 	path := "--set=ingress.hosts[0].paths[0]=/"
 
-	log.Println("----exec command-----", cmd.String())
-
+	
 	cmd = exec.Command("helm", "install", functionName, "code-server/code-server", "-n", "test", hostName, hostNameTls, secretName, path)
-
+	log.Println("----exec command-----", cmd.String())
+	
 	// helm install newnewnew-sdfsdfsdf-doupdate code-server/code-server -n test --set=ingress.hosts[0].host=7a759e6b-d8d5-4a3a-8427-9da68b0983f5.u-code.io --set=ingress.tls[0].hosts[0]=7a759e6b-d8d5-4a3a-8427-9da68b0983f5.u-code.io --set=ingress.tls[0].secretName=ucode-wildcard --set=ingress.hosts[0].paths[0]=/
 	err = cmd.Run()
 	isErr := !strings.HasPrefix(stderr.String(), "WARNING:")
