@@ -207,11 +207,36 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ProjectId:     environment.GetProjectId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
 		&fc.FunctionPrimaryKey{
 			Id:        functionID,
-			ProjectId: environment.GetId(),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
@@ -240,31 +265,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 	// 		break
 	// 	}
 	// }
-	if util.IsValidUUID(resourceId.(string)) {
-		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-			c.Request.Context(),
-			&obs.GetResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ResourceId:    resourceId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	} else {
-		resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-			c.Request.Context(),
-			&obs.GetDefaultResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ProjectId:     environment.GetProjectId(),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	}
+
 	function.ProjectId = resourceEnvironment.GetId()
 	services.FunctionService().FunctionService().Update(context.Background(), function)
 
