@@ -221,7 +221,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 
 	log.Println("function::", function)
 
-	if function.Url == "" && function.Password == "" {
+	if function.Url == "" {
 		uuid, _ := uuid.NewRandom()
 		fmt.Println("uuid::", uuid.String())
 		password, err := code_server.CreateCodeServer(function.Path, h.cfg, uuid.String())
@@ -233,13 +233,13 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		log.Println("url", function.Url)
 		function.Password = password
 	}
-	var status int
-	for {
-		status, err = util.DoRequestCheckCodeServer(function.Url+"/?folder=/functions/"+function.Path, "GET", nil)
-		if status == 200 {
-			break
-		}
-	}
+	// var status int
+	// for {
+	// 	status, err = util.DoRequestCheckCodeServer(function.Url+"/?folder=/functions/"+function.Path, "GET", nil)
+	// 	if status == 200 {
+	// 		break
+	// 	}
+	// }
 	if util.IsValidUUID(resourceId.(string)) {
 		resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 			c.Request.Context(),
