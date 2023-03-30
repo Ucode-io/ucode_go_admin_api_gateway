@@ -3,7 +3,6 @@ package code_server
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
@@ -58,29 +57,28 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 		log.Println("error exec command:", cmd.String())
 		return "", errors.New("error while install code server::" + stderr.String())
 	}
-	var out bytes.Buffer
+	// var out bytes.Buffer
 
-	log.Println("----exec command-----", cmd.String())
-	cmd = exec.Command("kubectl", "get", "secret", "--namespace", "test", functionName+"-code-server", "-o", "jsonpath=\"{.data.password}\"")
+	// log.Println("----exec command-----", cmd.String())
+	// cmd = exec.Command("kubectl", "get", "secret", "--namespace", "test", functionName+"-code-server", "-o", "jsonpath=\"{.data.password}\"")
 
-	cmd.Stdout = &out
+	// cmd.Stdout = &out
 
-	log.Println("----exec command-----", cmd.String())
-	err = cmd.Run()
-	if err != nil {
-		log.Println("err 3::", err)
-		return "", errors.New("error running get password command::" + stderr.String())
-	}
+	// err = cmd.Run()
+	// if err != nil {
+	// 	log.Println("err 3::", err)
+	// 	return "", errors.New("error running get password command::" + stderr.String())
+	// }
 
-	s := strings.ReplaceAll(out.String(), `"`, "")
-	str, err := base64.StdEncoding.DecodeString(s)
-	if err != nil {
-		log.Println("err 4::", err)
-		return "", errors.New("error while base64 to string::" + stderr.String())
-	}
-	pass := string(str)
+	// s := strings.ReplaceAll(out.String(), `"`, "")
+	// str, err := base64.StdEncoding.DecodeString(s)
+	// if err != nil {
+	// 	log.Println("err 4::", err)
+	// 	return "", errors.New("error while base64 to string::" + stderr.String())
+	// }
+	// pass := string(str)
 
-	return pass, nil
+	return "", nil
 }
 
 func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg config.Config) error {
