@@ -172,6 +172,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	fmt.Println("TIME_MANAGEMENT_LOGGING:::Create", time.Since(start))
 
 	start = time.Now()
+	fmt.Println("after action:::", afterActions)
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{

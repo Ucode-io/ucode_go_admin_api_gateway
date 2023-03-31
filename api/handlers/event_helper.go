@@ -9,7 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
-	nfc "ucode/ucode_go_api_gateway/genproto/new_function_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -17,14 +17,14 @@ import (
 )
 
 type DoInvokeFuntionStruct struct {
-	CustomEvents []*nfc.CustomEvent
+	CustomEvents []*obs.CustomEvent
 	IDs          []string
 	TableSlug    string
 	ObjectData   map[string]interface{}
 	Method       string
 }
 
-func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Handler) (beforeEvents, afterEvents []*nfc.CustomEvent, err error) {
+func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Handler) (beforeEvents, afterEvents []*obs.CustomEvent, err error) {
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -60,9 +60,9 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 		return
 	}
 
-	res, err := services.FunctionService().CustomEventService().GetList(
+	res, err := services.BuilderService().CustomEvent().GetList(
 		context.Background(),
-		&nfc.GetCustomEventsListRequest{
+		&obs.GetCustomEventsListRequest{
 			TableSlug: tableSlug,
 			Method:    method,
 			RoleId:    roleId,
@@ -146,7 +146,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		var invokeFunction models.NewInvokeFunctionRequest
 		data, err := helper.ConvertStructToResponse(customEvent.Attributes)
 		if err != nil {
-			return customEvent.Function.Name, err
+			return customEvent.GetFunctions()[0].Name, err
 		}
 		fmt.Println("idsssss::", request.IDs)
 		fmt.Println("dataaa::", request.ObjectData)
@@ -161,15 +161,15 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		fmt.Println("function body ----", string(js))
 		// h.log.Info("function path: ", logger.Any("", customEvent.Functions[0].Path))
 
-		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.Function.Path, "POST", invokeFunction)
+		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
 		if err != nil {
-			return customEvent.Function.Name, err
+			return customEvent.GetFunctions()[0].Name, err
 		} else if resp.Status == "error" {
 			var errStr = resp.Status
 			if resp.Data != nil && resp.Data["message"] != nil {
 				errStr = resp.Data["message"].(string)
 			}
-			return customEvent.Function.Name, errors.New(errStr)
+			return customEvent.GetFunctions()[0].Name, errors.New(errStr)
 		}
 		// _, err = services.BuilderService().CustomEvent().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
 		// 	FunctionId: customEvent.Functions[0].Id,
