@@ -37,6 +37,7 @@ type BuilderServiceI interface {
 	Cascading() object_builder_service.CascadingServiceClient
 	TableHelpers() object_builder_service.TableHelpersServiceClient
 	FieldsAndRelations() object_builder_service.FieldAndRelationServiceClient
+	Setting() object_builder_service.SettingServiceClient
 }
 
 func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderServiceI, error) {
@@ -68,8 +69,8 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		excelService:             object_builder_service.NewExcelServiceClient(connObjectBuilderService),
 		permissionService:        object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
 		customEventService:       object_builder_service.NewCustomEventServiceClient(connObjectBuilderService),
-		functionService:          object_builder_service.NewFunctionServiceClient((connObjectBuilderService)),
-		barcodeService:           object_builder_service.NewBarcodeServiceClient((connObjectBuilderService)),
+		functionService:          object_builder_service.NewFunctionServiceClient(connObjectBuilderService),
+		barcodeService:           object_builder_service.NewBarcodeServiceClient(connObjectBuilderService),
 		objectBuilderServiceAuth: object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
 		loginService:             object_builder_service.NewLoginServiceClient(connObjectBuilderService),
 		queryFolderService:       object_builder_service.NewQueryFolderServiceClient(connObjectBuilderService),
@@ -78,6 +79,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		cascadingService:         object_builder_service.NewCascadingServiceClient(connObjectBuilderService),
 		tableHelpersService:      object_builder_service.NewTableHelpersServiceClient(connObjectBuilderService),
 		fieldsAndRelations:       object_builder_service.NewFieldAndRelationServiceClient(connObjectBuilderService),
+		settingService:           object_builder_service.NewSettingServiceClient(connObjectBuilderService),
 	}, nil
 }
 
@@ -109,6 +111,7 @@ type builderServiceClient struct {
 	cascadingService         object_builder_service.CascadingServiceClient
 	tableHelpersService      object_builder_service.TableHelpersServiceClient
 	fieldsAndRelations       object_builder_service.FieldAndRelationServiceClient
+	settingService           object_builder_service.SettingServiceClient
 }
 
 func (g *builderServiceClient) Table() object_builder_service.TableServiceClient {
@@ -216,4 +219,8 @@ func (g *builderServiceClient) Cascading() object_builder_service.CascadingServi
 
 func (g *builderServiceClient) FieldsAndRelations() object_builder_service.FieldAndRelationServiceClient {
 	return g.fieldsAndRelations
+}
+
+func (g *builderServiceClient) Setting() object_builder_service.SettingServiceClient {
+	return g.settingService
 }

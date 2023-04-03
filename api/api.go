@@ -410,6 +410,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.PUT("/notification/category", h.UpdateCategoryNotification)
 		v1Admin.DELETE("/notification/category/:id", h.DeleteCategoryNotification)
 
+		// settings
+		v1Admin.GET("/project/:project-id/setting", h.GetDefaultSettings)
+		v1Admin.GET("/project/:project-id/setting-all", h.GetAllSettings)
+		v1Admin.PUT("/project/:project-id/setting", h.SetDefaultSettings)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())

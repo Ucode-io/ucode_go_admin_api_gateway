@@ -358,7 +358,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -686,7 +686,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -1971,7 +1971,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2559,7 +2559,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3050,7 +3050,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3845,7 +3845,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4348,7 +4348,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4763,7 +4763,7 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
@@ -5194,7 +5194,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -7721,7 +7721,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8222,7 +8222,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8723,7 +8723,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -9219,7 +9219,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -9915,7 +9915,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10747,7 +10747,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -11622,7 +11622,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -11805,7 +11805,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -12510,7 +12510,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13098,7 +13098,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -14049,7 +14049,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -14353,7 +14353,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -16385,7 +16385,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -17165,6 +17165,334 @@
                 }
             }
         },
+        "/v1/project/{project-id}/setting": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Default Setting",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Setting"
+                ],
+                "summary": "Get Default Setting",
+                "operationId": "get_default_settings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetDefaultSettingsRes",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.GetDefaultSettingsRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Set Default settings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Setting"
+                ],
+                "summary": "Set Default settings",
+                "operationId": "set_default_settings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "SetDefaultSettingsReq",
+                        "name": "setting",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.SetDefaultSettingsReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Setting data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.Setting"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/project/{project-id}/setting-all": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get List settings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Setting"
+                ],
+                "summary": "Get List settings",
+                "operationId": "get_list_setting",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "search",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "type",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Setting",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.Setting"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/query": {
             "post": {
                 "security": [
@@ -17732,7 +18060,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -18486,7 +18814,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -19418,7 +19746,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -20086,7 +20414,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -22858,7 +23186,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -23809,7 +24137,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -24543,7 +24871,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -25058,7 +25386,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -25876,7 +26204,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -26556,7 +26884,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -27151,7 +27479,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -27868,7 +28196,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -28205,6 +28533,117 @@
                 }
             }
         },
+        "/v2/function-for-app": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all functions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Function"
+                ],
+                "summary": "Get all functions",
+                "operationId": "get_all_new_functions_for_app",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "search",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FunctionBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/function/{function_id}": {
             "get": {
                 "security": [
@@ -28333,7 +28772,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -29238,7 +29677,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -29746,7 +30185,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -30244,7 +30683,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -30519,7 +30958,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "authentification": {
                     "type": "boolean"
@@ -30715,7 +31154,7 @@
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "$ref": "#/definitions/auth_service.ConfirmStrategies"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "string"
@@ -30739,19 +31178,6 @@
                     }
                 }
             }
-        },
-        "auth_service.ConfirmStrategies": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ConfirmStrategies_UNDECIDED",
-                "ConfirmStrategies_PHONE",
-                "ConfirmStrategies_EMAIL"
-            ]
         },
         "auth_service.CreateIntegrationRequest": {
             "type": "object",
@@ -30962,7 +31388,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -31194,10 +31620,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -31286,10 +31712,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -31371,10 +31797,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -31537,7 +31963,7 @@
                     }
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -31554,7 +31980,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -31647,30 +32073,15 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
                 }
             }
-        },
-        "company_service.ResourceType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "ResourceType_NOT_DECIDED",
-                "ResourceType_MONGODB",
-                "ResourceType_CLICKHOUSE",
-                "ResourceType_POSTGRESQL"
-            ]
         },
         "company_service.ResourceWithoutPassword": {
             "type": "object",
@@ -31691,7 +32102,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -31761,19 +32172,6 @@
                 }
             }
         },
-        "company_service.ServiceType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ServiceType_NOT_SPECIFIED",
-                "ServiceType_BUILDER_SERVICE",
-                "ServiceType_ANALYTICS_SERVICE"
-            ]
-        },
         "company_service.SetDefaultResourceReq": {
             "type": "object",
             "properties": {
@@ -31787,7 +32185,7 @@
                     "type": "string"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -31804,7 +32202,7 @@
                     "type": "string"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -31830,7 +32228,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -32052,38 +32450,6 @@
         "emptypb.Empty": {
             "type": "object"
         },
-        "github_com_golang_protobuf_ptypes_struct.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
-                    }
-                }
-            }
-        },
-        "google_golang_org_protobuf_types_known_structpb.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
-                    }
-                }
-            }
-        },
-        "google_golang_org_protobuf_types_known_structpb.Value": {
-            "type": "object",
-            "properties": {
-                "kind": {
-                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
-                }
-            }
-        },
         "handlers.Path": {
             "type": "object",
             "properties": {
@@ -32160,7 +32526,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -32213,7 +32579,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -32805,7 +33171,7 @@
             "type": "object",
             "properties": {
                 "components": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "folder_id": {
                     "type": "string"
@@ -33531,7 +33897,7 @@
             "type": "object",
             "properties": {
                 "components": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "folder_id": {
                     "type": "string"
@@ -33621,7 +33987,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -33997,7 +34363,7 @@
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
+                    "type": "integer"
                 },
                 "guid": {
                     "type": "string"
@@ -34041,19 +34407,6 @@
                 }
             }
         },
-        "object_builder_service.ConfirmStrategies": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ConfirmStrategies_UNDECIDED",
-                "ConfirmStrategies_PHONE",
-                "ConfirmStrategies_EMAIL"
-            ]
-        },
         "object_builder_service.CreateAppResponse": {
             "type": "object",
             "properties": {
@@ -34084,7 +34437,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -34174,7 +34527,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "autofill_field": {
                     "type": "string"
@@ -34454,7 +34807,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -34548,6 +34901,35 @@
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "object_builder_service.Currency": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "decimal_digits": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "name_plural": {
+                    "type": "string"
+                },
+                "rounding": {
+                    "type": "integer"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "symbol_native": {
+                    "type": "string"
                 }
             }
         },
@@ -34820,6 +35202,20 @@
                 }
             }
         },
+        "object_builder_service.GetDefaultSettingsRes": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "$ref": "#/definitions/object_builder_service.Currency"
+                },
+                "language": {
+                    "$ref": "#/definitions/object_builder_service.Language"
+                },
+                "timezone": {
+                    "$ref": "#/definitions/object_builder_service.Timezone"
+                }
+            }
+        },
         "object_builder_service.GetEventLogListsResponse": {
             "type": "object",
             "properties": {
@@ -34899,6 +35295,23 @@
                 },
                 "with_increment_id": {
                     "type": "boolean"
+                }
+            }
+        },
+        "object_builder_service.Language": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "native_name": {
+                    "type": "string"
+                },
+                "short_name": {
+                    "type": "string"
                 }
             }
         },
@@ -35056,6 +35469,31 @@
                 }
             }
         },
+        "object_builder_service.SetDefaultSettingsReq": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "object_builder_service.Setting": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                }
+            }
+        },
         "object_builder_service.Summary": {
             "type": "object",
             "properties": {
@@ -35109,7 +35547,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -35124,6 +35562,20 @@
                     "type": "string"
                 },
                 "view_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.Timezone": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "text": {
                     "type": "string"
                 }
             }
@@ -35439,7 +35891,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -35830,7 +36282,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -36008,7 +36460,7 @@
                     "type": "string"
                 },
                 "request": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "response": {
                     "type": "string"
@@ -36022,7 +36474,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -36126,7 +36578,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -36368,7 +36820,7 @@
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                        "$ref": "#/definitions/structpb.Struct"
                     }
                 },
                 "connect_info": {
@@ -36387,7 +36839,7 @@
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -36404,7 +36856,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "category_id": {
                     "type": "string"
@@ -36461,7 +36913,7 @@
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                        "$ref": "#/definitions/structpb.Struct"
                     }
                 },
                 "connect_info": {
@@ -36486,7 +36938,7 @@
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -36498,7 +36950,7 @@
                     "type": "string"
                 },
                 "ui_component": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 }
             }
         },
@@ -36583,7 +37035,7 @@
             "type": "object",
             "properties": {
                 "response": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 }
             }
         },
@@ -36622,6 +37074,26 @@
                 },
                 "status": {
                     "type": "string"
+                }
+            }
+        },
+        "structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/structpb.Value"
+                    }
+                }
+            }
+        },
+        "structpb.Value": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
                 }
             }
         },
@@ -36675,7 +37147,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -36957,7 +37429,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "role": {
                     "type": "string"
@@ -37005,7 +37477,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -37151,7 +37623,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -37359,7 +37831,7 @@
                     "type": "string"
                 },
                 "release_type": {
-                    "$ref": "#/definitions/versioning_service.ReleaseType"
+                    "type": "integer"
                 }
             }
         },
@@ -37491,21 +37963,6 @@
                     }
                 }
             }
-        },
-        "versioning_service.ReleaseType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "ReleaseType_UNDEFINED",
-                "ReleaseType_MAJOR",
-                "ReleaseType_MINOR",
-                "ReleaseType_PATCH"
-            ]
         },
         "versioning_service.ReleaseWithCommit": {
             "type": "object",
@@ -37726,7 +38183,7 @@
                     "$ref": "#/definitions/web_page_service.CommitInfo"
                 },
                 "components": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "environment_id": {
                     "type": "string"
