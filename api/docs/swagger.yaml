@@ -20913,6 +20913,70 @@ paths:
       summary: Update new function
       tags:
       - Function
+  /v2/function-for-app:
+    get:
+      consumes:
+      - application/json
+      description: Get all functions
+      operationId: get_all_new_functions_for_app
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: number
+      - description: offset
+        in: query
+        name: offset
+        type: number
+      - description: search
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FunctionBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all functions
+      tags:
+      - Function
   /v2/function/{function_id}:
     delete:
       consumes:
@@ -21028,6 +21092,10 @@ paths:
       - description: project-id
         in: query
         name: project-id
+        type: string
+      - description: search
+        in: query
+        name: search
         type: string
       produces:
       - application/json

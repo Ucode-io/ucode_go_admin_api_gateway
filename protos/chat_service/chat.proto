@@ -49,7 +49,7 @@ message GetChatByChatIdResponse {
 
 message GetChatListRequest {
     string environment_id = 1;
-    string chat_id = 2;
+    string search = 2;
 }
 
 message ChatWithLastMessageData {

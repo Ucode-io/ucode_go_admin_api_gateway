@@ -87,9 +87,11 @@ func (h *Handler) GetChatList(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "Environment-Id not found")
 		return
 	}
-	//Search := c.Query("search")
+
+	Search := c.Query("search")
 	resp, err := h.companyServices.ChatService().Chat().GetChatList(c.Request.Context(), &chat_service.GetChatListRequest{
 		EnvironmentId: EnvironmentId,
+		Search:        Search,
 	})
 
 	if err != nil {
