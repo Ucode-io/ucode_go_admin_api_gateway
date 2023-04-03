@@ -43,7 +43,7 @@ message CustomEvent {
     string icon = 5;
     string url = 6;
     bool disable = 7;
-    repeated Function functions = 8;
+    Function function = 8;
     string project_id = 9;
     string method = 10;
     string action_type =11;
@@ -67,7 +67,7 @@ message GetCustomEventsListRequest {
 
 message CustomEventPrimaryKey {
     string id = 1;
-    string environment_id = 2;
+    string project_id = 2;
 }
 
 message UpdateByFunctionIdRequest {
