@@ -75,6 +75,7 @@ func (h *Handler) CreatChat(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project-id query string false "project-id"
+// @Param search query string false "search"
 // @Success 200 {object} status_http.Response{data=chat_service.GetChatListResponse} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -87,8 +88,10 @@ func (h *Handler) GetChatList(c *gin.Context) {
 		return
 	}
 
+	Search := c.Query("search")
 	resp, err := h.companyServices.ChatService().Chat().GetChatList(c.Request.Context(), &chat_service.GetChatListRequest{
 		EnvironmentId: EnvironmentId,
+		Search:        Search,
 	})
 
 	if err != nil {
@@ -123,60 +126,6 @@ func (h *Handler) GetChatByChatID(c *gin.Context) {
 	idstr := c.Param("id")
 	resp, err := h.companyServices.ChatService().Chat().GetChatByChatId(c.Request.Context(), &chat_service.GetChatByChatIdRequest{
 		ChatId: idstr,
-	})
-
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
-	h.handleResponse(c, status_http.OK, resp)
-}
-
-// CreateMessage godoc
-// @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @ID CreateMessage
-// @Router /v3/chat/message [POST]
-// @Summary Create Chat
-// @Description Create Chat
-// @Tags Chat
-// @Accept json
-// @Produce json
-// @Param chat_service body models.CreateMessageRequest true "Chat body"
-// @Success 200 {object} status_http.Response{data=models.ChatResponse} "Response body"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) CreateMessage(c *gin.Context) {
-
-	var (
-		body models.CreateMessageRequest
-	)
-
-	err := c.ShouldBindJSON(&body)
-	if err != nil {
-		h.log.Error("ShouldBindJSON", logger.Error(err))
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
-	// EnvironmentId := c.GetHeader("Environment-Id")
-
-	// if !util.IsValidUUID(EnvironmentId) {
-	// 	h.handleResponse(c, status_http.BadRequest, "Environment-Id not found")
-	// 	return
-	// }
-
-	resp, err := h.companyServices.ChatService().Chat().CreateMessage(c.Request.Context(), &chat_service.CreateMessageRequest{
-		ChatId: body.ChatId,
-		Message: &chat_service.UserMessage{
-			SenderName: body.Chat.Sender_name,
-			Message:    body.Chat.Message,
-			CreatedAt:  body.Chat.CreatedAt,
-			UserId:     body.Chat.UserId,
-			Type:       body.Chat.Types,
-		},
 	})
 
 	if err != nil {

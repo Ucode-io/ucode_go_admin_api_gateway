@@ -49,6 +49,7 @@ message GetChatByChatIdResponse {
 
 message GetChatListRequest {
     string environment_id = 1;
+    string search = 2;
 }
 
 message ChatWithLastMessageData {
@@ -67,4 +68,13 @@ message GetChatListResponse {
 message CreateMessageRequest {
     string chat_id = 1;
     UserMessage message = 2;
+}
+
+message GetSelfChatContent {
+    string chat_id = 1;
+    string environment_id = 2;
+}
+
+message GetSelfChatContentResponse {
+    ChatWithLastMessageData message = 1;   
 }

@@ -450,7 +450,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v3.POST("/chat", h.CreatChat)
 		v3.GET("/chat", h.GetChatList)
 		v3.GET("/chat/:id", h.GetChatByChatID)
-		v3.POST("/chat/message", h.CreateMessage)
 
 	}
 
