@@ -182,8 +182,8 @@ func (h *Handler) GetNewCustomEventByID(c *gin.Context) {
 	resp, err := services.FunctionService().CustomEventService().GetSingle(
 		context.Background(),
 		&fc.CustomEventPrimaryKey{
-			Id:            customeventID,
-			EnvironmentId: resourceEnvironment.GetEnvironmentId(),
+			Id:        customeventID,
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 	if err != nil {
@@ -249,12 +249,14 @@ func (h *Handler) GetAllNewCustomEvents(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	tokenInfo, _ := h.GetAuthInfo(c)
 
 	resp, err := services.FunctionService().CustomEventService().GetList(
 		context.Background(),
 		&fc.GetCustomEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
 			ProjectId: resourceEnvironment.GetId(),
+			RoleId:    tokenInfo.GetRoleId(),
 		},
 	)
 	if err != nil {
@@ -425,8 +427,8 @@ func (h *Handler) DeleteNewCustomEvent(c *gin.Context) {
 	resp, err := services.FunctionService().CustomEventService().Delete(
 		context.Background(),
 		&fc.CustomEventPrimaryKey{
-			Id:            customeventID,
-			EnvironmentId: resourceEnvironment.GetEnvironmentId(),
+			Id:        customeventID,
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 

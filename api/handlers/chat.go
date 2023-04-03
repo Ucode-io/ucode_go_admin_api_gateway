@@ -75,6 +75,7 @@ func (h *Handler) CreatChat(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project-id query string false "project-id"
+// @Param search query string false "search"
 // @Success 200 {object} status_http.Response{data=chat_service.GetChatListResponse} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -86,7 +87,7 @@ func (h *Handler) GetChatList(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "Environment-Id not found")
 		return
 	}
-
+	//Search := c.Query("search")
 	resp, err := h.companyServices.ChatService().Chat().GetChatList(c.Request.Context(), &chat_service.GetChatListRequest{
 		EnvironmentId: EnvironmentId,
 	})

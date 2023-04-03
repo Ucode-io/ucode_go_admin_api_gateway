@@ -7,6 +7,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/genproto/new_function_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -504,9 +505,9 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		return
 	}
 
-	function, err := services.BuilderService().Function().GetSingle(
+	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
-		&obs.FunctionPrimaryKey{
+		&new_function_service.FunctionPrimaryKey{
 			Id:        invokeFunction.FunctionID,
 			ProjectId: resourceEnvironment.GetId(),
 		},
@@ -532,6 +533,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		invokeFunction.Attributes = make(map[string]interface{}, 0)
 	}
 
+	fmt.Println(function.Path)
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.NewInvokeFunctionRequest{
 		Data: map[string]interface{}{
 			"object_ids": invokeFunction.ObjectIDs,
