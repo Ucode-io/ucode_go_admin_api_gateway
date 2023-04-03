@@ -15,7 +15,7 @@ definitions:
       additional_url:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       authentification:
         type: boolean
       category_id:
@@ -143,7 +143,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/auth_service.ConfirmStrategies'
       id:
         type: string
       name:
@@ -159,6 +159,16 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
+  auth_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -296,7 +306,7 @@ definitions:
   auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       label:
@@ -448,9 +458,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
       user_id:
@@ -508,9 +518,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
       user_id:
@@ -563,9 +573,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.EmptyProto:
     type: object
@@ -670,7 +680,7 @@ definitions:
           $ref: '#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources'
         type: array
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources:
     properties:
@@ -681,7 +691,7 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -741,9 +751,9 @@ definitions:
       id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
     type: object
@@ -760,6 +770,18 @@ definitions:
       username:
         type: string
     type: object
+  company_service.ResourceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ResourceType_NOT_DECIDED
+    - ResourceType_MONGODB
+    - ResourceType_CLICKHOUSE
+    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -773,7 +795,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -805,6 +827,16 @@ definitions:
       resource_environment_id:
         type: string
     type: object
+  company_service.ServiceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ServiceType_NOT_SPECIFIED
+    - ServiceType_BUILDER_SERVICE
+    - ServiceType_ANALYTICS_SERVICE
   company_service.SetDefaultResourceReq:
     properties:
       environment_id:
@@ -814,7 +846,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.SetDefaultResourceRes:
     properties:
@@ -825,7 +857,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.UpdateResourceRequest:
     properties:
@@ -842,7 +874,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -989,6 +1021,27 @@ definitions:
     type: object
   emptypb.Empty:
     type: object
+  github_com_golang_protobuf_ptypes_struct.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
+  google_golang_org_protobuf_types_known_structpb.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
+  google_golang_org_protobuf_types_known_structpb.Value:
+    properties:
+      kind:
+        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+    type: object
   handlers.Path:
     properties:
       filename:
@@ -1039,7 +1092,7 @@ definitions:
       currency:
         type: string
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       deleted_at:
         type: string
       id:
@@ -1074,7 +1127,7 @@ definitions:
       currency:
         type: string
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       deleted_at:
         type: string
       id:
@@ -1254,7 +1307,7 @@ definitions:
     properties:
       chat:
         $ref: '#/definitions/models.Chat'
-      userid:
+      user_id:
         type: string
     type: object
   models.CreateDashboardRequest:
@@ -1358,6 +1411,13 @@ definitions:
       path:
         type: string
     type: object
+  models.CreateMessageRequest:
+    properties:
+      chat:
+        $ref: '#/definitions/models.UserMessage'
+      chatid:
+        type: string
+    type: object
   models.CreatePanelRequest:
     properties:
       attributes:
@@ -1455,7 +1515,7 @@ definitions:
   models.CreateWebPageReqModel:
     properties:
       components:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       folder_id:
         type: string
       icon:
@@ -1932,7 +1992,7 @@ definitions:
   models.UpdateWebPageReqModel:
     properties:
       components:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       folder_id:
         type: string
       icon:
@@ -1953,6 +2013,19 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  models.UserMessage:
+    properties:
+      created_at:
+        type: string
+      message:
+        type: string
+      sender_name:
+        type: string
+      types:
+        type: string
+      userid:
+        type: string
     type: object
   models.Verify:
     properties:
@@ -1978,7 +2051,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -2223,7 +2296,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
       guid:
         type: string
       name:
@@ -2251,6 +2324,16 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
+  object_builder_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -2271,7 +2354,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -2330,7 +2413,7 @@ definitions:
   object_builder_service.CreateFieldRequest:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       autofill_field:
         type: string
       autofill_table:
@@ -2515,7 +2598,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -2941,7 +3024,7 @@ definitions:
   object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       label:
@@ -3158,7 +3241,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -3413,7 +3496,7 @@ definitions:
   query_service.CreateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3529,7 +3612,7 @@ definitions:
       query_id:
         type: string
       request:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       response:
         type: string
       user_id:
@@ -3538,7 +3621,7 @@ definitions:
   query_service.Query:
     properties:
       body:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3606,7 +3689,7 @@ definitions:
   query_service.UpdateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3764,7 +3847,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/structpb.Struct'
+          $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
@@ -3777,7 +3860,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       slug:
         type: string
       title:
@@ -3788,7 +3871,7 @@ definitions:
   scenario_service.DAG:
     properties:
       attributes:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       category_id:
         type: string
       commit_id:
@@ -3825,7 +3908,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/structpb.Struct'
+          $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
@@ -3842,7 +3925,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       slug:
         type: string
       title:
@@ -3850,7 +3933,7 @@ definitions:
       type:
         type: string
       ui_component:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
     type: object
   scenario_service.GetDAGRequest:
     properties:
@@ -3905,7 +3988,7 @@ definitions:
   scenario_service.RunScenarioResponse:
     properties:
       response:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
     type: object
   scenario_service.VersionInfo:
     properties:
@@ -3931,19 +4014,6 @@ definitions:
         type: string
       status:
         type: string
-    type: object
-  structpb.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  structpb.Value:
-    properties:
-      kind:
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
     type: object
   template_service.CreateFolderNoteReq:
     properties:
@@ -3978,7 +4048,7 @@ definitions:
       folder_id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       project_id:
         type: string
       title:
@@ -4161,7 +4231,7 @@ definitions:
   template_service.GetObjectTokenRes:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       role:
         type: string
     type: object
@@ -4192,7 +4262,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       project_id:
         type: string
       title:
@@ -4287,7 +4357,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       project_id:
         type: string
       title:
@@ -4423,7 +4493,7 @@ definitions:
       project_id:
         type: string
       release_type:
-        type: integer
+        $ref: '#/definitions/versioning_service.ReleaseType'
     type: object
   versioning_service.ApiDeleteReleaseRequest:
     properties:
@@ -4508,6 +4578,18 @@ definitions:
           $ref: '#/definitions/versioning_service.ReleaseWithCommit'
         type: array
     type: object
+  versioning_service.ReleaseType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ReleaseType_UNDEFINED
+    - ReleaseType_MAJOR
+    - ReleaseType_MINOR
+    - ReleaseType_PATCH
   versioning_service.ReleaseWithCommit:
     properties:
       author_id:
@@ -4651,7 +4733,7 @@ definitions:
       commit_info:
         $ref: '#/definitions/web_page_service.CommitInfo'
       components:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       environment_id:
         type: string
       folder_id:
@@ -4834,7 +4916,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -5016,7 +5098,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -5741,7 +5823,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6019,7 +6101,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6358,7 +6440,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6663,7 +6745,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7096,7 +7178,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7390,7 +7472,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: ""
+          description: Created
         "400":
           description: Bad Request
           schema:
@@ -7581,7 +7663,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -8313,7 +8395,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -9294,7 +9376,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -9581,7 +9663,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -9865,7 +9947,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -10318,7 +10400,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -10794,7 +10876,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11239,7 +11321,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11340,7 +11422,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11744,7 +11826,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12078,7 +12160,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12565,7 +12647,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12743,7 +12825,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -13663,7 +13745,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -14750,7 +14832,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -15055,7 +15137,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -15792,7 +15874,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -16014,7 +16096,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -17713,7 +17795,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -18199,7 +18281,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -18688,7 +18770,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -18925,7 +19007,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -19463,7 +19545,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -19851,7 +19933,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -20126,7 +20208,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -20604,7 +20686,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -20872,7 +20954,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -21023,12 +21105,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.CreateChatRequest'
-      - description: Request body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateChatRequest'
       produces:
       - application/json
       responses:
@@ -21118,6 +21194,63 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: GetChatByChatID
+      tags:
+      - Chat
+  /v3/chat/message:
+    post:
+      consumes:
+      - application/json
+      description: Create Chat
+      operationId: CreateMessage
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: Chat body
+        in: body
+        name: chat_service
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ChatResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Chat
       tags:
       - Chat
   /v3/query:
@@ -21270,7 +21403,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -21562,7 +21695,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -21848,7 +21981,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:

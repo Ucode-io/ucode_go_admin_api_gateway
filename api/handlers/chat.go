@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/chat_service"
@@ -22,7 +23,6 @@ import (
 // @Accept json
 // @Produce json
 // @Param chat_service body models.CreateChatRequest true "Chat body"
-// @Param body body models.CreateChatRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=models.ChatResponse} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -44,7 +44,7 @@ func (h *Handler) CreatChat(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "Environment-Id not found")
 		return
 	}
-
+	fmt.Println(":::::::::::user id", body.UserId)
 	resp, err := h.companyServices.ChatService().Chat().CreateChat(c.Request.Context(), &chat_service.CreateChatRequest{
 		UserId: body.UserId,
 		Chat: &chat_service.Chat{
@@ -95,7 +95,7 @@ func (h *Handler) GetChatList(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
+	fmt.Println(resp, "::::::::::::::::::::::::")
 	h.handleResponse(c, status_http.OK, resp)
 }
 
@@ -123,6 +123,60 @@ func (h *Handler) GetChatByChatID(c *gin.Context) {
 	idstr := c.Param("id")
 	resp, err := h.companyServices.ChatService().Chat().GetChatByChatId(c.Request.Context(), &chat_service.GetChatByChatIdRequest{
 		ChatId: idstr,
+	})
+
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// CreateMessage godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID CreateMessage
+// @Router /v3/chat/message [POST]
+// @Summary Create Chat
+// @Description Create Chat
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param chat_service body models.CreateMessageRequest true "Chat body"
+// @Success 200 {object} status_http.Response{data=models.ChatResponse} "Response body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) CreateMessage(c *gin.Context) {
+
+	var (
+		body models.CreateMessageRequest
+	)
+
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		h.log.Error("ShouldBindJSON", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	// EnvironmentId := c.GetHeader("Environment-Id")
+
+	// if !util.IsValidUUID(EnvironmentId) {
+	// 	h.handleResponse(c, status_http.BadRequest, "Environment-Id not found")
+	// 	return
+	// }
+
+	resp, err := h.companyServices.ChatService().Chat().CreateMessage(c.Request.Context(), &chat_service.CreateMessageRequest{
+		ChatId: body.ChatId,
+		Message: &chat_service.UserMessage{
+			SenderName: body.Chat.Sender_name,
+			Message:    body.Chat.Message,
+			CreatedAt:  body.Chat.CreatedAt,
+			UserId:     body.Chat.UserId,
+			Type:       body.Chat.Types,
+		},
 	})
 
 	if err != nil {

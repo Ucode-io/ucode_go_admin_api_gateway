@@ -69,6 +69,7 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
+
 	if err != nil {
 		return
 	}
@@ -145,7 +146,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		var invokeFunction models.NewInvokeFunctionRequest
 		data, err := helper.ConvertStructToResponse(customEvent.Attributes)
 		if err != nil {
-			return customEvent.Functions[0].Name, err
+			return customEvent.GetFunctions()[0].Name, err
 		}
 		fmt.Println("idsssss::", request.IDs)
 		fmt.Println("dataaa::", request.ObjectData)
@@ -160,15 +161,15 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		fmt.Println("function body ----", string(js))
 		// h.log.Info("function path: ", logger.Any("", customEvent.Functions[0].Path))
 
-		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.Functions[0].Path, "POST", invokeFunction)
+		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
 		if err != nil {
-			return customEvent.Functions[0].Name, err
+			return customEvent.GetFunctions()[0].Name, err
 		} else if resp.Status == "error" {
 			var errStr = resp.Status
 			if resp.Data != nil && resp.Data["message"] != nil {
 				errStr = resp.Data["message"].(string)
 			}
-			return customEvent.Functions[0].Name, errors.New(errStr)
+			return customEvent.GetFunctions()[0].Name, errors.New(errStr)
 		}
 		// _, err = services.BuilderService().CustomEvent().UpdateByFunctionId(context.Background(), &obs.UpdateByFunctionIdRequest{
 		// 	FunctionId: customEvent.Functions[0].Id,
