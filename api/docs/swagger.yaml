@@ -1358,13 +1358,6 @@ definitions:
       path:
         type: string
     type: object
-  models.CreateMessageRequest:
-    properties:
-      chat:
-        $ref: '#/definitions/models.UserMessage'
-      chatid:
-        type: string
-    type: object
   models.CreatePanelRequest:
     properties:
       attributes:
@@ -1960,19 +1953,6 @@ definitions:
         items:
           type: string
         type: array
-    type: object
-  models.UserMessage:
-    properties:
-      created_at:
-        type: string
-      message:
-        type: string
-      sender_name:
-        type: string
-      types:
-        type: string
-      userid:
-        type: string
     type: object
   models.Verify:
     properties:
@@ -21304,6 +21284,10 @@ paths:
         in: query
         name: project-id
         type: string
+      - description: search
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:
@@ -21449,63 +21433,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: GetChatByChatID
-      tags:
-      - Chat
-  /v3/chat/message:
-    post:
-      consumes:
-      - application/json
-      description: Create Chat
-      operationId: CreateMessage
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: Chat body
-        in: body
-        name: chat_service
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateMessageRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Response body
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.ChatResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create Chat
       tags:
       - Chat
   /v3/query:
