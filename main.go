@@ -22,7 +22,7 @@ package main
 
 // 	go func(s *service) {
 // 		for {
-
+//
 // 			set(fmt.Sprint(rand.Intn(10)), rand.Int(), s)
 // 			v, err := get(fmt.Sprint(rand.Intn(10)), s)
 // 			if err != nil {
