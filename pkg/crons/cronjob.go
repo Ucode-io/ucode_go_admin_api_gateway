@@ -16,7 +16,7 @@ type Cronjob struct {
 func ExecuteCron() []Cronjob {
 	cronjobs := make([]Cronjob, 0)
 	getResult := Cronjob{
-		Interval: time.Duration(time.Minute) * 100,
+		Interval: time.Duration(time.Minute) * 1,
 		Function: code_server.DeleteCodeServer,
 	}
 	cronjobs = append(cronjobs, getResult)
