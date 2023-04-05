@@ -100,7 +100,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 			ProjectId: v.GetProjectId(),
 		})
 		if err != nil {
-			log.Println("error while getting functions for project id: " + v.GetProjectId())
+			log.Println("error while getting functions for project id: "+v.GetProjectId(), err.Error())
 			continue
 		}
 
