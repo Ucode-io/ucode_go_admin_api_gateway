@@ -43,7 +43,7 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 
 	path := "--set=ingress.hosts[0].paths[0]=/"
 
-	cmd = exec.Command("helm", "install", functionName, "code-server/code-server", "-n", "code-server", hostName, hostNameTls, secretName, path)
+	cmd = exec.Command("helm", "install", functionName, "code-server/code-server", "-n", "test", hostName, hostNameTls, secretName, path)
 	log.Println("----exec command-----", cmd.String())
 
 	// helm install newnewnew-sdfsdfsdf-doupdate code-server/code-server -n test --set=ingress.hosts[0].host=7a759e6b-d8d5-4a3a-8427-9da68b0983f5.u-code.io --set=ingress.tls[0].hosts[0]=7a759e6b-d8d5-4a3a-8427-9da68b0983f5.u-code.io --set=ingress.tls[0].secretName=ucode-wildcard --set=ingress.hosts[0].paths[0]=/
@@ -144,7 +144,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 func DeleteCodeServerByPath(path string, cfg config.Config) error {
 
 	var stdout bytes.Buffer
-	cmd := exec.Command("helm", "uninstall", path, "-n", "code-server")
+	cmd := exec.Command("helm", "uninstall", path, "-n", "test")
 	err := cmd.Run()
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
