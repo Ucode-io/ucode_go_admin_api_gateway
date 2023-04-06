@@ -95,7 +95,12 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 		return err
 	}
 
-	for _, v := range resEnvsIds.GetData() {
+	if len(resEnvsIds.GetData()) == 0 {
+		log.Println("no resource environments")
+		return nil
+	}
+
+	for _, v := range resEnvsIds.GetData()[:3] {
 		functions, err := srvs.FunctionService().FunctionService().GetListByRequestTime(context.Background(), &pb.GetListByRequestTimeRequest{
 			ProjectId: v.GetId(),
 		})
