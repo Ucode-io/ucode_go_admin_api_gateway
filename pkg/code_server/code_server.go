@@ -88,7 +88,9 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 		ids          = make([]string, 0)
 	)
 
-	req := &company_service.GetListResourceEnvironmentReq{}
+	req := &company_service.GetListResourceEnvironmentReq{
+		ProjectId: "f26e1a52-390a-4d7e-8d21-72b1a640e2c2",
+	}
 	resEnvsIds, err := srvs.CompanyService().Resource().GetListResourceEnvironment(ctx, req)
 	if err != nil {
 		log.Println("error while getting resource environments")
@@ -100,7 +102,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 		return nil
 	}
 
-	for _, v := range resEnvsIds.GetData()[:3] {
+	for _, v := range resEnvsIds.GetData() {
 		functions, err := srvs.FunctionService().FunctionService().GetListByRequestTime(context.Background(), &pb.GetListByRequestTimeRequest{
 			ProjectId: v.GetId(),
 		})
