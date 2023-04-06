@@ -82,7 +82,7 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 }
 
 func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg config.Config) error {
-
+	log.Println("!!!---DeleteCodeServer--->")
 	var (
 		allFunctions = make([]*pb.Function, 0)
 		ids          = make([]string, 0)
@@ -113,7 +113,9 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 	for _, function := range allFunctions {
 		log.Println("uninstalling func " + function.GetPath())
 		var stdout bytes.Buffer
+
 		cmd := exec.Command("helm", "uninstall", function.Path, "-n", "test")
+		log.Println(" --- exec command --- ", cmd.String())
 		err = cmd.Run()
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
