@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -460,7 +461,7 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 	}
 
 	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
+		c.Request.Context(),
 		&company_service.GetResEnvByResIdEnvIdRequest{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
@@ -472,8 +473,9 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 		return
 	}
 
+	log.Println("\n\nConvertHtmlToPdf---->")
 	resp, err := services.BuilderService().View().ConvertHtmlToPdf(
-		context.Background(),
+		c.Request.Context(),
 		&obs.HtmlBody{
 			Data:      structData,
 			Html:      html.Html,
