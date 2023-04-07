@@ -19,6 +19,7 @@ const (
 func DoRequest(url string, method string, body interface{}) (responseModel models.InvokeFunctionResponse, err error) {
 	data, err := json.Marshal(&body)
 	if err != nil {
+		fmt.Println("err:::::1", err.Error())
 		return
 	}
 	client := &http.Client{
@@ -27,22 +28,29 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
 	if err != nil {
+		fmt.Println("err:::::2", err.Error())
 		return
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Println("err:::::3", err.Error())
 		return
 	}
 	defer resp.Body.Close()
 
 	respByte, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Println("err:::::4", err.Error())
 		return
 	}
 	fmt.Println("check do::", string(respByte))
 
 	err = json.Unmarshal(respByte, &responseModel)
+	if err != nil {
+		fmt.Println("err:::::5", err.Error())
+	}
+	fmt.Println("responseModel", responseModel)
 
 	return
 }
