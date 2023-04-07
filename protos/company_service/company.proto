@@ -7,6 +7,11 @@ enum ServiceType {
     NOT_SPECIFIED = 0;
     BUILDER_SERVICE = 1;
     ANALYTICS_SERVICE = 2;
+    TEMPLATE_SERVICE = 3;
+    QUERY_SERVICE = 4;
+    FUNCTION_SERVICE = 5;
+    WEB_PAGE_SERVICE = 6;
+    API_REF_SERVICE = 7;
 }
 
 enum ResourceType {

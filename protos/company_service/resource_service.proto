@@ -43,7 +43,7 @@ message GetReourceListRequest {
 
 message GetReourceListResponse {
     int32 count = 1;
-    repeated NewResource resources = 2;
+    repeated Resource resources = 2;
 }
 
 message CreateResourceReq {

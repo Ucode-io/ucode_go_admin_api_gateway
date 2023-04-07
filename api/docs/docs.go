@@ -7496,6 +7496,211 @@ var doc = `{
                 }
             }
         },
+        "/v1/company/project/service-resource": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "get list service resource",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Service Resource"
+                ],
+                "summary": "get list service resource",
+                "operationId": "get_list_service_resource",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.GetListServiceResourceRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update service resource",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Service Resource"
+                ],
+                "summary": "Update service resource",
+                "operationId": "update_service_resource",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.UpdateServiceResourceReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.UpdateServiceResourceRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/company/{company_id}": {
             "get": {
                 "security": [
@@ -31654,6 +31859,23 @@ var doc = `{
                 }
             }
         },
+        "company_service.GetListServiceResourceRes": {
+            "type": "object",
+            "properties": {
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Resource"
+                    }
+                },
+                "service_resources": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/company_service.ServiceResourceModel"
+                    }
+                }
+            }
+        },
         "company_service.GetListWithProjectsResponse": {
             "type": "object",
             "properties": {
@@ -31691,7 +31913,7 @@ var doc = `{
                 "resources": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/company_service.NewResource"
+                        "$ref": "#/definitions/company_service.Resource"
                     }
                 }
             }
@@ -31754,23 +31976,6 @@ var doc = `{
                     "type": "string"
                 },
                 "short_name": {
-                    "type": "string"
-                }
-            }
-        },
-        "company_service.NewResource": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "resource_type": {
-                    "type": "string"
-                },
-                "title": {
                     "type": "string"
                 }
             }
@@ -31958,6 +32163,35 @@ var doc = `{
                 }
             }
         },
+        "company_service.ServiceResourceModel": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_environment_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "service_type": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "company_service.SetDefaultResourceReq": {
             "type": "object",
             "properties": {
@@ -32043,6 +32277,31 @@ var doc = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "company_service.UpdateServiceResourceReq": {
+            "type": "object",
+            "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "service_resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.ServiceResourceModel"
+                    }
+                }
+            }
+        },
+        "company_service.UpdateServiceResourceRes": {
+            "type": "object",
+            "properties": {
+                "rows_affected": {
+                    "type": "integer"
                 }
             }
         },

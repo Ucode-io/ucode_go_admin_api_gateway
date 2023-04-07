@@ -287,6 +287,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.DELETE("/company/project/resource", h.RemoveProjectResource)
 		v1Admin.GET("/company/project/resource/:resource_id", h.GetResource)
 		v1Admin.GET("/company/project/resource", h.GetResourceList)
+		v1Admin.GET("/v1/company/project/service-resource", h.GetListServiceResource)
+		v1Admin.PUT("/v1/company/project/service-resource", h.UpdateServiceResource)
 		v1Admin.POST("/company/project/resource/reconnect", h.ReconnectProjectResource)
 		v1Admin.PUT("/company/project/resource/:resource_id", h.UpdateResource)
 		v1Admin.POST("/company/project/configure-resource", h.ConfigureProjectResource)

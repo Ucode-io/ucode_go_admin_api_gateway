@@ -650,6 +650,17 @@ definitions:
           $ref: '#/definitions/company_service.EnvironmentWithResources'
         type: array
     type: object
+  company_service.GetListServiceResourceRes:
+    properties:
+      resources:
+        items:
+          $ref: '#/definitions/company_service.Resource'
+        type: array
+      service_resources:
+        additionalProperties:
+          $ref: '#/definitions/company_service.ServiceResourceModel'
+        type: object
+    type: object
   company_service.GetListWithProjectsResponse:
     properties:
       companies:
@@ -674,7 +685,7 @@ definitions:
         type: integer
       resources:
         items:
-          $ref: '#/definitions/company_service.NewResource'
+          $ref: '#/definitions/company_service.Resource'
         type: array
     type: object
   company_service.GetServiceResourcesRes:
@@ -715,17 +726,6 @@ definitions:
       native_name:
         type: string
       short_name:
-        type: string
-    type: object
-  company_service.NewResource:
-    properties:
-      id:
-        type: string
-      project_id:
-        type: string
-      resource_type:
-        type: string
-      title:
         type: string
     type: object
   company_service.Project:
@@ -847,6 +847,25 @@ definitions:
       resource_environment_id:
         type: string
     type: object
+  company_service.ServiceResourceModel:
+    properties:
+      description:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      resource_environment_id:
+        type: string
+      resource_id:
+        type: string
+      service_type:
+        type: integer
+      title:
+        type: string
+    type: object
   company_service.SetDefaultResourceReq:
     properties:
       environment_id:
@@ -903,6 +922,22 @@ definitions:
         type: integer
       title:
         type: string
+    type: object
+  company_service.UpdateServiceResourceReq:
+    properties:
+      environment_id:
+        type: string
+      project_id:
+        type: string
+      service_resources:
+        items:
+          $ref: '#/definitions/company_service.ServiceResourceModel'
+        type: array
+    type: object
+  company_service.UpdateServiceResourceRes:
+    properties:
+      rows_affected:
+        type: integer
     type: object
   config.Config:
     properties:
@@ -9148,6 +9183,123 @@ paths:
       summary: Reconnect ProjectResource
       tags:
       - Company Resource
+  /v1/company/project/service-resource:
+    get:
+      consumes:
+      - application/json
+      description: get list service resource
+      operationId: get_list_service_resource
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetListServiceResourceRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: get list service resource
+      tags:
+      - Service Resource
+    put:
+      consumes:
+      - application/json
+      description: Update service resource
+      operationId: update_service_resource
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.UpdateServiceResourceReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.UpdateServiceResourceRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update service resource
+      tags:
+      - Service Resource
   /v1/custom-event:
     get:
       consumes:

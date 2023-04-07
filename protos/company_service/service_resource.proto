@@ -4,69 +4,49 @@ package company_service;
 option go_package="genproto/company_service";
 
 import "projects_service.proto";
+import "company.proto";
 
 
-service ServiceResource {
-  rpc Create(CreateServiceResourceRequest) returns (ServiceResources) {}
-  rpc GetList(GetListServiceResourceRequest) returns (GetListServiceResourceResponse) {}
-  rpc GetById(ServiceResourcePrimaryKey) returns (ServiceResources) {}
-  rpc Update(UpdateServiceResourceRequest) returns (ServiceResources) {}
-  rpc Delete(ServiceResourcePrimaryKey) returns (EmptyProto) {}
+service MicroserviceResource {
+  rpc GetList(GetListServiceResourceReq) returns (GetListServiceResourceRes) {}
+  rpc Update(UpdateServiceResourceReq) returns (UpdateServiceResourceRes) {}
+  rpc GetSingle(GetSingleServiceResourceReq) returns (ServiceResourceModel) {}
 }
 
-message CreateServiceResourceRequest {
-  string resource_name = 1;
-  string microservice_name = 2;
-  string name = 3;
-  string description = 4;
-}
-
-message GetListServiceResourceRequest {
-  int32 offset = 1;
-  int32 limit = 2;
-  string search = 3;
-}
-
-message GetListServiceResourceResponse {
-  repeated ServiceResources service_resources = 1;
-  int32 count = 2;
-}
-
-message ServiceResourcePrimaryKey {
+message ServiceResourceModel {
   string id = 1;
-}
-
-message GetByIdByIdServiceResourceResponse {
-  string id = 1;
-  string resource_name = 2;
-  string microservice_name = 3;
-  string name = 4;
+  ServiceType service_type = 2;
+  string project_id = 3;
+  string title = 4;
   string description = 5;
-  string created_at = 6;
-  string updated_at = 7;
-}
-message UpdateServiceResourceRequest {
-  string id = 1;
-  string name = 2;
-  string description = 3;
-  string resource_name = 4;
-  string microservice_name = 5;
-
-}
-message UpdateServiceResourceResponse {
-  string id = 1;
-  string name = 2;
-  string description = 3;
-  string resource_name = 4;
-  string microservice_name = 5;
+  string resource_environment_id = 6;
+  string resource_id = 7;
+  string environment_id = 8;
 }
 
-message ServiceResources {
-  string  id = 1;
-  string resource_name = 2;
-  string microservice_name = 3;
-  string name = 4;
-  string description = 5;
-  string created_at = 6;
-  string updated_at = 7;
+message GetListServiceResourceReq {
+  string project_id = 1;
+  string environment_id = 2;
+}
+
+message GetListServiceResourceRes {
+  map<string, ServiceResourceModel> service_resources = 1;
+  repeated Resource resources = 2;
+}
+
+message GetSingleServiceResourceReq {
+  string id = 1;
+  string project_id = 2;
+  string environment_id = 3;
+  ServiceType service_type = 4;
+}
+
+message UpdateServiceResourceReq {
+  repeated ServiceResourceModel service_resources = 1;
+  string project_id = 2;
+  string environment_id = 3;
+}
+
+message UpdateServiceResourceRes {
+  int32 rows_affected = 1;
 }
