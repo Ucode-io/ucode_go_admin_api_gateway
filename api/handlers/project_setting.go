@@ -22,7 +22,7 @@ import (
 // @Tags Company Project
 // @Accept json
 // @Produce json
-// @Param project-id path string false "project-id"
+// @Param project-id query string false "project-id"
 // @Param search query string false "search"
 // @Param limit query string false "limit"
 // @Param offset query string false "offset"
@@ -70,7 +70,7 @@ func (h *Handler) GetAllSettings(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Param("project-id")
+	projectId := c.DefaultQuery("project-id", "")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
