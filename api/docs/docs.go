@@ -6618,6 +6618,11 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "name": "environment_id",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -17184,212 +17189,7 @@ var doc = `{
                 }
             }
         },
-        "/v1/project/{project-id}/setting": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get Default Setting",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Setting"
-                ],
-                "summary": "Get Default Setting",
-                "operationId": "get_default_settings",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "GetDefaultSettingsRes",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/object_builder_service.GetDefaultSettingsRes"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Set Default settings",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Setting"
-                ],
-                "summary": "Set Default settings",
-                "operationId": "set_default_settings",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "SetDefaultSettingsReq",
-                        "name": "setting",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/object_builder_service.SetDefaultSettingsReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Setting data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/object_builder_service.Setting"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/project/{project-id}/setting-all": {
+        "/v1/project/setting": {
             "get": {
                 "security": [
                     {
@@ -17404,7 +17204,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Setting"
+                    "Company Project"
                 ],
                 "summary": "Get List settings",
                 "operationId": "get_list_setting",
@@ -17419,15 +17219,13 @@ var doc = `{
                         "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
-                        "in": "path",
-                        "required": true
+                        "in": "path"
                     },
                     {
                         "type": "string",
@@ -17466,7 +17264,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.Setting"
+                                            "$ref": "#/definitions/company_service.Setting"
                                         }
                                     }
                                 }
@@ -31700,6 +31498,9 @@ var doc = `{
                 "company_id": {
                     "type": "string"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -31725,6 +31526,35 @@ var doc = `{
                 },
                 "service_type": {
                     "type": "integer"
+                }
+            }
+        },
+        "company_service.Currency": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "decimal_digits": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "name_plural": {
+                    "type": "string"
+                },
+                "rounding": {
+                    "type": "integer"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "symbol_native": {
+                    "type": "string"
                 }
             }
         },
@@ -31911,6 +31741,23 @@ var doc = `{
                 }
             }
         },
+        "company_service.Language": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "native_name": {
+                    "type": "string"
+                },
+                "short_name": {
+                    "type": "string"
+                }
+            }
+        },
         "company_service.NewResource": {
             "type": "object",
             "properties": {
@@ -31934,8 +31781,14 @@ var doc = `{
                 "company_id": {
                     "type": "string"
                 },
+                "currency": {
+                    "$ref": "#/definitions/company_service.Currency"
+                },
                 "k8s_namespace": {
                     "type": "string"
+                },
+                "language": {
+                    "$ref": "#/definitions/company_service.Language"
                 },
                 "logo": {
                     "type": "string"
@@ -31948,6 +31801,9 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/company_service.ResourceWithoutPassword"
                     }
+                },
+                "timezone": {
+                    "$ref": "#/definitions/company_service.Timezone"
                 },
                 "title": {
                     "type": "string"
@@ -31996,13 +31852,19 @@ var doc = `{
                 "id": {
                     "type": "string"
                 },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
                 "resource_type": {
                     "type": "integer"
                 },
-                "service_type": {
-                    "type": "integer"
-                },
                 "title": {
+                    "type": "string"
+                },
+                "vault_path": {
                     "type": "string"
                 }
             }
@@ -32127,6 +31989,31 @@ var doc = `{
                 },
                 "service_type": {
                     "type": "integer"
+                }
+            }
+        },
+        "company_service.Setting": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                }
+            }
+        },
+        "company_service.Timezone": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
                 }
             }
         },
@@ -34797,35 +34684,6 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.Currency": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "decimal_digits": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "name_plural": {
-                    "type": "string"
-                },
-                "rounding": {
-                    "type": "integer"
-                },
-                "symbol": {
-                    "type": "string"
-                },
-                "symbol_native": {
-                    "type": "string"
-                }
-            }
-        },
         "object_builder_service.DisableDates": {
             "type": "object",
             "properties": {
@@ -35095,20 +34953,6 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.GetDefaultSettingsRes": {
-            "type": "object",
-            "properties": {
-                "currency": {
-                    "$ref": "#/definitions/object_builder_service.Currency"
-                },
-                "language": {
-                    "$ref": "#/definitions/object_builder_service.Language"
-                },
-                "timezone": {
-                    "$ref": "#/definitions/object_builder_service.Timezone"
-                }
-            }
-        },
         "object_builder_service.GetEventLogListsResponse": {
             "type": "object",
             "properties": {
@@ -35188,23 +35032,6 @@ var doc = `{
                 },
                 "with_increment_id": {
                     "type": "boolean"
-                }
-            }
-        },
-        "object_builder_service.Language": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "native_name": {
-                    "type": "string"
-                },
-                "short_name": {
-                    "type": "string"
                 }
             }
         },
@@ -35362,31 +35189,6 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.SetDefaultSettingsReq": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "integer"
-                }
-            }
-        },
-        "object_builder_service.Setting": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer"
-                },
-                "data": {
-                    "$ref": "#/definitions/structpb.Struct"
-                }
-            }
-        },
         "object_builder_service.Summary": {
             "type": "object",
             "properties": {
@@ -35455,20 +35257,6 @@ var doc = `{
                     "type": "string"
                 },
                 "view_slug": {
-                    "type": "string"
-                }
-            }
-        },
-        "object_builder_service.Timezone": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "text": {
                     "type": "string"
                 }
             }

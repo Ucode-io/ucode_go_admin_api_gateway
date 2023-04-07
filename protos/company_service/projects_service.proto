@@ -4,6 +4,7 @@ package company_service;
 option go_package="genproto/company_service";
 
 import "company.proto";
+import "google/protobuf/struct.proto";
 
 service ProjectService {
     rpc Create(CreateProjectRequest) returns (CreateProjectResponse) {}
@@ -14,6 +15,20 @@ service ProjectService {
     rpc GetProjects(GetProjectsRequest) returns (GetProjectsResponse) {}
     rpc GetProjectsByCompanyId(GetProjectsByCompanyIdReq) returns (GetProjectsByCompanyIdRes) {}
     rpc UpdateProjectUserData (UpdateProjectUserDataReq) returns (UpdateProjectUserDataRes) {}
+    rpc GetListSetting(GetListSettingReq) returns (Setting) {};
+}
+
+message Setting {
+    google.protobuf.Struct data = 1;
+    int32 count = 2;
+}
+
+message GetListSettingReq {
+    SettingType type = 1;
+    string search = 2;
+    string project_id = 3;
+    int32 limit = 4;
+    int32 offset = 5;
 }
 
 message UpdateProjectUserDataReq {
@@ -108,6 +123,9 @@ message Project {
     string title = 4;
     repeated ResourceWithoutPassword resources = 5;
     string logo = 6;
+    Language language = 7;
+    Currency currency = 8;
+    Timezone timezone = 9;
 }
 
 message CreateProjectRequest {
@@ -174,13 +192,6 @@ message ConfigureResourceRequest {
     bool default = 11;
 }
 
-message CreateResourceReq {
-    string project_id = 1;
-    Resource resource = 2;
-    string company_id = 3;
-    string user_id = 4;
-}
-
 message AddResourceInUcodeRequest {
     string project_id = 1;
     string company_id = 2;
@@ -196,27 +207,8 @@ message ConfigureResourceResponse {
     string id = 1;
 }
 
-message CreateResourceRes {
-    string project_id = 1;
-    ServiceType service_type = 2;
-    ResourceType resource_type = 3;
-    string company_id = 4;
-}
-
 message RemoveResourceRequest {
     string id = 5;
-}
-
-message GetReourceListRequest {
-    int32 limit = 1;
-    int32 offset = 2;
-    string project_id = 3;
-    string search = 4;
-}
-
-message GetReourceListResponse {
-    int32 count = 1;
-    repeated NewResource resources = 2;
 }
 
 message GetResourceRequest {

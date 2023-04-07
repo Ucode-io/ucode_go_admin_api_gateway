@@ -279,7 +279,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/company-project/:project_id", h.GetCompanyProjectById)
 		v1Admin.PUT("/company-project/:project_id", h.UpdateCompanyProject)
 		v1Admin.DELETE("/company-project/:project_id", h.DeleteCompanyProject)
-
+		// project settings
+		v1Admin.GET("/project/setting", h.GetAllSettings)
+		// project resource
 		v1Admin.POST("/company/project/resource", h.AddProjectResource)
 		v1Admin.POST("/company/project/create-resource", h.CreateProjectResource)
 		v1Admin.DELETE("/company/project/resource", h.RemoveProjectResource)
@@ -409,11 +411,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/notification/category/:id", h.GetCategoryNotification)
 		v1Admin.PUT("/notification/category", h.UpdateCategoryNotification)
 		v1Admin.DELETE("/notification/category/:id", h.DeleteCategoryNotification)
-
-		// settings
-		v1Admin.GET("/project/:project-id/setting", h.GetDefaultSettings)
-		v1Admin.GET("/project/:project-id/setting-all", h.GetAllSettings)
-		v1Admin.PUT("/project/:project-id/setting", h.SetDefaultSettings)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())

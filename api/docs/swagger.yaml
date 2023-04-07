@@ -549,6 +549,8 @@ definitions:
     properties:
       company_id:
         type: string
+      environment_id:
+        type: string
       project_id:
         type: string
       resource:
@@ -566,6 +568,25 @@ definitions:
         type: integer
       service_type:
         type: integer
+    type: object
+  company_service.Currency:
+    properties:
+      code:
+        type: string
+      decimal_digits:
+        type: integer
+      id:
+        type: string
+      name:
+        type: string
+      name_plural:
+        type: string
+      rounding:
+        type: integer
+      symbol:
+        type: string
+      symbol_native:
+        type: string
     type: object
   company_service.EmptyProto:
     type: object
@@ -685,6 +706,17 @@ definitions:
       title:
         type: string
     type: object
+  company_service.Language:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      native_name:
+        type: string
+      short_name:
+        type: string
+    type: object
   company_service.NewResource:
     properties:
       id:
@@ -700,8 +732,12 @@ definitions:
     properties:
       company_id:
         type: string
+      currency:
+        $ref: '#/definitions/company_service.Currency'
       k8s_namespace:
         type: string
+      language:
+        $ref: '#/definitions/company_service.Language'
       logo:
         type: string
       project_id:
@@ -710,6 +746,8 @@ definitions:
         items:
           $ref: '#/definitions/company_service.ResourceWithoutPassword'
         type: array
+      timezone:
+        $ref: '#/definitions/company_service.Timezone'
       title:
         type: string
     type: object
@@ -740,11 +778,15 @@ definitions:
         $ref: '#/definitions/company_service.Resource_Credentials'
       id:
         type: string
+      is_configured:
+        type: boolean
+      project_id:
+        type: string
       resource_type:
         type: integer
-      service_type:
-        type: integer
       title:
+        type: string
+      vault_path:
         type: string
     type: object
   company_service.Resource_Credentials:
@@ -826,6 +868,22 @@ definitions:
         type: string
       service_type:
         type: integer
+    type: object
+  company_service.Setting:
+    properties:
+      count:
+        type: integer
+      data:
+        $ref: '#/definitions/structpb.Struct'
+    type: object
+  company_service.Timezone:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      text:
+        type: string
     type: object
   company_service.UpdateResourceRequest:
     properties:
@@ -2579,25 +2637,6 @@ definitions:
           type: string
         type: array
     type: object
-  object_builder_service.Currency:
-    properties:
-      code:
-        type: string
-      decimal_digits:
-        type: integer
-      id:
-        type: string
-      name:
-        type: string
-      name_plural:
-        type: string
-      rounding:
-        type: integer
-      symbol:
-        type: string
-      symbol_native:
-        type: string
-    type: object
   object_builder_service.DisableDates:
     properties:
       day_slug:
@@ -2772,15 +2811,6 @@ definitions:
           $ref: '#/definitions/object_builder_service.View'
         type: array
     type: object
-  object_builder_service.GetDefaultSettingsRes:
-    properties:
-      currency:
-        $ref: '#/definitions/object_builder_service.Currency'
-      language:
-        $ref: '#/definitions/object_builder_service.Language'
-      timezone:
-        $ref: '#/definitions/object_builder_service.Timezone'
-    type: object
   object_builder_service.GetEventLogListsResponse:
     properties:
       count:
@@ -2833,17 +2863,6 @@ definitions:
         type: string
       with_increment_id:
         type: boolean
-    type: object
-  object_builder_service.Language:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      native_name:
-        type: string
-      short_name:
-        type: string
     type: object
   object_builder_service.ManyToManyMessage:
     properties:
@@ -2945,22 +2964,6 @@ definitions:
       order:
         type: integer
     type: object
-  object_builder_service.SetDefaultSettingsReq:
-    properties:
-      id:
-        type: string
-      project_id:
-        type: string
-      type:
-        type: integer
-    type: object
-  object_builder_service.Setting:
-    properties:
-      count:
-        type: integer
-      data:
-        $ref: '#/definitions/structpb.Struct'
-    type: object
   object_builder_service.Summary:
     properties:
       field_name:
@@ -3006,15 +3009,6 @@ definitions:
       view_label:
         type: string
       view_slug:
-        type: string
-    type: object
-  object_builder_service.Timezone:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      text:
         type: string
     type: object
   object_builder_service.UpdateAppRequest:
@@ -8708,6 +8702,9 @@ paths:
         in: header
         name: Environment-Id
         required: true
+        type: string
+      - in: query
+        name: environment_id
         type: string
       - in: query
         name: limit
@@ -14548,124 +14545,7 @@ paths:
       summary: Upsert permissions
       tags:
       - Permission
-  /v1/project/{project-id}/setting:
-    get:
-      consumes:
-      - application/json
-      description: Get Default Setting
-      operationId: get_default_settings
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: path
-        name: project-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: GetDefaultSettingsRes
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/object_builder_service.GetDefaultSettingsRes'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get Default Setting
-      tags:
-      - Setting
-    put:
-      consumes:
-      - application/json
-      description: Set Default settings
-      operationId: set_default_settings
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: path
-        name: project-id
-        required: true
-        type: string
-      - description: SetDefaultSettingsReq
-        in: body
-        name: setting
-        required: true
-        schema:
-          $ref: '#/definitions/object_builder_service.SetDefaultSettingsReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Setting data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/object_builder_service.Setting'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Set Default settings
-      tags:
-      - Setting
-  /v1/project/{project-id}/setting-all:
+  /v1/project/setting:
     get:
       consumes:
       - application/json
@@ -14679,12 +14559,10 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
         type: string
       - description: project-id
         in: path
         name: project-id
-        required: true
         type: string
       - description: search
         in: query
@@ -14712,7 +14590,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/object_builder_service.Setting'
+                  $ref: '#/definitions/company_service.Setting'
               type: object
         "400":
           description: Invalid Argument
@@ -14736,7 +14614,7 @@ paths:
       - ApiKeyAuth: []
       summary: Get List settings
       tags:
-      - Setting
+      - Company Project
   /v1/query:
     post:
       consumes:
