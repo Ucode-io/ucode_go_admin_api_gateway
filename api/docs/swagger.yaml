@@ -14561,7 +14561,7 @@ paths:
         name: Environment-Id
         type: string
       - description: project-id
-        in: path
+        in: query
         name: project-id
         type: string
       - description: search

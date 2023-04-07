@@ -17225,7 +17225,7 @@ var doc = `{
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
-                        "in": "path"
+                        "in": "query"
                     },
                     {
                         "type": "string",
