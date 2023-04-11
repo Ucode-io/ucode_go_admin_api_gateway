@@ -30,8 +30,13 @@ message GetListServiceResourceReq {
 }
 
 message GetListServiceResourceRes {
+  message ResourceTypeList {
+    int32 id = 1;
+    string name = 2;
+  }
   map<string, ServiceResourceModel> service_resources = 1;
   repeated Resource resources = 2;
+  map<int32, string> resource_types = 3;
 }
 
 message GetSingleServiceResourceReq {

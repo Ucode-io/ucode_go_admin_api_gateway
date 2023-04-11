@@ -13,7 +13,7 @@ service ResourceService {
     rpc RemoveResource(RemoveResourceRequest) returns (EmptyProto) {}
     rpc UpdateResource(UpdateResourceRequest) returns (ResourceWithoutPassword) {}
     rpc GetResource(GetResourceRequest) returns (ResourceWithoutPassword) {}
-    rpc GetReourceList(GetReourceListRequest) returns (GetReourceListResponse) {}
+    rpc GetResourceList(GetResourceListRequest) returns (GetResourceListResponse) {}
     rpc CreateResource(CreateResourceReq) returns (CreateResourceRes) {}
     rpc AddResourceInUcode(AddResourceInUcodeRequest) returns (AddResourceResponse) {}
     rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
@@ -33,7 +33,7 @@ service ResourceService {
     rpc SetDefaultResource(SetDefaultResourceReq) returns(SetDefaultResourceRes) {}
 }
 
-message GetReourceListRequest {
+message GetResourceListRequest {
     int32 limit = 1;
     int32 offset = 2;
     string project_id = 3;
@@ -41,7 +41,7 @@ message GetReourceListRequest {
     string environment_id = 5;
 }
 
-message GetReourceListResponse {
+message GetResourceListResponse {
     int32 count = 1;
     repeated Resource resources = 2;
 }

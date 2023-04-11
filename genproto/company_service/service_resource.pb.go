@@ -185,6 +185,7 @@ type GetListServiceResourceRes struct {
 
 	ServiceResources map[string]*ServiceResourceModel `protobuf:"bytes,1,rep,name=service_resources,json=serviceResources,proto3" json:"service_resources,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	Resources        []*Resource                      `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources,omitempty"`
+	ResourceTypes    map[int32]string                 `protobuf:"bytes,3,rep,name=resource_types,json=resourceTypes,proto3" json:"resource_types,omitempty" protobuf_key:"varint,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (x *GetListServiceResourceRes) Reset() {
@@ -229,6 +230,13 @@ func (x *GetListServiceResourceRes) GetServiceResources() map[string]*ServiceRes
 func (x *GetListServiceResourceRes) GetResources() []*Resource {
 	if x != nil {
 		return x.Resources
+	}
+	return nil
+}
+
+func (x *GetListServiceResourceRes) GetResourceTypes() map[int32]string {
+	if x != nil {
+		return x.ResourceTypes
 	}
 	return nil
 }
@@ -414,6 +422,61 @@ func (x *UpdateServiceResourceRes) GetRowsAffected() int32 {
 	return 0
 }
 
+type GetListServiceResourceRes_ResourceTypeList struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id   int32  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+}
+
+func (x *GetListServiceResourceRes_ResourceTypeList) Reset() {
+	*x = GetListServiceResourceRes_ResourceTypeList{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_service_resource_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetListServiceResourceRes_ResourceTypeList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetListServiceResourceRes_ResourceTypeList) ProtoMessage() {}
+
+func (x *GetListServiceResourceRes_ResourceTypeList) ProtoReflect() protoreflect.Message {
+	mi := &file_service_resource_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetListServiceResourceRes_ResourceTypeList.ProtoReflect.Descriptor instead.
+func (*GetListServiceResourceRes_ResourceTypeList) Descriptor() ([]byte, []int) {
+	return file_service_resource_proto_rawDescGZIP(), []int{2, 0}
+}
+
+func (x *GetListServiceResourceRes_ResourceTypeList) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *GetListServiceResourceRes_ResourceTypeList) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
 var File_service_resource_proto protoreflect.FileDescriptor
 
 var file_service_resource_proto_rawDesc = []byte{
@@ -448,7 +511,7 @@ var file_service_resource_proto_rawDesc = []byte{
 	0x28, 0x09, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x25, 0x0a,
 	0x0e, 0x65, 0x6e, 0x76, 0x69, 0x72, 0x6f, 0x6e, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18,
 	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x65, 0x6e, 0x76, 0x69, 0x72, 0x6f, 0x6e, 0x6d, 0x65,
-	0x6e, 0x74, 0x49, 0x64, 0x22, 0xaf, 0x02, 0x0a, 0x19, 0x47, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74,
+	0x6e, 0x74, 0x49, 0x64, 0x22, 0x8f, 0x04, 0x0a, 0x19, 0x47, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74,
 	0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52,
 	0x65, 0x73, 0x12, 0x6d, 0x0a, 0x11, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x5f, 0x72, 0x65,
 	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x40, 0x2e,
@@ -460,13 +523,27 @@ var file_service_resource_proto_rawDesc = []byte{
 	0x73, 0x12, 0x37, 0x0a, 0x09, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x18, 0x02,
 	0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x6d, 0x70, 0x61, 0x6e, 0x79, 0x5f, 0x73,
 	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52,
-	0x09, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x1a, 0x6a, 0x0a, 0x15, 0x53, 0x65,
-	0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x45, 0x6e,
-	0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x3b, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02,
-	0x20, 0x01, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x63, 0x6f, 0x6d, 0x70, 0x61, 0x6e, 0x79, 0x5f, 0x73,
-	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65,
-	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x4d, 0x6f, 0x64, 0x65, 0x6c, 0x52, 0x05, 0x76, 0x61, 0x6c,
+	0x09, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x12, 0x64, 0x0a, 0x0e, 0x72, 0x65,
+	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x18, 0x03, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x3d, 0x2e, 0x63, 0x6f, 0x6d, 0x70, 0x61, 0x6e, 0x79, 0x5f, 0x73, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x2e, 0x47, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x65, 0x73, 0x2e, 0x52,
+	0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x54, 0x79, 0x70, 0x65, 0x73, 0x45, 0x6e, 0x74, 0x72,
+	0x79, 0x52, 0x0d, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x54, 0x79, 0x70, 0x65, 0x73,
+	0x1a, 0x36, 0x0a, 0x10, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x54, 0x79, 0x70, 0x65,
+	0x4c, 0x69, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05,
+	0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x1a, 0x6a, 0x0a, 0x15, 0x53, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x45, 0x6e, 0x74, 0x72,
+	0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03,
+	0x6b, 0x65, 0x79, 0x12, 0x3b, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x25, 0x2e, 0x63, 0x6f, 0x6d, 0x70, 0x61, 0x6e, 0x79, 0x5f, 0x73, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x6f,
+	0x75, 0x72, 0x63, 0x65, 0x4d, 0x6f, 0x64, 0x65, 0x6c, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65,
+	0x3a, 0x02, 0x38, 0x01, 0x1a, 0x40, 0x0a, 0x12, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65,
+	0x54, 0x79, 0x70, 0x65, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65,
+	0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05,
+	0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c,
 	0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0xb4, 0x01, 0x0a, 0x1b, 0x47, 0x65, 0x74, 0x53, 0x69,
 	0x6e, 0x67, 0x6c, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x6f, 0x75,
 	0x72, 0x63, 0x65, 0x52, 0x65, 0x71, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
@@ -531,36 +608,39 @@ func file_service_resource_proto_rawDescGZIP() []byte {
 	return file_service_resource_proto_rawDescData
 }
 
-var file_service_resource_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_service_resource_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_service_resource_proto_goTypes = []interface{}{
-	(*ServiceResourceModel)(nil),        // 0: company_service.ServiceResourceModel
-	(*GetListServiceResourceReq)(nil),   // 1: company_service.GetListServiceResourceReq
-	(*GetListServiceResourceRes)(nil),   // 2: company_service.GetListServiceResourceRes
-	(*GetSingleServiceResourceReq)(nil), // 3: company_service.GetSingleServiceResourceReq
-	(*UpdateServiceResourceReq)(nil),    // 4: company_service.UpdateServiceResourceReq
-	(*UpdateServiceResourceRes)(nil),    // 5: company_service.UpdateServiceResourceRes
-	nil,                                 // 6: company_service.GetListServiceResourceRes.ServiceResourcesEntry
-	(ServiceType)(0),                    // 7: company_service.ServiceType
-	(*Resource)(nil),                    // 8: company_service.Resource
+	(*ServiceResourceModel)(nil),                       // 0: company_service.ServiceResourceModel
+	(*GetListServiceResourceReq)(nil),                  // 1: company_service.GetListServiceResourceReq
+	(*GetListServiceResourceRes)(nil),                  // 2: company_service.GetListServiceResourceRes
+	(*GetSingleServiceResourceReq)(nil),                // 3: company_service.GetSingleServiceResourceReq
+	(*UpdateServiceResourceReq)(nil),                   // 4: company_service.UpdateServiceResourceReq
+	(*UpdateServiceResourceRes)(nil),                   // 5: company_service.UpdateServiceResourceRes
+	(*GetListServiceResourceRes_ResourceTypeList)(nil), // 6: company_service.GetListServiceResourceRes.ResourceTypeList
+	nil,              // 7: company_service.GetListServiceResourceRes.ServiceResourcesEntry
+	nil,              // 8: company_service.GetListServiceResourceRes.ResourceTypesEntry
+	(ServiceType)(0), // 9: company_service.ServiceType
+	(*Resource)(nil), // 10: company_service.Resource
 }
 var file_service_resource_proto_depIdxs = []int32{
-	7, // 0: company_service.ServiceResourceModel.service_type:type_name -> company_service.ServiceType
-	6, // 1: company_service.GetListServiceResourceRes.service_resources:type_name -> company_service.GetListServiceResourceRes.ServiceResourcesEntry
-	8, // 2: company_service.GetListServiceResourceRes.resources:type_name -> company_service.Resource
-	7, // 3: company_service.GetSingleServiceResourceReq.service_type:type_name -> company_service.ServiceType
-	0, // 4: company_service.UpdateServiceResourceReq.service_resources:type_name -> company_service.ServiceResourceModel
-	0, // 5: company_service.GetListServiceResourceRes.ServiceResourcesEntry.value:type_name -> company_service.ServiceResourceModel
-	1, // 6: company_service.MicroserviceResource.GetList:input_type -> company_service.GetListServiceResourceReq
-	4, // 7: company_service.MicroserviceResource.Update:input_type -> company_service.UpdateServiceResourceReq
-	3, // 8: company_service.MicroserviceResource.GetSingle:input_type -> company_service.GetSingleServiceResourceReq
-	2, // 9: company_service.MicroserviceResource.GetList:output_type -> company_service.GetListServiceResourceRes
-	5, // 10: company_service.MicroserviceResource.Update:output_type -> company_service.UpdateServiceResourceRes
-	0, // 11: company_service.MicroserviceResource.GetSingle:output_type -> company_service.ServiceResourceModel
-	9, // [9:12] is the sub-list for method output_type
-	6, // [6:9] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	9,  // 0: company_service.ServiceResourceModel.service_type:type_name -> company_service.ServiceType
+	7,  // 1: company_service.GetListServiceResourceRes.service_resources:type_name -> company_service.GetListServiceResourceRes.ServiceResourcesEntry
+	10, // 2: company_service.GetListServiceResourceRes.resources:type_name -> company_service.Resource
+	8,  // 3: company_service.GetListServiceResourceRes.resource_types:type_name -> company_service.GetListServiceResourceRes.ResourceTypesEntry
+	9,  // 4: company_service.GetSingleServiceResourceReq.service_type:type_name -> company_service.ServiceType
+	0,  // 5: company_service.UpdateServiceResourceReq.service_resources:type_name -> company_service.ServiceResourceModel
+	0,  // 6: company_service.GetListServiceResourceRes.ServiceResourcesEntry.value:type_name -> company_service.ServiceResourceModel
+	1,  // 7: company_service.MicroserviceResource.GetList:input_type -> company_service.GetListServiceResourceReq
+	4,  // 8: company_service.MicroserviceResource.Update:input_type -> company_service.UpdateServiceResourceReq
+	3,  // 9: company_service.MicroserviceResource.GetSingle:input_type -> company_service.GetSingleServiceResourceReq
+	2,  // 10: company_service.MicroserviceResource.GetList:output_type -> company_service.GetListServiceResourceRes
+	5,  // 11: company_service.MicroserviceResource.Update:output_type -> company_service.UpdateServiceResourceRes
+	0,  // 12: company_service.MicroserviceResource.GetSingle:output_type -> company_service.ServiceResourceModel
+	10, // [10:13] is the sub-list for method output_type
+	7,  // [7:10] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_service_resource_proto_init() }
@@ -643,6 +723,18 @@ func file_service_resource_proto_init() {
 				return nil
 			}
 		}
+		file_service_resource_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetListServiceResourceRes_ResourceTypeList); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -650,7 +742,7 @@ func file_service_resource_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_service_resource_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

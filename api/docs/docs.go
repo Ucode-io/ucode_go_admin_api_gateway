@@ -6655,7 +6655,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetReourceListResponse"
+                                            "$ref": "#/definitions/company_service.GetResourceListResponse"
                                         }
                                     }
                                 }
@@ -31862,6 +31862,12 @@ var doc = `{
         "company_service.GetListServiceResourceRes": {
             "type": "object",
             "properties": {
+                "resource_types": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "resources": {
                     "type": "array",
                     "items": {
@@ -31904,7 +31910,7 @@ var doc = `{
                 }
             }
         },
-        "company_service.GetReourceListResponse": {
+        "company_service.GetResourceListResponse": {
             "type": "object",
             "properties": {
                 "count": {

@@ -27,7 +27,7 @@ type ResourceServiceClient interface {
 	RemoveResource(ctx context.Context, in *RemoveResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error)
 	UpdateResource(ctx context.Context, in *UpdateResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error)
 	GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error)
-	GetReourceList(ctx context.Context, in *GetReourceListRequest, opts ...grpc.CallOption) (*GetReourceListResponse, error)
+	GetResourceList(ctx context.Context, in *GetResourceListRequest, opts ...grpc.CallOption) (*GetResourceListResponse, error)
 	CreateResource(ctx context.Context, in *CreateResourceReq, opts ...grpc.CallOption) (*CreateResourceRes, error)
 	AddResourceInUcode(ctx context.Context, in *AddResourceInUcodeRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
 	ReconnectResource(ctx context.Context, in *ReconnectResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error)
@@ -100,9 +100,9 @@ func (c *resourceServiceClient) GetResource(ctx context.Context, in *GetResource
 	return out, nil
 }
 
-func (c *resourceServiceClient) GetReourceList(ctx context.Context, in *GetReourceListRequest, opts ...grpc.CallOption) (*GetReourceListResponse, error) {
-	out := new(GetReourceListResponse)
-	err := c.cc.Invoke(ctx, "/company_service.ResourceService/GetReourceList", in, out, opts...)
+func (c *resourceServiceClient) GetResourceList(ctx context.Context, in *GetResourceListRequest, opts ...grpc.CallOption) (*GetResourceListResponse, error) {
+	out := new(GetResourceListResponse)
+	err := c.cc.Invoke(ctx, "/company_service.ResourceService/GetResourceList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +262,7 @@ type ResourceServiceServer interface {
 	RemoveResource(context.Context, *RemoveResourceRequest) (*EmptyProto, error)
 	UpdateResource(context.Context, *UpdateResourceRequest) (*ResourceWithoutPassword, error)
 	GetResource(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error)
-	GetReourceList(context.Context, *GetReourceListRequest) (*GetReourceListResponse, error)
+	GetResourceList(context.Context, *GetResourceListRequest) (*GetResourceListResponse, error)
 	CreateResource(context.Context, *CreateResourceReq) (*CreateResourceRes, error)
 	AddResourceInUcode(context.Context, *AddResourceInUcodeRequest) (*AddResourceResponse, error)
 	ReconnectResource(context.Context, *ReconnectResourceRequest) (*EmptyProto, error)
@@ -302,8 +302,8 @@ func (UnimplementedResourceServiceServer) UpdateResource(context.Context, *Updat
 func (UnimplementedResourceServiceServer) GetResource(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResource not implemented")
 }
-func (UnimplementedResourceServiceServer) GetReourceList(context.Context, *GetReourceListRequest) (*GetReourceListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetReourceList not implemented")
+func (UnimplementedResourceServiceServer) GetResourceList(context.Context, *GetResourceListRequest) (*GetResourceListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetResourceList not implemented")
 }
 func (UnimplementedResourceServiceServer) CreateResource(context.Context, *CreateResourceReq) (*CreateResourceRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateResource not implemented")
@@ -456,20 +456,20 @@ func _ResourceService_GetResource_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ResourceService_GetReourceList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetReourceListRequest)
+func _ResourceService_GetResourceList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetResourceListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ResourceServiceServer).GetReourceList(ctx, in)
+		return srv.(ResourceServiceServer).GetResourceList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/company_service.ResourceService/GetReourceList",
+		FullMethod: "/company_service.ResourceService/GetResourceList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResourceServiceServer).GetReourceList(ctx, req.(*GetReourceListRequest))
+		return srv.(ResourceServiceServer).GetResourceList(ctx, req.(*GetResourceListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -790,8 +790,8 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ResourceService_GetResource_Handler,
 		},
 		{
-			MethodName: "GetReourceList",
-			Handler:    _ResourceService_GetReourceList_Handler,
+			MethodName: "GetResourceList",
+			Handler:    _ResourceService_GetResourceList_Handler,
 		},
 		{
 			MethodName: "CreateResource",
