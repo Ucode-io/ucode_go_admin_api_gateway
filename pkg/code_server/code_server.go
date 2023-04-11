@@ -134,14 +134,18 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 		log.Println("successfully uninstalled " + function.GetPath())
 		ids = append(ids, function.GetId())
 	}
-	if len(ids) > 0 {
-		_, err = srvs.FunctionService().FunctionService().UpdateManyByRequestTime(context.Background(), &pb.UpdateManyUrlAndPassword{
-			Ids: ids,
-		})
-		if err != nil {
-			return err
+	for _, v := range resEnvsIds.GetData() {
+		if len(ids) > 0 {
+			_, err = srvs.FunctionService().FunctionService().UpdateManyByRequestTime(context.Background(), &pb.UpdateManyUrlAndPassword{
+				Ids:       ids,
+				ProjectId: v.GetId(),
+			})
+			if err != nil {
+				return err
+			}
 		}
 	}
+
 	fmt.Println("finish")
 
 	return nil

@@ -63,6 +63,7 @@ message FunctionPrimaryKey {
 
 message UpdateManyUrlAndPassword {
     repeated string ids = 1;
+    string project_id = 2;
 }
 
 message GetListByRequestTimeRequest {
