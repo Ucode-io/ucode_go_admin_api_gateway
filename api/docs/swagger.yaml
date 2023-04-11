@@ -12332,6 +12332,69 @@ paths:
       summary: Invoke Function
       tags:
       - Function
+  /v1/invoke_function/{function-path}:
+    post:
+      consumes:
+      - application/json
+      description: Invoke Function By Path
+      operationId: invoke_function_by_path
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: function-path
+        in: path
+        name: function-path
+        required: true
+        type: string
+      - description: InvokeFunctionByPathRequest
+        in: body
+        name: InvokeFunctionByPathRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Function data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.InvokeFunctionRequest'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Invoke Function
+      tags:
+      - Function
   /v1/many-to-many:
     delete:
       consumes:

@@ -7,6 +7,7 @@ import (
 	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
@@ -672,4 +673,114 @@ func (h *Handler) GetAllNewFunctionsForApp(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
+}
+
+// InvokeFunctionByPath godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Param function-path path string true "function-path"
+// @ID invoke_function_by_path
+// @Router /v1/invoke_function/{function-path} [POST]
+// @Summary Invoke Function By Path
+// @Description Invoke Function By Path
+// @Tags Function
+// @Accept json
+// @Produce json
+// @Param InvokeFunctionByPathRequest body models.CommonMessage true "InvokeFunctionByPathRequest"
+// @Success 201 {object} status_http.Response{data=models.InvokeFunctionRequest} "Function data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
+	var invokeFunction models.CommonMessage
+
+	err := c.ShouldBindJSON(&invokeFunction)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err = errors.New("error getting resource id")
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+		context.Background(),
+		&company_service.GetResEnvByResIdEnvIdRequest{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		err = errors.New("error getting resource environment id")
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	apiKeys, err := services.AuthService().ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+		EnvironmentId: environmentId.(string),
+		ProjectId:     resourceEnvironment.ProjectId,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	if len(apiKeys.Data) < 1 {
+		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
+		return
+	}
+	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+c.Param("function-path"), "POST", models.NewInvokeFunctionRequest{
+		Data: invokeFunction.Data,
+	})
+	if err != nil {
+		fmt.Println("error in do request", err)
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	} else if resp.Status == "error" {
+		fmt.Println("error in response status", err)
+		var errStr = resp.Status
+		if resp.Data != nil && resp.Data["message"] != nil {
+			errStr = resp.Data["message"].(string)
+		}
+		h.handleResponse(c, status_http.InvalidArgument, errStr)
+		return
+	}
+	// _, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
+	// 	context.Background(),
+	// 	&obs.UpdateByFunctionIdRequest{
+	// 		FunctionId: invokeFunction.FunctionID,
+	// 		ObjectIds:  invokeFunction.ObjectIDs,
+	// 		FieldSlug:  function.Path + "_disable",
+	// 		ProjectId:  resourceEnvironment.GetId(),
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
+	h.handleResponse(c, status_http.Created, resp)
 }
