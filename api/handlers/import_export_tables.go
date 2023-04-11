@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -99,9 +98,6 @@ func (h *Handler) ImportFromJSON(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
-	time.Sleep(2 * time.Minute)
-	h.handleResponse(c, status_http.OK, "Tables Successfully Tested 2min")
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
