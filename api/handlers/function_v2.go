@@ -267,7 +267,11 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 	// }
 
 	function.ProjectId = resourceEnvironment.GetId()
-	services.FunctionService().FunctionService().Update(context.Background(), function)
+	_, err = services.FunctionService().FunctionService().Update(context.Background(), function)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, status_http.OK, function)
 }
