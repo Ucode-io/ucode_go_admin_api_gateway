@@ -46,6 +46,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		ctx,
 		cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)),
 	)
 	if err != nil {
 		return nil, err
