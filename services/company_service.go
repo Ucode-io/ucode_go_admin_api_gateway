@@ -14,6 +14,7 @@ type CompanyServiceI interface {
 	Project() company_service.ProjectServiceClient
 	Environment() company_service.EnvironmentServiceClient
 	Resource() company_service.ResourceServiceClient
+	ServiceResource() company_service.MicroserviceResourceClient
 }
 
 type companyServiceClient struct {
@@ -21,6 +22,7 @@ type companyServiceClient struct {
 	projectService     company_service.ProjectServiceClient
 	environmentService company_service.EnvironmentServiceClient
 	resourceService    company_service.ResourceServiceClient
+	serviceResource    company_service.MicroserviceResourceClient
 }
 
 func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanyServiceI, error) {
@@ -39,6 +41,7 @@ func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanySer
 		projectService:     company_service.NewProjectServiceClient(connCompanyService),
 		environmentService: company_service.NewEnvironmentServiceClient(connCompanyService),
 		resourceService:    company_service.NewResourceServiceClient(connCompanyService),
+		serviceResource:    company_service.NewMicroserviceResourceClient(connCompanyService),
 	}, nil
 }
 
@@ -56,4 +59,8 @@ func (g *companyServiceClient) Environment() company_service.EnvironmentServiceC
 
 func (g *companyServiceClient) Resource() company_service.ResourceServiceClient {
 	return g.resourceService
+}
+
+func (g *companyServiceClient) ServiceResource() company_service.MicroserviceResourceClient {
+	return g.serviceResource
 }

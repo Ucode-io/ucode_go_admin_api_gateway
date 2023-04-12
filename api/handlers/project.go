@@ -108,8 +108,10 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateCompanyProject(c *gin.Context) {
-	projectId := c.Param("project_id")
 	var project company_service.Project
+
+	projectId := c.Param("project_id")
+	project.ProjectId = projectId
 
 	err := c.ShouldBindJSON(&project)
 	if err != nil {
@@ -119,13 +121,7 @@ func (h *Handler) UpdateCompanyProject(c *gin.Context) {
 
 	resp, err := h.companyServices.CompanyService().Project().Update(
 		context.Background(),
-		&company_service.Project{
-			ProjectId:    projectId,
-			CompanyId:    project.CompanyId,
-			Title:        project.Title,
-			K8SNamespace: project.K8SNamespace,
-			Logo:         project.GetLogo(),
-		},
+		&project,
 	)
 
 	if err != nil {

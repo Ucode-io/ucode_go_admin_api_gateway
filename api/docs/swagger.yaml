@@ -15,7 +15,7 @@ definitions:
       additional_url:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       authentification:
         type: boolean
       category_id:
@@ -143,7 +143,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/auth_service.ConfirmStrategies'
+        type: integer
       id:
         type: string
       name:
@@ -159,16 +159,6 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
-  auth_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -306,7 +296,7 @@ definitions:
   auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       label:
@@ -462,9 +452,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -522,9 +512,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -579,9 +569,28 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
+    type: object
+  company_service.Currency:
+    properties:
+      code:
+        type: string
+      decimal_digits:
+        type: integer
+      id:
+        type: string
+      name:
+        type: string
+      name_plural:
+        type: string
+      rounding:
+        type: integer
+      symbol:
+        type: string
+      symbol_native:
+        type: string
     type: object
   company_service.Currency:
     properties:
@@ -664,6 +673,21 @@ definitions:
           $ref: '#/definitions/company_service.EnvironmentWithResources'
         type: array
     type: object
+  company_service.GetListServiceResourceRes:
+    properties:
+      resource_types:
+        additionalProperties:
+          type: string
+        type: object
+      resources:
+        items:
+          $ref: '#/definitions/company_service.Resource'
+        type: array
+      service_resources:
+        additionalProperties:
+          $ref: '#/definitions/company_service.ServiceResourceModel'
+        type: object
+    type: object
   company_service.GetListWithProjectsResponse:
     properties:
       companies:
@@ -682,6 +706,18 @@ definitions:
           $ref: '#/definitions/company_service.Project'
         type: array
     type: object
+<<<<<<< HEAD
+=======
+  company_service.GetResourceListResponse:
+    properties:
+      count:
+        type: integer
+      resources:
+        items:
+          $ref: '#/definitions/company_service.Resource'
+        type: array
+    type: object
+>>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
   company_service.GetServiceResourcesRes:
     properties:
       service_resources:
@@ -696,7 +732,7 @@ definitions:
           $ref: '#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources'
         type: array
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources:
     properties:
@@ -707,7 +743,7 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -777,7 +813,11 @@ definitions:
       project_id:
         type: string
       resource_type:
+<<<<<<< HEAD
         $ref: '#/definitions/company_service.ResourceType'
+=======
+        type: integer
+>>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
       title:
         type: string
       vault_path:
@@ -796,18 +836,6 @@ definitions:
       username:
         type: string
     type: object
-  company_service.ResourceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ResourceType_NOT_DECIDED
-    - ResourceType_MONGODB
-    - ResourceType_CLICKHOUSE
-    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -821,7 +849,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -853,6 +881,7 @@ definitions:
       resource_environment_id:
         type: string
     type: object
+<<<<<<< HEAD
   company_service.ServiceType:
     enum:
     - 0
@@ -873,6 +902,29 @@ definitions:
     - ServiceType_FUNCTION_SERVICE
     - ServiceType_WEB_PAGE_SERVICE
     - ServiceType_API_REF_SERVICE
+=======
+  company_service.ServiceResourceModel:
+    properties:
+      description:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      resource_environment_id:
+        type: string
+      resource_id:
+        type: string
+      resource_type:
+        type: integer
+      service_type:
+        type: integer
+      title:
+        type: string
+    type: object
+>>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
   company_service.SetDefaultResourceReq:
     properties:
       environment_id:
@@ -882,7 +934,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.SetDefaultResourceRes:
     properties:
@@ -893,7 +945,23 @@ definitions:
       resource_id:
         type: string
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
+    type: object
+  company_service.Setting:
+    properties:
+      count:
+        type: integer
+      data:
+        $ref: '#/definitions/structpb.Struct'
+    type: object
+  company_service.Timezone:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      text:
+        type: string
     type: object
   company_service.Timezone:
     properties:
@@ -919,9 +987,25 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
+    type: object
+  company_service.UpdateServiceResourceReq:
+    properties:
+      environment_id:
+        type: string
+      project_id:
+        type: string
+      service_resources:
+        items:
+          $ref: '#/definitions/company_service.ServiceResourceModel'
+        type: array
+    type: object
+  company_service.UpdateServiceResourceRes:
+    properties:
+      rows_affected:
+        type: integer
     type: object
   config.Config:
     properties:
@@ -1066,27 +1150,6 @@ definitions:
     type: object
   emptypb.Empty:
     type: object
-  github_com_golang_protobuf_ptypes_struct.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  google_golang_org_protobuf_types_known_structpb.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  google_golang_org_protobuf_types_known_structpb.Value:
-    properties:
-      kind:
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
-    type: object
   handlers.Path:
     properties:
       filename:
@@ -1137,7 +1200,7 @@ definitions:
       currency:
         type: string
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       deleted_at:
         type: string
       id:
@@ -1172,7 +1235,7 @@ definitions:
       currency:
         type: string
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       deleted_at:
         type: string
       id:
@@ -1553,7 +1616,7 @@ definitions:
   models.CreateWebPageReqModel:
     properties:
       components:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/structpb.Struct'
       folder_id:
         type: string
       icon:
@@ -2030,7 +2093,7 @@ definitions:
   models.UpdateWebPageReqModel:
     properties:
       components:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/structpb.Struct'
       folder_id:
         type: string
       icon:
@@ -2076,7 +2139,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -2321,7 +2384,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
+        type: integer
       guid:
         type: string
       name:
@@ -2349,16 +2412,6 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
-  object_builder_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -2379,7 +2432,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -2438,7 +2491,7 @@ definitions:
   object_builder_service.CreateFieldRequest:
     properties:
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       autofill_field:
         type: string
       autofill_table:
@@ -2623,7 +2676,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -3049,7 +3102,7 @@ definitions:
   object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       label:
@@ -3266,7 +3319,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -3521,7 +3574,7 @@ definitions:
   query_service.CreateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3637,7 +3690,7 @@ definitions:
       query_id:
         type: string
       request:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       response:
         type: string
       user_id:
@@ -3646,7 +3699,7 @@ definitions:
   query_service.Query:
     properties:
       body:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3714,7 +3767,7 @@ definitions:
   query_service.UpdateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3872,7 +3925,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+          $ref: '#/definitions/structpb.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
@@ -3885,7 +3938,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       slug:
         type: string
       title:
@@ -3896,7 +3949,7 @@ definitions:
   scenario_service.DAG:
     properties:
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       category_id:
         type: string
       commit_id:
@@ -3933,7 +3986,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+          $ref: '#/definitions/structpb.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
@@ -3950,7 +4003,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       slug:
         type: string
       title:
@@ -3958,7 +4011,7 @@ definitions:
       type:
         type: string
       ui_component:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
     type: object
   scenario_service.GetDAGRequest:
     properties:
@@ -4013,7 +4066,7 @@ definitions:
   scenario_service.RunScenarioResponse:
     properties:
       response:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
     type: object
   scenario_service.VersionInfo:
     properties:
@@ -4039,6 +4092,19 @@ definitions:
         type: string
       status:
         type: string
+    type: object
+  structpb.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
+  structpb.Value:
+    properties:
+      kind:
+        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
     type: object
   template_service.CreateFolderNoteReq:
     properties:
@@ -4073,7 +4139,7 @@ definitions:
       folder_id:
         type: string
       json:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
       title:
@@ -4256,7 +4322,7 @@ definitions:
   template_service.GetObjectTokenRes:
     properties:
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       role:
         type: string
     type: object
@@ -4287,7 +4353,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
       title:
@@ -4382,7 +4448,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
       title:
@@ -4518,7 +4584,7 @@ definitions:
       project_id:
         type: string
       release_type:
-        $ref: '#/definitions/versioning_service.ReleaseType'
+        type: integer
     type: object
   versioning_service.ApiDeleteReleaseRequest:
     properties:
@@ -4603,18 +4669,6 @@ definitions:
           $ref: '#/definitions/versioning_service.ReleaseWithCommit'
         type: array
     type: object
-  versioning_service.ReleaseType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ReleaseType_UNDEFINED
-    - ReleaseType_MAJOR
-    - ReleaseType_MINOR
-    - ReleaseType_PATCH
   versioning_service.ReleaseWithCommit:
     properties:
       author_id:
@@ -4758,7 +4812,7 @@ definitions:
       commit_info:
         $ref: '#/definitions/web_page_service.CommitInfo'
       components:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       environment_id:
         type: string
       folder_id:
@@ -4941,7 +4995,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -5123,7 +5177,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -5848,7 +5902,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -6126,7 +6180,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -6465,7 +6519,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -6770,7 +6824,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7203,7 +7257,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7497,7 +7551,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: ""
         "400":
           description: Bad Request
           schema:
@@ -7688,7 +7742,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8420,7 +8474,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8736,6 +8790,75 @@ paths:
       summary: Remove ProjectResource
       tags:
       - Company Resource
+<<<<<<< HEAD
+=======
+    get:
+      consumes:
+      - application/json
+      description: Get all companies
+      operationId: get_resource_list
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - in: query
+        name: environment_id
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resource data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetResourceListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all companies
+      tags:
+      - Company Resource
+>>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
     post:
       consumes:
       - application/json
@@ -9131,6 +9254,123 @@ paths:
       summary: Reconnect ProjectResource
       tags:
       - Company Resource
+  /v1/company/project/service-resource:
+    get:
+      consumes:
+      - application/json
+      description: get list service resource
+      operationId: get_list_service_resource
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetListServiceResourceRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: get list service resource
+      tags:
+      - Service Resource
+    put:
+      consumes:
+      - application/json
+      description: Update service resource
+      operationId: update_service_resource
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.UpdateServiceResourceReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.UpdateServiceResourceRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update service resource
+      tags:
+      - Service Resource
   /v1/custom-event:
     get:
       consumes:
@@ -9338,7 +9578,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -9625,7 +9865,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -9909,7 +10149,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10362,7 +10602,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10838,7 +11078,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11283,7 +11523,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11384,7 +11624,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11788,7 +12028,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12095,6 +12335,69 @@ paths:
       summary: Invoke Function
       tags:
       - Function
+  /v1/invoke_function/{function-path}:
+    post:
+      consumes:
+      - application/json
+      description: Invoke Function By Path
+      operationId: invoke_function_by_path
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: function-path
+        in: path
+        name: function-path
+        required: true
+        type: string
+      - description: InvokeFunctionByPathRequest
+        in: body
+        name: InvokeFunctionByPathRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Function data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.InvokeFunctionRequest'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Invoke Function By Path
+      tags:
+      - Function
   /v1/many-to-many:
     delete:
       consumes:
@@ -12122,7 +12425,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12609,7 +12912,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12787,7 +13090,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -13707,7 +14010,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -14528,6 +14831,76 @@ paths:
       summary: Upsert permissions
       tags:
       - Permission
+  /v1/project/setting:
+    get:
+      consumes:
+      - application/json
+      description: Get List settings
+      operationId: get_list_setting
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      - description: search
+        in: query
+        name: search
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: type
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Setting
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Setting'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List settings
+      tags:
+      - Company Project
   /v1/query:
     post:
       consumes:
@@ -14794,7 +15167,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -15099,7 +15472,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -15836,7 +16209,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -16058,7 +16431,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -17757,7 +18130,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -18243,7 +18616,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -18732,7 +19105,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -18969,7 +19342,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -19507,7 +19880,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -19895,7 +20268,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -20170,7 +20543,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -20648,7 +21021,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -20980,7 +21353,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -21376,7 +21749,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -21668,7 +22041,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -21954,7 +22327,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
