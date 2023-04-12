@@ -193,7 +193,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// INVOKE FUNCTION
 
 		v1.POST("/invoke_function", h.InvokeFunction)
-		v1.POST("/invoke_function/function-path", h.InvokeFunctionByPath)
+		v1.POST("/invoke_function/:function-path", h.InvokeFunctionByPath)
 
 		// Excel Reader
 		v1.GET("/excel/:excel_id", h.ExcelReader)
