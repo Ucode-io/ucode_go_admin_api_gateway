@@ -13,7 +13,7 @@ service FunctionServiceV2 {
     rpc GetSingle(FunctionPrimaryKey) returns (Function) {}
     rpc Update(Function) returns (google.protobuf.Empty) {}
     rpc Delete(FunctionPrimaryKey) returns (google.protobuf.Empty) {}
-    rpc GetListByRequestTime(google.protobuf.Empty) returns (GetAllFunctionsResponse) {}
+    rpc GetListByRequestTime(GetListByRequestTimeRequest) returns (GetAllFunctionsResponse) {}
     rpc UpdateManyByRequestTime(UpdateManyUrlAndPassword) returns (google.protobuf.Empty) {}
 }
 
@@ -63,4 +63,13 @@ message FunctionPrimaryKey {
 
 message UpdateManyUrlAndPassword {
     repeated string ids = 1;
+    string project_id = 2;
+}
+
+message GetListByRequestTimeRequest {
+    string search = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+    string project_id = 4;
+    string environment_id = 5;
 }

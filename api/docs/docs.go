@@ -6577,117 +6577,6 @@ const docTemplate = `{
             }
         },
         "/v1/company/project/resource": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get all companies",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Company Resource"
-                ],
-                "summary": "Get all companies",
-                "operationId": "get_resource_list",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "search",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Resource data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/company_service.GetReourceListResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -31138,6 +31027,9 @@ const docTemplate = `{
                 "chat_id": {
                     "type": "string"
                 },
+                "check": {
+                    "type": "boolean"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -31183,16 +31075,19 @@ const docTemplate = `{
         "chat_service.UserMessage": {
             "type": "object",
             "properties": {
+                "check": {
+                    "type": "boolean"
+                },
                 "created_at": {
                     "type": "string"
                 },
                 "message": {
                     "type": "string"
                 },
-                "sender_name": {
+                "platformType": {
                     "type": "string"
                 },
-                "type": {
+                "sender_name": {
                     "type": "string"
                 },
                 "user_id": {
@@ -31378,6 +31273,9 @@ const docTemplate = `{
                 "company_id": {
                     "type": "string"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -31403,6 +31301,35 @@ const docTemplate = `{
                 },
                 "service_type": {
                     "$ref": "#/definitions/company_service.ServiceType"
+                }
+            }
+        },
+        "company_service.Currency": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "decimal_digits": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "name_plural": {
+                    "type": "string"
+                },
+                "rounding": {
+                    "type": "integer"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "symbol_native": {
+                    "type": "string"
                 }
             }
         },
@@ -31530,20 +31457,6 @@ const docTemplate = `{
                 }
             }
         },
-        "company_service.GetReourceListResponse": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer"
-                },
-                "resources": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/company_service.NewResource"
-                    }
-                }
-            }
-        },
         "company_service.GetServiceResourcesRes": {
             "type": "object",
             "properties": {
@@ -31589,19 +31502,19 @@ const docTemplate = `{
                 }
             }
         },
-        "company_service.NewResource": {
+        "company_service.Language": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "string"
                 },
-                "project_id": {
+                "name": {
                     "type": "string"
                 },
-                "resource_type": {
+                "native_name": {
                     "type": "string"
                 },
-                "title": {
+                "short_name": {
                     "type": "string"
                 }
             }
@@ -31612,8 +31525,14 @@ const docTemplate = `{
                 "company_id": {
                     "type": "string"
                 },
+                "currency": {
+                    "$ref": "#/definitions/company_service.Currency"
+                },
                 "k8s_namespace": {
                     "type": "string"
+                },
+                "language": {
+                    "$ref": "#/definitions/company_service.Language"
                 },
                 "logo": {
                     "type": "string"
@@ -31626,6 +31545,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/company_service.ResourceWithoutPassword"
                     }
+                },
+                "timezone": {
+                    "$ref": "#/definitions/company_service.Timezone"
                 },
                 "title": {
                     "type": "string"
@@ -31674,13 +31596,19 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
                 "resource_type": {
                     "$ref": "#/definitions/company_service.ResourceType"
                 },
-                "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
-                },
                 "title": {
+                    "type": "string"
+                },
+                "vault_path": {
                     "type": "string"
                 }
             }
@@ -31794,12 +31722,22 @@ const docTemplate = `{
             "enum": [
                 0,
                 1,
-                2
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
             ],
             "x-enum-varnames": [
                 "ServiceType_NOT_SPECIFIED",
                 "ServiceType_BUILDER_SERVICE",
-                "ServiceType_ANALYTICS_SERVICE"
+                "ServiceType_ANALYTICS_SERVICE",
+                "ServiceType_TEMPLATE_SERVICE",
+                "ServiceType_QUERY_SERVICE",
+                "ServiceType_FUNCTION_SERVICE",
+                "ServiceType_WEB_PAGE_SERVICE",
+                "ServiceType_API_REF_SERVICE"
             ]
         },
         "company_service.SetDefaultResourceReq": {
@@ -31833,6 +31771,20 @@ const docTemplate = `{
                 },
                 "service_type": {
                     "$ref": "#/definitions/company_service.ServiceType"
+                }
+            }
+        },
+        "company_service.Timezone": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
                 }
             }
         },
@@ -32377,13 +32329,13 @@ const docTemplate = `{
         "models.Chat": {
             "type": "object",
             "properties": {
-                "message": {
+                "phone_number": {
+                    "type": "string"
+                },
+                "platform_type": {
                     "type": "string"
                 },
                 "sender_name": {
-                    "type": "string"
-                },
-                "types": {
                     "type": "string"
                 }
             }

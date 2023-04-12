@@ -7,6 +7,11 @@ enum ServiceType {
     NOT_SPECIFIED = 0;
     BUILDER_SERVICE = 1;
     ANALYTICS_SERVICE = 2;
+    TEMPLATE_SERVICE = 3;
+    QUERY_SERVICE = 4;
+    FUNCTION_SERVICE = 5;
+    WEB_PAGE_SERVICE = 6;
+    API_REF_SERVICE = 7;
 }
 
 enum ResourceType {
@@ -14,6 +19,12 @@ enum ResourceType {
     MONGODB = 1;
     CLICKHOUSE = 2;
     POSTGRESQL = 3;
+}
+
+enum SettingType {
+    LANGUAGE = 0;
+    CURRENCY = 1;
+    TIMEZONE = 2;
 }
 
 message Resource {
@@ -24,11 +35,13 @@ message Resource {
         string password = 4;
         string database = 5;
     }
-    ServiceType service_type = 1;
-    ResourceType resource_type = 2;
-    Credentials credentials = 3;
-    string id = 4;
-    string title = 5;
+    ResourceType resource_type = 1;
+    Credentials credentials = 2;
+    string id = 3;
+    string title = 4;
+    bool is_configured = 5;
+    string vault_path = 6;
+    string project_id = 7;
 }
 
 message Environment {
@@ -78,4 +91,26 @@ message ResourceEnvironment {
 
 message Empty {
 
+}
+
+message Language {
+    string id = 1;
+    string name = 2;
+    string short_name = 3;
+    string native_name = 4;
+}
+message Currency {
+    string id = 1;
+    string symbol = 2;
+    string name = 3;
+    string symbol_native = 4;
+    int32 decimal_digits = 5;
+    int32 rounding = 6;
+    string code = 7;
+    string name_plural = 8;
+}
+message Timezone {
+    string id = 1;
+    string name = 2;
+    string text = 3;
 }

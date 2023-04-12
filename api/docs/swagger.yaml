@@ -403,6 +403,8 @@ definitions:
     properties:
       chat_id:
         type: string
+      check:
+        type: boolean
       created_at:
         type: string
       environment_id:
@@ -432,13 +434,15 @@ definitions:
     type: object
   chat_service.UserMessage:
     properties:
+      check:
+        type: boolean
       created_at:
         type: string
       message:
         type: string
-      sender_name:
+      platformType:
         type: string
-      type:
+      sender_name:
         type: string
       user_id:
         type: string
@@ -559,6 +563,8 @@ definitions:
     properties:
       company_id:
         type: string
+      environment_id:
+        type: string
       project_id:
         type: string
       resource:
@@ -576,6 +582,25 @@ definitions:
         $ref: '#/definitions/company_service.ResourceType'
       service_type:
         $ref: '#/definitions/company_service.ServiceType'
+    type: object
+  company_service.Currency:
+    properties:
+      code:
+        type: string
+      decimal_digits:
+        type: integer
+      id:
+        type: string
+      name:
+        type: string
+      name_plural:
+        type: string
+      rounding:
+        type: integer
+      symbol:
+        type: string
+      symbol_native:
+        type: string
     type: object
   company_service.EmptyProto:
     type: object
@@ -657,15 +682,6 @@ definitions:
           $ref: '#/definitions/company_service.Project'
         type: array
     type: object
-  company_service.GetReourceListResponse:
-    properties:
-      count:
-        type: integer
-      resources:
-        items:
-          $ref: '#/definitions/company_service.NewResource'
-        type: array
-    type: object
   company_service.GetServiceResourcesRes:
     properties:
       service_resources:
@@ -695,23 +711,27 @@ definitions:
       title:
         type: string
     type: object
-  company_service.NewResource:
+  company_service.Language:
     properties:
       id:
         type: string
-      project_id:
+      name:
         type: string
-      resource_type:
+      native_name:
         type: string
-      title:
+      short_name:
         type: string
     type: object
   company_service.Project:
     properties:
       company_id:
         type: string
+      currency:
+        $ref: '#/definitions/company_service.Currency'
       k8s_namespace:
         type: string
+      language:
+        $ref: '#/definitions/company_service.Language'
       logo:
         type: string
       project_id:
@@ -720,6 +740,8 @@ definitions:
         items:
           $ref: '#/definitions/company_service.ResourceWithoutPassword'
         type: array
+      timezone:
+        $ref: '#/definitions/company_service.Timezone'
       title:
         type: string
     type: object
@@ -750,11 +772,15 @@ definitions:
         $ref: '#/definitions/company_service.Resource_Credentials'
       id:
         type: string
+      is_configured:
+        type: boolean
+      project_id:
+        type: string
       resource_type:
         $ref: '#/definitions/company_service.ResourceType'
-      service_type:
-        $ref: '#/definitions/company_service.ServiceType'
       title:
+        type: string
+      vault_path:
         type: string
     type: object
   company_service.Resource_Credentials:
@@ -832,11 +858,21 @@ definitions:
     - 0
     - 1
     - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
     type: integer
     x-enum-varnames:
     - ServiceType_NOT_SPECIFIED
     - ServiceType_BUILDER_SERVICE
     - ServiceType_ANALYTICS_SERVICE
+    - ServiceType_TEMPLATE_SERVICE
+    - ServiceType_QUERY_SERVICE
+    - ServiceType_FUNCTION_SERVICE
+    - ServiceType_WEB_PAGE_SERVICE
+    - ServiceType_API_REF_SERVICE
   company_service.SetDefaultResourceReq:
     properties:
       environment_id:
@@ -858,6 +894,15 @@ definitions:
         type: string
       service_type:
         $ref: '#/definitions/company_service.ServiceType'
+    type: object
+  company_service.Timezone:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      text:
+        type: string
     type: object
   company_service.UpdateResourceRequest:
     properties:
@@ -1216,11 +1261,11 @@ definitions:
     type: object
   models.Chat:
     properties:
-      message:
+      phone_number:
+        type: string
+      platform_type:
         type: string
       sender_name:
-        type: string
-      types:
         type: string
     type: object
   models.ChatResponse:
@@ -8689,69 +8734,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Remove ProjectResource
-      tags:
-      - Company Resource
-    get:
-      consumes:
-      - application/json
-      description: Get all companies
-      operationId: get_resource_list
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - in: query
-        name: limit
-        type: integer
-      - in: query
-        name: offset
-        type: integer
-      - in: query
-        name: project_id
-        type: string
-      - in: query
-        name: search
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Resource data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.GetReourceListResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all companies
       tags:
       - Company Resource
     post:

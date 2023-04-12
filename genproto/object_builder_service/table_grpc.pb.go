@@ -28,6 +28,10 @@ type TableServiceClient interface {
 	GetAll(ctx context.Context, in *GetAllTablesRequest, opts ...grpc.CallOption) (*GetAllTablesResponse, error)
 	Update(ctx context.Context, in *Table, opts ...grpc.CallOption) (*empty.Empty, error)
 	Delete(ctx context.Context, in *TablePrimaryKey, opts ...grpc.CallOption) (*empty.Empty, error)
+	GetListTableHistory(ctx context.Context, in *GetTableHistoryRequest, opts ...grpc.CallOption) (*GetTableHistoryResponse, error)
+	GetTableHistoryById(ctx context.Context, in *TableHistoryPrimaryKey, opts ...grpc.CallOption) (*TableHistory, error)
+	RevertTableHistory(ctx context.Context, in *TableHistoryPrimaryKey, opts ...grpc.CallOption) (*TableHistory, error)
+	InsertVersionsToCommit(ctx context.Context, in *InsertVersionsToCommitRequest, opts ...grpc.CallOption) (*TableHistory, error)
 }
 
 type tableServiceClient struct {
@@ -83,6 +87,42 @@ func (c *tableServiceClient) Delete(ctx context.Context, in *TablePrimaryKey, op
 	return out, nil
 }
 
+func (c *tableServiceClient) GetListTableHistory(ctx context.Context, in *GetTableHistoryRequest, opts ...grpc.CallOption) (*GetTableHistoryResponse, error) {
+	out := new(GetTableHistoryResponse)
+	err := c.cc.Invoke(ctx, "/object_builder_service.TableService/GetListTableHistory", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tableServiceClient) GetTableHistoryById(ctx context.Context, in *TableHistoryPrimaryKey, opts ...grpc.CallOption) (*TableHistory, error) {
+	out := new(TableHistory)
+	err := c.cc.Invoke(ctx, "/object_builder_service.TableService/GetTableHistoryById", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tableServiceClient) RevertTableHistory(ctx context.Context, in *TableHistoryPrimaryKey, opts ...grpc.CallOption) (*TableHistory, error) {
+	out := new(TableHistory)
+	err := c.cc.Invoke(ctx, "/object_builder_service.TableService/RevertTableHistory", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tableServiceClient) InsertVersionsToCommit(ctx context.Context, in *InsertVersionsToCommitRequest, opts ...grpc.CallOption) (*TableHistory, error) {
+	out := new(TableHistory)
+	err := c.cc.Invoke(ctx, "/object_builder_service.TableService/InsertVersionsToCommit", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TableServiceServer is the server API for TableService service.
 // All implementations must embed UnimplementedTableServiceServer
 // for forward compatibility
@@ -92,6 +132,10 @@ type TableServiceServer interface {
 	GetAll(context.Context, *GetAllTablesRequest) (*GetAllTablesResponse, error)
 	Update(context.Context, *Table) (*empty.Empty, error)
 	Delete(context.Context, *TablePrimaryKey) (*empty.Empty, error)
+	GetListTableHistory(context.Context, *GetTableHistoryRequest) (*GetTableHistoryResponse, error)
+	GetTableHistoryById(context.Context, *TableHistoryPrimaryKey) (*TableHistory, error)
+	RevertTableHistory(context.Context, *TableHistoryPrimaryKey) (*TableHistory, error)
+	InsertVersionsToCommit(context.Context, *InsertVersionsToCommitRequest) (*TableHistory, error)
 	mustEmbedUnimplementedTableServiceServer()
 }
 
@@ -113,6 +157,18 @@ func (UnimplementedTableServiceServer) Update(context.Context, *Table) (*empty.E
 }
 func (UnimplementedTableServiceServer) Delete(context.Context, *TablePrimaryKey) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedTableServiceServer) GetListTableHistory(context.Context, *GetTableHistoryRequest) (*GetTableHistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetListTableHistory not implemented")
+}
+func (UnimplementedTableServiceServer) GetTableHistoryById(context.Context, *TableHistoryPrimaryKey) (*TableHistory, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTableHistoryById not implemented")
+}
+func (UnimplementedTableServiceServer) RevertTableHistory(context.Context, *TableHistoryPrimaryKey) (*TableHistory, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevertTableHistory not implemented")
+}
+func (UnimplementedTableServiceServer) InsertVersionsToCommit(context.Context, *InsertVersionsToCommitRequest) (*TableHistory, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InsertVersionsToCommit not implemented")
 }
 func (UnimplementedTableServiceServer) mustEmbedUnimplementedTableServiceServer() {}
 
@@ -217,6 +273,78 @@ func _TableService_Delete_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TableService_GetListTableHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTableHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TableServiceServer).GetListTableHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.TableService/GetListTableHistory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TableServiceServer).GetListTableHistory(ctx, req.(*GetTableHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TableService_GetTableHistoryById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TableHistoryPrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TableServiceServer).GetTableHistoryById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.TableService/GetTableHistoryById",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TableServiceServer).GetTableHistoryById(ctx, req.(*TableHistoryPrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TableService_RevertTableHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TableHistoryPrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TableServiceServer).RevertTableHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.TableService/RevertTableHistory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TableServiceServer).RevertTableHistory(ctx, req.(*TableHistoryPrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TableService_InsertVersionsToCommit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InsertVersionsToCommitRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TableServiceServer).InsertVersionsToCommit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.TableService/InsertVersionsToCommit",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TableServiceServer).InsertVersionsToCommit(ctx, req.(*InsertVersionsToCommitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TableService_ServiceDesc is the grpc.ServiceDesc for TableService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -243,6 +371,22 @@ var TableService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _TableService_Delete_Handler,
+		},
+		{
+			MethodName: "GetListTableHistory",
+			Handler:    _TableService_GetListTableHistory_Handler,
+		},
+		{
+			MethodName: "GetTableHistoryById",
+			Handler:    _TableService_GetTableHistoryById_Handler,
+		},
+		{
+			MethodName: "RevertTableHistory",
+			Handler:    _TableService_RevertTableHistory_Handler,
+		},
+		{
+			MethodName: "InsertVersionsToCommit",
+			Handler:    _TableService_InsertVersionsToCommit_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

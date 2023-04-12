@@ -13,8 +13,35 @@ service TableService {
     rpc GetAll(GetAllTablesRequest) returns (GetAllTablesResponse) {}
     rpc Update(Table) returns (google.protobuf.Empty) {}
     rpc Delete(TablePrimaryKey) returns (google.protobuf.Empty) {}
+
+    rpc GetListTableHistory(GetTableHistoryRequest) returns (GetTableHistoryResponse) {}
+    rpc GetTableHistoryById(TableHistoryPrimaryKey) returns (TableHistory) {}
+    rpc RevertTableHistory(TableHistoryPrimaryKey) returns (TableHistory) {}
+    rpc InsertVersionsToCommit(InsertVersionsToCommitRequest) returns (TableHistory) {}
 }
 
+message InsertVersionsToCommitRequest {
+    string id = 1;
+    repeated string version_ids = 2;
+}
+
+message GetTableHistoryRequest {
+    string table_id = 1;
+}
+
+message TableHistoryPrimaryKey {
+    string id = 1;
+}
+
+message TableHistory {
+    string id = 1;
+    string created_at = 2;
+    repeated string version_ids = 3;
+}
+
+message GetTableHistoryResponse {
+    repeated TableHistory items = 1;
+}
 
 message CreateTableRequest {
     string label = 1;

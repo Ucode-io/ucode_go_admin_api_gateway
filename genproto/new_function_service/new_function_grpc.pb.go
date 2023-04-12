@@ -28,7 +28,7 @@ type FunctionServiceV2Client interface {
 	GetSingle(ctx context.Context, in *FunctionPrimaryKey, opts ...grpc.CallOption) (*Function, error)
 	Update(ctx context.Context, in *Function, opts ...grpc.CallOption) (*empty.Empty, error)
 	Delete(ctx context.Context, in *FunctionPrimaryKey, opts ...grpc.CallOption) (*empty.Empty, error)
-	GetListByRequestTime(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetAllFunctionsResponse, error)
+	GetListByRequestTime(ctx context.Context, in *GetListByRequestTimeRequest, opts ...grpc.CallOption) (*GetAllFunctionsResponse, error)
 	UpdateManyByRequestTime(ctx context.Context, in *UpdateManyUrlAndPassword, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -85,7 +85,7 @@ func (c *functionServiceV2Client) Delete(ctx context.Context, in *FunctionPrimar
 	return out, nil
 }
 
-func (c *functionServiceV2Client) GetListByRequestTime(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetAllFunctionsResponse, error) {
+func (c *functionServiceV2Client) GetListByRequestTime(ctx context.Context, in *GetListByRequestTimeRequest, opts ...grpc.CallOption) (*GetAllFunctionsResponse, error) {
 	out := new(GetAllFunctionsResponse)
 	err := c.cc.Invoke(ctx, "/new_function_service.FunctionServiceV2/GetListByRequestTime", in, out, opts...)
 	if err != nil {
@@ -112,7 +112,7 @@ type FunctionServiceV2Server interface {
 	GetSingle(context.Context, *FunctionPrimaryKey) (*Function, error)
 	Update(context.Context, *Function) (*empty.Empty, error)
 	Delete(context.Context, *FunctionPrimaryKey) (*empty.Empty, error)
-	GetListByRequestTime(context.Context, *empty.Empty) (*GetAllFunctionsResponse, error)
+	GetListByRequestTime(context.Context, *GetListByRequestTimeRequest) (*GetAllFunctionsResponse, error)
 	UpdateManyByRequestTime(context.Context, *UpdateManyUrlAndPassword) (*empty.Empty, error)
 	mustEmbedUnimplementedFunctionServiceV2Server()
 }
@@ -136,7 +136,7 @@ func (UnimplementedFunctionServiceV2Server) Update(context.Context, *Function) (
 func (UnimplementedFunctionServiceV2Server) Delete(context.Context, *FunctionPrimaryKey) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedFunctionServiceV2Server) GetListByRequestTime(context.Context, *empty.Empty) (*GetAllFunctionsResponse, error) {
+func (UnimplementedFunctionServiceV2Server) GetListByRequestTime(context.Context, *GetListByRequestTimeRequest) (*GetAllFunctionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListByRequestTime not implemented")
 }
 func (UnimplementedFunctionServiceV2Server) UpdateManyByRequestTime(context.Context, *UpdateManyUrlAndPassword) (*empty.Empty, error) {
@@ -246,7 +246,7 @@ func _FunctionServiceV2_Delete_Handler(srv interface{}, ctx context.Context, dec
 }
 
 func _FunctionServiceV2_GetListByRequestTime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
+	in := new(GetListByRequestTimeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -258,7 +258,7 @@ func _FunctionServiceV2_GetListByRequestTime_Handler(srv interface{}, ctx contex
 		FullMethod: "/new_function_service.FunctionServiceV2/GetListByRequestTime",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FunctionServiceV2Server).GetListByRequestTime(ctx, req.(*empty.Empty))
+		return srv.(FunctionServiceV2Server).GetListByRequestTime(ctx, req.(*GetListByRequestTimeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
