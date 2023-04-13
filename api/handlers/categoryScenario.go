@@ -26,33 +26,33 @@ import (
 // @Success 201 {object} status_http.Response{data=models.Category} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) CreateCategoryScenario(c *gin.Context) {
+func (H *Handler) CreateCategoryScenario(c *gin.Context) {
 	var (
 		req models.CreateCategory
 	)
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+		H.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
 	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
+	services, err := H.GetService(namespace)
 	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err.Error())
+		H.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
 
 	EnvironmentId, _ := c.Get("environment_id")
 	if !util.IsValidUUID(EnvironmentId.(string)) {
-		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
+		H.handleResponse(c, status_http.BadRequest, "environment_id not found")
 		return
 	}
 
 	ProjectId := c.Query("project-id")
 	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+		H.handleResponse(c, status_http.BadRequest, "project_id not found")
 		return
 	}
 
@@ -65,11 +65,11 @@ func (h *Handler) CreateCategoryScenario(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.InternalServerError, err.Error())
+		H.handleResponse(c, status_http.InternalServerError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
+	H.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateCategory godoc

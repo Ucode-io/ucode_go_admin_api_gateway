@@ -18712,14 +18712,14 @@ var doc = `{
                     },
                     {
                         "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
                         "required": true
                     },
                     {
                         "description": "Request Body",
-                        "name": "data",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
