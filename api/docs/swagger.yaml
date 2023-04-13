@@ -356,6 +356,8 @@ definitions:
     type: object
   auth_service.V2LoginResponse:
     properties:
+      addational_table:
+        $ref: '#/definitions/structpb.Struct'
       app_permissions:
         items:
           $ref: '#/definitions/auth_service.RecordPermission'
@@ -379,6 +381,10 @@ definitions:
       sessions:
         items:
           $ref: '#/definitions/auth_service.Session'
+        type: array
+      tables:
+        items:
+          $ref: '#/definitions/auth_service.Object'
         type: array
       token:
         $ref: '#/definitions/auth_service.Token'
@@ -1326,6 +1332,21 @@ definitions:
       title:
         type: string
     type: object
+  models.CreateAppReqModel:
+    properties:
+      logo:
+        type: string
+      name:
+        type: string
+      pages:
+        $ref: '#/definitions/models.WebPageAppPages'
+      project_id:
+        type: string
+      routes:
+        $ref: '#/definitions/structpb.Struct'
+      sub_domain:
+        type: string
+    type: object
   models.CreateCashboxTransactionRequest:
     properties:
       amount_of_money:
@@ -1553,6 +1574,8 @@ definitions:
     type: object
   models.CreateWebPageReqModel:
     properties:
+      app_id:
+        type: string
       components:
         $ref: '#/definitions/structpb.Struct'
       folder_id:
@@ -2012,6 +2035,23 @@ definitions:
       text:
         type: string
     type: object
+  models.UpdateAppReqModel:
+    properties:
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      pages:
+        $ref: '#/definitions/models.WebPageAppPages'
+      project_id:
+        type: string
+      routes:
+        $ref: '#/definitions/structpb.Struct'
+      sub_domain:
+        type: string
+    type: object
   models.UpdateCategoryRequest:
     properties:
       id:
@@ -2030,6 +2070,8 @@ definitions:
     type: object
   models.UpdateWebPageReqModel:
     properties:
+      app_id:
+        type: string
       components:
         $ref: '#/definitions/structpb.Struct'
       folder_id:
@@ -2070,6 +2112,13 @@ definitions:
       guid:
         type: string
       title:
+        type: string
+    type: object
+  models.WebPageAppPages:
+    properties:
+      default_page:
+        type: string
+      login_page:
         type: string
     type: object
   new_function_service.CreateCustomEventRequest:
@@ -3206,6 +3255,8 @@ definitions:
     type: object
   object_builder_service.V2LoginResponse:
     properties:
+      addational_table:
+        $ref: '#/definitions/structpb.Struct'
       app_permissions:
         items:
           $ref: '#/definitions/object_builder_service.RecordPermission'
@@ -4637,6 +4688,27 @@ definitions:
       name:
         type: string
     type: object
+  web_page_service.App:
+    properties:
+      Routes:
+        $ref: '#/definitions/structpb.Struct'
+      environment_id:
+        type: string
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      pages:
+        $ref: '#/definitions/web_page_service.Pages'
+      project_id:
+        type: string
+      resource_id:
+        type: string
+      sub_domain:
+        type: string
+    type: object
   web_page_service.CommitInfo:
     properties:
       author_id:
@@ -4675,6 +4747,15 @@ definitions:
       title:
         type: string
     type: object
+  web_page_service.GetListAppRes:
+    properties:
+      Apps:
+        items:
+          $ref: '#/definitions/web_page_service.App'
+        type: array
+      count:
+        type: integer
+    type: object
   web_page_service.GetListFolderRes:
     properties:
       count:
@@ -4692,6 +4773,15 @@ definitions:
         items:
           $ref: '#/definitions/web_page_service.WebPage'
         type: array
+    type: object
+  web_page_service.GetSingleAppRes:
+    properties:
+      Apps:
+        items:
+          $ref: '#/definitions/web_page_service.App'
+        type: array
+      count:
+        type: integer
     type: object
   web_page_service.GetSingleFolderRes:
     properties:
@@ -4726,6 +4816,13 @@ definitions:
           $ref: '#/definitions/web_page_service.VersionInfo'
         type: object
     type: object
+  web_page_service.Pages:
+    properties:
+      default_page:
+        type: string
+      login_page:
+        type: string
+    type: object
   web_page_service.VersionInfo:
     properties:
       author_id:
@@ -4745,6 +4842,8 @@ definitions:
     type: object
   web_page_service.WebPage:
     properties:
+      app_id:
+        type: string
       commit_id:
         type: string
       commit_info:
@@ -20021,6 +20120,268 @@ paths:
       summary: Upsert view relation
       tags:
       - ViewRelation
+  /v1/webpage-app:
+    get:
+      consumes:
+      - application/json
+      description: Get List webpage app
+      operationId: get_list_web_page_app
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: AppBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/web_page_service.GetListAppRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List webpage app
+      tags:
+      - WebPage
+    post:
+      consumes:
+      - application/json
+      description: Create web page app
+      operationId: create_web_page_app
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: CreateAppReqModel
+        in: body
+        name: webpage_app
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateAppReqModel'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: WebPage app data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/web_page_service.App'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create web page app
+      tags:
+      - WebPage
+    put:
+      consumes:
+      - application/json
+      description: Update webpage app
+      operationId: update_web_page_app
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: UpdateAppReqModel
+        in: body
+        name: app
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateAppReqModel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: App data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/web_page_service.App'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update webpage app
+      tags:
+      - WebPage
+  /v1/webpage-app/{webpage-app-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete webpage app
+      operationId: delete_web_page_app
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: webpage-app-id
+        in: path
+        name: webpage-app-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete webpage app
+      tags:
+      - WebPage
+    get:
+      consumes:
+      - application/json
+      description: Get single webpage app
+      operationId: get_single_web_page_app
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: webpage-app-id
+        in: path
+        name: webpage-app-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetSingleAppRes
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/web_page_service.GetSingleAppRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single webpage app
+      tags:
+      - WebPage
   /v1/webpage-folder:
     get:
       consumes:

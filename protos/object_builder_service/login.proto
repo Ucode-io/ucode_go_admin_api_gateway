@@ -138,4 +138,5 @@ message V2LoginResponse {
     repeated RecordPermission permissions = 6;
     string login_table_slug = 7;
     repeated RecordPermission app_permissions = 8;
+    google.protobuf.Struct addational_table = 9;
 }
