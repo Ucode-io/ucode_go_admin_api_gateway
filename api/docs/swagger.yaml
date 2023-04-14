@@ -15952,14 +15952,14 @@ paths:
         name: query-id
         required: true
         type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: Request Body
         in: body
-        name: body
+        name: data
         required: true
         schema:
           $ref: '#/definitions/query_service.QueryManyVersions'
