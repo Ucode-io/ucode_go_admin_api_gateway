@@ -310,6 +310,8 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("USER:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::", resource)
+
 	resp, err := services.BuilderService().ObjectBuilder().GetSingle(
 		context.Background(),
 		&obs.CommonMessage{
@@ -318,12 +320,12 @@ func (h *Handler) GetSingle(c *gin.Context) {
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
+	fmt.Println("USER:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::", resp)
 	h.handleResponse(c, status_http.OK, resp)
 }
 
