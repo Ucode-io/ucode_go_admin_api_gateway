@@ -12449,6 +12449,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: DeleteManyToManyBody
         in: body
         name: object
@@ -12497,6 +12502,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateMany2ManyRequestBody
@@ -13840,6 +13850,11 @@ paths:
         name: table_slug
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: CreateObjectRequestBody
         in: body
         name: object
@@ -13903,6 +13918,11 @@ paths:
         name: table_slug
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: UpdateObjectRequestBody
         in: body
         name: object
@@ -13954,7 +13974,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -13964,6 +13983,11 @@ paths:
       - description: table_slug
         in: path
         name: table_slug
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: CreateObjectRequestBody
@@ -14040,6 +14064,11 @@ paths:
         name: object_id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -14077,7 +14106,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -14092,6 +14120,11 @@ paths:
       - description: object_id
         in: path
         name: object_id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       produces:
@@ -14149,6 +14182,11 @@ paths:
       - description: table_slug
         in: path
         name: table_slug
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: GetListObjectRequestBody
@@ -14214,6 +14252,11 @@ paths:
         name: table_slug
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: GetFinancialAnalyticsRequestBody
         in: body
         name: object
@@ -14275,6 +14318,11 @@ paths:
       - description: table_slug
         in: path
         name: table_slug
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: GetListObjectRequestBody
@@ -14340,6 +14388,11 @@ paths:
         name: table_slug
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: MultipleUpdateObjectRequestBody
         in: body
         name: object
@@ -14401,6 +14454,11 @@ paths:
       - description: table_slug
         in: path
         name: table_slug
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: GetObjectDetailsBody

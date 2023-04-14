@@ -13325,6 +13325,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateMany2ManyRequestBody",
                         "name": "object",
                         "in": "body",
@@ -13422,6 +13429,13 @@ var doc = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -15728,6 +15742,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "CreateObjectRequestBody",
                         "name": "object",
                         "in": "body",
@@ -15834,6 +15855,13 @@ var doc = `{
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -15946,6 +15974,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "GetFinancialAnalyticsRequestBody",
                         "name": "object",
                         "in": "body",
@@ -16052,6 +16087,13 @@ var doc = `{
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -16164,6 +16206,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "MultipleUpdateObjectRequestBody",
                         "name": "object",
                         "in": "body",
@@ -16270,6 +16319,13 @@ var doc = `{
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -16382,6 +16438,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateObjectRequestBody",
                         "name": "object",
                         "in": "body",
@@ -16473,8 +16536,7 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -16488,6 +16550,13 @@ var doc = `{
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -16582,8 +16651,7 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -16604,6 +16672,13 @@ var doc = `{
                         "description": "object_id",
                         "name": "object_id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -16718,6 +16793,13 @@ var doc = `{
                         "description": "object_id",
                         "name": "object_id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     }
                 ],
