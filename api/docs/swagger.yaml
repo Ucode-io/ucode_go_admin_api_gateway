@@ -780,6 +780,8 @@ definitions:
     properties:
       id:
         type: string
+      project_id:
+        type: string
     type: object
   company_service.RemoveResourceRequest:
     properties:
@@ -9249,6 +9251,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: ProjectResourceReconnectRequest

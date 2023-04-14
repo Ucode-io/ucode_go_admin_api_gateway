@@ -220,6 +220,10 @@ message ReconnectResourceRequest {
     string project_id = 2;
 }
 
+message ReconnectResourceRes {
+    int32 count = 1;
+}
+
 message GetResourceWithPathResponse {
     message Credentials {
         string host = 1;

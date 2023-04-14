@@ -28,6 +28,7 @@ message ServiceResourceModel {
 message GetListServiceResourceReq {
   string project_id = 1;
   string environment_id = 2;
+  string resource_id = 3;
 }
 
 message GetListServiceResourceRes {

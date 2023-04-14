@@ -7229,6 +7229,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "ProjectResourceReconnectRequest",
                         "name": "ProjectResource",
                         "in": "body",
@@ -32710,6 +32717,9 @@ var doc = `{
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 }
             }

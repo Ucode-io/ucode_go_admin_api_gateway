@@ -16,7 +16,7 @@ service ResourceService {
     rpc GetResourceList(GetResourceListRequest) returns (GetResourceListResponse) {}
     rpc CreateResource(CreateResourceReq) returns (CreateResourceRes) {}
     rpc AddResourceInUcode(AddResourceInUcodeRequest) returns (AddResourceResponse) {}
-    rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
+    rpc ReconnectResource(ReconnectResourceRequest) returns (ReconnectResourceRes) {}
     rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
     rpc AutoConnect(GetProjectsRequest) returns (GetResourceManyWithPathResponse) {}
     rpc GetResourceByResEnvironId(GetResourceRequest) returns (ResourceWithoutPassword) {}
