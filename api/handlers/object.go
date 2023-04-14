@@ -19,7 +19,7 @@ import (
 
 // CreateObject godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID create_object
 // @Router /v1/object/{table_slug}/ [POST]
@@ -29,6 +29,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
+// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "CreateObjectRequestBody"
 // @Success 201 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -63,6 +64,12 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -88,7 +95,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			//ProjectId:     projectId,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -209,7 +216,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 
 // GetSingle godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @ID get_object_by_id
 // @Router /v1/object/{table_slug}/{object_id} [GET]
@@ -220,6 +227,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 // @Produce json
 // @Param table_slug path string true "table_slug"
 // @Param object_id path string true "object_id"
+// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -262,6 +270,12 @@ func (h *Handler) GetSingle(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -284,7 +298,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			//ProjectId:     projectId,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -323,6 +337,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
+// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "UpdateObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -370,6 +385,12 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -392,7 +413,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			//ProjectId:     projectId,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -491,6 +512,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 // @Param table_slug path string true "table_slug"
 // @Param object body models.CommonMessage true "DeleteObjectRequestBody"
 // @Param object_id path string true "object_id"
+// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -536,6 +558,12 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -559,7 +587,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			//ProjectId:     projectId,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -652,6 +680,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
+// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -699,6 +728,12 @@ func (h *Handler) GetList(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -721,7 +756,7 @@ func (h *Handler) GetList(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			//ProjectId:     projectId,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -760,6 +795,7 @@ func (h *Handler) GetList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
+// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -799,6 +835,12 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -822,7 +864,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			//ProjectId:     projectId,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -860,6 +902,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 // @Tags Object
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param object body object_builder_service.ManyToManyMessage true "DeleteManyToManyBody"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -891,6 +934,12 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -913,7 +962,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			//ProjectId:     projectId,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -987,6 +1036,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 // @Tags Object
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param object body object_builder_service.ManyToManyMessage true "UpdateMany2ManyRequestBody"
 // @Success 200 {object} status_http.Response{data=string} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1019,6 +1069,12 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -1041,7 +1097,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			//ProjectId:     projectId,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -1116,6 +1172,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
+// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "GetObjectDetailsBody"
 // @Success 201 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1155,6 +1212,12 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -1178,7 +1241,7 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			//ProjectId:     projectId,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -1218,6 +1281,7 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
+// @Param project-id query string true "project-id"
 // @Param object body models.UpsertCommonMessage true "CreateObjectRequestBody"
 // @Success 201 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1251,6 +1315,12 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -1273,7 +1343,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			//ProjectId:     projectId,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -1424,6 +1494,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
+// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "MultipleUpdateObjectRequestBody"
 // @Success 201 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1480,6 +1551,12 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -1502,7 +1579,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			//ProjectId:     projectId,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -1582,6 +1659,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
+// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "GetFinancialAnalyticsRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -1615,6 +1693,12 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -1638,7 +1722,7 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			//ProjectId:     projectId,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
