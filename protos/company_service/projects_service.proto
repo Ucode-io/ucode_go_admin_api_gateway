@@ -217,6 +217,7 @@ message GetResourceRequest {
 
 message ReconnectResourceRequest {
     string id = 1;
+    string project_id = 2;
 }
 
 message GetResourceWithPathResponse {
