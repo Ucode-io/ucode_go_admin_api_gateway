@@ -6584,6 +6584,8 @@ var doc = `{
             }
         },
         "/v1/company/project/resource": {
+<<<<<<< HEAD
+=======
             "get": {
                 "security": [
                     {
@@ -6700,6 +6702,7 @@ var doc = `{
                     }
                 }
             },
+>>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
             "post": {
                 "security": [
                     {
@@ -32125,6 +32128,9 @@ var doc = `{
                 "chat_id": {
                     "type": "string"
                 },
+                "check": {
+                    "type": "boolean"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -32170,16 +32176,19 @@ var doc = `{
         "chat_service.UserMessage": {
             "type": "object",
             "properties": {
+                "check": {
+                    "type": "boolean"
+                },
                 "created_at": {
                     "type": "string"
                 },
                 "message": {
                     "type": "string"
                 },
-                "sender_name": {
+                "platformType": {
                     "type": "string"
                 },
-                "type": {
+                "sender_name": {
                     "type": "string"
                 },
                 "user_id": {
@@ -32425,6 +32434,35 @@ var doc = `{
                 }
             }
         },
+        "company_service.Currency": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "decimal_digits": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "name_plural": {
+                    "type": "string"
+                },
+                "rounding": {
+                    "type": "integer"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "symbol_native": {
+                    "type": "string"
+                }
+            }
+        },
         "company_service.EmptyProto": {
             "type": "object"
         },
@@ -32572,6 +32610,8 @@ var doc = `{
                 }
             }
         },
+<<<<<<< HEAD
+=======
         "company_service.GetResourceListResponse": {
             "type": "object",
             "properties": {
@@ -32586,6 +32626,7 @@ var doc = `{
                 }
             }
         },
+>>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
         "company_service.GetServiceResourcesRes": {
             "type": "object",
             "properties": {
@@ -32727,6 +32768,15 @@ var doc = `{
                 },
                 "is_configured": {
                     "type": "boolean"
+<<<<<<< HEAD
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/company_service.ResourceType"
+                },
+=======
                 },
                 "project_id": {
                     "type": "string"
@@ -32734,6 +32784,7 @@ var doc = `{
                 "resource_type": {
                     "type": "integer"
                 },
+>>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
                 "title": {
                     "type": "string"
                 },
@@ -32831,6 +32882,30 @@ var doc = `{
                 }
             }
         },
+<<<<<<< HEAD
+        "company_service.ServiceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+            ],
+            "x-enum-varnames": [
+                "ServiceType_NOT_SPECIFIED",
+                "ServiceType_BUILDER_SERVICE",
+                "ServiceType_ANALYTICS_SERVICE",
+                "ServiceType_TEMPLATE_SERVICE",
+                "ServiceType_QUERY_SERVICE",
+                "ServiceType_FUNCTION_SERVICE",
+                "ServiceType_WEB_PAGE_SERVICE",
+                "ServiceType_API_REF_SERVICE"
+            ]
+=======
         "company_service.ServiceResourceModel": {
             "type": "object",
             "properties": {
@@ -32862,6 +32937,7 @@ var doc = `{
                     "type": "string"
                 }
             }
+>>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
         },
         "company_service.SetDefaultResourceReq": {
             "type": "object",
@@ -32905,6 +32981,20 @@ var doc = `{
                 },
                 "data": {
                     "$ref": "#/definitions/structpb.Struct"
+                }
+            }
+        },
+        "company_service.Timezone": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
                 }
             }
         },
@@ -33456,13 +33546,13 @@ var doc = `{
         "models.Chat": {
             "type": "object",
             "properties": {
-                "message": {
+                "phone_number": {
+                    "type": "string"
+                },
+                "platform_type": {
                     "type": "string"
                 },
                 "sender_name": {
-                    "type": "string"
-                },
-                "types": {
                     "type": "string"
                 }
             }

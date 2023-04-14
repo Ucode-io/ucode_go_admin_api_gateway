@@ -2,9 +2,9 @@ package models
 
 // Chat ...
 type Chat struct {
-	Sender_name string `json:"sender_name"`
-	Message     string `json:"message"`
-	Types       string `json:"types"`
+	Sender_name  string `json:"sender_name"`
+	PhoneNumber  string `json:"phone_number"`
+	PlatformType string `json:"platform_type"`
 }
 
 // CreateChatModule

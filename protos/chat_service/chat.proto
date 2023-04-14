@@ -3,22 +3,25 @@ syntax = "proto3";
 option go_package = "genproto/chat_service";
 import "google/protobuf/empty.proto";
 
-// The service definition.
+// The service definition
 service ChatService {
     rpc CreateChat (CreateChatRequest) returns (CreateChatResponse) {}
     rpc GetChatByChatId (GetChatByChatIdRequest) returns (GetChatByChatIdResponse) {}
+    rpc GetChatByUserId (GetChatByUserIdRequest) returns (GetChatByUserIdResponse) {}
     rpc GetChatList (GetChatListRequest) returns (GetChatListResponse) {}
     rpc CreateMessage(CreateMessageRequest) returns (google.protobuf.Empty) {}
+    rpc UpdateChat(UpdateChatRequest) returns (google.protobuf.Empty) {}
 }
 
 // Chat ...
-message Chat { 
-    string chat_id = 1;
+message Chat {
+    string phone_number = 1;
     string sender_name = 2;
     string message = 3;
-    string types = 4;
+    string platformType = 4;
     string environment_id = 5;
     string created_at = 6;
+    bool check=7;
 }
 
 message CreateChatRequest{
@@ -35,16 +38,26 @@ message UserMessage {
     string message = 2;
     string created_at = 3;
     string user_id = 4;
-    string type = 5;
+    string platformType = 5;
+    bool check=6;
 }
 
 message GetChatByChatIdRequest {
     string chat_id = 1;
 }
 
+message GetChatByUserIdRequest {
+    string user_id = 1;
+}
+
 message GetChatByChatIdResponse {
     string chat_id = 1;
     repeated UserMessage messages = 2;
+}
+
+message GetChatByUserIdResponse {
+    string user_id = 1;
+    string chat_id = 2;
 }
 
 message GetChatListRequest {
@@ -57,7 +70,8 @@ message ChatWithLastMessageData {
     string sender_name = 2;
     UserMessage message = 3;
     string environment_id = 4;
-    string created_at = 5;
+    bool check = 5;
+    string created_at = 6;
 }
 
 message GetChatListResponse {
@@ -76,5 +90,10 @@ message GetSelfChatContent {
 }
 
 message GetSelfChatContentResponse {
-    ChatWithLastMessageData message = 1;   
+    ChatWithLastMessageData message = 1;
+}
+
+
+message UpdateChatRequest {
+    string chat_id = 1;
 }

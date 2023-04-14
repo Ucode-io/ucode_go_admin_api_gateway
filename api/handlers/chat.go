@@ -44,14 +44,15 @@ func (h *Handler) CreatChat(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "Environment-Id not found")
 		return
 	}
-	fmt.Println(":::::::::::user id", body.UserId)
+
 	resp, err := h.companyServices.ChatService().Chat().CreateChat(c.Request.Context(), &chat_service.CreateChatRequest{
 		UserId: body.UserId,
 		Chat: &chat_service.Chat{
 			SenderName:    body.Chat.Sender_name,
-			Message:       body.Chat.Message,
-			Types:         body.Chat.Types,
+			PhoneNumber:   body.Chat.PhoneNumber,
+			PlatformType:  body.Chat.PlatformType,
 			EnvironmentId: EnvironmentId,
+			Check:         false,
 		},
 	})
 
