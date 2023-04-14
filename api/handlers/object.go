@@ -310,7 +310,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("USER:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::", resource)
+	fmt.Println("USER:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::", resource, structData)
 
 	resp, err := services.BuilderService().ObjectBuilder().GetSingle(
 		context.Background(),
