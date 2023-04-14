@@ -7,7 +7,6 @@
 package company_service
 
 import (
-	_struct "github.com/golang/protobuf/ptypes/struct"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	structpb "google.golang.org/protobuf/types/known/structpb"
@@ -27,13 +26,8 @@ type Setting struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-<<<<<<< HEAD
-	Data  *_struct.Struct `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
-	Count int32           `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
-=======
 	Data  *structpb.Struct `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 	Count int32            `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
->>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
 }
 
 func (x *Setting) Reset() {
@@ -68,11 +62,7 @@ func (*Setting) Descriptor() ([]byte, []int) {
 	return file_projects_service_proto_rawDescGZIP(), []int{0}
 }
 
-<<<<<<< HEAD
-func (x *Setting) GetData() *_struct.Struct {
-=======
 func (x *Setting) GetData() *structpb.Struct {
->>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
 	if x != nil {
 		return x.Data
 	}
@@ -3063,11 +3053,7 @@ var file_projects_service_proto_goTypes = []interface{}{
 	(*GetResourceWithPathResponse_Credentials)(nil),                         // 34: company_service.GetResourceWithPathResponse.Credentials
 	(*GetResourceManyWithPathResponse_ResourceEnvironment)(nil),             // 35: company_service.GetResourceManyWithPathResponse.ResourceEnvironment
 	(*GetResourceManyWithPathResponse_ResourceEnvironment_Credentials)(nil), // 36: company_service.GetResourceManyWithPathResponse.ResourceEnvironment.Credentials
-<<<<<<< HEAD
-	(*_struct.Struct)(nil),                                                  // 37: google.protobuf.Struct
-=======
 	(*structpb.Struct)(nil),                                                 // 37: google.protobuf.Struct
->>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
 	(SettingType)(0),                                                        // 38: company_service.SettingType
 	(ResourceType)(0),                                                       // 39: company_service.ResourceType
 	(*Language)(nil),                                                        // 40: company_service.Language
