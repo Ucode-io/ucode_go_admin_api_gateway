@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -233,6 +234,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingle(c *gin.Context) {
 	var object models.CommonMessage
+	fmt.Println("USER:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::")
 
 	object.Data = make(map[string]interface{})
 

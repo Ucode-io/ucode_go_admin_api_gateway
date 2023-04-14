@@ -598,25 +598,6 @@ definitions:
       symbol_native:
         type: string
     type: object
-  company_service.Currency:
-    properties:
-      code:
-        type: string
-      decimal_digits:
-        type: integer
-      id:
-        type: string
-      name:
-        type: string
-      name_plural:
-        type: string
-      rounding:
-        type: integer
-      symbol:
-        type: string
-      symbol_native:
-        type: string
-    type: object
   company_service.EmptyProto:
     type: object
   company_service.Environment:
@@ -712,8 +693,6 @@ definitions:
           $ref: '#/definitions/company_service.Project'
         type: array
     type: object
-<<<<<<< HEAD
-=======
   company_service.GetResourceListResponse:
     properties:
       count:
@@ -723,7 +702,6 @@ definitions:
           $ref: '#/definitions/company_service.Resource'
         type: array
     type: object
->>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
   company_service.GetServiceResourcesRes:
     properties:
       service_resources:
@@ -819,11 +797,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-<<<<<<< HEAD
-        $ref: '#/definitions/company_service.ResourceType'
-=======
         type: integer
->>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
       title:
         type: string
       vault_path:
@@ -887,28 +861,6 @@ definitions:
       resource_environment_id:
         type: string
     type: object
-<<<<<<< HEAD
-  company_service.ServiceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    type: integer
-    x-enum-varnames:
-    - ServiceType_NOT_SPECIFIED
-    - ServiceType_BUILDER_SERVICE
-    - ServiceType_ANALYTICS_SERVICE
-    - ServiceType_TEMPLATE_SERVICE
-    - ServiceType_QUERY_SERVICE
-    - ServiceType_FUNCTION_SERVICE
-    - ServiceType_WEB_PAGE_SERVICE
-    - ServiceType_API_REF_SERVICE
-=======
   company_service.ServiceResourceModel:
     properties:
       description:
@@ -930,7 +882,6 @@ definitions:
       title:
         type: string
     type: object
->>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
   company_service.SetDefaultResourceReq:
     properties:
       environment_id:
@@ -959,15 +910,6 @@ definitions:
         type: integer
       data:
         $ref: '#/definitions/structpb.Struct'
-    type: object
-  company_service.Timezone:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      text:
-        type: string
     type: object
   company_service.Timezone:
     properties:
@@ -8889,8 +8831,6 @@ paths:
       summary: Remove ProjectResource
       tags:
       - Company Resource
-<<<<<<< HEAD
-=======
     get:
       consumes:
       - application/json
@@ -8957,7 +8897,6 @@ paths:
       summary: Get all companies
       tags:
       - Company Resource
->>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
     post:
       consumes:
       - application/json
