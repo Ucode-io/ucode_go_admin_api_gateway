@@ -11,11 +11,13 @@ import (
 type WebPageServiceI interface {
 	Folder() tmp.FolderServiceClient
 	WebPage() tmp.WebPageServiceClient
+	App() tmp.AppServiceClient
 }
 
 type WebPageServiceClient struct {
 	folderService  tmp.FolderServiceClient
 	webPageService tmp.WebPageServiceClient
+	appService     tmp.AppServiceClient
 }
 
 func NewWebPageServiceClient(ctx context.Context, cfg config.Config) (WebPageServiceI, error) {
@@ -32,6 +34,7 @@ func NewWebPageServiceClient(ctx context.Context, cfg config.Config) (WebPageSer
 	return &WebPageServiceClient{
 		folderService:  tmp.NewFolderServiceClient(connWebPageService),
 		webPageService: tmp.NewWebPageServiceClient(connWebPageService),
+		appService:     tmp.NewAppServiceClient(connWebPageService),
 	}, nil
 }
 
@@ -41,4 +44,8 @@ func (g *WebPageServiceClient) Folder() tmp.FolderServiceClient {
 
 func (g *WebPageServiceClient) WebPage() tmp.WebPageServiceClient {
 	return g.webPageService
+}
+
+func (g *WebPageServiceClient) App() tmp.AppServiceClient {
+	return g.appService
 }

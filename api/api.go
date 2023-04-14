@@ -395,6 +395,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/webpage-folder/:webpage-folder-id", h.GetSingleWebPageFolder)
 		v1Admin.DELETE("/webpage-folder/:webpage-folder-id", h.DeleteWebPageFolder)
 
+		v1Admin.POST("/webpage-app", h.CreateWebPageApp)
+		v1Admin.PUT("/webpage-app", h.UpdateWebPageApp)
+		v1Admin.GET("/webpage-app", h.GetListWebPageApp)
+		v1Admin.GET("/webpage-app/:webpage-app-id", h.GetSingleWebPageApp)
+		v1Admin.DELETE("/webpage-app/:webpage-app-id", h.DeleteWebPageApp)
+
 		v1Admin.POST("/webpageV2", h.CreateWebPageV2)
 		v1Admin.PUT("/webpageV2", h.UpdateWebPageV2)
 		v1Admin.GET("/webpageV2", h.GetListWebPageV2)
