@@ -3,37 +3,33 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	obs "ucode/ucode_go_api_gateway/genproto/company_service"
-	tmp "ucode/ucode_go_api_gateway/genproto/query_service"
+	tmp "ucode/ucode_go_api_gateway/genproto/web_page_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 )
 
-// CreateQueryRequestFolder godoc
+// CreateWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID create_query_request_folder
-// @Router /v1/query-folder [POST]
-// @Summary Create query request folder
-// @Description Create query request folder
-// @Tags Query
+// @ID create_web_page_app
+// @Router /v1/webpage-app [POST]
+// @Summary Create web page app
+// @Description Create web page app
+// @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param query_folder body tmp.CreateFolderReq true "CreateFolderReq"
-// @Success 201 {object} status_http.Response{data=tmp.Folder} "Query folder data"
+// @Param webpage_app body models.CreateAppReqModel true "CreateAppReqModel"
+// @Success 201 {object} status_http.Response{data=tmp.App} "WebPage app data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
+func (h *Handler) CreateWebPageApp(c *gin.Context) {
 	var (
-		folder tmp.CreateFolderReq
+		app tmp.CreateAppReq
 		//resourceEnvironment *obs.ResourceEnvironment
 	)
 
-	err := c.ShouldBindJSON(&folder)
+	err := c.ShouldBindJSON(&app)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -52,12 +48,11 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	if !util.IsValidUUID(app.ProjectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-	//
+
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
 	//	err = errors.New("error getting resource id")
@@ -66,13 +61,14 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 	//}
 	//
 	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	//
-	//if util.IsValidUUID(resourceId.(string)) {
+
+	app.EnvironmentId = environmentId.(string)
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -88,8 +84,8 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ResourceId: resourceId.(string),
+	//			ProjectId:  projectId,
 	//		},
 	//	)
 	//	if err != nil {
@@ -97,35 +93,11 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
+	//app.ProjectId = resourceEnvironment.GetId()
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   obs.ServiceType_QUERY_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	folder.ProjectId = resource.ResourceEnvironmentId
-
-	//uuID, err := uuid.NewRandom()
-	//if err != nil {
-	//	err = errors.New("error generating new id")
-	//	h.handleResponse(c, status_http.InternalServerError, err.Error())
-	//	return
-	//}
-
-	//folder.CommitId = uuID.String()
-	//folder.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
-
-	res, err := services.QueryService().Folder().CreateFolder(
+	res, err := services.WebPageService().App().CreateApp(
 		context.Background(),
-		&folder,
+		&app,
 	)
 
 	if err != nil {
@@ -136,30 +108,29 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 	h.handleResponse(c, status_http.Created, res)
 }
 
-// GetSingleQueryRequestFolder godoc
+// GetSingleWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID get_single_query_request_folder
-// @Router /v1/query-folder/{query-folder-id} [GET]
-// @Summary Get single query request folder
-// @Description Get single query request folder
-// @Tags Query
+// @ID get_single_web_page_app
+// @Router /v1/webpage-app/{webpage-app-id} [GET]
+// @Summary Get single webpage app
+// @Description Get single webpage app
+// @Tags WebPage
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param query-folder-id path string true "query-folder-id"
-// @Success 200 {object} status_http.Response{data=tmp.GetSingleFolderRes} "GetSingleFolderRes"
+// @Param webpage-app-id path string true "webpage-app-id"
+// @Success 200 {object} status_http.Response{data=tmp.GetSingleAppRes} "GetSingleAppRes"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) GetSingleQueryRequestFolder(c *gin.Context) {
+func (h *Handler) GetSingleWebPageApp(c *gin.Context) {
 	var (
 	//resourceEnvironment *obs.ResourceEnvironment
 	)
-	folderId := c.Param("query-folder-id")
+	appId := c.Param("webpage-app-id")
 
-	if !util.IsValidUUID(folderId) {
-		h.handleResponse(c, status_http.InvalidArgument, "folder id is an invalid uuid")
+	if !util.IsValidUUID(appId) {
+		h.handleResponse(c, status_http.InvalidArgument, "app id is an invalid uuid")
 		return
 	}
 
@@ -187,15 +158,15 @@ func (h *Handler) GetSingleQueryRequestFolder(c *gin.Context) {
 	//	h.handleResponse(c, status_http.BadRequest, err.Error())
 	//	return
 	//}
-
+	//
 	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
+	//
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -211,8 +182,8 @@ func (h *Handler) GetSingleQueryRequestFolder(c *gin.Context) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ResourceId: resourceId.(string),
+	//			ProjectId:  projectId,
 	//		},
 	//	)
 	//	if err != nil {
@@ -221,25 +192,12 @@ func (h *Handler) GetSingleQueryRequestFolder(c *gin.Context) {
 	//	}
 	//}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
+	res, err := services.WebPageService().App().GetSingleApp(
+		context.Background(),
+		&tmp.GetSingleAppReq{
+			Id:            appId,
 			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
-			ServiceType:   obs.ServiceType_QUERY_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	res, err := services.QueryService().Folder().GetSingleFolder(
-		context.Background(),
-		&tmp.GetSingleFolderReq{
-			Id:        folderId,
-			ProjectId: resource.ResourceEnvironmentId,
-			//VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
@@ -251,29 +209,27 @@ func (h *Handler) GetSingleQueryRequestFolder(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, res)
 }
 
-// UpdateQueryRequestFolder godoc
+// UpdateWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID update_query_request_folder
-// @Router /v1/query-folder [PUT]
-// @Summary Update query request folder
-// @Description Update query folder
-// @Tags Query
+// @ID update_web_page_app
+// @Router /v1/webpage-app [PUT]
+// @Summary Update webpage app
+// @Description Update webpage app
+// @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param folder body tmp.UpdateFolderReq true "UpdateFolderReq"
-// @Success 200 {object} status_http.Response{data=tmp.Folder} "Folder data"
+// @Param app body models.UpdateAppReqModel true "UpdateAppReqModel"
+// @Success 200 {object} status_http.Response{data=tmp.App} "App data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
+func (h *Handler) UpdateWebPageApp(c *gin.Context) {
 	var (
 		//resourceEnvironment *obs.ResourceEnvironment
-		folder tmp.UpdateFolderReq
+		app tmp.UpdateAppReq
 	)
 
-	err := c.ShouldBindJSON(&folder)
+	err := c.ShouldBindJSON(&app)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
@@ -292,8 +248,7 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	if !util.IsValidUUID(app.ProjectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -304,15 +259,15 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 	//	h.handleResponse(c, status_http.BadRequest, err.Error())
 	//	return
 	//}
-
+	//
 	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
+	app.EnvironmentId = environmentId.(string)
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -328,8 +283,8 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ResourceId: resourceId.(string),
+	//			ProjectId:  projectId,
 	//		},
 	//	)
 	//	if err != nil {
@@ -337,35 +292,11 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
+	//app.ProjectId = resourceEnvironment.GetId()
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   obs.ServiceType_QUERY_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	folder.ProjectId = resource.ResourceEnvironmentId
-
-	//uuID, err := uuid.NewRandom()
-	//if err != nil {
-	//	err = errors.New("error generating new id")
-	//	h.handleResponse(c, status_http.InternalServerError, err.Error())
-	//	return
-	//}
-
-	//folder.CommitId = uuID.String()
-	//folder.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
-
-	res, err := services.QueryService().Folder().UpdateFolder(
+	res, err := services.WebPageService().App().UpdateApp(
 		context.Background(),
-		&folder,
+		&app,
 	)
 
 	if err != nil {
@@ -376,29 +307,28 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, res)
 }
 
-// DeleteQueryRequestFolder godoc
+// DeleteWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID delete_query_request_folder
-// @Router /v1/query-folder/{query-folder-id} [DELETE]
-// @Summary Delete query folder
-// @Description Delete query folder
-// @Tags Query
+// @ID delete_web_page_app
+// @Router /v1/webpage-app/{webpage-app-id} [DELETE]
+// @Summary Delete webpage app
+// @Description Delete webpage app
+// @Tags WebPage
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param query-folder-id path string true "query-folder-id"
+// @Param webpage-app-id path string true "webpage-app-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) DeleteQueryRequestFolder(c *gin.Context) {
+func (h *Handler) DeleteWebPageApp(c *gin.Context) {
 	var (
 	//resourceEnvironment *obs.ResourceEnvironment
 	)
-	folderId := c.Param("query-folder-id")
+	appId := c.Param("webpage-app-id")
 
-	if !util.IsValidUUID(folderId) {
+	if !util.IsValidUUID(appId) {
 		h.handleResponse(c, status_http.InvalidArgument, "view id is an invalid uuid")
 		return
 	}
@@ -427,15 +357,15 @@ func (h *Handler) DeleteQueryRequestFolder(c *gin.Context) {
 	//	h.handleResponse(c, status_http.BadRequest, err.Error())
 	//	return
 	//}
-
+	//
 	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
+	//
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -451,8 +381,8 @@ func (h *Handler) DeleteQueryRequestFolder(c *gin.Context) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ResourceId: resourceId.(string),
+	//			ProjectId:  projectId,
 	//		},
 	//	)
 	//	if err != nil {
@@ -461,25 +391,12 @@ func (h *Handler) DeleteQueryRequestFolder(c *gin.Context) {
 	//	}
 	//}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
+	res, err := services.WebPageService().App().DeleteApp(
+		context.Background(),
+		&tmp.DeleteAppReq{
+			Id:            appId,
 			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
-			ServiceType:   obs.ServiceType_QUERY_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	res, err := services.QueryService().Folder().DeleteFolder(
-		context.Background(),
-		&tmp.DeleteFolderReq{
-			Id:        folderId,
-			ProjectId: resource.ResourceEnvironmentId,
-			//VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
@@ -491,22 +408,21 @@ func (h *Handler) DeleteQueryRequestFolder(c *gin.Context) {
 	h.handleResponse(c, status_http.NoContent, res)
 }
 
-// GetListQueryRequestFolder godoc
+// GetListWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID get_list_query_request_folder
-// @Router /v1/query-folder [GET]
-// @Summary Get List query folder
-// @Description Get List query folder
-// @Tags Query
+// @ID get_list_web_page_app
+// @Router /v1/webpage-app [GET]
+// @Summary Get List webpage app
+// @Description Get List webpage app
+// @Tags WebPage
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Success 200 {object} status_http.Response{data=tmp.GetListFolderRes} "FolderBody"
+// @Success 200 {object} status_http.Response{data=tmp.GetListAppRes} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) GetListQueryRequestFolder(c *gin.Context) {
+func (h *Handler) GetListWebPageApp(c *gin.Context) {
 	var (
 	//resourceEnvironment *obs.ResourceEnvironment
 	)
@@ -536,15 +452,15 @@ func (h *Handler) GetListQueryRequestFolder(c *gin.Context) {
 	//	h.handleResponse(c, status_http.BadRequest, err.Error())
 	//	return
 	//}
-
+	//
 	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
+	//
+	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetResourceEnvironmentReq{
@@ -560,8 +476,8 @@ func (h *Handler) GetListQueryRequestFolder(c *gin.Context) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ResourceId: resourceId.(string),
+	//			ProjectId:  projectId,
 	//		},
 	//	)
 	//	if err != nil {
@@ -570,25 +486,11 @@ func (h *Handler) GetListQueryRequestFolder(c *gin.Context) {
 	//	}
 	//}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
+	res, err := services.WebPageService().App().GetListApp(
+		context.Background(),
+		&tmp.GetListAppReq{
 			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
-			ServiceType:   obs.ServiceType_QUERY_SERVICE,
-		},
-	)
-	if err != nil {
-		fmt.Println("err:::::::", err.Error())
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	res, err := services.QueryService().Folder().GetListFolder(
-		context.Background(),
-		&tmp.GetListFolderReq{
-			ProjectId: resource.ResourceEnvironmentId,
-			//VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 

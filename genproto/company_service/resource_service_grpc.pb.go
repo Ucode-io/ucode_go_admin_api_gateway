@@ -30,7 +30,7 @@ type ResourceServiceClient interface {
 	GetResourceList(ctx context.Context, in *GetResourceListRequest, opts ...grpc.CallOption) (*GetResourceListResponse, error)
 	CreateResource(ctx context.Context, in *CreateResourceReq, opts ...grpc.CallOption) (*CreateResourceRes, error)
 	AddResourceInUcode(ctx context.Context, in *AddResourceInUcodeRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
-	ReconnectResource(ctx context.Context, in *ReconnectResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error)
+	ReconnectResource(ctx context.Context, in *ReconnectResourceRequest, opts ...grpc.CallOption) (*ReconnectResourceRes, error)
 	GetResourceWithPath(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*GetResourceWithPathResponse, error)
 	AutoConnect(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*GetResourceManyWithPathResponse, error)
 	GetResourceByResEnvironId(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error)
@@ -127,8 +127,8 @@ func (c *resourceServiceClient) AddResourceInUcode(ctx context.Context, in *AddR
 	return out, nil
 }
 
-func (c *resourceServiceClient) ReconnectResource(ctx context.Context, in *ReconnectResourceRequest, opts ...grpc.CallOption) (*EmptyProto, error) {
-	out := new(EmptyProto)
+func (c *resourceServiceClient) ReconnectResource(ctx context.Context, in *ReconnectResourceRequest, opts ...grpc.CallOption) (*ReconnectResourceRes, error) {
+	out := new(ReconnectResourceRes)
 	err := c.cc.Invoke(ctx, "/company_service.ResourceService/ReconnectResource", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -265,7 +265,7 @@ type ResourceServiceServer interface {
 	GetResourceList(context.Context, *GetResourceListRequest) (*GetResourceListResponse, error)
 	CreateResource(context.Context, *CreateResourceReq) (*CreateResourceRes, error)
 	AddResourceInUcode(context.Context, *AddResourceInUcodeRequest) (*AddResourceResponse, error)
-	ReconnectResource(context.Context, *ReconnectResourceRequest) (*EmptyProto, error)
+	ReconnectResource(context.Context, *ReconnectResourceRequest) (*ReconnectResourceRes, error)
 	GetResourceWithPath(context.Context, *GetResourceRequest) (*GetResourceWithPathResponse, error)
 	AutoConnect(context.Context, *GetProjectsRequest) (*GetResourceManyWithPathResponse, error)
 	GetResourceByResEnvironId(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error)
@@ -311,7 +311,7 @@ func (UnimplementedResourceServiceServer) CreateResource(context.Context, *Creat
 func (UnimplementedResourceServiceServer) AddResourceInUcode(context.Context, *AddResourceInUcodeRequest) (*AddResourceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddResourceInUcode not implemented")
 }
-func (UnimplementedResourceServiceServer) ReconnectResource(context.Context, *ReconnectResourceRequest) (*EmptyProto, error) {
+func (UnimplementedResourceServiceServer) ReconnectResource(context.Context, *ReconnectResourceRequest) (*ReconnectResourceRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReconnectResource not implemented")
 }
 func (UnimplementedResourceServiceServer) GetResourceWithPath(context.Context, *GetResourceRequest) (*GetResourceWithPathResponse, error) {

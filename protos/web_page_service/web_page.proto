@@ -31,6 +31,7 @@ message WebPage {
   CommitInfo commit_info = 9;
   string version_id = 10;
   string icon = 11;
+  string app_id = 12;
 }
 
 message CreateWebPageReq {
@@ -44,6 +45,7 @@ message CreateWebPageReq {
   CommitInfo commit_info = 8;
   string version_id = 9;
   string icon = 10;
+  string app_id = 11;
 }
 
 message GetListWebPageReq {
@@ -54,6 +56,7 @@ message GetListWebPageReq {
   int32 limit = 5;
   int32 offset = 6;
   string resource_id = 7;
+  string app_id = 8;
 }
 
 message GetListWebPageRes {
@@ -76,6 +79,8 @@ message DeleteWebPageReq {
   string version_id = 3;
   string environment_id = 4;
   string resource_id = 5;
+  string folder_id = 6;
+  string app_id = 7;
 }
 
 message GetWebPageHistoryReq {

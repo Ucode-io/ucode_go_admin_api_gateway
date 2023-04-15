@@ -5,6 +5,7 @@ option go_package="genproto/auth_service";
  
 import "auth.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
 
 service SessionService {
     rpc Login(LoginRequest) returns (LoginResponse) {}
@@ -204,6 +205,8 @@ message V2LoginResponse {
     string resource_id = 11;
     string environment_id = 12;
     User user = 13;
+    repeated Object tables = 14;
+    google.protobuf.Struct addational_table = 15;
 }
 message V2LoginRequest {
     string username = 1;

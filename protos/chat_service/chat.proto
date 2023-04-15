@@ -14,7 +14,7 @@ service ChatService {
 }
 
 // Chat ...
-message Chat { 
+message Chat {
     string phone_number = 1;
     string sender_name = 2;
     string message = 3;
@@ -90,7 +90,7 @@ message GetSelfChatContent {
 }
 
 message GetSelfChatContentResponse {
-    ChatWithLastMessageData message = 1;   
+    ChatWithLastMessageData message = 1;
 }
 
 

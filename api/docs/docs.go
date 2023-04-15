@@ -7222,6 +7222,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "ProjectResourceReconnectRequest",
                         "name": "ProjectResource",
                         "in": "body",
@@ -13318,6 +13325,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateMany2ManyRequestBody",
                         "name": "object",
                         "in": "body",
@@ -13415,6 +13429,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -15721,6 +15742,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "CreateObjectRequestBody",
                         "name": "object",
                         "in": "body",
@@ -15827,6 +15855,13 @@ const docTemplate = `{
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -15939,6 +15974,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "GetFinancialAnalyticsRequestBody",
                         "name": "object",
                         "in": "body",
@@ -16045,6 +16087,13 @@ const docTemplate = `{
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -16157,6 +16206,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "MultipleUpdateObjectRequestBody",
                         "name": "object",
                         "in": "body",
@@ -16263,6 +16319,13 @@ const docTemplate = `{
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -16375,6 +16438,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateObjectRequestBody",
                         "name": "object",
                         "in": "body",
@@ -16466,8 +16536,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -16481,6 +16550,13 @@ const docTemplate = `{
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -16575,8 +16651,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -16597,6 +16672,13 @@ const docTemplate = `{
                         "description": "object_id",
                         "name": "object_id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -16711,6 +16793,13 @@ const docTemplate = `{
                         "description": "object_id",
                         "name": "object_id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -18705,14 +18794,14 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
                         "description": "Request Body",
-                        "name": "body",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -26587,6 +26676,468 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/webpage-app": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get List webpage app",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WebPage"
+                ],
+                "summary": "Get List webpage app",
+                "operationId": "get_list_web_page_app",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AppBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/web_page_service.GetListAppRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update webpage app",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WebPage"
+                ],
+                "summary": "Update webpage app",
+                "operationId": "update_web_page_app",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "UpdateAppReqModel",
+                        "name": "app",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateAppReqModel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "App data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/web_page_service.App"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create web page app",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WebPage"
+                ],
+                "summary": "Create web page app",
+                "operationId": "create_web_page_app",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateAppReqModel",
+                        "name": "webpage_app",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateAppReqModel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "WebPage app data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/web_page_service.App"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/webpage-app/{webpage-app-id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get single webpage app",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WebPage"
+                ],
+                "summary": "Get single webpage app",
+                "operationId": "get_single_web_page_app",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "webpage-app-id",
+                        "name": "webpage-app-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetSingleAppRes",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/web_page_service.GetSingleAppRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete webpage app",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WebPage"
+                ],
+                "summary": "Delete webpage app",
+                "operationId": "delete_web_page_app",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "webpage-app-id",
+                        "name": "webpage-app-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/webpage-folder": {
             "get": {
                 "security": [
@@ -27008,7 +27559,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": ""
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -31522,6 +32073,9 @@ const docTemplate = `{
         "auth_service.V2LoginResponse": {
             "type": "object",
             "properties": {
+                "addational_table": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "app_permissions": {
                     "type": "array",
                     "items": {
@@ -31556,6 +32110,12 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/auth_service.Session"
+                    }
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Object"
                     }
                 },
                 "token": {
@@ -31855,35 +32415,6 @@ const docTemplate = `{
                 }
             }
         },
-        "company_service.Currency": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "decimal_digits": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "name_plural": {
-                    "type": "string"
-                },
-                "rounding": {
-                    "type": "integer"
-                },
-                "symbol": {
-                    "type": "string"
-                },
-                "symbol_native": {
-                    "type": "string"
-                }
-            }
-        },
         "company_service.EmptyProto": {
             "type": "object"
         },
@@ -32164,6 +32695,9 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
                 }
             }
         },
@@ -32191,7 +32725,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
+<<<<<<< HEAD
                     "$ref": "#/definitions/company_service.ResourceType"
+=======
+                    "type": "integer"
+>>>>>>> 5596c09264323b3578c22265b3b4e7e46fd80565
                 },
                 "title": {
                     "type": "string"
@@ -32336,6 +32874,7 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+<<<<<<< HEAD
         },
         "company_service.ServiceType": {
             "type": "integer",
@@ -32359,6 +32898,8 @@ const docTemplate = `{
                 "ServiceType_WEB_PAGE_SERVICE",
                 "ServiceType_API_REF_SERVICE"
             ]
+=======
+>>>>>>> 5596c09264323b3578c22265b3b4e7e46fd80565
         },
         "company_service.SetDefaultResourceReq": {
             "type": "object",
@@ -32402,20 +32943,6 @@ const docTemplate = `{
                 },
                 "data": {
                     "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
-                }
-            }
-        },
-        "company_service.Timezone": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "text": {
-                    "type": "string"
                 }
             }
         },
@@ -33083,6 +33610,29 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CreateAppReqModel": {
+            "type": "object",
+            "properties": {
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pages": {
+                    "$ref": "#/definitions/models.WebPageAppPages"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "routes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "sub_domain": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CreateCashboxTransactionRequest": {
             "type": "object",
             "properties": {
@@ -33429,6 +33979,9 @@ const docTemplate = `{
         "models.CreateWebPageReqModel": {
             "type": "object",
             "properties": {
+                "app_id": {
+                    "type": "string"
+                },
                 "components": {
                     "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
@@ -34127,6 +34680,32 @@ const docTemplate = `{
                 }
             }
         },
+        "models.UpdateAppReqModel": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pages": {
+                    "$ref": "#/definitions/models.WebPageAppPages"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "routes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "sub_domain": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UpdateCategoryRequest": {
             "type": "object",
             "properties": {
@@ -34155,6 +34734,9 @@ const docTemplate = `{
         "models.UpdateWebPageReqModel": {
             "type": "object",
             "properties": {
+                "app_id": {
+                    "type": "string"
+                },
                 "components": {
                     "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
@@ -34215,6 +34797,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.WebPageAppPages": {
+            "type": "object",
+            "properties": {
+                "default_page": {
+                    "type": "string"
+                },
+                "login_page": {
                     "type": "string"
                 }
             }
@@ -35967,6 +36560,9 @@ const docTemplate = `{
         "object_builder_service.V2LoginResponse": {
             "type": "object",
             "properties": {
+                "addational_table": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "app_permissions": {
                     "type": "array",
                     "items": {
@@ -38158,6 +38754,38 @@ const docTemplate = `{
                 }
             }
         },
+        "web_page_service.App": {
+            "type": "object",
+            "properties": {
+                "Routes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pages": {
+                    "$ref": "#/definitions/web_page_service.Pages"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "sub_domain": {
+                    "type": "string"
+                }
+            }
+        },
         "web_page_service.CommitInfo": {
             "type": "object",
             "properties": {
@@ -38216,6 +38844,20 @@ const docTemplate = `{
                 }
             }
         },
+        "web_page_service.GetListAppRes": {
+            "type": "object",
+            "properties": {
+                "Apps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/web_page_service.App"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
         "web_page_service.GetListFolderRes": {
             "type": "object",
             "properties": {
@@ -38241,6 +38883,20 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/web_page_service.WebPage"
                     }
+                }
+            }
+        },
+        "web_page_service.GetSingleAppRes": {
+            "type": "object",
+            "properties": {
+                "Apps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/web_page_service.App"
+                    }
+                },
+                "count": {
+                    "type": "integer"
                 }
             }
         },
@@ -38295,6 +38951,17 @@ const docTemplate = `{
                 }
             }
         },
+        "web_page_service.Pages": {
+            "type": "object",
+            "properties": {
+                "default_page": {
+                    "type": "string"
+                },
+                "login_page": {
+                    "type": "string"
+                }
+            }
+        },
         "web_page_service.VersionInfo": {
             "type": "object",
             "properties": {
@@ -38324,6 +38991,9 @@ const docTemplate = `{
         "web_page_service.WebPage": {
             "type": "object",
             "properties": {
+                "app_id": {
+                    "type": "string"
+                },
                 "commit_id": {
                     "type": "string"
                 },
