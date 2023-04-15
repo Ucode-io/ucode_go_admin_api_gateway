@@ -29,7 +29,7 @@ type TableServiceClient interface {
 	Update(ctx context.Context, in *Table, opts ...grpc.CallOption) (*empty.Empty, error)
 	Delete(ctx context.Context, in *TablePrimaryKey, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetListTableHistory(ctx context.Context, in *GetTableHistoryRequest, opts ...grpc.CallOption) (*GetTableHistoryResponse, error)
-	GetTableHistoryById(ctx context.Context, in *TableHistoryPrimaryKey, opts ...grpc.CallOption) (*TableHistory, error)
+	GetTableHistoryById(ctx context.Context, in *TableHistoryPrimaryKey, opts ...grpc.CallOption) (*Table, error)
 	RevertTableHistory(ctx context.Context, in *TableHistoryPrimaryKey, opts ...grpc.CallOption) (*TableHistory, error)
 	InsertVersionsToCommit(ctx context.Context, in *InsertVersionsToCommitRequest, opts ...grpc.CallOption) (*TableHistory, error)
 }
@@ -96,8 +96,8 @@ func (c *tableServiceClient) GetListTableHistory(ctx context.Context, in *GetTab
 	return out, nil
 }
 
-func (c *tableServiceClient) GetTableHistoryById(ctx context.Context, in *TableHistoryPrimaryKey, opts ...grpc.CallOption) (*TableHistory, error) {
-	out := new(TableHistory)
+func (c *tableServiceClient) GetTableHistoryById(ctx context.Context, in *TableHistoryPrimaryKey, opts ...grpc.CallOption) (*Table, error) {
+	out := new(Table)
 	err := c.cc.Invoke(ctx, "/object_builder_service.TableService/GetTableHistoryById", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ type TableServiceServer interface {
 	Update(context.Context, *Table) (*empty.Empty, error)
 	Delete(context.Context, *TablePrimaryKey) (*empty.Empty, error)
 	GetListTableHistory(context.Context, *GetTableHistoryRequest) (*GetTableHistoryResponse, error)
-	GetTableHistoryById(context.Context, *TableHistoryPrimaryKey) (*TableHistory, error)
+	GetTableHistoryById(context.Context, *TableHistoryPrimaryKey) (*Table, error)
 	RevertTableHistory(context.Context, *TableHistoryPrimaryKey) (*TableHistory, error)
 	InsertVersionsToCommit(context.Context, *InsertVersionsToCommitRequest) (*TableHistory, error)
 	mustEmbedUnimplementedTableServiceServer()
@@ -161,7 +161,7 @@ func (UnimplementedTableServiceServer) Delete(context.Context, *TablePrimaryKey)
 func (UnimplementedTableServiceServer) GetListTableHistory(context.Context, *GetTableHistoryRequest) (*GetTableHistoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListTableHistory not implemented")
 }
-func (UnimplementedTableServiceServer) GetTableHistoryById(context.Context, *TableHistoryPrimaryKey) (*TableHistory, error) {
+func (UnimplementedTableServiceServer) GetTableHistoryById(context.Context, *TableHistoryPrimaryKey) (*Table, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTableHistoryById not implemented")
 }
 func (UnimplementedTableServiceServer) RevertTableHistory(context.Context, *TableHistoryPrimaryKey) (*TableHistory, error) {

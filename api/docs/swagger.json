@@ -358,7 +358,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -686,7 +686,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -1971,7 +1971,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2559,7 +2559,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3050,7 +3050,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3845,7 +3845,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4348,7 +4348,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4763,7 +4763,7 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": ""
+                        "description": "Created"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -5194,7 +5194,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -6565,8 +6565,6 @@
             }
         },
         "/v1/company/project/resource": {
-<<<<<<< HEAD
-=======
             "get": {
                 "security": [
                     {
@@ -6683,7 +6681,6 @@
                     }
                 }
             },
->>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
             "post": {
                 "security": [
                     {
@@ -7934,7 +7931,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8435,7 +8432,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8936,7 +8933,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -9432,7 +9429,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10128,7 +10125,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10960,7 +10957,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -11835,7 +11832,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -12018,7 +12015,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -12723,7 +12720,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13420,7 +13417,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -14371,7 +14368,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -14675,7 +14672,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -16707,7 +16704,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -18175,7 +18172,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -18929,7 +18926,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -19861,7 +19858,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -20529,7 +20526,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -23301,7 +23298,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -24252,7 +24249,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -24986,7 +24983,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -25501,7 +25498,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -26319,7 +26316,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -26999,7 +26996,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -27594,7 +27591,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -28311,7 +28308,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -28887,7 +28884,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -29697,7 +29694,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -30205,7 +30202,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -30703,7 +30700,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -30978,7 +30975,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "authentification": {
                     "type": "boolean"
@@ -31174,7 +31171,7 @@
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/auth_service.ConfirmStrategies"
                 },
                 "id": {
                     "type": "string"
@@ -31198,6 +31195,19 @@
                     }
                 }
             }
+        },
+        "auth_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
         },
         "auth_service.CreateIntegrationRequest": {
             "type": "object",
@@ -31408,7 +31418,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -31646,10 +31656,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
@@ -31738,10 +31748,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
@@ -31826,39 +31836,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
-                }
-            }
-        },
-        "company_service.Currency": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "decimal_digits": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "name_plural": {
-                    "type": "string"
-                },
-                "rounding": {
-                    "type": "integer"
-                },
-                "symbol": {
-                    "type": "string"
-                },
-                "symbol_native": {
-                    "type": "string"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -32038,8 +32019,6 @@
                 }
             }
         },
-<<<<<<< HEAD
-=======
         "company_service.GetResourceListResponse": {
             "type": "object",
             "properties": {
@@ -32054,7 +32033,6 @@
                 }
             }
         },
->>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
         "company_service.GetServiceResourcesRes": {
             "type": "object",
             "properties": {
@@ -32076,7 +32054,7 @@
                     }
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -32093,7 +32071,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -32196,7 +32174,6 @@
                 },
                 "is_configured": {
                     "type": "boolean"
-<<<<<<< HEAD
                 },
                 "project_id": {
                     "type": "string"
@@ -32204,15 +32181,6 @@
                 "resource_type": {
                     "$ref": "#/definitions/company_service.ResourceType"
                 },
-=======
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "resource_type": {
-                    "type": "integer"
-                },
->>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
                 "title": {
                     "type": "string"
                 },
@@ -32220,6 +32188,21 @@
                     "type": "string"
                 }
             }
+        },
+        "company_service.ResourceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ResourceType_NOT_DECIDED",
+                "ResourceType_MONGODB",
+                "ResourceType_CLICKHOUSE",
+                "ResourceType_POSTGRESQL"
+            ]
         },
         "company_service.ResourceWithoutPassword": {
             "type": "object",
@@ -32240,7 +32223,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -32310,30 +32293,6 @@
                 }
             }
         },
-<<<<<<< HEAD
-        "company_service.ServiceType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-            ],
-            "x-enum-varnames": [
-                "ServiceType_NOT_SPECIFIED",
-                "ServiceType_BUILDER_SERVICE",
-                "ServiceType_ANALYTICS_SERVICE",
-                "ServiceType_TEMPLATE_SERVICE",
-                "ServiceType_QUERY_SERVICE",
-                "ServiceType_FUNCTION_SERVICE",
-                "ServiceType_WEB_PAGE_SERVICE",
-                "ServiceType_API_REF_SERVICE"
-            ]
-=======
         "company_service.ServiceResourceModel": {
             "type": "object",
             "properties": {
@@ -32356,16 +32315,38 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
                 }
             }
->>>>>>> 6935413b31cbcaa8628f3eee07ada7e036c65017
+        },
+        "company_service.ServiceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+            ],
+            "x-enum-varnames": [
+                "ServiceType_NOT_SPECIFIED",
+                "ServiceType_BUILDER_SERVICE",
+                "ServiceType_ANALYTICS_SERVICE",
+                "ServiceType_TEMPLATE_SERVICE",
+                "ServiceType_QUERY_SERVICE",
+                "ServiceType_FUNCTION_SERVICE",
+                "ServiceType_WEB_PAGE_SERVICE",
+                "ServiceType_API_REF_SERVICE"
+            ]
         },
         "company_service.SetDefaultResourceReq": {
             "type": "object",
@@ -32380,7 +32361,7 @@
                     "type": "string"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -32397,7 +32378,7 @@
                     "type": "string"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -32408,21 +32389,7 @@
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
-                }
-            }
-        },
-        "company_service.Timezone": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "text": {
-                    "type": "string"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
@@ -32462,7 +32429,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -32709,6 +32676,38 @@
         "emptypb.Empty": {
             "type": "object"
         },
+        "github_com_golang_protobuf_ptypes_struct.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
+                    }
+                }
+            }
+        },
+        "google_golang_org_protobuf_types_known_structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
+                    }
+                }
+            }
+        },
+        "google_golang_org_protobuf_types_known_structpb.Value": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+                }
+            }
+        },
         "handlers.Path": {
             "type": "object",
             "properties": {
@@ -32785,7 +32784,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -32838,7 +32837,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -33419,7 +33418,7 @@
             "type": "object",
             "properties": {
                 "components": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "folder_id": {
                     "type": "string"
@@ -34145,7 +34144,7 @@
             "type": "object",
             "properties": {
                 "components": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "folder_id": {
                     "type": "string"
@@ -34215,7 +34214,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -34591,7 +34590,7 @@
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
                 },
                 "guid": {
                     "type": "string"
@@ -34635,6 +34634,19 @@
                 }
             }
         },
+        "object_builder_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
+        },
         "object_builder_service.CreateAppResponse": {
             "type": "object",
             "properties": {
@@ -34665,7 +34677,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -34755,7 +34767,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "autofill_field": {
                     "type": "string"
@@ -35035,7 +35047,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -35690,7 +35702,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -36020,7 +36032,7 @@
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -36411,7 +36423,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -36589,7 +36601,7 @@
                     "type": "string"
                 },
                 "request": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "response": {
                     "type": "string"
@@ -36603,7 +36615,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -36707,7 +36719,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -36949,7 +36961,7 @@
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/structpb.Struct"
+                        "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                     }
                 },
                 "connect_info": {
@@ -36968,7 +36980,7 @@
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -36985,7 +36997,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "category_id": {
                     "type": "string"
@@ -37042,7 +37054,7 @@
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/structpb.Struct"
+                        "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                     }
                 },
                 "connect_info": {
@@ -37067,7 +37079,7 @@
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -37079,7 +37091,7 @@
                     "type": "string"
                 },
                 "ui_component": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
@@ -37164,7 +37176,7 @@
             "type": "object",
             "properties": {
                 "response": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
@@ -37203,26 +37215,6 @@
                 },
                 "status": {
                     "type": "string"
-                }
-            }
-        },
-        "structpb.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
-                    }
-                }
-            }
-        },
-        "structpb.Value": {
-            "type": "object",
-            "properties": {
-                "kind": {
-                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
                 }
             }
         },
@@ -37276,7 +37268,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -37558,7 +37550,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "role": {
                     "type": "string"
@@ -37606,7 +37598,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -37752,7 +37744,7 @@
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -37960,7 +37952,7 @@
                     "type": "string"
                 },
                 "release_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/versioning_service.ReleaseType"
                 }
             }
         },
@@ -38092,6 +38084,21 @@
                     }
                 }
             }
+        },
+        "versioning_service.ReleaseType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ReleaseType_UNDEFINED",
+                "ReleaseType_MAJOR",
+                "ReleaseType_MINOR",
+                "ReleaseType_PATCH"
+            ]
         },
         "versioning_service.ReleaseWithCommit": {
             "type": "object",
@@ -38312,7 +38319,7 @@
                     "$ref": "#/definitions/web_page_service.CommitInfo"
                 },
                 "components": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "environment_id": {
                     "type": "string"
