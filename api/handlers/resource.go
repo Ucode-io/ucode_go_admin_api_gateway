@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
@@ -116,7 +117,7 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
-	}	
+	}
 
 	if &company.ServiceType == nil || company.ServiceType == company_service.ServiceType_NOT_SPECIFIED {
 		fmt.Println("[company.ServiceType] nil", company.ProjectId)
@@ -267,8 +268,8 @@ func (h *Handler) UpdateResource(c *gin.Context) {
 // @Tags Company Resource
 // @Accept json
 // @Produce json
-// @Param filters query company_service.GetReourceListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=company_service.GetReourceListResponse} "Resource data"
+// @Param filters query company_service.GetResourceListRequest true "filters"
+// @Success 200 {object} status_http.Response{data=company_service.GetResourceListResponse} "Resource data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetResourceList(c *gin.Context) {
@@ -285,9 +286,9 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.companyServices.CompanyService().Resource().GetReourceList(
+	resp, err := h.companyServices.CompanyService().Resource().GetResourceList(
 		context.Background(),
-		&company_service.GetReourceListRequest{
+		&company_service.GetResourceListRequest{
 			Limit:     int32(limit),
 			Offset:    int32(offset),
 			Search:    c.DefaultQuery("search", ""),
@@ -314,6 +315,7 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 // @Tags Company Resource
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param ProjectResource body company_service.ReconnectResourceRequest true "ProjectResourceReconnectRequest"
 // @Success 201 {object} status_http.Response{data=company_service.EmptyProto} "ProjectResource data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -326,6 +328,13 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	company.ProjectId = projectId
 
 	resp, err := h.companyServices.CompanyService().Resource().ReconnectResource(
 		c.Request.Context(),

@@ -20,6 +20,7 @@ type CreateWebPageReqModel struct {
 	Title      string           `json:"title,omitempty"`
 	ProjectId  string           `json:"project_id,omitempty"`
 	FolderId   string           `json:"folder_id,omitempty"`
+	AppId      string           `json:"app_id,omitempty"`
 	Components *structpb.Struct `json:"components,omitempty"`
 	Icon       string           `json:"icon,omitempty"`
 }
@@ -29,6 +30,7 @@ type UpdateWebPageReqModel struct {
 	Title      string           `json:"title,omitempty"`
 	ProjectId  string           `json:"project_id,omitempty"`
 	FolderId   string           `json:"folder_id,omitempty"`
+	AppId      string           `json:"app_id,omitempty"`
 	Components *structpb.Struct `json:"components,omitempty"`
 	Icon       string           `json:"icon,omitempty"`
 }

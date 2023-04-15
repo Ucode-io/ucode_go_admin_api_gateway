@@ -9,10 +9,9 @@ import (
 	"os/exec"
 	"strings"
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/new_function_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
+	pb "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/services"
-
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func CreateCodeServer(functionName string, cfg config.Config, id string) (string, error) {
@@ -83,15 +82,45 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 }
 
 func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg config.Config) error {
+	log.Println("!!!---DeleteCodeServer--->")
+	var (
+		allFunctions = make([]*pb.Function, 0)
+		ids          = make([]string, 0)
+	)
 
-	functions, err := srvs.FunctionService().FunctionService().GetListByRequestTime(context.Background(), &emptypb.Empty{})
+	req := &company_service.GetListResourceEnvironmentReq{}
+	resEnvsIds, err := srvs.CompanyService().Resource().GetListResourceEnvironment(ctx, req)
+	if err != nil {
+		log.Println("error while getting resource environments")
+		return err
+	}
+
+	if len(resEnvsIds.GetData()) == 0 {
+		log.Println("no resource environments")
+		return nil
+	}
+
+	for _, v := range resEnvsIds.GetData() {
+		functions, err := srvs.FunctionService().FunctionService().GetListByRequestTime(context.Background(), &pb.GetListByRequestTimeRequest{
+			ProjectId: v.GetId(),
+		})
+		if err != nil {
+			log.Println("error while getting functions for project id: "+v.GetProjectId(), err.Error())
+			continue
+		}
+
+		allFunctions = append(allFunctions, functions.GetFunctions()...)
+	}
+
 	if err != nil {
 		return err
 	}
-	var ids = make([]string, 0, functions.GetCount())
-	for _, function := range functions.GetFunctions() {
+	for _, function := range allFunctions {
+		log.Println("uninstalling func " + function.GetPath())
 		var stdout bytes.Buffer
+
 		cmd := exec.Command("helm", "uninstall", function.Path, "-n", "test")
+		log.Println(" --- exec command --- ", cmd.String())
 		err = cmd.Run()
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
@@ -102,17 +131,21 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 			log.Println("error while uninstalling " + function.GetPath() + " error: " + stderr.String())
 			continue
 		}
+		log.Println("successfully uninstalled " + function.GetPath())
 		ids = append(ids, function.GetId())
-		fmt.Println(function.GetPath())
 	}
-	if len(ids) > 0 {
-		_, err = srvs.FunctionService().FunctionService().UpdateManyByRequestTime(context.Background(), &new_function_service.UpdateManyUrlAndPassword{
-			Ids: ids,
-		})
-		if err != nil {
-			return err
+	for _, v := range resEnvsIds.GetData() {
+		if len(ids) > 0 {
+			_, err = srvs.FunctionService().FunctionService().UpdateManyByRequestTime(context.Background(), &pb.UpdateManyUrlAndPassword{
+				Ids:       ids,
+				ProjectId: v.GetId(),
+			})
+			if err != nil {
+				return err
+			}
 		}
 	}
+
 	fmt.Println("finish")
 
 	return nil

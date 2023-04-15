@@ -193,6 +193,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// INVOKE FUNCTION
 
 		v1.POST("/invoke_function", h.InvokeFunction)
+		v1.POST("/invoke_function/:function-path", h.InvokeFunctionByPath)
 
 		// Excel Reader
 		v1.GET("/excel/:excel_id", h.ExcelReader)
@@ -279,12 +280,16 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/company-project/:project_id", h.GetCompanyProjectById)
 		v1Admin.PUT("/company-project/:project_id", h.UpdateCompanyProject)
 		v1Admin.DELETE("/company-project/:project_id", h.DeleteCompanyProject)
-
+		// project settings
+		v1Admin.GET("/project/setting", h.GetAllSettings)
+		// project resource
 		v1Admin.POST("/company/project/resource", h.AddProjectResource)
 		v1Admin.POST("/company/project/create-resource", h.CreateProjectResource)
 		v1Admin.DELETE("/company/project/resource", h.RemoveProjectResource)
 		v1Admin.GET("/company/project/resource/:resource_id", h.GetResource)
 		v1Admin.GET("/company/project/resource", h.GetResourceList)
+		v1Admin.GET("/company/project/service-resource", h.GetListServiceResource)
+		v1Admin.PUT("/company/project/service-resource", h.UpdateServiceResource)
 		v1Admin.POST("/company/project/resource/reconnect", h.ReconnectProjectResource)
 		v1Admin.PUT("/company/project/resource/:resource_id", h.UpdateResource)
 		v1Admin.POST("/company/project/configure-resource", h.ConfigureProjectResource)
@@ -390,6 +395,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/webpage-folder/:webpage-folder-id", h.GetSingleWebPageFolder)
 		v1Admin.DELETE("/webpage-folder/:webpage-folder-id", h.DeleteWebPageFolder)
 
+		v1Admin.POST("/webpage-app", h.CreateWebPageApp)
+		v1Admin.PUT("/webpage-app", h.UpdateWebPageApp)
+		v1Admin.GET("/webpage-app", h.GetListWebPageApp)
+		v1Admin.GET("/webpage-app/:webpage-app-id", h.GetSingleWebPageApp)
+		v1Admin.DELETE("/webpage-app/:webpage-app-id", h.DeleteWebPageApp)
+
 		v1Admin.POST("/webpageV2", h.CreateWebPageV2)
 		v1Admin.PUT("/webpageV2", h.UpdateWebPageV2)
 		v1Admin.GET("/webpageV2", h.GetListWebPageV2)
@@ -409,7 +420,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/notification/category/:id", h.GetCategoryNotification)
 		v1Admin.PUT("/notification/category", h.UpdateCategoryNotification)
 		v1Admin.DELETE("/notification/category/:id", h.DeleteCategoryNotification)
-
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())
@@ -450,7 +460,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v3.POST("/chat", h.CreatChat)
 		v3.GET("/chat", h.GetChatList)
 		v3.GET("/chat/:id", h.GetChatByChatID)
-		v3.POST("/chat/message", h.CreateMessage)
 
 	}
 
