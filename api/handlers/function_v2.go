@@ -95,7 +95,8 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		return
 	}
 	fmt.Println("test before clone")
-	err = gitlab_integration.CloneForkToPath(resp.Message["ssh_url_to_repo"].(string), h.cfg)
+	var sshURL = resp.Message["ssh_url_to_repo"].(string)
+	err = gitlab_integration.CloneForkToPath(sshURL, h.cfg)
 	fmt.Println("clone err::", err)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -147,6 +148,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 			FunctionFolderId: function.FuncitonFolderId,
 			Url:              url,
 			Password:         password,
+			SshUrl:           sshURL,
 		},
 	)
 
@@ -248,6 +250,12 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 	log.Println("function::", function)
 
 	if function.Url == "" {
+		err = gitlab_integration.CloneForkToPath(function.GetSshUrl(), h.cfg)
+		fmt.Println("clone err::", err)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
 		uuid, _ := uuid.NewRandom()
 		fmt.Println("uuid::", uuid.String())
 		password, err := code_server.CreateCodeServer(function.Path, h.cfg, uuid.String())
