@@ -29,6 +29,7 @@ message CreateFunctionRequest {
     string function_folder_id = 9;
     string url = 10;
     string password = 11;
+    string ssh_url = 12;
 }
 
 message Function {
@@ -41,6 +42,7 @@ message Function {
     string environment_id = 8;
     string url = 9;
     string password = 10;
+    string ssh_url = 11;
 }
 
 message GetAllFunctionsRequest {

@@ -94,6 +94,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 		log.Println("error while getting resource environments")
 		return err
 	}
+	fmt.Println("length resource environments", len(resEnvsIds.GetData()))
 
 	if len(resEnvsIds.GetData()) == 0 {
 		log.Println("no resource environments")
