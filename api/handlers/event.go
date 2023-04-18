@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -22,6 +22,7 @@ import (
 // @Tags Event
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param event body object_builder_service.CreateEventRequest true "CreateEventRequestBody"
 // @Success 201 {object} status_http.Response{data=object_builder_service.Event} "Event data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -48,33 +49,52 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	//resourceId, ok := c.Get("resource_id")
+	//if !ok {
+	//	err = errors.New("error getting resource id")
+	//	h.handleResponse(c, status_http.BadRequest, err.Error())
+	//	return
+	//}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
-		err = errors.New("error getting resource environment id")
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	event.ProjectId = resourceEnvironment.GetId()
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
+	event.ProjectId = resource.ResourceEnvironmentId
 
 	resp, err := services.BuilderService().Event().Create(
 		context.Background(),
@@ -100,6 +120,7 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 // @Tags Event
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param event_id path string true "event_id"
 // @Success 200 {object} status_http.Response{data=object_builder_service.Event} "EventBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -125,38 +146,57 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 	//	return
 	//}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	//resourceId, ok := c.Get("resource_id")
+	//if !ok {
+	//	err = errors.New("error getting resource id")
+	//	h.handleResponse(c, status_http.BadRequest, err.Error())
+	//	return
+	//}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
-		err = errors.New("error getting resource environment id")
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	resp, err := services.BuilderService().Event().GetSingle(
 		context.Background(),
 		&obs.EventPrimaryKey{
 			Id:        eventID,
-			ProjectId: resourceEnvironment.GetId(),
+			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 	if err != nil {
@@ -178,6 +218,7 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 // @Tags Event
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param filters query object_builder_service.GetEventsListRequest true "filters"
 // @Success 200 {object} status_http.Response{data=object_builder_service.GetEventsListResponse} "EventBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -196,38 +237,57 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 	//	return
 	//}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	//resourceId, ok := c.Get("resource_id")
+	//if !ok {
+	//	err = errors.New("error getting resource id")
+	//	h.handleResponse(c, status_http.BadRequest, err.Error())
+	//	return
+	//}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
-		err = errors.New("error getting resource environment id")
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	resp, err := services.BuilderService().Event().GetList(
 		context.Background(),
 		&obs.GetEventsListRequest{
 			TableSlug: c.DefaultQuery("table_slug", ""),
-			ProjectId: resourceEnvironment.GetId(),
+			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 
@@ -250,6 +310,7 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 // @Tags Event
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param event body object_builder_service.Event  true "UpdateEventRequestBody"
 // @Success 200 {object} status_http.Response{data=object_builder_service.Event} "Event data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -276,33 +337,52 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	//resourceId, ok := c.Get("resource_id")
+	//if !ok {
+	//	err = errors.New("error getting resource id")
+	//	h.handleResponse(c, status_http.BadRequest, err.Error())
+	//	return
+	//}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
-		err = errors.New("error getting resource environment id")
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	event.ProjectId = resourceEnvironment.GetId()
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
+	event.ProjectId = resource.ResourceEnvironmentId
 
 	resp, err := services.BuilderService().Event().Update(
 		context.Background(),
@@ -329,6 +409,7 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param event_id path string true "event_id"
+// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -353,38 +434,57 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 	//	return
 	//}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	//resourceId, ok := c.Get("resource_id")
+	//if !ok {
+	//	err = errors.New("error getting resource id")
+	//	h.handleResponse(c, status_http.BadRequest, err.Error())
+	//	return
+	//}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
-		err = errors.New("error getting resource environment id")
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	resp, err := services.BuilderService().Event().Delete(
 		context.Background(),
 		&obs.EventPrimaryKey{
 			Id:        eventID,
-			ProjectId: resourceEnvironment.GetId(),
+			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 
