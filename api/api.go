@@ -265,7 +265,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
 	v1Admin := r.Group("/v1")
-	v1Admin.Use(h.AdminAuthMiddleware())
+	// v1Admin.Use(h.AdminAuthMiddleware())
 	{
 		// company service
 		// v1.POST("/company", h.CreateCompany)
@@ -420,6 +420,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/notification/category/:id", h.GetCategoryNotification)
 		v1Admin.PUT("/notification/category", h.UpdateCategoryNotification)
 		v1Admin.DELETE("/notification/category/:id", h.DeleteCategoryNotification)
+
+		// table-folder
+		v1Admin.POST("/table-folder", h.CreateTableFolder)
+		v1Admin.GET("/table-folder/:table_id", h.GetTableFolderById)
+		v1Admin.GET("/table-folder", h.GetAllTableFolder)
+		v1Admin.PUT("/table-folder", h.UpdateTableFolder)
+		v1Admin.DELETE("/table-folder/:table_id", h.DeleteTableFolder)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())
@@ -431,6 +438,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2Admin.GET("/function", h.GetAllNewFunctions)
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
+
+		//v2 table
+		v2Admin.POST("/table", h.V2CreateTable)
+		v2Admin.GET("/table/:table_id", h.V2GetTableByID)
+		v2Admin.GET("/table", h.V2GetAllTables)
+		v2Admin.PUT("/table", h.V2UpdateTable)
+		v2Admin.DELETE("/table/:table_id", h.V2DeleteTable)
 
 	}
 
