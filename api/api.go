@@ -420,6 +420,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/notification/category/:id", h.GetCategoryNotification)
 		v1Admin.PUT("/notification/category", h.UpdateCategoryNotification)
 		v1Admin.DELETE("/notification/category/:id", h.DeleteCategoryNotification)
+		v1Admin.GET("/table-history/list/:table_id", h.GetListTableHistory)
+		v1Admin.GET("/table-history/:id", h.GetTableHistoryById)
+		v1Admin.GET("/table-history/revert", h.GetTableHistoryById)
+		v1Admin.PUT("/table-history", h.InsetrVersionsIdsToTableHistory)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())
@@ -431,7 +435,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2Admin.GET("/function", h.GetAllNewFunctions)
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
-
 	}
 
 	// v3 for ucode version 2
