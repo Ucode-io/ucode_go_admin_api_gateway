@@ -23,7 +23,7 @@ import (
 // @Tags ViewRelation
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetAllSectionsRequest true "filters"
+// @Param filters query obs.GetAllSectionsRequest true "filters"
 // @Success 200 {object} status_http.Response{data=string} "ViewRelationBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -122,7 +122,7 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 // @Tags ViewRelation
 // @Accept json
 // @Produce json
-// @Param table body object_builder_service.UpsertViewRelationsBody  true "UpsertViewRelationsBody"
+// @Param table body obs.UpsertViewRelationsBody  true "UpsertViewRelationsBody"
 // @Success 200 {object} status_http.Response{data=string} "View Relation data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

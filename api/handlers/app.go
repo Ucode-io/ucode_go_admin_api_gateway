@@ -23,9 +23,8 @@ import (
 // @Tags App
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param app body object_builder_service.AppRequest true "CreateAppRequestBody"
-// @Success 201 {object} status_http.Response{data=object_builder_service.CreateAppResponse} "App data"
+// @Param app body obs.AppRequest true "CreateAppRequestBody"
+// @Success 201 {object} status_http.Response{data=obs.CreateAppResponse} "App data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateApp(c *gin.Context) {
@@ -127,8 +126,7 @@ func (h *Handler) CreateApp(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param app_id path string true "app_id"
-// @Param project-id query string true "project-id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.App} "AppBody"
+// @Success 200 {object} status_http.Response{data=obs.App} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAppByID(c *gin.Context) {
@@ -225,9 +223,8 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param X-API-KEY header string true "API key for the endpoint"
-// @Param project-id query string true "project-id"
-// @Param filters query object_builder_service.GetAllAppsRequest true "filters"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetAllAppsResponse} "AppBody"
+// @Param filters query obs.GetAllAppsRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GetAllAppsResponse} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllApps(c *gin.Context) {
@@ -325,9 +322,8 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 // @Tags App
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param app body object_builder_service.UpdateAppRequest  true "UpdateAppRequestBody"
-// @Success 200 {object} status_http.Response{data=object_builder_service.App} "App data"
+// @Param app body obs.UpdateAppRequest  true "UpdateAppRequestBody"
+// @Success 200 {object} status_http.Response{data=obs.App} "App data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateApp(c *gin.Context) {

@@ -22,9 +22,8 @@ import (
 // @Tags HtmlTemplate
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param html_template body object_builder_service.CreateHtmlTemplateRequest true "CreateHtmlTemplateRequestBody"
-// @Success 201 {object} status_http.Response{data=object_builder_service.HtmlTemplate} "Html Template data"
+// @Param html_template body obs.CreateHtmlTemplateRequest true "CreateHtmlTemplateRequestBody"
+// @Success 201 {object} status_http.Response{data=obs.HtmlTemplate} "Html Template data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
@@ -122,7 +121,7 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param html_template_id path string true "html_template_id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.HtmlTemplate} "HtmlTemplateBody"
+// @Success 200 {object} status_http.Response{data=obs.HtmlTemplate} "HtmlTemplateBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
@@ -217,9 +216,8 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 // @Tags HtmlTemplate
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param html_template body object_builder_service.HtmlTemplate true "UpdateHtmlTemplateRequestBody"
-// @Success 200 {object} status_http.Response{data=object_builder_service.HtmlTemplate} "HtmlTemplate data"
+// @Param html_template body obs.HtmlTemplate true "UpdateHtmlTemplateRequestBody"
+// @Success 200 {object} status_http.Response{data=obs.HtmlTemplate} "HtmlTemplate data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
@@ -414,9 +412,8 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 // @Tags HtmlTemplate
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param filters query object_builder_service.GetAllHtmlTemplateRequest true "filters"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetAllHtmlTemplateResponse} "HtmlTemplateBody"
+// @Param filters query obs.GetAllHtmlTemplateRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GetAllHtmlTemplateResponse} "HtmlTemplateBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetHtmlTemplateList(c *gin.Context) {

@@ -104,7 +104,7 @@ func (h *Handler) GetQueryByID(c *gin.Context) {
 // @Tags Queries
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetAllQueriesRequest true "filters"
+// @Param filters query obs.GetAllQueriesRequest true "filters"
 // @Success 200 {object} status_http.Response{data=models.GetAllFieldsResponse} "FieldBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

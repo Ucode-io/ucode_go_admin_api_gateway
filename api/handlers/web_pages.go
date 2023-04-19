@@ -176,7 +176,7 @@ func (h *Handler) GetWebPagesById(c *gin.Context) {
 // @Tags Web Page
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetAllWebPagesRequest true "filters"
+// @Param filters query obs.GetAllWebPagesRequest true "filters"
 // @Success 200 {object} status_http.Response{data=models.GetAllFieldsResponse} "WebPageBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

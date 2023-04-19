@@ -162,7 +162,7 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 // @Tags ApiReference
 // @Accept json
 // @Produce json
-// @Param filters query api_reference_service.GetListCategoryRequest true "filters"
+// @Param filters query ars.GetListCategoryRequest true "filters"
 // @Success 200 {object} status_http.Response{data=models.GetAllCategoriesResponse} "GetAllCategoriesBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
