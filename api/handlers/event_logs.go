@@ -26,7 +26,7 @@ import (
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param filters query models.GetEventLogsListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetEventLogListsResponse} "EventLogsBody"
+// @Success 200 {object} status_http.Response{data=obs.GetEventLogListsResponse} "EventLogsBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetEventLogs(c *gin.Context) {
@@ -129,7 +129,7 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param event_log_id path string true "event_log_id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.EventLog} "EventLogBody"
+// @Success 200 {object} status_http.Response{data=obs.EventLog} "EventLogBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetEventLogById(c *gin.Context) {

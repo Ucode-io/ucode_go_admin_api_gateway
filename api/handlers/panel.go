@@ -24,9 +24,8 @@ import (
 // @Tags Panel
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param panel_coordinates body object_builder_service.UpdatePanelCoordinatesRequest true "UpdatePanelCoordinatesRequestBody"
-// @Success 201 {object} status_http.Response{data=object_builder_service.PanelCoordinates} "Coordinates data"
+// @Param panel_coordinates body obs.UpdatePanelCoordinatesRequest true "UpdatePanelCoordinatesRequestBody"
+// @Success 201 {object} status_http.Response{data=obs.PanelCoordinates} "Coordinates data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateCoordinates(c *gin.Context) {
@@ -342,8 +341,7 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 // @Tags Panel
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param filters query object_builder_service.GetAllPanelsRequest true "filters"
+// @Param filters query obs.GetAllPanelsRequest true "filters"
 // @Success 200 {object} status_http.Response{data=models.GetAllPanelsResponse} "PanelBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

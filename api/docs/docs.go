@@ -120,7 +120,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetIntegrationListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.GetIntegrationListResponse"
                                         }
                                     }
                                 }
@@ -209,7 +209,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.CreateIntegrationRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.CreateIntegrationRequest"
                         }
                     }
                 ],
@@ -225,7 +225,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.Integration"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Integration"
                                         }
                                     }
                                 }
@@ -306,7 +306,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.Integration"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Integration"
                                         }
                                     }
                                 }
@@ -451,7 +451,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetIntegrationSessionsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.GetIntegrationSessionsResponse"
                                         }
                                     }
                                 }
@@ -523,7 +523,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddSessionToIntegrationRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.AddSessionToIntegrationRequest"
                         }
                     }
                 ],
@@ -627,7 +627,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.Token"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Token"
                                         }
                                     }
                                 }
@@ -848,7 +848,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2LoginResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -938,7 +938,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2LoginResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -1192,7 +1192,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.GetObjectTokenReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetObjectTokenReq"
                         }
                     }
                 ],
@@ -1208,7 +1208,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.GetObjectTokenRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetObjectTokenRes"
                                         }
                                     }
                                 }
@@ -1331,207 +1331,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/alfalab/directions": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Create Directions",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "AlfaLab"
-                ],
-                "summary": "Create Directions",
-                "operationId": "create_patient",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "CreatePatientRequestBody",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateDirections"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Field data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/models.Field"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/alfalab/referral": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Query Referral Result",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "AlfaLab"
-                ],
-                "summary": "query referral result",
-                "operationId": "query_referral_result",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "nr",
-                        "name": "nr",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Barcode",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/object_builder_service.BarcodeGenerateRes"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
@@ -2121,13 +1920,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -2444,19 +2236,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdatePanelCoordinatesRequestBody",
                         "name": "panel_coordinates",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.UpdatePanelCoordinatesRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdatePanelCoordinatesRequest"
                         }
                     }
                 ],
@@ -2472,7 +2257,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.PanelCoordinates"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.PanelCoordinates"
                                         }
                                     }
                                 }
@@ -2777,7 +2562,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.GetAllVariablesResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.GetAllVariablesResponse"
                                         }
                                     }
                                 }
@@ -2861,7 +2646,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.Variable"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Variable"
                         }
                     }
                 ],
@@ -2877,7 +2662,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.Variable"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Variable"
                                         }
                                     }
                                 }
@@ -2956,19 +2741,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "CreateVariableRequestBody",
                         "name": "variable",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.CreateVariableRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateVariableRequest"
                         }
                     }
                 ],
@@ -2984,7 +2762,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.Variable"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Variable"
                                         }
                                     }
                                 }
@@ -3084,7 +2862,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.Variable"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Variable"
                                         }
                                     }
                                 }
@@ -3565,7 +3343,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/api_reference_service.GetListApiReferenceChangesResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_api_reference_service.GetListApiReferenceChangesResponse"
                                         }
                                     }
                                 }
@@ -3675,7 +3453,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api_reference_service.ApiRevertApiReferenceRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_api_reference_service.ApiRevertApiReferenceRequest"
                         }
                     }
                 ],
@@ -3691,7 +3469,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/api_reference_service.ApiReference"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_api_reference_service.ApiReference"
                                         }
                                     }
                                 }
@@ -3777,7 +3555,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api_reference_service.ApiManyVersions"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_api_reference_service.ApiManyVersions"
                         }
                     }
                 ],
@@ -3793,7 +3571,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/api_reference_service.ApiReference"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_api_reference_service.ApiReference"
                                         }
                                     }
                                 }
@@ -3891,7 +3669,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/api_reference_service.ApiReference"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_api_reference_service.ApiReference"
                                         }
                                     }
                                 }
@@ -4050,13 +3828,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -4089,7 +3860,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.GetAllAppsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.GetAllAppsResponse"
                                         }
                                     }
                                 }
@@ -4168,19 +3939,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateAppRequestBody",
                         "name": "app",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.UpdateAppRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdateAppRequest"
                         }
                     }
                 ],
@@ -4196,7 +3960,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.App"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.App"
                                         }
                                     }
                                 }
@@ -4275,19 +4039,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "CreateAppRequestBody",
                         "name": "app",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.AppRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.AppRequest"
                         }
                     }
                 ],
@@ -4303,7 +4060,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.CreateAppResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateAppResponse"
                                         }
                                     }
                                 }
@@ -4389,13 +4146,6 @@ const docTemplate = `{
                         "name": "app_id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -4410,7 +4160,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.App"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.App"
                                         }
                                     }
                                 }
@@ -4586,13 +4336,6 @@ const docTemplate = `{
                         "name": "table_slug",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -4607,7 +4350,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.BarcodeGenerateRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.BarcodeGenerateRes"
                                         }
                                     }
                                 }
@@ -4735,7 +4478,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/pos_service.GetAllBookedAppointmentsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.GetAllBookedAppointmentsResponse"
                                         }
                                     }
                                 }
@@ -4835,7 +4578,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/pos_service.GetSingleBookedAppointmentResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.GetSingleBookedAppointmentResponse"
                                         }
                                     }
                                 }
@@ -5446,7 +5189,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/pos_service.CashboxResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.CashboxResponse"
                                         }
                                     }
                                 }
@@ -5539,13 +5282,6 @@ const docTemplate = `{
                         "name": "field_id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -5560,7 +5296,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.CodeGenerateRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CodeGenerateRes"
                                         }
                                     }
                                 }
@@ -5674,7 +5410,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/versioning_service.GetCommitListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.GetCommitListResponse"
                                         }
                                     }
                                 }
@@ -5744,7 +5480,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/versioning_service.CreateCommitRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.CreateCommitRequest"
                         }
                     }
                 ],
@@ -5760,7 +5496,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/versioning_service.CommitWithRelease"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.CommitWithRelease"
                                         }
                                     }
                                 }
@@ -5846,7 +5582,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/versioning_service.CommitWithRelease"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.CommitWithRelease"
                                         }
                                     }
                                 }
@@ -5961,7 +5697,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetListWithProjectsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.GetListWithProjectsResponse"
                                         }
                                     }
                                 }
@@ -6074,7 +5810,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetProjectListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.GetProjectListResponse"
                                         }
                                     }
                                 }
@@ -6158,7 +5894,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.CreateProjectRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.CreateProjectRequest"
                         }
                     }
                 ],
@@ -6280,7 +6016,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Project"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Project"
                                         }
                                     }
                                 }
@@ -6371,7 +6107,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.Project"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Project"
                         }
                     }
                 ],
@@ -6387,7 +6123,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Project"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Project"
                                         }
                                     }
                                 }
@@ -6571,7 +6307,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.ConfigureResourceRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ConfigureResourceRequest"
                         }
                     }
                 ],
@@ -6587,7 +6323,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.ConfigureResourceResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ConfigureResourceResponse"
                                         }
                                     }
                                 }
@@ -6673,7 +6409,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.CreateResourceReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.CreateResourceReq"
                         }
                     }
                 ],
@@ -6689,7 +6425,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.CreateResourceRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.CreateResourceRes"
                                         }
                                     }
                                 }
@@ -6807,7 +6543,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetResourceListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.GetResourceListResponse"
                                         }
                                     }
                                 }
@@ -6891,7 +6627,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.AddResourceRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.AddResourceRequest"
                         }
                     }
                 ],
@@ -6907,7 +6643,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.AddResourceResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.AddResourceResponse"
                                         }
                                     }
                                 }
@@ -6991,7 +6727,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.RemoveResourceRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.RemoveResourceRequest"
                         }
                     }
                 ],
@@ -7007,7 +6743,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.EmptyProto"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.EmptyProto"
                                         }
                                     }
                                 }
@@ -7100,7 +6836,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetServiceResourcesRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.GetServiceResourcesRes"
                                         }
                                     }
                                 }
@@ -7184,7 +6920,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.SetDefaultResourceReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.SetDefaultResourceReq"
                         }
                     }
                 ],
@@ -7200,7 +6936,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.SetDefaultResourceRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.SetDefaultResourceRes"
                                         }
                                     }
                                 }
@@ -7300,7 +7036,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.ResourceWithoutPassword"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceWithoutPassword"
                                         }
                                     }
                                 }
@@ -7393,7 +7129,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.ReconnectResourceRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ReconnectResourceRequest"
                         }
                     }
                 ],
@@ -7409,7 +7145,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.EmptyProto"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.EmptyProto"
                                         }
                                     }
                                 }
@@ -7509,7 +7245,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.ResourceWithoutPassword"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceWithoutPassword"
                                         }
                                     }
                                 }
@@ -7593,7 +7329,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.UpdateResourceRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.UpdateResourceRequest"
                         }
                     }
                 ],
@@ -7609,7 +7345,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.ResourceWithoutPassword"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceWithoutPassword"
                                         }
                                     }
                                 }
@@ -7708,7 +7444,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetListServiceResourceRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.GetListServiceResourceRes"
                                         }
                                     }
                                 }
@@ -7798,7 +7534,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.UpdateServiceResourceReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.UpdateServiceResourceReq"
                         }
                     }
                 ],
@@ -7814,7 +7550,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.UpdateServiceResourceRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.UpdateServiceResourceRes"
                                         }
                                     }
                                 }
@@ -7914,7 +7650,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetCompanyByIdResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.GetCompanyByIdResponse"
                                         }
                                     }
                                 }
@@ -8021,7 +7757,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Company"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Company"
                                         }
                                     }
                                 }
@@ -8182,13 +7918,6 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -8415,19 +8144,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "CreateCustomEventRequestBody",
                         "name": "Customevent",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.CreateCustomEventRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateCustomEventRequest"
                         }
                     }
                 ],
@@ -8722,13 +8444,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "name": "end_date",
                         "in": "query"
                     },
@@ -8765,7 +8480,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.GetAllDocumentsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.GetAllDocumentsResponse"
                                         }
                                     }
                                 }
@@ -8844,19 +8559,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateDocumentRequestBody",
                         "name": "Document",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.Document"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Document"
                         }
                     }
                 ],
@@ -8872,7 +8580,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.Document"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Document"
                                         }
                                     }
                                 }
@@ -8951,19 +8659,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "CreateDocumentRequestBody",
                         "name": "Document",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.CreateDocumentRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateDocumentRequest"
                         }
                     }
                 ],
@@ -8979,7 +8680,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.Document"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Document"
                                         }
                                     }
                                 }
@@ -9086,7 +8787,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.Document"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Document"
                                         }
                                     }
                                 }
@@ -9289,7 +8990,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetEnvironmentListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.GetEnvironmentListResponse"
                                         }
                                     }
                                 }
@@ -9373,7 +9074,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.Environment"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Environment"
                         }
                     }
                 ],
@@ -9389,7 +9090,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Environment"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Environment"
                                         }
                                     }
                                 }
@@ -9473,7 +9174,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.CreateEnvironmentRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.CreateEnvironmentRequest"
                         }
                     }
                 ],
@@ -9489,7 +9190,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Environment"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Environment"
                                         }
                                     }
                                 }
@@ -9589,7 +9290,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Environment"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Environment"
                                         }
                                     }
                                 }
@@ -9754,13 +9455,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -9782,7 +9476,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.GetEventsListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.GetEventsListResponse"
                                         }
                                     }
                                 }
@@ -9861,19 +9555,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateEventRequestBody",
                         "name": "event",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.Event"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Event"
                         }
                     }
                 ],
@@ -9889,7 +9576,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.Event"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Event"
                                         }
                                     }
                                 }
@@ -9968,19 +9655,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "CreateEventRequestBody",
                         "name": "event",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.CreateEventRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateEventRequest"
                         }
                     }
                 ],
@@ -9996,7 +9676,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.Event"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Event"
                                         }
                                     }
                                 }
@@ -10111,7 +9791,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.GetEventLogListsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.GetEventLogListsResponse"
                                         }
                                     }
                                 }
@@ -10218,7 +9898,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.EventLog"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.EventLog"
                                         }
                                     }
                                 }
@@ -10325,7 +10005,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.Event"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Event"
                                         }
                                     }
                                 }
@@ -10640,7 +10320,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.ExcelReadResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ExcelReadResponse"
                                         }
                                     }
                                 }
@@ -10719,7 +10399,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.ExportToJSONRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ExportToJSONRequest"
                         }
                     }
                 ],
@@ -10735,7 +10415,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.ExportToJSONReponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ExportToJSONReponse"
                                         }
                                     }
                                 }
@@ -10813,13 +10493,6 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -11398,7 +11071,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.CreateFieldsAndRelationsRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateFieldsAndRelationsRequest"
                         }
                     }
                 ],
@@ -11414,7 +11087,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.CreateFieldsAndRelationsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateFieldsAndRelationsResponse"
                                         }
                                     }
                                 }
@@ -11492,13 +11165,6 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -12526,7 +12192,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/integration_service_v2.PayzeLinkRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_integration_service_v2.PayzeLinkRequest"
                         }
                     }
                 ],
@@ -12542,7 +12208,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/integration_service_v2.PayzeLinkResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_integration_service_v2.PayzeLinkResponse"
                                         }
                                     }
                                 }
@@ -12748,13 +12414,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -12776,7 +12435,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.GetAllHtmlTemplateResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.GetAllHtmlTemplateResponse"
                                         }
                                     }
                                 }
@@ -12855,19 +12514,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateHtmlTemplateRequestBody",
                         "name": "html_template",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.HtmlTemplate"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.HtmlTemplate"
                         }
                     }
                 ],
@@ -12883,7 +12535,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.HtmlTemplate"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.HtmlTemplate"
                                         }
                                     }
                                 }
@@ -12962,19 +12614,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "CreateHtmlTemplateRequestBody",
                         "name": "html_template",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.CreateHtmlTemplateRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateHtmlTemplateRequest"
                         }
                     }
                 ],
@@ -12990,7 +12635,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.HtmlTemplate"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.HtmlTemplate"
                                         }
                                     }
                                 }
@@ -13097,7 +12742,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.HtmlTemplate"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.HtmlTemplate"
                                         }
                                     }
                                 }
@@ -13289,7 +12934,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.PdfBody"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.PdfBody"
                                         }
                                     }
                                 }
@@ -13398,7 +13043,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.PdfBody"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.PdfBody"
                                         }
                                     }
                                 }
@@ -13477,7 +13122,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.ImportFromJSONRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ImportFromJSONRequest"
                         }
                     }
                 ],
@@ -13811,7 +13456,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.ManyToManyMessage"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ManyToManyMessage"
                         }
                     }
                 ],
@@ -13918,7 +13563,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.ManyToManyMessage"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ManyToManyMessage"
                         }
                     }
                 ],
@@ -14038,7 +13683,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.GetListNoteRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetListNoteRes"
                                         }
                                     }
                                 }
@@ -14129,7 +13774,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.UpdateNoteReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateNoteReq"
                         }
                     }
                 ],
@@ -14145,7 +13790,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.Note"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Note"
                                         }
                                     }
                                 }
@@ -14236,7 +13881,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.CreateNoteReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateNoteReq"
                         }
                     }
                 ],
@@ -14252,7 +13897,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.Note"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Note"
                                         }
                                     }
                                 }
@@ -14352,7 +13997,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.GetListFolderNoteRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetListFolderNoteRes"
                                         }
                                     }
                                 }
@@ -14443,7 +14088,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.UpdateFolderNoteReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateFolderNoteReq"
                         }
                     }
                 ],
@@ -14459,7 +14104,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.FolderNote"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.FolderNote"
                                         }
                                     }
                                 }
@@ -14550,7 +14195,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.CreateFolderNoteReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateFolderNoteReq"
                         }
                     }
                 ],
@@ -14566,7 +14211,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.FolderNote"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.FolderNote"
                                         }
                                     }
                                 }
@@ -14673,7 +14318,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.GetListFolderNoteRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetListFolderNoteRes"
                                         }
                                     }
                                 }
@@ -14780,7 +14425,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.GetSingleFolderNoteRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetSingleFolderNoteRes"
                                         }
                                     }
                                 }
@@ -14977,7 +14622,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.GetListNoteRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetListNoteRes"
                                         }
                                     }
                                 }
@@ -15084,7 +14729,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.Note"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Note"
                                         }
                                     }
                                 }
@@ -15284,7 +14929,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/notification_service.GetAllNotificationsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_notification_service.GetAllNotificationsResponse"
                                         }
                                     }
                                 }
@@ -15373,7 +15018,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/notification_service.CreateNotificationManyUserRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_notification_service.CreateNotificationManyUserRequest"
                         }
                     }
                 ],
@@ -15389,7 +15034,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/notification_service.NotificationUsers"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_notification_service.NotificationUsers"
                                         }
                                     }
                                 }
@@ -16013,7 +15658,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/notification_service.CreateUserTokenRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_notification_service.CreateUserTokenRequest"
                         }
                     }
                 ],
@@ -16029,7 +15674,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/notification_service.CreateUserTokenResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_notification_service.CreateUserTokenResponse"
                                         }
                                     }
                                 }
@@ -16128,7 +15773,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/notification_service.Notification"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_notification_service.Notification"
                                         }
                                     }
                                 }
@@ -17407,7 +17052,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/pos_service.GetAllOfflineAppointmentsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.GetAllOfflineAppointmentsResponse"
                                         }
                                     }
                                 }
@@ -17507,7 +17152,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/pos_service.GetSingleOfflineAppointmentResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.GetSingleOfflineAppointmentResponse"
                                         }
                                     }
                                 }
@@ -17600,7 +17245,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/pos_service.CashboxResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.CashboxResponse"
                                         }
                                     }
                                 }
@@ -17686,7 +17331,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/pos_service.UpdatePaymentStatusBody"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.UpdatePaymentStatusBody"
                         }
                     }
                 ],
@@ -17702,7 +17347,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/pos_service.OfflineAppointment"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.OfflineAppointment"
                                         }
                                     }
                                 }
@@ -17788,7 +17433,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/integration_service_v2.PayzeLinkRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_integration_service_v2.PayzeLinkRequest"
                         }
                     }
                 ],
@@ -17804,7 +17449,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/integration_service_v2.PayzeLinkResponseSaveCard"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_integration_service_v2.PayzeLinkResponseSaveCard"
                                         }
                                     }
                                 }
@@ -18148,7 +17793,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Setting"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Setting"
                                         }
                                     }
                                 }
@@ -18349,7 +17994,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.GetListFolderRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.GetListFolderRes"
                                         }
                                     }
                                 }
@@ -18439,7 +18084,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/query_service.UpdateFolderReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.UpdateFolderReq"
                         }
                     }
                 ],
@@ -18455,7 +18100,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.Folder"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Folder"
                                         }
                                     }
                                 }
@@ -18545,7 +18190,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/query_service.CreateFolderReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.CreateFolderReq"
                         }
                     }
                 ],
@@ -18561,7 +18206,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.Folder"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Folder"
                                         }
                                     }
                                 }
@@ -18667,7 +18312,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.GetSingleFolderRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.GetSingleFolderRes"
                                         }
                                     }
                                 }
@@ -18874,7 +18519,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.GetListQueryRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.GetListQueryRes"
                                         }
                                     }
                                 }
@@ -18964,7 +18609,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/query_service.UpdateQueryReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.UpdateQueryReq"
                         }
                     }
                 ],
@@ -18980,7 +18625,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.Query"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Query"
                                         }
                                     }
                                 }
@@ -19070,7 +18715,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/query_service.CreateQueryReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.CreateQueryReq"
                         }
                     }
                 ],
@@ -19086,7 +18731,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.Query"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Query"
                                         }
                                     }
                                 }
@@ -19178,7 +18823,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/query_service.Query"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Query"
                         }
                     }
                 ],
@@ -19194,7 +18839,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.RunQueryRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.RunQueryRes"
                                         }
                                     }
                                 }
@@ -19293,7 +18938,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/query_service.QueryManyVersions"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.QueryManyVersions"
                         }
                     }
                 ],
@@ -19421,7 +19066,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.Query"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Query"
                                         }
                                     }
                                 }
@@ -19630,7 +19275,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.GetQueryHistoryRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.GetQueryHistoryRes"
                                         }
                                     }
                                 }
@@ -19750,7 +19395,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.GetListLogRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.GetListLogRes"
                                         }
                                     }
                                 }
@@ -19863,7 +19508,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.Log"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Log"
                                         }
                                     }
                                 }
@@ -19978,7 +19623,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/query_service.Query"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Query"
                                         }
                                     }
                                 }
@@ -20073,13 +19718,6 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -20226,19 +19864,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateRelationRequestBody",
                         "name": "relation",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.UpdateRelationRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdateRelationRequest"
                         }
                     }
                 ],
@@ -20333,19 +19964,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "CreateRelationRequestBody",
                         "name": "table",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.CreateRelationRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateRelationRequest"
                         }
                     }
                 ],
@@ -20542,7 +20166,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/versioning_service.ApiCreateReleaseRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.ApiCreateReleaseRequest"
                         }
                     },
                     {
@@ -20644,7 +20268,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/versioning_service.ApiSetCurrentReleaseRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.ApiSetCurrentReleaseRequest"
                         }
                     }
                 ],
@@ -20746,7 +20370,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/versioning_service.GetCurrentReleaseResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.GetCurrentReleaseResponse"
                                         }
                                     }
                                 }
@@ -20851,7 +20475,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/versioning_service.GetReleaseListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.GetReleaseListResponse"
                                         }
                                     }
                                 }
@@ -20951,7 +20575,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/versioning_service.ReleaseWithCommit"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.ReleaseWithCommit"
                                         }
                                     }
                                 }
@@ -21037,7 +20661,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/versioning_service.ApiUpdateReleaseRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.ApiUpdateReleaseRequest"
                         }
                     }
                 ],
@@ -21053,7 +20677,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/versioning_service.ReleaseWithCommit"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.ReleaseWithCommit"
                                         }
                                     }
                                 }
@@ -21137,7 +20761,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/versioning_service.ApiDeleteReleaseRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.ApiDeleteReleaseRequest"
                         }
                     }
                 ],
@@ -21816,7 +21440,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/scenario_service.DAGList"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.DAGList"
                                         }
                                     }
                                 }
@@ -21906,7 +21530,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/scenario_service.DAG"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.DAG"
                         }
                     }
                 ],
@@ -21922,7 +21546,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/scenario_service.DAG"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.DAG"
                                         }
                                     }
                                 }
@@ -22012,7 +21636,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/scenario_service.CreateDAGRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.CreateDAGRequest"
                         }
                     }
                 ],
@@ -22028,7 +21652,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/scenario_service.DAG"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.DAG"
                                         }
                                     }
                                 }
@@ -22224,7 +21848,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/scenario_service.DAGStep"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.DAGStep"
                         }
                     }
                 ],
@@ -22240,7 +21864,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/scenario_service.DAGStep"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.DAGStep"
                                         }
                                     }
                                 }
@@ -22330,7 +21954,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/scenario_service.CreateDAGStepRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.CreateDAGStepRequest"
                         }
                     }
                 ],
@@ -22346,7 +21970,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/scenario_service.DAGStep"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.DAGStep"
                                         }
                                     }
                                 }
@@ -22445,7 +22069,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/scenario_service.GetDAGStepRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.GetDAGStepRequest"
                         }
                     }
                 ],
@@ -22461,7 +22085,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/scenario_service.DAGStep"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.DAGStep"
                                         }
                                     }
                                 }
@@ -22657,7 +22281,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/scenario_service.GetDAGRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.GetDAGRequest"
                         }
                     }
                 ],
@@ -22851,7 +22475,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/scenario_service.RevertScenarioRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.RevertScenarioRequest"
                         }
                     }
                 ],
@@ -22975,7 +22599,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/scenario_service.RunScenarioResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.RunScenarioResponse"
                                         }
                                     }
                                 }
@@ -23081,7 +22705,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/scenario_service.GetScenarioHistoryResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.GetScenarioHistoryResponse"
                                         }
                                     }
                                 }
@@ -23180,7 +22804,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/scenario_service.CommitWithRelease"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.CommitWithRelease"
                         }
                     }
                 ],
@@ -23274,13 +22898,6 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -23400,19 +23017,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateSectionRequestBody",
                         "name": "table",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.UpdateSectionsRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdateSectionsRequest"
                         }
                     }
                 ],
@@ -23508,13 +23118,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -23547,7 +23150,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.GetAllTablesResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.GetAllTablesResponse"
                                         }
                                     }
                                 }
@@ -23625,19 +23228,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateTableRequestBody",
                         "name": "table",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.Table"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Table"
                         }
                     }
                 ],
@@ -23653,7 +23249,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.Table"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Table"
                                         }
                                     }
                                 }
@@ -23759,7 +23355,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.Table"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Table"
                                         }
                                     }
                                 }
@@ -24573,7 +24169,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.GetListFolderRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetListFolderRes"
                                         }
                                     }
                                 }
@@ -24664,7 +24260,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.UpdateTemplateReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateTemplateReq"
                         }
                     }
                 ],
@@ -24680,7 +24276,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.Template"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Template"
                                         }
                                     }
                                 }
@@ -24771,7 +24367,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.CreateTemplateReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateTemplateReq"
                         }
                     }
                 ],
@@ -24787,7 +24383,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.Template"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Template"
                                         }
                                     }
                                 }
@@ -24887,7 +24483,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.GetListFolderRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetListFolderRes"
                                         }
                                     }
                                 }
@@ -24978,7 +24574,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.UpdateFolderReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateFolderReq"
                         }
                     }
                 ],
@@ -24994,7 +24590,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.Folder"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Folder"
                                         }
                                     }
                                 }
@@ -25085,7 +24681,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.CreateFolderReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateFolderReq"
                         }
                     }
                 ],
@@ -25101,7 +24697,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.Folder"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Folder"
                                         }
                                     }
                                 }
@@ -25208,7 +24804,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.GetListTemplateRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetListTemplateRes"
                                         }
                                     }
                                 }
@@ -25315,7 +24911,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.GetSingleFolderRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetSingleFolderRes"
                                         }
                                     }
                                 }
@@ -25498,7 +25094,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.UpdateTokenReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateTokenReq"
                         }
                     }
                 ],
@@ -25514,7 +25110,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.UpdateTokenRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateTokenRes"
                                         }
                                     }
                                 }
@@ -25605,7 +25201,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.CreateTokenReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateTokenReq"
                         }
                     }
                 ],
@@ -25621,7 +25217,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.CreateTokenRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateTokenRes"
                                         }
                                     }
                                 }
@@ -25728,7 +25324,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.GetListUserPermissionRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetListUserPermissionRes"
                                         }
                                     }
                                 }
@@ -25819,7 +25415,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.UpdateUserPermissionReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateUserPermissionReq"
                         }
                     }
                 ],
@@ -25835,7 +25431,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.UserPermission"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UserPermission"
                                         }
                                     }
                                 }
@@ -25926,7 +25522,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template_service.CreateUserPermissionReq"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateUserPermissionReq"
                         }
                     }
                 ],
@@ -25942,7 +25538,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.UserPermission"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UserPermission"
                                         }
                                     }
                                 }
@@ -26049,7 +25645,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.UserPermission"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UserPermission"
                                         }
                                     }
                                 }
@@ -26457,7 +26053,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.GetListTemplateRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.GetListTemplateRes"
                                         }
                                     }
                                 }
@@ -26564,7 +26160,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/template_service.Template"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Template"
                                         }
                                     }
                                 }
@@ -26989,7 +26585,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.GetAllViewsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.GetAllViewsResponse"
                                         }
                                     }
                                 }
@@ -27073,7 +26669,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.View"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.View"
                         }
                     }
                 ],
@@ -27089,7 +26685,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.View"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.View"
                                         }
                                     }
                                 }
@@ -27173,7 +26769,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.CreateViewRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateViewRequest"
                         }
                     }
                 ],
@@ -27189,7 +26785,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.View"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.View"
                                         }
                                     }
                                 }
@@ -27403,7 +26999,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.View"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.View"
                                         }
                                     }
                                 }
@@ -27688,7 +27284,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.UpsertViewRelationsBody"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.UpsertViewRelationsBody"
                         }
                     }
                 ],
@@ -27797,7 +27393,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.GetListAppRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.GetListAppRes"
                                         }
                                     }
                                 }
@@ -27897,7 +27493,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.App"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.App"
                                         }
                                     }
                                 }
@@ -27997,7 +27593,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.App"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.App"
                                         }
                                     }
                                 }
@@ -28097,7 +27693,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.GetSingleAppRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.GetSingleAppRes"
                                         }
                                     }
                                 }
@@ -28273,7 +27869,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.GetListFolderRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.GetListFolderRes"
                                         }
                                     }
                                 }
@@ -28366,7 +27962,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.Folder"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.Folder"
                                         }
                                     }
                                 }
@@ -28466,7 +28062,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.Folder"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.Folder"
                                         }
                                     }
                                 }
@@ -28566,7 +28162,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.GetSingleFolderRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.GetSingleFolderRes"
                                         }
                                     }
                                 }
@@ -28761,7 +28357,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.GetListWebPageRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.GetListWebPageRes"
                                         }
                                     }
                                 }
@@ -28861,7 +28457,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.WebPage"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.WebPage"
                                         }
                                     }
                                 }
@@ -28954,7 +28550,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.WebPage"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.WebPage"
                                         }
                                     }
                                 }
@@ -29175,7 +28771,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.WebPage"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.WebPage"
                                         }
                                     }
                                 }
@@ -29372,7 +28968,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.GetWebPageHistoryRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.GetWebPageHistoryRes"
                                         }
                                     }
                                 }
@@ -29481,7 +29077,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.WebPage"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.WebPage"
                                         }
                                     }
                                 }
@@ -29559,13 +29155,6 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -29792,19 +29381,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "CreateCustomEventRequestBody",
                         "name": "Customevent",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/new_function_service.CreateCustomEventRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_new_function_service.CreateCustomEventRequest"
                         }
                     }
                 ],
@@ -30327,7 +29909,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/new_function_service.Function"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_new_function_service.Function"
                                         }
                                     }
                                 }
@@ -30524,13 +30106,6 @@ const docTemplate = `{
                         "name": "function_id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -30545,7 +30120,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/new_function_service.Function"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_new_function_service.Function"
                                         }
                                     }
                                 }
@@ -30634,6 +30209,7 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+<<<<<<< HEAD
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -31160,6 +30736,8 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+=======
+>>>>>>> 79cdb13d1127a1825fb84fedfcb83d7a20ed5794
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -31258,7 +30836,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/chat_service.GetChatListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_chat_service.GetChatListResponse"
                                         }
                                     }
                                 }
@@ -31456,7 +31034,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/chat_service.GetChatByChatIdResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_chat_service.GetChatByChatIdResponse"
                                         }
                                     }
                                 }
@@ -33088,7 +32666,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2LoginResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -33185,7 +32763,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2LoginResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -33233,6 +32811,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
+<<<<<<< HEAD
         "api_reference_service.ApiManyVersions": {
             "type": "object",
             "properties": {
@@ -34757,6 +34336,8 @@ const docTemplate = `{
                 }
             }
         },
+=======
+>>>>>>> 79cdb13d1127a1825fb84fedfcb83d7a20ed5794
         "config.Config": {
             "type": "object",
             "properties": {
@@ -34978,6 +34559,38 @@ const docTemplate = `{
         "emptypb.Empty": {
             "type": "object"
         },
+        "github_com_golang_protobuf_ptypes_struct.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
+                    }
+                }
+            }
+        },
+        "google_golang_org_protobuf_types_known_structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
+                    }
+                }
+            }
+        },
+        "google_golang_org_protobuf_types_known_structpb.Value": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+                }
+            }
+        },
         "handlers.Path": {
             "type": "object",
             "properties": {
@@ -34985,155 +34598,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "hash": {
-                    "type": "string"
-                }
-            }
-        },
-        "integration_service_v2.PayzeLinkRequest": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/integration_service_v2.PayzeLinkRequestData"
-                },
-                "environment": {
-                    "type": "string"
-                },
-                "method": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "integration_service_v2.PayzeLinkRequestData": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "integer"
-                },
-                "callback": {
-                    "type": "string"
-                },
-                "callbackError": {
-                    "type": "string"
-                },
-                "currency": {
-                    "type": "string"
-                },
-                "hookRefund": {
-                    "type": "boolean"
-                },
-                "hookUrl": {
-                    "type": "string"
-                },
-                "lang": {
-                    "type": "string"
-                },
-                "preauthorize": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "integration_service_v2.PayzeLinkResponse": {
-            "type": "object",
-            "properties": {
-                "action": {
-                    "type": "integer"
-                },
-                "amount": {
-                    "type": "integer"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "created_date": {
-                    "type": "string"
-                },
-                "currency": {
-                    "type": "string"
-                },
-                "data": {
-                    "$ref": "#/definitions/structpb.Struct"
-                },
-                "deleted_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "order_id": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "product_id": {
-                    "type": "string"
-                },
-                "resp_id": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "transaction_id": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "integration_service_v2.PayzeLinkResponseSaveCard": {
-            "type": "object",
-            "properties": {
-                "action": {
-                    "type": "integer"
-                },
-                "amount": {
-                    "type": "integer"
-                },
-                "card_id": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "created_date": {
-                    "type": "string"
-                },
-                "currency": {
-                    "type": "string"
-                },
-                "data": {
-                    "$ref": "#/definitions/structpb.Struct"
-                },
-                "deleted_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "order_id": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "product_id": {
-                    "type": "string"
-                },
-                "resp_id": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "transaction_id": {
-                    "type": "string"
-                },
-                "updated_at": {
                     "type": "string"
                 }
             }
@@ -35173,39 +34637,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Assays": {
-            "type": "object",
-            "properties": {
-                "item": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.AssaysItem"
-                    }
-                }
-            }
-        },
-        "models.AssaysItem": {
-            "type": "object",
-            "properties": {
-                "barcode": {
-                    "type": "string"
-                },
-                "biomaterial_code": {
-                    "type": "string"
-                },
-                "orders": {
-                    "$ref": "#/definitions/models.AssaysOrders"
-                }
-            }
-        },
-        "models.AssaysOrders": {
-            "type": "object",
-            "properties": {
-                "item_code": {
                     "type": "string"
                 }
             }
@@ -35357,7 +34788,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "routes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "sub_domain": {
                     "type": "string"
@@ -35421,20 +34852,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                }
-            }
-        },
-        "models.CreateDirections": {
-            "type": "object",
-            "properties": {
-                "assays": {
-                    "$ref": "#/definitions/models.Assays"
-                },
-                "patient": {
-                    "$ref": "#/definitions/models.Patient"
-                },
-                "referral": {
-                    "$ref": "#/definitions/models.Referral"
                 }
             }
         },
@@ -35669,7 +35086,7 @@ const docTemplate = `{
                 "sections": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Section"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Section"
                     }
                 },
                 "show_in_menu": {
@@ -35722,7 +35139,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "components": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "folder_id": {
                     "type": "string"
@@ -35803,7 +35220,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "commit_info": {
-                    "$ref": "#/definitions/scenario_service.CommitInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.CommitInfo"
                 },
                 "id": {
                     "type": "string"
@@ -35845,7 +35262,7 @@ const docTemplate = `{
                     "additionalProperties": true
                 },
                 "connect_info": {
-                    "$ref": "#/definitions/scenario_service.ConnectInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.ConnectInfo"
                 },
                 "dag_id": {
                     "type": "string"
@@ -36189,44 +35606,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Patient": {
-            "type": "object",
-            "properties": {
-                "birth_date": {
-                    "type": "string"
-                },
-                "body_temperature": {
-                    "type": "string"
-                },
-                "document_number": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "gender": {
-                    "type": "string"
-                },
-                "last_name": {
-                    "type": "string"
-                },
-                "middle_name": {
-                    "type": "string"
-                },
-                "mis_id": {
-                    "type": "string"
-                },
-                "pay_category_id": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                }
-            }
-        },
         "models.Queries": {
             "type": "object",
             "properties": {
@@ -36267,77 +35646,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Referral": {
-            "type": "object",
-            "properties": {
-                "cito": {
-                    "type": "string"
-                },
-                "comment": {
-                    "type": "string"
-                },
-                "comment_1": {
-                    "type": "string"
-                },
-                "cycle_period": {
-                    "type": "string"
-                },
-                "date": {
-                    "type": "string"
-                },
-                "delivery_date": {
-                    "type": "string"
-                },
-                "department_code": {
-                    "type": "string"
-                },
-                "department_name": {
-                    "type": "string"
-                },
-                "diagnosisName": {
-                    "type": "string"
-                },
-                "diagnosis_code": {
-                    "type": "string"
-                },
-                "diuresis_ml": {
-                    "type": "string"
-                },
-                "doctor_code": {
-                    "type": "string"
-                },
-                "doctor_name": {
-                    "type": "string"
-                },
-                "ecomment": {
-                    "type": "string"
-                },
-                "height_cm": {
-                    "type": "string"
-                },
-                "last_menstruation": {
-                    "type": "string"
-                },
-                "mis_id": {
-                    "type": "string"
-                },
-                "nr": {
-                    "type": "string"
-                },
-                "pay_category_id": {
-                    "type": "string"
-                },
-                "pregnancy_week": {
-                    "type": "string"
-                },
-                "sampling_date": {
-                    "type": "string"
-                },
-                "weight_kg": {
-                    "type": "string"
-                }
-            }
-        },
         "models.RegisterOtp": {
             "type": "object",
             "properties": {
@@ -36351,7 +35659,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "commit_info": {
-                    "$ref": "#/definitions/web_page_service.CommitInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.CommitInfo"
                 },
                 "id": {
                     "type": "string"
@@ -36398,7 +35706,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/object_builder_service.V2LoginResponse"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.V2LoginResponse"
                 },
                 "sms_id": {
                     "type": "string"
@@ -36449,7 +35757,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "routes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "sub_domain": {
                     "type": "string"
@@ -36488,7 +35796,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "components": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "folder_id": {
                     "type": "string"
@@ -36526,12 +35834,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/object_builder_service.V2LoginResponse"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.V2LoginResponse"
                 },
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Object"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Object"
                     }
                 }
             }
@@ -36562,14 +35870,1709 @@ const docTemplate = `{
                 }
             }
         },
-        "new_function_service.CreateCustomEventRequest": {
+        "status_http.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "description": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_api_reference_service.ApiManyVersions": {
+            "type": "object",
+            "properties": {
+                "oldcommit_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_api_reference_service.ApiReference": {
+            "type": "object",
+            "properties": {
+                "additional_url": {
+                    "type": "string"
+                },
+                "attributes": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                },
+                "authentification": {
+                    "type": "boolean"
+                },
+                "category_id": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "string"
+                },
+                "commit_info": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_api_reference_service.CommitInfo"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "external_url": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "new_window": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_api_reference_service.ApiRevertApiReferenceRequest": {
+            "type": "object",
+            "properties": {
+                "commit_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_api_reference_service.CommitInfo": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "commit_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "version_infos": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_api_reference_service.VersionInfo"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_api_reference_service.GetListApiReferenceChangesResponse": {
+            "type": "object",
+            "properties": {
+                "api_references": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "guid": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_api_reference_service.GetListApiReferenceChangesResponse_ApiReferenceChange": {
+            "type": "object",
+            "properties": {
+                "commit_info": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_api_reference_service.CommitInfo"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "version_infos": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_api_reference_service.VersionInfo"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_api_reference_service.VersionInfo": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "is_current": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.AddSessionToIntegrationRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "integration_id": {
+                    "type": "string"
+                },
+                "secret_key": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.ClientPlatform": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "subdomain": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.ClientType": {
+            "type": "object",
+            "properties": {
+                "confirm_by": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.ConfirmStrategies"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "self_recover": {
+                    "type": "boolean"
+                },
+                "self_register": {
+                    "type": "boolean"
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Table"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.CreateIntegrationRequest": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "integer"
+                },
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "ip_whitelist": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "secret_key": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.GetIntegrationListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "integrations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Integration"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.GetIntegrationSessionsResponse": {
+            "type": "object",
+            "properties": {
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Session"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.Integration": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "integer"
+                },
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "ip_whitelist": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "secret_key": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.Object": {
+            "type": "object",
+            "properties": {
+                "object_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.RecordPermission": {
+            "type": "object",
+            "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
+                "delete": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "read": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "update": {
+                    "type": "string"
+                },
+                "write": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.Role": {
+            "type": "object",
+            "properties": {
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.Session": {
+            "type": "object",
+            "properties": {
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "integration_id": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string"
+                },
+                "is_changed": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.Table": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "view_label": {
+                    "type": "string"
+                },
+                "view_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.Token": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "refresh_in_seconds": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.User": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "integer"
+                },
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "company_id": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "photo_url": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_auth_service.V2LoginResponse": {
+            "type": "object",
+            "properties": {
+                "addational_table": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                },
+                "app_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.RecordPermission"
+                    }
+                },
+                "client_platform": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.ClientPlatform"
+                },
+                "client_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.ClientType"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "login_table_slug": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.RecordPermission"
+                    }
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Role"
+                },
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Session"
+                    }
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Object"
+                    }
+                },
+                "token": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.Token"
+                },
+                "user": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_auth_service.User"
+                },
+                "user_found": {
+                    "type": "boolean"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_chat_service.ChatWithLastMessageData": {
+            "type": "object",
+            "properties": {
+                "chat_id": {
+                    "type": "string"
+                },
+                "check": {
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "message": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_chat_service.UserMessage"
+                },
+                "platform_type": {
+                    "type": "string"
+                },
+                "sender_name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_chat_service.GetChatByChatIdResponse": {
+            "type": "object",
+            "properties": {
+                "chat_id": {
+                    "type": "string"
+                },
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_chat_service.UserMessage"
+                    }
+                },
+                "platform_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_chat_service.GetChatListResponse": {
+            "type": "object",
+            "properties": {
+                "chats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_chat_service.ChatWithLastMessageData"
+                    }
+                },
+                "environment_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_chat_service.UserMessage": {
+            "type": "object",
+            "properties": {
+                "check": {
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "message_id": {
+                    "type": "string"
+                },
+                "platform_type": {
+                    "type": "string"
+                },
+                "sender_name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.AddResourceRequest": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "credentials": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Resource_Credentials"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "is_default": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceType"
+                },
+                "service_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ServiceType"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.AddResourceResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.Company": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.CompanyWithProjects": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ProjectWithoutResource"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.ConfigureResourceRequest": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "credentials": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Resource_Credentials"
+                },
+                "default": {
+                    "type": "boolean"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceType"
+                },
+                "service_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ServiceType"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.ConfigureResourceResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.CreateEnvironmentRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.CreateProjectRequest": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "k8s_namespace": {
+                    "type": "string"
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Resource"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.CreateResourceReq": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Resource"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.CreateResourceRes": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceType"
+                },
+                "service_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ServiceType"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.Currency": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "decimal_digits": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "name_plural": {
+                    "type": "string"
+                },
+                "rounding": {
+                    "type": "integer"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "symbol_native": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.EmptyProto": {
+            "type": "object"
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.Environment": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.EnvironmentWithResources": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resources": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.EnvironmentWithResources_Resources"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.EnvironmentWithResources_Resources": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Resource"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.GetComanyListResponse": {
+            "type": "object",
+            "properties": {
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Company"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.GetCompanyByIdResponse": {
+            "type": "object",
+            "properties": {
+                "company": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Company"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.GetEnvironmentListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.EnvironmentWithResources"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.GetListServiceResourceRes": {
+            "type": "object",
+            "properties": {
+                "resource_types": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Resource"
+                    }
+                },
+                "service_resources": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ServiceResourceModel"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.GetListWithProjectsResponse": {
+            "type": "object",
+            "properties": {
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.CompanyWithProjects"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.GetProjectListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Project"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.GetResourceListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Resource"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.GetServiceResourcesRes": {
+            "type": "object",
+            "properties": {
+                "service_resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.GetServiceResourcesRes_ServiceTypeResources"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.GetServiceResourcesRes_ServiceTypeResources": {
+            "type": "object",
+            "properties": {
+                "resource": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources"
+                    }
+                },
+                "service_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ServiceType"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources": {
+            "type": "object",
+            "properties": {
+                "default": {
+                    "type": "boolean"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceType"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.Language": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "native_name": {
+                    "type": "string"
+                },
+                "short_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.Project": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "currency": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Currency"
+                },
+                "k8s_namespace": {
+                    "type": "string"
+                },
+                "language": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Language"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceWithoutPassword"
+                    }
+                },
+                "timezone": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Timezone"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.ProjectWithoutResource": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "k8s_namespace": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.ReconnectResourceRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.RemoveResourceRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.Resource": {
+            "type": "object",
+            "properties": {
+                "credentials": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Resource_Credentials"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceType"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "vault_path": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.ResourceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ResourceType_NOT_DECIDED",
+                "ResourceType_MONGODB",
+                "ResourceType_CLICKHOUSE",
+                "ResourceType_POSTGRESQL"
+            ]
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.ResourceWithoutPassword": {
+            "type": "object",
+            "properties": {
+                "credentials": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceWithoutPassword_Credentials"
+                },
+                "environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceWithoutPassword_Environment"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceType"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.ResourceWithoutPassword_Credentials": {
+            "type": "object",
+            "properties": {
+                "database": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.ResourceWithoutPassword_Environment": {
+            "type": "object",
+            "properties": {
+                "default": {
+                    "type": "boolean"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "resource_environment_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.Resource_Credentials": {
+            "type": "object",
+            "properties": {
+                "database": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.ServiceResourceModel": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_environment_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceType"
+                },
+                "service_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ServiceType"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.ServiceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+            ],
+            "x-enum-varnames": [
+                "ServiceType_NOT_SPECIFIED",
+                "ServiceType_BUILDER_SERVICE",
+                "ServiceType_ANALYTICS_SERVICE",
+                "ServiceType_TEMPLATE_SERVICE",
+                "ServiceType_QUERY_SERVICE",
+                "ServiceType_FUNCTION_SERVICE",
+                "ServiceType_WEB_PAGE_SERVICE",
+                "ServiceType_API_REF_SERVICE"
+            ]
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.SetDefaultResourceReq": {
+            "type": "object",
+            "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "service_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ServiceType"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.SetDefaultResourceRes": {
+            "type": "object",
+            "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "service_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ServiceType"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.Setting": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.Timezone": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.UpdateResourceRequest": {
+            "type": "object",
+            "properties": {
+                "credentials": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.Resource_Credentials"
+                },
+                "default": {
+                    "type": "boolean"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ResourceType"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.UpdateServiceResourceReq": {
+            "type": "object",
+            "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "service_resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_company_service.ServiceResourceModel"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_company_service.UpdateServiceResourceRes": {
+            "type": "object",
+            "properties": {
+                "rows_affected": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_integration_service_v2.PayzeLinkRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_integration_service_v2.PayzeLinkRequestData"
+                },
+                "environment": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_integration_service_v2.PayzeLinkRequestData": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "callback": {
+                    "type": "string"
+                },
+                "callbackError": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "hookRefund": {
+                    "type": "boolean"
+                },
+                "hookUrl": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "preauthorize": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_integration_service_v2.PayzeLinkResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "integer"
+                },
+                "amount": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_date": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "resp_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "transaction_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_integration_service_v2.PayzeLinkResponseSaveCard": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "integer"
+                },
+                "amount": {
+                    "type": "integer"
+                },
+                "card_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_date": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "resp_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "transaction_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_api_gateway_genproto_new_function_service.CreateCustomEventRequest": {
             "type": "object",
             "properties": {
                 "action_type": {
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -36609,7 +37612,7 @@ const docTemplate = `{
                 }
             }
         },
-        "new_function_service.Function": {
+        "ucode_ucode_go_api_gateway_genproto_new_function_service.Function": {
             "type": "object",
             "properties": {
                 "description": {
@@ -36644,7 +37647,7 @@ const docTemplate = `{
                 }
             }
         },
-        "notification_service.CreateNotificationManyUserRequest": {
+        "ucode_ucode_go_api_gateway_genproto_notification_service.CreateNotificationManyUserRequest": {
             "type": "object",
             "properties": {
                 "category_id": {
@@ -36654,12 +37657,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "notificationData": {
-                    "$ref": "#/definitions/notification_service.Notification"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_notification_service.Notification"
                 },
                 "notifs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/notification_service.ManyNotifs"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_notification_service.ManyNotifs"
                     }
                 },
                 "project_id": {
@@ -36673,7 +37676,7 @@ const docTemplate = `{
                 }
             }
         },
-        "notification_service.CreateUserTokenRequest": {
+        "ucode_ucode_go_api_gateway_genproto_notification_service.CreateUserTokenRequest": {
             "type": "object",
             "properties": {
                 "platform_id": {
@@ -36687,7 +37690,7 @@ const docTemplate = `{
                 }
             }
         },
-        "notification_service.CreateUserTokenResponse": {
+        "ucode_ucode_go_api_gateway_genproto_notification_service.CreateUserTokenResponse": {
             "type": "object",
             "properties": {
                 "user_token_id": {
@@ -36695,7 +37698,7 @@ const docTemplate = `{
                 }
             }
         },
-        "notification_service.GetAllNotificationsResponse": {
+        "ucode_ucode_go_api_gateway_genproto_notification_service.GetAllNotificationsResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -36707,7 +37710,7 @@ const docTemplate = `{
                 "notifications": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/notification_service.Notification"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_notification_service.Notification"
                     }
                 },
                 "project_id": {
@@ -36715,7 +37718,7 @@ const docTemplate = `{
                 }
             }
         },
-        "notification_service.ManyNotifs": {
+        "ucode_ucode_go_api_gateway_genproto_notification_service.ManyNotifs": {
             "type": "object",
             "properties": {
                 "scheduled_at": {
@@ -36726,7 +37729,7 @@ const docTemplate = `{
                 }
             }
         },
-        "notification_service.Notification": {
+        "ucode_ucode_go_api_gateway_genproto_notification_service.Notification": {
             "type": "object",
             "properties": {
                 "category_id": {
@@ -36750,13 +37753,13 @@ const docTemplate = `{
                 "notification_info": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/notification_service.NotificationInfo"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_notification_service.NotificationInfo"
                     }
                 },
                 "notifs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/notification_service.ManyNotifs"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_notification_service.ManyNotifs"
                     }
                 },
                 "platform_id": {
@@ -36776,7 +37779,7 @@ const docTemplate = `{
                 }
             }
         },
-        "notification_service.NotificationInfo": {
+        "ucode_ucode_go_api_gateway_genproto_notification_service.NotificationInfo": {
             "type": "object",
             "properties": {
                 "code": {
@@ -36802,7 +37805,7 @@ const docTemplate = `{
                 }
             }
         },
-        "notification_service.NotificationUsers": {
+        "ucode_ucode_go_api_gateway_genproto_notification_service.NotificationUsers": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -36828,7 +37831,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.ActionRelation": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ActionRelation": {
             "type": "object",
             "properties": {
                 "key": {
@@ -36839,7 +37842,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.App": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.App": {
             "type": "object",
             "properties": {
                 "description": {
@@ -36857,12 +37860,12 @@ const docTemplate = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Table"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Table"
                     }
                 }
             }
         },
-        "object_builder_service.AppRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.AppRequest": {
             "type": "object",
             "properties": {
                 "commit_guid": {
@@ -36891,7 +37894,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.AutoFilter": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.AutoFilter": {
             "type": "object",
             "properties": {
                 "field_from": {
@@ -36902,7 +37905,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.BarcodeGenerateRes": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.BarcodeGenerateRes": {
             "type": "object",
             "properties": {
                 "number": {
@@ -36910,7 +37913,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Cascading": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.Cascading": {
             "type": "object",
             "properties": {
                 "field_slug": {
@@ -36927,7 +37930,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.ClientPlatform": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ClientPlatform": {
             "type": "object",
             "properties": {
                 "guid": {
@@ -36944,11 +37947,15 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.ClientType": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ClientType": {
             "type": "object",
             "properties": {
                 "confirm_by": {
+<<<<<<< HEAD
                     "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
+=======
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ConfirmStrategies"
+>>>>>>> 79cdb13d1127a1825fb84fedfcb83d7a20ed5794
                 },
                 "guid": {
                     "type": "string"
@@ -36968,12 +37975,12 @@ const docTemplate = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.TableClientType"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.TableClientType"
                     }
                 }
             }
         },
-        "object_builder_service.CodeGenerateRes": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CodeGenerateRes": {
             "type": "object",
             "properties": {
                 "code": {
@@ -36981,18 +37988,22 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Condition": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.Condition": {
             "type": "object",
             "properties": {
                 "match_fields": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.MatchField"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.MatchField"
                     }
                 }
             }
         },
+<<<<<<< HEAD
         "object_builder_service.ConfirmStrategies": {
+=======
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ConfirmStrategies": {
+>>>>>>> 79cdb13d1127a1825fb84fedfcb83d7a20ed5794
             "type": "integer",
             "enum": [
                 0,
@@ -37005,7 +38016,11 @@ const docTemplate = `{
                 "ConfirmStrategies_EMAIL"
             ]
         },
+<<<<<<< HEAD
         "object_builder_service.CreateAppResponse": {
+=======
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateAppResponse": {
+>>>>>>> 79cdb13d1127a1825fb84fedfcb83d7a20ed5794
             "type": "object",
             "properties": {
                 "description": {
@@ -37028,14 +38043,14 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.CreateCustomEventRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateCustomEventRequest": {
             "type": "object",
             "properties": {
                 "action_type": {
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -37069,7 +38084,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.CreateDocumentRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateDocumentRequest": {
             "type": "object",
             "properties": {
                 "file_link": {
@@ -37101,13 +38116,13 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.CreateEventRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateEventRequest": {
             "type": "object",
             "properties": {
                 "does": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Do"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Do"
                     }
                 },
                 "project_id": {
@@ -37117,15 +38132,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "when": {
-                    "$ref": "#/definitions/object_builder_service.When"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.When"
                 }
             }
         },
-        "object_builder_service.CreateFieldRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateFieldRequest": {
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "autofill_field": {
                     "type": "string"
@@ -37174,7 +38189,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.CreateFieldsAndRelationsRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateFieldsAndRelationsRequest": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -37183,7 +38198,7 @@ const docTemplate = `{
                 "fields": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.CreateFieldRequest"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateFieldRequest"
                     }
                 },
                 "project_id": {
@@ -37192,7 +38207,7 @@ const docTemplate = `{
                 "relations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.CreateRelationRequest"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateRelationRequest"
                     }
                 },
                 "table_id": {
@@ -37203,10 +38218,10 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.CreateFieldsAndRelationsResponse": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateFieldsAndRelationsResponse": {
             "type": "object"
         },
-        "object_builder_service.CreateHtmlTemplateRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateHtmlTemplateRequest": {
             "type": "object",
             "properties": {
                 "html": {
@@ -37229,19 +38244,19 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.CreateRelationRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateRelationRequest": {
             "type": "object",
             "properties": {
                 "action_relations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.ActionRelation"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ActionRelation"
                     }
                 },
                 "auto_filters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.AutoFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.AutoFilter"
                     }
                 },
                 "cascading_tree_field_slug": {
@@ -37253,7 +38268,7 @@ const docTemplate = `{
                 "cascadings": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Cascading"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Cascading"
                     }
                 },
                 "columns": {
@@ -37277,7 +38292,7 @@ const docTemplate = `{
                 "dynamic_tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.DynamicTable"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.DynamicTable"
                     }
                 },
                 "editable": {
@@ -37310,7 +38325,7 @@ const docTemplate = `{
                 "quick_filters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.QuickFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.QuickFilter"
                     }
                 },
                 "relation_field_slug": {
@@ -37322,7 +38337,7 @@ const docTemplate = `{
                 "summaries": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Summary"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Summary"
                     }
                 },
                 "table_from": {
@@ -37357,7 +38372,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.CreateVariableRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateVariableRequest": {
             "type": "object",
             "properties": {
                 "commit_guid": {
@@ -37398,14 +38413,14 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.CreateViewRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateViewRequest": {
             "type": "object",
             "properties": {
                 "app_id": {
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -37429,7 +38444,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "disable_dates": {
-                    "$ref": "#/definitions/object_builder_service.DisableDates"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.DisableDates"
                 },
                 "group_fields": {
                     "type": "array",
@@ -37458,7 +38473,7 @@ const docTemplate = `{
                 "quick_filters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.QuickFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.QuickFilter"
                     }
                 },
                 "relation_id": {
@@ -37502,7 +38517,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.DisableDates": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.DisableDates": {
             "type": "object",
             "properties": {
                 "day_slug": {
@@ -37519,13 +38534,13 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Do": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.Do": {
             "type": "object",
             "properties": {
                 "fields": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.MatchField"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.MatchField"
                     }
                 },
                 "opperation_type": {
@@ -37536,7 +38551,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Document": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.Document": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -37574,7 +38589,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.DynamicTable": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.DynamicTable": {
             "type": "object",
             "properties": {
                 "table_slug": {
@@ -37588,13 +38603,13 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Event": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.Event": {
             "type": "object",
             "properties": {
                 "does": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Do"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Do"
                     }
                 },
                 "id": {
@@ -37607,11 +38622,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "when": {
-                    "$ref": "#/definitions/object_builder_service.When"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.When"
                 }
             }
         },
-        "object_builder_service.EventLog": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.EventLog": {
             "type": "object",
             "properties": {
                 "date": {
@@ -37634,7 +38649,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.ExcelReadResponse": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ExcelReadResponse": {
             "type": "object",
             "properties": {
                 "rows": {
@@ -37645,7 +38660,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.ExportToJSONReponse": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ExportToJSONReponse": {
             "type": "object",
             "properties": {
                 "link": {
@@ -37653,7 +38668,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.ExportToJSONRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ExportToJSONRequest": {
             "type": "object",
             "properties": {
                 "app_id": {
@@ -37667,7 +38682,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.FieldForSection": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.FieldForSection": {
             "type": "object",
             "properties": {
                 "column": {
@@ -37687,13 +38702,13 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.GetAllAppsResponse": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.GetAllAppsResponse": {
             "type": "object",
             "properties": {
                 "apps": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.App"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.App"
                     }
                 },
                 "count": {
@@ -37701,7 +38716,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.GetAllDocumentsResponse": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.GetAllDocumentsResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -37710,12 +38725,12 @@ const docTemplate = `{
                 "documents": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Document"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Document"
                     }
                 }
             }
         },
-        "object_builder_service.GetAllHtmlTemplateResponse": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.GetAllHtmlTemplateResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -37724,12 +38739,12 @@ const docTemplate = `{
                 "htmlTemplates": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.HtmlTemplate"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.HtmlTemplate"
                     }
                 }
             }
         },
-        "object_builder_service.GetAllTablesResponse": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.GetAllTablesResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -37738,12 +38753,12 @@ const docTemplate = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Table"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Table"
                     }
                 }
             }
         },
-        "object_builder_service.GetAllVariablesResponse": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.GetAllVariablesResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -37752,12 +38767,12 @@ const docTemplate = `{
                 "variables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Variable"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Variable"
                     }
                 }
             }
         },
-        "object_builder_service.GetAllViewsResponse": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.GetAllViewsResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -37766,12 +38781,12 @@ const docTemplate = `{
                 "views": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.View"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.View"
                     }
                 }
             }
         },
-        "object_builder_service.GetEventLogListsResponse": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.GetEventLogListsResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -37780,12 +38795,12 @@ const docTemplate = `{
                 "event_logs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.EventLog"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.EventLog"
                     }
                 }
             }
         },
-        "object_builder_service.GetEventsListResponse": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.GetEventsListResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -37794,12 +38809,12 @@ const docTemplate = `{
                 "events": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Event"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Event"
                     }
                 }
             }
         },
-        "object_builder_service.HtmlTemplate": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.HtmlTemplate": {
             "type": "object",
             "properties": {
                 "html": {
@@ -37825,7 +38840,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.ImportFromJSONRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ImportFromJSONRequest": {
             "type": "object",
             "properties": {
                 "app_id": {
@@ -37839,7 +38854,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.IncrementID": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.IncrementID": {
             "type": "object",
             "properties": {
                 "digit_number": {
@@ -37853,7 +38868,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.ManyToManyMessage": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ManyToManyMessage": {
             "type": "object",
             "properties": {
                 "id_from": {
@@ -37879,7 +38894,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.MatchField": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.MatchField": {
             "type": "object",
             "properties": {
                 "comparison_symbol": {
@@ -37896,7 +38911,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.PanelCoordinates": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.PanelCoordinates": {
             "type": "object",
             "properties": {
                 "coordinates": {
@@ -37910,7 +38925,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.PdfBody": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.PdfBody": {
             "type": "object",
             "properties": {
                 "link": {
@@ -37918,7 +38933,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.QuickFilter": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.QuickFilter": {
             "type": "object",
             "properties": {
                 "default_value": {
@@ -37929,7 +38944,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.RecordPermission": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.RecordPermission": {
             "type": "object",
             "properties": {
                 "client_type_id": {
@@ -37958,7 +38973,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Role": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.Role": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -37978,7 +38993,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Section": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.Section": {
             "type": "object",
             "properties": {
                 "column": {
@@ -37987,7 +39002,7 @@ const docTemplate = `{
                 "fields": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.FieldForSection"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.FieldForSection"
                     }
                 },
                 "icon": {
@@ -38007,7 +39022,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Summary": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.Summary": {
             "type": "object",
             "properties": {
                 "field_name": {
@@ -38018,7 +39033,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Table": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.Table": {
             "type": "object",
             "properties": {
                 "description": {
@@ -38031,7 +39046,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "increment_id": {
-                    "$ref": "#/definitions/object_builder_service.IncrementID"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.IncrementID"
                 },
                 "is_own_table": {
                     "type": "boolean"
@@ -38056,11 +39071,11 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.TableClientType": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.TableClientType": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -38079,7 +39094,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.UpdateAppRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdateAppRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -38100,18 +39115,18 @@ const docTemplate = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.UpdateTable"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdateTable"
                     }
                 }
             }
         },
-        "object_builder_service.UpdatePanelCoordinatesRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdatePanelCoordinatesRequest": {
             "type": "object",
             "properties": {
                 "panel_coordinates": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.PanelCoordinates"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.PanelCoordinates"
                     }
                 },
                 "project_id": {
@@ -38119,19 +39134,19 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.UpdateRelationRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdateRelationRequest": {
             "type": "object",
             "properties": {
                 "action_relations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.ActionRelation"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ActionRelation"
                     }
                 },
                 "auto_filters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.AutoFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.AutoFilter"
                     }
                 },
                 "cascading_tree_field_slug": {
@@ -38143,7 +39158,7 @@ const docTemplate = `{
                 "cascadings": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Cascading"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Cascading"
                     }
                 },
                 "columns": {
@@ -38167,7 +39182,7 @@ const docTemplate = `{
                 "dynamic_tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.DynamicTable"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.DynamicTable"
                     }
                 },
                 "editable": {
@@ -38203,7 +39218,7 @@ const docTemplate = `{
                 "quick_filters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.QuickFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.QuickFilter"
                     }
                 },
                 "relation_field_slug": {
@@ -38215,7 +39230,7 @@ const docTemplate = `{
                 "summaries": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Summary"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Summary"
                     }
                 },
                 "table_from": {
@@ -38250,7 +39265,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.UpdateSectionsRequest": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdateSectionsRequest": {
             "type": "object",
             "properties": {
                 "commit_guid": {
@@ -38265,7 +39280,7 @@ const docTemplate = `{
                 "sections": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Section"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Section"
                     }
                 },
                 "table_id": {
@@ -38273,7 +39288,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.UpdateTable": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdateTable": {
             "type": "object",
             "properties": {
                 "is_own_table": {
@@ -38287,7 +39302,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.UpsertViewRelationsBody": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.UpsertViewRelationsBody": {
             "type": "object",
             "properties": {
                 "commit_guid": {
@@ -38305,28 +39320,28 @@ const docTemplate = `{
                 "view_relations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.ViewRelationReq"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ViewRelationReq"
                     }
                 }
             }
         },
-        "object_builder_service.V2LoginResponse": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.V2LoginResponse": {
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RecordPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.RecordPermission"
                     }
                 },
                 "client_platform": {
-                    "$ref": "#/definitions/object_builder_service.ClientPlatform"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ClientPlatform"
                 },
                 "client_type": {
-                    "$ref": "#/definitions/object_builder_service.ClientType"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ClientType"
                 },
                 "login_table_slug": {
                     "type": "string"
@@ -38334,11 +39349,11 @@ const docTemplate = `{
                 "permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RecordPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.RecordPermission"
                     }
                 },
                 "role": {
-                    "$ref": "#/definitions/object_builder_service.Role"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Role"
                 },
                 "user_found": {
                     "type": "boolean"
@@ -38348,7 +39363,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Variable": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.Variable": {
             "type": "object",
             "properties": {
                 "dashboard_id": {
@@ -38386,14 +39401,14 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.View": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.View": {
             "type": "object",
             "properties": {
                 "app_id": {
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -38411,7 +39426,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "disable_dates": {
-                    "$ref": "#/definitions/object_builder_service.DisableDates"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.DisableDates"
                 },
                 "group_fields": {
                     "type": "array",
@@ -38443,7 +39458,7 @@ const docTemplate = `{
                 "quick_filters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.QuickFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.QuickFilter"
                     }
                 },
                 "relation_id": {
@@ -38487,7 +39502,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.ViewRelationReq": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.ViewRelationReq": {
             "type": "object",
             "properties": {
                 "order": {
@@ -38501,7 +39516,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.When": {
+        "ucode_ucode_go_api_gateway_genproto_object_builder_service.When": {
             "type": "object",
             "properties": {
                 "action": {
@@ -38513,7 +39528,7 @@ const docTemplate = `{
                 "conditions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Condition"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Condition"
                     }
                 },
                 "project_id": {
@@ -38521,7 +39536,7 @@ const docTemplate = `{
                 }
             }
         },
-        "pos_service.BookedAppointment": {
+        "ucode_ucode_go_api_gateway_genproto_pos_service.BookedAppointment": {
             "type": "object",
             "properties": {
                 "date": {
@@ -38544,24 +39559,24 @@ const docTemplate = `{
                 }
             }
         },
-        "pos_service.CashboxResponse": {
+        "ucode_ucode_go_api_gateway_genproto_pos_service.CashboxResponse": {
             "type": "object",
             "properties": {
                 "overall_payments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/pos_service.OverallPayment"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.OverallPayment"
                     }
                 }
             }
         },
-        "pos_service.GetAllBookedAppointmentsResponse": {
+        "ucode_ucode_go_api_gateway_genproto_pos_service.GetAllBookedAppointmentsResponse": {
             "type": "object",
             "properties": {
                 "booked_appointments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/pos_service.BookedAppointment"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.BookedAppointment"
                     }
                 },
                 "count": {
@@ -38569,7 +39584,7 @@ const docTemplate = `{
                 }
             }
         },
-        "pos_service.GetAllOfflineAppointmentsResponse": {
+        "ucode_ucode_go_api_gateway_genproto_pos_service.GetAllOfflineAppointmentsResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -38578,46 +39593,46 @@ const docTemplate = `{
                 "offline_appointments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/pos_service.OfflineAppointment"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.OfflineAppointment"
                     }
                 }
             }
         },
-        "pos_service.GetSingleBookedAppointmentResponse": {
+        "ucode_ucode_go_api_gateway_genproto_pos_service.GetSingleBookedAppointmentResponse": {
             "type": "object",
             "properties": {
                 "payments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/pos_service.PaymentResponse"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.PaymentResponse"
                     }
                 },
                 "services": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/pos_service.Service"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.Service"
                     }
                 }
             }
         },
-        "pos_service.GetSingleOfflineAppointmentResponse": {
+        "ucode_ucode_go_api_gateway_genproto_pos_service.GetSingleOfflineAppointmentResponse": {
             "type": "object",
             "properties": {
                 "payments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/pos_service.PaymentResponse"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.PaymentResponse"
                     }
                 },
                 "services": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/pos_service.Service"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.Service"
                     }
                 }
             }
         },
-        "pos_service.OfflineAppointment": {
+        "ucode_ucode_go_api_gateway_genproto_pos_service.OfflineAppointment": {
             "type": "object",
             "properties": {
                 "date": {
@@ -38640,7 +39655,7 @@ const docTemplate = `{
                 }
             }
         },
-        "pos_service.OverallPayment": {
+        "ucode_ucode_go_api_gateway_genproto_pos_service.OverallPayment": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -38651,7 +39666,7 @@ const docTemplate = `{
                 }
             }
         },
-        "pos_service.Payment": {
+        "ucode_ucode_go_api_gateway_genproto_pos_service.Payment": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -38662,7 +39677,7 @@ const docTemplate = `{
                 }
             }
         },
-        "pos_service.PaymentResponse": {
+        "ucode_ucode_go_api_gateway_genproto_pos_service.PaymentResponse": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -38679,7 +39694,7 @@ const docTemplate = `{
                 }
             }
         },
-        "pos_service.Service": {
+        "ucode_ucode_go_api_gateway_genproto_pos_service.Service": {
             "type": "object",
             "properties": {
                 "doctor_name": {
@@ -38696,7 +39711,7 @@ const docTemplate = `{
                 }
             }
         },
-        "pos_service.UpdatePaymentStatusBody": {
+        "ucode_ucode_go_api_gateway_genproto_pos_service.UpdatePaymentStatusBody": {
             "type": "object",
             "properties": {
                 "appointment_type": {
@@ -38711,7 +39726,7 @@ const docTemplate = `{
                 "payments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/pos_service.Payment"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_pos_service.Payment"
                     }
                 },
                 "service_ids": {
@@ -38722,6 +39737,7 @@ const docTemplate = `{
                 }
             }
         },
+<<<<<<< HEAD
         "postgres_object_builder_service.GetAllTablesResponse": {
             "type": "object",
             "properties": {
@@ -38789,6 +39805,9 @@ const docTemplate = `{
             }
         },
         "query_service.CommitInfo": {
+=======
+        "ucode_ucode_go_api_gateway_genproto_query_service.CommitInfo": {
+>>>>>>> 79cdb13d1127a1825fb84fedfcb83d7a20ed5794
             "type": "object",
             "properties": {
                 "author_id": {
@@ -38821,12 +39840,12 @@ const docTemplate = `{
                 "version_infos": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/query_service.VersionInfo"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.VersionInfo"
                     }
                 }
             }
         },
-        "query_service.CreateFolderReq": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.CreateFolderReq": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -38846,17 +39865,17 @@ const docTemplate = `{
                 }
             }
         },
-        "query_service.CreateQueryReq": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.CreateQueryReq": {
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
                 },
                 "commit_info": {
-                    "$ref": "#/definitions/query_service.CommitInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.CommitInfo"
                 },
                 "description": {
                     "type": "string"
@@ -38885,7 +39904,7 @@ const docTemplate = `{
                 "variables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/query_service.Variable"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Variable"
                     }
                 },
                 "version_id": {
@@ -38893,7 +39912,7 @@ const docTemplate = `{
                 }
             }
         },
-        "query_service.Folder": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.Folder": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -38916,7 +39935,7 @@ const docTemplate = `{
                 }
             }
         },
-        "query_service.GetListFolderRes": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.GetListFolderRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -38925,12 +39944,12 @@ const docTemplate = `{
                 "folders": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/query_service.Folder"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Folder"
                     }
                 }
             }
         },
-        "query_service.GetListLogRes": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.GetListLogRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -38939,12 +39958,12 @@ const docTemplate = `{
                 "log": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/query_service.Log"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Log"
                     }
                 }
             }
         },
-        "query_service.GetListQueryRes": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.GetListQueryRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -38953,12 +39972,12 @@ const docTemplate = `{
                 "queries": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/query_service.Query"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Query"
                     }
                 }
             }
         },
-        "query_service.GetQueryHistoryRes": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.GetQueryHistoryRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -38970,16 +39989,16 @@ const docTemplate = `{
                 "queries": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/query_service.GetQueryHistoryRes_QueryHistory"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.GetQueryHistoryRes_QueryHistory"
                     }
                 }
             }
         },
-        "query_service.GetQueryHistoryRes_QueryHistory": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.GetQueryHistoryRes_QueryHistory": {
             "type": "object",
             "properties": {
                 "commit_info": {
-                    "$ref": "#/definitions/query_service.CommitInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.CommitInfo"
                 },
                 "created_at": {
                     "type": "string"
@@ -38990,12 +40009,12 @@ const docTemplate = `{
                 "version_infos": {
                     "type": "object",
                     "additionalProperties": {
-                        "$ref": "#/definitions/query_service.VersionInfo"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.VersionInfo"
                     }
                 }
             }
         },
-        "query_service.GetSingleFolderRes": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.GetSingleFolderRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -39004,12 +40023,12 @@ const docTemplate = `{
                 "folders": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/query_service.Folder"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Folder"
                     }
                 }
             }
         },
-        "query_service.Log": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.Log": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -39028,7 +40047,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "request": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "response": {
                     "type": "string"
@@ -39038,17 +40057,17 @@ const docTemplate = `{
                 }
             }
         },
-        "query_service.Query": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.Query": {
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
                 },
                 "commit_info": {
-                    "$ref": "#/definitions/query_service.CommitInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.CommitInfo"
                 },
                 "description": {
                     "type": "string"
@@ -39080,7 +40099,7 @@ const docTemplate = `{
                 "variables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/query_service.Variable"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Variable"
                     }
                 },
                 "version_id": {
@@ -39088,7 +40107,7 @@ const docTemplate = `{
                 }
             }
         },
-        "query_service.QueryManyVersions": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.QueryManyVersions": {
             "type": "object",
             "properties": {
                 "oldcommit_id": {
@@ -39105,7 +40124,7 @@ const docTemplate = `{
                 }
             }
         },
-        "query_service.RunQueryRes": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.RunQueryRes": {
             "type": "object",
             "properties": {
                 "res": {
@@ -39119,7 +40138,7 @@ const docTemplate = `{
                 }
             }
         },
-        "query_service.UpdateFolderReq": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.UpdateFolderReq": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -39142,17 +40161,17 @@ const docTemplate = `{
                 }
             }
         },
-        "query_service.UpdateQueryReq": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.UpdateQueryReq": {
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "commit_id": {
                     "type": "string"
                 },
                 "commit_info": {
-                    "$ref": "#/definitions/query_service.CommitInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.CommitInfo"
                 },
                 "description": {
                     "type": "string"
@@ -39184,7 +40203,7 @@ const docTemplate = `{
                 "variables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/query_service.Variable"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.Variable"
                     }
                 },
                 "version_id": {
@@ -39192,7 +40211,7 @@ const docTemplate = `{
                 }
             }
         },
-        "query_service.Variable": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.Variable": {
             "type": "object",
             "properties": {
                 "default": {
@@ -39215,7 +40234,7 @@ const docTemplate = `{
                 }
             }
         },
-        "query_service.VersionInfo": {
+        "ucode_ucode_go_api_gateway_genproto_query_service.VersionInfo": {
             "type": "object",
             "properties": {
                 "author_id": {
@@ -39241,11 +40260,11 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.Commit": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.Commit": {
             "type": "object",
             "properties": {
                 "commit_info": {
-                    "$ref": "#/definitions/scenario_service.CommitInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.CommitInfo"
                 },
                 "created_at": {
                     "type": "string"
@@ -39261,7 +40280,7 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.CommitInfo": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.CommitInfo": {
             "type": "object",
             "properties": {
                 "author_id": {
@@ -39294,12 +40313,12 @@ const docTemplate = `{
                 "version_infos": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/scenario_service.VersionInfo"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.VersionInfo"
                     }
                 }
             }
         },
-        "scenario_service.CommitWithRelease": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.CommitWithRelease": {
             "type": "object",
             "properties": {
                 "author_id": {
@@ -39324,7 +40343,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release_info": {
-                    "$ref": "#/definitions/scenario_service.CommitWithRelease_Release"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.CommitWithRelease_Release"
                 },
                 "version_ids": {
                     "type": "array",
@@ -39334,7 +40353,7 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.CommitWithRelease_Release": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.CommitWithRelease_Release": {
             "type": "object",
             "properties": {
                 "ids": {
@@ -39351,7 +40370,7 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.ConnectInfo": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.ConnectInfo": {
             "type": "object",
             "properties": {
                 "header": {
@@ -39368,15 +40387,15 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.CreateDAGRequest": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.CreateDAGRequest": {
             "type": "object",
             "properties": {
                 "dag": {
-                    "$ref": "#/definitions/scenario_service.DAG"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.DAG"
                 }
             }
         },
-        "scenario_service.CreateDAGStepRequest": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.CreateDAGStepRequest": {
             "type": "object",
             "properties": {
                 "callback_type": {
@@ -39388,11 +40407,11 @@ const docTemplate = `{
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/structpb.Struct"
+                        "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                     }
                 },
                 "connect_info": {
-                    "$ref": "#/definitions/scenario_service.ConnectInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.ConnectInfo"
                 },
                 "dag_id": {
                     "type": "string"
@@ -39407,7 +40426,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -39420,11 +40439,11 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.DAG": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.DAG": {
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "category_id": {
                     "type": "string"
@@ -39433,7 +40452,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "commit_info": {
-                    "$ref": "#/definitions/scenario_service.CommitInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.CommitInfo"
                 },
                 "created_at": {
                     "type": "string"
@@ -39455,13 +40474,13 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.DAGList": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.DAGList": {
             "type": "object",
             "properties": {
                 "DAGs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/scenario_service.DAG"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.DAG"
                     }
                 },
                 "count": {
@@ -39469,7 +40488,7 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.DAGStep": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.DAGStep": {
             "type": "object",
             "properties": {
                 "callback_type": {
@@ -39481,11 +40500,11 @@ const docTemplate = `{
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/structpb.Struct"
+                        "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                     }
                 },
                 "connect_info": {
-                    "$ref": "#/definitions/scenario_service.ConnectInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.ConnectInfo"
                 },
                 "created_at": {
                     "type": "string"
@@ -39506,7 +40525,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -39518,11 +40537,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "ui_component": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
-        "scenario_service.GetDAGRequest": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.GetDAGRequest": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -39536,7 +40555,7 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.GetDAGStepRequest": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.GetDAGStepRequest": {
             "type": "object",
             "properties": {
                 "dag_id": {
@@ -39550,13 +40569,13 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.GetScenarioHistoryResponse": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.GetScenarioHistoryResponse": {
             "type": "object",
             "properties": {
                 "commits": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/scenario_service.Commit"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.Commit"
                     }
                 },
                 "count": {
@@ -39567,11 +40586,11 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.RevertScenarioRequest": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.RevertScenarioRequest": {
             "type": "object",
             "properties": {
                 "commit_info": {
-                    "$ref": "#/definitions/scenario_service.CommitInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_scenario_service.CommitInfo"
                 },
                 "environment_id": {
                     "type": "string"
@@ -39599,15 +40618,15 @@ const docTemplate = `{
                 }
             }
         },
-        "scenario_service.RunScenarioResponse": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.RunScenarioResponse": {
             "type": "object",
             "properties": {
                 "response": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 }
             }
         },
-        "scenario_service.VersionInfo": {
+        "ucode_ucode_go_api_gateway_genproto_scenario_service.VersionInfo": {
             "type": "object",
             "properties": {
                 "author_id": {
@@ -39633,39 +40652,7 @@ const docTemplate = `{
                 }
             }
         },
-        "status_http.Response": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "description": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "structpb.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
-                    }
-                }
-            }
-        },
-        "structpb.Value": {
-            "type": "object",
-            "properties": {
-                "kind": {
-                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
-                }
-            }
-        },
-        "template_service.CreateFolderNoteReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.CreateFolderNoteReq": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -39685,7 +40672,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.CreateFolderReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.CreateFolderReq": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -39705,7 +40692,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.CreateNoteReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.CreateNoteReq": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -39715,7 +40702,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -39728,7 +40715,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.CreateTemplateReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.CreateTemplateReq": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -39749,7 +40736,7 @@ const docTemplate = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.CreateTemplateReq_Table"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateTemplateReq_Table"
                     }
                 },
                 "title": {
@@ -39760,7 +40747,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.CreateTemplateReq_Table": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.CreateTemplateReq_Table": {
             "type": "object",
             "properties": {
                 "filter": {
@@ -39772,7 +40759,7 @@ const docTemplate = `{
                 "relations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.CreateTemplateReq_Table_Relation"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.CreateTemplateReq_Table_Relation"
                     }
                 },
                 "table_id": {
@@ -39783,7 +40770,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.CreateTemplateReq_Table_Relation": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.CreateTemplateReq_Table_Relation": {
             "type": "object",
             "properties": {
                 "relation_id": {
@@ -39791,7 +40778,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.CreateTokenReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.CreateTokenReq": {
             "type": "object",
             "properties": {
                 "is_private": {
@@ -39811,7 +40798,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.CreateTokenRes": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.CreateTokenRes": {
             "type": "object",
             "properties": {
                 "is_private": {
@@ -39834,7 +40821,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.CreateUserPermissionReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.CreateUserPermissionReq": {
             "type": "object",
             "properties": {
                 "email": {
@@ -39866,7 +40853,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.Folder": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.Folder": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -39889,7 +40876,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.FolderNote": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.FolderNote": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -39912,7 +40899,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.GetListFolderNoteRes": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.GetListFolderNoteRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -39921,12 +40908,12 @@ const docTemplate = `{
                 "folders": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.FolderNote"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.FolderNote"
                     }
                 }
             }
         },
-        "template_service.GetListFolderRes": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.GetListFolderRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -39935,12 +40922,12 @@ const docTemplate = `{
                 "folders": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.Folder"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Folder"
                     }
                 }
             }
         },
-        "template_service.GetListNoteRes": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.GetListNoteRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -39949,12 +40936,12 @@ const docTemplate = `{
                 "notes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.Note"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Note"
                     }
                 }
             }
         },
-        "template_service.GetListTemplateRes": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.GetListTemplateRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -39963,12 +40950,12 @@ const docTemplate = `{
                 "templates": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.Template"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Template"
                     }
                 }
             }
         },
-        "template_service.GetListUserPermissionRes": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.GetListUserPermissionRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -39977,12 +40964,12 @@ const docTemplate = `{
                 "users": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.UserPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UserPermission"
                     }
                 }
             }
         },
-        "template_service.GetObjectTokenReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.GetObjectTokenReq": {
             "type": "object",
             "properties": {
                 "token": {
@@ -39993,18 +40980,18 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.GetObjectTokenRes": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.GetObjectTokenRes": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "role": {
                     "type": "string"
                 }
             }
         },
-        "template_service.GetSingleFolderNoteRes": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.GetSingleFolderNoteRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -40013,12 +41000,12 @@ const docTemplate = `{
                 "folders": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.FolderNote"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.FolderNote"
                     }
                 }
             }
         },
-        "template_service.GetSingleFolderRes": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.GetSingleFolderRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -40027,12 +41014,12 @@ const docTemplate = `{
                 "folders": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.Folder"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Folder"
                     }
                 }
             }
         },
-        "template_service.Note": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.Note": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -40045,7 +41032,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -40058,7 +41045,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.PdfBody": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.PdfBody": {
             "type": "object",
             "properties": {
                 "link": {
@@ -40066,7 +41053,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.Template": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.Template": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -40090,7 +41077,7 @@ const docTemplate = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.Template_Table"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Template_Table"
                     }
                 },
                 "title": {
@@ -40101,7 +41088,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.Template_Table": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.Template_Table": {
             "type": "object",
             "properties": {
                 "filter": {
@@ -40113,7 +41100,7 @@ const docTemplate = `{
                 "relations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.Template_Table_Relation"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.Template_Table_Relation"
                     }
                 },
                 "table_id": {
@@ -40124,7 +41111,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.Template_Table_Relation": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.Template_Table_Relation": {
             "type": "object",
             "properties": {
                 "relation_id": {
@@ -40132,7 +41119,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.UpdateFolderNoteReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.UpdateFolderNoteReq": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -40155,7 +41142,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.UpdateFolderReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.UpdateFolderReq": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -40178,7 +41165,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.UpdateNoteReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.UpdateNoteReq": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -40191,7 +41178,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -40204,7 +41191,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.UpdateTemplateReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.UpdateTemplateReq": {
             "type": "object",
             "properties": {
                 "commit_id": {
@@ -40228,7 +41215,7 @@ const docTemplate = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.UpdateTemplateReq_Table"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateTemplateReq_Table"
                     }
                 },
                 "title": {
@@ -40239,7 +41226,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.UpdateTemplateReq_Table": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.UpdateTemplateReq_Table": {
             "type": "object",
             "properties": {
                 "filter": {
@@ -40251,7 +41238,7 @@ const docTemplate = `{
                 "relations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/template_service.UpdateTemplateReq_Table_Relation"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_template_service.UpdateTemplateReq_Table_Relation"
                     }
                 },
                 "table_id": {
@@ -40262,7 +41249,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.UpdateTemplateReq_Table_Relation": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.UpdateTemplateReq_Table_Relation": {
             "type": "object",
             "properties": {
                 "relation_id": {
@@ -40270,7 +41257,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.UpdateTokenReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.UpdateTokenReq": {
             "type": "object",
             "properties": {
                 "is_private": {
@@ -40290,7 +41277,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.UpdateTokenRes": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.UpdateTokenRes": {
             "type": "object",
             "properties": {
                 "is_private": {
@@ -40313,7 +41300,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.UpdateUserPermissionReq": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.UpdateUserPermissionReq": {
             "type": "object",
             "properties": {
                 "email": {
@@ -40348,7 +41335,7 @@ const docTemplate = `{
                 }
             }
         },
-        "template_service.UserPermission": {
+        "ucode_ucode_go_api_gateway_genproto_template_service.UserPermission": {
             "type": "object",
             "properties": {
                 "email": {
@@ -40383,7 +41370,7 @@ const docTemplate = `{
                 }
             }
         },
-        "versioning_service.ApiCreateReleaseRequest": {
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.ApiCreateReleaseRequest": {
             "type": "object",
             "properties": {
                 "author_id": {
@@ -40399,11 +41386,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release_type": {
+<<<<<<< HEAD
                     "$ref": "#/definitions/versioning_service.ReleaseType"
+=======
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.ReleaseType"
+>>>>>>> 79cdb13d1127a1825fb84fedfcb83d7a20ed5794
                 }
             }
         },
-        "versioning_service.ApiDeleteReleaseRequest": {
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.ApiDeleteReleaseRequest": {
             "type": "object",
             "properties": {
                 "project_id": {
@@ -40411,7 +41402,7 @@ const docTemplate = `{
                 }
             }
         },
-        "versioning_service.ApiSetCurrentReleaseRequest": {
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.ApiSetCurrentReleaseRequest": {
             "type": "object",
             "properties": {
                 "project_id": {
@@ -40422,7 +41413,7 @@ const docTemplate = `{
                 }
             }
         },
-        "versioning_service.ApiUpdateReleaseRequest": {
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.ApiUpdateReleaseRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -40433,7 +41424,7 @@ const docTemplate = `{
                 }
             }
         },
-        "versioning_service.CommitWithRelease": {
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.CommitWithRelease": {
             "type": "object",
             "properties": {
                 "author_id": {
@@ -40458,11 +41449,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release_info": {
-                    "$ref": "#/definitions/versioning_service.CommitWithRelease_Release"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.CommitWithRelease_Release"
                 }
             }
         },
-        "versioning_service.CommitWithRelease_Release": {
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.CommitWithRelease_Release": {
             "type": "object",
             "properties": {
                 "id": {
@@ -40476,7 +41467,7 @@ const docTemplate = `{
                 }
             }
         },
-        "versioning_service.CreateCommitRequest": {
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.CreateCommitRequest": {
             "type": "object",
             "properties": {
                 "author_id": {
@@ -40496,13 +41487,13 @@ const docTemplate = `{
                 }
             }
         },
-        "versioning_service.GetCommitListResponse": {
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.GetCommitListResponse": {
             "type": "object",
             "properties": {
                 "commits": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/versioning_service.CommitWithRelease"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.CommitWithRelease"
                     }
                 },
                 "count": {
@@ -40510,7 +41501,7 @@ const docTemplate = `{
                 }
             }
         },
-        "versioning_service.GetCurrentReleaseResponse": {
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.GetCurrentReleaseResponse": {
             "type": "object",
             "properties": {
                 "version_id": {
@@ -40518,7 +41509,7 @@ const docTemplate = `{
                 }
             }
         },
-        "versioning_service.GetReleaseListResponse": {
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.GetReleaseListResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -40527,12 +41518,16 @@ const docTemplate = `{
                 "releases": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/versioning_service.ReleaseWithCommit"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.ReleaseWithCommit"
                     }
                 }
             }
         },
+<<<<<<< HEAD
         "versioning_service.ReleaseType": {
+=======
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.ReleaseType": {
+>>>>>>> 79cdb13d1127a1825fb84fedfcb83d7a20ed5794
             "type": "integer",
             "enum": [
                 0,
@@ -40547,14 +41542,18 @@ const docTemplate = `{
                 "ReleaseType_PATCH"
             ]
         },
+<<<<<<< HEAD
         "versioning_service.ReleaseWithCommit": {
+=======
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.ReleaseWithCommit": {
+>>>>>>> 79cdb13d1127a1825fb84fedfcb83d7a20ed5794
             "type": "object",
             "properties": {
                 "author_id": {
                     "type": "string"
                 },
                 "commit_info": {
-                    "$ref": "#/definitions/versioning_service.ReleaseWithCommit_Commit"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.ReleaseWithCommit_Commit"
                 },
                 "created_at": {
                     "type": "string"
@@ -40582,7 +41581,7 @@ const docTemplate = `{
                 }
             }
         },
-        "versioning_service.ReleaseWithCommit_Commit": {
+        "ucode_ucode_go_api_gateway_genproto_versioning_service.ReleaseWithCommit_Commit": {
             "type": "object",
             "properties": {
                 "id": {
@@ -40593,11 +41592,11 @@ const docTemplate = `{
                 }
             }
         },
-        "web_page_service.App": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.App": {
             "type": "object",
             "properties": {
                 "Routes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "environment_id": {
                     "type": "string"
@@ -40612,7 +41611,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "pages": {
-                    "$ref": "#/definitions/web_page_service.Pages"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.Pages"
                 },
                 "project_id": {
                     "type": "string"
@@ -40625,7 +41624,7 @@ const docTemplate = `{
                 }
             }
         },
-        "web_page_service.CommitInfo": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.CommitInfo": {
             "type": "object",
             "properties": {
                 "author_id": {
@@ -40658,12 +41657,12 @@ const docTemplate = `{
                 "version_infos": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/web_page_service.VersionInfo"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.VersionInfo"
                     }
                 }
             }
         },
-        "web_page_service.Folder": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.Folder": {
             "type": "object",
             "properties": {
                 "environment_id": {
@@ -40683,13 +41682,13 @@ const docTemplate = `{
                 }
             }
         },
-        "web_page_service.GetListAppRes": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.GetListAppRes": {
             "type": "object",
             "properties": {
                 "Apps": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/web_page_service.App"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.App"
                     }
                 },
                 "count": {
@@ -40697,7 +41696,7 @@ const docTemplate = `{
                 }
             }
         },
-        "web_page_service.GetListFolderRes": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.GetListFolderRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -40706,12 +41705,12 @@ const docTemplate = `{
                 "folders": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/web_page_service.Folder"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.Folder"
                     }
                 }
             }
         },
-        "web_page_service.GetListWebPageRes": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.GetListWebPageRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -40720,18 +41719,18 @@ const docTemplate = `{
                 "web_pages": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/web_page_service.WebPage"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.WebPage"
                     }
                 }
             }
         },
-        "web_page_service.GetSingleAppRes": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.GetSingleAppRes": {
             "type": "object",
             "properties": {
                 "Apps": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/web_page_service.App"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.App"
                     }
                 },
                 "count": {
@@ -40739,7 +41738,7 @@ const docTemplate = `{
                 }
             }
         },
-        "web_page_service.GetSingleFolderRes": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.GetSingleFolderRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -40748,12 +41747,12 @@ const docTemplate = `{
                 "folders": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/web_page_service.Folder"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.Folder"
                     }
                 }
             }
         },
-        "web_page_service.GetWebPageHistoryRes": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.GetWebPageHistoryRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -40765,16 +41764,16 @@ const docTemplate = `{
                 "web_pages": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/web_page_service.GetWebPageHistoryRes_WebPageHistory"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.GetWebPageHistoryRes_WebPageHistory"
                     }
                 }
             }
         },
-        "web_page_service.GetWebPageHistoryRes_WebPageHistory": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.GetWebPageHistoryRes_WebPageHistory": {
             "type": "object",
             "properties": {
                 "commit_info": {
-                    "$ref": "#/definitions/web_page_service.CommitInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.CommitInfo"
                 },
                 "created_at": {
                     "type": "string"
@@ -40785,12 +41784,12 @@ const docTemplate = `{
                 "version_infos": {
                     "type": "object",
                     "additionalProperties": {
-                        "$ref": "#/definitions/web_page_service.VersionInfo"
+                        "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.VersionInfo"
                     }
                 }
             }
         },
-        "web_page_service.Pages": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.Pages": {
             "type": "object",
             "properties": {
                 "default_page": {
@@ -40801,7 +41800,7 @@ const docTemplate = `{
                 }
             }
         },
-        "web_page_service.VersionInfo": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.VersionInfo": {
             "type": "object",
             "properties": {
                 "author_id": {
@@ -40827,7 +41826,7 @@ const docTemplate = `{
                 }
             }
         },
-        "web_page_service.WebPage": {
+        "ucode_ucode_go_api_gateway_genproto_web_page_service.WebPage": {
             "type": "object",
             "properties": {
                 "app_id": {
@@ -40837,10 +41836,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "commit_info": {
-                    "$ref": "#/definitions/web_page_service.CommitInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_web_page_service.CommitInfo"
                 },
                 "components": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "environment_id": {
                     "type": "string"

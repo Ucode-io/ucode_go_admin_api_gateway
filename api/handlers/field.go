@@ -154,8 +154,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 // @Tags Field
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param filters query object_builder_service.GetAllFieldsRequest true "filters"
+// @Param filters query obs.GetAllFieldsRequest true "filters"
 // @Success 200 {object} status_http.Response{data=models.GetAllFieldsResponse} "FieldBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
