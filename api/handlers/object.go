@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -78,6 +77,19 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	//start = time.Now()
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
@@ -92,19 +104,6 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	//	return
 	//}
 	//fmt.Println("TIME_MANAGEMENT_LOGGING:::GetResEnvByResIdEnvId", time.Since(start))
-
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
 
 	id, _ := uuid.NewRandom()
 	objectRequest.Data["guid"] = id.String()
@@ -234,7 +233,6 @@ func (h *Handler) CreateObject(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingle(c *gin.Context) {
 	var object models.CommonMessage
-	fmt.Println("USER:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::")
 
 	object.Data = make(map[string]interface{})
 
@@ -285,18 +283,6 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -310,7 +296,18 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("USER:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::", resource, structData)
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	resp, err := services.BuilderService().ObjectBuilder().GetSingle(
 		context.Background(),
@@ -325,7 +322,6 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("USER:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::", resp)
 	h.handleResponse(c, status_http.OK, resp)
 }
 
@@ -402,18 +398,6 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -426,6 +410,19 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "UPDATE", c, h)
 	if err != nil {
@@ -575,19 +572,6 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -600,6 +584,19 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "DELETE", c, h)
 	if err != nil {
@@ -745,18 +742,6 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -769,6 +754,19 @@ func (h *Handler) GetList(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	resp, err := services.BuilderService().ObjectBuilder().GetList(
 		context.Background(),
@@ -852,19 +850,6 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -877,6 +862,19 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	resp, err := services.BuilderService().ObjectBuilder().GetListInExcel(
 		context.Background(),
@@ -951,18 +949,6 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -975,6 +961,19 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	beforeActions, afterActions, err := GetListCustomEvents(m2mMessage.TableTo, "", "DELETE_MANY2MANY", c, h)
@@ -1086,18 +1085,6 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -1110,6 +1097,19 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	beforeActions, afterActions, err := GetListCustomEvents(m2mMessage.TableFrom, "", "APPEND_MANY2MANY", c, h)
@@ -1229,19 +1229,6 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -1254,6 +1241,19 @@ func (h *Handler) GetObjectDetails(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	resp, err := services.BuilderService().ObjectBuilder().GetObjectDetails(
 		context.Background(),
@@ -1332,18 +1332,6 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -1356,6 +1344,19 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	objects := objectRequest.Data["objects"].([]interface{})
 	editedObjects := make([]interface{}, 0, len(objects))
@@ -1568,18 +1569,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -1592,6 +1581,19 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "MULTIPLE_UPDATE", c, h)
 	if err != nil {
@@ -1710,19 +1712,6 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -1735,6 +1724,19 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	//tokenInfo := h.GetAuthInfo
 	objectRequest.Data["tables"] = authInfo.GetTables()

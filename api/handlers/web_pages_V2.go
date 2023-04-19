@@ -9,6 +9,7 @@ import (
 	"time"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	vcs "ucode/ucode_go_api_gateway/genproto/versioning_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/web_page_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -29,6 +30,7 @@ import (
 // @Tags WebPage
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param webpage_folder body models.CreateFolderReqModel true "CreateFolderReqModel"
 // @Success 201 {object} status_http.Response{data=tmp.Folder} "WebPage folder data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -58,7 +60,8 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(folder.ProjectId) {
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -70,14 +73,29 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 	//	return
 	//}
 	//
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	folder.EnvironmentId = environmentId.(string)
+	folder.ProjectId = resource.ResourceEnvironmentId
 	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
@@ -103,7 +121,7 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	//folder.ProjectId = resourceEnvironment.GetId()
+	//folder.ProjectId = resource.ResourceEnvironmentId
 
 	res, err := services.WebPageService().Folder().CreateFolder(
 		context.Background(),
@@ -169,10 +187,24 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 	//	return
 	//}
 	//
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	//
@@ -206,7 +238,7 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleFolderReq{
 			Id:            folderId,
-			ProjectId:     projectId,
+			ProjectId:     resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -258,11 +290,6 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(folder.ProjectId) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
 	//	err = errors.New("error getting resource id")
@@ -270,10 +297,29 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 	//	return
 	//}
 	//
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	folder.EnvironmentId = environmentId.(string)
@@ -302,7 +348,7 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	//folder.ProjectId = resourceEnvironment.GetId()
+	folder.ProjectId = resource.ResourceEnvironmentId
 
 	res, err := services.WebPageService().Folder().UpdateFolder(
 		context.Background(),
@@ -368,10 +414,24 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 	//	return
 	//}
 	//
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	//
@@ -405,7 +465,7 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteFolderReq{
 			Id:            folderId,
-			ProjectId:     projectId,
+			ProjectId:     resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -463,10 +523,24 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 	//	return
 	//}
 	//
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	//
@@ -499,7 +573,7 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 	res, err := services.WebPageService().Folder().GetListFolder(
 		context.Background(),
 		&tmp.GetListFolderReq{
-			ProjectId:     projectId,
+			ProjectId:     resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -555,11 +629,6 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	}
 	log.Println("---CreateWebPageV2->3---")
 
-	if !util.IsValidUUID(webpage.GetProjectId()) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
 	//	err = errors.New("error getting resource id")
@@ -568,10 +637,29 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	//}
 	//
 	log.Println("---CreateWebPageV2->4---")
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	webpage.EnvironmentId = environmentId.(string)
@@ -600,7 +688,7 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	//template.ProjectId = resourceEnvironment.GetId()
+	webpage.ProjectId = resource.ResourceEnvironmentId
 
 	log.Println("---CreateWebPageV2->5---")
 	uuID, err := uuid.NewRandom()
@@ -620,13 +708,13 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 		AuthorId:   authInfo.GetUserId(),
 		ProjectId:  webpage.GetProjectId(),
 	}
-	
+
 	log.Println("---CreateWebPageV2->6---")
 	res, err := services.WebPageService().WebPage().CreateWebPage(
 		context.Background(),
 		&webpage,
 	)
-	
+
 	log.Println("---CreateWebPageV2->7---")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -691,10 +779,24 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 	//	return
 	//}
 	//
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	//
@@ -728,7 +830,7 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleWebPageReq{
 			Id:            webPageId,
-			ProjectId:     projectId,
+			ProjectId:     resource.ResourceEnvironmentId,
 			VersionId:     versionId,
 			CommitId:      commitId,
 			EnvironmentId: environmentId.(string),
@@ -778,6 +880,7 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param webpage body models.UpdateWebPageReqModel true "UpdateWebPageReqModel"
 // @Success 200 {object} status_http.Response{data=tmp.WebPage} "WebPage data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -807,11 +910,6 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(webPage.GetProjectId()) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
 	//	err = errors.New("error getting resource id")
@@ -819,10 +917,29 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 	//	return
 	//}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	webPage.EnvironmentId = environmentId.(string)
@@ -851,7 +968,7 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	//template.ProjectId = resourceEnvironment.GetId()
+	webPage.ProjectId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -947,10 +1064,24 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 	//	return
 	//}
 	//
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	//
@@ -984,7 +1115,7 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteWebPageReq{
 			Id:            webPageId,
-			ProjectId:     projectId,
+			ProjectId:     resource.ResourceEnvironmentId,
 			VersionId:     uuid.NewString(),
 			EnvironmentId: environmentId.(string),
 		},
@@ -1057,10 +1188,24 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 	//	return
 	//}
 	//
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -1093,7 +1238,7 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 	res, err := services.WebPageService().WebPage().GetListWebPage(
 		context.Background(),
 		&tmp.GetListWebPageReq{
-			ProjectId:     projectId,
+			ProjectId:     resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 			FolderId:      c.DefaultQuery("folder-id", ""),
 			Limit:         int32(limit),
@@ -1128,19 +1273,11 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetWebPageHistory(c *gin.Context) {
 	id := c.Param("webpage-id")
-	projectId := c.Query("project-id")
 
 	if !util.IsValidUUID(id) {
 		err := errors.New("query is an invalid uuid")
 		h.log.Error("query is an invalid uuid", logger.Error(err))
 		h.handleResponse(c, status_http.InvalidArgument, "query is an invalid uuid")
-		return
-	}
-
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("project_id is an invalid uuid")
-		h.log.Error("project_id is an invalid uuid", logger.Error(err))
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
 		return
 	}
 
@@ -1166,10 +1303,29 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 		return
 	}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -1177,7 +1333,7 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 		context.Background(),
 		&tmp.GetWebPageHistoryReq{
 			Id:            id,
-			ProjectId:     projectId,
+			ProjectId:     resource.ResourceEnvironmentId,
 			Offset:        int64(offset),
 			Limit:         int64(limit),
 			EnvironmentId: environmentId.(string),
@@ -1267,6 +1423,7 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param webpage-id path string true "webpage-id"
+// @Param project-id query string true "project-id"
 // @Param RevertWebPageReq body models.RevertWebPageReqModel true "Request Body"
 // @Success 200 {object} status_http.Response{data=tmp.WebPage} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1306,13 +1463,33 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 		return
 	}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	body.EnvironmentId = environmentId.(string)
+	body.ProjectId = resource.ResourceEnvironmentId
 	if !util.IsValidUUID(body.GetEnvironmentId()) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
@@ -1351,6 +1528,7 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param webpage-id path string true "webpage-id"
+// @Param project-id query string true "project-id"
 // @Param ManyVersionsModel body models.ManyVersionsModel true "Request Body"
 // @Success 200 {object} status_http.Response{data=empty.Empty} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1381,13 +1559,6 @@ func (h *Handler) InsertManyVersionForWebPageService(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(body.GetProjectId()) {
-		err := errors.New("project_id is an invalid uuid")
-		h.log.Error("project_id is an invalid uuid", logger.Error(err))
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
-		return
-	}
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -1396,10 +1567,29 @@ func (h *Handler) InsertManyVersionForWebPageService(c *gin.Context) {
 		return
 	}
 
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	body.EnvironmentId = environmentId.(string)
@@ -1407,6 +1597,7 @@ func (h *Handler) InsertManyVersionForWebPageService(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
 	}
+	body.ProjectId = resource.ResourceEnvironmentId
 
 	// _, commitId, err := h.CreateAutoCommitForAdminChange(c, environmentID.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
 	// if err != nil {
