@@ -22,7 +22,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
-// @Success 200 {object} status_http.Response{data=object_builder_service.BarcodeGenerateRes} "Barcode"
+// @Success 200 {object} status_http.Response{data=obs.BarcodeGenerateRes} "Barcode"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
@@ -96,7 +96,7 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 // @Produce json
 // @Param table_slug path string true "table_slug"
 // @Param field_id path string true "field_id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.CodeGenerateRes} "Code"
+// @Success 200 {object} status_http.Response{data=obs.CodeGenerateRes} "Code"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetNewGeneratedCode(c *gin.Context) {

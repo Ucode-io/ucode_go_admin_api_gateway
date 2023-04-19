@@ -22,8 +22,8 @@ import (
 // @Tags Variable
 // @Accept json
 // @Produce json
-// @Param variable body object_builder_service.CreateVariableRequest true "CreateVariableRequestBody"
-// @Success 201 {object} status_http.Response{data=object_builder_service.Variable} "Variable data"
+// @Param variable body obs.CreateVariableRequest true "CreateVariableRequestBody"
+// @Success 201 {object} status_http.Response{data=obs.Variable} "Variable data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateVariable(c *gin.Context) {
@@ -110,7 +110,7 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param variable_id path string true "variable_id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.Variable} "VariableBody"
+// @Success 200 {object} status_http.Response{data=obs.Variable} "VariableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleVariable(c *gin.Context) {
@@ -187,8 +187,8 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 // @Tags Variable
 // @Accept json
 // @Produce json
-// @Param variable body object_builder_service.Variable true "UpdateVariableRequestBody"
-// @Success 200 {object} status_http.Response{data=object_builder_service.Variable} "Variable data"
+// @Param variable body obs.Variable true "UpdateVariableRequestBody"
+// @Success 200 {object} status_http.Response{data=obs.Variable} "Variable data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateVariable(c *gin.Context) {
@@ -339,8 +339,8 @@ func (h *Handler) DeleteVariable(c *gin.Context) {
 // @Tags Variable
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetAllVariablesRequest true "filters"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetAllVariablesResponse} "VariableBody"
+// @Param filters query obs.GetAllVariablesRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GetAllVariablesResponse} "VariableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllVariables(c *gin.Context) {

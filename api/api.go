@@ -203,8 +203,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/code-generator/:table_slug/:field_id", h.GetNewGeneratedCode)
 
 		// Integration with AlfaLab
-		v1.POST("/alfalab/directions", h.CreateDirections)
-		v1.GET("/alfalab/referral", h.GetReferral)
+		// v1.POST("/alfalab/directions", h.CreateDirections)
+		// v1.GET("/alfalab/referral", h.GetReferral)
 
 		v1.POST("/export-to-json", h.ExportToJSON)
 		v1.POST("import-from-json", h.ImportFromJSON)

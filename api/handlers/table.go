@@ -27,7 +27,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param table body models.CreateTableRequest true "CreateTableRequestBody"
-// @Success 201 {object} status_http.Response{data=object_builder_service.Table} "Table data"
+// @Success 201 {object} status_http.Response{data=obs.Table} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateTable(c *gin.Context) {
@@ -220,8 +220,8 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetAllTablesRequest true "filters"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetAllTablesResponse} "TableBody"
+// @Param filters query obs.GetAllTablesRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GetAllTablesResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllTables(c *gin.Context) {
@@ -330,8 +330,8 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param table body object_builder_service.Table  true "UpdateTableRequestBody"
-// @Success 200 {object} status_http.Response{data=object_builder_service.Table} "Table data"
+// @Param table body obs.Table  true "UpdateTableRequestBody"
+// @Success 200 {object} status_http.Response{data=obs.Table} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateTable(c *gin.Context) {

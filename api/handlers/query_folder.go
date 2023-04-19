@@ -151,7 +151,7 @@ func (h *Handler) GetQueryFolderByID(c *gin.Context) {
 // @Tags Query Folder
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetAllQueryFolderRequest true "filters"
+// @Param filters query obs.GetAllQueryFolderRequest true "filters"
 // @Success 200 {object} status_http.Response{data=models.GetAllFieldsResponse} "FieldBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

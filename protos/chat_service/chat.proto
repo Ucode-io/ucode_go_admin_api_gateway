@@ -11,14 +11,51 @@ service ChatService {
     rpc GetChatList (GetChatListRequest) returns (GetChatListResponse) {}
     rpc CreateMessage(CreateMessageRequest) returns (google.protobuf.Empty) {}
     rpc UpdateChat(UpdateChatRequest) returns (google.protobuf.Empty) {}
+    rpc UpdateChatMessage(UpdateChatMessageRequest) returns (google.protobuf.Empty) {}
+
+    rpc CreateBot (CreateBotRequest) returns (CreateBotResponse) {}
+    rpc UpdateBotToken(UpdateBotTokenRequest) returns (google.protobuf.Empty) {}
+    rpc GetBotTokenList (google.protobuf.Empty) returns (GetBotTokenListResponse) {}
+    rpc GetBotByBotId (GetBotByBotIdRequest) returns (GetBotByBotIdResponse) {}
+    rpc DeleteBotToken(UpdateBotTokenRequest) returns (google.protobuf.Empty) {}
 }
 
+
+message CreateBotRequest{
+    string bot_token = 1;
+    string environment_id = 2;
+}
+
+message CreateBotResponse{
+    string bot_id = 1;
+}
+
+message UpdateBotTokenRequest{
+    string bot_id = 1;
+}
+
+message GetBotByBotIdRequest{
+    string bot_id = 1;
+}
+
+message GetBotTokenListResponse{
+    repeated CreateBotRequest BotTokenList = 1;
+}
+
+message GetBotByBotIdResponse{
+    string bot_token = 1;
+    string environment_id = 2;
+}
+
+message DeleteBotToken{
+    string bot_id = 1;
+}
 // Chat ...
-message Chat {
+message Chat { 
     string phone_number = 1;
     string sender_name = 2;
     string message = 3;
-    string platformType = 4;
+    string platform_type = 4;
     string environment_id = 5;
     string created_at = 6;
     bool check=7;
@@ -38,8 +75,9 @@ message UserMessage {
     string message = 2;
     string created_at = 3;
     string user_id = 4;
-    string platformType = 5;
+    string platform_type = 5;
     bool check=6;
+    string message_id=7;
 }
 
 message GetChatByChatIdRequest {
@@ -53,6 +91,7 @@ message GetChatByUserIdRequest {
 message GetChatByChatIdResponse {
     string chat_id = 1;
     repeated UserMessage messages = 2;
+    string platform_type = 3;
 }
 
 message GetChatByUserIdResponse {
@@ -72,6 +111,8 @@ message ChatWithLastMessageData {
     string environment_id = 4;
     bool check = 5;
     string created_at = 6;
+    string platform_type = 7;
+    string user_id = 8;
 }
 
 message GetChatListResponse {
@@ -97,3 +138,8 @@ message GetSelfChatContentResponse {
 message UpdateChatRequest {
     string chat_id = 1;
 }
+
+message UpdateChatMessageRequest {
+    string message_id = 1;
+}
+

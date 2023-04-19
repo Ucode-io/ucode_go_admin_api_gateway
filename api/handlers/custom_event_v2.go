@@ -26,7 +26,7 @@ import (
 // @Tags NewCustomEvent
 // @Accept json
 // @Produce json
-// @Param Customevent body new_function_service.CreateCustomEventRequest true "CreateCustomEventRequestBody"
+// @Param Customevent body fc.CreateCustomEventRequest true "CreateCustomEventRequestBody"
 // @Success 201 {object} status_http.Response{data=string} "CustomEvent data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -205,7 +205,7 @@ func (h *Handler) GetNewCustomEventByID(c *gin.Context) {
 // @Tags CustomEvent
 // @Accept json
 // @Produce json
-// @Param filters query new_function_service.GetCustomEventsListRequest false "filters"
+// @Param filters query fc.GetCustomEventsListRequest false "filters"
 // @Success 200 {object} status_http.Response{data=string} "CustomEventBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

@@ -22,7 +22,7 @@ import (
 // @Tags Relation
 // @Accept json
 // @Produce json
-// @Param table body object_builder_service.CreateRelationRequest true "CreateRelationRequestBody"
+// @Param table body obs.CreateRelationRequest true "CreateRelationRequestBody"
 // @Success 201 {object} status_http.Response{data=string} "Relation data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -112,7 +112,7 @@ func (h *Handler) CreateRelation(c *gin.Context) {
 // @Tags Relation
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetAllRelationsRequest true "filters"
+// @Param filters query obs.GetAllRelationsRequest true "filters"
 // @Success 200 {object} status_http.Response{data=string} "RelationBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -201,7 +201,7 @@ func (h *Handler) GetAllRelations(c *gin.Context) {
 // @Tags Relation
 // @Accept json
 // @Produce json
-// @Param relation body object_builder_service.UpdateRelationRequest  true "UpdateRelationRequestBody"
+// @Param relation body obs.UpdateRelationRequest  true "UpdateRelationRequestBody"
 // @Success 200 {object} status_http.Response{data=string} "Relation data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

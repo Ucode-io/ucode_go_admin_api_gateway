@@ -22,8 +22,8 @@ import (
 // @Tags Event
 // @Accept json
 // @Produce json
-// @Param event body object_builder_service.CreateEventRequest true "CreateEventRequestBody"
-// @Success 201 {object} status_http.Response{data=object_builder_service.Event} "Event data"
+// @Param event body obs.CreateEventRequest true "CreateEventRequestBody"
+// @Success 201 {object} status_http.Response{data=obs.Event} "Event data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateEvent(c *gin.Context) {
@@ -101,7 +101,7 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param event_id path string true "event_id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.Event} "EventBody"
+// @Success 200 {object} status_http.Response{data=obs.Event} "EventBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetEventByID(c *gin.Context) {
@@ -178,8 +178,8 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 // @Tags Event
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetEventsListRequest true "filters"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetEventsListResponse} "EventBody"
+// @Param filters query obs.GetEventsListRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GetEventsListResponse} "EventBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllEvents(c *gin.Context) {
@@ -250,8 +250,8 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 // @Tags Event
 // @Accept json
 // @Produce json
-// @Param event body object_builder_service.Event  true "UpdateEventRequestBody"
-// @Success 200 {object} status_http.Response{data=object_builder_service.Event} "Event data"
+// @Param event body obs.Event  true "UpdateEventRequestBody"
+// @Success 200 {object} status_http.Response{data=obs.Event} "Event data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateEvent(c *gin.Context) {

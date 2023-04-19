@@ -22,8 +22,8 @@ import (
 // @Tags Document
 // @Accept json
 // @Produce json
-// @Param Document body object_builder_service.CreateDocumentRequest true "CreateDocumentRequestBody"
-// @Success 201 {object} status_http.Response{data=object_builder_service.Document} "Document data"
+// @Param Document body obs.CreateDocumentRequest true "CreateDocumentRequestBody"
+// @Success 201 {object} status_http.Response{data=obs.Document} "Document data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateDocument(c *gin.Context) {
@@ -101,7 +101,7 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param document_id path string true "document_id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.Document} "DocumentBody"
+// @Success 200 {object} status_http.Response{data=obs.Document} "DocumentBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleDocument(c *gin.Context) {
@@ -183,8 +183,8 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 // @Tags Document
 // @Accept json
 // @Produce json
-// @Param Document body object_builder_service.Document true "UpdateDocumentRequestBody"
-// @Success 200 {object} status_http.Response{data=object_builder_service.Document} "Document data"
+// @Param Document body obs.Document true "UpdateDocumentRequestBody"
+// @Success 200 {object} status_http.Response{data=obs.Document} "Document data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateDocument(c *gin.Context) {
@@ -339,8 +339,8 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 // @Tags Document
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetAllDocumentsRequest true "filters"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetAllDocumentsResponse} "DocumentBody"
+// @Param filters query obs.GetAllDocumentsRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GetAllDocumentsResponse} "DocumentBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetDocumentList(c *gin.Context) {

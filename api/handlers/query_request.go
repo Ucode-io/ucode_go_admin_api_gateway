@@ -1146,7 +1146,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 // @Produce json
 // @Param query-id path string true "query-id"
 // @Param project-id query string true "project-id"
-// @Param data body query_service.QueryManyVersions true "Request Body"
+// @Param data body tmp.QueryManyVersions true "Request Body"
 // @Success 200 {object} status_http.Response{data=string} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

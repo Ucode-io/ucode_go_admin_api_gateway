@@ -907,7 +907,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param object body object_builder_service.ManyToManyMessage true "DeleteManyToManyBody"
+// @Param object body obs.ManyToManyMessage true "DeleteManyToManyBody"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -1041,7 +1041,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param object body object_builder_service.ManyToManyMessage true "UpdateMany2ManyRequestBody"
+// @Param object body obs.ManyToManyMessage true "UpdateMany2ManyRequestBody"
 // @Success 200 {object} status_http.Response{data=string} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

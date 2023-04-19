@@ -203,7 +203,7 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 // @Tags Function
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetAllFunctionsRequest true "filters"
+// @Param filters query obs.GetAllFunctionsRequest true "filters"
 // @Success 200 {object} status_http.Response{data=string} "FunctionBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

@@ -33,7 +33,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param Function body models.CreateFunctionRequest true "CreateFunctionRequestBody"
-// @Success 201 {object} status_http.Response{data=new_function_service.Function} "Function data"
+// @Success 201 {object} status_http.Response{data=fc.Function} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateNewFunction(c *gin.Context) {
@@ -169,7 +169,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param function_id path string true "function_id"
-// @Success 200 {object} status_http.Response{data=new_function_service.Function} "FunctionBody"
+// @Success 200 {object} status_http.Response{data=fc.Function} "FunctionBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetNewFunctionByID(c *gin.Context) {

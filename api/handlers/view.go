@@ -25,8 +25,8 @@ import (
 // @Tags View
 // @Accept json
 // @Produce json
-// @Param view body object_builder_service.CreateViewRequest true "CreateViewRequestBody"
-// @Success 201 {object} status_http.Response{data=object_builder_service.View} "View data"
+// @Param view body obs.CreateViewRequest true "CreateViewRequestBody"
+// @Success 201 {object} status_http.Response{data=obs.View} "View data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateView(c *gin.Context) {
@@ -112,7 +112,7 @@ func (h *Handler) CreateView(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param view_id path string true "view_id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.View} "ViewBody"
+// @Success 200 {object} status_http.Response{data=obs.View} "ViewBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleView(c *gin.Context) {
@@ -188,8 +188,8 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 // @Tags View
 // @Accept json
 // @Produce json
-// @Param view body object_builder_service.View true "UpdateViewRequestBody"
-// @Success 200 {object} status_http.Response{data=object_builder_service.View} "View data"
+// @Param view body obs.View true "UpdateViewRequestBody"
+// @Success 200 {object} status_http.Response{data=obs.View} "View data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateView(c *gin.Context) {
@@ -343,8 +343,8 @@ func (h *Handler) DeleteView(c *gin.Context) {
 // @Tags View
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetAllViewsRequest true "filters"
-// @Success 200 {object} status_http.Response{data=object_builder_service.GetAllViewsResponse} "ViewBody"
+// @Param filters query obs.GetAllViewsRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GetAllViewsResponse} "ViewBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetViewList(c *gin.Context) {
@@ -416,7 +416,7 @@ func (h *Handler) GetViewList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param view body models.HtmlBody true "HtmlBody"
-// @Success 201 {object} status_http.Response{data=object_builder_service.PdfBody} "PdfBody data"
+// @Success 201 {object} status_http.Response{data=obs.PdfBody} "PdfBody data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {

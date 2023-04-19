@@ -21,7 +21,7 @@ import (
 // @Tags Section
 // @Accept json
 // @Produce json
-// @Param filters query object_builder_service.GetAllSectionsRequest true "filters"
+// @Param filters query obs.GetAllSectionsRequest true "filters"
 // @Success 200 {object} status_http.Response{data=string} "FieldBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -98,7 +98,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 // @Tags Section
 // @Accept json
 // @Produce json
-// @Param table body object_builder_service.UpdateSectionsRequest  true "UpdateSectionRequestBody"
+// @Param table body obs.UpdateSectionsRequest  true "UpdateSectionRequestBody"
 // @Success 200 {object} status_http.Response{data=string} "Section data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

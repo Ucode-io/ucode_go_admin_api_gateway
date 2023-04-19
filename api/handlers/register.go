@@ -159,7 +159,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 // @Param sms_id path string true "sms_id"
 // @Param otp path string true "otp"
 // @Param verifyBody body models.Verify true "verify_body"
-// @Success 201 {object} status_http.Response{data=auth_service.V2LoginResponse} "User data"
+// @Success 201 {object} status_http.Response{data=pb.V2LoginResponse} "User data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) Verify(c *gin.Context) {
@@ -254,7 +254,7 @@ func (h *Handler) Verify(c *gin.Context) {
 // @Produce json
 // @Param registerBody body models.RegisterOtp true "register_body"
 // @Param table_slug path string true "table_slug"
-// @Success 201 {object} status_http.Response{data=auth_service.V2LoginResponse} "User data"
+// @Success 201 {object} status_http.Response{data=pb.V2LoginResponse} "User data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) RegisterOtp(c *gin.Context) {
