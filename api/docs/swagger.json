@@ -1392,6 +1392,13 @@
                     },
                     {
                         "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "name",
                         "in": "query"
                     }
@@ -1484,6 +1491,13 @@
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -1587,15 +1601,6 @@
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "CreateDashboardRequestBody",
-                        "name": "dashboard",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateDashboardRequest"
-                        }
-=======
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -1603,10 +1608,13 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "name": "name",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "CreateDashboardRequestBody",
+                        "name": "dashboard",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateDashboardRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -1703,26 +1711,17 @@
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
-                        "description": "dashboard_id",
-                        "name": "dashboard_id",
-                        "in": "path",
-                        "required": true
-=======
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "description": "UpdateDashboardRequestBody",
-                        "name": "dashboard",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Dashboard"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "type": "string",
+                        "description": "dashboard_id",
+                        "name": "dashboard_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1817,26 +1816,17 @@
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
-                        "description": "dashboard_id",
-                        "name": "dashboard_id",
-                        "in": "path",
-                        "required": true
-=======
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "description": "CreateDashboardRequestBody",
-                        "name": "dashboard",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateDashboardRequest"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "type": "string",
+                        "description": "dashboard_id",
+                        "name": "dashboard_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1918,7 +1908,6 @@
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "name": "project_id",
                         "in": "query"
                     },
@@ -1926,19 +1915,6 @@
                         "type": "string",
                         "name": "title",
                         "in": "query"
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "dashboard_id",
-                        "name": "dashboard_id",
-                        "in": "path",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -2032,15 +2008,6 @@
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "UpdatePanelRequestBody",
-                        "name": "relation",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Panel"
-                        }
-=======
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -2048,12 +2015,13 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "dashboard_id",
-                        "name": "dashboard_id",
-                        "in": "path",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "UpdatePanelRequestBody",
+                        "name": "relation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Panel"
+                        }
                     }
                 ],
                 "responses": {
@@ -2147,15 +2115,6 @@
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "CreatePanelRequestBody",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreatePanelRequest"
-                        }
-=======
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -2163,15 +2122,13 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "title",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "CreatePanelRequestBody",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreatePanelRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -2267,20 +2224,8 @@
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "UpdatePanelCoordinatesRequestBody",
                         "name": "panel_coordinates",
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdatePanelRequestBody",
-                        "name": "relation",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -2382,26 +2327,17 @@
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "panel_id",
                         "name": "panel_id",
                         "in": "path",
                         "required": true
-=======
+                    },
+                    {
+                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "description": "CreatePanelRequestBody",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreatePanelRequest"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -2496,26 +2432,17 @@
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "panel_id",
                         "name": "panel_id",
                         "in": "path",
                         "required": true
-=======
+                    },
+                    {
+                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "description": "UpdatePanelCoordinatesRequestBody",
-                        "name": "panel_coordinates",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/object_builder_service.UpdatePanelCoordinatesRequest"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -2597,7 +2524,6 @@
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "name": "dashboard_id",
                         "in": "query"
                     },
@@ -2610,19 +2536,6 @@
                         "type": "string",
                         "name": "slug",
                         "in": "query"
-=======
-                        "description": "panel_id",
-                        "name": "panel_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -2716,51 +2629,10 @@
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "UpdateVariableRequestBody",
                         "name": "variable",
                         "in": "body",
                         "required": true,
-=======
-                        "type": "string",
-                        "description": "panel_id",
-                        "name": "panel_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": ""
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.Variable"
                         }
@@ -2960,26 +2832,10 @@
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "variable_id",
                         "name": "variable_id",
                         "in": "path",
                         "required": true
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateVariableRequestBody",
-                        "name": "variable",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/object_builder_service.CreateVariableRequest"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -3960,13 +3816,6 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -4078,13 +3927,6 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateAppRequestBody",
                         "name": "app",
                         "in": "body",
@@ -4182,13 +4024,6 @@
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -4298,13 +4133,6 @@
                         "description": "app_id",
                         "name": "app_id",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     }
                 ],
@@ -4495,13 +4323,6 @@
                         "description": "table_slug",
                         "name": "table_slug",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     }
                 ],
@@ -5448,13 +5269,6 @@
                         "description": "field_id",
                         "name": "field_id",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     }
                 ],
@@ -8096,13 +7910,6 @@
                     },
                     {
                         "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "name": "method",
                         "in": "query"
                     },
@@ -8322,13 +8129,6 @@
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -8632,13 +8432,6 @@
                     },
                     {
                         "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "name": "end_date",
                         "in": "query"
                     },
@@ -8754,13 +8547,6 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateDocumentRequestBody",
                         "name": "Document",
                         "in": "body",
@@ -8858,13 +8644,6 @@
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -9664,13 +9443,6 @@
                     },
                     {
                         "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -9771,13 +9543,6 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateEventRequestBody",
                         "name": "event",
                         "in": "body",
@@ -9875,13 +9640,6 @@
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -10726,13 +10484,6 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -11402,13 +11153,6 @@
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -12658,13 +12402,6 @@
                     },
                     {
                         "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -12765,13 +12502,6 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateHtmlTemplateRequestBody",
                         "name": "html_template",
                         "in": "body",
@@ -12869,13 +12599,6 @@
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -19986,13 +19709,6 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -20136,13 +19852,6 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateRelationRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -20240,13 +19949,6 @@
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -23188,13 +22890,6 @@
                     },
                     {
                         "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "name": "project_id",
                         "in": "query"
                     },
@@ -23310,13 +23005,6 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateSectionRequestBody",
                         "name": "table",
                         "in": "body",
@@ -23415,13 +23103,6 @@
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -23532,13 +23213,6 @@
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -28973,13 +28647,6 @@
                     },
                     {
                         "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "name": "environment_id",
                         "in": "query"
                     },
@@ -29199,13 +28866,6 @@
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -29933,13 +29593,6 @@
                         "description": "function_id",
                         "name": "function_id",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     }
                 ],

@@ -1404,6 +1404,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "name",
                         "in": "query"
                     }
@@ -1496,6 +1503,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -1596,6 +1610,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -1702,12 +1723,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
-                        "description": "dashboard_id",
-                        "name": "dashboard_id",
-                        "in": "path",
-                        "required": true
-=======
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
@@ -1715,9 +1730,10 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "name",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "dashboard_id",
+                        "name": "dashboard_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1812,7 +1828,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "dashboard_id",
                         "name": "dashboard_id",
                         "in": "path",
@@ -1825,18 +1847,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid Argument",
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateDashboardRequestBody",
-                        "name": "dashboard",
-                        "in": "body",
-                        "required": true,
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "schema": {
                             "allOf": [
                                 {
@@ -2010,10 +2020,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "UpdatePanelRequestBody",
-                        "name": "relation",
-=======
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -2021,9 +2027,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "CreateDashboardRequestBody",
-                        "name": "dashboard",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "UpdatePanelRequestBody",
+                        "name": "relation",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -2122,15 +2127,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "CreatePanelRequestBody",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreatePanelRequest"
-                        }
-=======
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -2138,12 +2134,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "dashboard_id",
-                        "name": "dashboard_id",
-                        "in": "path",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "CreatePanelRequestBody",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreatePanelRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -2239,7 +2236,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "UpdatePanelCoordinatesRequestBody",
                         "name": "panel_coordinates",
                         "in": "body",
@@ -2247,20 +2243,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.UpdatePanelCoordinatesRequest"
                         }
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "dashboard_id",
-                        "name": "dashboard_id",
-                        "in": "path",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -2357,27 +2339,17 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "panel_id",
                         "name": "panel_id",
                         "in": "path",
                         "required": true
-=======
+                    },
+                    {
+                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "title",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -2472,10 +2444,16 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "panel_id",
                         "name": "panel_id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -2485,18 +2463,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid Argument",
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdatePanelRequestBody",
-                        "name": "relation",
-                        "in": "body",
-                        "required": true,
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "schema": {
                             "allOf": [
                                 {
@@ -2675,20 +2641,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "UpdateVariableRequestBody",
                         "name": "variable",
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreatePanelRequestBody",
-                        "name": "table",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -2787,20 +2741,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "CreateVariableRequestBody",
                         "name": "variable",
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdatePanelCoordinatesRequestBody",
-                        "name": "panel_coordinates",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -2906,13 +2848,6 @@ const docTemplate = `{
                         "name": "variable_id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -3010,13 +2945,6 @@ const docTemplate = `{
                         "description": "variable_id",
                         "name": "variable_id",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     }
                 ],
@@ -3277,34 +3205,8 @@ const docTemplate = `{
                 "operationId": "create_api_reference",
                 "parameters": [
                     {
-<<<<<<< HEAD
                         "description": "CreateApiReferenceRequestBody",
                         "name": "api_reference",
-=======
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateVariableRequestBody",
-                        "name": "variable",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -4342,6 +4244,13 @@ const docTemplate = `{
                         "name": "app_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -4427,36 +4336,6 @@ const docTemplate = `{
                         "name": "table_slug",
                         "in": "path",
                         "required": true
-<<<<<<< HEAD
-=======
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "search",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -4553,7 +4432,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "name": "branch_id",
                         "in": "query"
                     },
@@ -4586,21 +4464,6 @@ const docTemplate = `{
                         "type": "string",
                         "name": "search",
                         "in": "query"
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateAppRequestBody",
-                        "name": "app",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/object_builder_service.UpdateAppRequest"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -4697,26 +4560,10 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "booked_appointment_id",
                         "name": "booked_appointment_id",
                         "in": "path",
                         "required": true
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateAppRequestBody",
-                        "name": "app",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/object_builder_service.AppRequest"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -4812,7 +4659,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "CreateTransactionBody",
                         "name": "app",
                         "in": "body",
@@ -4820,20 +4666,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.CreateCashboxTransactionRequest"
                         }
-=======
-                        "type": "string",
-                        "description": "app_id",
-                        "name": "app_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -4921,22 +4753,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "name": "version_id",
                         "in": "query"
-=======
-                        "description": "app_id",
-                        "name": "app_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -5016,7 +4834,6 @@ const docTemplate = `{
                 "operationId": "update_reference_category",
                 "parameters": [
                     {
-<<<<<<< HEAD
                         "description": "UpdateCategoryRequestBody",
                         "name": "api_reference",
                         "in": "body",
@@ -5024,34 +4841,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.Category"
                         }
-=======
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -6005,22 +5794,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "name": "search",
                         "in": "query"
-=======
-                        "description": "field_id",
-                        "name": "field_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -8262,6 +8037,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateCustomEventRequestBody",
                         "name": "Customevent",
                         "in": "body",
@@ -8465,6 +8247,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "custom_event_id",
                         "name": "custom_event_id",
                         "in": "path",
@@ -8563,6 +8352,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "custom_event_id",
                         "name": "custom_event_id",
                         "in": "path",
@@ -8648,18 +8444,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "name": "end_date",
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "method",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "query"
                     },
                     {
@@ -8774,20 +8559,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "UpdateDocumentRequestBody",
                         "name": "Document",
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateCustomEventRequestBody",
-                        "name": "Customevent",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -8886,20 +8659,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "CreateDocumentRequestBody",
                         "name": "Document",
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateCustomEventRequestBody",
-                        "name": "Customevent",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -9001,10 +8762,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
-                        "description": "document_id",
-                        "name": "document_id",
-=======
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
@@ -9012,9 +8769,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "custom_event_id",
-                        "name": "custom_event_id",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "document_id",
+                        "name": "document_id",
                         "in": "path",
                         "required": true
                     }
@@ -9111,10 +8867,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
-                        "description": "document_id",
-                        "name": "document_id",
-=======
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
@@ -9122,9 +8874,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "custom_event_id",
-                        "name": "custom_event_id",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "document_id",
+                        "name": "document_id",
                         "in": "path",
                         "required": true
                     }
@@ -9207,20 +8958,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "type": "integer",
                         "name": "limit",
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "end_date",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "query"
                     },
                     {
@@ -9330,20 +9069,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "UpdateEnvironmentRequestBody",
                         "name": "environment",
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateDocumentRequestBody",
-                        "name": "Document",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -9442,20 +9169,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "CreateEnvironmentRequestBody",
                         "name": "environment",
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateDocumentRequestBody",
-                        "name": "Document",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -9557,20 +9272,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "environment_id",
                         "name": "environment_id",
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "document_id",
-                        "name": "document_id",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "path",
                         "required": true
                     }
@@ -9667,20 +9370,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "environment_id",
                         "name": "environment_id",
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "document_id",
-                        "name": "document_id",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "path",
                         "required": true
                     }
@@ -10067,6 +9758,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "limit",
                         "in": "query"
                     },
@@ -10175,6 +9873,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "event_log_id",
                         "name": "event_log_id",
                         "in": "path",
@@ -10275,12 +9980,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
-                        "description": "event_id",
-                        "name": "event_id",
-                        "in": "path",
-                        "required": true
-=======
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
@@ -10288,14 +9987,10 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "table_slug",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "event_id",
+                        "name": "event_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -10392,26 +10087,17 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "event_id",
                         "name": "event_id",
                         "in": "path",
                         "required": true
-=======
+                    },
+                    {
+                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "description": "UpdateEventRequestBody",
-                        "name": "event",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/object_builder_service.Event"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -10493,25 +10179,21 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "excel_id",
                         "name": "excel_id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "ExcelToDbRequest",
-                        "name": "table",
-=======
+                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "description": "CreateEventRequestBody",
-                        "name": "event",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "ExcelToDbRequest",
+                        "name": "table",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -10613,32 +10295,17 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "excel_id",
                         "name": "excel_id",
                         "in": "path",
                         "required": true
-=======
+                    },
+                    {
+                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "table_slug",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -10720,29 +10387,6 @@ const docTemplate = `{
                 "operationId": "export_to_json",
                 "parameters": [
                     {
-<<<<<<< HEAD
-                        "description": "ExportToJSONRequestBody",
-                        "name": "export_to_json",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ExportToJSONRequest"
-                        }
-=======
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -10750,12 +10394,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "event_log_id",
-                        "name": "event_log_id",
-                        "in": "path",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "ExportToJSONRequestBody",
+                        "name": "export_to_json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.ExportToJSONRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -10862,7 +10507,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "name": "project_id",
                         "in": "query"
                     },
@@ -10900,19 +10544,6 @@ const docTemplate = `{
                         "type": "boolean",
                         "name": "with_one_relation",
                         "in": "query"
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "event_id",
-                        "name": "event_id",
-                        "in": "path",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -11006,7 +10637,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateFieldRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -11014,20 +10651,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.Field"
                         }
-=======
-                        "type": "string",
-                        "description": "event_id",
-                        "name": "event_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -11121,16 +10744,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "CreateFieldRequestBody",
-=======
-                        "type": "string",
-                        "description": "excel_id",
-                        "name": "excel_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -11138,8 +10751,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "ExcelToDbRequest",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "CreateFieldRequestBody",
                         "name": "table",
                         "in": "body",
                         "required": true,
@@ -11342,7 +10954,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "Resource-Id",
                         "name": "Resource-Id",
                         "in": "header",
@@ -11357,25 +10968,17 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "field_id",
-                        "name": "field_id",
-                        "in": "path",
-                        "required": true
-=======
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "description": "ExportToJSONRequestBody",
-                        "name": "export_to_json",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/object_builder_service.ExportToJSONRequest"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "type": "string",
+                        "description": "field_id",
+                        "name": "field_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -11456,15 +11059,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "Request Body",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateFieldsAndRelationsRequest"
-                        }
-=======
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -11472,55 +11066,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "role_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "search",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "table_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "table_slug",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "version_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "boolean",
-                        "name": "with_many_relation",
-                        "in": "query"
-                    },
-                    {
-                        "type": "boolean",
-                        "name": "with_one_relation",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "Request Body",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateFieldsAndRelationsRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -11616,7 +11168,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -11630,22 +11181,6 @@ const docTemplate = `{
                         "type": "string",
                         "name": "search",
                         "in": "query"
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateFieldRequestBody",
-                        "name": "relation",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Field"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -11739,10 +11274,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "UpdateFunctionRequestBody",
-                        "name": "Function",
-=======
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -11750,9 +11281,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "CreateFieldRequestBody",
-                        "name": "table",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "UpdateFunctionRequestBody",
+                        "name": "Function",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -11851,7 +11381,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "CreateFunctionRequestBody",
                         "name": "Function",
                         "in": "body",
@@ -11859,27 +11395,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.CreateFunctionRequest"
                         }
-=======
-                        "type": "string",
-                        "description": "role_id",
-                        "name": "role_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -11968,6 +11483,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "type": "number",
                         "description": "limit",
                         "name": "limit",
@@ -11981,23 +11503,9 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "search",
                         "name": "search",
                         "in": "query"
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "field_id",
-                        "name": "field_id",
-                        "in": "path",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -12084,10 +11592,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "UpdateFunctionFolderRequestBody",
-                        "name": "Function",
-=======
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -12095,9 +11599,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Request Body",
-                        "name": "table",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "UpdateFunctionFolderRequestBody",
+                        "name": "Function",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -12195,15 +11698,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "CreateFunctionFolderRequestBody",
-                        "name": "Function",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateFunctionFolderRequest"
-                        }
-=======
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -12211,20 +11705,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "search",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "CreateFunctionFolderRequestBody",
+                        "name": "Function",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateFunctionFolderRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -12314,26 +11801,17 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
-                        "description": "function_folder_id",
-                        "name": "function_folder_id",
-                        "in": "path",
-                        "required": true
-=======
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "description": "UpdateFunctionRequestBody",
-                        "name": "Function",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Function"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "type": "string",
+                        "description": "function_folder_id",
+                        "name": "function_folder_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -12421,26 +11899,17 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "function_folder_id",
                         "name": "function_folder_id",
                         "in": "path",
                         "required": true
-=======
+                    },
+                    {
+                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "description": "CreateFunctionRequestBody",
-                        "name": "Function",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateFunctionRequest"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -12515,35 +11984,23 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
                         "required": true
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "number",
-                        "description": "limit",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "number",
-                        "description": "offset",
-                        "name": "offset",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     },
                     {
                         "type": "string",
                         "description": "function_id",
                         "name": "function_id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -12639,26 +12096,17 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "function_id",
                         "name": "function_id",
                         "in": "path",
                         "required": true
-=======
+                    },
+                    {
+                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "description": "UpdateFunctionFolderRequestBody",
-                        "name": "Function",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.FunctionFolder"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -12739,20 +12187,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "PayzeLinkRequestBody",
                         "name": "Integration",
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateFunctionFolderRequestBody",
-                        "name": "Function",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -12857,20 +12293,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "Resource-Id",
                         "name": "Resource-Id",
                         "in": "header",
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "required": true
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
@@ -12880,11 +12309,14 @@ const docTemplate = `{
                         "type": "string",
                         "description": "table_slug",
                         "name": "table_slug",
-=======
-                        "description": "function_folder_id",
-                        "name": "function_folder_id",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -12982,7 +12414,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "name": "project_id",
                         "in": "query"
                     },
@@ -12990,19 +12421,6 @@ const docTemplate = `{
                         "type": "string",
                         "name": "table_slug",
                         "in": "query"
-=======
-                        "description": "function_folder_id",
-                        "name": "function_folder_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -13096,7 +12514,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "UpdateHtmlTemplateRequestBody",
                         "name": "html_template",
                         "in": "body",
@@ -13104,20 +12521,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.HtmlTemplate"
                         }
-=======
-                        "type": "string",
-                        "description": "function_id",
-                        "name": "function_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -13211,7 +12614,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "CreateHtmlTemplateRequestBody",
                         "name": "html_template",
                         "in": "body",
@@ -13219,20 +12621,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_object_builder_service.CreateHtmlTemplateRequest"
                         }
-=======
-                        "type": "string",
-                        "description": "function_id",
-                        "name": "function_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -13325,6 +12713,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -13518,7 +12913,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "HtmlBody",
                         "name": "view",
                         "in": "body",
@@ -13526,23 +12920,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.HtmlBody"
                         }
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "table_slug",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -13645,13 +13022,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "HtmlBody",
                         "name": "template",
-=======
-                        "description": "UpdateHtmlTemplateRequestBody",
-                        "name": "html_template",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -13738,24 +13110,6 @@ const docTemplate = `{
                 "operationId": "import_from_json",
                 "parameters": [
                     {
-<<<<<<< HEAD
-                        "description": "ImportFromJSONRequestBody",
-                        "name": "export_to_json",
-=======
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -13763,9 +13117,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "CreateHtmlTemplateRequestBody",
-                        "name": "html_template",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "ImportFromJSONRequestBody",
+                        "name": "export_to_json",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -13866,15 +13219,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "InvokeFunctionRequest",
-                        "name": "InvokeFunctionRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.InvokeFunctionRequest"
-                        }
-=======
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -13882,12 +13226,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "html_template_id",
-                        "name": "html_template_id",
-                        "in": "path",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "InvokeFunctionRequest",
+                        "name": "InvokeFunctionRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.InvokeFunctionRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -13990,7 +13335,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "InvokeFunctionByPathRequest",
                         "name": "InvokeFunctionByPathRequest",
                         "in": "body",
@@ -13998,13 +13349,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.CommonMessage"
                         }
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -14288,7 +13632,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "Resource-Id",
                         "name": "Resource-Id",
                         "in": "header",
@@ -14303,15 +13646,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-=======
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "type": "string",
                         "description": "folder-id",
                         "name": "folder-id",
@@ -14329,15 +13669,6 @@ const docTemplate = `{
                         "description": "offset",
                         "name": "offset",
                         "in": "query"
-=======
-                        "description": "ImportFromJSONRequestBody",
-                        "name": "export_to_json",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/object_builder_service.ImportFromJSONRequest"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -14438,13 +13769,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "UpdateNoteReqBody",
                         "name": "Note",
-=======
-                        "description": "InvokeFunctionRequest",
-                        "name": "InvokeFunctionRequest",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -14550,20 +13876,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "CreateNoteReq",
                         "name": "Note",
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "InvokeFunctionByPathRequest",
-                        "name": "InvokeFunctionByPathRequest",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -18221,6 +17535,13 @@ const docTemplate = `{
                         "name": "role_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -18320,6 +17641,13 @@ const docTemplate = `{
                         "description": "app_id",
                         "name": "app_id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -18857,7 +18185,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "CreateFolderReq",
                         "name": "query_folder",
                         "in": "body",
@@ -18865,13 +18192,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_query_service.CreateFolderReq"
                         }
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -18974,26 +18294,10 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "query-folder-id",
                         "name": "query-folder-id",
                         "in": "path",
                         "required": true
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpsertPermissionRequestBody",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CommonMessage"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -20784,6 +20088,13 @@ const docTemplate = `{
                         "name": "relation_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -21133,26 +20444,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "type": "string",
                         "description": "project_id",
                         "name": "project_id",
@@ -21270,25 +20561,6 @@ const docTemplate = `{
                         "name": "project_id",
                         "in": "path",
                         "required": true
-<<<<<<< HEAD
-=======
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateRelationRequestBody",
-                        "name": "relation",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/object_builder_service.UpdateRelationRequest"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -21384,20 +20656,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "Request Body",
                         "name": "release",
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateRelationRequestBody",
-                        "name": "table",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -21496,7 +20756,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "Request Body",
                         "name": "release",
                         "in": "body",
@@ -21504,20 +20763,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_api_gateway_genproto_versioning_service.ApiDeleteReleaseRequest"
                         }
-=======
-                        "type": "string",
-                        "description": "relation_id",
-                        "name": "relation_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -23863,8 +23108,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -23974,8 +23218,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -24074,14 +23317,20 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -24176,14 +23425,20 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -24274,8 +23529,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -24286,7 +23540,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "table_id",
                         "name": "table_id",
                         "in": "path",
@@ -24296,17 +23556,6 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -24506,13 +23755,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "UpdateTemplateReqBody",
                         "name": "template",
-=======
-                        "description": "UpdateSectionRequestBody",
-                        "name": "table",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -24600,7 +23844,8 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -24610,26 +23855,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -24728,7 +23953,8 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -24743,18 +23969,6 @@ const docTemplate = `{
                         "name": "project-id",
                         "in": "query",
                         "required": true
-<<<<<<< HEAD
-=======
-                    },
-                    {
-                        "description": "UpdateTableRequestBody",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/object_builder_service.Table"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -24837,7 +24051,8 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -24854,13 +24069,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "UpdateFolderReqBody",
                         "name": "folder",
-=======
-                        "description": "CreateTableRequestBody",
-                        "name": "table",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -24948,7 +24158,8 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -24962,16 +24173,6 @@ const docTemplate = `{
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query",
-<<<<<<< HEAD
-=======
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "table_id",
-                        "name": "table_id",
-                        "in": "path",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "required": true
                     },
                     {
@@ -25066,7 +24267,8 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -25084,13 +24286,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "template-folder-id",
                         "name": "template-folder-id",
-=======
-                        "description": "table_id",
-                        "name": "table_id",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "path",
                         "required": true
                     }
@@ -26756,6 +25953,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "tags",
                         "name": "tags",
                         "in": "query"
@@ -27174,6 +26378,13 @@ const docTemplate = `{
                         "name": "table_slug",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -27468,24 +26679,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "name": "table_slug",
                         "in": "query"
                     },
                     {
                         "type": "string",
                         "name": "version_id",
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "tags",
-                        "name": "tags",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "query"
                     }
                 ],
@@ -27766,6 +26965,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateAppReqModel",
                         "name": "app",
                         "in": "body",
@@ -27859,7 +27065,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "CreateAppReqModel",
                         "name": "webpage_app",
                         "in": "body",
@@ -27867,27 +27079,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.CreateAppReqModel"
                         }
-=======
-                        "type": "string",
-                        "description": "role_id",
-                        "name": "role_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -28343,6 +27534,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "CreateFolderReqModel",
                         "name": "webpage_folder",
                         "in": "body",
@@ -28543,21 +27741,11 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "type": "string",
                         "description": "webpage-folder-id",
                         "name": "webpage-folder-id",
                         "in": "path",
                         "required": true
-=======
-                        "description": "UpdateAppReqModel",
-                        "name": "app",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.UpdateAppReqModel"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -28638,7 +27826,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "type": "string",
                         "description": "folder-id",
                         "name": "folder-id",
@@ -28656,15 +27843,6 @@ const docTemplate = `{
                         "description": "offset",
                         "name": "offset",
                         "in": "query"
-=======
-                        "description": "CreateAppReqModel",
-                        "name": "webpage_app",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateAppReqModel"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -28748,6 +27926,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -28943,6 +28128,13 @@ const docTemplate = `{
                         "description": "webpage-id",
                         "name": "webpage-id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -29158,21 +28350,11 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "type": "string",
                         "description": "webpage-id",
                         "name": "webpage-id",
                         "in": "path",
                         "required": true
-=======
-                        "description": "CreateFolderReqModel",
-                        "name": "webpage_folder",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateFolderReqModel"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -29364,6 +28546,13 @@ const docTemplate = `{
                         "description": "webpage-id",
                         "name": "webpage-id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -29578,106 +28767,17 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateWebPageReqModel",
-                        "name": "webpage",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.UpdateWebPageReqModel"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "WebPage data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/web_page_service.WebPage"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Create webpage",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "WebPage"
-                ],
-                "summary": "Create webpage",
-                "operationId": "create_web_pageV2",
-                "parameters": [
-                    {
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -29781,20 +28881,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "CreateCustomEventRequestBody",
                         "name": "Customevent",
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "Request Body",
-                        "name": "ManyVersionsModel",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -29892,6 +28980,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -30071,6 +29166,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "type": "number",
                         "description": "limit",
                         "name": "limit",
@@ -30173,17 +29275,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "UpdateFunctionRequestBody",
-                        "name": "Function",
-=======
-                        "type": "string",
-                        "description": "webpage-id",
-                        "name": "webpage-id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -30191,9 +29282,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Request Body",
-                        "name": "RevertWebPageReq",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "UpdateFunctionRequestBody",
+                        "name": "Function",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -30291,15 +29381,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "description": "CreateFunctionRequestBody",
-                        "name": "Function",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateFunctionRequest"
-                        }
-=======
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
@@ -30307,30 +29388,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "name": "environment_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "method",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "role_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "table_slug",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
+                        "description": "CreateFunctionRequestBody",
+                        "name": "Function",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateFunctionRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -30426,7 +29490,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "type": "number",
                         "description": "limit",
                         "name": "limit",
@@ -30443,22 +29513,6 @@ const docTemplate = `{
                         "description": "search",
                         "name": "search",
                         "in": "query"
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateCustomEventRequestBody",
-                        "name": "Customevent",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CustomEvent"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -30548,26 +29602,10 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "function_id",
                         "name": "function_id",
                         "in": "path",
                         "required": true
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateCustomEventRequestBody",
-                        "name": "Customevent",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/new_function_service.CreateCustomEventRequest"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -30655,21 +29693,16 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "function_id",
                         "name": "function_id",
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "custom_event_id",
-                        "name": "custom_event_id",
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
-                        "in": "path",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -30852,7 +29885,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "Chat body",
                         "name": "chat_service",
                         "in": "body",
@@ -30860,31 +29892,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.CreateChatRequest"
                         }
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "number",
-                        "description": "limit",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "number",
-                        "description": "offset",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "search",
-                        "name": "search",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -30980,26 +29987,10 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "chat-id",
                         "name": "id",
                         "in": "path",
                         "required": true
-=======
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateFunctionRequestBody",
-                        "name": "Function",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Function"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -31095,7 +30086,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -31119,22 +30109,6 @@ const docTemplate = `{
                         "type": "string",
                         "name": "search",
                         "in": "query"
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateFunctionRequestBody",
-                        "name": "Function",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateFunctionRequest"
-                        }
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -31228,7 +30202,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "CreateQueryRequest",
                         "name": "table",
                         "in": "body",
@@ -31236,31 +30209,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.CreateQueryRequest"
                         }
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "number",
-                        "description": "limit",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "number",
-                        "description": "offset",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "search",
-                        "name": "search",
-                        "in": "query"
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {
@@ -31360,13 +30308,6 @@ const docTemplate = `{
                         "description": "guid",
                         "name": "guid",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
                         "required": true
                     }
                 ],
@@ -31468,7 +30409,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "UpdateQueryRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -31476,13 +30416,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.CreateQueryRequest"
                         }
-=======
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
->>>>>>> 219df23c05bc9dd26b966e527ed73fff26fb3c99
                     }
                 ],
                 "responses": {

@@ -5951,11 +5951,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -6254,11 +6249,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdatePanelCoordinatesRequestBody
         in: body
         name: panel_coordinates
@@ -6375,11 +6365,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: CreateVariableRequestBody
@@ -7057,11 +7042,6 @@ paths:
         name: X-API-KEY
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: limit
         type: integer
@@ -7125,11 +7105,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateAppRequestBody
         in: body
         name: app
@@ -7185,11 +7160,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpdateAppRequestBody
@@ -7309,11 +7279,6 @@ paths:
         name: app_id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -7369,11 +7334,6 @@ paths:
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -7906,11 +7866,6 @@ paths:
       - description: field_id
         in: path
         name: field_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -9412,11 +9367,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: method
         type: string
@@ -9481,11 +9431,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: CreateCustomEventRequestBody
@@ -9724,11 +9669,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: end_date
         type: string
@@ -9795,11 +9735,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateDocumentRequestBody
         in: body
         name: Document
@@ -9855,11 +9790,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpdateDocumentRequestBody
@@ -10320,11 +10250,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -10382,11 +10307,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateEventRequestBody
         in: body
         name: event
@@ -10442,11 +10362,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpdateEventRequestBody
@@ -10935,11 +10850,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: limit
         type: integer
@@ -11329,11 +11239,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - in: query
@@ -12056,11 +11961,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -12118,11 +12018,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateHtmlTemplateRequestBody
         in: body
         name: html_template
@@ -12178,11 +12073,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpdateHtmlTemplateRequestBody
@@ -16308,11 +16198,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: limit
         type: integer
@@ -16386,11 +16271,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateRelationRequestBody
         in: body
         name: table
@@ -16456,11 +16336,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpdateRelationRequestBody
@@ -18156,11 +18031,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -18227,11 +18097,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateSectionRequestBody
         in: body
         name: table
@@ -18287,11 +18152,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - in: query
@@ -18415,11 +18275,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpdateTableRequestBody
@@ -21500,11 +21355,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: environment_id
         type: string
@@ -21569,11 +21419,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: CreateCustomEventRequestBody
@@ -22105,11 +21950,6 @@ paths:
       - description: function_id
         in: path
         name: function_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:

@@ -179,7 +179,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 // @Param sms_id path string true "sms_id"
 // @Param otp path string true "otp"
 // @Param verifyBody body models.Verify true "verify_body"
-// @Success 201 {object} status_http.Response{data=pb.V2LoginResponse} "User data"
+// @Success 201 {object} status_http.Response{data=pbAuth.V2LoginResponse} "User data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) VerifyEmail(c *gin.Context) {
@@ -300,7 +300,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 // @Param project-id query string true "project-id"
 // @Param registerBody body models.RegisterOtp true "register_body"
 // @Param table_slug path string true "table_slug"
-// @Success 201 {object} status_http.Response{data=pb.V2LoginResponse} "User data"
+// @Success 201 {object} status_http.Response{data=pbAuth.V2LoginResponse} "User data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) RegisterEmailOtp(c *gin.Context) {
