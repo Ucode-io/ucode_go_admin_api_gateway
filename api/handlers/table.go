@@ -185,17 +185,17 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	// authInfo, err := h.GetAuthInfo(c)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err.Error())
+	// 	return
+	// }
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
+	// resourceId, ok := c.Get("resource_id")
+	// if !ok {
+	// 	h.handleResponse(c, status_http.BadRequest, errors.New("cant get resource_id"))
+	// 	return
+	// }
 
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
@@ -223,17 +223,17 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resource.ResourceEnvironmentId,
-	//	},
-	//)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	// resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	// 	context.Background(),
+	// 	&company_service.GetResEnvByResIdEnvIdRequest{
+	// 		EnvironmentId: environmentId.(string),
+	// 		ResourceId:    resource.ResourceEnvironmentId,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
 	resp, err := services.BuilderService().Table().GetByID(
 		context.Background(),
@@ -623,14 +623,14 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-
+	fmt.Println(c.Get("environment_id"))
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-
+	fmt.Println("::::::::::::: test 2")
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -664,7 +664,7 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID get_table_histories
+// @ID get_table_history_by_id
 // @Router /v1/table-history/{id} [GET]
 // @Summary Get table history by id
 // @Description Get table history by id
@@ -734,8 +734,8 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID get_table_histories
-// @Router /v1/table-history/revert [GET]
+// @ID revert_table_history
+// @Router /v1/table-history/revert [PUT]
 // @Summary Get table history by id
 // @Description Get table history by id
 // @Tags Table
@@ -810,7 +810,7 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @ID get_table_histories
+// @ID insert into table history
 // @Router /v1/table-history [PUT]
 // @Summary Get table history by id
 // @Description Get table history by id
@@ -869,8 +869,8 @@ func (h *Handler) InsetrVersionsIdsToTableHistory(c *gin.Context) {
 	resp, err := services.BuilderService().Table().InsertVersionsToCommit(
 		context.Background(),
 		&obs.InsertVersionsToCommitRequest{
-			ProjectId: resource.ResourceEnvironmentId,
-			Id:        body.Id,
+			ProjectId:  resource.ResourceEnvironmentId,
+			Id:         body.Id,
 			VersionIds: body.Version_ids,
 		},
 	)

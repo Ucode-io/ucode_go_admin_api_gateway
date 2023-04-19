@@ -36,7 +36,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	v1.Use(h.AuthMiddleware(cfg))
+	// v1.Use(h.AuthMiddleware(cfg))
 	{
 		v1.POST("/upload", h.Upload)
 		v1.POST("/upload-file/:table_slug/:object_id", h.UploadFile)
@@ -253,7 +253,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 	}
 	v2 := r.Group("/v2")
-	v2.Use(h.AuthMiddleware(cfg))
+	// v2.Use(h.AuthMiddleware(cfg))
 	{
 		// custom event
 		v2.POST("/custom-event", h.CreateNewCustomEvent)
@@ -265,7 +265,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
 	v1Admin := r.Group("/v1")
-	v1Admin.Use(h.AdminAuthMiddleware())
+	// v1Admin.Use(h.AdminAuthMiddleware())
 	{
 		// company service
 		// v1.POST("/company", h.CreateCompany)
@@ -420,13 +420,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/notification/category/:id", h.GetCategoryNotification)
 		v1Admin.PUT("/notification/category", h.UpdateCategoryNotification)
 		v1Admin.DELETE("/notification/category/:id", h.DeleteCategoryNotification)
+
 		v1Admin.GET("/table-history/list/:table_id", h.GetListTableHistory)
 		v1Admin.GET("/table-history/:id", h.GetTableHistoryById)
-		v1Admin.GET("/table-history/revert", h.GetTableHistoryById)
+		v1Admin.PUT("/table-history/revert", h.RevertTableHistory)
 		v1Admin.PUT("/table-history", h.InsetrVersionsIdsToTableHistory)
 	}
 	v2Admin := r.Group("/v2")
-	v2Admin.Use(h.AdminAuthMiddleware())
+	// v2Admin.Use(h.AdminAuthMiddleware())
 	{
 
 		// function
