@@ -24,6 +24,8 @@ service ChatService {
 message CreateBotRequest{
     string bot_token = 1;
     string environment_id = 2;
+    string created_at = 3;
+    string updated_at = 6;
 }
 
 message CreateBotResponse{
@@ -45,11 +47,14 @@ message GetBotTokenListResponse{
 message GetBotByBotIdResponse{
     string bot_token = 1;
     string environment_id = 2;
+    string created_at = 3;
+    string updated_at = 4;
 }
 
 message DeleteBotToken{
     string bot_id = 1;
 }
+
 // Chat ...
 message Chat { 
     string phone_number = 1;
@@ -92,6 +97,7 @@ message GetChatByChatIdResponse {
     string chat_id = 1;
     repeated UserMessage messages = 2;
     string platform_type = 3;
+    string user_id = 4;
 }
 
 message GetChatByUserIdResponse {
@@ -133,7 +139,6 @@ message GetSelfChatContent {
 message GetSelfChatContentResponse {
     ChatWithLastMessageData message = 1;
 }
-
 
 message UpdateChatRequest {
     string chat_id = 1;
