@@ -101,6 +101,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 		return nil
 	}
 
+	fmt.Println("test length resource::::", len(resEnvsIds.GetData()))
 	for _, v := range resEnvsIds.GetData() {
 		functions, err := srvs.FunctionService().FunctionService().GetListByRequestTime(context.Background(), &pb.GetListByRequestTimeRequest{
 			ProjectId: v.GetId(),
