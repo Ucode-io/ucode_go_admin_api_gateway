@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/chat_service"
@@ -99,7 +98,7 @@ func (h *Handler) GetChatList(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	fmt.Println(resp, "::::::::::::::::::::::::")
+
 	h.handleResponse(c, status_http.OK, resp)
 }
 
