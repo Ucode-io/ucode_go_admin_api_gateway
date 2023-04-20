@@ -477,7 +477,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v3.POST("/chat", h.CreatChat)
 		v3.GET("/chat", h.GetChatList)
 		v3.GET("/chat/:id", h.GetChatByChatID)
-
+		v3.POST("/bot", h.CreateBot)
+		v3.GET("/bot", h.GetBotTokenList)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

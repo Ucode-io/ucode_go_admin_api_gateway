@@ -30763,6 +30763,194 @@
                 }
             }
         },
+        "/v3/bot": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "GetBotTokenlist",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "GetBotTokenlist",
+                "operationId": "GetBotTokenlist",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/chat_service.GetBotTokenListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create bot",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Create bot",
+                "operationId": "CreateBot",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "botToken",
+                        "name": "botToken",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response body",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v3/chat": {
             "get": {
                 "security": [
@@ -33414,6 +33602,29 @@
                 }
             }
         },
+        "chat_service.Bot": {
+            "type": "object",
+            "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
+                "bot_token": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "chat_service.ChatWithLastMessageData": {
             "type": "object",
             "properties": {
@@ -33443,6 +33654,17 @@
                 }
             }
         },
+        "chat_service.GetBotTokenListResponse": {
+            "type": "object",
+            "properties": {
+                "bottokenlist": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chat_service.Bot"
+                    }
+                }
+            }
+        },
         "chat_service.GetChatByChatIdResponse": {
             "type": "object",
             "properties": {
@@ -33456,6 +33678,9 @@
                     }
                 },
                 "platform_type": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }

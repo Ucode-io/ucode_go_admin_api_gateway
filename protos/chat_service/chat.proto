@@ -20,12 +20,18 @@ service ChatService {
     rpc DeleteBotToken(UpdateBotTokenRequest) returns (google.protobuf.Empty) {}
 }
 
+message Bot{
+    string bot_id =1;
+    string bot_token = 2;
+    string environment_id = 3;
+    string created_at = 4;
+    string updated_at = 5;
+    bool status=6;
+}
 
 message CreateBotRequest{
     string bot_token = 1;
     string environment_id = 2;
-    string created_at = 3;
-    string updated_at = 6;
 }
 
 message CreateBotResponse{
@@ -41,14 +47,11 @@ message GetBotByBotIdRequest{
 }
 
 message GetBotTokenListResponse{
-    repeated CreateBotRequest BotTokenList = 1;
+    repeated Bot bottokenlist = 1;
 }
 
 message GetBotByBotIdResponse{
-    string bot_token = 1;
-    string environment_id = 2;
-    string created_at = 3;
-    string updated_at = 4;
+    Bot bot =1;
 }
 
 message DeleteBotToken{

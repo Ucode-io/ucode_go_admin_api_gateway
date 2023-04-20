@@ -405,6 +405,21 @@ definitions:
       user_id:
         type: string
     type: object
+  chat_service.Bot:
+    properties:
+      bot_id:
+        type: string
+      bot_token:
+        type: string
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      status:
+        type: boolean
+      updated_at:
+        type: string
+    type: object
   chat_service.ChatWithLastMessageData:
     properties:
       chat_id:
@@ -424,6 +439,13 @@ definitions:
       user_id:
         type: string
     type: object
+  chat_service.GetBotTokenListResponse:
+    properties:
+      bottokenlist:
+        items:
+          $ref: '#/definitions/chat_service.Bot'
+        type: array
+    type: object
   chat_service.GetChatByChatIdResponse:
     properties:
       chat_id:
@@ -433,6 +455,8 @@ definitions:
           $ref: '#/definitions/chat_service.UserMessage'
         type: array
       platform_type:
+        type: string
+      user_id:
         type: string
     type: object
   chat_service.GetChatListResponse:
@@ -22640,6 +22664,111 @@ paths:
       summary: V2 Get table by id
       tags:
       - V2Table
+  /v3/bot:
+    get:
+      consumes:
+      - application/json
+      description: GetBotTokenlist
+      operationId: GetBotTokenlist
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/chat_service.GetBotTokenListResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: GetBotTokenlist
+      tags:
+      - Chat
+    post:
+      consumes:
+      - application/json
+      description: Create bot
+      operationId: CreateBot
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: botToken
+        in: header
+        name: botToken
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create bot
+      tags:
+      - Chat
   /v3/chat:
     get:
       consumes:
