@@ -251,6 +251,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/template-note/share", h.CreateSharingToken)
 		v1.PUT("/template-note/share", h.UpdateSharingToken)
 
+		//api-reference service
+		v1.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
+		v1.GET("/api-reference", h.GetAllApiReferences)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))
