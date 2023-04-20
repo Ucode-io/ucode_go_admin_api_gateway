@@ -116,6 +116,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 	if err != nil {
 		return err
 	}
+	fmt.Println("len function::::", len(allFunctions))
 	for _, function := range allFunctions {
 		log.Println("uninstalling func " + function.GetPath())
 		var stdout bytes.Buffer
