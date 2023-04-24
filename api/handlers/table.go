@@ -256,6 +256,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	fmt.Println("test resource type:::", resource.ResourceType)
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Table().GetByID(
