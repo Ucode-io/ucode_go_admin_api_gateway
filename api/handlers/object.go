@@ -694,15 +694,15 @@ func (h *Handler) GetList(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	tokenInfo, err := h.GetAuthInfo(c)
+	// tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
-	objectRequest.Data["tables"] = tokenInfo.GetTables()
-	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
-	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
-	objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	// objectRequest.Data["tables"] = tokenInfo.GetTables()
+	// objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
+	// objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+	// objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -729,31 +729,31 @@ func (h *Handler) GetList(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
+	// projectId := c.Query("project-id")
+	// if !util.IsValidUUID(projectId) {
+	// 	h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+	// 	return
+	// }
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
+	// environmentId, ok := c.Get("environment_id")
+	// if !ok || !util.IsValidUUID(environmentId.(string)) {
+	// 	err = errors.New("error getting environment id | not valid")
+	// 	h.handleResponse(c, status_http.BadRequest, err)
+	// 	return
+	// }
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// resource, err := services.CompanyService().ServiceResource().GetSingle(
+	// 	c.Request.Context(),
+	// 	&pb.GetSingleServiceResourceReq{
+	// 		ProjectId:     projectId,
+	// 		EnvironmentId: environmentId.(string),
+	// 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
@@ -773,7 +773,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
+			ProjectId: "4ef62259-adf8-4066-b0e6-16e3cb47241b",
 		},
 	)
 

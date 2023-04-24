@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
-	postgresObs "ucode/ucode_go_api_gateway/genproto/postgres_object_builder_service"
+	postgresObs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
