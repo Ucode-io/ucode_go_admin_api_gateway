@@ -3,30 +3,30 @@ package services
 import (
 	"context"
 	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/genproto/postgres_object_builder_service"
+	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type PostgresBuilderServiceI interface {
-	Table() postgres_object_builder_service.TableServiceClient
-	Field() postgres_object_builder_service.FieldServiceClient
-	Relation() postgres_object_builder_service.RelationServiceClient
-	App() postgres_object_builder_service.AppServiceClient
-	Dashboard() postgres_object_builder_service.DashboardServiceClient
-	Panel() postgres_object_builder_service.PanelServiceClient
-	Variable() postgres_object_builder_service.VariableServiceClient
-	Excel() postgres_object_builder_service.ExcelServiceClient
-	Permission() postgres_object_builder_service.PermissionServiceClient
-	CustomEvent() postgres_object_builder_service.CustomEventServiceClient
-	Barcode() postgres_object_builder_service.BarcodeServiceClient
-	Login() postgres_object_builder_service.LoginServiceClient
-	Cascading() postgres_object_builder_service.CascadingServiceClient
-	TableHelpers() postgres_object_builder_service.TableHelpersServiceClient
-	FieldsAndRelations() postgres_object_builder_service.FieldAndRelationServiceClient
-	Setting() postgres_object_builder_service.SettingServiceClient
-	TableFolder() postgres_object_builder_service.TableFolderServiceClient
+	Table() object_builder_service.TableServiceClient
+	Field() object_builder_service.FieldServiceClient
+	Relation() object_builder_service.RelationServiceClient
+	App() object_builder_service.AppServiceClient
+	Dashboard() object_builder_service.DashboardServiceClient
+	Panel() object_builder_service.PanelServiceClient
+	Variable() object_builder_service.VariableServiceClient
+	Excel() object_builder_service.ExcelServiceClient
+	Permission() object_builder_service.PermissionServiceClient
+	CustomEvent() object_builder_service.CustomEventServiceClient
+	Barcode() object_builder_service.BarcodeServiceClient
+	Login() object_builder_service.LoginServiceClient
+	Cascading() object_builder_service.CascadingServiceClient
+	TableHelpers() object_builder_service.TableHelpersServiceClient
+	FieldsAndRelations() object_builder_service.FieldAndRelationServiceClient
+	Setting() object_builder_service.SettingServiceClient
+	TableFolder() object_builder_service.TableFolderServiceClient
 }
 
 func NewPostgrespostgresBuilderServiceClient(ctx context.Context, cfg config.Config) (PostgresBuilderServiceI, error) {
@@ -42,122 +42,122 @@ func NewPostgrespostgresBuilderServiceClient(ctx context.Context, cfg config.Con
 	}
 
 	return &postgresBuilderServiceClient{
-		tableService:         postgres_object_builder_service.NewTableServiceClient(connObjectBuilderService),
-		fieldService:         postgres_object_builder_service.NewFieldServiceClient(connObjectBuilderService),
-		objectBuilderService: postgres_object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
-		relationService:      postgres_object_builder_service.NewRelationServiceClient(connObjectBuilderService),
-		dashboardService:     postgres_object_builder_service.NewDashboardServiceClient(connObjectBuilderService),
-		variableService:      postgres_object_builder_service.NewVariableServiceClient(connObjectBuilderService),
-		panelService:         postgres_object_builder_service.NewPanelServiceClient(connObjectBuilderService),
-		appService:           postgres_object_builder_service.NewAppServiceClient(connObjectBuilderService),
-		excelService:         postgres_object_builder_service.NewExcelServiceClient(connObjectBuilderService),
-		permissionService:    postgres_object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
-		customEventService:   postgres_object_builder_service.NewCustomEventServiceClient(connObjectBuilderService),
-		barcodeService:       postgres_object_builder_service.NewBarcodeServiceClient(connObjectBuilderService),
-		loginService:         postgres_object_builder_service.NewLoginServiceClient(connObjectBuilderService),
-		cascadingService:     postgres_object_builder_service.NewCascadingServiceClient(connObjectBuilderService),
-		tableHelpersService:  postgres_object_builder_service.NewTableHelpersServiceClient(connObjectBuilderService),
-		fieldsAndRelations:   postgres_object_builder_service.NewFieldAndRelationServiceClient(connObjectBuilderService),
-		settingService:       postgres_object_builder_service.NewSettingServiceClient(connObjectBuilderService),
-		tableFolderService:   postgres_object_builder_service.NewTableFolderServiceClient(connObjectBuilderService),
+		tableService:         object_builder_service.NewTableServiceClient(connObjectBuilderService),
+		fieldService:         object_builder_service.NewFieldServiceClient(connObjectBuilderService),
+		objectBuilderService: object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
+		relationService:      object_builder_service.NewRelationServiceClient(connObjectBuilderService),
+		dashboardService:     object_builder_service.NewDashboardServiceClient(connObjectBuilderService),
+		variableService:      object_builder_service.NewVariableServiceClient(connObjectBuilderService),
+		panelService:         object_builder_service.NewPanelServiceClient(connObjectBuilderService),
+		appService:           object_builder_service.NewAppServiceClient(connObjectBuilderService),
+		excelService:         object_builder_service.NewExcelServiceClient(connObjectBuilderService),
+		permissionService:    object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
+		customEventService:   object_builder_service.NewCustomEventServiceClient(connObjectBuilderService),
+		barcodeService:       object_builder_service.NewBarcodeServiceClient(connObjectBuilderService),
+		loginService:         object_builder_service.NewLoginServiceClient(connObjectBuilderService),
+		cascadingService:     object_builder_service.NewCascadingServiceClient(connObjectBuilderService),
+		tableHelpersService:  object_builder_service.NewTableHelpersServiceClient(connObjectBuilderService),
+		fieldsAndRelations:   object_builder_service.NewFieldAndRelationServiceClient(connObjectBuilderService),
+		settingService:       object_builder_service.NewSettingServiceClient(connObjectBuilderService),
+		tableFolderService:   object_builder_service.NewTableFolderServiceClient(connObjectBuilderService),
 	}, nil
 }
 
 type postgresBuilderServiceClient struct {
-	tableService             postgres_object_builder_service.TableServiceClient
-	fieldService             postgres_object_builder_service.FieldServiceClient
-	objectBuilderService     postgres_object_builder_service.ObjectBuilderServiceClient
-	sectionService           postgres_object_builder_service.SectionServiceClient
-	relationService          postgres_object_builder_service.RelationServiceClient
-	viewService              postgres_object_builder_service.ViewServiceClient
-	dashboardService         postgres_object_builder_service.DashboardServiceClient
-	panelService             postgres_object_builder_service.PanelServiceClient
-	variableService          postgres_object_builder_service.VariableServiceClient
-	appService               postgres_object_builder_service.AppServiceClient
-	excelService             postgres_object_builder_service.ExcelServiceClient
-	permissionService        postgres_object_builder_service.PermissionServiceClient
-	customEventService       postgres_object_builder_service.CustomEventServiceClient
-	barcodeService           postgres_object_builder_service.BarcodeServiceClient
-	objectBuilderServiceAuth postgres_object_builder_service.ObjectBuilderServiceClient
-	loginService             postgres_object_builder_service.LoginServiceClient
-	cascadingService         postgres_object_builder_service.CascadingServiceClient
-	tableHelpersService      postgres_object_builder_service.TableHelpersServiceClient
-	fieldsAndRelations       postgres_object_builder_service.FieldAndRelationServiceClient
-	settingService           postgres_object_builder_service.SettingServiceClient
-	tableFolderService       postgres_object_builder_service.TableFolderServiceClient
+	tableService             object_builder_service.TableServiceClient
+	fieldService             object_builder_service.FieldServiceClient
+	objectBuilderService     object_builder_service.ObjectBuilderServiceClient
+	sectionService           object_builder_service.SectionServiceClient
+	relationService          object_builder_service.RelationServiceClient
+	viewService              object_builder_service.ViewServiceClient
+	dashboardService         object_builder_service.DashboardServiceClient
+	panelService             object_builder_service.PanelServiceClient
+	variableService          object_builder_service.VariableServiceClient
+	appService               object_builder_service.AppServiceClient
+	excelService             object_builder_service.ExcelServiceClient
+	permissionService        object_builder_service.PermissionServiceClient
+	customEventService       object_builder_service.CustomEventServiceClient
+	barcodeService           object_builder_service.BarcodeServiceClient
+	objectBuilderServiceAuth object_builder_service.ObjectBuilderServiceClient
+	loginService             object_builder_service.LoginServiceClient
+	cascadingService         object_builder_service.CascadingServiceClient
+	tableHelpersService      object_builder_service.TableHelpersServiceClient
+	fieldsAndRelations       object_builder_service.FieldAndRelationServiceClient
+	settingService           object_builder_service.SettingServiceClient
+	tableFolderService       object_builder_service.TableFolderServiceClient
 }
 
-func (g *postgresBuilderServiceClient) Table() postgres_object_builder_service.TableServiceClient {
+func (g *postgresBuilderServiceClient) Table() object_builder_service.TableServiceClient {
 	return g.tableService
 }
 
-func (g *postgresBuilderServiceClient) Field() postgres_object_builder_service.FieldServiceClient {
+func (g *postgresBuilderServiceClient) Field() object_builder_service.FieldServiceClient {
 	return g.fieldService
 }
 
-func (g *postgresBuilderServiceClient) Section() postgres_object_builder_service.SectionServiceClient {
+func (g *postgresBuilderServiceClient) Section() object_builder_service.SectionServiceClient {
 	return g.sectionService
 }
 
-func (g *postgresBuilderServiceClient) Relation() postgres_object_builder_service.RelationServiceClient {
+func (g *postgresBuilderServiceClient) Relation() object_builder_service.RelationServiceClient {
 	return g.relationService
 }
 
-func (g *postgresBuilderServiceClient) View() postgres_object_builder_service.ViewServiceClient {
+func (g *postgresBuilderServiceClient) View() object_builder_service.ViewServiceClient {
 	return g.viewService
 }
 
-func (g *postgresBuilderServiceClient) App() postgres_object_builder_service.AppServiceClient {
+func (g *postgresBuilderServiceClient) App() object_builder_service.AppServiceClient {
 	return g.appService
 }
 
-func (g *postgresBuilderServiceClient) Dashboard() postgres_object_builder_service.DashboardServiceClient {
+func (g *postgresBuilderServiceClient) Dashboard() object_builder_service.DashboardServiceClient {
 	return g.dashboardService
 }
 
-func (g *postgresBuilderServiceClient) Variable() postgres_object_builder_service.VariableServiceClient {
+func (g *postgresBuilderServiceClient) Variable() object_builder_service.VariableServiceClient {
 	return g.variableService
 }
 
-func (g *postgresBuilderServiceClient) Panel() postgres_object_builder_service.PanelServiceClient {
+func (g *postgresBuilderServiceClient) Panel() object_builder_service.PanelServiceClient {
 	return g.panelService
 }
 
-func (g *postgresBuilderServiceClient) Excel() postgres_object_builder_service.ExcelServiceClient {
+func (g *postgresBuilderServiceClient) Excel() object_builder_service.ExcelServiceClient {
 	return g.excelService
 }
-func (g *postgresBuilderServiceClient) Permission() postgres_object_builder_service.PermissionServiceClient {
+func (g *postgresBuilderServiceClient) Permission() object_builder_service.PermissionServiceClient {
 	return g.permissionService
 }
 
-func (g *postgresBuilderServiceClient) CustomEvent() postgres_object_builder_service.CustomEventServiceClient {
+func (g *postgresBuilderServiceClient) CustomEvent() object_builder_service.CustomEventServiceClient {
 	return g.customEventService
 }
 
-func (g *postgresBuilderServiceClient) Barcode() postgres_object_builder_service.BarcodeServiceClient {
+func (g *postgresBuilderServiceClient) Barcode() object_builder_service.BarcodeServiceClient {
 	return g.barcodeService
 }
 
-func (g *postgresBuilderServiceClient) TableHelpers() postgres_object_builder_service.TableHelpersServiceClient {
+func (g *postgresBuilderServiceClient) TableHelpers() object_builder_service.TableHelpersServiceClient {
 	return g.tableHelpersService
 }
 
-func (g *postgresBuilderServiceClient) Login() postgres_object_builder_service.LoginServiceClient {
+func (g *postgresBuilderServiceClient) Login() object_builder_service.LoginServiceClient {
 	return g.loginService
 }
 
-func (g *postgresBuilderServiceClient) Cascading() postgres_object_builder_service.CascadingServiceClient {
+func (g *postgresBuilderServiceClient) Cascading() object_builder_service.CascadingServiceClient {
 	return g.cascadingService
 }
 
-func (g *postgresBuilderServiceClient) FieldsAndRelations() postgres_object_builder_service.FieldAndRelationServiceClient {
+func (g *postgresBuilderServiceClient) FieldsAndRelations() object_builder_service.FieldAndRelationServiceClient {
 	return g.fieldsAndRelations
 }
 
-func (g *postgresBuilderServiceClient) Setting() postgres_object_builder_service.SettingServiceClient {
+func (g *postgresBuilderServiceClient) Setting() object_builder_service.SettingServiceClient {
 	return g.settingService
 }
 
-func (g *postgresBuilderServiceClient) TableFolder() postgres_object_builder_service.TableFolderServiceClient {
+func (g *postgresBuilderServiceClient) TableFolder() object_builder_service.TableFolderServiceClient {
 	return g.tableFolderService
 }
