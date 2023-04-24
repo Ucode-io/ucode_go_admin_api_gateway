@@ -780,7 +780,8 @@ func (h *Handler) QueryRun(c *gin.Context) {
 	//	}
 	//}
 
-	query.ProjectId = resource.ResourceEnvironmentId
+	query.ResourceId = resource.ResourceEnvironmentId
+	query.ProjectId = projectId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {

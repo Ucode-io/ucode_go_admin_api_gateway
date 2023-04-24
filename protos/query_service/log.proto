@@ -21,12 +21,14 @@ message Log {
   google.protobuf.Struct request = 6;
   string response = 7;
   string created_at = 8;
+  string resource_id = 9;
 }
 
 message GetSingleLogReq {
   string id = 1;
   string project_id = 2;
   string environment_id = 3;
+  string resource_id = 4;
 }
 
 message GetListLogReq {
@@ -35,6 +37,7 @@ message GetListLogReq {
   string query_id = 3;
   int64 limit = 4;
   int64 offset = 5;
+  string resource_id = 6;
 }
 
 message GetListLogRes {
