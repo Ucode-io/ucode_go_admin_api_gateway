@@ -15,6 +15,13 @@ service ProjectService {
   rpc DeregisterMany(DeregisterManyProjectsRequest) returns (DeregisterManyProjectsResponse) {}
 }
 
+enum ResourceType {
+  NOT_DECIDED = 0;
+  MONGODB = 1;
+  CLICKHOUSE = 2;
+  POSTGRESQL = 3;
+}
+
 message RegisterProjectRequest {
   message Credentials {
     string host = 1;
@@ -29,6 +36,8 @@ message RegisterProjectRequest {
   Credentials credentials = 4;
   string user_id = 5;
   string resource_id = 6;
+  string resource_analyt_id = 7;
+  ResourceType resource_type = 8;
 }
 
 message DeregisterProjectRequest {

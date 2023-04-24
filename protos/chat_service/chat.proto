@@ -20,6 +20,14 @@ service ChatService {
     rpc DeleteBotToken(UpdateBotTokenRequest) returns (google.protobuf.Empty) {}
 }
 
+message Bot{
+    string bot_id =1;
+    string bot_token = 2;
+    string environment_id = 3;
+    string created_at = 4;
+    string updated_at = 5;
+    bool status=6;
+}
 
 message CreateBotRequest{
     string bot_token = 1;
@@ -39,17 +47,17 @@ message GetBotByBotIdRequest{
 }
 
 message GetBotTokenListResponse{
-    repeated CreateBotRequest BotTokenList = 1;
+    repeated Bot bottokenlist = 1;
 }
 
 message GetBotByBotIdResponse{
-    string bot_token = 1;
-    string environment_id = 2;
+    Bot bot =1;
 }
 
 message DeleteBotToken{
     string bot_id = 1;
 }
+
 // Chat ...
 message Chat { 
     string phone_number = 1;
@@ -92,6 +100,7 @@ message GetChatByChatIdResponse {
     string chat_id = 1;
     repeated UserMessage messages = 2;
     string platform_type = 3;
+    string user_id = 4;
 }
 
 message GetChatByUserIdResponse {
@@ -133,7 +142,6 @@ message GetSelfChatContent {
 message GetSelfChatContentResponse {
     ChatWithLastMessageData message = 1;
 }
-
 
 message UpdateChatRequest {
     string chat_id = 1;

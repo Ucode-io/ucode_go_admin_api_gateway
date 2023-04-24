@@ -111,7 +111,8 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 	//	}
 	//}
 
-	folder.ProjectId = resource.ResourceEnvironmentId
+	folder.ResourceId = resource.ResourceId
+	folder.ProjectId = projectId
 
 	//uuID, err := uuid.NewRandom()
 	//if err != nil {
@@ -237,8 +238,9 @@ func (h *Handler) GetSingleQueryRequestFolder(c *gin.Context) {
 	res, err := services.QueryService().Folder().GetSingleFolder(
 		context.Background(),
 		&tmp.GetSingleFolderReq{
-			Id:        folderId,
-			ProjectId: resource.ResourceEnvironmentId,
+			Id:         folderId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
 			//VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
@@ -351,7 +353,8 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 	//	}
 	//}
 
-	folder.ProjectId = resource.ResourceEnvironmentId
+	folder.ProjectId = projectId
+	folder.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
 	//if err != nil {
@@ -477,8 +480,9 @@ func (h *Handler) DeleteQueryRequestFolder(c *gin.Context) {
 	res, err := services.QueryService().Folder().DeleteFolder(
 		context.Background(),
 		&tmp.DeleteFolderReq{
-			Id:        folderId,
-			ProjectId: resource.ResourceEnvironmentId,
+			Id:         folderId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
 			//VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
@@ -586,7 +590,8 @@ func (h *Handler) GetListQueryRequestFolder(c *gin.Context) {
 	res, err := services.QueryService().Folder().GetListFolder(
 		context.Background(),
 		&tmp.GetListFolderReq{
-			ProjectId: resource.ResourceEnvironmentId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
 			//VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
