@@ -33630,7 +33630,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "boolean"
+                    "type": "string"
                 },
                 "updated_at": {
                     "type": "string"
@@ -33640,6 +33640,9 @@ const docTemplate = `{
         "chat_service.ChatWithLastMessageData": {
             "type": "object",
             "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
                 "chat_id": {
                     "type": "string"
                 },
@@ -33680,6 +33683,9 @@ const docTemplate = `{
         "chat_service.GetChatByChatIdResponse": {
             "type": "object",
             "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
                 "chat_id": {
                     "type": "string"
                 },
@@ -33714,6 +33720,9 @@ const docTemplate = `{
         "chat_service.UserMessage": {
             "type": "object",
             "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
                 "check": {
                     "type": "boolean"
                 },
@@ -38526,6 +38535,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -38594,6 +38606,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "title": {
@@ -38718,6 +38733,9 @@ const docTemplate = `{
                 "request": {
                     "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "response": {
                     "type": "string"
                 },
@@ -38785,6 +38803,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "version_ids": {
                     "type": "array",
                     "items": {
@@ -38820,6 +38841,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "title": {

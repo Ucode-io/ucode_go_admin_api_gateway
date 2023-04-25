@@ -416,12 +416,14 @@ definitions:
       environment_id:
         type: string
       status:
-        type: boolean
+        type: string
       updated_at:
         type: string
     type: object
   chat_service.ChatWithLastMessageData:
     properties:
+      bot_id:
+        type: string
       chat_id:
         type: string
       check:
@@ -448,6 +450,8 @@ definitions:
     type: object
   chat_service.GetChatByChatIdResponse:
     properties:
+      bot_id:
+        type: string
       chat_id:
         type: string
       messages:
@@ -470,6 +474,8 @@ definitions:
     type: object
   chat_service.UserMessage:
     properties:
+      bot_id:
+        type: string
       check:
         type: boolean
       created_at:
@@ -3627,6 +3633,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       title:
         type: string
       version_id:
@@ -3672,6 +3680,8 @@ definitions:
       parent_id:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       title:
         type: string
@@ -3752,6 +3762,8 @@ definitions:
         type: string
       request:
         $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+      resource_id:
+        type: string
       response:
         type: string
       user_id:
@@ -3796,6 +3808,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       version_ids:
         items:
           type: string
@@ -3819,6 +3833,8 @@ definitions:
       parent_id:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       title:
         type: string
