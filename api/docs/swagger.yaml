@@ -15,7 +15,7 @@ definitions:
       additional_url:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       authentification:
         type: boolean
       category_id:
@@ -306,7 +306,7 @@ definitions:
   auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       label:
@@ -367,7 +367,7 @@ definitions:
   auth_service.V2LoginResponse:
     properties:
       addational_table:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       app_permissions:
         items:
           $ref: '#/definitions/auth_service.RecordPermission'
@@ -993,7 +993,7 @@ definitions:
       count:
         type: integer
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
     type: object
   company_service.Timezone:
     properties:
@@ -1186,27 +1186,6 @@ definitions:
     type: object
   emptypb.Empty:
     type: object
-  github_com_golang_protobuf_ptypes_struct.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  google_golang_org_protobuf_types_known_structpb.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  google_golang_org_protobuf_types_known_structpb.Value:
-    properties:
-      kind:
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
-    type: object
   handlers.Path:
     properties:
       filename:
@@ -1257,7 +1236,7 @@ definitions:
       currency:
         type: string
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       deleted_at:
         type: string
       id:
@@ -1292,7 +1271,7 @@ definitions:
       currency:
         type: string
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       deleted_at:
         type: string
       id:
@@ -1435,7 +1414,7 @@ definitions:
       project_id:
         type: string
       routes:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/structpb.Struct'
       sub_domain:
         type: string
     type: object
@@ -1665,7 +1644,7 @@ definitions:
       app_id:
         type: string
       components:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/structpb.Struct'
       folder_id:
         type: string
       icon:
@@ -2071,7 +2050,7 @@ definitions:
       project_id:
         type: string
       routes:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/structpb.Struct'
       sub_domain:
         type: string
     type: object
@@ -2096,7 +2075,7 @@ definitions:
       app_id:
         type: string
       components:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/structpb.Struct'
       folder_id:
         type: string
       icon:
@@ -2149,7 +2128,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -2454,7 +2433,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -2513,7 +2492,7 @@ definitions:
   object_builder_service.CreateFieldRequest:
     properties:
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       autofill_field:
         type: string
       autofill_table:
@@ -2698,7 +2677,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -3124,7 +3103,7 @@ definitions:
   object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       label:
@@ -3291,7 +3270,7 @@ definitions:
   object_builder_service.V2LoginResponse:
     properties:
       addational_table:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       app_permissions:
         items:
           $ref: '#/definitions/object_builder_service.RecordPermission'
@@ -3343,7 +3322,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -3643,7 +3622,7 @@ definitions:
   query_service.CreateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3761,7 +3740,11 @@ definitions:
       query_id:
         type: string
       request:
+<<<<<<< HEAD
         $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+=======
+        $ref: '#/definitions/structpb.Struct'
+>>>>>>> 8b363505563f5e87d576b9319f2f0db65bbe0152
       resource_id:
         type: string
       response:
@@ -3772,7 +3755,7 @@ definitions:
   query_service.Query:
     properties:
       body:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3844,7 +3827,7 @@ definitions:
   query_service.UpdateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_id:
         type: string
       commit_info:
@@ -4002,7 +3985,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+          $ref: '#/definitions/structpb.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
@@ -4015,7 +3998,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       slug:
         type: string
       title:
@@ -4026,7 +4009,7 @@ definitions:
   scenario_service.DAG:
     properties:
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       category_id:
         type: string
       commit_id:
@@ -4063,7 +4046,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+          $ref: '#/definitions/structpb.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
@@ -4080,7 +4063,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       slug:
         type: string
       title:
@@ -4088,7 +4071,7 @@ definitions:
       type:
         type: string
       ui_component:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
     type: object
   scenario_service.GetDAGRequest:
     properties:
@@ -4143,7 +4126,7 @@ definitions:
   scenario_service.RunScenarioResponse:
     properties:
       response:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
     type: object
   scenario_service.VersionInfo:
     properties:
@@ -4169,6 +4152,19 @@ definitions:
         type: string
       status:
         type: string
+    type: object
+  structpb.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
+  structpb.Value:
+    properties:
+      kind:
+        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
     type: object
   template_service.CreateFolderNoteReq:
     properties:
@@ -4203,7 +4199,7 @@ definitions:
       folder_id:
         type: string
       json:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
       title:
@@ -4386,7 +4382,7 @@ definitions:
   template_service.GetObjectTokenRes:
     properties:
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       role:
         type: string
     type: object
@@ -4417,7 +4413,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
       title:
@@ -4512,7 +4508,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
       title:
@@ -4778,7 +4774,7 @@ definitions:
   web_page_service.App:
     properties:
       Routes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       environment_id:
         type: string
       id:
@@ -4936,7 +4932,7 @@ definitions:
       commit_info:
         $ref: '#/definitions/web_page_service.CommitInfo'
       components:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       environment_id:
         type: string
       folder_id:
