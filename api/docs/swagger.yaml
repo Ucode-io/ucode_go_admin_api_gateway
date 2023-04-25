@@ -3740,11 +3740,7 @@ definitions:
       query_id:
         type: string
       request:
-<<<<<<< HEAD
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
-=======
         $ref: '#/definitions/structpb.Struct'
->>>>>>> 8b363505563f5e87d576b9319f2f0db65bbe0152
       resource_id:
         type: string
       response:

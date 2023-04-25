@@ -38704,9 +38704,6 @@ const docTemplate = `{
                 "resource_id": {
                     "type": "string"
                 },
-                "resource_id": {
-                    "type": "string"
-                },
                 "response": {
                     "type": "string"
                 },
