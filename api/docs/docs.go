@@ -33630,7 +33630,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "boolean"
+                    "type": "string"
                 },
                 "updated_at": {
                     "type": "string"
@@ -33640,6 +33640,9 @@ const docTemplate = `{
         "chat_service.ChatWithLastMessageData": {
             "type": "object",
             "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
                 "chat_id": {
                     "type": "string"
                 },
@@ -33680,6 +33683,9 @@ const docTemplate = `{
         "chat_service.GetChatByChatIdResponse": {
             "type": "object",
             "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
                 "chat_id": {
                     "type": "string"
                 },
@@ -33714,6 +33720,9 @@ const docTemplate = `{
         "chat_service.UserMessage": {
             "type": "object",
             "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
                 "check": {
                     "type": "boolean"
                 },
@@ -38691,6 +38700,9 @@ const docTemplate = `{
                 },
                 "request": {
                     "$ref": "#/definitions/structpb.Struct"
+                },
+                "resource_id": {
+                    "type": "string"
                 },
                 "resource_id": {
                     "type": "string"
