@@ -33020,7 +33020,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "authentification": {
                     "type": "boolean"
@@ -33463,7 +33463,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -33556,7 +33556,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
@@ -33630,7 +33630,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "boolean"
+                    "type": "string"
                 },
                 "updated_at": {
                     "type": "string"
@@ -33640,6 +33640,9 @@ const docTemplate = `{
         "chat_service.ChatWithLastMessageData": {
             "type": "object",
             "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
                 "chat_id": {
                     "type": "string"
                 },
@@ -33680,6 +33683,9 @@ const docTemplate = `{
         "chat_service.GetChatByChatIdResponse": {
             "type": "object",
             "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
                 "chat_id": {
                     "type": "string"
                 },
@@ -33714,6 +33720,9 @@ const docTemplate = `{
         "chat_service.UserMessage": {
             "type": "object",
             "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
                 "check": {
                     "type": "boolean"
                 },
@@ -34497,7 +34506,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 }
             }
         },
@@ -34790,38 +34799,6 @@ const docTemplate = `{
         "emptypb.Empty": {
             "type": "object"
         },
-        "github_com_golang_protobuf_ptypes_struct.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
-                    }
-                }
-            }
-        },
-        "google_golang_org_protobuf_types_known_structpb.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
-                    }
-                }
-            }
-        },
-        "google_golang_org_protobuf_types_known_structpb.Value": {
-            "type": "object",
-            "properties": {
-                "kind": {
-                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
-                }
-            }
-        },
         "handlers.Path": {
             "type": "object",
             "properties": {
@@ -34898,7 +34875,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -34951,7 +34928,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "deleted_at": {
                     "type": "string"
@@ -35168,7 +35145,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "routes": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "sub_domain": {
                     "type": "string"
@@ -35519,7 +35496,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "components": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "folder_id": {
                     "type": "string"
@@ -36137,7 +36114,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "routes": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "sub_domain": {
                     "type": "string"
@@ -36176,7 +36153,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "components": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "folder_id": {
                     "type": "string"
@@ -36257,7 +36234,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -36723,7 +36700,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_guid": {
                     "type": "string"
@@ -36813,7 +36790,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "autofill_field": {
                     "type": "string"
@@ -37093,7 +37070,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -37748,7 +37725,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -38002,7 +37979,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
@@ -38081,7 +38058,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "calendar_from_slug": {
                     "type": "string"
@@ -38526,6 +38503,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -38538,7 +38518,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -38594,6 +38574,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "title": {
@@ -38716,7 +38699,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "request": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "resource_id": {
+                    "type": "string"
                 },
                 "response": {
                     "type": "string"
@@ -38730,7 +38716,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -38785,6 +38771,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "version_ids": {
                     "type": "array",
                     "items": {
@@ -38822,6 +38811,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -38834,7 +38826,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "commit_id": {
                     "type": "string"
@@ -39076,7 +39068,7 @@ const docTemplate = `{
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                        "$ref": "#/definitions/structpb.Struct"
                     }
                 },
                 "connect_info": {
@@ -39095,7 +39087,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -39112,7 +39104,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "category_id": {
                     "type": "string"
@@ -39169,7 +39161,7 @@ const docTemplate = `{
                 "condition_action": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                        "$ref": "#/definitions/structpb.Struct"
                     }
                 },
                 "connect_info": {
@@ -39194,7 +39186,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "request_info": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "slug": {
                     "type": "string"
@@ -39206,7 +39198,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "ui_component": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 }
             }
         },
@@ -39291,7 +39283,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "response": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 }
             }
         },
@@ -39330,6 +39322,26 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "string"
+                }
+            }
+        },
+        "structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/structpb.Value"
+                    }
+                }
+            }
+        },
+        "structpb.Value": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
                 }
             }
         },
@@ -39383,7 +39395,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -39665,7 +39677,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "role": {
                     "type": "string"
@@ -39713,7 +39725,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -39859,7 +39871,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "json": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "project_id": {
                     "type": "string"
@@ -40265,7 +40277,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "Routes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "environment_id": {
                     "type": "string"
@@ -40508,7 +40520,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/web_page_service.CommitInfo"
                 },
                 "components": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "environment_id": {
                     "type": "string"
