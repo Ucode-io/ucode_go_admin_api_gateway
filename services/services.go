@@ -22,6 +22,7 @@ type ServiceManagerI interface {
 	WebPageService() WebPageServiceI
 	ChatService() ChatServiceI
 	NotificationService() NotificationServiceI
+	PostgresBuilderService() PostgresBuilderServiceI
 }
 
 type grpcClients struct {
@@ -41,6 +42,7 @@ type grpcClients struct {
 	webPageService           WebPageServiceI
 	chatService              ChatServiceI
 	notificationService      NotificationServiceI
+	postgresBuilderService   PostgresBuilderServiceI
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -55,7 +57,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	}
 	chatServiceClient, err := NewChatServiceClient(ctx, cfg)
 	if err != nil {
-		return nil, err	
+		return nil, err
 	}
 	companyServiceClient, err := NewCompanyServiceClient(ctx, cfg)
 	if err != nil {
@@ -120,6 +122,10 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 	if err != nil {
 		return nil, err
 	}
+	postgresBuilderServiceClient, err := NewPostgrespostgresBuilderServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
 
 	return grpcClients{
 		apiReferenceService:      apiReferenceClient,
@@ -138,6 +144,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		webPageService:           webPageServiceClient,
 		chatService:              chatServiceClient,
 		notificationService:      notificationServiceClient,
+		postgresBuilderService:   postgresBuilderServiceClient,
 	}, nil
 }
 
@@ -201,4 +208,8 @@ func (g grpcClients) WebPageService() WebPageServiceI {
 
 func (g grpcClients) NotificationService() NotificationServiceI {
 	return g.notificationService
+}
+
+func (g grpcClients) PostgresBuilderService() PostgresBuilderServiceI {
+	return g.postgresBuilderService
 }

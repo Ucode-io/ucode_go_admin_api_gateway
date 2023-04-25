@@ -16,3 +16,8 @@ type CreateChatRequest struct {
 type ChatResponse struct {
 	Chat_id string `json:"chat_id"`
 }
+
+type CreateBotRequest struct {
+	BotToken      string `json:"bot_token"`
+	EnvironmentID string `json:"environment_id"`
+}

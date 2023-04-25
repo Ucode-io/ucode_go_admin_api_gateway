@@ -19,7 +19,7 @@ import (
 // @Tags Release
 // @Accept json
 // @Produce json
-// @Param release body versioning_service.ApiCreateReleaseRequest true "Request Body"
+// @Param release body obs.ApiCreateReleaseRequest true "Request Body"
 // @Param Environment-Id header string true "Environment-Id"
 // @Success 201 {object} status_http.Response{data=string} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -92,7 +92,7 @@ func (h *Handler) CreateRelease(c *gin.Context) {
 // @Param version_id path string true "version_id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Param project_id path string true "project_id"
-// @Success 200 {object} status_http.Response{data=versioning_service.ReleaseWithCommit} "ReleaseBody"
+// @Success 200 {object} status_http.Response{data=obs.ReleaseWithCommit} "ReleaseBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetReleaseByID(c *gin.Context) {
@@ -149,7 +149,7 @@ func (h *Handler) GetReleaseByID(c *gin.Context) {
 // @Param project_id path string true "project_id"
 // @Param offset query int false "offset"
 // @Param limit query int false "limit"
-// @Success 200 {object} status_http.Response{data=versioning_service.GetReleaseListResponse} "Response Body"
+// @Success 200 {object} status_http.Response{data=obs.GetReleaseListResponse} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllReleases(c *gin.Context) {
@@ -212,8 +212,8 @@ func (h *Handler) GetAllReleases(c *gin.Context) {
 // @Produce json
 // @Param version_id path string true "version_id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Param release body versioning_service.ApiUpdateReleaseRequest  true "Request Body"
-// @Success 200 {object} status_http.Response{data=versioning_service.ReleaseWithCommit} "Response Body"
+// @Param release body obs.ApiUpdateReleaseRequest  true "Request Body"
+// @Success 200 {object} status_http.Response{data=obs.ReleaseWithCommit} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateRelease(c *gin.Context) {
@@ -273,7 +273,7 @@ func (h *Handler) UpdateRelease(c *gin.Context) {
 // @Produce json
 // @Param version_id path string true "version_id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Param release body versioning_service.ApiDeleteReleaseRequest true "Request Body"
+// @Param release body obs.ApiDeleteReleaseRequest true "Request Body"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -331,7 +331,7 @@ func (h *Handler) DeleteRelease(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param Environment-Id header string true "Environment-Id"
-// @Param release body versioning_service.ApiSetCurrentReleaseRequest  true "Request Body"
+// @Param release body obs.ApiSetCurrentReleaseRequest  true "Request Body"
 // @Success 200 {object} status_http.Response{data=string} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -343,7 +343,6 @@ func (h *Handler) SetCurrentRelease(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
 
 	environmentID, ok := c.Get("environment_id")
 	if !ok {
@@ -391,7 +390,7 @@ func (h *Handler) SetCurrentRelease(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param environment-id path string true "environment-id"
-// @Success 200 {object} status_http.Response{data=versioning_service.GetCurrentReleaseResponse} "GetReleaseBody"
+// @Success 200 {object} status_http.Response{data=obs.GetCurrentReleaseResponse} "GetReleaseBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetCurrentRelease(c *gin.Context) {

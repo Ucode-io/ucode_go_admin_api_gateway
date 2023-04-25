@@ -6,8 +6,8 @@ import (
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	pb "ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
+	pbAuth "ucode/ucode_go_api_gateway/genproto/auth_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	pbObject "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -26,6 +26,7 @@ import (
 // @Tags Email
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param send_message body models.Email true "SendMessageToEmailRequestBody"
 // @Success 201 {object} status_http.Response{data=models.SendCodeResponse} "User data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -73,39 +74,58 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	//	return
 	//}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	//resourceId, ok := c.Get("resource_id")
+	//if !ok {
+	//	err = errors.New("error getting resource id")
+	//	h.handleResponse(c, status_http.BadRequest, err.Error())
+	//	return
+	//}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
-		err = errors.New("error getting resource environment id")
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	respObject, err := services.BuilderService().Login().LoginWithEmailOtp(
 		c.Request.Context(),
 		&pbObject.EmailOtpRequest{
 			Email:      request.Email,
 			ClientType: request.ClientType,
-			ProjectId:  resourceEnvironment.GetId(),
+			ProjectId:  resource.ResourceEnvironmentId,
 		})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -119,7 +139,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 
 	resp, err := services.AuthService().Email().Create(
 		c.Request.Context(),
-		&pb.Email{
+		&pbAuth.Email{
 			Id:        id.String(),
 			Email:     request.Email,
 			Otp:       code,
@@ -155,10 +175,11 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 // @Tags Email
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param sms_id path string true "sms_id"
 // @Param otp path string true "otp"
 // @Param verifyBody body models.Verify true "verify_body"
-// @Success 201 {object} status_http.Response{data=auth_service.V2LoginResponse} "User data"
+// @Success 201 {object} status_http.Response{data=pbAuth.V2LoginResponse} "User data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) VerifyEmail(c *gin.Context) {
@@ -183,37 +204,56 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 	//	return
 	//}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	//resourceId, ok := c.Get("resource_id")
+	//if !ok {
+	//	err = errors.New("error getting resource id")
+	//	h.handleResponse(c, status_http.BadRequest, err.Error())
+	//	return
+	//}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
-		err = errors.New("error getting resource environment id")
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
+
 	if c.Param("otp") != "1212" {
 		resp, err := services.AuthService().Email().GetEmailByID(
 			c.Request.Context(),
-			&pb.EmailOtpPrimaryKey{
+			&pbAuth.EmailOtpPrimaryKey{
 				Id: c.Param("sms_id"),
 				// ProjectId: resourceId.(string),
 			},
@@ -234,10 +274,10 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
 	res, err := services.AuthService().Session().SessionAndTokenGenerator(
 		context.Background(),
-		&pb.SessionAndTokenRequest{
+		&pbAuth.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
 			Tables:    body.Tables,
-			ProjectId: resourceEnvironment.GetProjectId(),
+			ProjectId: resource.ProjectId,
 		})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -257,9 +297,10 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 // @Tags Email
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param registerBody body models.RegisterOtp true "register_body"
 // @Param table_slug path string true "table_slug"
-// @Success 201 {object} status_http.Response{data=auth_service.V2LoginResponse} "User data"
+// @Success 201 {object} status_http.Response{data=pbAuth.V2LoginResponse} "User data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) RegisterEmailOtp(c *gin.Context) {
@@ -284,32 +325,51 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	//	return
 	//}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	//resourceId, ok := c.Get("resource_id")
+	//if !ok {
+	//	err = errors.New("error getting resource id")
+	//	h.handleResponse(c, status_http.BadRequest, err.Error())
+	//	return
+	//}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
-		err = errors.New("error getting resource environment id")
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	structData, err := helper.ConvertMapToStruct(body.Data)
 
@@ -322,7 +382,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: resourceEnvironment.GetId(),
+			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 	if err != nil {
@@ -335,7 +395,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		&pbObject.EmailOtpRequest{
 			Email:      body.Data["email"].(string),
 			ClientType: "PATIENT",
-			ProjectId:  resourceId.(string),
+			ProjectId:  resource.ResourceEnvironmentId,
 		})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -345,10 +405,10 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
 	res, err := services.AuthService().Session().SessionAndTokenGenerator(
 		context.Background(),
-		&pb.SessionAndTokenRequest{
+		&pbAuth.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
-			Tables:    []*pb.Object{},
-			ProjectId: resourceId.(string),
+			Tables:    []*pbAuth.Object{},
+			ProjectId: resource.ProjectId,
 		})
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())

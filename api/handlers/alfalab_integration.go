@@ -1,5 +1,6 @@
 package handlers
 
+/*
 import (
 	"fmt"
 	"io/ioutil"
@@ -7,9 +8,11 @@ import (
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/pkg/util"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+
+	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
-	"ucode/ucode_go_api_gateway/api/status_http"
 )
 
 // CreateDirections godoc
@@ -166,3 +169,4 @@ func (h *Handler) GetReferral(c *gin.Context) {
 }
 
 // Need to delete
+*/

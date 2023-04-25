@@ -3,10 +3,9 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
-	obs "ucode/ucode_go_api_gateway/genproto/company_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/query_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 )
@@ -65,10 +64,24 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 	//	return
 	//}
 	//
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_QUERY_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	//
@@ -98,20 +111,8 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 	//	}
 	//}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   obs.ServiceType_QUERY_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	folder.ProjectId = resource.ResourceEnvironmentId
+	folder.ResourceId = resource.ResourceId
+	folder.ProjectId = projectId
 
 	//uuID, err := uuid.NewRandom()
 	//if err != nil {
@@ -195,6 +196,19 @@ func (h *Handler) GetSingleQueryRequestFolder(c *gin.Context) {
 		return
 	}
 
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_QUERY_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	//if util.IsValidUUID(resourceId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
@@ -221,24 +235,12 @@ func (h *Handler) GetSingleQueryRequestFolder(c *gin.Context) {
 	//	}
 	//}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   obs.ServiceType_QUERY_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
 	res, err := services.QueryService().Folder().GetSingleFolder(
 		context.Background(),
 		&tmp.GetSingleFolderReq{
-			Id:        folderId,
-			ProjectId: resource.ResourceEnvironmentId,
+			Id:         folderId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
 			//VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
@@ -312,6 +314,19 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 		return
 	}
 
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_QUERY_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	//if util.IsValidUUID(resourceId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
@@ -338,20 +353,8 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 	//	}
 	//}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   obs.ServiceType_QUERY_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	folder.ProjectId = resource.ResourceEnvironmentId
+	folder.ProjectId = projectId
+	folder.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
 	//if err != nil {
@@ -435,6 +438,19 @@ func (h *Handler) DeleteQueryRequestFolder(c *gin.Context) {
 		return
 	}
 
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_QUERY_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	//if util.IsValidUUID(resourceId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
@@ -461,24 +477,12 @@ func (h *Handler) DeleteQueryRequestFolder(c *gin.Context) {
 	//	}
 	//}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   obs.ServiceType_QUERY_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
 	res, err := services.QueryService().Folder().DeleteFolder(
 		context.Background(),
 		&tmp.DeleteFolderReq{
-			Id:        folderId,
-			ProjectId: resource.ResourceEnvironmentId,
+			Id:         folderId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
 			//VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
@@ -544,6 +548,19 @@ func (h *Handler) GetListQueryRequestFolder(c *gin.Context) {
 		return
 	}
 
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_QUERY_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	//if util.IsValidUUID(resourceId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
@@ -570,24 +587,11 @@ func (h *Handler) GetListQueryRequestFolder(c *gin.Context) {
 	//	}
 	//}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   obs.ServiceType_QUERY_SERVICE,
-		},
-	)
-	if err != nil {
-		fmt.Println("err:::::::", err.Error())
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
 	res, err := services.QueryService().Folder().GetListFolder(
 		context.Background(),
 		&tmp.GetListFolderReq{
-			ProjectId: resource.ResourceEnvironmentId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
 			//VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)

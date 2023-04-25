@@ -1,28 +1,24 @@
 package handlers
 
 import (
-	"context"
-	"errors"
+	"github.com/gin-gonic/gin"
+	"github.com/saidamir98/udevs_pkg/util"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
-
-	"github.com/saidamir98/udevs_pkg/util"
-
-	"github.com/gin-gonic/gin"
 )
 
 // CreateIntegration godoc
 // @ID create_Integration
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string false "Environment-Id"
 // @Router /integration [POST]
 // @Summary Create Integration
 // @Description Create Integration
 // @Tags Integration
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param Integration body auth_service.CreateIntegrationRequest true "CreateIntegrationRequestBody"
 // @Success 201 {object} status_http.Response{data=auth_service.Integration} "Integration data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -49,33 +45,52 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	//resourceId, ok := c.Get("resource_id")
+	//if !ok {
+	//	err = errors.New("error getting resource id")
+	//	h.handleResponse(c, status_http.BadRequest, err.Error())
+	//	return
+	//}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
+	//environmentId, ok := c.Get("environment_id")
+	//if !ok || !util.IsValidUUID(environmentId.(string)) {
+	//	err = errors.New("error getting environment id | not valid")
+	//	h.handleResponse(c, status_http.BadRequest, err)
+	//	return
+	//}
 
-	resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-		context.Background(),
-		&company_service.GetResEnvByResIdEnvIdRequest{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-	integration.ProjectId = resourceEnvironment.GetId()
+	//resource, err := services.CompanyService().ServiceResource().GetSingle(
+	//	c.Request.Context(),
+	//	&pb.GetSingleServiceResourceReq{
+	//		ProjectId:     projectId,
+	//		EnvironmentId: environmentId.(string),
+	//		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+	//	},
+	//)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
+	integration.ProjectId = projectId
 
 	resp, err := services.AuthService().Integration().CreateIntegration(
 		c.Request.Context(),
