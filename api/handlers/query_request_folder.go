@@ -111,7 +111,7 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 	//	}
 	//}
 
-	folder.ResourceId = resource.ResourceId
+	folder.ResourceId = resource.ResourceEnvironmentId
 	folder.ProjectId = projectId
 
 	//uuID, err := uuid.NewRandom()
