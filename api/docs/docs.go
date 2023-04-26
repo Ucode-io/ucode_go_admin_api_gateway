@@ -26331,6 +26331,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "type-from-file",
+                        "name": "type-from-file",
+                        "in": "query"
+                    },
+                    {
                         "type": "file",
                         "description": "file",
                         "name": "file",
