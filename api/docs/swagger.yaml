@@ -441,6 +441,11 @@ definitions:
       user_id:
         type: string
     type: object
+  chat_service.GetBotByBotIdResponse:
+    properties:
+      bot_token:
+        type: string
+    type: object
   chat_service.GetBotTokenListResponse:
     properties:
       bottokenlist:
@@ -2052,6 +2057,13 @@ definitions:
       routes:
         $ref: '#/definitions/structpb.Struct'
       sub_domain:
+        type: string
+    type: object
+  models.UpdateBotToken:
+    properties:
+      bot_id:
+        type: string
+      bot_token:
         type: string
     type: object
   models.UpdateCategoryRequest:
@@ -3740,11 +3752,7 @@ definitions:
       query_id:
         type: string
       request:
-<<<<<<< HEAD
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
-=======
         $ref: '#/definitions/structpb.Struct'
->>>>>>> 8b363505563f5e87d576b9319f2f0db65bbe0152
       resource_id:
         type: string
       response:
@@ -22779,6 +22787,171 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create bot
+      tags:
+      - Chat
+    put:
+      consumes:
+      - application/json
+      description: UpdateBotToken
+      operationId: UpdateBotToken
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      - description: body
+        in: body
+        name: bot_token
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateBotToken'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: UpdateBotToken
+      tags:
+      - Chat
+  /v3/bot/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: DeleteBotToken
+      operationId: DeleteBotToken
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        type: string
+      - description: bot-id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: DeleteBotToken
+      tags:
+      - Chat
+    get:
+      consumes:
+      - application/json
+      description: GetBotTokenByBotID
+      operationId: GetBotTokenByBotID
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: bot-id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/chat_service.GetBotByBotIdResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: GetBotTokenByBotID
       tags:
       - Chat
   /v3/chat:
