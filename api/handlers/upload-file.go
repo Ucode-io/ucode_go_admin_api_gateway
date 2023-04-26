@@ -41,6 +41,7 @@ type Path struct {
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
+// @Param type-from-file query string false "type-from-file"
 // @Router /v1/upload [POST]
 // @Summary Upload
 // @Description Upload
@@ -85,11 +86,16 @@ func (h *Handler) Upload(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	
+
 	splitedContentType := strings.Split(file.File.Header["Content-Type"][0], "/")
 	if splitedContentType[0] != "image" && splitedContentType[0] != "video" {
 		defaultBucket = "docs"
 	}
+	TypeFromFile := c.Query("Type-from-file")
+	if TypeFromFile == "to_telegram_bot" {
+		defaultBucket = "telegram"
+	}
+
 	fmt.Println("content-type", splitedContentType)
 	_, err = minioClient.FPutObject(
 		context.Background(),

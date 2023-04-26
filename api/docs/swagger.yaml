@@ -20126,6 +20126,10 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: type-from-file
+        in: query
+        name: type-from-file
+        type: string
       - description: file
         in: formData
         name: file
