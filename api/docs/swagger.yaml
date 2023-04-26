@@ -1423,6 +1423,11 @@ definitions:
       sub_domain:
         type: string
     type: object
+  models.CreateBotToken:
+    properties:
+      bot_token:
+        type: string
+    type: object
   models.CreateCashboxTransactionRequest:
     properties:
       amount_of_money:
@@ -22749,11 +22754,12 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: botToken
-        in: header
-        name: botToken
+      - description: body
+        in: body
+        name: bot_token
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/models.CreateBotToken'
       produces:
       - application/json
       responses:
