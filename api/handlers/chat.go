@@ -149,16 +149,19 @@ func (h *Handler) GetChatByChatID(c *gin.Context) {
 // @Tags Chat
 // @Accept json
 // @Produce json
-// @Param botToken header string true "botToken"
+// @Param bot_token body models.CreateBotToken true "body"
 // @Success 200 {object} status_http.Response{data=string} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateBot(c *gin.Context) {
 
-	botToken := c.GetHeader("botToken")
-	fmt.Println("bot token: ", botToken)
-	if len(botToken) != 46 {
-		h.handleResponse(c, status_http.BadRequest, "bot token is not true! in getway")
+	var (
+		body models.CreateBotToken
+	)
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		h.log.Error("ShouldBindJSON", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -171,7 +174,7 @@ func (h *Handler) CreateBot(c *gin.Context) {
 	}
 
 	resp, err := h.companyServices.ChatService().Chat().CreateBot(c.Request.Context(), &chat_service.CreateBotRequest{
-		BotToken:      botToken,
+		BotToken:      body.BotToken,
 		EnvironmentId: EnvironmentId,
 	})
 

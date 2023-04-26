@@ -30996,11 +30996,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "botToken",
-                        "name": "botToken",
-                        "in": "header",
-                        "required": true
+                        "description": "body",
+                        "name": "bot_token",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateBotToken"
+                        }
                     }
                 ],
                 "responses": {
@@ -35449,6 +35451,14 @@ const docTemplate = `{
                     "$ref": "#/definitions/structpb.Struct"
                 },
                 "sub_domain": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateBotToken": {
+            "type": "object",
+            "properties": {
+                "bot_token": {
                     "type": "string"
                 }
             }

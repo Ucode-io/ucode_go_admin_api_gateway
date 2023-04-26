@@ -38,6 +38,7 @@ type SessionServiceClient interface {
 	UpdateSessionsByRoleId(ctx context.Context, in *UpdateSessionByRoleIdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	MultiCompanyLogin(ctx context.Context, in *MultiCompanyLoginRequest, opts ...grpc.CallOption) (*MultiCompanyLoginResponse, error)
 	V2MultiCompanyLogin(ctx context.Context, in *V2MultiCompanyLoginReq, opts ...grpc.CallOption) (*V2MultiCompanyLoginRes, error)
+	V2MultiCompanyOneLogin(ctx context.Context, in *V2MultiCompanyLoginReq, opts ...grpc.CallOption) (*V2MultiCompanyOneLoginRes, error)
 }
 
 type sessionServiceClient struct {
@@ -183,6 +184,15 @@ func (c *sessionServiceClient) V2MultiCompanyLogin(ctx context.Context, in *V2Mu
 	return out, nil
 }
 
+func (c *sessionServiceClient) V2MultiCompanyOneLogin(ctx context.Context, in *V2MultiCompanyLoginReq, opts ...grpc.CallOption) (*V2MultiCompanyOneLoginRes, error) {
+	out := new(V2MultiCompanyOneLoginRes)
+	err := c.cc.Invoke(ctx, "/auth_service.SessionService/V2MultiCompanyOneLogin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SessionServiceServer is the server API for SessionService service.
 // All implementations must embed UnimplementedSessionServiceServer
 // for forward compatibility
@@ -202,6 +212,7 @@ type SessionServiceServer interface {
 	UpdateSessionsByRoleId(context.Context, *UpdateSessionByRoleIdRequest) (*emptypb.Empty, error)
 	MultiCompanyLogin(context.Context, *MultiCompanyLoginRequest) (*MultiCompanyLoginResponse, error)
 	V2MultiCompanyLogin(context.Context, *V2MultiCompanyLoginReq) (*V2MultiCompanyLoginRes, error)
+	V2MultiCompanyOneLogin(context.Context, *V2MultiCompanyLoginReq) (*V2MultiCompanyOneLoginRes, error)
 	mustEmbedUnimplementedSessionServiceServer()
 }
 
@@ -253,6 +264,9 @@ func (UnimplementedSessionServiceServer) MultiCompanyLogin(context.Context, *Mul
 }
 func (UnimplementedSessionServiceServer) V2MultiCompanyLogin(context.Context, *V2MultiCompanyLoginReq) (*V2MultiCompanyLoginRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2MultiCompanyLogin not implemented")
+}
+func (UnimplementedSessionServiceServer) V2MultiCompanyOneLogin(context.Context, *V2MultiCompanyLoginReq) (*V2MultiCompanyOneLoginRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method V2MultiCompanyOneLogin not implemented")
 }
 func (UnimplementedSessionServiceServer) mustEmbedUnimplementedSessionServiceServer() {}
 
@@ -537,6 +551,24 @@ func _SessionService_V2MultiCompanyLogin_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SessionService_V2MultiCompanyOneLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(V2MultiCompanyLoginReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).V2MultiCompanyOneLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.SessionService/V2MultiCompanyOneLogin",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).V2MultiCompanyOneLogin(ctx, req.(*V2MultiCompanyLoginReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SessionService_ServiceDesc is the grpc.ServiceDesc for SessionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -603,6 +635,10 @@ var SessionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "V2MultiCompanyLogin",
 			Handler:    _SessionService_V2MultiCompanyLogin_Handler,
+		},
+		{
+			MethodName: "V2MultiCompanyOneLogin",
+			Handler:    _SessionService_V2MultiCompanyOneLogin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
