@@ -16,11 +16,10 @@ service ChatService {
 
     rpc CreateBot (CreateBotRequest) returns (CreateBotResponse) {}
     rpc UpdateBotStatus(UpdateBotStatusRequest) returns (google.protobuf.Empty) {}
-    rpc UpdateBotToken(UpdateBotTokenRequest) returns (google.protobuf.Empty) {}
     rpc GetBotTokenList (google.protobuf.Empty) returns (GetBotTokenListResponse) {}
     rpc GetBotTokenByBotId (GetBotByBotIdRequest) returns (GetBotByBotIdResponse) {}
     rpc GetBotIDByChatId (GetBotIDByChatIDRequest) returns (GetBotIDByChatIDResponse) {}
-    rpc DeleteBotToken(DeleteBotTokenRequest) returns (google.protobuf.Empty) {}
+    rpc DeleteBotToken(UpdateBotStatusRequest) returns (google.protobuf.Empty) {}
 }
 
 message Bot{
@@ -41,18 +40,9 @@ message CreateBotResponse{
     string bot_id = 1;
 }
 
-message DeleteBotTokenRequest{
-    string bot_id = 1;
-}
-
 message UpdateBotStatusRequest{
     string bot_token = 1;
     string status = 2;
-}
-
-message UpdateBotTokenRequest{
-    string bot_id = 1;
-    string bot_token = 2;
 }
 
 message GetBotByBotIdRequest{
