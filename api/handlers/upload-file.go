@@ -85,6 +85,7 @@ func (h *Handler) Upload(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+	
 	splitedContentType := strings.Split(file.File.Header["Content-Type"][0], "/")
 	if splitedContentType[0] != "image" && splitedContentType[0] != "video" {
 		defaultBucket = "docs"

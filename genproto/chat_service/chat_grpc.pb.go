@@ -32,11 +32,10 @@ type ChatServiceClient interface {
 	UpdateChatMessage(ctx context.Context, in *UpdateChatMessageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CreateBot(ctx context.Context, in *CreateBotRequest, opts ...grpc.CallOption) (*CreateBotResponse, error)
 	UpdateBotStatus(ctx context.Context, in *UpdateBotStatusRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	UpdateBotToken(ctx context.Context, in *UpdateBotTokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetBotTokenList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetBotTokenListResponse, error)
 	GetBotTokenByBotId(ctx context.Context, in *GetBotByBotIdRequest, opts ...grpc.CallOption) (*GetBotByBotIdResponse, error)
 	GetBotIDByChatId(ctx context.Context, in *GetBotIDByChatIDRequest, opts ...grpc.CallOption) (*GetBotIDByChatIDResponse, error)
-	DeleteBotToken(ctx context.Context, in *DeleteBotTokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteBotToken(ctx context.Context, in *UpdateBotStatusRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type chatServiceClient struct {
@@ -128,15 +127,6 @@ func (c *chatServiceClient) UpdateBotStatus(ctx context.Context, in *UpdateBotSt
 	return out, nil
 }
 
-func (c *chatServiceClient) UpdateBotToken(ctx context.Context, in *UpdateBotTokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/ChatService/UpdateBotToken", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *chatServiceClient) GetBotTokenList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetBotTokenListResponse, error) {
 	out := new(GetBotTokenListResponse)
 	err := c.cc.Invoke(ctx, "/ChatService/GetBotTokenList", in, out, opts...)
@@ -164,7 +154,7 @@ func (c *chatServiceClient) GetBotIDByChatId(ctx context.Context, in *GetBotIDBy
 	return out, nil
 }
 
-func (c *chatServiceClient) DeleteBotToken(ctx context.Context, in *DeleteBotTokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *chatServiceClient) DeleteBotToken(ctx context.Context, in *UpdateBotStatusRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/ChatService/DeleteBotToken", in, out, opts...)
 	if err != nil {
@@ -186,11 +176,10 @@ type ChatServiceServer interface {
 	UpdateChatMessage(context.Context, *UpdateChatMessageRequest) (*emptypb.Empty, error)
 	CreateBot(context.Context, *CreateBotRequest) (*CreateBotResponse, error)
 	UpdateBotStatus(context.Context, *UpdateBotStatusRequest) (*emptypb.Empty, error)
-	UpdateBotToken(context.Context, *UpdateBotTokenRequest) (*emptypb.Empty, error)
 	GetBotTokenList(context.Context, *emptypb.Empty) (*GetBotTokenListResponse, error)
 	GetBotTokenByBotId(context.Context, *GetBotByBotIdRequest) (*GetBotByBotIdResponse, error)
 	GetBotIDByChatId(context.Context, *GetBotIDByChatIDRequest) (*GetBotIDByChatIDResponse, error)
-	DeleteBotToken(context.Context, *DeleteBotTokenRequest) (*emptypb.Empty, error)
+	DeleteBotToken(context.Context, *UpdateBotStatusRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedChatServiceServer()
 }
 
@@ -225,9 +214,6 @@ func (UnimplementedChatServiceServer) CreateBot(context.Context, *CreateBotReque
 func (UnimplementedChatServiceServer) UpdateBotStatus(context.Context, *UpdateBotStatusRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateBotStatus not implemented")
 }
-func (UnimplementedChatServiceServer) UpdateBotToken(context.Context, *UpdateBotTokenRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateBotToken not implemented")
-}
 func (UnimplementedChatServiceServer) GetBotTokenList(context.Context, *emptypb.Empty) (*GetBotTokenListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBotTokenList not implemented")
 }
@@ -237,7 +223,7 @@ func (UnimplementedChatServiceServer) GetBotTokenByBotId(context.Context, *GetBo
 func (UnimplementedChatServiceServer) GetBotIDByChatId(context.Context, *GetBotIDByChatIDRequest) (*GetBotIDByChatIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBotIDByChatId not implemented")
 }
-func (UnimplementedChatServiceServer) DeleteBotToken(context.Context, *DeleteBotTokenRequest) (*emptypb.Empty, error) {
+func (UnimplementedChatServiceServer) DeleteBotToken(context.Context, *UpdateBotStatusRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteBotToken not implemented")
 }
 func (UnimplementedChatServiceServer) mustEmbedUnimplementedChatServiceServer() {}
@@ -415,24 +401,6 @@ func _ChatService_UpdateBotStatus_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ChatService_UpdateBotToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateBotTokenRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ChatServiceServer).UpdateBotToken(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/ChatService/UpdateBotToken",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServiceServer).UpdateBotToken(ctx, req.(*UpdateBotTokenRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _ChatService_GetBotTokenList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -488,7 +456,7 @@ func _ChatService_GetBotIDByChatId_Handler(srv interface{}, ctx context.Context,
 }
 
 func _ChatService_DeleteBotToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteBotTokenRequest)
+	in := new(UpdateBotStatusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -500,7 +468,7 @@ func _ChatService_DeleteBotToken_Handler(srv interface{}, ctx context.Context, d
 		FullMethod: "/ChatService/DeleteBotToken",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServiceServer).DeleteBotToken(ctx, req.(*DeleteBotTokenRequest))
+		return srv.(ChatServiceServer).DeleteBotToken(ctx, req.(*UpdateBotStatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -547,10 +515,6 @@ var ChatService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateBotStatus",
 			Handler:    _ChatService_UpdateBotStatus_Handler,
-		},
-		{
-			MethodName: "UpdateBotToken",
-			Handler:    _ChatService_UpdateBotToken_Handler,
 		},
 		{
 			MethodName: "GetBotTokenList",
