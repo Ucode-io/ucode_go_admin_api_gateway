@@ -39,17 +39,18 @@ message ResourceEnvironmentV2MultiCompany {
     string description = 10;
 }
 
+message Project2 {
+    string id = 1;
+    string company_id = 2;
+    string name = 3;
+    string domain = 4;
+    string created_at = 5;
+    string updated_at = 6;
+    repeated ResourceEnvironmentV2MultiCompany resource_environments = 7;
+    google.protobuf.Struct client_types = 8;
+}
+
 message Company2 {
-    message Project {
-        string id = 1;
-        string company_id = 2;
-        string name = 3;
-        string domain = 4;
-        string created_at = 5;
-        string updated_at = 6;
-        repeated ResourceEnvironmentV2MultiCompany resource_environments = 7;
-        repeated ClientType client_types = 8;
-    }
     string id = 1;
     string name = 2;
     string logo = 3;
@@ -57,7 +58,7 @@ message Company2 {
     string created_at = 5;
     string updated_at = 6;
     string owner_id = 7;
-    repeated Project projects = 8;
+    repeated Project2 projects = 8;
 }
 
 message V2MultiCompanyOneLoginRes {
