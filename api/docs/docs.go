@@ -7145,7 +7145,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.EmptyProto"
+                                            "$ref": "#/definitions/company_service.ReconnectResourceRes"
                                         }
                                     }
                                 }
@@ -30809,6 +30809,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
                         "in": "query"
@@ -33959,6 +33966,9 @@ const docTemplate = `{
                 "message": {
                     "$ref": "#/definitions/chat_service.UserMessage"
                 },
+                "message_type": {
+                    "type": "string"
+                },
                 "platform_type": {
                     "type": "string"
                 },
@@ -34042,6 +34052,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "message_id": {
+                    "type": "string"
+                },
+                "message_type": {
                     "type": "string"
                 },
                 "platform_type": {
@@ -34576,6 +34589,28 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
+                }
+            }
+        },
+        "company_service.ReconnectResourceRes": {
+            "type": "object",
+            "properties": {
+                "reconnect_status": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.ReconnectResourceRes_ReconnectStatus"
+                    }
+                }
+            }
+        },
+        "company_service.ReconnectResourceRes_ReconnectStatus": {
+            "type": "object",
+            "properties": {
+                "service_type": {
+                    "$ref": "#/definitions/company_service.ServiceType"
+                },
+                "status": {
+                    "type": "boolean"
                 }
             }
         },
