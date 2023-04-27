@@ -9,7 +9,6 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // CreateChat godoc
@@ -199,7 +198,7 @@ func (h *Handler) CreateBot(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetBotTokenList(c *gin.Context) {
 
-	resp, err := h.companyServices.ChatService().Chat().GetBotTokenList(c.Request.Context(), &emptypb.Empty{})
+	resp, err := h.companyServices.ChatService().Chat().GetBotTokenList(c.Request.Context(), &chat_service.GetBotTokenListRequest{})
 
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
