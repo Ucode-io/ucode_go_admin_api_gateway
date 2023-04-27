@@ -17,7 +17,7 @@ service ChatService {
     rpc CreateBot (CreateBotRequest) returns (CreateBotResponse) {}
     rpc UpdateBotStatus(UpdateBotStatusRequest) returns (google.protobuf.Empty) {}
     rpc UpdateBotToken(UpdateBotTokenRequest) returns (google.protobuf.Empty) {}
-    rpc GetBotTokenList (google.protobuf.Empty) returns (GetBotTokenListResponse) {}
+    rpc GetBotTokenList (GetBotTokenListRequest) returns (GetBotTokenListResponse) {}
     rpc GetBotTokenByBotId (GetBotByBotIdRequest) returns (GetBotByBotIdResponse) {}
     rpc GetBotIDByChatId (GetBotIDByChatIDRequest) returns (GetBotIDByChatIDResponse) {}
     rpc DeleteBotToken(DeleteBotTokenRequest) returns (google.protobuf.Empty) {}
@@ -63,6 +63,10 @@ message GetBotTokenListResponse{
     repeated Bot bottokenlist = 1;
 }
 
+message GetBotTokenListRequest{
+    string environment_id = 1;
+}
+
 message GetBotByBotIdResponse{
     string bot_token =1;
 }
@@ -101,6 +105,7 @@ message UserMessage {
     bool check=6;
     string message_id=7;
     string bot_id = 8;
+    string message_type = 9;
 }
 
 message GetChatByChatIdRequest {
@@ -150,6 +155,8 @@ message ChatWithLastMessageData {
     string platform_type = 7;
     string user_id = 8;
     string bot_id=9;
+    string message_type = 10;
+
 }
 
 message GetChatListResponse {

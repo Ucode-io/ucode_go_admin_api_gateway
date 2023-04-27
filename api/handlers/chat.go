@@ -9,7 +9,6 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // CreateChat godoc
@@ -189,6 +188,7 @@ func (h *Handler) CreateBot(c *gin.Context) {
 // GetBotTokenlist godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID GetBotTokenlist
 // @Router /v3/bot [GET]
 // @Summary GetBotTokenlist
@@ -201,8 +201,11 @@ func (h *Handler) CreateBot(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetBotTokenList(c *gin.Context) {
+	EnvironmentId := c.GetHeader("Environment-Id")
 
-	resp, err := h.companyServices.ChatService().Chat().GetBotTokenList(c.Request.Context(), &emptypb.Empty{})
+	resp, err := h.companyServices.ChatService().Chat().GetBotTokenList(c.Request.Context(), &chat_service.GetBotTokenListRequest{
+		EnvironmentId: EnvironmentId,
+	})
 
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())

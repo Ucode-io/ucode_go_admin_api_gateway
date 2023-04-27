@@ -434,6 +434,8 @@ definitions:
         type: string
       message:
         $ref: '#/definitions/chat_service.UserMessage'
+      message_type:
+        type: string
       platform_type:
         type: string
       sender_name:
@@ -488,6 +490,8 @@ definitions:
       message:
         type: string
       message_id:
+        type: string
+      message_type:
         type: string
       platform_type:
         type: string
@@ -835,6 +839,20 @@ definitions:
         type: string
       project_id:
         type: string
+    type: object
+  company_service.ReconnectResourceRes:
+    properties:
+      reconnect_status:
+        items:
+          $ref: '#/definitions/company_service.ReconnectResourceRes_ReconnectStatus'
+        type: array
+    type: object
+  company_service.ReconnectResourceRes_ReconnectStatus:
+    properties:
+      service_type:
+        $ref: '#/definitions/company_service.ServiceType'
+      status:
+        type: boolean
     type: object
   company_service.RemoveResourceRequest:
     properties:
@@ -9318,7 +9336,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.EmptyProto'
+                  $ref: '#/definitions/company_service.ReconnectResourceRes'
               type: object
         "400":
           description: Bad Request
@@ -22703,6 +22721,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
         type: string
       - description: project-id
         in: query
