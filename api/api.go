@@ -76,6 +76,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/object/:table_slug", h.CreateObject)
 		v1.GET("/object/:table_slug/:object_id", h.GetSingle)
 		v1.POST("/object/get-list/:table_slug", h.GetList)
+		v1.GET("/object-slim/:table_slug/:object_id", h.GetSingleSlim)
+		v1.POST("/object-slim/get-list/:table_slug", h.GetListSlim)
 		v1.PUT("/object/:table_slug", h.UpdateObject)
 		v1.DELETE("/object/:table_slug/:object_id", h.DeleteObject)
 		v1.POST("/object/object-details/:table_slug", h.GetObjectDetails)
