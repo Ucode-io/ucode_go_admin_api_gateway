@@ -95,7 +95,8 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 	}
 
 	folder.EnvironmentId = environmentId.(string)
-	folder.ProjectId = resource.ResourceEnvironmentId
+	folder.ProjectId = projectId
+	folder.ResourceId = resource.ResourceEnvironmentId
 	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
@@ -238,7 +239,8 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleFolderReq{
 			Id:            folderId,
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     projectId,
+			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -348,7 +350,8 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	folder.ProjectId = resource.ResourceEnvironmentId
+	folder.ProjectId = projectId
+	folder.ResourceId = resource.ResourceEnvironmentId
 
 	res, err := services.WebPageService().Folder().UpdateFolder(
 		context.Background(),
@@ -465,7 +468,8 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteFolderReq{
 			Id:            folderId,
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     projectId,
+			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -573,7 +577,8 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 	res, err := services.WebPageService().Folder().GetListFolder(
 		context.Background(),
 		&tmp.GetListFolderReq{
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     projectId,
+			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -688,7 +693,8 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	webpage.ProjectId = resource.ResourceEnvironmentId
+	webpage.ProjectId = projectId
+	webpage.ResourceId = resource.ResourceEnvironmentId
 
 	log.Println("---CreateWebPageV2->5---")
 	uuID, err := uuid.NewRandom()
@@ -830,7 +836,8 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleWebPageReq{
 			Id:            webPageId,
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     projectId,
+			ResourceId:    resource.ResourceEnvironmentId,
 			VersionId:     versionId,
 			CommitId:      commitId,
 			EnvironmentId: environmentId.(string),
@@ -968,7 +975,8 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	webPage.ProjectId = resource.ResourceEnvironmentId
+	webPage.ProjectId = projectId
+	webPage.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -1115,7 +1123,8 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteWebPageReq{
 			Id:            webPageId,
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     projectId,
+			ResourceId:    resource.ResourceEnvironmentId,
 			VersionId:     uuid.NewString(),
 			EnvironmentId: environmentId.(string),
 		},
@@ -1238,7 +1247,8 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 	res, err := services.WebPageService().WebPage().GetListWebPage(
 		context.Background(),
 		&tmp.GetListWebPageReq{
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     projectId,
+			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 			FolderId:      c.DefaultQuery("folder-id", ""),
 			Limit:         int32(limit),
@@ -1333,7 +1343,8 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 		context.Background(),
 		&tmp.GetWebPageHistoryReq{
 			Id:            id,
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     projectId,
+			ResourceId:    resource.ResourceEnvironmentId,
 			Offset:        int64(offset),
 			Limit:         int64(limit),
 			EnvironmentId: environmentId.(string),
@@ -1489,7 +1500,9 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 		return
 	}
 	body.EnvironmentId = environmentId.(string)
-	body.ProjectId = resource.ResourceEnvironmentId
+	body.ProjectId = projectId
+	body.ResourceId = resource.ResourceEnvironmentId
+
 	if !util.IsValidUUID(body.GetEnvironmentId()) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
@@ -1597,7 +1610,8 @@ func (h *Handler) InsertManyVersionForWebPageService(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
 	}
-	body.ProjectId = resource.ResourceEnvironmentId
+	body.ProjectId = projectId
+	body.ResourceId = resource.ResourceEnvironmentId
 
 	// _, commitId, err := h.CreateAutoCommitForAdminChange(c, environmentID.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())
 	// if err != nil {
