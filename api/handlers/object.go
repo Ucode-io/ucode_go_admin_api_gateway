@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -250,12 +252,14 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		return
 	}
 
+	start := time.Now()
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+	fmt.Println("TIME_MANAGEMENT_LOGGING:::GetService", time.Since(start))
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
@@ -282,7 +286,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-
+	start = time.Now()
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -295,6 +299,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("TIME_MANAGEMENT_LOGGING:::SERVICE_RESOURCE:::GetSingle", time.Since(start))
 
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
@@ -308,7 +313,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
-
+	start = time.Now()
 	resp, err := services.BuilderService().ObjectBuilder().GetSingle(
 		context.Background(),
 		&obs.CommonMessage{
@@ -321,6 +326,7 @@ func (h *Handler) GetSingle(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("TIME_MANAGEMENT_LOGGING:::OBJECT_BUILDER:::GetSingle", time.Since(start))
 
 	h.handleResponse(c, status_http.OK, resp)
 }
