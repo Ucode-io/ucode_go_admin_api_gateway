@@ -41,7 +41,7 @@ type Path struct {
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Param type-from-file query string false "type-from-file"
+// @Param from-chat query string false "from-chat"
 // @Router /v1/upload [POST]
 // @Summary Upload
 // @Description Upload
@@ -91,8 +91,8 @@ func (h *Handler) Upload(c *gin.Context) {
 	if splitedContentType[0] != "image" && splitedContentType[0] != "video" {
 		defaultBucket = "docs"
 	}
-	TypeFromFile := c.Query("Type-from-file")
-	if TypeFromFile == "to_telegram_bot" {
+
+	if c.Query("from-chat") == "to_telegram_bot" {
 		defaultBucket = "telegram"
 	}
 
