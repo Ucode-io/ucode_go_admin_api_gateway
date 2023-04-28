@@ -33975,6 +33975,9 @@ const docTemplate = `{
                 "sender_name": {
                     "type": "string"
                 },
+                "userProfilePhotoUrl": {
+                    "type": "string"
+                },
                 "user_id": {
                     "type": "string"
                 }
@@ -34015,6 +34018,9 @@ const docTemplate = `{
                     }
                 },
                 "platform_type": {
+                    "type": "string"
+                },
+                "userProfilePhotoUrl": {
                     "type": "string"
                 },
                 "user_id": {
