@@ -32,7 +32,7 @@ func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNode
 }
 
 func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data interface{}) {
-	// switch code := status.Code; {
+	switch code := status.Code; {
 	// case code < 300:
 	// 	h.log.Info(
 	// 		"response",
@@ -41,23 +41,23 @@ func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data
 	// 		logger.Any("description", status.Description),
 	// 		// logger.Any("data", data),
 	// 	)
-	// case code < 400:
-	// 	h.log.Warn(
-	// 		"response",
-	// 		logger.Int("code", status.Code),
-	// 		logger.String("status", status.Status),
-	// 		logger.Any("description", status.Description),
-	// 		logger.Any("data", data),
-	// 	)
-	// default:
-	// 	h.log.Error(
-	// 		"response",
-	// 		logger.Int("code", status.Code),
-	// 		logger.String("status", status.Status),
-	// 		logger.Any("description", status.Description),
-	// 		logger.Any("data", data),
-	// 	)
-	// }
+	case code < 400:
+		h.log.Warn(
+			"response",
+			logger.Int("code", status.Code),
+			logger.String("status", status.Status),
+			logger.Any("description", status.Description),
+			logger.Any("data", data),
+		)
+	default:
+		h.log.Error(
+			"response",
+			logger.Int("code", status.Code),
+			logger.String("status", status.Status),
+			logger.Any("description", status.Description),
+			logger.Any("data", data),
+		)
+	}
 
 	c.JSON(status.Code, status_http.Response{
 		Status:      status.Status,
