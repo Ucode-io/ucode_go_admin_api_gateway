@@ -1150,6 +1150,7 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param folder-id query string true "folder-id"
+// @Param app-id query string true "app-id"
 // @Param limit query string false "limit"
 // @Param offset query string false "offset"
 // @Success 200 {object} status_http.Response{data=tmp.GetListWebPageRes} "GetListWebPageRes"
@@ -1251,6 +1252,7 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 			FolderId:      c.DefaultQuery("folder-id", ""),
+			AppId:         c.DefaultQuery("app-id", ""),
 			Limit:         int32(limit),
 			Offset:        int32(offset),
 		},
