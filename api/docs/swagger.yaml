@@ -20148,9 +20148,9 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: type-from-file
+      - description: from-chat
         in: query
-        name: type-from-file
+        name: from-chat
         type: string
       - description: file
         in: formData
