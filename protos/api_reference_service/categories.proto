@@ -21,6 +21,7 @@ message CreateCategoryRequest {
     string project_id = 4;
     string commit_id = 5;
     string version_id = 6;
+    string resource_id = 7;
 }
 
 message Category {
@@ -31,12 +32,14 @@ message Category {
     string project_id = 5;
     string commit_id = 6;
     string version_id = 7;
+    string resource_id = 8;
 }
 
 message GetCategoryRequest {
     string guid = 1;
     string commit_id = 2;
     string version_id = 3;
+    string resource_id = 4;
 }
 
 message GetListCategoryRequest {
@@ -45,6 +48,7 @@ message GetListCategoryRequest {
     string project_id = 3;
     string commit_id = 4;
     string version_id = 5;
+    string resource_id = 6;
 }
 
 message GetListCategoryResponse {
@@ -56,4 +60,5 @@ message DeleteCategoryRequest {
     string guid = 1;
     string commit_id = 2;
     string version_id = 3;
+    string resource_id = 4;
 }
