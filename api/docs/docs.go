@@ -26348,8 +26348,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "type-from-file",
-                        "name": "type-from-file",
+                        "description": "from-chat",
+                        "name": "from-chat",
                         "in": "query"
                     },
                     {
