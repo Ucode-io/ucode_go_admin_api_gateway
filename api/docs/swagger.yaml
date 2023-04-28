@@ -442,6 +442,8 @@ definitions:
         type: string
       user_id:
         type: string
+      userProfilePhotoUrl:
+        type: string
     type: object
   chat_service.GetBotByBotIdResponse:
     properties:
@@ -468,6 +470,8 @@ definitions:
       platform_type:
         type: string
       user_id:
+        type: string
+      userProfilePhotoUrl:
         type: string
     type: object
   chat_service.GetChatListResponse:

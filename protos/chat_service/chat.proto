@@ -12,6 +12,7 @@ service ChatService {
     rpc GetChatList (GetChatListRequest) returns (GetChatListResponse) {}
     rpc CreateMessage(CreateMessageRequest) returns (google.protobuf.Empty) {}
     rpc UpdateChat(UpdateChatRequest) returns (google.protobuf.Empty) {}
+    rpc UpdateChatProfielPhotoUrl(UpdateProfilePhotoUrlRequest) returns (google.protobuf.Empty) {}
     rpc UpdateChatMessage(UpdateChatMessageRequest) returns (google.protobuf.Empty) {}
 
     rpc CreateBot (CreateBotRequest) returns (CreateBotResponse) {}
@@ -62,7 +63,6 @@ message GetBotByBotIdRequest{
 message GetBotTokenListResponse{
     repeated Bot bottokenlist = 1;
 }
-
 message GetBotTokenListRequest{
     string environment_id = 1;
 }
@@ -90,6 +90,7 @@ message CreateChatRequest{
     string user_id = 1;
     string bot_id = 2;
     Chat chat = 3;
+    string userProfilePhotoUrl=4;
 }
 
 message CreateChatResponse{
@@ -121,6 +122,11 @@ message GetBotIDByChatIDRequest {
     string chat_id = 1;
 }
 
+message UpdateProfilePhotoUrlRequest {
+    string user_id = 1;
+    string userProfilePhotoUrl=2;
+}
+
 message GetBotIDByChatIDResponse{
     string bot_id = 1;
 }
@@ -132,12 +138,15 @@ message GetChatByChatIdResponse {
     string platform_type = 3;
     string user_id = 4;
     string bot_id = 5;
+    string userProfilePhotoUrl=6;
+
 }
 
 message GetChatByUserIdResponse {
     string user_id = 1;
     string chat_id = 2;
     string bot_id = 3;
+    string userProfilePhotoUrl=4;
 }
 
 message GetChatListRequest {
@@ -156,6 +165,8 @@ message ChatWithLastMessageData {
     string user_id = 8;
     string bot_id=9;
     string message_type = 10;
+    string userProfilePhotoUrl=11;
+
 
 }
 

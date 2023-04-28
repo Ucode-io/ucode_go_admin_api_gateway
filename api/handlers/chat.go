@@ -124,6 +124,7 @@ func (h *Handler) GetChatByChatID(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "id not found")
 		return
 	}
+	
 	idstr := c.Param("id")
 	resp, err := h.companyServices.ChatService().Chat().GetChatByChatId(c.Request.Context(), &chat_service.GetChatByChatIdRequest{
 		ChatId: idstr,

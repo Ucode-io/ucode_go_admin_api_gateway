@@ -29,6 +29,7 @@ type ChatServiceClient interface {
 	GetChatList(ctx context.Context, in *GetChatListRequest, opts ...grpc.CallOption) (*GetChatListResponse, error)
 	CreateMessage(ctx context.Context, in *CreateMessageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateChat(ctx context.Context, in *UpdateChatRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateChatProfielPhotoUrl(ctx context.Context, in *UpdateProfilePhotoUrlRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateChatMessage(ctx context.Context, in *UpdateChatMessageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CreateBot(ctx context.Context, in *CreateBotRequest, opts ...grpc.CallOption) (*CreateBotResponse, error)
 	UpdateBotStatus(ctx context.Context, in *UpdateBotStatusRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -95,6 +96,15 @@ func (c *chatServiceClient) CreateMessage(ctx context.Context, in *CreateMessage
 func (c *chatServiceClient) UpdateChat(ctx context.Context, in *UpdateChatRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/ChatService/UpdateChat", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatServiceClient) UpdateChatProfielPhotoUrl(ctx context.Context, in *UpdateProfilePhotoUrlRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/ChatService/UpdateChatProfielPhotoUrl", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -183,6 +193,7 @@ type ChatServiceServer interface {
 	GetChatList(context.Context, *GetChatListRequest) (*GetChatListResponse, error)
 	CreateMessage(context.Context, *CreateMessageRequest) (*emptypb.Empty, error)
 	UpdateChat(context.Context, *UpdateChatRequest) (*emptypb.Empty, error)
+	UpdateChatProfielPhotoUrl(context.Context, *UpdateProfilePhotoUrlRequest) (*emptypb.Empty, error)
 	UpdateChatMessage(context.Context, *UpdateChatMessageRequest) (*emptypb.Empty, error)
 	CreateBot(context.Context, *CreateBotRequest) (*CreateBotResponse, error)
 	UpdateBotStatus(context.Context, *UpdateBotStatusRequest) (*emptypb.Empty, error)
@@ -215,6 +226,9 @@ func (UnimplementedChatServiceServer) CreateMessage(context.Context, *CreateMess
 }
 func (UnimplementedChatServiceServer) UpdateChat(context.Context, *UpdateChatRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateChat not implemented")
+}
+func (UnimplementedChatServiceServer) UpdateChatProfielPhotoUrl(context.Context, *UpdateProfilePhotoUrlRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateChatProfielPhotoUrl not implemented")
 }
 func (UnimplementedChatServiceServer) UpdateChatMessage(context.Context, *UpdateChatMessageRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateChatMessage not implemented")
@@ -357,6 +371,24 @@ func _ChatService_UpdateChat_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ChatServiceServer).UpdateChat(ctx, req.(*UpdateChatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChatService_UpdateChatProfielPhotoUrl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateProfilePhotoUrlRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServiceServer).UpdateChatProfielPhotoUrl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ChatService/UpdateChatProfielPhotoUrl",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServiceServer).UpdateChatProfielPhotoUrl(ctx, req.(*UpdateProfilePhotoUrlRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -535,6 +567,10 @@ var ChatService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateChat",
 			Handler:    _ChatService_UpdateChat_Handler,
+		},
+		{
+			MethodName: "UpdateChatProfielPhotoUrl",
+			Handler:    _ChatService_UpdateChatProfielPhotoUrl_Handler,
 		},
 		{
 			MethodName: "UpdateChatMessage",
