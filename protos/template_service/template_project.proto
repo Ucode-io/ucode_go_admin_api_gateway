@@ -1,6 +1,6 @@
 syntax="proto3";
 
-package project_service;
+package template_service;
 option go_package="genproto/template_service";
 
 import "google/protobuf/empty.proto";
