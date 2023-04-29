@@ -3,7 +3,6 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -23,7 +22,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			_ = c.AbortWithError(401, errors.New("unauthorized"))
 			return
 		}
-		log.Printf("AUTH OBJECT: %+v", res)
+		// log.Printf("AUTH OBJECT: %+v", res)
 		c.Set("Auth_Admin", res)
 		c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Set("environment_id", c.GetHeader("Environment-Id"))

@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.17.3
-// source: query_project.proto
+// source: template_project.proto
 
-package query_service
+package template_service
 
 import (
 	context "context"
@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProjectServiceClient interface {
 	Register(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	RegisterProjects(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Deregister(ctx context.Context, in *DeregisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Reconnect(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	RegisterMany(ctx context.Context, in *RegisterManyProjectsRequest, opts ...grpc.CallOption) (*RegisterManyProjectsResponse, error)
@@ -40,7 +41,16 @@ func NewProjectServiceClient(cc grpc.ClientConnInterface) ProjectServiceClient {
 
 func (c *projectServiceClient) Register(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/query_service.ProjectService/Register", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/template_service.ProjectService/Register", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) RegisterProjects(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/template_service.ProjectService/RegisterProjects", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +59,7 @@ func (c *projectServiceClient) Register(ctx context.Context, in *RegisterProject
 
 func (c *projectServiceClient) Deregister(ctx context.Context, in *DeregisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/query_service.ProjectService/Deregister", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/template_service.ProjectService/Deregister", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +68,7 @@ func (c *projectServiceClient) Deregister(ctx context.Context, in *DeregisterPro
 
 func (c *projectServiceClient) Reconnect(ctx context.Context, in *RegisterProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/query_service.ProjectService/Reconnect", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/template_service.ProjectService/Reconnect", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +77,7 @@ func (c *projectServiceClient) Reconnect(ctx context.Context, in *RegisterProjec
 
 func (c *projectServiceClient) RegisterMany(ctx context.Context, in *RegisterManyProjectsRequest, opts ...grpc.CallOption) (*RegisterManyProjectsResponse, error) {
 	out := new(RegisterManyProjectsResponse)
-	err := c.cc.Invoke(ctx, "/query_service.ProjectService/RegisterMany", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/template_service.ProjectService/RegisterMany", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +86,7 @@ func (c *projectServiceClient) RegisterMany(ctx context.Context, in *RegisterMan
 
 func (c *projectServiceClient) DeregisterMany(ctx context.Context, in *DeregisterManyProjectsRequest, opts ...grpc.CallOption) (*DeregisterManyProjectsResponse, error) {
 	out := new(DeregisterManyProjectsResponse)
-	err := c.cc.Invoke(ctx, "/query_service.ProjectService/DeregisterMany", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/template_service.ProjectService/DeregisterMany", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,6 +98,7 @@ func (c *projectServiceClient) DeregisterMany(ctx context.Context, in *Deregiste
 // for forward compatibility
 type ProjectServiceServer interface {
 	Register(context.Context, *RegisterProjectRequest) (*emptypb.Empty, error)
+	RegisterProjects(context.Context, *RegisterProjectRequest) (*emptypb.Empty, error)
 	Deregister(context.Context, *DeregisterProjectRequest) (*emptypb.Empty, error)
 	Reconnect(context.Context, *RegisterProjectRequest) (*emptypb.Empty, error)
 	RegisterMany(context.Context, *RegisterManyProjectsRequest) (*RegisterManyProjectsResponse, error)
@@ -101,6 +112,9 @@ type UnimplementedProjectServiceServer struct {
 
 func (UnimplementedProjectServiceServer) Register(context.Context, *RegisterProjectRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedProjectServiceServer) RegisterProjects(context.Context, *RegisterProjectRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterProjects not implemented")
 }
 func (UnimplementedProjectServiceServer) Deregister(context.Context, *DeregisterProjectRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deregister not implemented")
@@ -137,10 +151,28 @@ func _ProjectService_Register_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/query_service.ProjectService/Register",
+		FullMethod: "/template_service.ProjectService/Register",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProjectServiceServer).Register(ctx, req.(*RegisterProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_RegisterProjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).RegisterProjects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/template_service.ProjectService/RegisterProjects",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).RegisterProjects(ctx, req.(*RegisterProjectRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -155,7 +187,7 @@ func _ProjectService_Deregister_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/query_service.ProjectService/Deregister",
+		FullMethod: "/template_service.ProjectService/Deregister",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProjectServiceServer).Deregister(ctx, req.(*DeregisterProjectRequest))
@@ -173,7 +205,7 @@ func _ProjectService_Reconnect_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/query_service.ProjectService/Reconnect",
+		FullMethod: "/template_service.ProjectService/Reconnect",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProjectServiceServer).Reconnect(ctx, req.(*RegisterProjectRequest))
@@ -191,7 +223,7 @@ func _ProjectService_RegisterMany_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/query_service.ProjectService/RegisterMany",
+		FullMethod: "/template_service.ProjectService/RegisterMany",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProjectServiceServer).RegisterMany(ctx, req.(*RegisterManyProjectsRequest))
@@ -209,7 +241,7 @@ func _ProjectService_DeregisterMany_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/query_service.ProjectService/DeregisterMany",
+		FullMethod: "/template_service.ProjectService/DeregisterMany",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProjectServiceServer).DeregisterMany(ctx, req.(*DeregisterManyProjectsRequest))
@@ -221,12 +253,16 @@ func _ProjectService_DeregisterMany_Handler(srv interface{}, ctx context.Context
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ProjectService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "query_service.ProjectService",
+	ServiceName: "template_service.ProjectService",
 	HandlerType: (*ProjectServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Register",
 			Handler:    _ProjectService_Register_Handler,
+		},
+		{
+			MethodName: "RegisterProjects",
+			Handler:    _ProjectService_RegisterProjects_Handler,
 		},
 		{
 			MethodName: "Deregister",
@@ -246,5 +282,5 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "query_project.proto",
+	Metadata: "template_project.proto",
 }

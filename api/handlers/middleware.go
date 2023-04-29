@@ -120,7 +120,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			c.Abort()
 		}
-		fmt.Println("res::::", res)
+		// fmt.Println("res::::", res)
 		c.Set("Auth", res)
 		c.Set("namespace", h.cfg.UcodeNamespace)
 
