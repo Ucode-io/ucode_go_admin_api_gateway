@@ -124,6 +124,7 @@ func (h *Handler) GetChatByChatID(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, "id not found")
 		return
 	}
+	
 	idstr := c.Param("id")
 	resp, err := h.companyServices.ChatService().Chat().GetChatByChatId(c.Request.Context(), &chat_service.GetChatByChatIdRequest{
 		ChatId: idstr,
@@ -148,16 +149,19 @@ func (h *Handler) GetChatByChatID(c *gin.Context) {
 // @Tags Chat
 // @Accept json
 // @Produce json
-// @Param botToken header string true "botToken"
+// @Param bot_token body models.CreateBotToken true "body"
 // @Success 200 {object} status_http.Response{data=string} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateBot(c *gin.Context) {
 
-	botToken := c.GetHeader("botToken")
-	fmt.Println("bot token: ", botToken)
-	if len(botToken) != 46 {
-		h.handleResponse(c, status_http.BadRequest, "bot token is not true! in getway")
+	var (
+		body models.CreateBotToken
+	)
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		h.log.Error("ShouldBindJSON", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -170,7 +174,7 @@ func (h *Handler) CreateBot(c *gin.Context) {
 	}
 
 	resp, err := h.companyServices.ChatService().Chat().CreateBot(c.Request.Context(), &chat_service.CreateBotRequest{
-		BotToken:      botToken,
+		BotToken:      body.BotToken,
 		EnvironmentId: EnvironmentId,
 	})
 
@@ -185,6 +189,7 @@ func (h *Handler) CreateBot(c *gin.Context) {
 // GetBotTokenlist godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @ID GetBotTokenlist
 // @Router /v3/bot [GET]
 // @Summary GetBotTokenlist
@@ -197,42 +202,10 @@ func (h *Handler) CreateBot(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetBotTokenList(c *gin.Context) {
+	EnvironmentId := c.GetHeader("Environment-Id")
 
-	resp, err := h.companyServices.ChatService().Chat().GetBotTokenList(c.Request.Context(), &chat_service.GetBotTokenListRequest{})
-
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
-	h.handleResponse(c, status_http.OK, resp)
-}
-
-/*
-// GetChatByChatID godoc
-// @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
-// @ID GetChatByChatID
-// @Router /v3/chat/{id} [GET]
-// @Summary GetChatByChatID
-// @Description GetChatByChatID
-// @Tags Chat
-// @Accept json
-// @Produce json
-// @Param id path string true "chat-id"
-// @Success 200 {object} status_http.Response{data=chat_service.GetChatByChatIdResponse} "Response body"
-// @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) GetChatByChatID(c *gin.Context) {
-
-	if !util.IsValidUUID(c.Param("id")) {
-		h.handleResponse(c, status_http.BadRequest, "id not found")
-		return
-	}
-	idstr := c.Param("id")
-	resp, err := h.companyServices.ChatService().Chat().GetChatByChatId(c.Request.Context(), &chat_service.GetChatByChatIdRequest{
-		ChatId: idstr,
+	resp, err := h.companyServices.ChatService().Chat().GetBotTokenList(c.Request.Context(), &chat_service.GetBotTokenListRequest{
+		EnvironmentId: EnvironmentId,
 	})
 
 	if err != nil {
@@ -242,4 +215,111 @@ func (h *Handler) GetChatByChatID(c *gin.Context) {
 
 	h.handleResponse(c, status_http.OK, resp)
 }
-*/
+
+// UpdateBotToken godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
+// @ID UpdateBotToken
+// @Router /v3/bot [PUT]
+// @Summary UpdateBotToken
+// @Description UpdateBotToken
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param project-id query string false "project-id"
+// @Param bot_token body models.UpdateBotToken true "body"
+// @Success 200 {object} status_http.Response{data=string} "Response body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) UpdateBotToken(c *gin.Context) {
+
+	var (
+		body models.UpdateBotToken
+	)
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		h.log.Error("ShouldBindJSON", logger.Error(err))
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.companyServices.ChatService().Chat().UpdateBotToken(c.Request.Context(), &chat_service.UpdateBotTokenRequest{
+		BotId:    body.BotId,
+		BotToken: body.BotToken,
+	})
+
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// DeleteBotToken godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string false "Environment-Id"
+// @ID DeleteBotToken
+// @Router /v3/bot/{id} [DELETE]
+// @Summary DeleteBotToken
+// @Description DeleteBotToken
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param id path string true "bot-id"
+// @Success 200 {object} status_http.Response{data=string} "Response body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) DeleteBotToken(c *gin.Context) {
+
+	if !util.IsValidUUID(c.Param("id")) {
+		h.handleResponse(c, status_http.BadRequest, "id not found")
+		return
+	}
+	idstr := c.Param("id")
+	resp, err := h.companyServices.ChatService().Chat().DeleteBotToken(c.Request.Context(), &chat_service.DeleteBotTokenRequest{
+		BotId: idstr,
+	})
+
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// GetBotTokenByBotID godoc
+// @Security ApiKeyAuth
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @ID GetBotTokenByBotID
+// @Router /v3/bot/{id} [GET]
+// @Summary GetBotTokenByBotID
+// @Description GetBotTokenByBotID
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param id path string true "bot-id"
+// @Success 200 {object} status_http.Response{data=chat_service.GetBotByBotIdResponse} "Response body"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetBotTokenByBotID(c *gin.Context) {
+
+	if !util.IsValidUUID(c.Param("id")) {
+		h.handleResponse(c, status_http.BadRequest, "id not found")
+		return
+	}
+	idstr := c.Param("id")
+	resp, err := h.companyServices.ChatService().Chat().GetBotTokenByBotId(c.Request.Context(), &chat_service.GetBotByBotIdRequest{
+		BotId: idstr,
+	})
+
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}

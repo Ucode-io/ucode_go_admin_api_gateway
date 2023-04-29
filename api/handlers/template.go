@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"github.com/google/uuid"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -11,6 +10,8 @@ import (
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 )
@@ -114,7 +115,8 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	folder.ProjectId = resource.ResourceEnvironmentId
+	folder.ProjectId = projectId
+	folder.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -240,9 +242,10 @@ func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
 	res, err := services.TemplateService().Template().GetSingleFolder(
 		context.Background(),
 		&tmp.GetSingleFolderReq{
-			Id:        folderId,
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:         folderId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
@@ -353,7 +356,8 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	folder.ProjectId = resource.ResourceEnvironmentId
+	folder.ProjectId = projectId
+	folder.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -479,9 +483,10 @@ func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
 	res, err := services.TemplateService().Template().DeleteFolder(
 		context.Background(),
 		&tmp.DeleteFolderReq{
-			Id:        folderId,
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:         folderId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
@@ -588,8 +593,9 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 	res, err := services.TemplateService().Template().GetListFolder(
 		context.Background(),
 		&tmp.GetListFolderReq{
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
@@ -696,9 +702,10 @@ func (h *Handler) GetTemplateFolderCommits(c *gin.Context) {
 	res, err := services.TemplateService().Template().GetTemplateFolderObjectCommits(
 		context.Background(),
 		&tmp.GetTemplateFolderObjectCommitsReq{
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
-			Id:        c.Param("template-folder-id"),
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:         c.Param("template-folder-id"),
 		},
 	)
 
@@ -809,7 +816,8 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	template.ProjectId = resource.ResourceEnvironmentId
+	template.ProjectId = projectId
+	template.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -935,9 +943,10 @@ func (h *Handler) GetSingleTemplate(c *gin.Context) {
 	res, err := services.TemplateService().Template().GetSingleTemplate(
 		context.Background(),
 		&tmp.GetSingleTemplateReq{
-			Id:        templateId,
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:         templateId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
@@ -1048,7 +1057,8 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	template.ProjectId = resource.ResourceEnvironmentId
+	template.ProjectId = projectId
+	template.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -1174,9 +1184,10 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 	res, err := services.TemplateService().Template().DeleteTemplate(
 		context.Background(),
 		&tmp.DeleteTemplateReq{
-			Id:        templateId,
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:         templateId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
@@ -1297,11 +1308,12 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 	res, err := services.TemplateService().Template().GetListTemplate(
 		context.Background(),
 		&tmp.GetListTemplateReq{
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
-			FolderId:  c.DefaultQuery("folder-id", ""),
-			Limit:     int32(limit),
-			Offset:    int32(offset),
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			FolderId:   c.DefaultQuery("folder-id", ""),
+			Limit:      int32(limit),
+			Offset:     int32(offset),
 		},
 	)
 
@@ -1408,9 +1420,10 @@ func (h *Handler) GetTemplateCommits(c *gin.Context) {
 	res, err := services.TemplateService().Template().GetTemplateObjectCommits(
 		context.Background(),
 		&tmp.GetTemplateObjectCommitsReq{
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
-			Id:        c.Param("template-id"),
+			ProjectId:  projectId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:         c.Param("template-id"),
+			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
 
@@ -1530,9 +1543,10 @@ func (h *Handler) ConvertHtmlToPdfV2(c *gin.Context) {
 	resp, err := services.TemplateService().Template().ConvertHtmlToPdf(
 		context.Background(),
 		&tmp.HtmlBody{
-			Data:      structData,
-			Html:      html.Html,
-			ProjectId: resource.ResourceEnvironmentId,
+			Data:       structData,
+			Html:       html.Html,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
 
@@ -1653,9 +1667,10 @@ func (h *Handler) ConvertTemplateToHtmlV2(c *gin.Context) {
 	resp, err := services.TemplateService().Template().ConvertTemplateToHtml(
 		context.Background(),
 		&tmp.HtmlBody{
-			Data:      structData,
-			Html:      html.Html,
-			ProjectId: resource.ResourceEnvironmentId,
+			Data:       structData,
+			Html:       html.Html,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
 

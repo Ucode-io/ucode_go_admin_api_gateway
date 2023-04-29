@@ -109,7 +109,8 @@ func (h *Handler) CreateWebPageApp(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	app.ProjectId = resource.ResourceEnvironmentId
+	app.ProjectId = projectId
+	app.ResourceId = resource.ResourceEnvironmentId
 
 	res, err := services.WebPageService().App().CreateApp(
 		context.Background(),
@@ -225,7 +226,8 @@ func (h *Handler) GetSingleWebPageApp(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleAppReq{
 			Id:            appId,
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     projectId,
+			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -336,7 +338,8 @@ func (h *Handler) UpdateWebPageApp(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	app.ProjectId = resource.ResourceEnvironmentId
+	app.ProjectId = projectId
+	app.ResourceId = resource.ResourceEnvironmentId
 
 	res, err := services.WebPageService().App().UpdateApp(
 		context.Background(),
@@ -453,7 +456,8 @@ func (h *Handler) DeleteWebPageApp(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteAppReq{
 			Id:            appId,
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     projectId,
+			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -560,7 +564,8 @@ func (h *Handler) GetListWebPageApp(c *gin.Context) {
 	res, err := services.WebPageService().App().GetListApp(
 		context.Background(),
 		&tmp.GetListAppReq{
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     projectId,
+			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)

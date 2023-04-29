@@ -13,6 +13,14 @@ type CreateChatRequest struct {
 	Chat   Chat   `json:"chat"`
 }
 
+type UpdateBotToken struct {
+	BotId    string `json:"bot_id"`
+	BotToken string `json:"bot_token"`
+}
+type CreateBotToken struct {
+	BotToken string `json:"bot_token"`
+}
+
 type ChatResponse struct {
 	Chat_id string `json:"chat_id"`
 }

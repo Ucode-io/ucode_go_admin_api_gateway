@@ -41,6 +41,7 @@ type Path struct {
 // @Security ApiKeyAuth
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
+// @Param from-chat query string false "from-chat"
 // @Router /v1/upload [POST]
 // @Summary Upload
 // @Description Upload
@@ -71,6 +72,7 @@ func (h *Handler) Upload(c *gin.Context) {
 		Creds:  credentials.NewStaticV4(h.cfg.MinioAccessKeyID, h.cfg.MinioSecretAccessKey, ""),
 		Secure: h.cfg.MinioProtocol,
 	})
+	fmt.Println("access key::", h.cfg.MinioAccessKeyID)
 	h.log.Info("info", logger.String("access_key: ",
 		h.cfg.MinioAccessKeyID), logger.String("access_secret: ", h.cfg.MinioSecretAccessKey))
 
@@ -84,10 +86,16 @@ func (h *Handler) Upload(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
 	splitedContentType := strings.Split(file.File.Header["Content-Type"][0], "/")
 	if splitedContentType[0] != "image" && splitedContentType[0] != "video" {
 		defaultBucket = "docs"
 	}
+
+	if c.Query("from-chat") == "to_telegram_bot" {
+		defaultBucket = "telegram"
+	}
+
 	fmt.Println("content-type", splitedContentType)
 	_, err = minioClient.FPutObject(
 		context.Background(),
