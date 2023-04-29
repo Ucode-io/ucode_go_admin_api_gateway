@@ -6744,6 +6744,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.CreateApiReferenceModel'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -6791,6 +6796,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.ApiReference'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -6846,9 +6856,9 @@ paths:
         in: query
         name: version_id
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -6897,6 +6907,11 @@ paths:
         name: api_reference_id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -6937,9 +6952,9 @@ paths:
         name: api_reference_id
         required: true
         type: string
-      - description: project_id
-        in: path
-        name: project_id
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: page
@@ -7032,6 +7047,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/api_reference_service.ApiRevertApiReferenceRequest'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -7090,6 +7110,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/api_reference_service.ApiManyVersions'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:

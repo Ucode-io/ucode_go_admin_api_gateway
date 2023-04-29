@@ -3131,6 +3131,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.ApiReference"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -3217,6 +3224,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.CreateApiReferenceModel"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -3306,9 +3320,9 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "path",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -3460,6 +3474,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/api_reference_service.ApiRevertApiReferenceRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -3562,6 +3583,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/api_reference_service.ApiManyVersions"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -3663,8 +3691,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query"
                     }
                 ],
@@ -3751,6 +3779,13 @@ const docTemplate = `{
                         "description": "api_reference_id",
                         "name": "api_reference_id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     }
                 ],
