@@ -6,6 +6,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	ars "ucode/ucode_go_api_gateway/genproto/api_reference_service"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	vcs "ucode/ucode_go_api_gateway/genproto/versioning_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -25,6 +26,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param app body models.CreateCategory true "CreateApiReferenceRequestBody"
+// @Param project_id query string true "project_id"
 // @Success 201 {object} status_http.Response{data=models.Category} "Categoryç data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -49,6 +51,7 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
+	project_id := c.Query("project_id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
 		return
@@ -56,6 +59,19 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 
 	if !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     project_id,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_API_REF_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -70,6 +86,7 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 
 	category.CommitId = uuid.NewString()
 	category.VersionId = uuid.NewString()
+	category.ResourceId = resource.ResourceEnvironmentId
 
 	resp, err := services.ApiReferenceService().Category().Create(
 		context.Background(), &category,
@@ -99,6 +116,7 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param category_id path string true "category_id"
+// @Param project_id query string true "project_id"
 // @Success 200 {object} status_http.Response{data=models.Category} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -118,6 +136,7 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
+	project_id := c.Query("project_id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
 		return
@@ -138,11 +157,24 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 		return
 	}
 
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     project_id,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_API_REF_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	resp, err := services.ApiReferenceService().Category().Get(
 		context.Background(),
 		&ars.GetCategoryRequest{
-			Guid:      id,
-			VersionId: activeVersion.GetVersionId(),
+			Guid:       id,
+			VersionId:  activeVersion.GetVersionId(),
+			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
 	if err != nil {
@@ -190,6 +222,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
+	project_id := c.Query("project_id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
 		return
@@ -209,14 +242,26 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     project_id,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_API_REF_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	resp, err := services.ApiReferenceService().Category().GetList(
 		context.Background(),
 		&ars.GetListCategoryRequest{
-			Limit:     int64(limit),
-			Offset:    int64(offset),
-			ProjectId: c.Query("project_id"),
-			VersionId: activeVersion.GetVersionId(),
+			Limit:      int64(limit),
+			Offset:     int64(offset),
+			ProjectId:  project_id,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  activeVersion.GetVersionId(),
 		},
 	)
 
@@ -238,6 +283,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param api_reference body models.Category  true "UpdateCategoryRequestBody"
+// @Param project_id query string false "project_id"
 // @Success 200 {object} status_http.Response{data=models.Category} "Category data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -257,6 +303,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
+	// project_id := c.Query("project_id")
 	if !ok {
 		err = errors.New("error getting environment id")
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
@@ -293,6 +340,19 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     category.ProjectID,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_API_REF_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	resp, err := services.ApiReferenceService().Category().Update(
 		context.Background(),
 		&ars.Category{
@@ -303,6 +363,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 			Attributes: attributes,
 			CommitId:   category.CommitId,
 			VersionId:  category.VersionId,
+			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
 
@@ -325,6 +386,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param category_id path string true "category_id"
+// @Param project_id query string true "project_id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -344,6 +406,7 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
+	project_id := c.Query("project_id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
 		return
@@ -363,12 +426,24 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     project_id,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_API_REF_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	resp, err := services.ApiReferenceService().Category().Delete(
 		context.Background(),
 		&ars.DeleteCategoryRequest{
-			Guid:      id,
-			VersionId: activeVersion.GetVersionId(),
+			Guid:       id,
+			VersionId:  activeVersion.GetVersionId(),
+			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
 	if err != nil {

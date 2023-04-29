@@ -4857,6 +4857,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.Category"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4943,6 +4949,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.CreateCategory"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -5029,6 +5042,13 @@ const docTemplate = `{
                         "name": "category_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -5112,6 +5132,13 @@ const docTemplate = `{
                         "description": "category_id",
                         "name": "category_id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -39685,6 +39712,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -39703,6 +39733,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "title": {
@@ -39728,6 +39761,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -39749,6 +39785,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "size": {
@@ -39811,6 +39850,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string"
                 },
@@ -39858,6 +39900,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "role": {
@@ -39993,6 +40038,9 @@ const docTemplate = `{
         "template_service.GetObjectTokenReq": {
             "type": "object",
             "properties": {
+                "resource_id": {
+                    "type": "string"
+                },
                 "token": {
                     "type": "string"
                 },
@@ -40155,6 +40203,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -40176,6 +40227,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "title": {
@@ -40204,6 +40258,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -40228,6 +40285,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "size": {
@@ -40290,6 +40350,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string"
                 },
@@ -40340,6 +40403,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "role": {
