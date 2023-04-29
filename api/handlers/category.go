@@ -51,9 +51,14 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	project_id := c.Query("project-id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -65,7 +70,7 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     project_id,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -87,6 +92,7 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 	category.CommitId = uuid.NewString()
 	category.VersionId = uuid.NewString()
 	category.ResourceId = resource.ResourceEnvironmentId
+	category.ProjectId = projectId
 
 	resp, err := services.ApiReferenceService().Category().Create(
 		context.Background(), &category,
@@ -136,13 +142,18 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	project_id := c.Query("project-id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
 		return
 	}
 	if !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -160,7 +171,7 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     project_id,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -222,13 +233,18 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	project_id := c.Query("project-id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
 		return
 	}
 	if !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -245,7 +261,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     project_id,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -259,7 +275,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		&ars.GetListCategoryRequest{
 			Limit:      int64(limit),
 			Offset:     int64(offset),
-			ProjectId:  project_id,
+			ProjectId:  projectId,
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  activeVersion.GetVersionId(),
 		},
@@ -303,7 +319,6 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	// project_id := c.Query("project-id")
 	if !ok {
 		err = errors.New("error getting environment id")
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
@@ -311,6 +326,12 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 	}
 	if !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -343,7 +364,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     category.ProjectID,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -359,7 +380,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 			Guid:       category.Guid,
 			Name:       category.Name,
 			BaseUrl:    category.BaseUrl,
-			ProjectId:  category.ProjectID,
+			ProjectId:  projectId,
 			Attributes: attributes,
 			CommitId:   category.CommitId,
 			VersionId:  category.VersionId,
@@ -406,13 +427,18 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	project_id := c.Query("project-id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
 		return
 	}
 	if !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -429,7 +455,7 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     project_id,
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
