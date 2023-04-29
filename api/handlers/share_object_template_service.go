@@ -3,11 +3,12 @@ package handlers
 import (
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateUserTemplate godoc
@@ -109,7 +110,8 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	user.ProjectId = resource.ResourceEnvironmentId
+	user.ProjectId = projectId
+	user.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
 	//if err != nil {
@@ -232,8 +234,9 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 	res, err := services.TemplateService().UserPermission().GetSingleUserPermission(
 		context.Background(),
 		&tmp.GetSingleUserPermissionReq{
-			Id:        userPermissionId,
-			ProjectId: resource.ResourceEnvironmentId,
+			Id:         userPermissionId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
 
@@ -344,7 +347,8 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	user.ProjectId = resource.ResourceEnvironmentId
+	user.ProjectId = projectId
+	user.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
 	//if err != nil {
@@ -467,8 +471,9 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 	res, err := services.TemplateService().UserPermission().DeleteUserPermission(
 		context.Background(),
 		&tmp.DeleteUserPermissionReq{
-			Id:        userPermissionId,
-			ProjectId: resource.ResourceEnvironmentId,
+			Id:         userPermissionId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
 
@@ -581,8 +586,9 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 	res, err := services.TemplateService().UserPermission().GetListUserPermission(
 		context.Background(),
 		&tmp.GetListUserPermissionReq{
-			ProjectId: resource.ResourceEnvironmentId,
-			ObjectId:  objectId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			ObjectId:   objectId,
 		},
 	)
 
@@ -693,7 +699,8 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	share.ProjectId = resource.ResourceEnvironmentId
+	share.ProjectId = projectId
+	share.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
 	//if err != nil {
@@ -814,7 +821,8 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	share.ProjectId = resource.ResourceEnvironmentId
+	share.ProjectId = projectId
+	share.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
 	//if err != nil {
@@ -845,6 +853,7 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param share body tmp.GetObjectTokenReq true "GetObjectTokenReq"
+// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetObjectTokenRes} "GetObjectTokenRes"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -917,12 +926,36 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 	//		return
 	//	}
 	//}
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 	res, err := services.TemplateService().Share().GetObjectToken(
 		context.Background(),
 		&tmp.GetObjectTokenReq{
-			Token:     share.GetToken(),
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Token:      share.GetToken(),
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
 
