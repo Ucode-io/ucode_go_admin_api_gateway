@@ -3038,6 +3038,11 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "name": "resource_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "version_id",
                         "in": "query"
                     }
@@ -3654,6 +3659,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "version_id",
                         "name": "version_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
                         "in": "query"
                     }
                 ],
@@ -4749,6 +4760,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "resource_id",
                         "in": "query"
                     },
                     {
@@ -33313,6 +33329,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "version_ids": {
                     "type": "array",
                     "items": {
@@ -33366,6 +33385,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -33381,6 +33403,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 }
             }
@@ -33524,7 +33549,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "$ref": "#/definitions/auth_service.ConfirmStrategies"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "string"
@@ -33548,19 +33573,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "auth_service.ConfirmStrategies": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ConfirmStrategies_UNDECIDED",
-                "ConfirmStrategies_PHONE",
-                "ConfirmStrategies_EMAIL"
-            ]
         },
         "auth_service.CreateIntegrationRequest": {
             "type": "object",
@@ -34096,10 +34108,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -34188,10 +34200,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -34276,10 +34288,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -34494,7 +34506,7 @@ const docTemplate = `{
                     }
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -34511,7 +34523,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -34613,7 +34625,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "status": {
                     "type": "boolean"
@@ -34644,7 +34656,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -34653,21 +34665,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "company_service.ResourceType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "ResourceType_NOT_DECIDED",
-                "ResourceType_MONGODB",
-                "ResourceType_CLICKHOUSE",
-                "ResourceType_POSTGRESQL"
-            ]
         },
         "company_service.ResourceWithoutPassword": {
             "type": "object",
@@ -34688,7 +34685,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -34780,40 +34777,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
                 }
             }
-        },
-        "company_service.ServiceType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8
-            ],
-            "x-enum-varnames": [
-                "ServiceType_NOT_SPECIFIED",
-                "ServiceType_BUILDER_SERVICE",
-                "ServiceType_ANALYTICS_SERVICE",
-                "ServiceType_TEMPLATE_SERVICE",
-                "ServiceType_QUERY_SERVICE",
-                "ServiceType_FUNCTION_SERVICE",
-                "ServiceType_WEB_PAGE_SERVICE",
-                "ServiceType_API_REF_SERVICE",
-                "ServiceType_POSTGRES_BUILDER"
-            ]
         },
         "company_service.SetDefaultResourceReq": {
             "type": "object",
@@ -34828,7 +34800,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -34845,7 +34817,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -34896,7 +34868,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -36982,7 +36954,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
+                    "type": "integer"
                 },
                 "guid": {
                     "type": "string"
@@ -37025,19 +36997,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "object_builder_service.ConfirmStrategies": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ConfirmStrategies_UNDECIDED",
-                "ConfirmStrategies_PHONE",
-                "ConfirmStrategies_EMAIL"
-            ]
         },
         "object_builder_service.CreateAppResponse": {
             "type": "object",
@@ -40448,7 +40407,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release_type": {
-                    "$ref": "#/definitions/versioning_service.ReleaseType"
+                    "type": "integer"
                 }
             }
         },
@@ -40580,21 +40539,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "versioning_service.ReleaseType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "ReleaseType_UNDEFINED",
-                "ReleaseType_MAJOR",
-                "ReleaseType_MINOR",
-                "ReleaseType_PATCH"
-            ]
         },
         "versioning_service.ReleaseWithCommit": {
             "type": "object",
