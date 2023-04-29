@@ -76,6 +76,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/object/:table_slug", h.CreateObject)
 		v1.GET("/object/:table_slug/:object_id", h.GetSingle)
 		v1.POST("/object/get-list/:table_slug", h.GetList)
+		v1.GET("/object-slim/:table_slug/:object_id", h.GetSingleSlim)
+		v1.POST("/object-slim/get-list/:table_slug", h.GetListSlim)
 		v1.PUT("/object/:table_slug", h.UpdateObject)
 		v1.DELETE("/object/:table_slug/:object_id", h.DeleteObject)
 		v1.POST("/object/object-details/:table_slug", h.GetObjectDetails)
@@ -251,9 +253,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/template-note/share", h.CreateSharingToken)
 		v1.PUT("/template-note/share", h.UpdateSharingToken)
 
-		//api-reference service
-		v1.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
+		// api-reference
 		v1.GET("/api-reference", h.GetAllApiReferences)
+		v1.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
+		v1.GET("/category/:category_id", h.GetApiCategoryByID)
+		v1.GET("/category", h.GetAllCategories)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))
@@ -337,8 +341,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		v1Admin.POST("/category", h.CreateCategory)
 		v1Admin.PUT("/category", h.UpdateCategory)
-		v1Admin.GET("/category/:category_id", h.GetApiCategoryByID)
-		v1Admin.GET("/category", h.GetAllCategories)
+		// v1Admin.GET("/category/:category_id", h.GetApiCategoryByID)
+		// v1Admin.GET("/category", h.GetAllCategories)
 		v1Admin.DELETE("/category/:category_id", h.DeleteCategory)
 
 		// function folder
