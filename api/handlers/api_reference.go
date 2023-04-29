@@ -257,6 +257,7 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query ars.GetListApiReferenceRequest true "filters"
+// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.GetAllApiReferenceResponse} "ApiReferencesBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -307,7 +308,7 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     c.Query("project_id"),
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -798,7 +799,7 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 // @Param api_reference_id path string true "api_reference_id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Param body body ars.ApiManyVersions true "Request Body"
-// @Param project-id query string true "project-id" 
+// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=ars.ApiReference} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

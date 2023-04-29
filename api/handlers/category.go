@@ -205,6 +205,7 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 // @Tags ApiReference
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param filters query ars.GetListCategoryRequest true "filters"
 // @Success 200 {object} status_http.Response{data=models.GetAllCategoriesResponse} "GetAllCategoriesBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -221,8 +222,9 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	if !util.IsValidUUID(c.Query("project_id")) {
-		h.handleResponse(c, status_http.BadRequest, errors.New("project id is invalid uuid").Error())
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 	namespace := c.GetString("namespace")
@@ -239,12 +241,6 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 	}
 	if !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
-		return
-	}
-
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
