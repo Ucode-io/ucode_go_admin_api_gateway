@@ -7729,9 +7729,9 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.CreateCategory'
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       produces:
@@ -7781,9 +7781,9 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.Category'
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -7832,9 +7832,9 @@ paths:
         name: category_id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       produces:
@@ -7876,9 +7876,9 @@ paths:
         name: category_id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       produces:

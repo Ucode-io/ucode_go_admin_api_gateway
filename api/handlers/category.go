@@ -26,7 +26,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param app body models.CreateCategory true "CreateApiReferenceRequestBody"
-// @Param project_id query string true "project_id"
+// @Param project-id query string true "project-id"
 // @Success 201 {object} status_http.Response{data=models.Category} "Categoryç data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -51,7 +51,7 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	project_id := c.Query("project_id")
+	project_id := c.Query("project-id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
 		return
@@ -116,7 +116,7 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param category_id path string true "category_id"
-// @Param project_id query string true "project_id"
+// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.Category} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -136,7 +136,7 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	project_id := c.Query("project_id")
+	project_id := c.Query("project-id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
 		return
@@ -222,7 +222,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	project_id := c.Query("project_id")
+	project_id := c.Query("project-id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
 		return
@@ -283,7 +283,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param api_reference body models.Category  true "UpdateCategoryRequestBody"
-// @Param project_id query string false "project_id"
+// @Param project-id query string false "project-id"
 // @Success 200 {object} status_http.Response{data=models.Category} "Category data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -303,7 +303,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	// project_id := c.Query("project_id")
+	// project_id := c.Query("project-id")
 	if !ok {
 		err = errors.New("error getting environment id")
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
@@ -386,7 +386,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param category_id path string true "category_id"
-// @Param project_id query string true "project_id"
+// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -406,7 +406,7 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
-	project_id := c.Query("project_id")
+	project_id := c.Query("project-id")
 	if !ok {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is not set").Error())
 		return
