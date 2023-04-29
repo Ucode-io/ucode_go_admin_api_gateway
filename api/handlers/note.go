@@ -3,12 +3,13 @@ package handlers
 import (
 	"context"
 	"errors"
-	"github.com/google/uuid"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 )
@@ -112,7 +113,8 @@ func (h *Handler) CreateNoteFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	folderNote.ProjectId = resource.ResourceEnvironmentId
+	folderNote.ProjectId = projectId
+	folderNote.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -238,9 +240,10 @@ func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 	res, err := services.TemplateService().Note().GetSingleFolderNote(
 		context.Background(),
 		&tmp.GetSingleFolderNoteReq{
-			Id:        folderNoteId,
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:         folderNoteId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
@@ -357,7 +360,8 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	folderNote.ProjectId = resource.ResourceEnvironmentId
+	folderNote.ProjectId = projectId
+	folderNote.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -483,9 +487,10 @@ func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 	res, err := services.TemplateService().Note().DeleteFolderNote(
 		context.Background(),
 		&tmp.DeleteFolderNoteReq{
-			Id:        folderId,
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:         folderId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
@@ -592,8 +597,9 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 	res, err := services.TemplateService().Note().GetListFolderNote(
 		context.Background(),
 		&tmp.GetListFolderNoteReq{
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
@@ -700,9 +706,10 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 	res, err := services.TemplateService().Note().GetNoteFolderObjectCommits(
 		context.Background(),
 		&tmp.GetNoteFolderObjectCommitsReq{
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
-			Id:        c.Param("note-folder-id"),
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:         c.Param("note-folder-id"),
 		},
 	)
 
@@ -813,7 +820,8 @@ func (h *Handler) CreateNote(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	note.ProjectId = resource.ResourceEnvironmentId
+	note.ProjectId = projectId
+	note.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -939,9 +947,10 @@ func (h *Handler) GetSingleNote(c *gin.Context) {
 	res, err := services.TemplateService().Note().GetSingleNote(
 		context.Background(),
 		&tmp.GetSingleNoteReq{
-			Id:        noteId,
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:         noteId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
@@ -1052,7 +1061,8 @@ func (h *Handler) UpdateNote(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	note.ProjectId = resource.ResourceEnvironmentId
+	note.ProjectId = projectId
+	note.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -1178,9 +1188,10 @@ func (h *Handler) DeleteNote(c *gin.Context) {
 	res, err := services.TemplateService().Note().DeleteNote(
 		context.Background(),
 		&tmp.DeleteNoteReq{
-			Id:        noteId,
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:         noteId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
 	)
 
@@ -1301,11 +1312,12 @@ func (h *Handler) GetListNote(c *gin.Context) {
 	res, err := services.TemplateService().Note().GetListNote(
 		context.Background(),
 		&tmp.GetListNoteReq{
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
-			FolderId:  c.DefaultQuery("folder-id", ""),
-			Limit:     int32(limit),
-			Offset:    int32(offset),
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			FolderId:   c.DefaultQuery("folder-id", ""),
+			Limit:      int32(limit),
+			Offset:     int32(offset),
 		},
 	)
 
@@ -1412,9 +1424,10 @@ func (h *Handler) GetNoteCommits(c *gin.Context) {
 	res, err := services.TemplateService().Note().GetNoteObjectCommits(
 		context.Background(),
 		&tmp.GetNoteObjectCommitsReq{
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
-			Id:        c.Param("note-id"),
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			Id:         c.Param("note-id"),
 		},
 	)
 
