@@ -33,18 +33,21 @@ message GetTemplateFolderObjectCommitsReq {
     string project_id = 1;
     string id = 2;
     string version_id = 3;
+    string resource_id = 4;
 }
 
 message GetTemplateObjectCommitsReq {
     string project_id = 1;
     string id = 2;
     string version_id = 3;
+    string resource_id = 4;
 }
 
 message DeleteTemplateReq {
     string project_id = 1;
     string id = 2;
     string version_id = 3;
+    string resource_id = 4;
 }
 
 message UpdateTemplateReq {
@@ -67,12 +70,14 @@ message UpdateTemplateReq {
     repeated Table tables = 7;
     string commit_id = 8;
     string version_id = 9;
+    string resource_id = 10;
 }
 
 message GetSingleTemplateReq {
     string project_id = 1;
     string id = 2;
     string version_id = 3;
+    string resource_id = 4;
 }
 
 message GetListTemplateReq {
@@ -81,6 +86,7 @@ message GetListTemplateReq {
     int32 limit = 3;
     int32 offset = 4;
     string version_id = 5;
+    string resource_id = 6;
 }
 
 message GetListTemplateRes {
@@ -107,6 +113,7 @@ message CreateTemplateReq {
     repeated Table tables = 6;
     string commit_id = 7;
     string version_id = 8;
+    string resource_id = 9;
 }
 
 message Template {
@@ -137,6 +144,7 @@ message CreateFolderReq {
     string parent_id = 3;
     string commit_id = 4;
     string version_id = 5;
+    string resource_id = 6;
 }
 
 message Folder {
@@ -153,6 +161,7 @@ message GetListFolderReq {
     int32 limit = 2;
     int32 offset = 3;
     string version_id = 4;
+    string resource_id = 5;
 }
 
 message GetListFolderRes {
@@ -164,6 +173,7 @@ message GetSingleFolderReq {
     string id = 1;
     string project_id = 2;
     string version_id = 3;
+    string resource_id = 4;
 }
 
 message GetSingleFolderRes {
@@ -178,18 +188,21 @@ message UpdateFolderReq {
     string parent_id = 4;
     string commit_id = 5;
     string version_id = 6;
+    string resource_id = 7;
 }
 
 message DeleteFolderReq {
     string id = 1;
     string project_id = 2;
     string version_id = 3;
+    string resource_id = 4;
 }
 
 message HtmlBody {
     string html = 1;
     google.protobuf.Struct data = 2;
     string project_id = 3;
+    string resource_id = 4;
 }
 
 message PdfBody {

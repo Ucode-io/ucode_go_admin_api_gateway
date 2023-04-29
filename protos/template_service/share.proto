@@ -20,6 +20,7 @@ message CreateTokenReq {
     string project_id = 3;
     string role = 4;
     bool is_private = 5;
+    string resource_id = 6;
 }
 
 message CreateTokenRes {
@@ -37,6 +38,7 @@ message UpdateTokenReq {
     string project_id = 3;
     string role = 4;
     bool is_private = 5;
+    string resource_id = 6;
 }
 
 message UpdateTokenRes {
@@ -51,6 +53,7 @@ message UpdateTokenRes {
 message GetObjectTokenReq {
     string token = 1;
     string version_id = 2;
+    string resource_id = 3;
 }
 
 message GetObjectTokenRes {

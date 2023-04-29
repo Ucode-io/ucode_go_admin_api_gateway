@@ -4161,6 +4161,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       title:
         type: string
       version_id:
@@ -4173,6 +4175,8 @@ definitions:
       parent_id:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       title:
         type: string
@@ -4189,6 +4193,8 @@ definitions:
         $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
+      resource_id:
+        type: string
       title:
         type: string
       version_id:
@@ -4203,6 +4209,8 @@ definitions:
       html:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       size:
         type: string
@@ -4243,6 +4251,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       role:
         type: string
       type:
@@ -4274,6 +4284,8 @@ definitions:
       photo_url:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       role:
         type: string
@@ -4361,6 +4373,8 @@ definitions:
     type: object
   template_service.GetObjectTokenReq:
     properties:
+      resource_id:
+        type: string
       token:
         type: string
       version_id:
@@ -4466,6 +4480,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       title:
         type: string
       version_id:
@@ -4480,6 +4496,8 @@ definitions:
       parent_id:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       title:
         type: string
@@ -4498,6 +4516,8 @@ definitions:
         $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
+      resource_id:
+        type: string
       title:
         type: string
       version_id:
@@ -4514,6 +4534,8 @@ definitions:
       id:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       size:
         type: string
@@ -4554,6 +4576,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       role:
         type: string
       type:
@@ -4587,6 +4611,8 @@ definitions:
       photo_url:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       role:
         type: string
@@ -7703,6 +7729,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.CreateCategory'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -7750,6 +7781,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.Category'
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
       produces:
       - application/json
       responses:
@@ -7797,6 +7832,11 @@ paths:
         name: category_id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -7834,6 +7874,11 @@ paths:
       - description: category_id
         in: path
         name: category_id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       produces:

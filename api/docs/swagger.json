@@ -4845,6 +4845,12 @@
                         "schema": {
                             "$ref": "#/definitions/models.Category"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4931,6 +4937,13 @@
                         "schema": {
                             "$ref": "#/definitions/models.CreateCategory"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -5017,6 +5030,13 @@
                         "name": "category_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -5100,6 +5120,13 @@
                         "description": "category_id",
                         "name": "category_id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -39673,6 +39700,9 @@
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -39691,6 +39721,9 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "title": {
@@ -39716,6 +39749,9 @@
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -39737,6 +39773,9 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "size": {
@@ -39799,6 +39838,9 @@
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string"
                 },
@@ -39846,6 +39888,9 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "role": {
@@ -39981,6 +40026,9 @@
         "template_service.GetObjectTokenReq": {
             "type": "object",
             "properties": {
+                "resource_id": {
+                    "type": "string"
+                },
                 "token": {
                     "type": "string"
                 },
@@ -40143,6 +40191,9 @@
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -40164,6 +40215,9 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "title": {
@@ -40192,6 +40246,9 @@
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -40216,6 +40273,9 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "size": {
@@ -40278,6 +40338,9 @@
                 "project_id": {
                     "type": "string"
                 },
+                "resource_id": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string"
                 },
@@ -40328,6 +40391,9 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
                     "type": "string"
                 },
                 "role": {
