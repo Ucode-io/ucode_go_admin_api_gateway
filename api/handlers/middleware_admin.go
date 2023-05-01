@@ -3,30 +3,102 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		res, ok := h.adminHasAccess(c)
-		fmt.Println(res)
-		if !ok {
-			_ = c.AbortWithError(401, errors.New("unauthorized"))
+
+		var (
+			res = &auth_service.HasAccessSuperAdminRes{}
+			ok  bool
+		)
+
+		bearerToken := c.GetHeader("Authorization")
+		strArr := strings.Split(bearerToken, " ")
+
+		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
+			h.log.Error("---ERR->Unexpected token format")
+			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
 			return
 		}
-		// log.Printf("AUTH OBJECT: %+v", res)
+		switch strArr[0] {
+		case "Bearer":
+			res, ok = h.adminHasAccess(c)
+			fmt.Println(res)
+			if !ok {
+				_ = c.AbortWithError(401, errors.New("unauthorized"))
+				return
+			}
+			resourceId := c.GetHeader("Resource-Id")
+			environmentId := c.GetHeader("Environment-Id")
+
+			if _, err := uuid.Parse(resourceId); err != nil {
+				resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
+					c.Request.Context(),
+					&company_service.GetResourceByEnvIDRequest{
+						EnvId: environmentId,
+					},
+				)
+				if err != nil {
+					h.log.Error("--ERR-->GetResourceByEnvID->", logger.Error(err))
+					h.handleResponse(c, status_http.BadRequest, err.Error())
+					c.Abort()
+					return
+				}
+				fmt.Println(resource)
+
+				resourceId = resource.GetResource().Id
+			}
+			c.Set("environment_id", environmentId)
+			c.Set("resource_id", resourceId)
+		case "API-KEY":
+			app_id := c.GetHeader("X-API-KEY")
+			apikeys, err := h.authService.ApiKey().GetEnvID(
+				c.Request.Context(),
+				&auth_service.GetReq{
+					Id: app_id,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				c.Abort()
+				return
+			}
+
+			resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
+				c.Request.Context(),
+				&company_service.GetResourceByEnvIDRequest{
+					EnvId: apikeys.GetEnvironmentId(),
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				c.Abort()
+				return
+			}
+			c.Set("resource_id", resource.GetResource().GetId())
+			c.Set("environment_id", apikeys.GetEnvironmentId())
+		default:
+			err := errors.New("error invalid authorization method")
+			h.log.Error("--AuthMiddleware--", logger.Error(err))
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			c.Abort()
+		}
 		c.Set("Auth_Admin", res)
 		c.Set("namespace", h.cfg.UcodeNamespace)
-		c.Set("environment_id", c.GetHeader("Environment-Id"))
-		c.Set("resource_id", c.GetHeader("Resource-Id"))
 		c.Next()
 	}
 }
