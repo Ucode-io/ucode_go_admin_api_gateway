@@ -27,6 +27,8 @@ type PostgresBuilderServiceI interface {
 	FieldsAndRelations() object_builder_service.FieldAndRelationServiceClient
 	Setting() object_builder_service.SettingServiceClient
 	TableFolder() object_builder_service.TableFolderServiceClient
+	Section() object_builder_service.SectionServiceClient
+	View() object_builder_service.ViewServiceClient
 }
 
 func NewPostgrespostgresBuilderServiceClient(ctx context.Context, cfg config.Config) (PostgresBuilderServiceI, error) {

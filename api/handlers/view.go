@@ -12,6 +12,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // CreateView godoc
@@ -30,7 +31,10 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateView(c *gin.Context) {
-	var view obs.CreateViewRequest
+	var (
+		view obs.CreateViewRequest
+		resp *obs.View
+	)
 
 	err := c.ShouldBindJSON(&view)
 	if err != nil {
@@ -105,15 +109,27 @@ func (h *Handler) CreateView(c *gin.Context) {
 
 	// view.CommitId = commitID
 	// view.CommitGuid = commitGuid
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().View().Create(
+			context.Background(),
+			&view,
+		)
 
-	resp, err := services.BuilderService().View().Create(
-		context.Background(),
-		&view,
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().View().Create(
+			context.Background(),
+			&view,
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -136,6 +152,9 @@ func (h *Handler) CreateView(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleView(c *gin.Context) {
 	viewID := c.Param("view_id")
+	var (
+		resp *obs.View
+	)
 
 	if !util.IsValidUUID(viewID) {
 		h.handleResponse(c, status_http.InvalidArgument, "view id is an invalid uuid")
@@ -199,17 +218,31 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
-
-	resp, err := services.BuilderService().View().GetSingle(
-		context.Background(),
-		&obs.ViewPrimaryKey{
-			Id:        viewID,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().View().GetSingle(
+			context.Background(),
+			&obs.ViewPrimaryKey{
+				Id:        viewID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().View().GetSingle(
+			context.Background(),
+			&obs.ViewPrimaryKey{
+				Id:        viewID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -231,7 +264,10 @@ func (h *Handler) GetSingleView(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateView(c *gin.Context) {
-	var view obs.View
+	var (
+		view obs.View
+		resp *emptypb.Empty
+	)
 
 	err := c.ShouldBindJSON(&view)
 	if err != nil {
@@ -298,14 +334,27 @@ func (h *Handler) UpdateView(c *gin.Context) {
 	//}
 	view.ProjectId = resource.ResourceEnvironmentId
 
-	resp, err := services.BuilderService().View().Update(
-		context.Background(),
-		&view,
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().View().Update(
+			context.Background(),
+			&view,
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().View().Update(
+			context.Background(),
+			&view,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -328,6 +377,9 @@ func (h *Handler) UpdateView(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteView(c *gin.Context) {
 	viewID := c.Param("view_id")
+	var (
+		resp *emptypb.Empty
+	)
 
 	if !util.IsValidUUID(viewID) {
 		h.handleResponse(c, status_http.InvalidArgument, "view id is an invalid uuid")
@@ -391,18 +443,33 @@ func (h *Handler) DeleteView(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().View().Delete(
+			context.Background(),
+			&obs.ViewPrimaryKey{
+				Id:        viewID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	resp, err := services.BuilderService().View().Delete(
-		context.Background(),
-		&obs.ViewPrimaryKey{
-			Id:        viewID,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().View().Delete(
+			context.Background(),
+			&obs.ViewPrimaryKey{
+				Id:        viewID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
@@ -424,6 +491,10 @@ func (h *Handler) DeleteView(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetViewList(c *gin.Context) {
+
+	var (
+		resp *obs.GetAllViewsResponse
+	)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -482,18 +553,33 @@ func (h *Handler) GetViewList(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().View().GetList(
+			context.Background(),
+			&obs.GetAllViewsRequest{
+				TableSlug: c.Query("table_slug"),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	resp, err := services.BuilderService().View().GetList(
-		context.Background(),
-		&obs.GetAllViewsRequest{
-			TableSlug: c.Query("table_slug"),
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().View().GetList(
+			context.Background(),
+			&obs.GetAllViewsRequest{
+				TableSlug: c.Query("table_slug"),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -515,7 +601,10 @@ func (h *Handler) GetViewList(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
-	var html models.HtmlBody
+	var (
+		html models.HtmlBody
+		resp *obs.PdfBody
+	)
 
 	err := c.ShouldBindJSON(&html)
 	if err != nil {
@@ -586,20 +675,37 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		log.Println("\n\nConvertHtmlToPdf---->")
+		resp, err = services.BuilderService().View().ConvertHtmlToPdf(
+			c.Request.Context(),
+			&obs.HtmlBody{
+				Data:      structData,
+				Html:      html.Html,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	log.Println("\n\nConvertHtmlToPdf---->")
-	resp, err := services.BuilderService().View().ConvertHtmlToPdf(
-		c.Request.Context(),
-		&obs.HtmlBody{
-			Data:      structData,
-			Html:      html.Html,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		log.Println("\n\nConvertHtmlToPdf---->")
+		resp, err = services.BuilderService().View().ConvertHtmlToPdf(
+			c.Request.Context(),
+			&obs.HtmlBody{
+				Data:      structData,
+				Html:      html.Html,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -621,7 +727,10 @@ func (h *Handler) ConvertHtmlToPdf(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
-	var html models.HtmlBody
+	var (
+		html models.HtmlBody
+		resp *obs.HtmlBody
+	)
 
 	err := c.ShouldBindJSON(&html)
 	if err != nil {
@@ -693,19 +802,37 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
 
-	resp, err := services.BuilderService().View().ConvertTemplateToHtml(
-		context.Background(),
-		&obs.HtmlBody{
-			Data:      structData,
-			Html:      html.Html,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		resp, err = services.BuilderService().View().ConvertTemplateToHtml(
+			context.Background(),
+			&obs.HtmlBody{
+				Data:      structData,
+				Html:      html.Html,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+
+		resp, err = services.BuilderService().View().ConvertTemplateToHtml(
+			context.Background(),
+			&obs.HtmlBody{
+				Data:      structData,
+				Html:      html.Html,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
