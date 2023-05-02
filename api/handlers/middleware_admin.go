@@ -6,14 +6,12 @@ import (
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -45,23 +43,6 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
 
-			if _, err := uuid.Parse(resourceId); err != nil {
-				resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
-					c.Request.Context(),
-					&company_service.GetResourceByEnvIDRequest{
-						EnvId: environmentId,
-					},
-				)
-				if err != nil {
-					h.log.Error("--ERR-->GetResourceByEnvID->", logger.Error(err))
-					h.handleResponse(c, status_http.BadRequest, err.Error())
-					c.Abort()
-					return
-				}
-				fmt.Println(resource)
-
-				resourceId = resource.GetResource().Id
-			}
 			c.Set("environment_id", environmentId)
 			c.Set("resource_id", resourceId)
 		case "API-KEY":
@@ -78,18 +59,6 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 				return
 			}
 
-			resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
-				c.Request.Context(),
-				&company_service.GetResourceByEnvIDRequest{
-					EnvId: apikeys.GetEnvironmentId(),
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				c.Abort()
-				return
-			}
-			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 		default:
 			err := errors.New("error invalid authorization method")
