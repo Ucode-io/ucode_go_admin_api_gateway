@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // CreateApp godoc
@@ -28,7 +29,10 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateApp(c *gin.Context) {
-	var app obs.AppRequest
+	var (
+		app  obs.AppRequest
+		resp *obs.CreateAppResponse
+	)
 
 	err := c.ShouldBindJSON(&app)
 	if err != nil {
@@ -100,15 +104,27 @@ func (h *Handler) CreateApp(c *gin.Context) {
 
 	// app.CommitId = commitID
 	// app.CommitGuid = commitGuid
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().App().Create(
+			context.Background(),
+			&app,
+		)
 
-	resp, err := services.BuilderService().App().Create(
-		context.Background(),
-		&app,
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().App().Create(
+			context.Background(),
+			&app,
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -131,6 +147,9 @@ func (h *Handler) CreateApp(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAppByID(c *gin.Context) {
 	appID := c.Param("app_id")
+	var (
+		resp *obs.App
+	)
 
 	if !util.IsValidUUID(appID) {
 		h.handleResponse(c, status_http.InvalidArgument, "app id is an invalid uuid")
@@ -195,17 +214,31 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
-
-	resp, err := services.BuilderService().App().GetByID(
-		context.Background(),
-		&obs.AppPrimaryKey{
-			Id:        appID,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().App().GetByID(
+			context.Background(),
+			&obs.AppPrimaryKey{
+				Id:        appID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().App().GetByID(
+			context.Background(),
+			&obs.AppPrimaryKey{
+				Id:        appID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -229,6 +262,9 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllApps(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
+	var (
+		resp *obs.GetAllAppsResponse
+	)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -292,22 +328,28 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
-
-	resp, err := services.BuilderService().App().GetAll(
-		context.Background(),
-		&obs.GetAllAppsRequest{
-			Limit:     int32(limit),
-			Offset:    int32(offset),
-			Search:    c.DefaultQuery("search", ""),
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().App().GetAll(
+			context.Background(),
+			&obs.GetAllAppsRequest{
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				Search:    c.DefaultQuery("search", ""),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().App().GetAll(
+			context.Background(),
+			&obs.GetAllAppsRequest{
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				Search:    c.DefaultQuery("search", ""),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 	}
-
 	h.handleResponse(c, status_http.OK, resp)
 }
 
@@ -327,7 +369,10 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateApp(c *gin.Context) {
-	var app obs.UpdateAppRequest
+	var (
+		app  obs.UpdateAppRequest
+		resp *emptypb.Empty
+	)
 
 	err := c.ShouldBindJSON(&app)
 	if err != nil {
@@ -394,15 +439,27 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 	//	return
 	//}
 	app.ProjectId = resource.ResourceEnvironmentId
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().App().Update(
+			context.Background(),
+			&app,
+		)
 
-	resp, err := services.BuilderService().App().Update(
-		context.Background(),
-		&app,
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().App().Update(
+			context.Background(),
+			&app,
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -426,6 +483,9 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteApp(c *gin.Context) {
 	appID := c.Param("app_id")
+	var (
+		resp *emptypb.Empty
+	)
 
 	if !util.IsValidUUID(appID) {
 		h.handleResponse(c, status_http.InvalidArgument, "app id is an invalid uuid")
@@ -490,18 +550,34 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().App().Delete(
+			context.Background(),
+			&obs.AppPrimaryKey{
+				Id:        appID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	resp, err := services.BuilderService().App().Delete(
-		context.Background(),
-		&obs.AppPrimaryKey{
-			Id:        appID,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().App().Delete(
+			context.Background(),
+			&obs.AppPrimaryKey{
+				Id:        appID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
