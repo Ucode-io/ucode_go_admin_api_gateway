@@ -12,6 +12,7 @@ enum ServiceType {
     FUNCTION_SERVICE = 5;
     WEB_PAGE_SERVICE = 6;
     API_REF_SERVICE = 7;
+    POSTGRES_BUILDER = 8;
 }
 
 enum ResourceType {

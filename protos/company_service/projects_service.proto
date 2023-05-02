@@ -221,7 +221,11 @@ message ReconnectResourceRequest {
 }
 
 message ReconnectResourceRes {
-    int32 count = 1;
+    message ReconnectStatus {
+        ServiceType service_type = 1;
+        bool status = 2;
+    }
+    repeated ReconnectStatus reconnect_status = 1;
 }
 
 message GetResourceWithPathResponse {
