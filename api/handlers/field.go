@@ -11,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // CreateField godoc
@@ -30,7 +31,10 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateField(c *gin.Context) {
-	var fieldRequest models.CreateFieldRequest
+	var (
+		fieldRequest models.CreateFieldRequest
+		resp         *obs.Field
+	)
 
 	err := c.ShouldBindJSON(&fieldRequest)
 	if err != nil {
@@ -130,14 +134,27 @@ func (h *Handler) CreateField(c *gin.Context) {
 	// field.CommitGuid = commitGuid
 	// field.CommitId = commitGuid
 	// field.VersionId = versionGuid
-	resp, err := services.BuilderService().Field().Create(
-		context.Background(),
-		&field,
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Field().Create(
+			context.Background(),
+			&field,
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Field().Create(
+			context.Background(),
+			&field,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.Created, resp)
@@ -159,6 +176,9 @@ func (h *Handler) CreateField(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllFields(c *gin.Context) {
+	var (
+		resp *obs.GetAllFieldsResponse
+	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -238,24 +258,45 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Field().GetAll(
+			context.Background(),
+			&obs.GetAllFieldsRequest{
+				Limit:            int32(limit),
+				Offset:           int32(offset),
+				Search:           c.DefaultQuery("search", ""),
+				TableId:          c.DefaultQuery("table_id", ""),
+				TableSlug:        c.DefaultQuery("table_slug", ""),
+				WithManyRelation: withManyRelation,
+				WithOneRelation:  withOneRelation,
+				ProjectId:        resource.ResourceEnvironmentId,
+			},
+		)
 
-	resp, err := services.BuilderService().Field().GetAll(
-		context.Background(),
-		&obs.GetAllFieldsRequest{
-			Limit:            int32(limit),
-			Offset:           int32(offset),
-			Search:           c.DefaultQuery("search", ""),
-			TableId:          c.DefaultQuery("table_id", ""),
-			TableSlug:        c.DefaultQuery("table_slug", ""),
-			WithManyRelation: withManyRelation,
-			WithOneRelation:  withOneRelation,
-			ProjectId:        resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Field().GetAll(
+			context.Background(),
+			&obs.GetAllFieldsRequest{
+				Limit:            int32(limit),
+				Offset:           int32(offset),
+				Search:           c.DefaultQuery("search", ""),
+				TableId:          c.DefaultQuery("table_id", ""),
+				TableSlug:        c.DefaultQuery("table_slug", ""),
+				WithManyRelation: withManyRelation,
+				WithOneRelation:  withOneRelation,
+				ProjectId:        resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -278,7 +319,10 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateField(c *gin.Context) {
-	var fieldRequest models.Field
+	var (
+		fieldRequest models.Field
+		resp         *emptypb.Empty
+	)
 
 	err := c.ShouldBindJSON(&fieldRequest)
 	if err != nil {
@@ -369,15 +413,27 @@ func (h *Handler) UpdateField(c *gin.Context) {
 	//	return
 	//}
 	field.ProjectId = resource.ResourceEnvironmentId
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Field().Update(
+			context.Background(),
+			&field,
+		)
 
-	resp, err := services.BuilderService().Field().Update(
-		context.Background(),
-		&field,
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Field().Update(
+			context.Background(),
+			&field,
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -401,6 +457,9 @@ func (h *Handler) UpdateField(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteField(c *gin.Context) {
 	fieldID := c.Param("field_id")
+	var (
+		resp *emptypb.Empty
+	)
 
 	if !util.IsValidUUID(fieldID) {
 		h.handleResponse(c, status_http.InvalidArgument, "field id is an invalid uuid")
@@ -465,18 +524,33 @@ func (h *Handler) DeleteField(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Field().Delete(
+			context.Background(),
+			&obs.FieldPrimaryKey{
+				Id:        fieldID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	resp, err := services.BuilderService().Field().Delete(
-		context.Background(),
-		&obs.FieldPrimaryKey{
-			Id:        fieldID,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Field().Delete(
+			context.Background(),
+			&obs.FieldPrimaryKey{
+				Id:        fieldID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.NoContent, resp)
