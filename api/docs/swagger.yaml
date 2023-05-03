@@ -5,6 +5,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       version_ids:
         items:
           type: string
@@ -15,7 +17,7 @@ definitions:
       additional_url:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       authentification:
         type: boolean
       category_id:
@@ -40,6 +42,8 @@ definitions:
         type: boolean
       project_id:
         type: string
+      resource_id:
+        type: string
       title:
         type: string
       version_id:
@@ -50,6 +54,8 @@ definitions:
       commit_id:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
     type: object
   api_reference_service.CommitInfo:
@@ -306,7 +312,7 @@ definitions:
   auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       label:
@@ -367,7 +373,7 @@ definitions:
   auth_service.V2LoginResponse:
     properties:
       addational_table:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       app_permissions:
         items:
           $ref: '#/definitions/auth_service.RecordPermission'
@@ -407,6 +413,8 @@ definitions:
     type: object
   chat_service.ChatWithLastMessageData:
     properties:
+      bot_id:
+        type: string
       chat_id:
         type: string
       check:
@@ -417,17 +425,33 @@ definitions:
         type: string
       message:
         $ref: '#/definitions/chat_service.UserMessage'
+      message_type:
+        type: string
+      platform_type:
+        type: string
       sender_name:
+        type: string
+      user_id:
+        type: string
+      userProfilePhotoUrl:
         type: string
     type: object
   chat_service.GetChatByChatIdResponse:
     properties:
+      bot_id:
+        type: string
       chat_id:
         type: string
       messages:
         items:
           $ref: '#/definitions/chat_service.UserMessage'
         type: array
+      platform_type:
+        type: string
+      user_id:
+        type: string
+      userProfilePhotoUrl:
+        type: string
     type: object
   chat_service.GetChatListResponse:
     properties:
@@ -440,13 +464,19 @@ definitions:
     type: object
   chat_service.UserMessage:
     properties:
+      bot_id:
+        type: string
       check:
         type: boolean
       created_at:
         type: string
       message:
         type: string
-      platformType:
+      message_id:
+        type: string
+      message_type:
+        type: string
+      platform_type:
         type: string
       sender_name:
         type: string
@@ -916,6 +946,7 @@ definitions:
     - 5
     - 6
     - 7
+    - 8
     type: integer
     x-enum-varnames:
     - ServiceType_NOT_SPECIFIED
@@ -926,6 +957,7 @@ definitions:
     - ServiceType_FUNCTION_SERVICE
     - ServiceType_WEB_PAGE_SERVICE
     - ServiceType_API_REF_SERVICE
+    - ServiceType_POSTGRES_BUILDER
   company_service.SetDefaultResourceReq:
     properties:
       environment_id:
@@ -953,7 +985,7 @@ definitions:
       count:
         type: integer
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
     type: object
   company_service.Timezone:
     properties:
@@ -1142,27 +1174,6 @@ definitions:
     type: object
   emptypb.Empty:
     type: object
-  github_com_golang_protobuf_ptypes_struct.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  google_golang_org_protobuf_types_known_structpb.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  google_golang_org_protobuf_types_known_structpb.Value:
-    properties:
-      kind:
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
-    type: object
   handlers.Path:
     properties:
       filename:
@@ -1213,7 +1224,7 @@ definitions:
       currency:
         type: string
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       deleted_at:
         type: string
       id:
@@ -1248,7 +1259,7 @@ definitions:
       currency:
         type: string
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       deleted_at:
         type: string
       id:
@@ -1412,7 +1423,7 @@ definitions:
       project_id:
         type: string
       routes:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/structpb.Struct'
       sub_domain:
         type: string
     type: object
@@ -1593,6 +1604,13 @@ definitions:
           $ref: '#/definitions/models.DAGStep'
         type: array
     type: object
+  models.CreateTableFolderRequest:
+    properties:
+      parentd_id:
+        type: string
+      title:
+        type: string
+    type: object
   models.CreateTableRequest:
     properties:
       app_id:
@@ -1646,7 +1664,7 @@ definitions:
       app_id:
         type: string
       components:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/structpb.Struct'
       folder_id:
         type: string
       icon:
@@ -2131,7 +2149,7 @@ definitions:
       project_id:
         type: string
       routes:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/structpb.Struct'
       sub_domain:
         type: string
     type: object
@@ -2156,7 +2174,7 @@ definitions:
       app_id:
         type: string
       components:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/structpb.Struct'
       folder_id:
         type: string
       icon:
@@ -2209,7 +2227,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -2514,7 +2532,7 @@ definitions:
       action_type:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_guid:
         type: string
       commit_id:
@@ -2573,7 +2591,7 @@ definitions:
   object_builder_service.CreateFieldRequest:
     properties:
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       autofill_field:
         type: string
       autofill_table:
@@ -2758,7 +2776,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -3167,6 +3185,8 @@ definitions:
     properties:
       description:
         type: string
+      folder_id:
+        type: string
       icon:
         type: string
       id:
@@ -3191,7 +3211,7 @@ definitions:
   object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       label:
@@ -3201,6 +3221,17 @@ definitions:
       view_label:
         type: string
       view_slug:
+        type: string
+    type: object
+  object_builder_service.TableFolder:
+    properties:
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
         type: string
     type: object
   object_builder_service.TableHistory:
@@ -3369,7 +3400,7 @@ definitions:
   object_builder_service.V2LoginResponse:
     properties:
       addational_table:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       app_permissions:
         items:
           $ref: '#/definitions/object_builder_service.RecordPermission'
@@ -3421,7 +3452,7 @@ definitions:
       app_id:
         type: string
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       calendar_from_slug:
         type: string
       calendar_to_slug:
@@ -3668,6 +3699,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       title:
         type: string
       version_id:
@@ -3676,7 +3709,7 @@ definitions:
   query_service.CreateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3713,6 +3746,8 @@ definitions:
       parent_id:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       title:
         type: string
@@ -3792,7 +3827,9 @@ definitions:
       query_id:
         type: string
       request:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
+      resource_id:
+        type: string
       response:
         type: string
       user_id:
@@ -3801,7 +3838,7 @@ definitions:
   query_service.Query:
     properties:
       body:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_id:
         type: string
       commit_info:
@@ -3837,6 +3874,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       version_ids:
         items:
           type: string
@@ -3861,6 +3900,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       title:
         type: string
       version_id:
@@ -3869,7 +3910,7 @@ definitions:
   query_service.UpdateQueryReq:
     properties:
       body:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       commit_id:
         type: string
       commit_info:
@@ -4027,7 +4068,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+          $ref: '#/definitions/structpb.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
@@ -4040,7 +4081,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       slug:
         type: string
       title:
@@ -4051,7 +4092,7 @@ definitions:
   scenario_service.DAG:
     properties:
       attributes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       category_id:
         type: string
       commit_id:
@@ -4088,7 +4129,7 @@ definitions:
         type: string
       condition_action:
         items:
-          $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+          $ref: '#/definitions/structpb.Struct'
         type: array
       connect_info:
         $ref: '#/definitions/scenario_service.ConnectInfo'
@@ -4105,7 +4146,7 @@ definitions:
       parent_id:
         type: string
       request_info:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       slug:
         type: string
       title:
@@ -4113,7 +4154,7 @@ definitions:
       type:
         type: string
       ui_component:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
     type: object
   scenario_service.GetDAGRequest:
     properties:
@@ -4168,7 +4209,7 @@ definitions:
   scenario_service.RunScenarioResponse:
     properties:
       response:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
     type: object
   scenario_service.VersionInfo:
     properties:
@@ -4195,6 +4236,19 @@ definitions:
       status:
         type: string
     type: object
+  structpb.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
+  structpb.Value:
+    properties:
+      kind:
+        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+    type: object
   template_service.CreateFolderNoteReq:
     properties:
       commit_id:
@@ -4202,6 +4256,8 @@ definitions:
       parent_id:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       title:
         type: string
@@ -4216,6 +4272,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       title:
         type: string
       version_id:
@@ -4228,8 +4286,10 @@ definitions:
       folder_id:
         type: string
       json:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       project_id:
+        type: string
+      resource_id:
         type: string
       title:
         type: string
@@ -4245,6 +4305,8 @@ definitions:
       html:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       size:
         type: string
@@ -4285,6 +4347,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       role:
         type: string
       type:
@@ -4316,6 +4380,8 @@ definitions:
       photo_url:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       role:
         type: string
@@ -4403,6 +4469,8 @@ definitions:
     type: object
   template_service.GetObjectTokenReq:
     properties:
+      resource_id:
+        type: string
       token:
         type: string
       version_id:
@@ -4411,7 +4479,7 @@ definitions:
   template_service.GetObjectTokenRes:
     properties:
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       role:
         type: string
     type: object
@@ -4442,7 +4510,7 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       project_id:
         type: string
       title:
@@ -4508,6 +4576,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       title:
         type: string
       version_id:
@@ -4523,6 +4593,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       title:
         type: string
       version_id:
@@ -4537,8 +4609,10 @@ definitions:
       id:
         type: string
       json:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       project_id:
+        type: string
+      resource_id:
         type: string
       title:
         type: string
@@ -4556,6 +4630,8 @@ definitions:
       id:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       size:
         type: string
@@ -4596,6 +4672,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_id:
+        type: string
       role:
         type: string
       type:
@@ -4629,6 +4707,8 @@ definitions:
       photo_url:
         type: string
       project_id:
+        type: string
+      resource_id:
         type: string
       role:
         type: string
@@ -4803,7 +4883,7 @@ definitions:
   web_page_service.App:
     properties:
       Routes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       environment_id:
         type: string
       id:
@@ -4961,7 +5041,7 @@ definitions:
       commit_info:
         $ref: '#/definitions/web_page_service.CommitInfo'
       components:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/structpb.Struct'
       environment_id:
         type: string
       folder_id:
@@ -6849,6 +6929,9 @@ paths:
         name: project_id
         type: string
       - in: query
+        name: resource_id
+        type: string
+      - in: query
         name: version_id
         type: string
       produces:
@@ -7850,6 +7933,9 @@ paths:
         type: integer
       - in: query
         name: project_id
+        type: string
+      - in: query
+        name: resource_id
         type: string
       - in: query
         name: version_id
@@ -18546,6 +18632,9 @@ paths:
       - in: query
         name: search
         type: string
+      - in: query
+        name: version_id
+        type: string
       produces:
       - application/json
       responses:
@@ -22633,6 +22722,307 @@ paths:
       summary: Get Function by id
       tags:
       - Function
+  /v2/table-folder:
+    get:
+      consumes:
+      - application/json
+      description: Get all table folders
+      operationId: get_all_table_folders
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllTablesResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all table folders
+      tags:
+      - Table
+    post:
+      consumes:
+      - application/json
+      description: Create table folder
+      operationId: create_table_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateTableFolderRequest
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTableFolderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Table data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.TableFolder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create table folder
+      tags:
+      - Table
+    put:
+      consumes:
+      - application/json
+      description: Update table folder
+      operationId: update_table_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: TableFolder
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.TableFolder'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Table data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.TableFolder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update table folder
+      tags:
+      - Table
+  /v2/table-folder/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Table Folder
+      operationId: delete_table_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Table Folder
+      tags:
+      - Table
+    get:
+      consumes:
+      - application/json
+      description: Get table folder by id
+      operationId: get_table_folder_by_id
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.TableFolder'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get table folder by id
+      tags:
+      - Table
   /v3/chat:
     get:
       consumes:
