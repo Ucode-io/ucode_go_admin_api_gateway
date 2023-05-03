@@ -29,6 +29,7 @@ type PostgresBuilderServiceI interface {
 	TableFolder() object_builder_service.TableFolderServiceClient
 	Section() object_builder_service.SectionServiceClient
 	View() object_builder_service.ViewServiceClient
+	ObjectBuilder() object_builder_service.ObjectBuilderServiceClient
 }
 
 func NewPostgrespostgresBuilderServiceClient(ctx context.Context, cfg config.Config) (PostgresBuilderServiceI, error) {
@@ -162,4 +163,8 @@ func (g *postgresBuilderServiceClient) Setting() object_builder_service.SettingS
 
 func (g *postgresBuilderServiceClient) TableFolder() object_builder_service.TableFolderServiceClient {
 	return g.tableFolderService
+}
+
+func (g *postgresBuilderServiceClient) ObjectBuilder() object_builder_service.ObjectBuilderServiceClient {
+	return g.objectBuilderService
 }

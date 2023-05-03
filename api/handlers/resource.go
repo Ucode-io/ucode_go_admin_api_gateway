@@ -75,6 +75,8 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE
 		case company_service.ResourceType_CLICKHOUSE:
 			company.ServiceType = company_service.ServiceType_ANALYTICS_SERVICE
+		case company_service.ResourceType_POSTGRESQL:
+			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE
 		default:
 			err := errors.New("err resource type not supported yet")
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -126,6 +128,8 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE
 		case company_service.ResourceType_CLICKHOUSE:
 			company.ServiceType = company_service.ServiceType_ANALYTICS_SERVICE
+		case company_service.ResourceType_POSTGRESQL:
+			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE
 		default:
 			err := errors.New("err resource type not supported yet")
 			h.handleResponse(c, status_http.GRPCError, err.Error())
