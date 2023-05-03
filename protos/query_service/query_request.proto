@@ -5,6 +5,7 @@ option go_package="genproto/query_service";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
+import "google/protobuf/any.proto";
 import "commit.proto";
 
 
@@ -41,9 +42,9 @@ message Query {
 message Variable {
   string id = 1;
   string key = 2;
-  string value = 3;
+  google.protobuf.Any value = 3;
   string type = 4;
-  string default = 5;
+  google.protobuf.Any default = 5;
   string query_id = 6;
 }
 
