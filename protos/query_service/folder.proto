@@ -22,6 +22,7 @@ message Folder {
   string parent_id = 4;
   string commit_id = 5;
   string version_id = 6;
+  string resource_id = 7;
 }
 
 message CreateFolderReq {
@@ -30,6 +31,7 @@ message CreateFolderReq {
   string parent_id = 3;
   string commit_id = 4;
   string version_id = 5;
+  string resource_id = 6;
 }
 
 message GetListFolderReq {
@@ -37,6 +39,7 @@ message GetListFolderReq {
   int32 limit = 2;
   int32 offset = 3;
   string version_id = 4;
+  string resource_id = 5;
 }
 
 message GetListFolderRes {
@@ -48,6 +51,7 @@ message GetSingleFolderReq {
   string id = 1;
   string project_id = 2;
   string version_id = 3;
+  string resource_id = 4;
 }
 
 message GetSingleFolderRes {
@@ -62,10 +66,12 @@ message UpdateFolderReq {
   string parent_id = 4;
   string commit_id = 5;
   string version_id = 6;
+  string resource_id = 7;
 }
 
 message DeleteFolderReq {
   string id = 1;
   string project_id = 2;
   string version_id = 3;
+  string resource_id = 4;
 }

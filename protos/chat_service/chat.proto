@@ -8,17 +8,79 @@ service ChatService {
     rpc CreateChat (CreateChatRequest) returns (CreateChatResponse) {}
     rpc GetChatByChatId (GetChatByChatIdRequest) returns (GetChatByChatIdResponse) {}
     rpc GetChatByUserId (GetChatByUserIdRequest) returns (GetChatByUserIdResponse) {}
+
     rpc GetChatList (GetChatListRequest) returns (GetChatListResponse) {}
     rpc CreateMessage(CreateMessageRequest) returns (google.protobuf.Empty) {}
     rpc UpdateChat(UpdateChatRequest) returns (google.protobuf.Empty) {}
+    rpc UpdateChatProfielPhotoUrl(UpdateProfilePhotoUrlRequest) returns (google.protobuf.Empty) {}
+    rpc UpdateChatMessage(UpdateChatMessageRequest) returns (google.protobuf.Empty) {}
+
+    rpc CreateBot (CreateBotRequest) returns (CreateBotResponse) {}
+    rpc UpdateBotStatus(UpdateBotStatusRequest) returns (google.protobuf.Empty) {}
+    rpc UpdateBotToken(UpdateBotTokenRequest) returns (google.protobuf.Empty) {}
+    rpc GetBotTokenList (GetBotTokenListRequest) returns (GetBotTokenListResponse) {}
+    rpc GetBotTokenByBotId (GetBotByBotIdRequest) returns (GetBotByBotIdResponse) {}
+    rpc GetBotIDByChatId (GetBotIDByChatIDRequest) returns (GetBotIDByChatIDResponse) {}
+    rpc DeleteBotToken(DeleteBotTokenRequest) returns (google.protobuf.Empty) {}
+}
+
+message Bot{
+    string bot_id =1;
+    string bot_token = 2;
+    string environment_id = 3;
+    string created_at = 4;
+    string updated_at = 5;
+    string status=6;
+}
+
+message CreateBotRequest{
+    string bot_token = 1;
+    string environment_id = 2;
+}
+
+message CreateBotResponse{
+    string bot_id = 1;
+}
+
+message DeleteBotTokenRequest{
+    string bot_id = 1;
+}
+
+message UpdateBotStatusRequest{
+    string bot_token = 1;
+    string status = 2;
+}
+
+message UpdateBotTokenRequest{
+    string bot_id = 1;
+    string bot_token = 2;
+}
+
+message GetBotByBotIdRequest{
+    string bot_id = 1;
+}
+
+message GetBotTokenListResponse{
+    repeated Bot bottokenlist = 1;
+}
+message GetBotTokenListRequest{
+    string environment_id = 1;
+}
+
+message GetBotByBotIdResponse{
+    string bot_token =1;
+}
+
+message DeleteBotToken{
+    string bot_id = 1;
 }
 
 // Chat ...
-message Chat {
+message Chat { 
     string phone_number = 1;
     string sender_name = 2;
     string message = 3;
-    string platformType = 4;
+    string platform_type = 4;
     string environment_id = 5;
     string created_at = 6;
     bool check=7;
@@ -26,7 +88,9 @@ message Chat {
 
 message CreateChatRequest{
     string user_id = 1;
-    Chat chat = 2;
+    string bot_id = 2;
+    Chat chat = 3;
+    string userProfilePhotoUrl=4;
 }
 
 message CreateChatResponse{
@@ -38,8 +102,11 @@ message UserMessage {
     string message = 2;
     string created_at = 3;
     string user_id = 4;
-    string platformType = 5;
+    string platform_type = 5;
     bool check=6;
+    string message_id=7;
+    string bot_id = 8;
+    string message_type = 9;
 }
 
 message GetChatByChatIdRequest {
@@ -48,16 +115,38 @@ message GetChatByChatIdRequest {
 
 message GetChatByUserIdRequest {
     string user_id = 1;
+    string bot_id = 2;
 }
+
+message GetBotIDByChatIDRequest {
+    string chat_id = 1;
+}
+
+message UpdateProfilePhotoUrlRequest {
+    string user_id = 1;
+    string userProfilePhotoUrl=2;
+}
+
+message GetBotIDByChatIDResponse{
+    string bot_id = 1;
+}
+
 
 message GetChatByChatIdResponse {
     string chat_id = 1;
     repeated UserMessage messages = 2;
+    string platform_type = 3;
+    string user_id = 4;
+    string bot_id = 5;
+    string userProfilePhotoUrl=6;
+
 }
 
 message GetChatByUserIdResponse {
     string user_id = 1;
     string chat_id = 2;
+    string bot_id = 3;
+    string userProfilePhotoUrl=4;
 }
 
 message GetChatListRequest {
@@ -72,6 +161,13 @@ message ChatWithLastMessageData {
     string environment_id = 4;
     bool check = 5;
     string created_at = 6;
+    string platform_type = 7;
+    string user_id = 8;
+    string bot_id=9;
+    string message_type = 10;
+    string userProfilePhotoUrl=11;
+
+
 }
 
 message GetChatListResponse {
@@ -93,7 +189,11 @@ message GetSelfChatContentResponse {
     ChatWithLastMessageData message = 1;
 }
 
-
 message UpdateChatRequest {
     string chat_id = 1;
 }
+
+message UpdateChatMessageRequest {
+    string message_id = 1;
+}
+

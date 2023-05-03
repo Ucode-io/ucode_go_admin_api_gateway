@@ -60,6 +60,7 @@ message CreateTableRequest {
     string project_id = 11;
     string commit_id = 12;
     string version_id = 13;
+    string folder_id = 14;
 }
 
 message IncrementID {
@@ -93,6 +94,7 @@ message Table {
     bool is_own_table = 9;
     IncrementID increment_id = 10;
     string project_id = 11;
+    string folder_id = 12;
 }
 
 message GetAllTablesResponse {
@@ -111,4 +113,5 @@ message GetAllTablesRequest {
     int32 limit = 2;
     string search = 3;
     string project_id = 4;
+    string version_id = 5;
 }

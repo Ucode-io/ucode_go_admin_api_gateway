@@ -436,6 +436,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2Admin.GET("/function", h.GetAllNewFunctions)
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
+
+		v2Admin.POST("/table-folder", h.CreateTableFolder)
+		v2Admin.PUT("/table-folder", h.UpdateTableFolder)
+		v2Admin.GET("/table-folder", h.GetAllTableFolders)
+		v2Admin.GET("/table-folder/:id", h.GetTableFolderByID)
+		v2Admin.DELETE("/table-folder/:id", h.DeleteTableFolder)
 	}
 
 	// v3 for ucode version 2
