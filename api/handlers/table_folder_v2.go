@@ -118,7 +118,7 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 	resp, err := services.PostgresBuilderService().TableFolder().Create(
 		context.Background(),
 		&postgresObs.TableFolderRequest{
-			Name:      tableFolder.Name,
+			Title:      tableFolder.Name,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
@@ -481,7 +481,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 		context.Background(),
 		&postgresObs.TableFolder{
 			Id:        tableFolder.Id,
-			Name:      tableFolder.Name,
+			Title:      tableFolder.Name,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
