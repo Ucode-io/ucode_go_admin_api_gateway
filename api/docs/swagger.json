@@ -40032,7 +40032,7 @@
             "type": "object",
             "properties": {
                 "default": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
@@ -40047,7 +40047,7 @@
                     "type": "string"
                 },
                 "value": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "type": "string"
                 }
             }
         },

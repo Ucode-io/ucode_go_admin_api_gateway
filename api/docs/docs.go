@@ -40051,7 +40051,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "default": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
@@ -40066,7 +40066,7 @@ var doc = `{
                     "type": "string"
                 },
                 "value": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "type": "string"
                 }
             }
         },

@@ -41,9 +41,9 @@ message Query {
 message Variable {
   string id = 1;
   string key = 2;
-  google.protobuf.Struct value = 3;
+  string value = 3;
   string type = 4;
-  google.protobuf.Struct default = 5;
+  string default = 5;
   string query_id = 6;
 }
 

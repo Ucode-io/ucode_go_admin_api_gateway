@@ -3887,7 +3887,7 @@ definitions:
   query_service.Variable:
     properties:
       default:
-        $ref: '#/definitions/structpb.Struct'
+        type: string
       id:
         type: string
       key:
@@ -3897,7 +3897,7 @@ definitions:
       type:
         type: string
       value:
-        $ref: '#/definitions/structpb.Struct'
+        type: string
     type: object
   query_service.VersionInfo:
     properties:
