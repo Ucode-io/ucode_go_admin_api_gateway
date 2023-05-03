@@ -450,8 +450,6 @@ definitions:
         type: string
       userProfilePhotoUrl:
         type: string
-<<<<<<< HEAD
-=======
     type: object
   chat_service.GetBotByBotIdResponse:
     properties:
@@ -464,7 +462,6 @@ definitions:
         items:
           $ref: '#/definitions/chat_service.Bot'
         type: array
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
     type: object
   chat_service.GetChatByChatIdResponse:
     properties:
@@ -863,7 +860,7 @@ definitions:
   company_service.ReconnectResourceRes_ReconnectStatus:
     properties:
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       status:
         type: boolean
     type: object
@@ -1629,13 +1626,7 @@ definitions:
     type: object
   models.CreateTableFolderRequest:
     properties:
-<<<<<<< HEAD
-      parentd_id:
-        type: string
-      title:
-=======
       name:
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         type: string
     type: object
   models.CreateTableRequest:
@@ -2089,13 +2080,6 @@ definitions:
       recipient:
         type: string
       text:
-        type: string
-    type: object
-  models.TableFolder:
-    properties:
-      id:
-        type: string
-      name:
         type: string
     type: object
   models.UpdateAppReqModel:
@@ -5752,6 +5736,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/template_service.GetObjectTokenReq'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -18737,7 +18726,6 @@ paths:
       summary: Update table
       tags:
       - Table
-<<<<<<< HEAD
   /v1/table-history:
     put:
       consumes:
@@ -18811,15 +18799,6 @@ paths:
         in: header
         name: Resource-Id
         type: string
-=======
-  /v1/table-folder:
-    get:
-      consumes:
-      - application/json
-      description: Get all table folders
-      operationId: get_all_table_folders
-      parameters:
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -18830,44 +18809,22 @@ paths:
         name: project-id
         required: true
         type: string
-<<<<<<< HEAD
       - description: id
         in: path
         name: id
         required: true
-=======
-      - description: limit
-        in: query
-        name: limit
-        type: number
-      - description: offset
-        in: query
-        name: offset
-        type: number
-      - description: search
-        in: query
-        name: search
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         type: string
       produces:
       - application/json
       responses:
         "200":
-<<<<<<< HEAD
           description: TableBody
-=======
-          description: TableFolderBody
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.Table'
-=======
-                  type: string
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
               type: object
         "400":
           description: Invalid Argument
@@ -18889,7 +18846,6 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-<<<<<<< HEAD
       summary: Get table history by id
       tags:
       - Table
@@ -18899,16 +18855,6 @@ paths:
       - application/json
       description: Get table histories
       operationId: get_table_histories
-=======
-      summary: Get all table folders
-      tags:
-      - TableFolder
-    post:
-      consumes:
-      - application/json
-      description: Create Table Folder
-      operationId: create_table_folder
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       parameters:
       - description: Resource-Id
         in: header
@@ -18924,7 +18870,6 @@ paths:
         name: project-id
         required: true
         type: string
-<<<<<<< HEAD
       - description: table_id
         in: path
         name: table_id
@@ -18935,35 +18880,15 @@ paths:
       responses:
         "200":
           description: TableBody
-=======
-      - description: CreateTableFolderRequestBody
-        in: body
-        name: Function
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateTableFolderRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Function data
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.GetTableHistoryResponse'
               type: object
         "400":
           description: Invalid Argument
-=======
-                  $ref: '#/definitions/models.TableFolder'
-              type: object
-        "400":
-          description: Bad Request
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
@@ -18982,7 +18907,6 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-<<<<<<< HEAD
       summary: Get table histories
       tags:
       - Table
@@ -18997,17 +18921,6 @@ paths:
         in: header
         name: Resource-Id
         type: string
-=======
-      summary: Create Table Folder
-      tags:
-      - TableFolder
-    put:
-      consumes:
-      - application/json
-      description: Update table folder
-      operationId: update_table_folder
-      parameters:
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -19018,146 +18931,23 @@ paths:
         name: project-id
         required: true
         type: string
-<<<<<<< HEAD
       - description: UpdateTableRequestBody
         in: body
         name: table
         required: true
         schema:
           $ref: '#/definitions/models.RevertHistoryRequest'
-=======
-      - description: UpdateTableFolderRequestBody
-        in: body
-        name: Table
-        required: true
-        schema:
-          $ref: '#/definitions/models.TableFolder'
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       produces:
       - application/json
       responses:
         "200":
-<<<<<<< HEAD
           description: TableBody
-=======
-          description: Function data
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.TableHistory'
-=======
-                  $ref: '#/definitions/models.TableFolder'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Update table folder
-      tags:
-      - TableFolder
-  /v1/table-folder/{table_folder_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete Table Folder
-      operationId: delete_table_folder
-      parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: table_folder_id
-        in: path
-        name: table_folder_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete Table Folder
-      tags:
-      - TableFolder
-    get:
-      consumes:
-      - application/json
-      description: Get table by id
-      operationId: get_table_folder_by_id
-      parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: table_folder_id
-        in: path
-        name: table_folder_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: FunctionBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.TableFolder'
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
               type: object
         "400":
           description: Invalid Argument
@@ -19179,15 +18969,9 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-<<<<<<< HEAD
       summary: Get table history by id
       tags:
       - Table
-=======
-      summary: Get table by id
-      tags:
-      - TableFolder
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
   /v1/table/{table_id}:
     delete:
       consumes:
@@ -22866,21 +22650,12 @@ paths:
       summary: Get Function by id
       tags:
       - Function
-<<<<<<< HEAD
-  /v2/table-folder:
-    get:
-      consumes:
-      - application/json
-      description: Get all table folders
-      operationId: get_all_table_folders
-=======
   /v2/table:
     get:
       consumes:
       - application/json
       description: V2 Get all tables
       operationId: v2_get_all_tables
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       parameters:
       - description: Resource-Id
         in: header
@@ -22903,12 +22678,199 @@ paths:
         name: offset
         type: integer
       - in: query
-<<<<<<< HEAD
-=======
         name: project_id
         type: string
       - in: query
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
+        name: search
+        type: string
+      - in: query
+        name: version_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/postgres_object_builder_service.GetAllTablesResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: V2 Get all tables
+      tags:
+      - V2Table
+    post:
+      consumes:
+      - application/json
+      description: v2 Create table
+      operationId: v2_create_table
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateTableRequestBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTableRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Table data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/postgres_object_builder_service.Table'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: v2 Create table
+      tags:
+      - V2Table
+    put:
+      consumes:
+      - application/json
+      description: Update table
+      operationId: v2_update_table
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateTableRequestBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/postgres_object_builder_service.Table'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Table data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/postgres_object_builder_service.Table'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update table
+      tags:
+      - V2Table
+  /v2/table-folder:
+    get:
+      consumes:
+      - application/json
+      description: Get all table folders
+      operationId: get_all_table_folders
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
         name: search
         type: string
       produces:
@@ -22921,11 +22883,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.GetAllTablesResponse'
-=======
-                  $ref: '#/definitions/postgres_object_builder_service.GetAllTablesResponse'
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
               type: object
         "400":
           description: Invalid Argument
@@ -22947,7 +22905,6 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-<<<<<<< HEAD
       summary: Get all table folders
       tags:
       - Table
@@ -22956,16 +22913,6 @@ paths:
       - application/json
       description: Create table folder
       operationId: create_table_folder
-=======
-      summary: V2 Get all tables
-      tags:
-      - V2Table
-    post:
-      consumes:
-      - application/json
-      description: v2 Create table
-      operationId: v2_create_table
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       parameters:
       - description: Resource-Id
         in: header
@@ -22981,20 +22928,12 @@ paths:
         name: project-id
         required: true
         type: string
-<<<<<<< HEAD
       - description: CreateTableFolderRequest
-=======
-      - description: CreateTableRequestBody
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         in: body
         name: table
         required: true
         schema:
-<<<<<<< HEAD
           $ref: '#/definitions/models.CreateTableFolderRequest'
-=======
-          $ref: '#/definitions/models.CreateTableRequest'
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       produces:
       - application/json
       responses:
@@ -23005,11 +22944,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.TableFolder'
-=======
-                  $ref: '#/definitions/postgres_object_builder_service.Table'
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
               type: object
         "400":
           description: Bad Request
@@ -23031,7 +22966,6 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-<<<<<<< HEAD
       summary: Create table folder
       tags:
       - Table
@@ -23040,16 +22974,6 @@ paths:
       - application/json
       description: Update table folder
       operationId: update_table_folder
-=======
-      summary: v2 Create table
-      tags:
-      - V2Table
-    put:
-      consumes:
-      - application/json
-      description: Update table
-      operationId: v2_update_table
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       parameters:
       - description: Resource-Id
         in: header
@@ -23065,20 +22989,12 @@ paths:
         name: project-id
         required: true
         type: string
-<<<<<<< HEAD
       - description: TableFolder
-=======
-      - description: UpdateTableRequestBody
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         in: body
         name: table
         required: true
         schema:
-<<<<<<< HEAD
           $ref: '#/definitions/object_builder_service.TableFolder'
-=======
-          $ref: '#/definitions/postgres_object_builder_service.Table'
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       produces:
       - application/json
       responses:
@@ -23089,11 +23005,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.TableFolder'
-=======
-                  $ref: '#/definitions/postgres_object_builder_service.Table'
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
               type: object
         "400":
           description: Bad Request
@@ -23115,7 +23027,6 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-<<<<<<< HEAD
       summary: Update table folder
       tags:
       - Table
@@ -23125,17 +23036,6 @@ paths:
       - application/json
       description: Delete Table Folder
       operationId: delete_table_folder
-=======
-      summary: Update table
-      tags:
-      - V2Table
-  /v2/table/{table_id}:
-    delete:
-      consumes:
-      - application/json
-      description: V2 Delete Table
-      operationId: v2_delete_table
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       parameters:
       - description: Resource-Id
         in: header
@@ -23151,26 +23051,16 @@ paths:
         name: project-id
         required: true
         type: string
-<<<<<<< HEAD
       - description: id
         in: path
         name: id
-=======
-      - description: table_id
-        in: path
-        name: table_id
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         required: true
         type: string
       produces:
       - application/json
       responses:
         "204":
-<<<<<<< HEAD
           description: No Content
-=======
-          description: ""
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         "400":
           description: Invalid Argument
           schema:
@@ -23191,7 +23081,6 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-<<<<<<< HEAD
       summary: Delete Table Folder
       tags:
       - Table
@@ -23200,16 +23089,6 @@ paths:
       - application/json
       description: Get table folder by id
       operationId: get_table_folder_by_id
-=======
-      summary: V2 Delete Table
-      tags:
-      - V2Table
-    get:
-      consumes:
-      - application/json
-      description: V2 Get table by id
-      operationId: v2_get_table_by_id
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       parameters:
       - description: Resource-Id
         in: header
@@ -23225,15 +23104,9 @@ paths:
         name: project-id
         required: true
         type: string
-<<<<<<< HEAD
       - description: id
         in: path
         name: id
-=======
-      - description: table_id
-        in: path
-        name: table_id
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         required: true
         type: string
       produces:
@@ -23246,11 +23119,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.TableFolder'
-=======
-                  $ref: '#/definitions/models.CreateTableResponse'
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
               type: object
         "400":
           description: Invalid Argument
@@ -23272,11 +23141,120 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-<<<<<<< HEAD
       summary: Get table folder by id
       tags:
       - Table
-=======
+  /v2/table/{table_id}:
+    delete:
+      consumes:
+      - application/json
+      description: V2 Delete Table
+      operationId: v2_delete_table
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: table_id
+        in: path
+        name: table_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: V2 Delete Table
+      tags:
+      - V2Table
+    get:
+      consumes:
+      - application/json
+      description: V2 Get table by id
+      operationId: v2_get_table_by_id
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: table_id
+        in: path
+        name: table_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CreateTableResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
       summary: V2 Get table by id
       tags:
       - V2Table
@@ -23556,7 +23534,6 @@ paths:
       summary: GetBotTokenByBotID
       tags:
       - Chat
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
   /v3/chat:
     get:
       consumes:

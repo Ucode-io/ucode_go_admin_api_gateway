@@ -245,19 +245,6 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		return
 	}
 
-<<<<<<< HEAD
-	// resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	// 	context.Background(),
-	// 	&company_service.GetResEnvByResIdEnvIdRequest{
-	// 		EnvironmentId: environmentId.(string),
-	// 		ResourceId:    resource.ResourceEnvironmentId,
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
-=======
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
 	//	&company_service.GetResEnvByResIdEnvIdRequest{
@@ -278,7 +265,6 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())

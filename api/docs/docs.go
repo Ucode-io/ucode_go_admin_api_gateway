@@ -1194,6 +1194,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/template_service.GetObjectTokenReq"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -23727,7 +23734,6 @@ const docTemplate = `{
                 }
             }
         },
-<<<<<<< HEAD
         "/v1/table-history": {
             "put": {
                 "security": [
@@ -23837,20 +23843,13 @@ const docTemplate = `{
             }
         },
         "/v1/table-history/list/{table_id}": {
-=======
-        "/v1/table-folder": {
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-<<<<<<< HEAD
                 "description": "Get table histories",
-=======
-                "description": "Get all table folders",
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                 "consumes": [
                     "application/json"
                 ],
@@ -23858,7 +23857,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-<<<<<<< HEAD
                     "Table"
                 ],
                 "summary": "Get table histories",
@@ -23872,15 +23870,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-=======
-                    "TableFolder"
-                ],
-                "summary": "Get all table folders",
-                "operationId": "get_all_table_folders",
-                "parameters": [
-                    {
-                        "type": "string",
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
@@ -23894,39 +23883,16 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "type": "string",
                         "description": "table_id",
                         "name": "table_id",
                         "in": "path",
                         "required": true
-=======
-                        "type": "number",
-                        "description": "limit",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "number",
-                        "description": "offset",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "search",
-                        "name": "search",
-                        "in": "query"
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                     }
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "TableBody",
-=======
-                        "description": "TableFolderBody",
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                         "schema": {
                             "allOf": [
                                 {
@@ -23936,11 +23902,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-<<<<<<< HEAD
                                             "$ref": "#/definitions/object_builder_service.GetTableHistoryResponse"
-=======
-                                            "type": "string"
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                                         }
                                     }
                                 }
@@ -23984,24 +23946,16 @@ const docTemplate = `{
                         }
                     }
                 }
-<<<<<<< HEAD
             }
         },
         "/v1/table-history/revert": {
-=======
-            },
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
             "put": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-<<<<<<< HEAD
                 "description": "Get table history by id",
-=======
-                "description": "Update table folder",
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                 "consumes": [
                     "application/json"
                 ],
@@ -24009,117 +23963,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-<<<<<<< HEAD
                     "Table"
                 ],
                 "summary": "Get table history by id",
                 "operationId": "revert_table_history",
-=======
-                    "TableFolder"
-                ],
-                "summary": "Update table folder",
-                "operationId": "update_table_folder",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateTableFolderRequestBody",
-                        "name": "Table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.TableFolder"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Function data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/models.TableFolder"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Create Table Folder",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "TableFolder"
-                ],
-                "summary": "Create Table Folder",
-                "operationId": "create_table_folder",
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                 "parameters": [
                     {
                         "type": "string",
@@ -24142,32 +23989,18 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-<<<<<<< HEAD
                         "description": "UpdateTableRequestBody",
                         "name": "table",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/models.RevertHistoryRequest"
-=======
-                        "description": "CreateTableFolderRequestBody",
-                        "name": "Function",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateTableFolderRequest"
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                         }
                     }
                 ],
                 "responses": {
-<<<<<<< HEAD
                     "200": {
                         "description": "TableBody",
-=======
-                    "201": {
-                        "description": "Function data",
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                         "schema": {
                             "allOf": [
                                 {
@@ -24177,11 +24010,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-<<<<<<< HEAD
                                             "$ref": "#/definitions/object_builder_service.TableHistory"
-=======
-                                            "$ref": "#/definitions/models.TableFolder"
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                                         }
                                     }
                                 }
@@ -24189,11 +24018,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-<<<<<<< HEAD
                         "description": "Invalid Argument",
-=======
-                        "description": "Bad Request",
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                         "schema": {
                             "allOf": [
                                 {
@@ -24231,22 +24056,14 @@ const docTemplate = `{
                 }
             }
         },
-<<<<<<< HEAD
         "/v1/table-history/{id}": {
-=======
-        "/v1/table-folder/{table_folder_id}": {
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-<<<<<<< HEAD
                 "description": "Get table history by id",
-=======
-                "description": "Get table by id",
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                 "consumes": [
                     "application/json"
                 ],
@@ -24254,7 +24071,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-<<<<<<< HEAD
                     "Table"
                 ],
                 "summary": "Get table history by id",
@@ -24268,15 +24084,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-=======
-                    "TableFolder"
-                ],
-                "summary": "Get table by id",
-                "operationId": "get_table_folder_by_id",
-                "parameters": [
-                    {
-                        "type": "string",
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
@@ -24291,24 +24098,15 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-<<<<<<< HEAD
                         "description": "id",
                         "name": "id",
-=======
-                        "description": "table_folder_id",
-                        "name": "table_folder_id",
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "TableBody",
-=======
-                        "description": "FunctionBody",
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                         "schema": {
                             "allOf": [
                                 {
@@ -24318,11 +24116,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-<<<<<<< HEAD
                                             "$ref": "#/definitions/object_builder_service.Table"
-=======
-                                            "$ref": "#/definitions/models.TableFolder"
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                                         }
                                     }
                                 }
@@ -24366,92 +24160,6 @@ const docTemplate = `{
                         }
                     }
                 }
-<<<<<<< HEAD
-=======
-            },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Delete Table Folder",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "TableFolder"
-                ],
-                "summary": "Delete Table Folder",
-                "operationId": "delete_table_folder",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "table_folder_id",
-                        "name": "table_folder_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": ""
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
             }
         },
         "/v1/table/{table_id}": {
@@ -30815,6 +30523,342 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/table": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "V2 Get all tables",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2Table"
+                ],
+                "summary": "V2 Get all tables",
+                "operationId": "v2_get_all_tables",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "version_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "TableBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/postgres_object_builder_service.GetAllTablesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update table",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2Table"
+                ],
+                "summary": "Update table",
+                "operationId": "v2_update_table",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "UpdateTableRequestBody",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/postgres_object_builder_service.Table"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Table data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/postgres_object_builder_service.Table"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "v2 Create table",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2Table"
+                ],
+                "summary": "v2 Create table",
+                "operationId": "v2_create_table",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateTableRequestBody",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateTableRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Table data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/postgres_object_builder_service.Table"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/table-folder": {
             "get": {
                 "security": [
@@ -31336,337 +31380,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v2/table": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "V2 Get all tables",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "V2Table"
-                ],
-                "summary": "V2 Get all tables",
-                "operationId": "v2_get_all_tables",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "project_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "search",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "TableBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/postgres_object_builder_service.GetAllTablesResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Update table",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "V2Table"
-                ],
-                "summary": "Update table",
-                "operationId": "v2_update_table",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateTableRequestBody",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/postgres_object_builder_service.Table"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Table data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/postgres_object_builder_service.Table"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "v2 Create table",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "V2Table"
-                ],
-                "summary": "v2 Create table",
-                "operationId": "v2_create_table",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "CreateTableRequestBody",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateTableRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Table data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/postgres_object_builder_service.Table"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/status_http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/v2/table/{table_id}": {
             "get": {
                 "security": [
@@ -31821,7 +31534,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -35070,8 +34783,6 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "string"
-<<<<<<< HEAD
-=======
                 }
             }
         },
@@ -35091,7 +34802,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/chat_service.Bot"
                     }
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                 }
             }
         },
@@ -35706,7 +35416,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "status": {
                     "type": "boolean"
@@ -36862,14 +36572,7 @@ const docTemplate = `{
         "models.CreateTableFolderRequest": {
             "type": "object",
             "properties": {
-<<<<<<< HEAD
-                "parentd_id": {
-                    "type": "string"
-                },
-                "title": {
-=======
                 "name": {
->>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
                     "type": "string"
                 }
             }
@@ -37560,17 +37263,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "text": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.TableFolder": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
                     "type": "string"
                 }
             }
