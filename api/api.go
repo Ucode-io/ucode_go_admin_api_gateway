@@ -76,6 +76,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/object/:table_slug", h.CreateObject)
 		v1.GET("/object/:table_slug/:object_id", h.GetSingle)
 		v1.POST("/object/get-list/:table_slug", h.GetList)
+		v1.GET("/object-slim/:table_slug/:object_id", h.GetSingleSlim)
+		v1.POST("/object-slim/get-list/:table_slug", h.GetListSlim)
 		v1.PUT("/object/:table_slug", h.UpdateObject)
 		v1.DELETE("/object/:table_slug/:object_id", h.DeleteObject)
 		v1.POST("/object/object-details/:table_slug", h.GetObjectDetails)
@@ -203,8 +205,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/code-generator/:table_slug/:field_id", h.GetNewGeneratedCode)
 
 		// Integration with AlfaLab
-		v1.POST("/alfalab/directions", h.CreateDirections)
-		v1.GET("/alfalab/referral", h.GetReferral)
+		// v1.POST("/alfalab/directions", h.CreateDirections)
+		// v1.GET("/alfalab/referral", h.GetReferral)
 
 		v1.POST("/export-to-json", h.ExportToJSON)
 		v1.POST("import-from-json", h.ImportFromJSON)
@@ -251,6 +253,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/template-note/share", h.CreateSharingToken)
 		v1.PUT("/template-note/share", h.UpdateSharingToken)
 
+		// api-reference
+		v1.GET("/api-reference", h.GetAllApiReferences)
+		v1.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
+		v1.GET("/category/:category_id", h.GetApiCategoryByID)
+		v1.GET("/category", h.GetAllCategories)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))
@@ -325,8 +332,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		//api-reference service
 		v1Admin.POST("/api-reference", h.CreateApiReference)
 		v1Admin.PUT("/api-reference", h.UpdateApiReference)
-		v1Admin.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
-		v1Admin.GET("/api-reference", h.GetAllApiReferences)
+		// v1Admin.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
+		// v1Admin.GET("/api-reference", h.GetAllApiReferences)
 		v1Admin.DELETE("/api-reference/:project_id/:api_reference_id", h.DeleteApiReference)
 		v1Admin.GET("/api-reference/history/:project_id/:api_reference_id", h.GetApiReferenceChanges)
 		v1Admin.POST("/api-reference/revert/:api_reference_id", h.RevertApiReference)
@@ -334,8 +341,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		v1Admin.POST("/category", h.CreateCategory)
 		v1Admin.PUT("/category", h.UpdateCategory)
-		v1Admin.GET("/category/:category_id", h.GetApiCategoryByID)
-		v1Admin.GET("/category", h.GetAllCategories)
+		// v1Admin.GET("/category/:category_id", h.GetApiCategoryByID)
+		// v1Admin.GET("/category", h.GetAllCategories)
 		v1Admin.DELETE("/category/:category_id", h.DeleteCategory)
 
 		// function folder
@@ -470,6 +477,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v3.POST("/chat", h.CreatChat)
 		v3.GET("/chat", h.GetChatList)
 		v3.GET("/chat/:id", h.GetChatByChatID)
+
+		v3.POST("/bot", h.CreateBot)
+		v3.GET("/bot/:id", h.GetBotTokenByBotID)
+		v3.GET("/bot", h.GetBotTokenList)
+		v3.PUT("/bot", h.UpdateBotToken)
+		v3.DELETE("/bot/:id", h.DeleteBotToken)
 
 	}
 

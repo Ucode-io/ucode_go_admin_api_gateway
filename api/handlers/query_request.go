@@ -119,7 +119,8 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	//	}
 	//}
 
-	query.ProjectId = resource.ResourceEnvironmentId
+	query.ProjectId = projectId
+	query.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -256,10 +257,11 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 	res, err := services.QueryService().Query().GetSingleQuery(
 		context.Background(),
 		&tmp.GetSingleQueryReq{
-			Id:        queryId,
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: versionId,
-			CommitId:  commitId,
+			Id:         queryId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  versionId,
+			CommitId:   commitId,
 		},
 	)
 	if err != nil {
@@ -396,7 +398,8 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 	//	}
 	//}
 
-	query.ProjectId = resource.ResourceEnvironmentId
+	query.ProjectId = projectId
+	query.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -541,9 +544,10 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 	res, err := services.QueryService().Query().DeleteQuery(
 		context.Background(),
 		&tmp.DeleteQueryReq{
-			Id:        queryId,
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: uuid.NewString(),
+			Id:         queryId,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  uuid.NewString(),
 		},
 	)
 
@@ -664,11 +668,12 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 	res, err := services.QueryService().Query().GetListQuery(
 		context.Background(),
 		&tmp.GetListQueryReq{
-			ProjectId: resource.ResourceEnvironmentId,
-			VersionId: "",
-			FolderId:  c.DefaultQuery("folder-id", ""),
-			Limit:     int32(limit),
-			Offset:    int32(offset),
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			VersionId:  "",
+			FolderId:   c.DefaultQuery("folder-id", ""),
+			Limit:      int32(limit),
+			Offset:     int32(offset),
 		},
 	)
 
@@ -780,7 +785,8 @@ func (h *Handler) QueryRun(c *gin.Context) {
 	//	}
 	//}
 
-	query.ProjectId = resource.ResourceEnvironmentId
+	query.ResourceId = resource.ResourceEnvironmentId
+	query.ProjectId = projectId
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -924,10 +930,11 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 	resp, err := services.QueryService().Query().GetQueryHistory(
 		context.Background(),
 		&tmp.GetQueryHistoryReq{
-			Id:        id,
-			ProjectId: resource.ResourceEnvironmentId,
-			Offset:    int64(offset),
-			Limit:     int64(limit),
+			Id:         id,
+			ProjectId:  projectId,
+			ResourceId: resource.ResourceEnvironmentId,
+			Offset:     int64(offset),
+			Limit:      int64(limit),
 		},
 	)
 	if err != nil {
@@ -1123,7 +1130,8 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 			VersionId:   versionGuid,
 			OldCommitId: body.CommitId,
 			NewCommitId: commitGuid,
-			ProjectId:   resource.ResourceEnvironmentId,
+			ProjectId:   projectId,
+			ResourceId:  resource.ResourceEnvironmentId,
 		},
 	)
 	if err != nil {
@@ -1148,7 +1156,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 // @Produce json
 // @Param query-id path string true "query-id"
 // @Param project-id query string true "project-id"
-// @Param data body query_service.QueryManyVersions true "Request Body"
+// @Param data body tmp.QueryManyVersions true "Request Body"
 // @Success 200 {object} status_http.Response{data=string} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -1240,7 +1248,8 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 	//	}
 	//}
 
-	body.ProjectId = resource.ResourceEnvironmentId
+	body.ProjectId = projectId
+	body.ResourceId = resource.ResourceEnvironmentId
 	body.EnvironmentId = environmentId.(string)
 	body.Id = queryId
 
@@ -1369,7 +1378,8 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleLogReq{
 			Id:            logId,
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     projectId,
+			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -1499,7 +1509,8 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 		context.Background(),
 		&tmp.GetListLogReq{
 			QueryId:       queryId,
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     projectId,
+			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 			Limit:         int64(limit),
 			Offset:        int64(offset),

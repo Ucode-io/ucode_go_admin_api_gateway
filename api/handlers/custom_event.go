@@ -24,8 +24,7 @@ import (
 // @Tags CustomEvent
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param Customevent body object_builder_service.CreateCustomEventRequest true "CreateCustomEventRequestBody"
+// @Param Customevent body obs.CreateCustomEventRequest true "CreateCustomEventRequestBody"
 // @Success 201 {object} status_http.Response{data=string} "CustomEvent data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -243,8 +242,7 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 // @Tags CustomEvent
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param filters query object_builder_service.GetCustomEventsListRequest true "filters"
+// @Param filters query obs.GetCustomEventsListRequest true "filters"
 // @Success 200 {object} status_http.Response{data=string} "CustomEventBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

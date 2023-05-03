@@ -77,7 +77,7 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessU
 		return nil, errors.New("token error: wrong format")
 	}
 
-	fmt.Println(":::::accessResponse", accessResponse)
+	// fmt.Println(":::::accessResponse", accessResponse)
 
 	return accessResponse, nil
 }

@@ -411,6 +411,21 @@ definitions:
       user_id:
         type: string
     type: object
+  chat_service.Bot:
+    properties:
+      bot_id:
+        type: string
+      bot_token:
+        type: string
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+    type: object
   chat_service.ChatWithLastMessageData:
     properties:
       bot_id:
@@ -435,6 +450,21 @@ definitions:
         type: string
       userProfilePhotoUrl:
         type: string
+<<<<<<< HEAD
+=======
+    type: object
+  chat_service.GetBotByBotIdResponse:
+    properties:
+      bot_token:
+        type: string
+    type: object
+  chat_service.GetBotTokenListResponse:
+    properties:
+      bottokenlist:
+        items:
+          $ref: '#/definitions/chat_service.Bot'
+        type: array
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
     type: object
   chat_service.GetChatByChatIdResponse:
     properties:
@@ -823,6 +853,20 @@ definitions:
       project_id:
         type: string
     type: object
+  company_service.ReconnectResourceRes:
+    properties:
+      reconnect_status:
+        items:
+          $ref: '#/definitions/company_service.ReconnectResourceRes_ReconnectStatus'
+        type: array
+    type: object
+  company_service.ReconnectResourceRes_ReconnectStatus:
+    properties:
+      service_type:
+        type: integer
+      status:
+        type: boolean
+    type: object
   company_service.RemoveResourceRequest:
     properties:
       id:
@@ -1133,6 +1177,10 @@ definitions:
           username:
             type: string
         type: object
+      postgresBuilderServiceHost:
+        type: string
+      postgresBuilderServicePort:
+        type: string
       queryServiceHost:
         type: string
       queryServicePort:
@@ -1305,27 +1353,6 @@ definitions:
       title:
         type: string
     type: object
-  models.Assays:
-    properties:
-      item:
-        items:
-          $ref: '#/definitions/models.AssaysItem'
-        type: array
-    type: object
-  models.AssaysItem:
-    properties:
-      barcode:
-        type: string
-      biomaterial_code:
-        type: string
-      orders:
-        $ref: '#/definitions/models.AssaysOrders'
-    type: object
-  models.AssaysOrders:
-    properties:
-      item_code:
-        type: string
-    type: object
   models.Category:
     properties:
       attributes:
@@ -1427,6 +1454,11 @@ definitions:
       sub_domain:
         type: string
     type: object
+  models.CreateBotToken:
+    properties:
+      bot_token:
+        type: string
+    type: object
   models.CreateCashboxTransactionRequest:
     properties:
       amount_of_money:
@@ -1465,15 +1497,6 @@ definitions:
         type: string
       name:
         type: string
-    type: object
-  models.CreateDirections:
-    properties:
-      assays:
-        $ref: '#/definitions/models.Assays'
-      patient:
-        $ref: '#/definitions/models.Patient'
-      referral:
-        $ref: '#/definitions/models.Referral'
     type: object
   models.CreateFieldRequest:
     properties:
@@ -1606,9 +1629,13 @@ definitions:
     type: object
   models.CreateTableFolderRequest:
     properties:
+<<<<<<< HEAD
       parentd_id:
         type: string
       title:
+=======
+      name:
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         type: string
     type: object
   models.CreateTableRequest:
@@ -1980,31 +2007,6 @@ definitions:
       title:
         type: string
     type: object
-  models.Patient:
-    properties:
-      birth_date:
-        type: string
-      body_temperature:
-        type: string
-      document_number:
-        type: string
-      email:
-        type: string
-      first_name:
-        type: string
-      gender:
-        type: string
-      last_name:
-        type: string
-      middle_name:
-        type: string
-      mis_id:
-        type: string
-      pay_category_id:
-        type: string
-      phone:
-        type: string
-    type: object
   models.Queries:
     properties:
       attributes:
@@ -2029,53 +2031,6 @@ definitions:
       commit_id:
         type: string
       project_id:
-        type: string
-    type: object
-  models.Referral:
-    properties:
-      cito:
-        type: string
-      comment:
-        type: string
-      comment_1:
-        type: string
-      cycle_period:
-        type: string
-      date:
-        type: string
-      delivery_date:
-        type: string
-      department_code:
-        type: string
-      department_name:
-        type: string
-      diagnosis_code:
-        type: string
-      diagnosisName:
-        type: string
-      diuresis_ml:
-        type: string
-      doctor_code:
-        type: string
-      doctor_name:
-        type: string
-      ecomment:
-        type: string
-      height_cm:
-        type: string
-      last_menstruation:
-        type: string
-      mis_id:
-        type: string
-      nr:
-        type: string
-      pay_category_id:
-        type: string
-      pregnancy_week:
-        type: string
-      sampling_date:
-        type: string
-      weight_kg:
         type: string
     type: object
   models.RegisterOtp:
@@ -2136,6 +2091,13 @@ definitions:
       text:
         type: string
     type: object
+  models.TableFolder:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   models.UpdateAppReqModel:
     properties:
       id:
@@ -2151,6 +2113,13 @@ definitions:
       routes:
         $ref: '#/definitions/structpb.Struct'
       sub_domain:
+        type: string
+    type: object
+  models.UpdateBotToken:
+    properties:
+      bot_id:
+        type: string
+      bot_token:
         type: string
     type: object
   models.UpdateCategoryRequest:
@@ -3665,6 +3634,49 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  postgres_object_builder_service.GetAllTablesResponse:
+    properties:
+      count:
+        type: integer
+      tables:
+        items:
+          $ref: '#/definitions/postgres_object_builder_service.Table'
+        type: array
+    type: object
+  postgres_object_builder_service.IncrementID:
+    properties:
+      digit_number:
+        type: integer
+      prefix:
+        type: string
+      with_increment_id:
+        type: boolean
+    type: object
+  postgres_object_builder_service.Table:
+    properties:
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      increment_id:
+        $ref: '#/definitions/postgres_object_builder_service.IncrementID'
+      is_own_table:
+        type: boolean
+      is_visible:
+        type: boolean
+      label:
+        type: string
+      project_id:
+        type: string
+      show_in_menu:
+        type: boolean
+      slug:
+        type: string
+      subtitle_field_slug:
+        type: string
     type: object
   query_service.CommitInfo:
     properties:
@@ -5840,120 +5852,6 @@ paths:
       summary: Get all action permissions
       tags:
       - Permission
-  /v1/alfalab/directions:
-    post:
-      consumes:
-      - application/json
-      description: Create Directions
-      operationId: create_patient
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: CreatePatientRequestBody
-        in: body
-        name: table
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateDirections'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Field data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.Field'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create Directions
-      tags:
-      - AlfaLab
-  /v1/alfalab/referral:
-    get:
-      consumes:
-      - application/json
-      description: Query Referral Result
-      operationId: query_referral_result
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: nr
-        in: query
-        name: nr
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Barcode
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/object_builder_service.BarcodeGenerateRes'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: query referral result
-      tags:
-      - AlfaLab
   /v1/analytics/dashboard:
     get:
       consumes:
@@ -6271,11 +6169,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -6574,11 +6467,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdatePanelCoordinatesRequestBody
         in: body
         name: panel_coordinates
@@ -6695,11 +6583,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: CreateVariableRequestBody
@@ -6934,6 +6817,11 @@ paths:
       - in: query
         name: version_id
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -6981,6 +6869,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.CreateApiReferenceModel'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -7028,6 +6921,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.ApiReference'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -7083,6 +6981,10 @@ paths:
         in: query
         name: version_id
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
       produces:
       - application/json
       responses:
@@ -7130,6 +7032,11 @@ paths:
         name: api_reference_id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -7170,9 +7077,9 @@ paths:
         name: api_reference_id
         required: true
         type: string
-      - description: project_id
-        in: path
-        name: project_id
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: page
@@ -7265,6 +7172,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/api_reference_service.ApiRevertApiReferenceRequest'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -7323,6 +7235,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/api_reference_service.ApiManyVersions'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -7378,11 +7295,6 @@ paths:
       - description: API key for the endpoint
         in: header
         name: X-API-KEY
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - in: query
@@ -7448,11 +7360,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateAppRequestBody
         in: body
         name: app
@@ -7508,11 +7415,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpdateAppRequestBody
@@ -7632,11 +7534,6 @@ paths:
         name: app_id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -7692,11 +7589,6 @@ paths:
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -7922,6 +7814,11 @@ paths:
       description: Get all categories
       operationId: get_all_category
       parameters:
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - in: query
         name: commit_id
         type: string
@@ -7987,6 +7884,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.CreateCategory'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -8034,6 +7936,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.Category'
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
       produces:
       - application/json
       responses:
@@ -8081,6 +7987,11 @@ paths:
         name: category_id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -8118,6 +8029,11 @@ paths:
       - description: category_id
         in: path
         name: category_id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       produces:
@@ -8232,11 +8148,6 @@ paths:
       - description: field_id
         in: path
         name: field_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -9579,7 +9490,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.EmptyProto'
+                  $ref: '#/definitions/company_service.ReconnectResourceRes'
               type: object
         "400":
           description: Bad Request
@@ -9738,11 +9649,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: method
         type: string
@@ -9807,11 +9713,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: CreateCustomEventRequestBody
@@ -10050,11 +9951,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: end_date
         type: string
@@ -10121,11 +10017,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateDocumentRequestBody
         in: body
         name: Document
@@ -10181,11 +10072,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpdateDocumentRequestBody
@@ -10646,11 +10532,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -10708,11 +10589,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateEventRequestBody
         in: body
         name: event
@@ -10768,11 +10644,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpdateEventRequestBody
@@ -11261,11 +11132,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: limit
         type: integer
@@ -11655,11 +11521,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - in: query
@@ -12382,11 +12243,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -12444,11 +12300,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateHtmlTemplateRequestBody
         in: body
         name: html_template
@@ -12504,11 +12355,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpdateHtmlTemplateRequestBody
@@ -14369,6 +14215,140 @@ paths:
       summary: Create User Token
       tags:
       - Notification
+  /v1/object-slim/{table_slug}/{object_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get object by id slim
+      operationId: get_object_by_id_slim
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: object_id
+        in: path
+        name: object_id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get object by id slim
+      tags:
+      - Object
+  /v1/object-slim/get-list/{table_slug}:
+    post:
+      consumes:
+      - application/json
+      description: Get all objects slim
+      operationId: get_list_objects_slim
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: GetListObjectRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all objects slim
+      tags:
+      - Object
   /v1/object-upsert/{table_slug}:
     post:
       consumes:
@@ -16634,11 +16614,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: limit
         type: integer
@@ -16712,11 +16687,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateRelationRequestBody
         in: body
         name: table
@@ -16782,11 +16752,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpdateRelationRequestBody
@@ -18482,11 +18447,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -18553,11 +18513,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateSectionRequestBody
         in: body
         name: table
@@ -18613,11 +18568,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - in: query
@@ -18746,11 +18696,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateTableRequestBody
         in: body
         name: table
@@ -18792,6 +18737,7 @@ paths:
       summary: Update table
       tags:
       - Table
+<<<<<<< HEAD
   /v1/table-history:
     put:
       consumes:
@@ -18865,6 +18811,15 @@ paths:
         in: header
         name: Resource-Id
         type: string
+=======
+  /v1/table-folder:
+    get:
+      consumes:
+      - application/json
+      description: Get all table folders
+      operationId: get_all_table_folders
+      parameters:
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -18875,22 +18830,44 @@ paths:
         name: project-id
         required: true
         type: string
+<<<<<<< HEAD
       - description: id
         in: path
         name: id
         required: true
+=======
+      - description: limit
+        in: query
+        name: limit
+        type: number
+      - description: offset
+        in: query
+        name: offset
+        type: number
+      - description: search
+        in: query
+        name: search
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         type: string
       produces:
       - application/json
       responses:
         "200":
+<<<<<<< HEAD
           description: TableBody
+=======
+          description: TableFolderBody
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
+<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.Table'
+=======
+                  type: string
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
               type: object
         "400":
           description: Invalid Argument
@@ -18912,6 +18889,7 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
+<<<<<<< HEAD
       summary: Get table history by id
       tags:
       - Table
@@ -18921,6 +18899,16 @@ paths:
       - application/json
       description: Get table histories
       operationId: get_table_histories
+=======
+      summary: Get all table folders
+      tags:
+      - TableFolder
+    post:
+      consumes:
+      - application/json
+      description: Create Table Folder
+      operationId: create_table_folder
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       parameters:
       - description: Resource-Id
         in: header
@@ -18936,6 +18924,7 @@ paths:
         name: project-id
         required: true
         type: string
+<<<<<<< HEAD
       - description: table_id
         in: path
         name: table_id
@@ -18946,15 +18935,35 @@ paths:
       responses:
         "200":
           description: TableBody
+=======
+      - description: CreateTableFolderRequestBody
+        in: body
+        name: Function
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTableFolderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Function data
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
+<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.GetTableHistoryResponse'
               type: object
         "400":
           description: Invalid Argument
+=======
+                  $ref: '#/definitions/models.TableFolder'
+              type: object
+        "400":
+          description: Bad Request
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
@@ -18973,6 +18982,7 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
+<<<<<<< HEAD
       summary: Get table histories
       tags:
       - Table
@@ -18987,6 +18997,17 @@ paths:
         in: header
         name: Resource-Id
         type: string
+=======
+      summary: Create Table Folder
+      tags:
+      - TableFolder
+    put:
+      consumes:
+      - application/json
+      description: Update table folder
+      operationId: update_table_folder
+      parameters:
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -18997,23 +19018,146 @@ paths:
         name: project-id
         required: true
         type: string
+<<<<<<< HEAD
       - description: UpdateTableRequestBody
         in: body
         name: table
         required: true
         schema:
           $ref: '#/definitions/models.RevertHistoryRequest'
+=======
+      - description: UpdateTableFolderRequestBody
+        in: body
+        name: Table
+        required: true
+        schema:
+          $ref: '#/definitions/models.TableFolder'
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       produces:
       - application/json
       responses:
         "200":
+<<<<<<< HEAD
           description: TableBody
+=======
+          description: Function data
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
+<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.TableHistory'
+=======
+                  $ref: '#/definitions/models.TableFolder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update table folder
+      tags:
+      - TableFolder
+  /v1/table-folder/{table_folder_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Table Folder
+      operationId: delete_table_folder
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: table_folder_id
+        in: path
+        name: table_folder_id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Table Folder
+      tags:
+      - TableFolder
+    get:
+      consumes:
+      - application/json
+      description: Get table by id
+      operationId: get_table_folder_by_id
+      parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: table_folder_id
+        in: path
+        name: table_folder_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FunctionBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TableFolder'
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
               type: object
         "400":
           description: Invalid Argument
@@ -19035,9 +19179,15 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
+<<<<<<< HEAD
       summary: Get table history by id
       tags:
       - Table
+=======
+      summary: Get table by id
+      tags:
+      - TableFolder
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
   /v1/table/{table_id}:
     delete:
       consumes:
@@ -20448,6 +20598,10 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: from-chat
+        in: query
+        name: from-chat
+        type: string
       - description: file
         in: formData
         name: file
@@ -21599,6 +21753,11 @@ paths:
         name: folder-id
         required: true
         type: string
+      - description: app-id
+        in: query
+        name: app-id
+        required: true
+        type: string
       - description: limit
         in: query
         name: limit
@@ -22075,11 +22234,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: environment_id
         type: string
@@ -22144,11 +22298,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: CreateCustomEventRequestBody
@@ -22682,11 +22831,6 @@ paths:
         name: function_id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -22722,12 +22866,21 @@ paths:
       summary: Get Function by id
       tags:
       - Function
+<<<<<<< HEAD
   /v2/table-folder:
     get:
       consumes:
       - application/json
       description: Get all table folders
       operationId: get_all_table_folders
+=======
+  /v2/table:
+    get:
+      consumes:
+      - application/json
+      description: V2 Get all tables
+      operationId: v2_get_all_tables
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       parameters:
       - description: Resource-Id
         in: header
@@ -22750,6 +22903,12 @@ paths:
         name: offset
         type: integer
       - in: query
+<<<<<<< HEAD
+=======
+        name: project_id
+        type: string
+      - in: query
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         name: search
         type: string
       produces:
@@ -22762,7 +22921,11 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
+<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.GetAllTablesResponse'
+=======
+                  $ref: '#/definitions/postgres_object_builder_service.GetAllTablesResponse'
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
               type: object
         "400":
           description: Invalid Argument
@@ -22784,6 +22947,7 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
+<<<<<<< HEAD
       summary: Get all table folders
       tags:
       - Table
@@ -22792,6 +22956,16 @@ paths:
       - application/json
       description: Create table folder
       operationId: create_table_folder
+=======
+      summary: V2 Get all tables
+      tags:
+      - V2Table
+    post:
+      consumes:
+      - application/json
+      description: v2 Create table
+      operationId: v2_create_table
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       parameters:
       - description: Resource-Id
         in: header
@@ -22807,12 +22981,20 @@ paths:
         name: project-id
         required: true
         type: string
+<<<<<<< HEAD
       - description: CreateTableFolderRequest
+=======
+      - description: CreateTableRequestBody
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         in: body
         name: table
         required: true
         schema:
+<<<<<<< HEAD
           $ref: '#/definitions/models.CreateTableFolderRequest'
+=======
+          $ref: '#/definitions/models.CreateTableRequest'
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       produces:
       - application/json
       responses:
@@ -22823,7 +23005,11 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
+<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.TableFolder'
+=======
+                  $ref: '#/definitions/postgres_object_builder_service.Table'
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
               type: object
         "400":
           description: Bad Request
@@ -22845,6 +23031,7 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
+<<<<<<< HEAD
       summary: Create table folder
       tags:
       - Table
@@ -22853,6 +23040,16 @@ paths:
       - application/json
       description: Update table folder
       operationId: update_table_folder
+=======
+      summary: v2 Create table
+      tags:
+      - V2Table
+    put:
+      consumes:
+      - application/json
+      description: Update table
+      operationId: v2_update_table
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       parameters:
       - description: Resource-Id
         in: header
@@ -22868,12 +23065,20 @@ paths:
         name: project-id
         required: true
         type: string
+<<<<<<< HEAD
       - description: TableFolder
+=======
+      - description: UpdateTableRequestBody
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         in: body
         name: table
         required: true
         schema:
+<<<<<<< HEAD
           $ref: '#/definitions/object_builder_service.TableFolder'
+=======
+          $ref: '#/definitions/postgres_object_builder_service.Table'
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       produces:
       - application/json
       responses:
@@ -22884,7 +23089,11 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
+<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.TableFolder'
+=======
+                  $ref: '#/definitions/postgres_object_builder_service.Table'
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
               type: object
         "400":
           description: Bad Request
@@ -22906,6 +23115,7 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
+<<<<<<< HEAD
       summary: Update table folder
       tags:
       - Table
@@ -22915,6 +23125,17 @@ paths:
       - application/json
       description: Delete Table Folder
       operationId: delete_table_folder
+=======
+      summary: Update table
+      tags:
+      - V2Table
+  /v2/table/{table_id}:
+    delete:
+      consumes:
+      - application/json
+      description: V2 Delete Table
+      operationId: v2_delete_table
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       parameters:
       - description: Resource-Id
         in: header
@@ -22930,16 +23151,26 @@ paths:
         name: project-id
         required: true
         type: string
+<<<<<<< HEAD
       - description: id
         in: path
         name: id
+=======
+      - description: table_id
+        in: path
+        name: table_id
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         required: true
         type: string
       produces:
       - application/json
       responses:
         "204":
+<<<<<<< HEAD
           description: No Content
+=======
+          description: ""
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         "400":
           description: Invalid Argument
           schema:
@@ -22960,6 +23191,7 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
+<<<<<<< HEAD
       summary: Delete Table Folder
       tags:
       - Table
@@ -22968,6 +23200,16 @@ paths:
       - application/json
       description: Get table folder by id
       operationId: get_table_folder_by_id
+=======
+      summary: V2 Delete Table
+      tags:
+      - V2Table
+    get:
+      consumes:
+      - application/json
+      description: V2 Get table by id
+      operationId: v2_get_table_by_id
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
       parameters:
       - description: Resource-Id
         in: header
@@ -22983,9 +23225,15 @@ paths:
         name: project-id
         required: true
         type: string
+<<<<<<< HEAD
       - description: id
         in: path
         name: id
+=======
+      - description: table_id
+        in: path
+        name: table_id
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
         required: true
         type: string
       produces:
@@ -22998,7 +23246,11 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
+<<<<<<< HEAD
                   $ref: '#/definitions/object_builder_service.TableFolder'
+=======
+                  $ref: '#/definitions/models.CreateTableResponse'
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
               type: object
         "400":
           description: Invalid Argument
@@ -23020,9 +23272,291 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
+<<<<<<< HEAD
       summary: Get table folder by id
       tags:
       - Table
+=======
+      summary: V2 Get table by id
+      tags:
+      - V2Table
+  /v3/bot:
+    get:
+      consumes:
+      - application/json
+      description: GetBotTokenlist
+      operationId: GetBotTokenlist
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/chat_service.GetBotTokenListResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: GetBotTokenlist
+      tags:
+      - Chat
+    post:
+      consumes:
+      - application/json
+      description: Create bot
+      operationId: CreateBot
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: body
+        in: body
+        name: bot_token
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateBotToken'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create bot
+      tags:
+      - Chat
+    put:
+      consumes:
+      - application/json
+      description: UpdateBotToken
+      operationId: UpdateBotToken
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      - description: body
+        in: body
+        name: bot_token
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateBotToken'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: UpdateBotToken
+      tags:
+      - Chat
+  /v3/bot/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: DeleteBotToken
+      operationId: DeleteBotToken
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        type: string
+      - description: bot-id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: DeleteBotToken
+      tags:
+      - Chat
+    get:
+      consumes:
+      - application/json
+      description: GetBotTokenByBotID
+      operationId: GetBotTokenByBotID
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: bot-id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/chat_service.GetBotByBotIdResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: GetBotTokenByBotID
+      tags:
+      - Chat
+>>>>>>> a3fcb63783453822b29fd0efb96648433d607fe3
   /v3/chat:
     get:
       consumes:

@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // GetAllSections godoc
@@ -22,14 +23,16 @@ import (
 // @Tags Section
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param filters query object_builder_service.GetAllSectionsRequest true "filters"
+// @Param filters query obs.GetAllSectionsRequest true "filters"
 // @Success 200 {object} status_http.Response{data=string} "FieldBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllSections(c *gin.Context) {
 
 	//tokenInfo := h.GetAuthInfo
+	var (
+		resp *obs.GetAllSectionsResponse
+	)
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -90,19 +93,37 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 	//	return
 	//}
 
-	resp, err := services.BuilderService().Section().GetAll(
-		context.Background(),
-		&obs.GetAllSectionsRequest{
-			TableId:   c.Query("table_id"),
-			TableSlug: c.Query("table_slug"),
-			RoleId:    authInfo.GetRoleId(),
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Section().GetAll(
+			context.Background(),
+			&obs.GetAllSectionsRequest{
+				TableId:   c.Query("table_id"),
+				TableSlug: c.Query("table_slug"),
+				RoleId:    authInfo.GetRoleId(),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Section().GetAll(
+			context.Background(),
+			&obs.GetAllSectionsRequest{
+				TableId:   c.Query("table_id"),
+				TableSlug: c.Query("table_slug"),
+				RoleId:    authInfo.GetRoleId(),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -119,13 +140,15 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 // @Tags Section
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
-// @Param table body object_builder_service.UpdateSectionsRequest  true "UpdateSectionRequestBody"
+// @Param table body obs.UpdateSectionsRequest  true "UpdateSectionRequestBody"
 // @Success 200 {object} status_http.Response{data=string} "Section data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateSection(c *gin.Context) {
-	var sections obs.UpdateSectionsRequest
+	var (
+		sections obs.UpdateSectionsRequest
+		resp     *emptypb.Empty
+	)
 
 	err := c.ShouldBindJSON(&sections)
 	if err != nil {
@@ -200,15 +223,28 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 
 	// sections.CommitId = commitID
 	// sections.CommitGuid = commitGuid
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Section().Update(
+			context.Background(),
+			&sections,
+		)
 
-	resp, err := services.BuilderService().Section().Update(
-		context.Background(),
-		&sections,
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Section().Update(
+			context.Background(),
+			&sections,
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 	}
 
 	h.handleResponse(c, status_http.OK, resp)

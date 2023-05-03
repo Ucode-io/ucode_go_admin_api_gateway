@@ -3,10 +3,11 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"log"
+	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 
@@ -17,17 +18,56 @@ import (
 
 func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		res, ok := h.adminHasAccess(c)
-		fmt.Println(res)
-		if !ok {
-			_ = c.AbortWithError(401, errors.New("unauthorized"))
+
+		var (
+			res = &auth_service.HasAccessSuperAdminRes{}
+			ok  bool
+		)
+
+		bearerToken := c.GetHeader("Authorization")
+		strArr := strings.Split(bearerToken, " ")
+
+		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
+			h.log.Error("---ERR->Unexpected token format")
+			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
 			return
 		}
-		log.Printf("AUTH OBJECT: %+v", res)
+		switch strArr[0] {
+		case "Bearer":
+			res, ok = h.adminHasAccess(c)
+			fmt.Println(res)
+			if !ok {
+				_ = c.AbortWithError(401, errors.New("unauthorized"))
+				return
+			}
+			resourceId := c.GetHeader("Resource-Id")
+			environmentId := c.GetHeader("Environment-Id")
+
+			c.Set("environment_id", environmentId)
+			c.Set("resource_id", resourceId)
+		case "API-KEY":
+			app_id := c.GetHeader("X-API-KEY")
+			apikeys, err := h.authService.ApiKey().GetEnvID(
+				c.Request.Context(),
+				&auth_service.GetReq{
+					Id: app_id,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				c.Abort()
+				return
+			}
+
+			c.Set("environment_id", apikeys.GetEnvironmentId())
+		default:
+			err := errors.New("error invalid authorization method")
+			h.log.Error("--AuthMiddleware--", logger.Error(err))
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			c.Abort()
+		}
 		c.Set("Auth_Admin", res)
 		c.Set("namespace", h.cfg.UcodeNamespace)
-		c.Set("environment_id", c.GetHeader("Environment-Id"))
-		c.Set("resource_id", c.GetHeader("Resource-Id"))
 		c.Next()
 	}
 }

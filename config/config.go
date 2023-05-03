@@ -108,6 +108,9 @@ type Config struct {
 
 	NotificationServiceHost string
 	NotificationGRPCPort    string
+
+	PostgresBuilderServiceHost string
+	PostgresBuilderServicePort string
 }
 
 // Load ...
@@ -206,6 +209,9 @@ func Load() Config {
 
 	config.NotificationServiceHost = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_SERVICE_HOST", "localhost"))
 	config.NotificationGRPCPort = cast.ToString(GetOrReturnDefaultValue("NOTIFICATION_GRPC_PORT", ":8101"))
+
+	config.PostgresBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", "localhost"))
+	config.PostgresBuilderServicePort = cast.ToString(GetOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ":9202"))
 	return config
 }
 

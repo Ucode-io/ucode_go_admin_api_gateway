@@ -54,7 +54,7 @@ func (h *Handler) CreateCommit(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Success 200 {object} status_http.Response{data=versioning_service.CommitWithRelease} "CommitBody"
+// @Success 200 {object} status_http.Response{data=obs.CommitWithRelease} "CommitBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetCommitByID(c *gin.Context) {

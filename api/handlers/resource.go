@@ -317,7 +317,7 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param ProjectResource body company_service.ReconnectResourceRequest true "ProjectResourceReconnectRequest"
-// @Success 201 {object} status_http.Response{data=company_service.EmptyProto} "ProjectResource data"
+// @Success 201 {object} status_http.Response{data=company_service.ReconnectResourceRes} "ProjectResource data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) ReconnectProjectResource(c *gin.Context) {
