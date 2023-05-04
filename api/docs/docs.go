@@ -23447,7 +23447,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "folder-id",
+                        "name": "folder_id",
                         "in": "query"
                     },
                     {

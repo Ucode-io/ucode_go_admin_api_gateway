@@ -18562,7 +18562,7 @@ paths:
         required: true
         type: string
       - in: query
-        name: folder-id
+        name: folder_id
         type: string
       - in: query
         name: limit

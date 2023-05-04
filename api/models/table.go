@@ -15,5 +15,5 @@ type GetAllTablesRequest struct {
 	Search    string `json:"search"`
 	ProjectId string `json:"project-id"`
 	VersionId string `json:"version_id"`
-	FolderId  string `json:"folder-id"`
+	FolderId  string `json:"folder_id"`
 }
