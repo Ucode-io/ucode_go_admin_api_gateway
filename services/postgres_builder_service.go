@@ -63,6 +63,8 @@ func NewPostgrespostgresBuilderServiceClient(ctx context.Context, cfg config.Con
 		fieldsAndRelations:   object_builder_service.NewFieldAndRelationServiceClient(connObjectBuilderService),
 		settingService:       object_builder_service.NewSettingServiceClient(connObjectBuilderService),
 		tableFolderService:   object_builder_service.NewTableFolderServiceClient(connObjectBuilderService),
+		viewService:          object_builder_service.NewViewServiceClient(connObjectBuilderService),
+		sectionService:       object_builder_service.NewSectionServiceClient(connObjectBuilderService),
 	}, nil
 }
 
