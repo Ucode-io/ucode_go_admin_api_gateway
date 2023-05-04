@@ -23435,7 +23435,7 @@
                     },
                     {
                         "type": "string",
-                        "name": "folder_id",
+                        "name": "folder-id",
                         "in": "query"
                     },
                     {
@@ -23450,7 +23450,7 @@
                     },
                     {
                         "type": "string",
-                        "name": "project_id",
+                        "name": "project-id",
                         "in": "query"
                     },
                     {

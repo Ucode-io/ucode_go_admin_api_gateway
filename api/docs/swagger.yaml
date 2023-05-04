@@ -18562,7 +18562,7 @@ paths:
         required: true
         type: string
       - in: query
-        name: folder_id
+        name: folder-id
         type: string
       - in: query
         name: limit
@@ -18571,7 +18571,7 @@ paths:
         name: offset
         type: integer
       - in: query
-        name: project_id
+        name: project-id
         type: string
       - in: query
         name: search

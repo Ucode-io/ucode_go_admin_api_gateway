@@ -23447,7 +23447,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "folder_id",
+                        "name": "folder-id",
                         "in": "query"
                     },
                     {
@@ -23462,7 +23462,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "project_id",
+                        "name": "project-id",
                         "in": "query"
                     },
                     {

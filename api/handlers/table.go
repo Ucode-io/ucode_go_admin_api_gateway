@@ -299,7 +299,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param filters query obs.GetAllTablesRequest true "filters"
+// @Param filters query models.GetAllTablesRequest true "filters"
 // @Success 200 {object} status_http.Response{data=obs.GetAllTablesResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
