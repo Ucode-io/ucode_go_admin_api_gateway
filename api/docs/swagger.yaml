@@ -1626,7 +1626,7 @@ definitions:
     type: object
   models.CreateTableFolderRequest:
     properties:
-      parentd_id:
+      parent_id:
         type: string
       title:
         type: string

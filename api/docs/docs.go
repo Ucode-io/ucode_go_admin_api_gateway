@@ -36582,7 +36582,7 @@ const docTemplate = `{
         "models.CreateTableFolderRequest": {
             "type": "object",
             "properties": {
-                "parentd_id": {
+                "parent_id": {
                     "type": "string"
                 },
                 "title": {
