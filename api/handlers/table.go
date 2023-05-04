@@ -403,6 +403,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 				Offset:    int32(offset),
 				Search:    c.DefaultQuery("search", ""),
 				ProjectId: resource.ResourceEnvironmentId,
+				FolderId:  c.Query("folder_id"),
 			},
 		)
 
