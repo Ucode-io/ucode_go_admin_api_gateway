@@ -34,9 +34,11 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateTable(c *gin.Context) {
 	var (
-		tableRequest models.CreateTableRequest
-		resp         *obs.CreateTableResponse
-		err          error
+		tableRequest          models.CreateTableRequest
+		resp                  *obs.CreateTableResponse
+		err                   error
+		resourceEnvironmentId string
+		resourceType          pb.ResourceType
 	)
 
 	err = c.ShouldBindJSON(&tableRequest)
@@ -45,12 +47,6 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -58,11 +54,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
+	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
@@ -77,30 +69,38 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	if !resourceIdOk {
+		resource, err := services.CompanyService().ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resource.ResourceEnvironmentId,
-	//	},
-	//)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+		resourceEnvironmentId = resource.ResourceEnvironmentId
+		resourceType = resource.ResourceType
+	} else {
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&pb.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resourceEnvironment.GetId()
+		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
+	}
 
 	var fields []*obs.CreateFieldsRequest
 	for _, field := range tableRequest.Fields {
@@ -122,7 +122,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 			Automatic:  field.Automatic,
 		}
 
-		tempField.ProjectId = resource.ResourceEnvironmentId
+		tempField.ProjectId = resourceEnvironmentId
 
 		fields = append(fields, &tempField)
 	}
@@ -144,9 +144,9 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		},
 	}
 
-	table.ProjectId = resource.ResourceEnvironmentId
+	table.ProjectId = resourceEnvironmentId
 
-	switch resource.ResourceType {
+	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Table().Create(
 			context.Background(),
@@ -191,8 +191,10 @@ func (h *Handler) CreateTable(c *gin.Context) {
 func (h *Handler) GetTableByID(c *gin.Context) {
 	tableID := c.Param("table_id")
 	var (
-		resp *obs.Table
-		err  error
+		resp                  *obs.Table
+		err                   error
+		resourceEnvironmentId string
+		resourceType          pb.ResourceType
 	)
 
 	if !util.IsValidUUID(tableID) {
@@ -207,17 +209,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		return
 	}
 
-	// authInfo, err := h.GetAuthInfo(c)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.Forbidden, err.Error())
-	// 	return
-	// }
-
-	// resourceId, ok := c.Get("resource_id")
-	// if !ok {
-	// 	h.handleResponse(c, status_http.BadRequest, errors.New("cant get resource_id"))
-	// 	return
-	// }
+	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
@@ -232,37 +224,46 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if !resourceIdOk {
+		resource, err := services.CompanyService().ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resource.ResourceEnvironmentId
+		resourceType = resource.ResourceType
+	} else {
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&pb.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resourceEnvironment.GetId()
+		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resource.ResourceEnvironmentId,
-	//	},
-	//)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-	switch resource.ResourceType {
+	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Table().GetByID(
 			context.Background(),
 			&obs.TablePrimaryKey{
 				Id:        tableID,
-				ProjectId: resource.ResourceEnvironmentId,
+				ProjectId: resourceEnvironmentId,
 			},
 		)
 
@@ -275,7 +276,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 			context.Background(),
 			&obs.TablePrimaryKey{
 				Id:        tableID,
-				ProjectId: resource.ResourceEnvironmentId,
+				ProjectId: resourceEnvironmentId,
 			},
 		)
 
@@ -306,7 +307,9 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 func (h *Handler) GetAllTables(c *gin.Context) {
 	var (
 		//resourceEnvironment *company_service.ResourceEnvironment
-		resp *obs.GetAllTablesResponse
+		resp                  *obs.GetAllTablesResponse
+		resourceEnvironmentId string
+		resourceType          pb.ResourceType
 	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
@@ -327,17 +330,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		return
 	}
 
-	//_, err = h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
+	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
@@ -352,49 +345,40 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if !resourceIdOk {
+		resource, err := services.CompanyService().ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resource.ResourceEnvironmentId
+		resourceType = resource.ResourceType
+	} else {
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&pb.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resourceEnvironment.GetId()
+		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
 	}
 
-	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&company_service.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&company_service.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
-
-	fmt.Println("resourceId:::::::::", resource.ResourceId)
-	fmt.Println("environmentId::::::", environmentId)
-	fmt.Println("resourceEnvironment", resource.ResourceEnvironmentId)
-	switch resource.ResourceType {
+	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Table().GetAll(
 			context.Background(),
@@ -402,7 +386,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				Search:    c.DefaultQuery("search", ""),
-				ProjectId: resource.ResourceEnvironmentId,
+				ProjectId: resourceEnvironmentId,
 				FolderId:  c.Query("folder_id"),
 			},
 		)
@@ -418,7 +402,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 				Limit:     int32(limit),
 				Offset:    int32(offset),
 				Search:    c.DefaultQuery("search", ""),
-				ProjectId: resource.ResourceEnvironmentId,
+				ProjectId: resourceEnvironmentId,
 			},
 		)
 
@@ -450,7 +434,9 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 	var (
 		table obs.Table
 		//resourceEnvironment *company_service.ResourceEnvironment
-		resp *emptypb.Empty
+		resp                  *emptypb.Empty
+		resourceEnvironmentId string
+		resourceType          pb.ResourceType
 	)
 
 	err := c.ShouldBindJSON(&table)
@@ -466,21 +452,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		return
 	}
 
-	//if !util.IsValidUUID(table.GetProjectId()) {
-	//	h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-	//	return
-	//}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
+	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
@@ -495,46 +467,41 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if !resourceIdOk {
+		resource, err := services.CompanyService().ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resource.ResourceEnvironmentId
+		resourceType = resource.ResourceType
+	} else {
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&pb.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resourceEnvironment.GetId()
+		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
 	}
 
-	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&company_service.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&company_service.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  table.GetProjectId(),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
-	table.ProjectId = resource.ResourceEnvironmentId
-	switch resource.ResourceType {
+	table.ProjectId = resourceEnvironmentId
+	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Table().Update(
 			context.Background(),
@@ -580,7 +547,9 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 func (h *Handler) DeleteTable(c *gin.Context) {
 	tableID := c.Param("table_id")
 	var (
-		resp *emptypb.Empty
+		resp                  *emptypb.Empty
+		resourceEnvironmentId string
+		resourceType          pb.ResourceType
 	)
 
 	if !util.IsValidUUID(tableID) {
@@ -595,17 +564,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
+	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
@@ -619,37 +578,47 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+
+	if !resourceIdOk {
+		resource, err := services.CompanyService().ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resource.ResourceEnvironmentId
+		resourceType = resource.ResourceType
+	} else {
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&pb.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resourceEnvironment.GetId()
+		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resource.ResourceEnvironmentId,
-	//	},
-	//)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-	switch resource.ResourceType {
+	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Table().Delete(
 			context.Background(),
 			&obs.TablePrimaryKey{
 				Id:        tableID,
-				ProjectId: resource.ResourceEnvironmentId,
+				ProjectId: resourceEnvironmentId,
 			},
 		)
 
@@ -662,7 +631,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 			context.Background(),
 			&obs.TablePrimaryKey{
 				Id:        tableID,
-				ProjectId: resource.ResourceEnvironmentId,
+				ProjectId: resourceEnvironmentId,
 			},
 		)
 		if err != nil {
