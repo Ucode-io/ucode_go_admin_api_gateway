@@ -889,10 +889,15 @@ func (h *Handler) GetList(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
-	objectRequest.Data["tables"] = tokenInfo.GetTables()
-	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
-	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
-	objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	if tokenInfo != nil {
+		if tokenInfo.Tables != nil {
+			objectRequest.Data["tables"] = tokenInfo.GetTables()
+		}
+		objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
+		objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
+		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	}
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())

@@ -428,12 +428,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.PUT("/notification/category", h.UpdateCategoryNotification)
 		v1Admin.DELETE("/notification/category/:id", h.DeleteCategoryNotification)
 
-		// table-folder
-		v1Admin.POST("/table-folder", h.CreateTableFolder)
-		v1Admin.GET("/table-folder/:table_id", h.GetTableFolderById)
-		v1Admin.GET("/table-folder", h.GetAllTableFolder)
-		v1Admin.PUT("/table-folder", h.UpdateTableFolder)
-		v1Admin.DELETE("/table-folder/:table_id", h.DeleteTableFolder)
+		v1Admin.GET("/table-history/list/:table_id", h.GetListTableHistory)
+		v1Admin.GET("/table-history/:id", h.GetTableHistoryById)
+		v1Admin.PUT("/table-history/revert", h.RevertTableHistory)
+		v1Admin.PUT("/table-history", h.InsetrVersionsIdsToTableHistory)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())
@@ -446,13 +444,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
 
-		//v2 table
-		v2Admin.POST("/table", h.V2CreateTable)
-		v2Admin.GET("/table/:table_id", h.V2GetTableByID)
-		v2Admin.GET("/table", h.V2GetAllTables)
-		v2Admin.PUT("/table", h.V2UpdateTable)
-		v2Admin.DELETE("/table/:table_id", h.V2DeleteTable)
-
+		v2Admin.POST("/table-folder", h.CreateTableFolder)
+		v2Admin.PUT("/table-folder", h.UpdateTableFolder)
+		v2Admin.GET("/table-folder", h.GetAllTableFolders)
+		v2Admin.GET("/table-folder/:id", h.GetTableFolderByID)
+		v2Admin.DELETE("/table-folder/:id", h.DeleteTableFolder)
 	}
 
 	// v3 for ucode version 2
