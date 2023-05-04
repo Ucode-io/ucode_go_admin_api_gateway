@@ -514,7 +514,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		}
 
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.BuilderService().Table().Update(
+		resp, err = services.PostgresBuilderService().Table().Update(
 			context.Background(),
 			&table,
 		)

@@ -35,7 +35,10 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateObject(c *gin.Context) {
-	var objectRequest models.CommonMessage
+	var (
+		objectRequest models.CommonMessage
+		resp          *obs.CommonMessage
+	)
 
 	err := c.ShouldBindJSON(&objectRequest)
 	if err != nil {
@@ -173,21 +176,39 @@ func (h *Handler) CreateObject(c *gin.Context) {
 			return
 		}
 	}
-	//fmt.Println("TIME_MANAGEMENT_LOGGING:::DoInvokeFuntion", time.Since(start))
+	// fmt.Println("TIME_MANAGEMENT_LOGGING:::DoInvokeFuntion", time.Since(start))
 
 	//start = time.Now()
-	resp, err := services.BuilderService().ObjectBuilder().Create(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().ObjectBuilder().Create(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().ObjectBuilder().Create(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 	}
+
 	//fmt.Println("TIME_MANAGEMENT_LOGGING:::Create", time.Since(start))
 
 	//start = time.Now()
@@ -232,7 +253,10 @@ func (h *Handler) CreateObject(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingle(c *gin.Context) {
-	var object models.CommonMessage
+	var (
+		object models.CommonMessage
+		resp   *obs.CommonMessage
+	)
 
 	object.Data = make(map[string]interface{})
 
@@ -307,17 +331,33 @@ func (h *Handler) GetSingle(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
-	resp, err := services.BuilderService().ObjectBuilder().GetSingle(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().ObjectBuilder().GetSingle(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().ObjectBuilder().GetSingle(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -450,7 +490,10 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateObject(c *gin.Context) {
-	var objectRequest models.CommonMessage
+	var (
+		objectRequest models.CommonMessage
+		resp          *obs.CommonMessage
+	)
 
 	err := c.ShouldBindJSON(&objectRequest)
 	if err != nil {
@@ -552,18 +595,34 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 			return
 		}
 	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().ObjectBuilder().Update(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().ObjectBuilder().Update(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 
-	resp, err := services.BuilderService().ObjectBuilder().Update(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
 	}
 
 	if c.Param("table_slug") == "record_permission" {
@@ -625,7 +684,10 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteObject(c *gin.Context) {
-	var objectRequest models.CommonMessage
+	var (
+		objectRequest models.CommonMessage
+		resp          *obs.CommonMessage
+	)
 
 	err := c.ShouldBindJSON(&objectRequest)
 	if err != nil {
@@ -726,20 +788,38 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 			return
 		}
 	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().ObjectBuilder().Delete(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	resp, err := services.BuilderService().ObjectBuilder().Delete(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().ObjectBuilder().Delete(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
 	}
+
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
@@ -794,7 +874,10 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetList(c *gin.Context) {
-	var objectRequest models.CommonMessage
+	var (
+		objectRequest models.CommonMessage
+		resp          *obs.CommonMessage
+	)
 
 	err := c.ShouldBindJSON(&objectRequest)
 	if err != nil {
@@ -879,19 +962,35 @@ func (h *Handler) GetList(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().ObjectBuilder().GetList(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	resp, err := services.BuilderService().ObjectBuilder().GetList(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().ObjectBuilder().GetList(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
