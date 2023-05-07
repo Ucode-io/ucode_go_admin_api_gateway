@@ -115,6 +115,8 @@ message User {
     string client_platform_id = 12;
     int32 active = 13;
     string expires_at = 14;
+    string language_id = 15;
+    string  timezone_id = 16;
 }
 
 message UserRelation {

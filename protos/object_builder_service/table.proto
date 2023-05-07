@@ -40,6 +40,8 @@ message TableHistory {
     string id = 1;
     string created_at = 2;
     repeated string version_ids = 3;
+    string author_id = 4;
+    string action_type = 5;
 }
 
 message GetTableHistoryResponse {
@@ -61,6 +63,7 @@ message CreateTableRequest {
     string commit_id = 12;
     string version_id = 13;
     string folder_id = 14;
+    string author_id = 15;
 }
 
 message IncrementID {
@@ -95,6 +98,7 @@ message Table {
     IncrementID increment_id = 10;
     string project_id = 11;
     string folder_id = 12;
+    string author_id = 13;
 }
 
 message GetAllTablesResponse {
@@ -106,6 +110,7 @@ message TablePrimaryKey {
     string id = 1;
     string project_id = 2;
     string version_id = 3;
+    string author_id = 4;
 }
 
 message GetAllTablesRequest {

@@ -34638,6 +34638,9 @@
                 "id": {
                     "type": "string"
                 },
+                "language_id": {
+                    "type": "string"
+                },
                 "login": {
                     "type": "string"
                 },
@@ -34657,6 +34660,9 @@
                     "type": "string"
                 },
                 "role_id": {
+                    "type": "string"
+                },
+                "timezone_id": {
                     "type": "string"
                 }
             }
@@ -38881,6 +38887,9 @@
         "object_builder_service.Table": {
             "type": "object",
             "properties": {
+                "author_id": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -38962,6 +38971,12 @@
         "object_builder_service.TableHistory": {
             "type": "object",
             "properties": {
+                "action_type": {
+                    "type": "string"
+                },
+                "author_id": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },

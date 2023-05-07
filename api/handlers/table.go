@@ -47,6 +47,12 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		return
 	}
 
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
+		return
+	}
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -142,6 +148,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 			DigitNumber:     tableRequest.IncrementID.DigitNumber,
 			Prefix:          tableRequest.IncrementID.Prefix,
 		},
+		AuthorId: authInfo.GetUserId(),
 	}
 
 	table.ProjectId = resourceEnvironmentId
@@ -445,6 +452,14 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		return
 	}
 
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
+		return
+	}
+
+	table.AuthorId = authInfo.GetUserId()
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -557,6 +572,12 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		return
 	}
 
+	authInfo, err := h.adminAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
+		return
+	}
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -619,6 +640,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 			&obs.TablePrimaryKey{
 				Id:        tableID,
 				ProjectId: resourceEnvironmentId,
+				AuthorId:  authInfo.GetUserId(),
 			},
 		)
 

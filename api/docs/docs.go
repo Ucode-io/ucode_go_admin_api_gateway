@@ -34650,6 +34650,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "language_id": {
+                    "type": "string"
+                },
                 "login": {
                     "type": "string"
                 },
@@ -34669,6 +34672,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "role_id": {
+                    "type": "string"
+                },
+                "timezone_id": {
                     "type": "string"
                 }
             }
@@ -38893,6 +38899,9 @@ const docTemplate = `{
         "object_builder_service.Table": {
             "type": "object",
             "properties": {
+                "author_id": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -38974,6 +38983,12 @@ const docTemplate = `{
         "object_builder_service.TableHistory": {
             "type": "object",
             "properties": {
+                "action_type": {
+                    "type": "string"
+                },
+                "author_id": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },

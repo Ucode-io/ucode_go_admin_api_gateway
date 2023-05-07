@@ -355,6 +355,8 @@ definitions:
         type: string
       id:
         type: string
+      language_id:
+        type: string
       login:
         type: string
       name:
@@ -368,6 +370,8 @@ definitions:
       project_id:
         type: string
       role_id:
+        type: string
+      timezone_id:
         type: string
     type: object
   auth_service.V2LoginResponse:
@@ -3138,6 +3142,8 @@ definitions:
     type: object
   object_builder_service.Table:
     properties:
+      author_id:
+        type: string
       description:
         type: string
       folder_id:
@@ -3191,6 +3197,10 @@ definitions:
     type: object
   object_builder_service.TableHistory:
     properties:
+      action_type:
+        type: string
+      author_id:
+        type: string
       created_at:
         type: string
       id:

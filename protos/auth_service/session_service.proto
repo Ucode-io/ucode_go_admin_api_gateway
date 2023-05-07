@@ -257,6 +257,7 @@ message V2LoginRequest {
     string login_strategy = 5;
     string project_id = 6;
     string resource_environment_id = 7;
+    int32 resource_type = 8;
 }
 
 message V2LoginSuperAdminRes {
