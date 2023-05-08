@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // GetViewRelation godoc
@@ -94,18 +95,36 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
-	resp, err := services.BuilderService().Section().GetViewRelation(
-		context.Background(),
-		&obs.GetAllSectionsRequest{
-			TableId:   c.Query("table_id"),
-			TableSlug: c.Query("table_slug"),
-			RoleId:    tokenInfo.GetRoleId(),
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	var resp *obs.GetViewRelationResponse
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Section().GetViewRelation(
+			context.Background(),
+			&obs.GetAllSectionsRequest{
+				TableId:   c.Query("table_id"),
+				TableSlug: c.Query("table_slug"),
+				RoleId:    tokenInfo.GetRoleId(),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Section().GetViewRelation(
+			context.Background(),
+			&obs.GetAllSectionsRequest{
+				TableId:   c.Query("table_id"),
+				TableSlug: c.Query("table_slug"),
+				RoleId:    tokenInfo.GetRoleId(),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -202,15 +221,28 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 
 	// viewRelation.CommitId = commitID
 	// viewRelation.CommitGuid = commitGuid
+	var resp *emptypb.Empty
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Section().UpsertViewRelations(
+			context.Background(),
+			&viewRelation,
+		)
 
-	resp, err := services.BuilderService().Section().UpsertViewRelations(
-		context.Background(),
-		&viewRelation,
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Section().UpsertViewRelations(
+			context.Background(),
+			&viewRelation,
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)

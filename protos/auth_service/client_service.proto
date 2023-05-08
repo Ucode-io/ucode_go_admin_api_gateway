@@ -94,11 +94,13 @@ message CreateClientPlatformRequest {
     string project_id = 2;
     string name = 3;
     string subdomain = 4;
+    int32 resource_type = 5;
 }
 
 message ClientPlatformPrimaryKey {
     string id = 1;
     string project_id = 2;
+    int32 resource_type = 3;
 }
 
 message GetClientPlatformListRequest {
@@ -106,6 +108,7 @@ message GetClientPlatformListRequest {
     int32 offset = 2;
     string search = 3;
     string project_id = 4;
+    int32 resource_type = 5;
 }
 
 message GetClientPlatformListResponse {
@@ -118,6 +121,7 @@ message UpdateClientPlatformRequest {
     string name = 3;
     string subdomain = 4;
     repeated string client_type_ids = 5;
+    int32 resource_type = 6;
 }
 
 message CreateClientTypeRequest {
@@ -279,6 +283,7 @@ message V2CreateClientTypeRequest {
     string project_id = 6;
     string db_project_id = 7;
     repeated string client_platform_ids = 8;
+    int32 resource_type = 9;
 }
 
 message V2GetClientTypeListRequest {
@@ -286,6 +291,7 @@ message V2GetClientTypeListRequest {
     int32 offset = 2;
     string search = 3;
     string project_id = 4;
+    int32 resource_type = 5;
 }
 
 message V2UpdateClientTypeRequest {
@@ -297,9 +303,11 @@ message V2UpdateClientTypeRequest {
     repeated string client_platform_ids = 7;
     string project_id = 8;
     string db_project_id = 9;
+    int32 resource_type = 10;
 }
 
 message V2ClientTypePrimaryKey {
     string id = 1;
     string project_id = 2;
+    int32 resource_type = 3;
 }

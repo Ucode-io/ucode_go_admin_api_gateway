@@ -120,16 +120,19 @@ message CreatePermissionRequest {
     string client_platform_id = 2;
     string parent_id = 3;
     string name = 4;
+    int32 resource_type = 5;
 }
 
 message PermissionPrimaryKey {
     string id = 1;
+    int32 resource_type = 2;
 }
 
 message GetPermissionListRequest {
     int32 limit = 1;
     int32 offset = 2;
     string search = 3;
+    int32 resource_type = 4;
 }
 
 message GetPermissionListResponse {
@@ -142,6 +145,7 @@ message UpdatePermissionRequest {
     string client_platform_id = 2;
     string parent_id = 3;
     string name = 4;
+    int32 resource_type = 5;
 }
 
 message AddPermissionScopeRequest {
@@ -161,10 +165,12 @@ message PermissionScopePrimaryKey {
 message AddRolePermissionRequest {
     string role_id = 1;
     string permission_id = 2;
+    int32 resource_type = 3;
 }
 
 message AddRolePermissionsRequest {
     repeated AddRolePermissionRequest permissions = 1;
+    int32 resource_type = 2;
 }
 
 message AddRolePermissionsResponse {
@@ -205,6 +211,7 @@ message GetScopesResponse {
 message V2RolePrimaryKey {
     string id = 1;
     string project_id = 2;
+    int32 resource_type = 3;
 }
 
 message V2GetRolesListRequest {
@@ -213,6 +220,7 @@ message V2GetRolesListRequest {
     string client_platform_id = 3;
     string client_type_id = 4;
     string project_id = 5;
+    int32 resource_type = 6;
 }
 
 message V2AddRoleRequest {
@@ -221,6 +229,7 @@ message V2AddRoleRequest {
     string client_platform_id = 4;
     string project_id = 5;
     string db_project_id = 6;
+    int32 resource_type = 7;
 }
 
 message V2UpdateRoleRequest {
@@ -230,4 +239,5 @@ message V2UpdateRoleRequest {
     string client_platform_id = 4;
     string project_id = 5;
     string db_project_id = 6;
+    int32 resource_type = 7;
 }
