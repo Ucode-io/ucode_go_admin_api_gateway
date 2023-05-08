@@ -23573,6 +23573,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/object_builder_service.Table"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -34794,6 +34801,9 @@ const docTemplate = `{
                 "sender_name": {
                     "type": "string"
                 },
+                "unreadMessageCount": {
+                    "type": "integer"
+                },
                 "userProfilePhotoUrl": {
                     "type": "string"
                 },
@@ -34838,6 +34848,9 @@ const docTemplate = `{
                 },
                 "platform_type": {
                     "type": "string"
+                },
+                "unreadMessageCount": {
+                    "type": "integer"
                 },
                 "userProfilePhotoUrl": {
                     "type": "string"
@@ -37848,6 +37861,29 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.CommitInfo": {
+            "type": "object",
+            "properties": {
+                "commit_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "object_builder_service.Condition": {
             "type": "object",
             "properties": {
@@ -38902,6 +38938,9 @@ const docTemplate = `{
                 "author_id": {
                     "type": "string"
                 },
+                "commitInfo": {
+                    "$ref": "#/definitions/object_builder_service.CommitInfo"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -38993,6 +39032,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 },
                 "version_ids": {

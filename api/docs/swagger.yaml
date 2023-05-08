@@ -450,6 +450,8 @@ definitions:
         type: string
       sender_name:
         type: string
+      unreadMessageCount:
+        type: integer
       user_id:
         type: string
       userProfilePhotoUrl:
@@ -479,6 +481,8 @@ definitions:
         type: array
       platform_type:
         type: string
+      unreadMessageCount:
+        type: integer
       user_id:
         type: string
       userProfilePhotoUrl:
@@ -2454,6 +2458,21 @@ definitions:
       code:
         type: string
     type: object
+  object_builder_service.CommitInfo:
+    properties:
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+    type: object
   object_builder_service.Condition:
     properties:
       match_fields:
@@ -3144,6 +3163,8 @@ definitions:
     properties:
       author_id:
         type: string
+      commitInfo:
+        $ref: '#/definitions/object_builder_service.CommitInfo'
       description:
         type: string
       folder_id:
@@ -3204,6 +3225,8 @@ definitions:
       created_at:
         type: string
       id:
+        type: string
+      name:
         type: string
       version_ids:
         items:
@@ -18706,6 +18729,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/object_builder_service.Table'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:

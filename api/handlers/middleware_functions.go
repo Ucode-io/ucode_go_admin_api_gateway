@@ -22,8 +22,8 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 	bearerToken := c.GetHeader("Authorization")
 	projectId := c.DefaultQuery("project_id", "")
 
-	fmt.Println("---hasAccess->-project_id---" + projectId)
 	strArr := strings.Split(bearerToken, " ")
+
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
 		h.log.Error("---ERR->HasAccess->Unexpected token format")
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")

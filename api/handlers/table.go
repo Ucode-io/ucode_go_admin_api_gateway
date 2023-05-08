@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
-
-	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -47,7 +48,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.adminAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
 		return
@@ -133,6 +134,8 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		fields = append(fields, &tempField)
 	}
 
+	fmt.Println("User id  ", authInfo.GetUserId())
+
 	var table = obs.CreateTableRequest{
 		Label:             tableRequest.Label,
 		Description:       tableRequest.Description,
@@ -148,7 +151,9 @@ func (h *Handler) CreateTable(c *gin.Context) {
 			DigitNumber:     tableRequest.IncrementID.DigitNumber,
 			Prefix:          tableRequest.IncrementID.Prefix,
 		},
-		AuthorId: authInfo.GetUserId(),
+		AuthorId:   authInfo.GetUserId(),
+		Name:       fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123)),
+		CommitType: config.COMMIT_TYPE_TABLE,
 	}
 
 	table.ProjectId = resourceEnvironmentId
@@ -434,12 +439,13 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table body obs.Table  true "UpdateTableRequestBody"
+// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=obs.Table} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateTable(c *gin.Context) {
 	var (
-		table obs.Table
+		table obs.UpdateTableRequest
 		//resourceEnvironment *company_service.ResourceEnvironment
 		resp                  *emptypb.Empty
 		resourceEnvironmentId string
@@ -452,13 +458,15 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.adminAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
 		return
 	}
 
 	table.AuthorId = authInfo.GetUserId()
+	table.Name = fmt.Sprintf("Auto Created Commit Update table - %s", time.Now().Format(time.RFC1123))
+	table.CommitType = config.COMMIT_TYPE_TABLE
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -572,7 +580,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		return
 	}
 
-	authInfo, err := h.adminAuthInfo(c)
+	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
 		return
@@ -638,9 +646,11 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		resp, err = services.BuilderService().Table().Delete(
 			context.Background(),
 			&obs.TablePrimaryKey{
-				Id:        tableID,
-				ProjectId: resourceEnvironmentId,
-				AuthorId:  authInfo.GetUserId(),
+				Id:         tableID,
+				ProjectId:  resourceEnvironmentId,
+				AuthorId:   authInfo.GetUserId(),
+				Name:       fmt.Sprintf("Auto Created Commit Delete table - %s", time.Now().Format(time.RFC1123)),
+				CommitType: config.COMMIT_TYPE_TABLE,
 			},
 		)
 
@@ -832,6 +842,12 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 		return
 	}
 
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
+		return
+	}
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -867,9 +883,12 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 
 	resp, err := services.BuilderService().Table().RevertTableHistory(
 		context.Background(),
-		&obs.TableHistoryPrimaryKey{
-			ProjectId: resource.ResourceEnvironmentId,
-			Id:        body.Id,
+		&obs.RevertTableHistoryRequest{
+			ProjectId:  resource.ResourceEnvironmentId,
+			Id:         body.Id,
+			AuthorId:   authInfo.GetUserId(),
+			CommitType: config.COMMIT_TYPE_TABLE,
+			Name:       fmt.Sprintf("Auto Created Commit Revert table - %s", time.Now().Format(time.RFC1123)),
 		},
 	)
 
