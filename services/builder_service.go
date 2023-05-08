@@ -11,6 +11,7 @@ import (
 
 type BuilderServiceI interface {
 	Table() object_builder_service.TableServiceClient
+	TableFolder() object_builder_service.TableFolderServiceClient
 	Field() object_builder_service.FieldServiceClient
 	ObjectBuilder() object_builder_service.ObjectBuilderServiceClient
 	Section() object_builder_service.SectionServiceClient
@@ -54,6 +55,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 
 	return &builderServiceClient{
 		tableService:             object_builder_service.NewTableServiceClient(connObjectBuilderService),
+		tableFolderService:       object_builder_service.NewTableFolderServiceClient(connObjectBuilderService),
 		fieldService:             object_builder_service.NewFieldServiceClient(connObjectBuilderService),
 		objectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
 		sectionService:           object_builder_service.NewSectionServiceClient(connObjectBuilderService),
@@ -86,6 +88,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 
 type builderServiceClient struct {
 	tableService             object_builder_service.TableServiceClient
+	tableFolderService       object_builder_service.TableFolderServiceClient
 	fieldService             object_builder_service.FieldServiceClient
 	objectBuilderService     object_builder_service.ObjectBuilderServiceClient
 	sectionService           object_builder_service.SectionServiceClient
@@ -117,6 +120,10 @@ type builderServiceClient struct {
 
 func (g *builderServiceClient) Table() object_builder_service.TableServiceClient {
 	return g.tableService
+}
+
+func (g *builderServiceClient) TableFolder() object_builder_service.TableFolderServiceClient {
+	return g.tableFolderService
 }
 
 func (g *builderServiceClient) Field() object_builder_service.FieldServiceClient {

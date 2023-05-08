@@ -26,6 +26,9 @@ type DoInvokeFuntionStruct struct {
 
 func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Handler) (beforeEvents, afterEvents []*obs.CustomEvent, err error) {
 
+	var (
+		res *obs.GetCustomEventsListResponse
+	)
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -78,20 +81,37 @@ func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Ha
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		res, err = services.BuilderService().CustomEvent().GetList(
+			context.Background(),
+			&obs.GetCustomEventsListRequest{
+				TableSlug: tableSlug,
+				Method:    method,
+				RoleId:    roleId,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	res, err := services.BuilderService().CustomEvent().GetList(
-		context.Background(),
-		&obs.GetCustomEventsListRequest{
-			TableSlug: tableSlug,
-			Method:    method,
-			RoleId:    roleId,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		res, err = services.PostgresBuilderService().CustomEvent().GetList(
+			context.Background(),
+			&obs.GetCustomEventsListRequest{
+				TableSlug: tableSlug,
+				Method:    method,
+				RoleId:    roleId,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		return
+		if err != nil {
+			return
+		}
 	}
+
 	if res != nil {
 		for _, customEvent := range res.CustomEvents {
 			if err != nil {

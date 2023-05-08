@@ -149,7 +149,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/auth_service.ConfirmStrategies'
       id:
         type: string
       name:
@@ -165,6 +165,16 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
+  auth_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -345,6 +355,8 @@ definitions:
         type: string
       id:
         type: string
+      language_id:
+        type: string
       login:
         type: string
       name:
@@ -358,6 +370,8 @@ definitions:
       project_id:
         type: string
       role_id:
+        type: string
+      timezone_id:
         type: string
     type: object
   auth_service.V2LoginResponse:
@@ -515,9 +529,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
       user_id:
@@ -575,9 +589,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
       user_id:
@@ -632,9 +646,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.Currency:
     properties:
@@ -773,7 +787,7 @@ definitions:
           $ref: '#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources'
         type: array
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources:
     properties:
@@ -784,7 +798,7 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -850,7 +864,7 @@ definitions:
   company_service.ReconnectResourceRes_ReconnectStatus:
     properties:
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       status:
         type: boolean
     type: object
@@ -870,7 +884,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
       vault_path:
@@ -889,6 +903,18 @@ definitions:
       username:
         type: string
     type: object
+  company_service.ResourceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ResourceType_NOT_DECIDED
+    - ResourceType_MONGODB
+    - ResourceType_CLICKHOUSE
+    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -902,7 +928,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -949,12 +975,34 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
     type: object
+  company_service.ServiceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    type: integer
+    x-enum-varnames:
+    - ServiceType_NOT_SPECIFIED
+    - ServiceType_BUILDER_SERVICE
+    - ServiceType_ANALYTICS_SERVICE
+    - ServiceType_TEMPLATE_SERVICE
+    - ServiceType_QUERY_SERVICE
+    - ServiceType_FUNCTION_SERVICE
+    - ServiceType_WEB_PAGE_SERVICE
+    - ServiceType_API_REF_SERVICE
+    - ServiceType_POSTGRES_BUILDER
   company_service.SetDefaultResourceReq:
     properties:
       environment_id:
@@ -964,7 +1012,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.SetDefaultResourceRes:
     properties:
@@ -975,7 +1023,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.Setting:
     properties:
@@ -1008,7 +1056,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -1582,7 +1630,9 @@ definitions:
     type: object
   models.CreateTableFolderRequest:
     properties:
-      name:
+      parent_id:
+        type: string
+      title:
         type: string
     type: object
   models.CreateTableRequest:
@@ -1900,6 +1950,15 @@ definitions:
       with_increment_id:
         type: boolean
     type: object
+  models.InsertVersionsToCommitRequest:
+    properties:
+      id:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+    type: object
   models.InvokeFunctionRequest:
     properties:
       attributes:
@@ -1977,6 +2036,11 @@ definitions:
         additionalProperties: true
         type: object
     type: object
+  models.RevertHistoryRequest:
+    properties:
+      id:
+        type: string
+    type: object
   models.RevertWebPageReqModel:
     properties:
       commit_info:
@@ -2022,13 +2086,6 @@ definitions:
       recipient:
         type: string
       text:
-        type: string
-    type: object
-  models.TableFolder:
-    properties:
-      id:
-        type: string
-      name:
         type: string
     type: object
   models.UpdateAppReqModel:
@@ -2376,7 +2433,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
       guid:
         type: string
       name:
@@ -2404,6 +2461,16 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
+  object_builder_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -2924,6 +2991,13 @@ definitions:
           $ref: '#/definitions/object_builder_service.Event'
         type: array
     type: object
+  object_builder_service.GetTableHistoryResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/object_builder_service.TableHistory'
+        type: array
+    type: object
   object_builder_service.HtmlTemplate:
     properties:
       html:
@@ -3068,7 +3142,11 @@ definitions:
     type: object
   object_builder_service.Table:
     properties:
+      author_id:
+        type: string
       description:
+        type: string
+      folder_id:
         type: string
       icon:
         type: string
@@ -3105,6 +3183,32 @@ definitions:
         type: string
       view_slug:
         type: string
+    type: object
+  object_builder_service.TableFolder:
+    properties:
+      id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      title:
+        type: string
+    type: object
+  object_builder_service.TableHistory:
+    properties:
+      action_type:
+        type: string
+      author_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
     type: object
   object_builder_service.UpdateAppRequest:
     properties:
@@ -4657,7 +4761,7 @@ definitions:
       project_id:
         type: string
       release_type:
-        type: integer
+        $ref: '#/definitions/versioning_service.ReleaseType'
     type: object
   versioning_service.ApiDeleteReleaseRequest:
     properties:
@@ -4742,6 +4846,18 @@ definitions:
           $ref: '#/definitions/versioning_service.ReleaseWithCommit'
         type: array
     type: object
+  versioning_service.ReleaseType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ReleaseType_UNDEFINED
+    - ReleaseType_MAJOR
+    - ReleaseType_MINOR
+    - ReleaseType_PATCH
   versioning_service.ReleaseWithCommit:
     properties:
       author_id:
@@ -5119,7 +5235,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -5301,7 +5417,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -5632,6 +5748,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/template_service.GetObjectTokenReq'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -5947,7 +6068,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6245,7 +6366,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6589,7 +6710,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6921,7 +7042,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7369,7 +7490,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7663,7 +7784,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: ""
+          description: Created
         "400":
           description: Bad Request
           schema:
@@ -7876,7 +7997,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -8613,7 +8734,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -9729,7 +9850,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -10026,7 +10147,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -10315,7 +10436,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -10788,7 +10909,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11299,7 +11420,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11779,7 +11900,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11890,7 +12011,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12309,7 +12430,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12731,7 +12852,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -13223,7 +13344,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -13401,7 +13522,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -14474,7 +14595,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -15670,7 +15791,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -15975,7 +16096,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -16717,7 +16838,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -16939,7 +17060,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -18451,16 +18572,22 @@ paths:
         required: true
         type: string
       - in: query
+        name: folder_id
+        type: string
+      - in: query
         name: limit
         type: integer
       - in: query
         name: offset
         type: integer
       - in: query
-        name: project_id
+        name: project-id
         type: string
       - in: query
         name: search
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json
@@ -18614,75 +18741,12 @@ paths:
       summary: Update table
       tags:
       - Table
-  /v1/table-folder:
-    get:
+  /v1/table-history:
+    put:
       consumes:
       - application/json
-      description: Get all table folders
-      operationId: get_all_table_folders
-      parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: limit
-        in: query
-        name: limit
-        type: number
-      - description: offset
-        in: query
-        name: offset
-        type: number
-      - description: search
-        in: query
-        name: search
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: TableFolderBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all table folders
-      tags:
-      - TableFolder
-    post:
-      consumes:
-      - application/json
-      description: Create Table Folder
-      operationId: create_table_folder
+      description: Get table history by id
+      operationId: insert into table history
       parameters:
       - description: Resource-Id
         in: header
@@ -18698,131 +18762,24 @@ paths:
         name: project-id
         required: true
         type: string
-      - description: CreateTableFolderRequestBody
+      - description: UpdateTableRequestBody
         in: body
-        name: Function
+        name: table
         required: true
         schema:
-          $ref: '#/definitions/models.CreateTableFolderRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Function data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.TableFolder'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create Table Folder
-      tags:
-      - TableFolder
-    put:
-      consumes:
-      - application/json
-      description: Update table folder
-      operationId: update_table_folder
-      parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: UpdateTableFolderRequestBody
-        in: body
-        name: Table
-        required: true
-        schema:
-          $ref: '#/definitions/models.TableFolder'
+          $ref: '#/definitions/models.InsertVersionsToCommitRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Function data
+          description: TableBody
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.TableFolder'
+                  $ref: '#/definitions/object_builder_service.TableHistory'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Update table folder
-      tags:
-      - TableFolder
-  /v1/table-folder/{table_folder_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete Table Folder
-      operationId: delete_table_folder
-      parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: table_folder_id
-        in: path
-        name: table_folder_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -18843,15 +18800,20 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-      summary: Delete Table Folder
+      summary: Get table history by id
       tags:
-      - TableFolder
+      - Table
+  /v1/table-history/{id}:
     get:
       consumes:
       - application/json
-      description: Get table by id
-      operationId: get_table_folder_by_id
+      description: Get table history by id
+      operationId: get_table_history_by_id
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
@@ -18862,22 +18824,22 @@ paths:
         name: project-id
         required: true
         type: string
-      - description: table_folder_id
+      - description: id
         in: path
-        name: table_folder_id
+        name: id
         required: true
         type: string
       produces:
       - application/json
       responses:
         "200":
-          description: FunctionBody
+          description: TableBody
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.TableFolder'
+                  $ref: '#/definitions/object_builder_service.Table'
               type: object
         "400":
           description: Invalid Argument
@@ -18899,9 +18861,132 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-      summary: Get table by id
+      summary: Get table history by id
       tags:
-      - TableFolder
+      - Table
+  /v1/table-history/list/{table_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get table histories
+      operationId: get_table_histories
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: table_id
+        in: path
+        name: table_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetTableHistoryResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get table histories
+      tags:
+      - Table
+  /v1/table-history/revert:
+    put:
+      consumes:
+      - application/json
+      description: Get table history by id
+      operationId: revert_table_history
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateTableRequestBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/models.RevertHistoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.TableHistory'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get table history by id
+      tags:
+      - Table
   /v1/table/{table_id}:
     delete:
       consumes:
@@ -18932,7 +19017,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -19422,7 +19507,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -19911,7 +19996,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -20148,7 +20233,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -20700,7 +20785,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -21098,7 +21183,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -21365,7 +21450,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -21650,7 +21735,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -22143,7 +22228,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -22505,7 +22590,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -22602,6 +22687,9 @@ paths:
         required: true
         type: string
       - in: query
+        name: folder_id
+        type: string
+      - in: query
         name: limit
         type: integer
       - in: query
@@ -22612,6 +22700,9 @@ paths:
         type: string
       - in: query
         name: search
+        type: string
+      - in: query
+        name: version_id
         type: string
       produces:
       - application/json
@@ -22770,6 +22861,307 @@ paths:
       summary: Update table
       tags:
       - V2Table
+  /v2/table-folder:
+    get:
+      consumes:
+      - application/json
+      description: Get all table folders
+      operationId: get_all_table_folders
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllTablesResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all table folders
+      tags:
+      - Table
+    post:
+      consumes:
+      - application/json
+      description: Create table folder
+      operationId: create_table_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: CreateTableFolderRequest
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTableFolderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Table data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.TableFolder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create table folder
+      tags:
+      - Table
+    put:
+      consumes:
+      - application/json
+      description: Update table folder
+      operationId: update_table_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: TableFolder
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.TableFolder'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Table data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.TableFolder'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update table folder
+      tags:
+      - Table
+  /v2/table-folder/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Table Folder
+      operationId: delete_table_folder
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Table Folder
+      tags:
+      - Table
+    get:
+      consumes:
+      - application/json
+      description: Get table folder by id
+      operationId: get_table_folder_by_id
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.TableFolder'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get table folder by id
+      tags:
+      - Table
   /v2/table/{table_id}:
     delete:
       consumes:
@@ -22800,7 +23192,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -23481,7 +23873,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -23773,7 +24165,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -24059,7 +24451,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:

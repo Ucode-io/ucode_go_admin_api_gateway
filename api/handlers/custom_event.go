@@ -29,7 +29,10 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateCustomEvent(c *gin.Context) {
-	var customevent models.CreateCustomEventRequest
+	var (
+		customevent models.CreateCustomEventRequest
+		resp        *obs.CustomEvent
+	)
 
 	err := c.ShouldBindJSON(&customevent)
 	if err != nil {
@@ -106,24 +109,44 @@ func (h *Handler) CreateCustomEvent(c *gin.Context) {
 	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
 	// 	return
 	// }
-
-	resp, err := services.BuilderService().CustomEvent().Create(
-		context.Background(),
-		&obs.CreateCustomEventRequest{
-			TableSlug:  customevent.TableSlug,
-			EventPath:  customevent.EventPath,
-			Label:      customevent.Label,
-			Icon:       customevent.Icon,
-			Url:        customevent.Url,
-			Disable:    customevent.Disable,
-			ActionType: customevent.ActionType,
-			Method:     customevent.Method,
-			Attributes: structData,
-			ProjectId:  resource.ResourceEnvironmentId, //added resource id
-			// CommitId:   commitID,
-			// CommitGuid: commitGuid,
-		},
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().CustomEvent().Create(
+			context.Background(),
+			&obs.CreateCustomEventRequest{
+				TableSlug:  customevent.TableSlug,
+				EventPath:  customevent.EventPath,
+				Label:      customevent.Label,
+				Icon:       customevent.Icon,
+				Url:        customevent.Url,
+				Disable:    customevent.Disable,
+				ActionType: customevent.ActionType,
+				Method:     customevent.Method,
+				Attributes: structData,
+				ProjectId:  resource.ResourceEnvironmentId, //added resource id
+				// CommitId:   commitID,
+				// CommitGuid: commitGuid,
+			},
+		)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.BuilderService().CustomEvent().Create(
+			context.Background(),
+			&obs.CreateCustomEventRequest{
+				TableSlug:  customevent.TableSlug,
+				EventPath:  customevent.EventPath,
+				Label:      customevent.Label,
+				Icon:       customevent.Icon,
+				Url:        customevent.Url,
+				Disable:    customevent.Disable,
+				ActionType: customevent.ActionType,
+				Method:     customevent.Method,
+				Attributes: structData,
+				ProjectId:  resource.ResourceEnvironmentId, //added resource id
+				// CommitId:   commitID,
+				// CommitGuid: commitGuid,
+			},
+		)
+	}
 
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -247,6 +270,7 @@ func (h *Handler) GetCustomEventByID(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllCustomEvents(c *gin.Context) {
+	var resp *obs.GetCustomEventsListResponse
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -305,19 +329,35 @@ func (h *Handler) GetAllCustomEvents(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().CustomEvent().GetList(
+			context.Background(),
+			&obs.GetCustomEventsListRequest{
+				TableSlug: c.DefaultQuery("table_slug", ""),
+				RoleId:    authInfo.GetRoleId(),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	resp, err := services.BuilderService().CustomEvent().GetList(
-		context.Background(),
-		&obs.GetCustomEventsListRequest{
-			TableSlug: c.DefaultQuery("table_slug", ""),
-			RoleId:    authInfo.GetRoleId(),
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().CustomEvent().GetList(
+			context.Background(),
+			&obs.GetCustomEventsListRequest{
+				TableSlug: c.DefaultQuery("table_slug", ""),
+				RoleId:    authInfo.GetRoleId(),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
