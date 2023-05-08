@@ -450,11 +450,11 @@ definitions:
         type: string
       sender_name:
         type: string
-      unreadMessageCount:
+      unread_message_count:
         type: integer
       user_id:
         type: string
-      userProfilePhotoUrl:
+      user_profile_photo_url:
         type: string
     type: object
   chat_service.GetBotByBotIdResponse:
@@ -481,11 +481,11 @@ definitions:
         type: array
       platform_type:
         type: string
-      unreadMessageCount:
+      unread_message_count:
         type: integer
       user_id:
         type: string
-      userProfilePhotoUrl:
+      user_profile_photo_url:
         type: string
     type: object
   chat_service.GetChatListResponse:

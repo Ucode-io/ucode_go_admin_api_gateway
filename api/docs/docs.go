@@ -34794,13 +34794,13 @@ const docTemplate = `{
                 "sender_name": {
                     "type": "string"
                 },
-                "unreadMessageCount": {
+                "unread_message_count": {
                     "type": "integer"
                 },
-                "userProfilePhotoUrl": {
+                "user_id": {
                     "type": "string"
                 },
-                "user_id": {
+                "user_profile_photo_url": {
                     "type": "string"
                 }
             }
@@ -34842,13 +34842,13 @@ const docTemplate = `{
                 "platform_type": {
                     "type": "string"
                 },
-                "unreadMessageCount": {
+                "unread_message_count": {
                     "type": "integer"
                 },
-                "userProfilePhotoUrl": {
+                "user_id": {
                     "type": "string"
                 },
-                "user_id": {
+                "user_profile_photo_url": {
                     "type": "string"
                 }
             }
