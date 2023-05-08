@@ -439,7 +439,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateTable(c *gin.Context) {
 	var (
-		table obs.Table
+		table obs.UpdateTableRequest
 		//resourceEnvironment *company_service.ResourceEnvironment
 		resp                  *emptypb.Empty
 		resourceEnvironmentId string
@@ -867,7 +867,7 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 
 	resp, err := services.BuilderService().Table().RevertTableHistory(
 		context.Background(),
-		&obs.TableHistoryPrimaryKey{
+		&obs.RevertTableHistoryRequest{
 			ProjectId: resource.ResourceEnvironmentId,
 			Id:        body.Id,
 		},

@@ -393,7 +393,7 @@ func (h *Handler) V2GetAllTables(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateTable(c *gin.Context) {
 	var (
-		table postgresObs.Table
+		table postgresObs.UpdateTableRequest
 		//resourceEnvironment *company_service.ResourceEnvironment
 	)
 
