@@ -34801,13 +34801,21 @@ const docTemplate = `{
                 "sender_name": {
                     "type": "string"
                 },
+<<<<<<< HEAD
                 "unreadMessageCount": {
                     "type": "integer"
                 },
                 "userProfilePhotoUrl": {
                     "type": "string"
+=======
+                "unread_message_count": {
+                    "type": "integer"
+>>>>>>> 106fa093cb0587cb930bfde9ff03afe9569d1abb
                 },
                 "user_id": {
+                    "type": "string"
+                },
+                "user_profile_photo_url": {
                     "type": "string"
                 }
             }
@@ -34849,13 +34857,21 @@ const docTemplate = `{
                 "platform_type": {
                     "type": "string"
                 },
+<<<<<<< HEAD
                 "unreadMessageCount": {
                     "type": "integer"
                 },
                 "userProfilePhotoUrl": {
                     "type": "string"
+=======
+                "unread_message_count": {
+                    "type": "integer"
+>>>>>>> 106fa093cb0587cb930bfde9ff03afe9569d1abb
                 },
                 "user_id": {
+                    "type": "string"
+                },
+                "user_profile_photo_url": {
                     "type": "string"
                 }
             }
