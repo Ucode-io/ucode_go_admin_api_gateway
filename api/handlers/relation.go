@@ -478,7 +478,7 @@ func (h *Handler) DeleteRelation(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.BuilderService().Relation().Delete(
+		resp, err = services.PostgresBuilderService().Relation().Delete(
 			context.Background(),
 			&obs.RelationPrimaryKey{
 				Id:        relationID,
