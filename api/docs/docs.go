@@ -34801,16 +34801,8 @@ const docTemplate = `{
                 "sender_name": {
                     "type": "string"
                 },
-<<<<<<< HEAD
-                "unreadMessageCount": {
-                    "type": "integer"
-                },
-                "userProfilePhotoUrl": {
-                    "type": "string"
-=======
                 "unread_message_count": {
                     "type": "integer"
->>>>>>> 106fa093cb0587cb930bfde9ff03afe9569d1abb
                 },
                 "user_id": {
                     "type": "string"
@@ -34857,16 +34849,8 @@ const docTemplate = `{
                 "platform_type": {
                     "type": "string"
                 },
-<<<<<<< HEAD
-                "unreadMessageCount": {
-                    "type": "integer"
-                },
-                "userProfilePhotoUrl": {
-                    "type": "string"
-=======
                 "unread_message_count": {
                     "type": "integer"
->>>>>>> 106fa093cb0587cb930bfde9ff03afe9569d1abb
                 },
                 "user_id": {
                     "type": "string"
@@ -38954,7 +38938,7 @@ const docTemplate = `{
                 "author_id": {
                     "type": "string"
                 },
-                "commitInfo": {
+                "commit_info": {
                     "$ref": "#/definitions/object_builder_service.CommitInfo"
                 },
                 "description": {
@@ -39038,10 +39022,10 @@ const docTemplate = `{
         "object_builder_service.TableHistory": {
             "type": "object",
             "properties": {
-                "action_type": {
+                "author_id": {
                     "type": "string"
                 },
-                "author_id": {
+                "commit_type": {
                     "type": "string"
                 },
                 "created_at": {

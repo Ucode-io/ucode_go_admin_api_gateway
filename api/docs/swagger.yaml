@@ -450,7 +450,6 @@ definitions:
         type: string
       sender_name:
         type: string
-      unreadMessageCount:
       unread_message_count:
         type: integer
       user_id:
@@ -3164,7 +3163,7 @@ definitions:
     properties:
       author_id:
         type: string
-      commitInfo:
+      commit_info:
         $ref: '#/definitions/object_builder_service.CommitInfo'
       description:
         type: string
@@ -3219,9 +3218,9 @@ definitions:
     type: object
   object_builder_service.TableHistory:
     properties:
-      action_type:
-        type: string
       author_id:
+        type: string
+      commit_type:
         type: string
       created_at:
         type: string
