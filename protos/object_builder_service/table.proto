@@ -11,12 +11,12 @@ service TableService {
     rpc Create(CreateTableRequest) returns (CreateTableResponse) {}
     rpc GetByID(TablePrimaryKey) returns (Table) {}
     rpc GetAll(GetAllTablesRequest) returns (GetAllTablesResponse) {}
-    rpc Update(Table) returns (google.protobuf.Empty) {}
+    rpc Update(UpdateTableRequest) returns (google.protobuf.Empty) {}
     rpc Delete(TablePrimaryKey) returns (google.protobuf.Empty) {}
 
     rpc GetListTableHistory(GetTableHistoryRequest) returns (GetTableHistoryResponse) {}
     rpc GetTableHistoryById(TableHistoryPrimaryKey) returns (Table) {}
-    rpc RevertTableHistory(TableHistoryPrimaryKey) returns (TableHistory) {}
+    rpc RevertTableHistory(RevertTableHistoryRequest) returns (TableHistory) {}
     rpc InsertVersionsToCommit(InsertVersionsToCommitRequest) returns (TableHistory) {}
 }
 
@@ -36,10 +36,21 @@ message TableHistoryPrimaryKey {
     string project_id = 2;
 }
 
+message RevertTableHistoryRequest {
+    string id = 1;
+    string project_id = 2;
+    string author_id = 3;
+    string commit_type = 4;
+    string name = 5;
+}
+
 message TableHistory {
     string id = 1;
     string created_at = 2;
     repeated string version_ids = 3;
+    string author_id = 4;
+    string commit_type = 5;
+    string name = 6;
 }
 
 message GetTableHistoryResponse {
@@ -61,6 +72,9 @@ message CreateTableRequest {
     string commit_id = 12;
     string version_id = 13;
     string folder_id = 14;
+    string author_id = 15;
+    string commit_type = 16;
+    string name = 17;
 }
 
 message IncrementID {
@@ -82,6 +96,24 @@ message CreateTableResponse {
     IncrementID increment_id = 10;
 }
 
+message UpdateTableRequest {
+    string id = 1;
+    string label = 2;
+    string description = 3;
+    string slug = 4;
+    bool show_in_menu = 5;
+    string icon = 6;
+    string subtitle_field_slug = 7;
+    bool is_visible = 8;
+    bool is_own_table = 9;
+    IncrementID increment_id = 10;
+    string project_id = 11;
+    string folder_id = 12;
+    string author_id = 13;
+    string commit_type = 14;
+    string name = 15;
+}
+
 message Table {
     string id = 1;
     string label = 2;
@@ -95,6 +127,16 @@ message Table {
     IncrementID increment_id = 10;
     string project_id = 11;
     string folder_id = 12;
+    string author_id = 13;
+    CommitInfo commit_info = 14;
+}
+
+message CommitInfo {
+    string id = 1;
+    string commit_type = 2;
+    string created_at = 3;
+    string name = 4;
+    repeated string version_ids = 5;
 }
 
 message GetAllTablesResponse {
@@ -106,6 +148,9 @@ message TablePrimaryKey {
     string id = 1;
     string project_id = 2;
     string version_id = 3;
+    string author_id = 4;
+    string commit_type = 5;
+    string name = 6;
 }
 
 message GetAllTablesRequest {

@@ -2,7 +2,7 @@ package models
 
 type CreateTableFolderRequest struct {
 	Title     string `json:"title"`
-	ParentdId string `json:"parentd_id"`
+	ParentdId string `json:"parent_id"`
 }
 
 type GetAllTableFoldersRequest struct {

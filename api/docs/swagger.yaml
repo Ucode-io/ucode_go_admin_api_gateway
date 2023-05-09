@@ -355,6 +355,8 @@ definitions:
         type: string
       id:
         type: string
+      language_id:
+        type: string
       login:
         type: string
       name:
@@ -368,6 +370,8 @@ definitions:
       project_id:
         type: string
       role_id:
+        type: string
+      timezone_id:
         type: string
     type: object
   auth_service.V2LoginResponse:
@@ -446,9 +450,11 @@ definitions:
         type: string
       sender_name:
         type: string
+      unread_message_count:
+        type: integer
       user_id:
         type: string
-      userProfilePhotoUrl:
+      user_profile_photo_url:
         type: string
     type: object
   chat_service.GetBotByBotIdResponse:
@@ -475,9 +481,11 @@ definitions:
         type: array
       platform_type:
         type: string
+      unread_message_count:
+        type: integer
       user_id:
         type: string
-      userProfilePhotoUrl:
+      user_profile_photo_url:
         type: string
     type: object
   chat_service.GetChatListResponse:
@@ -1626,7 +1634,7 @@ definitions:
     type: object
   models.CreateTableFolderRequest:
     properties:
-      parentd_id:
+      parent_id:
         type: string
       title:
         type: string
@@ -2450,6 +2458,21 @@ definitions:
       code:
         type: string
     type: object
+  object_builder_service.CommitInfo:
+    properties:
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+    type: object
   object_builder_service.Condition:
     properties:
       match_fields:
@@ -3138,6 +3161,10 @@ definitions:
     type: object
   object_builder_service.Table:
     properties:
+      author_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/object_builder_service.CommitInfo'
       description:
         type: string
       folder_id:
@@ -3191,9 +3218,15 @@ definitions:
     type: object
   object_builder_service.TableHistory:
     properties:
+      author_id:
+        type: string
+      commit_type:
+        type: string
       created_at:
         type: string
       id:
+        type: string
+      name:
         type: string
       version_ids:
         items:
@@ -18696,6 +18729,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/object_builder_service.Table'
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:

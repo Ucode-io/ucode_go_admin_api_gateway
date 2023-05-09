@@ -23573,6 +23573,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/object_builder_service.Table"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -34650,6 +34657,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "language_id": {
+                    "type": "string"
+                },
                 "login": {
                     "type": "string"
                 },
@@ -34669,6 +34679,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "role_id": {
+                    "type": "string"
+                },
+                "timezone_id": {
                     "type": "string"
                 }
             }
@@ -34788,10 +34801,13 @@ const docTemplate = `{
                 "sender_name": {
                     "type": "string"
                 },
-                "userProfilePhotoUrl": {
-                    "type": "string"
+                "unread_message_count": {
+                    "type": "integer"
                 },
                 "user_id": {
+                    "type": "string"
+                },
+                "user_profile_photo_url": {
                     "type": "string"
                 }
             }
@@ -34833,10 +34849,13 @@ const docTemplate = `{
                 "platform_type": {
                     "type": "string"
                 },
-                "userProfilePhotoUrl": {
-                    "type": "string"
+                "unread_message_count": {
+                    "type": "integer"
                 },
                 "user_id": {
+                    "type": "string"
+                },
+                "user_profile_photo_url": {
                     "type": "string"
                 }
             }
@@ -36582,7 +36601,7 @@ const docTemplate = `{
         "models.CreateTableFolderRequest": {
             "type": "object",
             "properties": {
-                "parentd_id": {
+                "parent_id": {
                     "type": "string"
                 },
                 "title": {
@@ -37842,6 +37861,29 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.CommitInfo": {
+            "type": "object",
+            "properties": {
+                "commit_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "object_builder_service.Condition": {
             "type": "object",
             "properties": {
@@ -38893,6 +38935,12 @@ const docTemplate = `{
         "object_builder_service.Table": {
             "type": "object",
             "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "commit_info": {
+                    "$ref": "#/definitions/object_builder_service.CommitInfo"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -38974,10 +39022,19 @@ const docTemplate = `{
         "object_builder_service.TableHistory": {
             "type": "object",
             "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "commit_type": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 },
                 "version_ids": {

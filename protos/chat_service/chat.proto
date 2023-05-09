@@ -14,12 +14,14 @@ service ChatService {
     rpc UpdateChat(UpdateChatRequest) returns (google.protobuf.Empty) {}
     rpc UpdateChatProfielPhotoUrl(UpdateProfilePhotoUrlRequest) returns (google.protobuf.Empty) {}
     rpc UpdateChatMessage(UpdateChatMessageRequest) returns (google.protobuf.Empty) {}
-
+    rpc UpdateChatMessageCount(UpdateChatMessageCountRequest) returns (google.protobuf.Empty) {}
+  
     rpc CreateBot (CreateBotRequest) returns (CreateBotResponse) {}
     rpc UpdateBotStatus(UpdateBotStatusRequest) returns (google.protobuf.Empty) {}
     rpc UpdateBotToken(UpdateBotTokenRequest) returns (google.protobuf.Empty) {}
     rpc GetBotTokenList (GetBotTokenListRequest) returns (GetBotTokenListResponse) {}
     rpc GetBotTokenByBotId (GetBotByBotIdRequest) returns (GetBotByBotIdResponse) {}
+    rpc GetBotStatusByBotToken (GetBotStatusRequest) returns (GetBotStatusResponse) {}
     rpc GetBotIDByChatId (GetBotIDByChatIDRequest) returns (GetBotIDByChatIDResponse) {}
     rpc DeleteBotToken(DeleteBotTokenRequest) returns (google.protobuf.Empty) {}
 }
@@ -60,9 +62,18 @@ message GetBotByBotIdRequest{
     string bot_id = 1;
 }
 
+message GetBotStatusRequest{
+    string bot_token = 1;
+}
+
+message GetBotStatusResponse{
+    string status = 1;
+}
+
 message GetBotTokenListResponse{
     repeated Bot bottokenlist = 1;
 }
+
 message GetBotTokenListRequest{
     string environment_id = 1;
 }
@@ -90,7 +101,7 @@ message CreateChatRequest{
     string user_id = 1;
     string bot_id = 2;
     Chat chat = 3;
-    string userProfilePhotoUrl=4;
+    string user_profile_photo_url=4;
 }
 
 message CreateChatResponse{
@@ -124,7 +135,7 @@ message GetBotIDByChatIDRequest {
 
 message UpdateProfilePhotoUrlRequest {
     string user_id = 1;
-    string userProfilePhotoUrl=2;
+    string user_profile_photo_url=2;
 }
 
 message GetBotIDByChatIDResponse{
@@ -138,15 +149,15 @@ message GetChatByChatIdResponse {
     string platform_type = 3;
     string user_id = 4;
     string bot_id = 5;
-    string userProfilePhotoUrl=6;
-
+    string user_profile_photo_url=6;
+    int32 unread_message_count = 7;
 }
 
 message GetChatByUserIdResponse {
     string user_id = 1;
     string chat_id = 2;
     string bot_id = 3;
-    string userProfilePhotoUrl=4;
+    string user_profile_photo_url=4;
 }
 
 message GetChatListRequest {
@@ -165,8 +176,8 @@ message ChatWithLastMessageData {
     string user_id = 8;
     string bot_id=9;
     string message_type = 10;
-    string userProfilePhotoUrl=11;
-
+    string user_profile_photo_url=11;
+    int32 unread_message_count = 12;
 
 }
 
@@ -197,3 +208,6 @@ message UpdateChatMessageRequest {
     string message_id = 1;
 }
 
+message UpdateChatMessageCountRequest {
+    string chat_id = 1;
+}

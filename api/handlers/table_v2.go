@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
+	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	postgresObs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
@@ -40,11 +42,11 @@ func (h *Handler) V2CreateTable(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -136,6 +138,9 @@ func (h *Handler) V2CreateTable(c *gin.Context) {
 			DigitNumber:     tableRequest.IncrementID.DigitNumber,
 			Prefix:          tableRequest.IncrementID.Prefix,
 		},
+		AuthorId:   authInfo.GetUserId(),
+		Name:       fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123)),
+		CommitType: config.COMMIT_TYPE_TABLE,
 	}
 
 	table.ProjectId = resource.ResourceEnvironmentId
@@ -393,7 +398,7 @@ func (h *Handler) V2GetAllTables(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateTable(c *gin.Context) {
 	var (
-		table postgresObs.Table
+		table postgresObs.UpdateTableRequest
 		//resourceEnvironment *company_service.ResourceEnvironment
 	)
 
@@ -415,11 +420,12 @@ func (h *Handler) V2UpdateTable(c *gin.Context) {
 	//	return
 	//}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	authInfo, err := h.GetAuthInfo(c)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
+
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
 	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get resource_id"))
@@ -478,6 +484,9 @@ func (h *Handler) V2UpdateTable(c *gin.Context) {
 	//	}
 	//}
 	table.ProjectId = resource.ResourceEnvironmentId
+	table.AuthorId = authInfo.GetUserId()
+	table.Name = fmt.Sprintf("Auto Created Commit Update table - %s", time.Now().Format(time.RFC1123))
+	table.CommitType = config.COMMIT_TYPE_TABLE
 
 	resp, err := services.PostgresBuilderService().Table().Update(
 		context.Background(),

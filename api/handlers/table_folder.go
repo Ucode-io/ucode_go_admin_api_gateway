@@ -32,6 +32,7 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateTableFolder(c *gin.Context) {
 	var tableFolder models.CreateTableFolderRequest
+	var resourceEnvironmentId string
 
 	err := c.ShouldBindJSON(&tableFolder)
 	if err != nil {
@@ -46,11 +47,7 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
+	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
@@ -65,17 +62,35 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if !resourceIdOk {
+		resource, err := services.CompanyService().ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resource.ResourceEnvironmentId
+	} else {
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&pb.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resourceEnvironment.GetId()
 	}
 
 	resp, err := services.BuilderService().TableFolder().Create(
@@ -83,7 +98,7 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 		&object_builder_service.TableFolderRequest{
 			Title:     tableFolder.Title,
 			ParentId:  tableFolder.ParentdId,
-			ProjectId: resource.ResourceEnvironmentId,
+			ProjectId: resourceEnvironmentId,
 		},
 	)
 
@@ -122,6 +137,8 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 		return
 	}
 
+	resourceId, resourceIdOk := c.Get("resource_id")
+
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -135,24 +152,43 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	var resourceEnvironmentId string
+	if !resourceIdOk {
+		resource, err := services.CompanyService().ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resource.ResourceEnvironmentId
+	} else {
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&pb.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resourceEnvironment.GetId()
 	}
 
 	resp, err := services.BuilderService().TableFolder().GetByID(
 		context.Background(),
 		&object_builder_service.TableFolderPrimaryKey{
 			Id:        Id,
-			ProjectId: resource.ResourceEnvironmentId,
+			ProjectId: resourceEnvironmentId,
 		},
 	)
 
@@ -177,7 +213,8 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllTableFolders(c *gin.Context) {
 	var (
-	//resourceEnvironment *company_service.ResourceEnvironment
+		//resourceEnvironment *company_service.ResourceEnvironment
+		resourceEnvironmentId string
 	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
@@ -198,6 +235,8 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 		return
 	}
 
+	resourceId, resourceIdOk := c.Get("resource_id")
+
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -211,17 +250,35 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if !resourceIdOk {
+		resource, err := services.CompanyService().ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resource.ResourceEnvironmentId
+	} else {
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&pb.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resourceEnvironment.GetId()
 	}
 
 	resp, err := services.BuilderService().TableFolder().GetAll(
@@ -229,7 +286,7 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 		&object_builder_service.GetAllTableFoldersRequest{
 			Offset:    int32(offset),
 			Limit:     int32(limit),
-			ProjectId: resource.ResourceEnvironmentId,
+			ProjectId: resourceEnvironmentId,
 		},
 	)
 
@@ -256,6 +313,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 	var (
 		tableFolder object_builder_service.TableFolder
 		//resourceEnvironment *company_service.ResourceEnvironment
+		resourceEnvironmentId string
 	)
 
 	err := c.ShouldBindJSON(&tableFolder)
@@ -271,6 +329,8 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 		return
 	}
 
+	resourceId, resourceIdOk := c.Get("resource_id")
+
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -284,17 +344,35 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if !resourceIdOk {
+		resource, err := services.CompanyService().ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resource.ResourceEnvironmentId
+	} else {
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&pb.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resourceEnvironment.GetId()
 	}
 
 	resp, err := services.BuilderService().TableFolder().Update(
@@ -302,7 +380,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 		&object_builder_service.TableFolder{
 			Title:     tableFolder.Title,
 			ParentId:  tableFolder.ParentId,
-			ProjectId: resource.ResourceEnvironmentId,
+			ProjectId: resourceEnvironmentId,
 			Id:        tableFolder.Id,
 		},
 	)
@@ -328,7 +406,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteTableFolder(c *gin.Context) {
 	Id := c.Param("id")
-
+	resourceEnvironmentId := ""
 	if !util.IsValidUUID(Id) {
 		h.handleResponse(c, status_http.InvalidArgument, "table id is an invalid uuid")
 		return
@@ -340,6 +418,8 @@ func (h *Handler) DeleteTableFolder(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+
+	resourceId, resourceIdOk := c.Get("resource_id")
 
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
@@ -354,24 +434,42 @@ func (h *Handler) DeleteTableFolder(c *gin.Context) {
 		return
 	}
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if !resourceIdOk {
+		resource, err := services.CompanyService().ServiceResource().GetSingle(
+			c.Request.Context(),
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     projectId,
+				EnvironmentId: environmentId.(string),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resource.ResourceEnvironmentId
+	} else {
+		resourceEnvironment, err := services.CompanyService().Resource().GetResourceEnvironment(
+			c.Request.Context(),
+			&pb.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		resourceEnvironmentId = resourceEnvironment.GetId()
 	}
 
 	resp, err := services.BuilderService().TableFolder().Delete(
 		context.Background(),
 		&obs.TableFolderPrimaryKey{
 			Id:        Id,
-			ProjectId: resource.ResourceEnvironmentId,
+			ProjectId: resourceEnvironmentId,
 		},
 	)
 
