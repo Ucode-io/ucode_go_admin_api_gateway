@@ -45,13 +45,6 @@ func main() {
 	defer cancel()
 
 	redis := redis.NewRedis(cfg)
-	redis.SetX(ctx, "test", "VALUEEE", time.Second*10)
-	val, err := redis.Get(ctx, "test")
-	if err != nil {
-		log.Error("[ucode] error while establishing redis conn", logger.Error(err))
-	}
-	fmt.Println("REDIS_VALUE :: " + val)
-	fmt.Println("REDIS_START_HERE")
 
 	authSrvc, err := services.NewAuthGrpcClient(ctx, cfg)
 	if err != nil {
@@ -70,7 +63,7 @@ func main() {
 
 	r := gin.New()
 
-	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(gin.Recovery())
 
 	h := handlers.NewHandler(cfg, log, serviceNodes, grpcSvcs, authSrvc)
 
