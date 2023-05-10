@@ -1115,6 +1115,8 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	if err == nil {
 		h.handleResponse(c, status_http.OK, redisResp+" FROM REDIS")
 		return
+	} else {
+		h.log.Error("Error while getting redis", logger.Error(err))
 	}
 
 	resp, err := services.BuilderService().ObjectBuilder().GetListSlim(
