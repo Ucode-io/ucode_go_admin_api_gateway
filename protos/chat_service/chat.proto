@@ -101,8 +101,7 @@ message CreateChatRequest{
     string user_id = 1;
     string bot_id = 2;
     Chat chat = 3;
-    string userProfilePhotoUrl=4;
-    // int32 unreadMessageCount = 5;
+    string user_profile_photo_url=4;
 }
 
 message CreateChatResponse{
@@ -136,7 +135,7 @@ message GetBotIDByChatIDRequest {
 
 message UpdateProfilePhotoUrlRequest {
     string user_id = 1;
-    string userProfilePhotoUrl=2;
+    string user_profile_photo_url=2;
 }
 
 message GetBotIDByChatIDResponse{
@@ -150,15 +149,15 @@ message GetChatByChatIdResponse {
     string platform_type = 3;
     string user_id = 4;
     string bot_id = 5;
-    string userProfilePhotoUrl=6;
-    int32 unreadMessageCount = 7;
+    string user_profile_photo_url=6;
+    int32 unread_message_count = 7;
 }
 
 message GetChatByUserIdResponse {
     string user_id = 1;
     string chat_id = 2;
     string bot_id = 3;
-    string userProfilePhotoUrl=4;
+    string user_profile_photo_url=4;
 }
 
 message GetChatListRequest {
@@ -177,8 +176,8 @@ message ChatWithLastMessageData {
     string user_id = 8;
     string bot_id=9;
     string message_type = 10;
-    string userProfilePhotoUrl=11;
-    int32 unreadMessageCount = 12;
+    string user_profile_photo_url=11;
+    int32 unread_message_count = 12;
 
 }
 

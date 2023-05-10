@@ -23573,6 +23573,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/object_builder_service.Table"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -34794,13 +34801,13 @@ const docTemplate = `{
                 "sender_name": {
                     "type": "string"
                 },
-                "unreadMessageCount": {
+                "unread_message_count": {
                     "type": "integer"
                 },
-                "userProfilePhotoUrl": {
+                "user_id": {
                     "type": "string"
                 },
-                "user_id": {
+                "user_profile_photo_url": {
                     "type": "string"
                 }
             }
@@ -34842,13 +34849,13 @@ const docTemplate = `{
                 "platform_type": {
                     "type": "string"
                 },
-                "unreadMessageCount": {
+                "unread_message_count": {
                     "type": "integer"
                 },
-                "userProfilePhotoUrl": {
+                "user_id": {
                     "type": "string"
                 },
-                "user_id": {
+                "user_profile_photo_url": {
                     "type": "string"
                 }
             }
@@ -38931,7 +38938,7 @@ const docTemplate = `{
                 "author_id": {
                     "type": "string"
                 },
-                "commitInfo": {
+                "commit_info": {
                     "$ref": "#/definitions/object_builder_service.CommitInfo"
                 },
                 "description": {
@@ -39015,10 +39022,10 @@ const docTemplate = `{
         "object_builder_service.TableHistory": {
             "type": "object",
             "properties": {
-                "action_type": {
+                "author_id": {
                     "type": "string"
                 },
-                "author_id": {
+                "commit_type": {
                     "type": "string"
                 },
                 "created_at": {

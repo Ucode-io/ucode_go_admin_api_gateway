@@ -15,6 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // CreateObject godoc
@@ -1237,7 +1238,10 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteManyToMany(c *gin.Context) {
-	var m2mMessage obs.ManyToManyMessage
+	var (
+		m2mMessage obs.ManyToManyMessage
+		resp       *emptypb.Empty
+	)
 
 	err := c.ShouldBindJSON(&m2mMessage)
 	if err != nil {
@@ -1324,16 +1328,29 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 			return
 		}
 	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().ObjectBuilder().ManyToManyDelete(
+			context.Background(),
+			&m2mMessage,
+		)
 
-	resp, err := services.BuilderService().ObjectBuilder().ManyToManyDelete(
-		context.Background(),
-		&m2mMessage,
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().ObjectBuilder().ManyToManyDelete(
+			context.Background(),
+			&m2mMessage,
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
+
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
@@ -1372,7 +1389,10 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) AppendManyToMany(c *gin.Context) {
-	var m2mMessage obs.ManyToManyMessage
+	var (
+		m2mMessage obs.ManyToManyMessage
+		resp       *emptypb.Empty
+	)
 
 	err := c.ShouldBindJSON(&m2mMessage)
 	if err != nil {
@@ -1460,16 +1480,29 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 			return
 		}
 	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().ObjectBuilder().ManyToManyAppend(
+			context.Background(),
+			&m2mMessage,
+		)
 
-	resp, err := services.BuilderService().ObjectBuilder().ManyToManyAppend(
-		context.Background(),
-		&m2mMessage,
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().ObjectBuilder().ManyToManyAppend(
+			context.Background(),
+			&m2mMessage,
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
+
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{

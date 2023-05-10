@@ -18,7 +18,6 @@ import (
 
 func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		var (
 			res = &auth_service.HasAccessSuperAdminRes{}
 			ok  bool
@@ -32,6 +31,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
 			return
 		}
+
 		switch strArr[0] {
 		case "Bearer":
 			res, ok = h.adminHasAccess(c)
@@ -40,6 +40,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 				_ = c.AbortWithError(401, errors.New("unauthorized"))
 				return
 			}
+
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
 

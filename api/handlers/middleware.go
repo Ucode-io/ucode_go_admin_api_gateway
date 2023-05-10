@@ -49,20 +49,15 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		}
 		switch strArr[0] {
 		case "Bearer":
-			fmt.Println("aa")
-			fmt.Println("pl;::", platformType)
-			fmt.Println("pla::::", cfg.PlatformType)
 			if platformType != cfg.PlatformType {
 				fmt.Println(origin)
 				res, ok = h.hasAccess(c)
-				fmt.Println("a::::::::::", res)
 				if !ok {
 					h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
 					c.Abort()
 					return
 				}
 			}
-			fmt.Println("bb")
 
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
