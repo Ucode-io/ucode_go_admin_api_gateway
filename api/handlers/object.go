@@ -463,11 +463,14 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 
 	redisResp, err := h.redis.Get(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))
 	if err == nil {
+		fmt.Println("REDIS_RESULT")
 		h.handleResponse(c, status_http.OK, redisResp+" FROM REDIS")
 		return
 	} else {
 		h.log.Error("Error while getting redis", logger.Error(err))
 	}
+	fmt.Println("redisResp", redisResp)
+	fmt.Println("redisErr", err)
 
 	resp, err := services.BuilderService().ObjectBuilder().GetSingleSlim(
 		context.Background(),
