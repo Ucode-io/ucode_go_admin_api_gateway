@@ -16,6 +16,8 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
+	"encoding/base64"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -460,14 +462,8 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
-	Convert the string to a byte slice
-	bytes := []byte(str)
 
-	// Encode the byte slice to base64
-	encoded := base64.StdEncoding.EncodeToString(bytes)
-
-
-	redisResp, err := h.redis.Get(context.Background(), base64.stdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
+	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 	if err == nil {
 		fmt.Println("REDIS_RESULT")
 		h.handleResponse(c, status_http.OK, redisResp+" FROM REDIS")
@@ -492,7 +488,7 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 	}
 
 	jsonData, _ := resp.GetData().MarshalJSON()
-	err = h.redis.SetX(context.Background(), base64.stdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
+	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
 	if err != nil {
 		h.log.Error("Error while setting redis", logger.Error(err))
 	}
