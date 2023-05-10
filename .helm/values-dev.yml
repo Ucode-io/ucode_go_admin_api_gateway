@@ -38,7 +38,7 @@ podAnnotations:
   vault.hashicorp.com/auth-path: "auth/kubernetes-ucode-hzn"
   vault.hashicorp.com/agent-inject-secret-.env: "secret/data/k8s/ucode-dev/go-admin-api-gateway"
   vault.hashicorp.com/secret-volume-path-.env: "/app"
-  vault.hashicorp.com/role: "ucode-demo"
+  vault.hashicorp.com/role: "ucode-dev"
   vault.hashicorp.com/agent-inject-template-.env: |
     {{- with secret "secret/data/k8s/ucode-dev/minio" -}}
     {{- range $key, $value := .Data.data }}
