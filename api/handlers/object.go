@@ -490,7 +490,7 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 		h.log.Error("Error while setting redis", logger.Error(err))
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
+	h.handleResponse(c, status_http.OK, resp.String()+" FROM GRPC")
 }
 
 // UpdateObject godoc
