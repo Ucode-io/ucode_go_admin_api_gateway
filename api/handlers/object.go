@@ -485,12 +485,13 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 		return
 	}
 
-	err = h.redis.SetX(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId), resp.String(), 5*time.Second)
+	jsonData, _ := resp.GetData().MarshalJSON()
+	err = h.redis.SetX(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId), string(jsonData), 5*time.Second)
 	if err != nil {
 		h.log.Error("Error while setting redis", logger.Error(err))
 	}
 
-	h.handleResponse(c, status_http.OK, resp.String()+" FROM GRPC")
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateObject godoc
