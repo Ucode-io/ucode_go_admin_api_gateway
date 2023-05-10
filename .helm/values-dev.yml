@@ -15,7 +15,7 @@ image:
   repository: /ucode/ucode_go_admin_api_gateway
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "test"
+  tag: "dev"
 
 imagePullSecrets: "gitlab-registry"
 nameOverride: ""
@@ -35,27 +35,27 @@ serviceAccount:
 
 podAnnotations:
   vault.hashicorp.com/agent-inject: "true"
-  vault.hashicorp.com/auth-path: "auth/kubernetes-ucode"
-  vault.hashicorp.com/agent-inject-secret-.env: "secret/data/k8s/ucode-demo/go-admin-api-gateway"
+  vault.hashicorp.com/auth-path: "auth/kubernetes-ucode-hzn"
+  vault.hashicorp.com/agent-inject-secret-.env: "secret/data/k8s/ucode-dev/go-admin-api-gateway"
   vault.hashicorp.com/secret-volume-path-.env: "/app"
   vault.hashicorp.com/role: "ucode-demo"
   vault.hashicorp.com/agent-inject-template-.env: |
-    {{- with secret "secret/data/k8s/ucode-demo/minio" -}}
+    {{- with secret "secret/data/k8s/ucode-dev/minio" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
-    {{- with secret "secret/data/k8s/ucode-demo/services" -}}
+    {{- with secret "secret/data/k8s/ucode-dev/services" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
-    {{- with secret "secret/data/k8s/ucode-demo/postgres" -}}
+    {{- with secret "secret/data/k8s/ucode-dev/postgres" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
-    {{- with secret "secret/data/k8s/ucode-demo/go-admin-api-gateway" -}}
+    {{- with secret "secret/data/k8s/ucode-dev/go-admin-api-gateway" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
     {{- end }}
@@ -112,16 +112,15 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
-        cert-manager.io/cluster-issuer: letsencrypt-prod
       type: web
       hosts:
-        - host: "demo.admin.api.u-code.io"
+        - host: "dev-admin-api.ucode.run"
           path: /
           servicePort: 8080
       tls:
         - secretName: admin-api-tls
           hosts:
-            - "demo.admin.api.u-code.io"
+            - "dev-admin-api.ucode.run"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -133,16 +132,15 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
-        cert-manager.io/cluster-issuer: letsencrypt-prod
       type: auth
       hosts:
-        - host: "demo.admin.api.u-code.io"
+        - host: "dev-admin-api.ucode.run"
           path: /swagger
           servicePort: 8080
       tls:
         - secretName: admin-api-tls
           hosts:
-            - "demo.admin.api.u-code.io"
+            - "dev-admin-api.ucode.run"
 
 # resources:
 #    limits:
@@ -168,7 +166,7 @@ affinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
         - matchExpressions:
-            - key: kubernetes.io/env-demo
+            - key: kubernetes.io/ucode-dev
               operator: In
               values:
                 - "true"
