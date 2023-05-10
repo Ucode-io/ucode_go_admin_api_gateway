@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/crons"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
+	"ucode/ucode_go_api_gateway/storage/redis"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,6 +43,13 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	redis := redis.NewRedis(cfg)
+	redis.SetX(ctx, "test", "VALUEEE", time.Second*10)
+	_, err := redis.Get(ctx, "test")
+	if err != nil {
+		log.Error("[ucode] error while establishing redis conn", logger.Error(err))
+	}
 
 	authSrvc, err := services.NewAuthGrpcClient(ctx, cfg)
 	if err != nil {

@@ -111,6 +111,11 @@ type Config struct {
 
 	PostgresBuilderServiceHost string
 	PostgresBuilderServicePort string
+
+	GetRequestRedisHost     string
+	GetRequestRedisPort     string
+	GetRequestRedisDatabase int
+	GetRequestRedisPassword string
 }
 
 // Load ...
@@ -212,6 +217,12 @@ func Load() Config {
 
 	config.PostgresBuilderServiceHost = cast.ToString(GetOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", "localhost"))
 	config.PostgresBuilderServicePort = cast.ToString(GetOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ":9202"))
+
+	config.GetRequestRedisHost = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", "localhost"))
+	config.GetRequestRedisPort = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", "6601"))
+	config.GetRequestRedisDatabase = cast.ToInt(GetOrReturnDefaultValue("GET_REQUEST_REDIS_DATABASE", 0))
+	config.GetRequestRedisPassword = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PASSWORD", "redis_password"))
+
 	return config
 }
 
