@@ -51,6 +51,7 @@ func main() {
 		log.Error("[ucode] error while establishing redis conn", logger.Error(err))
 	}
 	fmt.Println("REDIS_VALUE :: " + val)
+	fmt.Println("REDIS_START_HERE")
 
 	authSrvc, err := services.NewAuthGrpcClient(ctx, cfg)
 	if err != nil {
