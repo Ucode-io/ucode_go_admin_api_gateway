@@ -1113,7 +1113,7 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 
 	redisResp, err := h.redis.Get(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))
 	if err == nil {
-		h.handleResponse(c, status_http.OK, redisResp)
+		h.handleResponse(c, status_http.OK, redisResp+" FROM REDIS")
 		return
 	}
 
