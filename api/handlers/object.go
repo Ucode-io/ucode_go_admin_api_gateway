@@ -486,7 +486,7 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 	}
 
 	jsonData, _ := resp.GetData().MarshalJSON()
-	err = h.redis.SetX(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId), string(jsonData), 5*time.Second)
+	err = h.redis.SetX(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId), string(jsonData), 15*time.Second)
 	if err != nil {
 		h.log.Error("Error while setting redis", logger.Error(err))
 	}
