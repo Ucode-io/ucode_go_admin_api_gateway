@@ -70,7 +70,7 @@ func main() {
 
 	r := gin.New()
 
-	r.Use(gin.Recovery())
+	r.Use(gin.Logger(), gin.Recovery())
 
 	h := handlers.NewHandler(cfg, log, serviceNodes, grpcSvcs, authSrvc)
 
