@@ -65,7 +65,7 @@ func main() {
 
 	r.Use(gin.Recovery())
 
-	h := handlers.NewHandler(cfg, log, serviceNodes, grpcSvcs, authSrvc)
+	h := handlers.NewHandler(cfg, log, serviceNodes, grpcSvcs, authSrvc, redis)
 
 	api.SetUpAPI(r, h, cfg)
 	cronjobs := crons.ExecuteCron()
