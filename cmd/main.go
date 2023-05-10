@@ -46,10 +46,11 @@ func main() {
 
 	redis := redis.NewRedis(cfg)
 	redis.SetX(ctx, "test", "VALUEEE", time.Second*10)
-	_, err := redis.Get(ctx, "test")
+	val, err := redis.Get(ctx, "test")
 	if err != nil {
 		log.Error("[ucode] error while establishing redis conn", logger.Error(err))
 	}
+	fmt.Println("REDIS_VALUE :: " + val)
 
 	authSrvc, err := services.NewAuthGrpcClient(ctx, cfg)
 	if err != nil {
