@@ -45,11 +45,11 @@ podAnnotations:
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
-    {{- with secret "secret/data/k8s/ucode-dev/postgres" -}}
-    {{- range $key, $value := .Data.data }}
-    {{ $key }}: {{ $value }}
-    {{- end }}
-    {{ end -}}
+#    {{- with secret "secret/data/k8s/ucode-dev/postgres" -}}
+#    {{- range $key, $value := .Data.data }}
+#    {{ $key }}: {{ $value }}
+#    {{- end }}
+#    {{ end -}}
     {{- with secret "secret/data/k8s/ucode-dev/go-admin-api-gateway" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
@@ -95,8 +95,8 @@ service:
   type: ClusterIP
   annotations: {}
   specs:
-    - port: 80
-      targetPort: 80
+    - port: 8080
+      targetPort: 8080
       name: http
 
 ingress:
@@ -114,9 +114,9 @@ ingress:
       hosts:
         - host: "dev-admin-api.ucode.run"
           path: /swagger
-          servicePort: 80
+          servicePort: 8080
       tls:
-        - secretName: admin-api-tls
+        - secretName: admin-dev-api-tls
           hosts:
             - "dev-admin-api.ucode.run"
 
