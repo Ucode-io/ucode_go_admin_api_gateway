@@ -17,6 +17,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"encoding/base64"
+	"encoding/json"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -464,15 +465,19 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 	//}
 
 	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
+
 	if err == nil {
-		fmt.Println("REDIS_RESULT")
-		h.handleResponse(c, status_http.OK, redisResp+" FROM REDIS")
-		return
+		m := make(map[string]interface{})
+		err = json.Unmarshal([]byte(redisResp), &m)
+		if err != nil {
+			h.log.Error("Error while unmarshal redis", logger.Error(err))
+		} else {
+			h.handleResponse(c, status_http.OK, m)
+			return
+		}
 	} else {
 		h.log.Error("Error while getting redis", logger.Error(err))
 	}
-	fmt.Println("redisResp", redisResp)
-	fmt.Println("redisErr", err)
 
 	resp, err := services.BuilderService().ObjectBuilder().GetSingleSlim(
 		context.Background(),
