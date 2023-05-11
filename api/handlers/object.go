@@ -465,7 +465,6 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 	//}
 
 	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
-
 	if err == nil {
 		resp := make(map[string]interface{})
 		m := make(map[string]interface{})
@@ -1126,10 +1125,18 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	//	return
 	//}
 
-	redisResp, err := h.redis.Get(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))
+	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 	if err == nil {
-		h.handleResponse(c, status_http.OK, redisResp+" FROM REDIS")
-		return
+		resp := make(map[string]interface{})
+		m := make(map[string]interface{})
+		err = json.Unmarshal([]byte(redisResp), &m)
+		if err != nil {
+			h.log.Error("Error while unmarshal redis", logger.Error(err))
+		} else {
+			resp["data"] = m
+			h.handleResponse(c, status_http.OK, m)
+			return
+		}
 	} else {
 		h.log.Error("Error while getting redis", logger.Error(err))
 	}
@@ -1148,7 +1155,8 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	err = h.redis.SetX(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId), resp.String(), 5*time.Second)
+	jsonData, _ := resp.GetData().MarshalJSON()
+	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
 	if err != nil {
 		h.log.Error("Error while setting redis", logger.Error(err))
 	}
