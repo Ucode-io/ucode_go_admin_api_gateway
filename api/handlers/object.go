@@ -467,11 +467,13 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 
 	if err == nil {
+		resp := make(map[string]interface{})
 		m := make(map[string]interface{})
 		err = json.Unmarshal([]byte(redisResp), &m)
 		if err != nil {
 			h.log.Error("Error while unmarshal redis", logger.Error(err))
 		} else {
+			resp["data"] = m
 			h.handleResponse(c, status_http.OK, m)
 			return
 		}
