@@ -117,14 +117,13 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
-        cert-manager.io/cluster-issuer: letsencrypt-prod
       type: web
       hosts:
         - host: "dev-admin-api.ucode.run"
           path: /
           servicePort: 8080
       tls:
-        - secretName: admin-apidev-tls
+        - secretName: ucode-star
           hosts:
             - "dev-admin-api.ucode.run"
     - annotations:
@@ -138,14 +137,13 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
-        cert-manager.io/cluster-issuer: letsencrypt-prod
       type: auth
       hosts:
         - host: "dev-admin-api.ucode.ucode.run"
           path: /swagger
           servicePort: 8080
       tls:
-        - secretName: admin-api-dev-tls
+        - secretName: ucode-star
           hosts:
             - "dev-admin-api.ucode.ucode.run"
 
