@@ -19,15 +19,17 @@ type Handler struct {
 	companyServices services.ServiceManagerI
 	authService     services.AuthServiceManagerI
 	apikeyService   services.AuthServiceManagerI
+	redis           storage.RedisStorageI
 }
 
-func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.ServiceManagerI, authService services.AuthServiceManagerI) Handler {
+func NewHandler(cfg config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.ServiceManagerI, authService services.AuthServiceManagerI, redis storage.RedisStorageI) Handler {
 	return Handler{
 		cfg:             cfg,
 		log:             log,
 		services:        svcs,
 		companyServices: cmpServ,
 		authService:     authService,
+		redis:           redis,
 	}
 }
 

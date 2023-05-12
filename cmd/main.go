@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/crons"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/services"
+	"ucode/ucode_go_api_gateway/storage/redis"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,6 +44,8 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	redis := redis.NewRedis(cfg)
+
 	authSrvc, err := services.NewAuthGrpcClient(ctx, cfg)
 	if err != nil {
 		log.Error("[ucode] error while establishing auth grpc conn", logger.Error(err))
@@ -62,7 +65,7 @@ func main() {
 
 	r.Use(gin.Recovery())
 
-	h := handlers.NewHandler(cfg, log, serviceNodes, grpcSvcs, authSrvc)
+	h := handlers.NewHandler(cfg, log, serviceNodes, grpcSvcs, authSrvc, redis)
 
 	api.SetUpAPI(r, h, cfg)
 	cronjobs := crons.ExecuteCron()

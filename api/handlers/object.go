@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	authPb "ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -11,6 +13,7 @@ import (
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -457,6 +460,18 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+
+	redisResp, err := h.redis.Get(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))
+	if err == nil {
+		fmt.Println("REDIS_RESULT")
+		h.handleResponse(c, status_http.OK, redisResp+" FROM REDIS")
+		return
+	} else {
+		h.log.Error("Error while getting redis", logger.Error(err))
+	}
+	fmt.Println("redisResp", redisResp)
+	fmt.Println("redisErr", err)
+
 	resp, err := services.BuilderService().ObjectBuilder().GetSingleSlim(
 		context.Background(),
 		&obs.CommonMessage{
@@ -470,7 +485,12 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
+	err = h.redis.SetX(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId), resp.String(), 5*time.Second)
+	if err != nil {
+		h.log.Error("Error while setting redis", logger.Error(err))
+	}
+
+	h.handleResponse(c, status_http.OK, resp.String()+" FROM GRPC")
 }
 
 // UpdateObject godoc
@@ -1096,6 +1116,14 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	//	return
 	//}
 
+	redisResp, err := h.redis.Get(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))
+	if err == nil {
+		h.handleResponse(c, status_http.OK, redisResp+" FROM REDIS")
+		return
+	} else {
+		h.log.Error("Error while getting redis", logger.Error(err))
+	}
+
 	resp, err := services.BuilderService().ObjectBuilder().GetListSlim(
 		context.Background(),
 		&obs.CommonMessage{
@@ -1108,6 +1136,11 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
+	}
+
+	err = h.redis.SetX(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId), resp.String(), 5*time.Second)
+	if err != nil {
+		h.log.Error("Error while setting redis", logger.Error(err))
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
