@@ -115,8 +115,20 @@ message User {
     string client_platform_id = 12;
     int32 active = 13;
     string expires_at = 14;
-    string language_id = 15;
-    string  timezone_id = 16;
+    Language language = 15;
+    Timezone  timezone = 16;
+}
+message Timezone {
+    string id = 1;
+    string name = 2;
+    string text = 3;
+}
+
+message Language {
+    string id = 1;
+    string name = 2;
+    string short_name = 3;
+    string native_name = 4;
 }
 
 message UserRelation {
@@ -143,6 +155,7 @@ message Session {
     string updated_at = 11;
     string integration_id = 12;
     bool is_changed = 13;
+    string env_id = 14;
 }
 
 message Passcode {
