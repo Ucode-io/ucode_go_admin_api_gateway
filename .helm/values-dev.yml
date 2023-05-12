@@ -7,7 +7,7 @@ global:
   # list of key: value
   # GLOBAL1: value
 labels:
-  app: go-admin-api-gateway
+  app: ucode-go-admin-api-gateway
 replicaCount: 1
 
 image:
@@ -40,17 +40,7 @@ podAnnotations:
   vault.hashicorp.com/secret-volume-path-.env: "/app"
   vault.hashicorp.com/role: "ucode-dev"
   vault.hashicorp.com/agent-inject-template-.env: |
-    {{- with secret "secret/data/k8s/ucode-dev/minio" -}}
-    {{- range $key, $value := .Data.data }}
-    {{ $key }}: {{ $value }}
-    {{- end }}
-    {{ end -}}
     {{- with secret "secret/data/k8s/ucode-dev/services" -}}
-    {{- range $key, $value := .Data.data }}
-    {{ $key }}: {{ $value }}
-    {{- end }}
-    {{ end -}}
-    {{- with secret "secret/data/k8s/ucode-dev/postgres" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key }}: {{ $value }}
     {{- end }}
@@ -62,7 +52,7 @@ podAnnotations:
     {{ end -}}
 
 podLabels:
-  app: go-admin-api-gateway
+  app: ucode-go-admin-api-gateway
 
 podSecurityContext:
   {}
@@ -83,18 +73,33 @@ vault:
     VAULT_TOKEN: vault_token
     SECRETS_PATH: vault_path
 
-environment: {}
+environment:
+  KUBECONFIG: /kubeconfig/config
+  GIT_SSH_COMMAND: "ssh -i /key/ssh-privatekey -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 volumes:
-  enabled: false
+  enabled: true
+  hostpath:
+    enabled: true
+    name: code-server
+    path: /functions
+    mountPath: /functions
+    type: Directory
   pvc:
     enabled: false
     existing_claim:
     name: pvc
-    mountPath: /pv
+    mountPath: /functions
     size: 1G
     class:
     accessModes:
-      - ReadWriteOnce
+      - ReadWriteMany
+  configMaps:
+    - name: code-server-kubeconfig
+      mountPath: /kubeconfig
+  secrets:
+    - name: ssh-key-secret
+      mountPath: /key
+      defaultMode: 256
 
 service:
   type: ClusterIP
@@ -112,13 +117,14 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-prod
       type: web
       hosts:
         - host: "dev-admin-api.ucode.run"
           path: /
           servicePort: 8080
       tls:
-        - secretName: admin-api-tls
+        - secretName: admin-apidev-tls
           hosts:
             - "dev-admin-api.ucode.run"
     - annotations:
@@ -132,15 +138,16 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-prod
       type: auth
       hosts:
-        - host: "dev-admin-api.ucode.run"
+        - host: "dev-admin-api.ucode.ucode.run"
           path: /swagger
           servicePort: 8080
       tls:
-        - secretName: admin-api-tls
+        - secretName: admin-api-dev-tls
           hosts:
-            - "dev-admin-api.ucode.run"
+            - "dev-admin-api.ucode.ucode.run"
 
 # resources:
 #    limits:
