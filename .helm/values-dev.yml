@@ -120,13 +120,13 @@ ingress:
         cert-manager.io/cluster-issuer: letsencrypt-prod
       type: web
       hosts:
-        - host: "dev.admin.api.ucode.run"
+        - host: "dev-admin-api.ucode.run"
           path: /
           servicePort: 8080
       tls:
-        - secretName: admin-api-tls
+        - secretName: admin-apidev-tls
           hosts:
-            - "dev.admin.api.ucode.run"
+            - "dev-admin-api.ucode.run"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
