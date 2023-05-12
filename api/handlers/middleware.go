@@ -13,7 +13,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // const (
@@ -59,28 +58,21 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 				}
 			}
 
+			fmt.Println("/nresponse V2hasaccessuser", res)
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
+			projectId := c.GetHeader("project-id")
 
-			if _, err := uuid.Parse(resourceId); err != nil {
-				resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
-					c.Request.Context(),
-					&company_service.GetResourceByEnvIDRequest{
-						EnvId: environmentId,
-					},
-				)
-				if err != nil {
-					h.log.Error("--ERR-->GetResourceByEnvID->", logger.Error(err))
-					h.handleResponse(c, status_http.BadRequest, err.Error())
-					c.Abort()
-					return
-				}
-				fmt.Println(resource)
-
-				resourceId = resource.GetResource().Id
+			if res.ProjectId != "" {
+				projectId = res.ProjectId
 			}
+			if res.EnvId != "" {
+				environmentId = res.EnvId
+			}
+
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
+			c.Set("project_id", projectId)
 
 		case "API-KEY":
 			app_id := c.GetHeader("X-API-KEY")

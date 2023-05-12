@@ -75,6 +75,7 @@ message CreateTableRequest {
     string author_id = 15;
     string commit_type = 16;
     string name = 17;
+    bool is_cached = 18;
 }
 
 message IncrementID {
@@ -94,6 +95,7 @@ message CreateTableResponse {
     string subtitle_field_slug = 8;
     repeated Section sections = 9;
     IncrementID increment_id = 10;
+    bool is_cached = 11;
 }
 
 message UpdateTableRequest {
@@ -112,6 +114,7 @@ message UpdateTableRequest {
     string author_id = 13;
     string commit_type = 14;
     string name = 15;
+    bool is_cached = 16;
 }
 
 message Table {
@@ -129,6 +132,7 @@ message Table {
     string folder_id = 12;
     string author_id = 13;
     CommitInfo commit_info = 14;
+    bool is_cached = 15;
 }
 
 message CommitInfo {

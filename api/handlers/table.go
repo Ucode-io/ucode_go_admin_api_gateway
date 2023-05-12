@@ -304,7 +304,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 // GetAllTables godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
+// @Param Environment-Id header string false "Environment-Id"
 // @ID get_all_tables
 // @Router /v1/table [GET]
 // @Summary Get all tables
@@ -344,8 +344,9 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	fmt.Println("\n>>>>>>>>>>>>>>>>>>> ", projectId, "\n")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -361,7 +362,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},

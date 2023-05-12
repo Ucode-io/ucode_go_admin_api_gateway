@@ -23442,8 +23442,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -34483,6 +34482,23 @@ const docTemplate = `{
                 }
             }
         },
+        "auth_service.Language": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "native_name": {
+                    "type": "string"
+                },
+                "short_name": {
+                    "type": "string"
+                }
+            }
+        },
         "auth_service.Object": {
             "type": "object",
             "properties": {
@@ -34558,6 +34574,9 @@ const docTemplate = `{
                 "data": {
                     "type": "string"
                 },
+                "env_id": {
+                    "type": "string"
+                },
                 "expires_at": {
                     "type": "string"
                 },
@@ -34610,6 +34629,20 @@ const docTemplate = `{
                 }
             }
         },
+        "auth_service.Timezone": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
         "auth_service.Token": {
             "type": "object",
             "properties": {
@@ -34657,8 +34690,8 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "language_id": {
-                    "type": "string"
+                "language": {
+                    "$ref": "#/definitions/auth_service.Language"
                 },
                 "login": {
                     "type": "string"
@@ -34681,8 +34714,8 @@ const docTemplate = `{
                 "role_id": {
                     "type": "string"
                 },
-                "timezone_id": {
-                    "type": "string"
+                "timezone": {
+                    "$ref": "#/definitions/auth_service.Timezone"
                 }
             }
         },
@@ -38955,6 +38988,9 @@ const docTemplate = `{
                 },
                 "increment_id": {
                     "$ref": "#/definitions/object_builder_service.IncrementID"
+                },
+                "is_cached": {
+                    "type": "boolean"
                 },
                 "is_own_table": {
                     "type": "boolean"
