@@ -91,17 +91,33 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	var res *object_builder_service.ExcelReadResponse
 
-	res, err := services.BuilderService().Excel().ExcelRead(
-		context.Background(),
-		&object_builder_service.ExcelReadRequest{
-			Id:        excelId,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		res, err = services.BuilderService().Excel().ExcelRead(
+			context.Background(),
+			&object_builder_service.ExcelReadRequest{
+				Id:        excelId,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		res, err = services.PostgresBuilderService().Excel().ExcelRead(
+			context.Background(),
+			&object_builder_service.ExcelReadRequest{
+				Id:        excelId,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, res)
@@ -197,19 +213,36 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		_, err = services.BuilderService().Excel().ExcelToDb(
+			context.Background(),
+			&object_builder_service.ExcelToDbRequest{
+				Id:        c.Param("excel_id"),
+				TableSlug: excelRequest.TableSlug,
+				Data:      data,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		_, err = services.PostgresBuilderService().Excel().ExcelToDb(
+			context.Background(),
+			&object_builder_service.ExcelToDbRequest{
+				Id:        c.Param("excel_id"),
+				TableSlug: excelRequest.TableSlug,
+				Data:      data,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
 
-	_, err = services.BuilderService().Excel().ExcelToDb(
-		context.Background(),
-		&object_builder_service.ExcelToDbRequest{
-			Id:        c.Param("excel_id"),
-			TableSlug: excelRequest.TableSlug,
-			Data:      data,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
 	}
 
 	h.handleResponse(c, status_http.Created, models.ExcelToDbResponse{
