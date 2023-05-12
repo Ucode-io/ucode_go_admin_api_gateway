@@ -15,7 +15,7 @@ image:
   repository: /ucode/ucode_go_admin_api_gateway
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "test"
+  tag: "dev"
 
 imagePullSecrets: "gitlab-registry"
 nameOverride: ""
@@ -117,16 +117,15 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
-        cert-manager.io/cluster-issuer: letsencrypt-prod
       type: web
       hosts:
-        - host: "dev.admin.api.ucode.run"
+        - host: "dev-admin-api.ucode.run"
           path: /
           servicePort: 8080
       tls:
-        - secretName: admin-api-tls
+        - secretName: ucode-star
           hosts:
-            - "dev.admin.api.ucode.run"
+            - "dev-admin-api.ucode.run"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -138,16 +137,15 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
-        cert-manager.io/cluster-issuer: letsencrypt-prod
       type: auth
       hosts:
-        - host: "dev.admin.api.ucode.run"
+        - host: "dev-admin-api.ucode.ucode.run"
           path: /swagger
           servicePort: 8080
       tls:
-        - secretName: admin-api-dev-tls
+        - secretName: ucode-star
           hosts:
-            - "dev.admin.api.ucode.run"
+            - "dev-admin-api.ucode.ucode.run"
 
 # resources:
 #    limits:
