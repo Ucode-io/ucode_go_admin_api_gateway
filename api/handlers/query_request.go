@@ -67,8 +67,8 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -83,7 +83,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -110,7 +110,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -119,7 +119,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	//	}
 	//}
 
-	query.ProjectId = projectId
+	query.ProjectId = projectId.(string)
 	query.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -190,8 +190,8 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -218,7 +218,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -245,7 +245,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -258,7 +258,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleQueryReq{
 			Id:         queryId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  versionId,
 			CommitId:   commitId,
@@ -339,8 +339,8 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -362,7 +362,7 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -389,7 +389,7 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -398,7 +398,7 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 	//	}
 	//}
 
-	query.ProjectId = projectId
+	query.ProjectId = projectId.(string)
 	query.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -477,8 +477,8 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -505,7 +505,7 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -532,7 +532,7 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -545,7 +545,7 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteQueryReq{
 			Id:         queryId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  uuid.NewString(),
 		},
@@ -601,8 +601,8 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -629,7 +629,7 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -656,7 +656,7 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -668,7 +668,7 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 	res, err := services.QueryService().Query().GetListQuery(
 		context.Background(),
 		&tmp.GetListQueryReq{
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "",
 			FolderId:   c.DefaultQuery("folder-id", ""),
@@ -726,8 +726,8 @@ func (h *Handler) QueryRun(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -749,7 +749,7 @@ func (h *Handler) QueryRun(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -776,7 +776,7 @@ func (h *Handler) QueryRun(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -786,7 +786,7 @@ func (h *Handler) QueryRun(c *gin.Context) {
 	//}
 
 	query.ResourceId = resource.ResourceEnvironmentId
-	query.ProjectId = projectId
+	query.ProjectId = projectId.(string)
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -836,7 +836,11 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 	)
 
 	id := c.Param("query-id")
-	projectId := c.Query("project-id")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
 
 	if !util.IsValidUUID(id) {
 		err := errors.New("query is an invalid uuid")
@@ -845,7 +849,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(projectId) {
+	if !util.IsValidUUID(projectId.(string)) {
 		err := errors.New("project_id is an invalid uuid")
 		h.log.Error("project_id is an invalid uuid", logger.Error(err))
 		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
@@ -891,7 +895,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -918,7 +922,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -931,7 +935,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 		context.Background(),
 		&tmp.GetQueryHistoryReq{
 			Id:         id,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			Offset:     int64(offset),
 			Limit:      int64(limit),
@@ -955,7 +959,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 		c.Request.Context(),
 		&vcs.GetMultipleVersionInfoRequest{
 			VersionIds: versionIds,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 		},
 	)
 
@@ -1048,11 +1052,9 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 		return
 	}
 
-	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("project_id is an invalid uuid")
-		h.log.Error("project_id is an invalid uuid", logger.Error(err))
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -1081,7 +1083,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -1130,7 +1132,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 			VersionId:   versionGuid,
 			OldCommitId: body.CommitId,
 			NewCommitId: commitGuid,
-			ProjectId:   projectId,
+			ProjectId:   projectId.(string),
 			ResourceId:  resource.ResourceEnvironmentId,
 		},
 	)
@@ -1179,11 +1181,9 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 		return
 	}
 
-	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("project_id is an invalid uuid")
-		h.log.Error("project_id is an invalid uuid", logger.Error(err))
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -1212,7 +1212,7 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -1248,7 +1248,7 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 	//	}
 	//}
 
-	body.ProjectId = projectId
+	body.ProjectId = projectId.(string)
 	body.ResourceId = resource.ResourceEnvironmentId
 	body.EnvironmentId = environmentId.(string)
 	body.Id = queryId
@@ -1305,11 +1305,9 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 		return
 	}
 
-	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("project_id is an invalid uuid")
-		h.log.Error("project_id is an invalid uuid", logger.Error(err))
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -1338,7 +1336,7 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -1365,7 +1363,7 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -1378,7 +1376,7 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleLogReq{
 			Id:            logId,
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
@@ -1422,11 +1420,9 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 		return
 	}
 
-	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("project_id is an invalid uuid")
-		h.log.Error("project_id is an invalid uuid", logger.Error(err))
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -1469,7 +1465,7 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -1496,7 +1492,7 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -1509,7 +1505,7 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 		context.Background(),
 		&tmp.GetListLogReq{
 			QueryId:       queryId,
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 			Limit:         int64(limit),

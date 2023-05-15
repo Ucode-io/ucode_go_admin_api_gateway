@@ -67,8 +67,8 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -83,7 +83,7 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -178,8 +178,8 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -194,7 +194,7 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -275,8 +275,8 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -291,7 +291,7 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -382,8 +382,8 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -398,7 +398,7 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -485,8 +485,8 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -501,7 +501,7 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -585,8 +585,8 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -601,7 +601,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},

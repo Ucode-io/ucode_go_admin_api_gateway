@@ -103,9 +103,9 @@ func (h *Handler) GetReleaseByID(c *gin.Context) {
 		return
 	}
 
-	projectID := c.Param("project_id")
-	if !util.IsValidUUID(projectID) {
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -125,7 +125,7 @@ func (h *Handler) GetReleaseByID(c *gin.Context) {
 		&obs.ReleasePrimaryKey{
 			Id:            versionID,
 			EnvironmentId: environmentId.(string),
-			ProjectId:     projectID,
+			ProjectId:     projectId.(string),
 		},
 	)
 	if err != nil {
@@ -165,9 +165,9 @@ func (h *Handler) GetAllReleases(c *gin.Context) {
 		return
 	}
 
-	projectID := c.Param("project_id")
-	if !util.IsValidUUID(projectID) {
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -188,7 +188,7 @@ func (h *Handler) GetAllReleases(c *gin.Context) {
 			Limit:         int32(limit),
 			Offset:        int32(offset),
 			Search:        c.Query("search"),
-			ProjectId:     projectID,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 		},
 	)

@@ -56,8 +56,8 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -79,7 +79,7 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -106,7 +106,7 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -114,7 +114,7 @@ func (h *Handler) CreateTemplateFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	folder.ProjectId = projectId
+	folder.ProjectId = projectId.(string)
 	folder.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -174,8 +174,8 @@ func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -202,7 +202,7 @@ func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -229,7 +229,7 @@ func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -242,7 +242,7 @@ func (h *Handler) GetSingleTemplateFolder(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleFolderReq{
 			Id:         folderId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -297,8 +297,8 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -320,7 +320,7 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -347,7 +347,7 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -355,7 +355,7 @@ func (h *Handler) UpdateTemplateFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	folder.ProjectId = projectId
+	folder.ProjectId = projectId.(string)
 	folder.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -415,8 +415,8 @@ func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -443,7 +443,7 @@ func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -470,7 +470,7 @@ func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -483,7 +483,7 @@ func (h *Handler) DeleteTemplateFolder(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteFolderReq{
 			Id:         folderId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -530,8 +530,8 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -553,7 +553,7 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -580,7 +580,7 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -592,7 +592,7 @@ func (h *Handler) GetListTemplateFolder(c *gin.Context) {
 	res, err := services.TemplateService().Template().GetListFolder(
 		context.Background(),
 		&tmp.GetListFolderReq{
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -634,8 +634,8 @@ func (h *Handler) GetTemplateFolderCommits(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -662,7 +662,7 @@ func (h *Handler) GetTemplateFolderCommits(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -689,7 +689,7 @@ func (h *Handler) GetTemplateFolderCommits(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -701,7 +701,7 @@ func (h *Handler) GetTemplateFolderCommits(c *gin.Context) {
 	res, err := services.TemplateService().Template().GetTemplateFolderObjectCommits(
 		context.Background(),
 		&tmp.GetTemplateFolderObjectCommitsReq{
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 			Id:         c.Param("template-folder-id"),
@@ -757,8 +757,8 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -780,7 +780,7 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -807,7 +807,7 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -815,7 +815,7 @@ func (h *Handler) CreateTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	template.ProjectId = projectId
+	template.ProjectId = projectId.(string)
 	template.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -875,8 +875,8 @@ func (h *Handler) GetSingleTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -903,7 +903,7 @@ func (h *Handler) GetSingleTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -930,7 +930,7 @@ func (h *Handler) GetSingleTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -943,7 +943,7 @@ func (h *Handler) GetSingleTemplate(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleTemplateReq{
 			Id:         templateId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -998,8 +998,8 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1021,7 +1021,7 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -1048,7 +1048,7 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -1056,7 +1056,7 @@ func (h *Handler) UpdateTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	template.ProjectId = projectId
+	template.ProjectId =  projectId.(string)
 	template.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -1116,8 +1116,8 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1144,7 +1144,7 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -1171,7 +1171,7 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -1184,7 +1184,7 @@ func (h *Handler) DeleteTemplate(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteTemplateReq{
 			Id:         templateId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -1240,8 +1240,8 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1268,7 +1268,7 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -1295,7 +1295,7 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -1307,7 +1307,7 @@ func (h *Handler) GetListTemplate(c *gin.Context) {
 	res, err := services.TemplateService().Template().GetListTemplate(
 		context.Background(),
 		&tmp.GetListTemplateReq{
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 			FolderId:   c.DefaultQuery("folder-id", ""),
@@ -1352,8 +1352,8 @@ func (h *Handler) GetTemplateCommits(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1380,7 +1380,7 @@ func (h *Handler) GetTemplateCommits(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -1407,7 +1407,7 @@ func (h *Handler) GetTemplateCommits(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -1419,7 +1419,7 @@ func (h *Handler) GetTemplateCommits(c *gin.Context) {
 	res, err := services.TemplateService().Template().GetTemplateObjectCommits(
 		context.Background(),
 		&tmp.GetTemplateObjectCommitsReq{
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 			Id:         c.Param("template-id"),
 			ResourceId: resource.ResourceEnvironmentId,
@@ -1475,8 +1475,8 @@ func (h *Handler) ConvertHtmlToPdfV2(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1503,7 +1503,7 @@ func (h *Handler) ConvertHtmlToPdfV2(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -1530,7 +1530,7 @@ func (h *Handler) ConvertHtmlToPdfV2(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -1544,7 +1544,7 @@ func (h *Handler) ConvertHtmlToPdfV2(c *gin.Context) {
 		&tmp.HtmlBody{
 			Data:       structData,
 			Html:       html.Html,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
@@ -1599,8 +1599,8 @@ func (h *Handler) ConvertTemplateToHtmlV2(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1627,7 +1627,7 @@ func (h *Handler) ConvertTemplateToHtmlV2(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -1654,7 +1654,7 @@ func (h *Handler) ConvertTemplateToHtmlV2(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -1668,7 +1668,7 @@ func (h *Handler) ConvertTemplateToHtmlV2(c *gin.Context) {
 		&tmp.HtmlBody{
 			Data:       structData,
 			Html:       html.Html,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)

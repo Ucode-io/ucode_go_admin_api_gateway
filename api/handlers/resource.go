@@ -333,12 +333,13 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-	company.ProjectId = projectId
+
+	company.ProjectId = projectId.(string)
 
 	resp, err := h.companyServices.CompanyService().Resource().ReconnectResource(
 		c.Request.Context(),

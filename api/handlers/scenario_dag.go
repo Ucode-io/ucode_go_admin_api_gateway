@@ -47,8 +47,12 @@ func (h *Handler) CreateDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -129,8 +133,12 @@ func (h *Handler) GetAllDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -193,8 +201,12 @@ func (h *Handler) GetDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -255,8 +267,12 @@ func (h *Handler) UpdateDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -312,8 +328,12 @@ func (h *Handler) DeleteDAG(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}

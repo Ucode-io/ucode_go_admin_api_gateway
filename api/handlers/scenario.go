@@ -55,8 +55,12 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -122,7 +126,7 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 	}
 
 	serviceReq := pb.CreateScenarioRequest{
-		ProjectId:     ProjectId,
+		ProjectId:     projectId.(string),
 		EnvironmentId: EnvironmentId.(string),
 		Dag:           dag,
 		Steps:         dagSteps,
@@ -139,7 +143,7 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 		CommitType: config.COMMIT_TYPE_SCENARIO,
 		Name:       fmt.Sprintf("Auto Created Commit Create Scenario - %s", time.Now().Format(time.RFC1123)),
 		AuthorId:   authInfo.GetUserId(),
-		ProjectId:  ProjectId,
+		ProjectId:  projectId.(string),
 	}
 
 	resp, err := services.ScenarioService().DagService().CreateScenario(
@@ -194,8 +198,12 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -261,7 +269,7 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 	}
 
 	serviceReq := pb.CreateScenarioRequest{
-		ProjectId:     ProjectId,
+		ProjectId:     projectId.(string),
 		EnvironmentId: EnvironmentId.(string),
 		Dag:           dag,
 		Steps:         dagSteps,
@@ -278,7 +286,7 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 		CommitType: config.COMMIT_TYPE_SCENARIO,
 		Name:       fmt.Sprintf("Auto Created Commit Update Scenario - %s", time.Now().Format(time.RFC1123)),
 		AuthorId:   authInfo.GetUserId(),
-		ProjectId:  ProjectId,
+		ProjectId:  projectId.(string),
 	}
 
 	resp, err := services.ScenarioService().DagService().Update(
@@ -324,8 +332,12 @@ func (h *Handler) GetScenarioHistory(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -338,7 +350,7 @@ func (h *Handler) GetScenarioHistory(c *gin.Context) {
 	resp, err := services.ScenarioService().DagService().GetScenarioHistory(
 		c.Request.Context(),
 		&pb.GetScenarioHistoryRequest{
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 			DagId:         c.Param("id"),
 		},
@@ -391,8 +403,12 @@ func (h *Handler) SelectVersionsScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -402,7 +418,7 @@ func (h *Handler) SelectVersionsScenario(c *gin.Context) {
 		return
 	}
 
-	req.ProjectId = ProjectId
+	req.ProjectId = projectId.(string)
 	req.EnvironmentId = EnvironmentId.(string)
 	req.Id = c.Param("id")
 
@@ -457,13 +473,13 @@ func (h *Handler) RevertScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project-id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
-	req.ProjectId = ProjectId
+	req.ProjectId = projectId.(string)
 	req.EnvironmentId = EnvironmentId.(string)
 
 	authInfo, err := h.adminAuthInfo(c)
@@ -477,7 +493,7 @@ func (h *Handler) RevertScenario(c *gin.Context) {
 		CommitType: config.COMMIT_TYPE_SCENARIO,
 		Name:       fmt.Sprintf("Auto Created Commit revert Scenario - %s", time.Now().Format(time.RFC1123)),
 		AuthorId:   authInfo.GetUserId(),
-		ProjectId:  ProjectId,
+		ProjectId:  projectId.(string),
 		VersionIds: req.GetVersionIds(),
 	}
 

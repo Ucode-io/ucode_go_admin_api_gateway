@@ -60,8 +60,8 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -84,7 +84,7 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -95,7 +95,7 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 	}
 
 	folder.EnvironmentId = environmentId.(string)
-	folder.ProjectId = projectId
+	folder.ProjectId = projectId.(string)
 	folder.ResourceId = resource.ResourceEnvironmentId
 	//if util.IsValidUUID(environmentId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
@@ -114,7 +114,7 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -170,8 +170,8 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -199,7 +199,7 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -226,7 +226,7 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -239,7 +239,7 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleFolderReq{
 			Id:            folderId,
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
@@ -299,8 +299,8 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 	//	return
 	//}
 	//
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -315,7 +315,7 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -342,7 +342,7 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -350,7 +350,7 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	folder.ProjectId = projectId
+	folder.ProjectId = projectId.(string)
 	folder.ResourceId = resource.ResourceEnvironmentId
 
 	res, err := services.WebPageService().Folder().UpdateFolder(
@@ -399,8 +399,8 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -428,7 +428,7 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -455,7 +455,7 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -468,7 +468,7 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteFolderReq{
 			Id:            folderId,
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
@@ -514,8 +514,8 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -538,7 +538,7 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -565,7 +565,7 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -577,7 +577,7 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 	res, err := services.WebPageService().Folder().GetListFolder(
 		context.Background(),
 		&tmp.GetListFolderReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
@@ -642,8 +642,8 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	//}
 	//
 	log.Println("---CreateWebPageV2->4---")
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -658,7 +658,7 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -685,7 +685,7 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -693,7 +693,7 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	webpage.ProjectId = projectId
+	webpage.ProjectId = projectId.(string)
 	webpage.ResourceId = resource.ResourceEnvironmentId
 
 	log.Println("---CreateWebPageV2->5---")
@@ -767,8 +767,8 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -796,7 +796,7 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -823,7 +823,7 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -836,7 +836,7 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleWebPageReq{
 			Id:            webPageId,
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			ResourceId:    resource.ResourceEnvironmentId,
 			VersionId:     versionId,
 			CommitId:      commitId,
@@ -924,8 +924,8 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -940,7 +940,7 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -967,7 +967,7 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -975,7 +975,7 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	webPage.ProjectId = projectId
+	webPage.ProjectId = projectId.(string)
 	webPage.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -1054,8 +1054,8 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1083,7 +1083,7 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -1110,7 +1110,7 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -1123,7 +1123,7 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteWebPageReq{
 			Id:            webPageId,
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			ResourceId:    resource.ResourceEnvironmentId,
 			VersionId:     uuid.NewString(),
 			EnvironmentId: environmentId.(string),
@@ -1180,8 +1180,8 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1209,7 +1209,7 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -1236,7 +1236,7 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -1248,7 +1248,7 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 	res, err := services.WebPageService().WebPage().GetListWebPage(
 		context.Background(),
 		&tmp.GetListWebPageReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 			FolderId:      c.DefaultQuery("folder-id", ""),
@@ -1315,8 +1315,8 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1331,7 +1331,7 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -1345,7 +1345,7 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 		context.Background(),
 		&tmp.GetWebPageHistoryReq{
 			Id:            id,
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			ResourceId:    resource.ResourceEnvironmentId,
 			Offset:        int64(offset),
 			Limit:         int64(limit),
@@ -1370,7 +1370,7 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 		c.Request.Context(),
 		&vcs.GetMultipleVersionInfoRequest{
 			VersionIds: versionIds,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 		},
 	)
 	fmt.Println("", err)
@@ -1476,8 +1476,8 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1492,7 +1492,7 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -1502,7 +1502,7 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 		return
 	}
 	body.EnvironmentId = environmentId.(string)
-	body.ProjectId = projectId
+	body.ProjectId = projectId.(string)
 	body.ResourceId = resource.ResourceEnvironmentId
 
 	if !util.IsValidUUID(body.GetEnvironmentId()) {
@@ -1582,8 +1582,8 @@ func (h *Handler) InsertManyVersionForWebPageService(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1598,7 +1598,7 @@ func (h *Handler) InsertManyVersionForWebPageService(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
 		},
@@ -1612,7 +1612,7 @@ func (h *Handler) InsertManyVersionForWebPageService(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
 	}
-	body.ProjectId = projectId
+	body.ProjectId = projectId.(string)
 	body.ResourceId = resource.ResourceEnvironmentId
 
 	// _, commitId, err := h.CreateAutoCommitForAdminChange(c, environmentID.(string), config.COMMIT_TYPE_FIELD, body.GetProjectId())

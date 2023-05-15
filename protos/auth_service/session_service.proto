@@ -175,6 +175,7 @@ message HasAccessSuperAdminRes {
     string created_at = 10;
     string updated_at = 11;
     repeated TableBody tables = 12;
+    string env_id = 13;
 }
 
 message TableBody {

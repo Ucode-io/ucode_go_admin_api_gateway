@@ -51,9 +51,9 @@ func (h *Handler) CreateCategoryNotification(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *Handler) CreateCategoryNotification(c *gin.Context) {
 		context.Background(),
 		&pb.CreateCategoryRequest{
 			Name:          req.Name,
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 			ParentId:      req.ParentID,
 		},
@@ -111,16 +111,16 @@ func (h *Handler) GetCategoryNotification(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	resp, err := services.NotificationService().Category().Get(
 		context.Background(),
 		&pb.GetCategoryRequest{
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 			Guid:          id,
 		},
@@ -166,16 +166,16 @@ func (h *Handler) GetListCategoryNotification(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	resp, err := services.NotificationService().Category().GetList(
 		c.Request.Context(),
 		&pb.GetListCategoryRequest{
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 		},
 	)
@@ -225,9 +225,9 @@ func (h *Handler) UpdateCategoryNotification(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -240,7 +240,7 @@ func (h *Handler) UpdateCategoryNotification(c *gin.Context) {
 	resp, err := services.NotificationService().Category().Update(
 		context.Background(),
 		&pb.Category{
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 			Guid:          req.Id,
 			Name:          req.Name,
@@ -292,16 +292,16 @@ func (h *Handler) DeleteCategoryNotification(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	resp, err := services.NotificationService().Category().Delete(
 		c.Request.Context(),
 		&pb.DeleteCategoryRequest{
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 			Guid:          id,
 		},

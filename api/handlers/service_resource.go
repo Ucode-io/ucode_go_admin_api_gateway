@@ -3,10 +3,11 @@ package handlers
 import (
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
 )
 
 // UpdateServiceResource godoc
@@ -35,13 +36,12 @@ func (h *Handler) UpdateServiceResource(c *gin.Context) {
 		return
 	}
 
-	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("invalid projectId")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-	data.ProjectId = projectId
+	data.ProjectId = projectId.(string)
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
@@ -81,10 +81,9 @@ func (h *Handler) UpdateServiceResource(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetListServiceResource(c *gin.Context) {
 
-	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("invalid projectId")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -98,7 +97,7 @@ func (h *Handler) GetListServiceResource(c *gin.Context) {
 	resp, err := h.companyServices.CompanyService().ServiceResource().GetList(
 		context.Background(),
 		&pb.GetListServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 		},
 	)

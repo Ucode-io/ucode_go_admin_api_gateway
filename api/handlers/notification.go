@@ -47,11 +47,12 @@ func (h *Handler) CreateUserFCMToken(c *gin.Context) {
 	// 	return
 	// }
 
-	// ProjectId := c.Query("project-id")
-	// if !util.IsValidUUID(ProjectId) {
-	// 	h.handleResponse(c, status_http.BadRequest, "project-id not found")
-	// 	return
-	// }
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	resp, err := services.NotificationService().Notification().CreateUserToken(c.Request.Context(), &req)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -94,9 +95,9 @@ func (h *Handler) CreateNotificationUsers(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project-id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -114,7 +115,7 @@ func (h *Handler) CreateNotificationUsers(c *gin.Context) {
 
 	req.SenderId = hasAccess.GetUserId()
 	req.EnvironmentId = EnvironmentId.(string)
-	req.ProjectId = ProjectId
+	req.ProjectId = projectId.(string)
 
 	resp, err := services.NotificationService().Notification().CreateNotificationUsers(
 		c.Request.Context(),
@@ -166,9 +167,9 @@ func (h *Handler) GetAllNotifications(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project-id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -185,7 +186,7 @@ func (h *Handler) GetAllNotifications(c *gin.Context) {
 	}
 	req.Limit = int32(limit)
 	req.Offset = int32(offset)
-	req.ProjectId = ProjectId
+	req.ProjectId = projectId.(string)
 	req.EnvironmentId = EnvironmentId.(string)
 	req.CategoryId = c.Query("category-id")
 
@@ -235,8 +236,12 @@ func (h *Handler) GetNotificationById(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
