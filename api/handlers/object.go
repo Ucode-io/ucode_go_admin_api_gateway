@@ -1838,25 +1838,42 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 	}
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	var resp *obs.CommonMessage
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().ObjectBuilder().Batch(
+			context.Background(),
+			&obs.BatchRequest{
+				TableSlug:     c.Param("table_slug"),
+				Data:          structData,
+				UpdatedFields: objectRequest.UpdatedFields,
+				ProjectId:     resource.ResourceEnvironmentId,
+			},
+		)
 
-	resp, err := services.BuilderService().ObjectBuilder().Batch(
-		context.Background(),
-		&obs.BatchRequest{
-			TableSlug:     c.Param("table_slug"),
-			Data:          structData,
-			UpdatedFields: objectRequest.UpdatedFields,
-			ProjectId:     resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().ObjectBuilder().Batch(
+			context.Background(),
+			&obs.BatchRequest{
+				TableSlug:     c.Param("table_slug"),
+				Data:          structData,
+				UpdatedFields: objectRequest.UpdatedFields,
+				ProjectId:     resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	if c.Param("table_slug") == "record_permission" {
@@ -2028,22 +2045,42 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 			return
 		}
 	}
+	var resp *obs.CommonMessage
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().ObjectBuilder().MultipleUpdate(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	resp, err := services.BuilderService().ObjectBuilder().MultipleUpdate(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		log.Println("----mulltiple_update ---->", resp.GetData().AsMap())
 
-	log.Println("----mulltiple_update ---->", resp.GetData().AsMap())
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.BuilderService().ObjectBuilder().MultipleUpdate(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		log.Println("----mulltiple_update ---->", resp.GetData().AsMap())
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
+
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
