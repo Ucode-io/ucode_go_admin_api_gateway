@@ -20,7 +20,7 @@ import (
 
 func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
 	bearerToken := c.GetHeader("Authorization")
-	projectId := c.DefaultQuery("project_id", "")
+	// projectId := c.DefaultQuery("project_id", "")
 
 	strArr := strings.Split(bearerToken, " ")
 
@@ -35,10 +35,8 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 		c.Request.Context(),
 		&auth_service.V2HasAccessUserReq{
 			AccessToken: accessToken,
-			ProjectId:   projectId,
-			// ClientPlatformId: "3f6320a6-b6ed-4f5f-ad90-14a154c95ed3",
-			Path:   helper.GetURLWithTableSlug(c),
-			Method: c.Request.Method,
+			Path:        helper.GetURLWithTableSlug(c),
+			Method:      c.Request.Method,
 		},
 	)
 	if err != nil {

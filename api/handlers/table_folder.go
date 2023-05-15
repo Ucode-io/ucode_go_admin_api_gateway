@@ -49,8 +49,8 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -66,7 +66,7 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -139,8 +139,8 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -157,7 +157,7 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -237,8 +237,8 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -254,7 +254,7 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -331,8 +331,8 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -348,7 +348,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -421,8 +421,8 @@ func (h *Handler) DeleteTableFolder(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -438,7 +438,7 @@ func (h *Handler) DeleteTableFolder(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},

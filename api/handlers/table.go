@@ -63,8 +63,8 @@ func (h *Handler) CreateTable(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -80,7 +80,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -223,8 +223,8 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -240,7 +240,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -304,7 +304,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 // GetAllTables godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
+// @Param Environment-Id header string false "Environment-Id"
 // @ID get_all_tables
 // @Router /v1/table [GET]
 // @Summary Get all tables
@@ -344,8 +344,8 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -361,7 +361,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -477,8 +477,8 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -494,7 +494,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -595,8 +595,8 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -612,7 +612,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -703,11 +703,12 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
+
 	fmt.Println(c.Get("environment_id"))
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
@@ -719,7 +720,7 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -773,8 +774,8 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -789,7 +790,7 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -855,8 +856,8 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -871,7 +872,7 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -934,8 +935,8 @@ func (h *Handler) InsetrVersionsIdsToTableHistory(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -950,7 +951,7 @@ func (h *Handler) InsetrVersionsIdsToTableHistory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},

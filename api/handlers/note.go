@@ -9,9 +9,8 @@ import (
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
-	"github.com/google/uuid"
-
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateNoteFolder godoc
@@ -62,8 +61,8 @@ func (h *Handler) CreateNoteFolder(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -78,7 +77,7 @@ func (h *Handler) CreateNoteFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -105,7 +104,7 @@ func (h *Handler) CreateNoteFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -113,7 +112,7 @@ func (h *Handler) CreateNoteFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	folderNote.ProjectId = projectId
+	folderNote.ProjectId = projectId.(string)
 	folderNote.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -185,8 +184,8 @@ func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -201,7 +200,7 @@ func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -228,7 +227,7 @@ func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -241,7 +240,7 @@ func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleFolderNoteReq{
 			Id:         folderNoteId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -296,11 +295,11 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 		return
 	}
 
-	//projectId := c.Query("project-id")
-	//if !util.IsValidUUID(projectId) {
-	//	h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-	//	return
-	//}
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
 
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
@@ -308,12 +307,6 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 	//	h.handleResponse(c, status_http.BadRequest, err.Error())
 	//	return
 	//}
-
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
@@ -325,7 +318,7 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -352,7 +345,7 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -360,7 +353,7 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	folderNote.ProjectId = projectId
+	folderNote.ProjectId = projectId.(string)
 	folderNote.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -432,8 +425,8 @@ func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -448,7 +441,7 @@ func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -475,7 +468,7 @@ func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -488,7 +481,7 @@ func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteFolderNoteReq{
 			Id:         folderId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -542,8 +535,8 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -558,7 +551,7 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -585,7 +578,7 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -597,7 +590,7 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 	res, err := services.TemplateService().Note().GetListFolderNote(
 		context.Background(),
 		&tmp.GetListFolderNoteReq{
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -651,8 +644,8 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -667,7 +660,7 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -694,7 +687,7 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -706,7 +699,7 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 	res, err := services.TemplateService().Note().GetNoteFolderObjectCommits(
 		context.Background(),
 		&tmp.GetNoteFolderObjectCommitsReq{
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 			Id:         c.Param("note-folder-id"),
@@ -769,8 +762,8 @@ func (h *Handler) CreateNote(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -785,7 +778,7 @@ func (h *Handler) CreateNote(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -812,7 +805,7 @@ func (h *Handler) CreateNote(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -820,7 +813,7 @@ func (h *Handler) CreateNote(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	note.ProjectId = projectId
+	note.ProjectId = projectId.(string)
 	note.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -892,8 +885,8 @@ func (h *Handler) GetSingleNote(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -908,7 +901,7 @@ func (h *Handler) GetSingleNote(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -935,7 +928,7 @@ func (h *Handler) GetSingleNote(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -948,7 +941,7 @@ func (h *Handler) GetSingleNote(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleNoteReq{
 			Id:         noteId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -1010,8 +1003,8 @@ func (h *Handler) UpdateNote(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1026,7 +1019,7 @@ func (h *Handler) UpdateNote(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -1053,7 +1046,7 @@ func (h *Handler) UpdateNote(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -1061,7 +1054,7 @@ func (h *Handler) UpdateNote(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	note.ProjectId = projectId
+	note.ProjectId = projectId.(string)
 	note.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -1133,8 +1126,8 @@ func (h *Handler) DeleteNote(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1149,7 +1142,7 @@ func (h *Handler) DeleteNote(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -1176,7 +1169,7 @@ func (h *Handler) DeleteNote(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -1189,7 +1182,7 @@ func (h *Handler) DeleteNote(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteNoteReq{
 			Id:         noteId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 		},
@@ -1257,8 +1250,8 @@ func (h *Handler) GetListNote(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1273,7 +1266,7 @@ func (h *Handler) GetListNote(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -1300,7 +1293,7 @@ func (h *Handler) GetListNote(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -1312,7 +1305,7 @@ func (h *Handler) GetListNote(c *gin.Context) {
 	res, err := services.TemplateService().Note().GetListNote(
 		context.Background(),
 		&tmp.GetListNoteReq{
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 			FolderId:   c.DefaultQuery("folder-id", ""),
@@ -1369,8 +1362,8 @@ func (h *Handler) GetNoteCommits(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -1385,7 +1378,7 @@ func (h *Handler) GetNoteCommits(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -1412,7 +1405,7 @@ func (h *Handler) GetNoteCommits(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -1424,7 +1417,7 @@ func (h *Handler) GetNoteCommits(c *gin.Context) {
 	res, err := services.TemplateService().Note().GetNoteObjectCommits(
 		context.Background(),
 		&tmp.GetNoteObjectCommitsReq{
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
 			Id:         c.Param("note-id"),

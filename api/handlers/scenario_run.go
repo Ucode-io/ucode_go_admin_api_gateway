@@ -50,9 +50,9 @@ func (h *Handler) RunScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 

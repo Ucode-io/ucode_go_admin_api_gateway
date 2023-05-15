@@ -50,9 +50,9 @@ func (h *Handler) CreateCategoryScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -60,7 +60,7 @@ func (h *Handler) CreateCategoryScenario(c *gin.Context) {
 		context.Background(),
 		&pb.CreateCategoryRequest{
 			Name:          req.Name,
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 		},
 	)
@@ -109,16 +109,16 @@ func (h *Handler) GetCategoryScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	resp, err := services.ScenarioService().CategoryService().Get(
 		context.Background(),
 		&pb.GetCategoryRequest{
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 			Guid:          id,
 		},
@@ -182,16 +182,16 @@ func (h *Handler) GetListCategoryScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	resp, err := services.ScenarioService().CategoryService().GetList(
 		c.Request.Context(),
 		&pb.GetListCategoryRequest{
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 			Filter: &pb.Filters{
 				Offset: int64(offset),

@@ -1,10 +1,11 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/saidamir98/udevs_pkg/util"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
+
+	"github.com/gin-gonic/gin"
+	"github.com/saidamir98/udevs_pkg/util"
 )
 
 // CreateIntegration godoc
@@ -52,8 +53,8 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -68,7 +69,7 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 	//resource, err := services.CompanyService().ServiceResource().GetSingle(
 	//	c.Request.Context(),
 	//	&pb.GetSingleServiceResourceReq{
-	//		ProjectId:     projectId,
+	//		ProjectId:     projectId.(string),
 	//		EnvironmentId: environmentId.(string),
 	//		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 	//	},
@@ -90,7 +91,7 @@ func (h *Handler) CreateIntegration(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
-	integration.ProjectId = projectId
+	integration.ProjectId = projectId.(string)
 
 	resp, err := services.AuthService().Integration().CreateIntegration(
 		c.Request.Context(),

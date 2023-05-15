@@ -64,8 +64,8 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -99,12 +99,12 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		CommitType: config.COMMIT_TYPE_FIELD,
 		Name:       fmt.Sprintf("Auto Created Commit Create api reference - %s", time.Now().Format(time.RFC1123)),
 		AuthorId:   authInfo.GetUserId(),
-		ProjectId:  projectId,
+		ProjectId:  projectId.(string),
 	}
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -114,7 +114,7 @@ func (h *Handler) CreateApiReference(c *gin.Context) {
 		return
 	}
 	apiReference.ResourceId = resource.GetResourceEnvironmentId()
-	apiReference.ProjectId = projectId
+	apiReference.ProjectId = projectId.(string)
 	// set: commit_id
 	resp, err := services.ApiReferenceService().ApiReference().Create(
 		c.Request.Context(),
@@ -172,8 +172,8 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -196,7 +196,7 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -279,8 +279,8 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -308,7 +308,7 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -323,7 +323,7 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 			Limit:      int64(limit),
 			Offset:     int64(offset),
 			CategoryId: c.Query("category_id"),
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.GetResourceEnvironmentId(),
 			VersionId:  "",
 		},
@@ -383,11 +383,12 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
+
 	// versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, environmentId.(string), config.COMMIT_TYPE_FIELD, apiReference.GetProjectId())
 	// if err != nil {
 	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
@@ -417,12 +418,12 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		CommitType: config.COMMIT_TYPE_FIELD,
 		Name:       fmt.Sprintf("Auto Created Commit Update api reference - %s", time.Now().Format(time.RFC1123)),
 		AuthorId:   authInfo.GetUserId(),
-		ProjectId:  projectId,
+		ProjectId:  projectId.(string),
 	}
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -432,7 +433,7 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 		return
 	}
 	apiReference.ResourceId = resource.ResourceEnvironmentId
-	apiReference.ProjectId = projectId
+	apiReference.ProjectId = projectId.(string)
 	resp, err := services.ApiReferenceService().ApiReference().Update(
 		c.Request.Context(), &apiReference,
 	)
@@ -467,8 +468,8 @@ func (h *Handler) DeleteApiReference(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -499,7 +500,7 @@ func (h *Handler) DeleteApiReference(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -553,8 +554,8 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -589,7 +590,7 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -602,7 +603,7 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 		context.Background(),
 		&ars.GetListApiReferenceChangesRequest{
 			Guid:       id,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			Offset:     int64(offset),
 			Limit:      int64(limit),
@@ -626,7 +627,7 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 		c.Request.Context(),
 		&vcs.GetMultipleVersionInfoRequest{
 			VersionIds: versionIds,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 		},
 	)
 	if err != nil {
@@ -744,8 +745,8 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -758,7 +759,7 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -775,7 +776,7 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 			OldcommitId: body.GetCommitId(),
 			NewcommitId: uuid.NewString(),
 			ResourceId:  resource.ResourceEnvironmentId,
-			ProjectId:   projectId,
+			ProjectId:   projectId.(string),
 		},
 	)
 	if err != nil {
@@ -834,8 +835,8 @@ func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -858,7 +859,7 @@ func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: body.EnvironmentId,
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -868,7 +869,7 @@ func (h *Handler) InsertManyVersionForApiReference(c *gin.Context) {
 		return
 	}
 	body.ResourceId = resource.ResourceEnvironmentId
-	body.ProjectId = projectId
+	body.ProjectId = projectId.(string)
 	resp, err := services.ApiReferenceService().ApiReference().CreateManyApiReference(c.Request.Context(), &body)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())

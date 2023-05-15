@@ -56,8 +56,8 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -70,7 +70,7 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -92,7 +92,7 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 	category.CommitId = uuid.NewString()
 	category.VersionId = uuid.NewString()
 	category.ResourceId = resource.ResourceEnvironmentId
-	category.ProjectId = projectId
+	category.ProjectId = projectId.(string)
 
 	resp, err := services.ApiReferenceService().Category().Create(
 		context.Background(), &category,
@@ -151,8 +151,8 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -171,7 +171,7 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -222,11 +222,12 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
+
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -257,7 +258,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -271,7 +272,7 @@ func (h *Handler) GetAllCategories(c *gin.Context) {
 		&ars.GetListCategoryRequest{
 			Limit:      int64(limit),
 			Offset:     int64(offset),
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  activeVersion.GetVersionId(),
 		},
@@ -325,8 +326,8 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -360,7 +361,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},
@@ -376,7 +377,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 			Guid:       category.Guid,
 			Name:       category.Name,
 			BaseUrl:    category.BaseUrl,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			Attributes: attributes,
 			CommitId:   category.CommitId,
 			VersionId:  category.VersionId,
@@ -432,8 +433,8 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -451,7 +452,7 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_API_REF_SERVICE,
 		},

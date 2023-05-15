@@ -52,8 +52,8 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -75,7 +75,7 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -102,7 +102,7 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -110,7 +110,7 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	user.ProjectId = projectId
+	user.ProjectId = projectId.(string)
 	user.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
@@ -167,8 +167,8 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -195,7 +195,7 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -222,7 +222,7 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -235,7 +235,7 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleUserPermissionReq{
 			Id:         userPermissionId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
@@ -289,8 +289,8 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -312,7 +312,7 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -339,7 +339,7 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -347,7 +347,7 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	user.ProjectId = projectId
+	user.ProjectId = projectId.(string)
 	user.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
@@ -404,8 +404,8 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -432,7 +432,7 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -459,7 +459,7 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -472,7 +472,7 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteUserPermissionReq{
 			Id:         userPermissionId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
@@ -513,17 +513,13 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	objectId := c.Query("object-id")
-	if !util.IsValidUUID(projectId) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
@@ -547,7 +543,7 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -574,7 +570,7 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -586,7 +582,7 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 	res, err := services.TemplateService().UserPermission().GetListUserPermission(
 		context.Background(),
 		&tmp.GetListUserPermissionReq{
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			ObjectId:   objectId,
 		},
@@ -641,8 +637,8 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -664,7 +660,7 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -691,7 +687,7 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -699,7 +695,7 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	share.ProjectId = projectId
+	share.ProjectId = projectId.(string)
 	share.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
@@ -763,8 +759,8 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -786,7 +782,7 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -813,7 +809,7 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -821,7 +817,7 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	share.ProjectId = projectId
+	share.ProjectId = projectId.(string)
 	share.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
@@ -875,9 +871,7 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//projectId := c.Query("project-id")
-	//if !util.IsValidUUID(projectId) {
+	//if !util.IsValidUUID(projectId.(string)) {
 	//	h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 	//	return
 	//}
@@ -918,7 +912,7 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -926,8 +920,8 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -941,7 +935,7 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},

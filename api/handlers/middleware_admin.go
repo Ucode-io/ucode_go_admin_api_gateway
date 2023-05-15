@@ -44,6 +44,13 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
 
+			if res.ProjectId != "" {
+				c.Set("project_id", res.ProjectId)
+			}
+			if res.EnvId != "" {
+				environmentId = res.EnvId
+			}
+
 			c.Set("environment_id", environmentId)
 			c.Set("resource_id", resourceId)
 		case "API-KEY":
