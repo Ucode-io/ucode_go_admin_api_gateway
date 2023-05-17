@@ -1,10 +1,11 @@
 package handlers
 
 import (
-	obs "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/pkg/util"
-
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	obs "ucode/ucode_go_api_gateway/genproto/company_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -95,12 +96,12 @@ func (h *Handler) GetSingleEnvironment(c *gin.Context) {
 // @Tags Environment
 // @Accept json
 // @Produce json
-// @Param environment body obs.Environment true "UpdateEnvironmentRequestBody"
+// @Param environment body models.Environment true "UpdateEnvironmentRequestBody"
 // @Success 200 {object} status_http.Response{data=obs.Environment} "Environment data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateEnvironment(c *gin.Context) {
-	var environment obs.Environment
+	var environment models.Environment
 
 	err := c.ShouldBindJSON(&environment)
 	if err != nil {
@@ -108,9 +109,18 @@ func (h *Handler) UpdateEnvironment(c *gin.Context) {
 		return
 	}
 
+	structData, err := helper.ConvertMapToStruct(environment.Data)
+
 	resp, err := h.companyServices.CompanyService().Environment().Update(
 		c.Request.Context(),
-		&environment,
+		&obs.Environment{
+			Id:           environment.Id,
+			ProjectId:    environment.ProjectId,
+			Name:         environment.Name,
+			DisplayColor: environment.DisplayColor,
+			Description:  environment.Description,
+			Data:         structData,
+		},
 	)
 
 	if err != nil {

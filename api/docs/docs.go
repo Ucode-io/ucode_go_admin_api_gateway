@@ -9173,7 +9173,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.Environment"
+                            "$ref": "#/definitions/models.Environment"
                         }
                     }
                 ],
@@ -35183,6 +35183,9 @@ const docTemplate = `{
         "company_service.Environment": {
             "type": "object",
             "properties": {
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -35203,6 +35206,9 @@ const docTemplate = `{
         "company_service.EnvironmentWithResources": {
             "type": "object",
             "properties": {
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -35861,6 +35867,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "functionServicePort": {
+                    "type": "string"
+                },
+                "getRequestRedisDatabase": {
+                    "type": "integer"
+                },
+                "getRequestRedisHost": {
+                    "type": "string"
+                },
+                "getRequestRedisPassword": {
+                    "type": "string"
+                },
+                "getRequestRedisPort": {
                     "type": "string"
                 },
                 "gitlabGroupId": {
@@ -36898,6 +36916,30 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Environment": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 }
             }
