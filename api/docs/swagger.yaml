@@ -149,7 +149,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/auth_service.ConfirmStrategies'
+        type: integer
       id:
         type: string
       name:
@@ -165,16 +165,6 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
-  auth_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -555,9 +545,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -615,9 +605,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -672,9 +662,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.Currency:
     properties:
@@ -761,6 +751,15 @@ definitions:
           $ref: '#/definitions/company_service.EnvironmentWithResources'
         type: array
     type: object
+  company_service.GetListRedirectUrlRes:
+    properties:
+      count:
+        type: integer
+      redirect_urls:
+        items:
+          $ref: '#/definitions/company_service.RedirectUrl'
+        type: array
+    type: object
   company_service.GetListServiceResourceRes:
     properties:
       resource_types:
@@ -817,7 +816,7 @@ definitions:
           $ref: '#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources'
         type: array
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources:
     properties:
@@ -828,7 +827,7 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -894,9 +893,26 @@ definitions:
   company_service.ReconnectResourceRes_ReconnectStatus:
     properties:
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       status:
         type: boolean
+    type: object
+  company_service.RedirectUrl:
+    properties:
+      created_at:
+        type: string
+      env_id:
+        type: string
+      from:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      to:
+        type: string
+      updated_at:
+        type: string
     type: object
   company_service.RemoveResourceRequest:
     properties:
@@ -914,7 +930,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
       vault_path:
@@ -933,18 +949,6 @@ definitions:
       username:
         type: string
     type: object
-  company_service.ResourceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ResourceType_NOT_DECIDED
-    - ResourceType_MONGODB
-    - ResourceType_CLICKHOUSE
-    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -958,7 +962,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -1005,34 +1009,12 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
     type: object
-  company_service.ServiceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    type: integer
-    x-enum-varnames:
-    - ServiceType_NOT_SPECIFIED
-    - ServiceType_BUILDER_SERVICE
-    - ServiceType_ANALYTICS_SERVICE
-    - ServiceType_TEMPLATE_SERVICE
-    - ServiceType_QUERY_SERVICE
-    - ServiceType_FUNCTION_SERVICE
-    - ServiceType_WEB_PAGE_SERVICE
-    - ServiceType_API_REF_SERVICE
-    - ServiceType_POSTGRES_BUILDER
   company_service.SetDefaultResourceReq:
     properties:
       environment_id:
@@ -1042,7 +1024,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.SetDefaultResourceRes:
     properties:
@@ -1053,7 +1035,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.Setting:
     properties:
@@ -1086,7 +1068,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -2487,7 +2469,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
+        type: integer
       guid:
         type: string
       name:
@@ -2530,16 +2512,6 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
-  object_builder_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -4836,7 +4808,7 @@ definitions:
       project_id:
         type: string
       release_type:
-        $ref: '#/definitions/versioning_service.ReleaseType'
+        type: integer
     type: object
   versioning_service.ApiDeleteReleaseRequest:
     properties:
@@ -4921,18 +4893,6 @@ definitions:
           $ref: '#/definitions/versioning_service.ReleaseWithCommit'
         type: array
     type: object
-  versioning_service.ReleaseType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ReleaseType_UNDEFINED
-    - ReleaseType_MAJOR
-    - ReleaseType_MINOR
-    - ReleaseType_PATCH
   versioning_service.ReleaseWithCommit:
     properties:
       author_id:
@@ -5310,7 +5270,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -5492,7 +5452,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -6143,7 +6103,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -6441,7 +6401,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -6785,7 +6745,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7117,7 +7077,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7565,7 +7525,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -7859,7 +7819,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: ""
         "400":
           description: Bad Request
           schema:
@@ -8072,7 +8032,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -8809,7 +8769,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -9925,7 +9885,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10222,7 +10182,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10511,7 +10471,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -10984,7 +10944,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11495,7 +11455,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -11975,7 +11935,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12086,7 +12046,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12505,7 +12465,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -12927,7 +12887,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -13419,7 +13379,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -13597,7 +13557,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -14670,7 +14630,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -15866,7 +15826,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -16171,7 +16131,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -16663,6 +16623,236 @@ paths:
       summary: Insert Many query
       tags:
       - Query
+  /v1/redirect-url:
+    get:
+      consumes:
+      - application/json
+      description: Get List redirect url
+      operationId: get_list_redirect_url
+      parameters:
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetListRedirectUrlRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List redirect url
+      tags:
+      - RedirectUrl
+    post:
+      consumes:
+      - application/json
+      description: Create redirect url
+      operationId: create_redirect_url
+      parameters:
+      - description: CreateRedirectUrl
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.RedirectUrl'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Redirect Url response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.RedirectUrl'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create redirect url
+      tags:
+      - RedirectUrl
+    put:
+      consumes:
+      - application/json
+      description: Update redirect url
+      operationId: update_redirect_url
+      parameters:
+      - description: UpdateRedirectUrl
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.RedirectUrl'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: RedirectUrl response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.RedirectUrl'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update redirect url
+      tags:
+      - RedirectUrl
+  /v1/redirect-url/{redirect-url-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete redirect url
+      operationId: delete_redirect_url
+      parameters:
+      - description: redirect-url-id
+        in: path
+        name: redirect-url-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete redirect url
+      tags:
+      - RedirectUrl
+    get:
+      consumes:
+      - application/json
+      description: Get single redirect url
+      operationId: get_single_redirect_url
+      parameters:
+      - description: redirect-url-id
+        in: path
+        name: redirect-url-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetSingleRedirectUrl response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.RedirectUrl'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single redirect url
+      tags:
+      - RedirectUrl
   /v1/relation:
     get:
       consumes:
@@ -16913,7 +17103,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -17135,7 +17325,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -19096,7 +19286,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -19586,7 +19776,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -20075,7 +20265,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -20312,7 +20502,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -20864,7 +21054,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -21262,7 +21452,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -21529,7 +21719,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -21814,7 +22004,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -22307,7 +22497,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -22669,7 +22859,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -23157,7 +23347,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -23271,7 +23461,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -23952,7 +24142,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -24244,7 +24434,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:
@@ -24530,7 +24720,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
+          description: ""
         "400":
           description: Invalid Argument
           schema:

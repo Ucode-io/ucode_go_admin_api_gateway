@@ -432,6 +432,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/table-history/:id", h.GetTableHistoryById)
 		v1Admin.PUT("/table-history/revert", h.RevertTableHistory)
 		v1Admin.PUT("/table-history", h.InsetrVersionsIdsToTableHistory)
+
+		v1Admin.POST("/redirect-url", h.CreateRedirectUrl)
+		v1Admin.PUT("/redirect-url", h.UpdateRedirectUrl)
+		v1Admin.GET("/redirect-url", h.GetListRedirectUrl)
+		v1Admin.GET("/redirect-url/:redirect-url-id", h.GetSingleRedirectUrl)
+		v1Admin.DELETE("/redirect-url/:redirect-url-id", h.DeleteRedirectUrl)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())
