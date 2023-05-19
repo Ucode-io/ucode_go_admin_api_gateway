@@ -99,6 +99,7 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 			Title:     tableFolder.Title,
 			ParentId:  tableFolder.ParentdId,
 			ProjectId: resourceEnvironmentId,
+			Icon:      tableFolder.Icon,
 		},
 	)
 
@@ -382,6 +383,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 			ParentId:  tableFolder.ParentId,
 			ProjectId: resourceEnvironmentId,
 			Id:        tableFolder.Id,
+			Icon:      tableFolder.Icon,
 		},
 	)
 

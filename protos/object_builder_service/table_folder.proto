@@ -17,12 +17,14 @@ message TableFolderRequest {
     string title = 1;
     string project_id = 2;
     string parent_id = 3;
+    string icon = 4;
 }
 
 message CreateTableFolderResponse {
     string id = 1;
     string title = 2;
     string project_id = 3;
+    string icon = 4;
 }
 
 message TableFolder {
@@ -30,6 +32,7 @@ message TableFolder {
     string title = 2;
     string project_id = 3;
     string parent_id = 4;
+    string icon = 5;
 }
 
 

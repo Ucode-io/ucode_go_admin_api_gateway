@@ -1,0 +1,57 @@
+syntax="proto3";
+// 
+package auth_service;
+option go_package="genproto/auth_service";
+
+service LoginStrategyService {
+    rpc GetList (GetListRequest) returns (GetListResponse) {}
+    rpc GetByID (LoginStrategyPrimaryKey) returns (LoginStrategy) {}
+    rpc Update (UpdateRequest) returns (UpdateResponse) {}
+}
+
+enum LoginStrategyType {
+    PHONE = 0;
+    EMAIL = 1;
+    LOGIN = 2;
+    PHONE_OTP = 3;
+    EMAIL_OTP = 4;
+    LOGIN_PWD = 5;
+    PHONE_PWD = 6;
+    EMAIL_PWD = 7;
+    GOOGLE = 8;
+    APPLE = 9;
+}
+
+message UpdateRequest {
+    repeated LoginStrategy login_strategies = 1;
+}
+
+message UpdateResponse {
+    int32 rows_affected = 1;
+}
+
+message GetListResponse {
+    map<string, LoginStrategy> login_strategies = 1;
+}
+
+message CreateRequest {
+    string id = 1;
+    LoginStrategyType type = 2;
+    string project_id = 3;
+    string env_id = 4;
+}
+
+message LoginStrategy {
+    string id = 1;
+    LoginStrategyType type = 2;
+    string project_id = 3;
+    string env_id = 4;
+}
+
+message GetListRequest {
+    string project_id = 1;
+}
+
+message LoginStrategyPrimaryKey {
+    string id = 1;
+}
