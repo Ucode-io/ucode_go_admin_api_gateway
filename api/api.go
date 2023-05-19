@@ -1,13 +1,15 @@
 package api
 
 import (
-	"ucode/ucode_go_api_gateway/api/docs"
-	"ucode/ucode_go_api_gateway/api/handlers"
-	"ucode/ucode_go_api_gateway/config"
-
+	"fmt"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"ucode/ucode_go_api_gateway/api/docs"
+	"ucode/ucode_go_api_gateway/api/handlers"
+	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 )
 
 // SetUpAPI @description This is an api gateway
@@ -492,6 +494,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 	}
 
+	r.Any("/api", h.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.Proxy)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 }
@@ -538,4 +542,42 @@ func MaxAllowed(n int) gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		fmt.Println("::::::::::::PROXY before:::::::::::::::::::", len(r.Routes()), c.Request.URL.Path)
+		c = RedirectUrl(c, h)
+		r.HandleContext(c)
+		c.Next()
+		fmt.Println("::::::::::::PROXY after:::::::::::::::::::")
+	}
+}
+
+func RedirectUrl(c *gin.Context, h *handlers.Handler) *gin.Context {
+	path := c.Request.URL.Path
+	projectId := c.DefaultQuery("project-id", "")
+	envId, ok := c.Get("environment_id")
+	if !ok {
+		return c
+	}
+
+	namespace := c.GetString("namespace")
+	svcs, err := h.GetService(namespace)
+	if err != nil {
+		return c
+	}
+
+	path, err = helper.FindUrlTo(svcs, helper.MatchingData{
+		ProjectId: projectId,
+		EnvId:     envId.(string),
+		Path:      path,
+	})
+	if err != nil {
+		fmt.Println("cant parse url", logger.Error(err))
+		return c
+	}
+
+	c.Request.URL.Path = path
+	return c
 }
