@@ -32,10 +32,10 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
-			res          = &auth_service.V2HasAccessUserRes{}
-			ok           bool
-			origin       = c.GetHeader("Origin")
-			platformType = c.GetHeader("Platform-Type")
+			res    = &auth_service.V2HasAccessUserRes{}
+			ok     bool
+			origin = c.GetHeader("Origin")
+			//platformType = c.GetHeader("Platform-Type")
 		)
 
 		bearerToken := c.GetHeader("Authorization")
@@ -48,15 +48,15 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		}
 		switch strArr[0] {
 		case "Bearer":
-			if platformType != cfg.PlatformType {
-				fmt.Println(origin)
-				res, ok = h.hasAccess(c)
-				if !ok {
-					h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
-					c.Abort()
-					return
-				}
+			//if platformType != cfg.PlatformType {
+			fmt.Println(origin)
+			res, ok = h.hasAccess(c)
+			if !ok {
+				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
+				c.Abort()
+				return
 			}
+			//}
 
 			fmt.Println("/nresponse V2hasaccessuser", res)
 			resourceId := c.GetHeader("Resource-Id")
