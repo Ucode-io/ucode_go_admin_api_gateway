@@ -569,6 +569,8 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	path := c.Request.URL.Path
 	projectId := c.DefaultQuery("project-id", "")
 	envId, ok := c.Get("environment_id")
+	fmt.Println("project_id::::::PROXY::::::::", projectId)
+	fmt.Println("env_id::::::PROXY::::::::", envId)
 	if !ok {
 		return c, errors.New("something went wrong")
 	}
