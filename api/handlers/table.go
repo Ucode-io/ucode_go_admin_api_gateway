@@ -145,6 +145,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		Fields:            fields,
 		SubtitleFieldSlug: tableRequest.SubtitleFieldSlug,
 		Sections:          tableRequest.Sections,
+		Layouts:           tableRequest.Layouts,
 		AppId:             tableRequest.AppID,
 		IncrementId: &obs.IncrementID{
 			WithIncrementId: tableRequest.IncrementID.WithIncrementID,
