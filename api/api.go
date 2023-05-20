@@ -1,10 +1,12 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"time"
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
@@ -494,7 +496,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 	}
 
-	r.Any("/api", h.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.Proxy)
+	r.Any("/api/*any", h.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.Proxy)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -546,38 +548,67 @@ func MaxAllowed(n int) gin.HandlerFunc {
 
 func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fmt.Println("::::::::::::PROXY before:::::::::::::::::::", len(r.Routes()), c.Request.URL.Path)
-		c = RedirectUrl(c, h)
-		r.HandleContext(c)
+		start := time.Now()
+		var (
+			err error
+		)
+		fmt.Println("::::::::::::PROXY before:::::::::::::::::::", len(r.Routes()), c.Request.URL.Path, c.Request.URL)
+		c, err = RedirectUrl(c, h)
+		if err == nil {
+			//fmt.Println("here:::::::::::::1")
+			//fmt.Println("::::::::::::PROXY before:::::::::::::::::::", len(r.Routes()), c.Request.URL.Path)
+			r.HandleContext(c)
+		}
+		//fmt.Println("here:::::::::::::2")
+		fmt.Println("time in proxyMiddleware:::::", time.Since(start).Milliseconds())
 		c.Next()
-		fmt.Println("::::::::::::PROXY after:::::::::::::::::::")
+		fmt.Println("::::::::::::PROXY after:::::::::::::::::::", c.Request.URL.Path)
 	}
 }
 
-func RedirectUrl(c *gin.Context, h *handlers.Handler) *gin.Context {
+func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	path := c.Request.URL.Path
 	projectId := c.DefaultQuery("project-id", "")
 	envId, ok := c.Get("environment_id")
 	if !ok {
-		return c
+		return c, errors.New("something went wrong")
 	}
 
 	namespace := c.GetString("namespace")
 	svcs, err := h.GetService(namespace)
 	if err != nil {
-		return c
+		return c, errors.New("something went wrong")
 	}
 
-	path, err = helper.FindUrlTo(svcs, helper.MatchingData{
+	start := time.Now()
+
+	pathM, err := helper.FindUrlTo(svcs, helper.MatchingData{
 		ProjectId: projectId,
 		EnvId:     envId.(string),
 		Path:      path,
 	})
 	if err != nil {
 		fmt.Println("cant parse url", logger.Error(err))
-		return c
+		return c, errors.New("cant change")
 	}
 
-	c.Request.URL.Path = path
-	return c
+	fmt.Println("time in RedirectUrl:::::::", time.Since(start).Milliseconds())
+
+	if path == pathM {
+		return c, errors.New("identical path")
+	}
+
+	c.Request.URL.Path = pathM
+	fmt.Println("path", c.Request.URL.Path)
+	return c, nil
+}
+
+func testAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("environment_id", "063dad1e-4596-483a-8638-14f9b99922c3")
+		u := c.Request.URL.Query()
+		u.Set("project-id", "d6042238-0f60-4f30-8c1a-af78883f1d52")
+		c.Request.URL.RawQuery = u.Encode()
+		c.Next()
+	}
 }
