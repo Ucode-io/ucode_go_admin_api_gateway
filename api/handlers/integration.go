@@ -142,6 +142,12 @@ func (h *Handler) GetIntegrationList(c *gin.Context) {
 		return
 	}
 
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	//@TODO::protobuff already has project_id field
 	resp, err := services.AuthService().Integration().GetIntegrationList(
 		c.Request.Context(),
@@ -151,7 +157,7 @@ func (h *Handler) GetIntegrationList(c *gin.Context) {
 			Search:           c.Query("search"),
 			ClientPlatformId: c.Query("client-platform-id"),
 			ClientTypeId:     c.Query("client-type-id"),
-			ProjectId:        c.Query("project-id"),
+			ProjectId:        projectId.(string),
 		},
 	)
 	if err != nil {

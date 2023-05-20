@@ -3,10 +3,11 @@ package handlers
 import (
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateRedirectUrl godoc
@@ -54,8 +55,8 @@ func (h *Handler) CreateRedirectUrl(c *gin.Context) {
 	//	return
 	//}
 	//
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -67,7 +68,7 @@ func (h *Handler) CreateRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	data.ProjectId = projectId
+	data.ProjectId = projectId.(string)
 	data.EnvId = environmentId.(string)
 
 	res, err := services.CompanyService().Redirect().Create(
@@ -114,8 +115,8 @@ func (h *Handler) GetSingleRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -199,8 +200,8 @@ func (h *Handler) UpdateRedirectUrl(c *gin.Context) {
 	//	return
 	//}
 	//
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -212,7 +213,7 @@ func (h *Handler) UpdateRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	data.ProjectId = projectId
+	data.ProjectId = projectId.(string)
 	data.EnvId = environmentId.(string)
 
 	res, err := services.CompanyService().Redirect().Update(
@@ -259,8 +260,8 @@ func (h *Handler) DeleteRedirectUrl(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -344,8 +345,8 @@ func (h *Handler) GetListRedirectUrl(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -367,7 +368,7 @@ func (h *Handler) GetListRedirectUrl(c *gin.Context) {
 	res, err := services.CompanyService().Redirect().GetList(
 		context.Background(),
 		&pb.GetListRedirectUrlReq{
-			ProjectId: projectId,
+			ProjectId: projectId.(string),
 			EnvId:     environmentId.(string),
 			Offset:    int32(offset),
 			Limit:     int32(limit),

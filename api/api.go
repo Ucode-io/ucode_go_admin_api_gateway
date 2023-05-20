@@ -36,7 +36,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	// v1.Use(h.AuthMiddleware(cfg))
+	v1.Use(h.AuthMiddleware(cfg))
 	{
 		v1.POST("/upload", h.Upload)
 		v1.POST("/upload-file/:table_slug/:object_id", h.UploadFile)
@@ -260,7 +260,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/category", h.GetAllCategories)
 	}
 	v2 := r.Group("/v2")
-	// v2.Use(h.AuthMiddleware(cfg))
+	v2.Use(h.AuthMiddleware(cfg))
 	{
 		// custom event
 		v2.POST("/custom-event", h.CreateNewCustomEvent)
@@ -272,7 +272,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
 	v1Admin := r.Group("/v1")
-	// v1Admin.Use(h.AdminAuthMiddleware())
+	v1Admin.Use(h.AdminAuthMiddleware())
 	{
 		// company service
 		// v1.POST("/company", h.CreateCompany)
@@ -440,13 +440,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.DELETE("/redirect-url/:redirect-url-id", h.DeleteRedirectUrl)
 	}
 	v2Admin := r.Group("/v2")
+	v2Admin.Use(h.AdminAuthMiddleware())
 	v2Admin.POST("/table-folder", h.CreateTableFolder)
 	v2Admin.PUT("/table-folder", h.UpdateTableFolder)
 	v2Admin.GET("/table-folder", h.GetAllTableFolders)
 	v2Admin.GET("/table-folder/:id", h.GetTableFolderByID)
 	v2Admin.DELETE("/table-folder/:id", h.DeleteTableFolder)
 
-	// v2Admin.Use(h.AdminAuthMiddleware())
 	{
 		// function
 		v2Admin.POST("/function", h.CreateNewFunction)

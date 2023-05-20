@@ -43,8 +43,9 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
-
+			fmt.Println(">>>>>>>>>>>>>>. adminhasaccess ", res)
 			if res.ProjectId != "" {
+				fmt.Println(">>>>>>>>>>>>>>>>>>>. res project id")
 				c.Set("project_id", res.ProjectId)
 			}
 			if res.EnvId != "" {
