@@ -66,6 +66,7 @@ type CreateTableRequest struct {
 	Icon              string                            `json:"icon"`
 	SubtitleFieldSlug string                            `json:"subtitle_field_slug"`
 	Sections          []*object_builder_service.Section `json:"sections"`
+	Layouts           []*object_builder_service.Layout  `json:"layouts"`
 	AppID             string                            `json:"app_id"`
 	IncrementID       IncrementId                       `json:"increment_id"`
 }

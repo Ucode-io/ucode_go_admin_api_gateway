@@ -1,0 +1,62 @@
+syntax="proto3";
+
+package object_builder_service;
+option go_package="genproto/object_builder_service";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "field.proto";
+import "section.proto";
+
+service LayoutService {
+    rpc CreateAll(CreateLayoutRequest) returns (GetListLayoutResponse) {}
+    rpc Update(UpdateLayoutRequest) returns (google.protobuf.Empty) {}
+    rpc GetAll(GetListLayoutRequest) returns (GetListLayoutResponse) {}
+    rpc GetByID(LayoutPrimaryKey) returns (Layout) {}
+}
+
+message Layout {
+    string id = 1;
+    string label = 2;
+    string order = 3;
+    string table_id = 4;
+    string type = 5;
+    repeated Tab tabs = 6;
+}
+
+message GetListLayoutResponse {
+    repeated Layout layouts = 1;
+}
+
+message Tab {
+    string id = 1;
+    string label = 2;
+    string layout_id = 3;
+    string relation_id = 4;
+    string type = 5;
+    repeated Section sections = 6;
+}
+
+message CreateLayoutRequest {
+    string project_id = 1;
+}
+
+message UpdateLayoutRequest {
+    string id = 1;
+    string label = 2;
+    string order = 3;
+    string table_id = 4;
+    string type = 5;
+    repeated Tab tabs = 6;
+    string project_id = 7;
+}
+
+message LayoutPrimaryKey {
+    string id = 1;
+    string project_id = 2;
+}
+
+message GetListLayoutRequest {
+    string table_id = 1;
+    string project_id = 2;
+}

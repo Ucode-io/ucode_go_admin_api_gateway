@@ -1717,6 +1717,10 @@ definitions:
         $ref: '#/definitions/models.IncrementId'
       label:
         type: string
+      layouts:
+        items:
+          $ref: '#/definitions/object_builder_service.Layout'
+        type: array
       sections:
         items:
           $ref: '#/definitions/object_builder_service.Section'
@@ -3088,6 +3092,13 @@ definitions:
           $ref: '#/definitions/object_builder_service.Event'
         type: array
     type: object
+  object_builder_service.GetListLayoutResponse:
+    properties:
+      layouts:
+        items:
+          $ref: '#/definitions/object_builder_service.Layout'
+        type: array
+    type: object
   object_builder_service.GetTableHistoryResponse:
     properties:
       items:
@@ -3129,6 +3140,23 @@ definitions:
         type: string
       with_increment_id:
         type: boolean
+    type: object
+  object_builder_service.Layout:
+    properties:
+      id:
+        type: string
+      label:
+        type: string
+      order:
+        type: string
+      table_id:
+        type: string
+      tabs:
+        items:
+          $ref: '#/definitions/object_builder_service.Tab'
+        type: array
+      type:
+        type: string
     type: object
   object_builder_service.ManyToManyMessage:
     properties:
@@ -3237,6 +3265,23 @@ definitions:
       formula_name:
         type: string
     type: object
+  object_builder_service.Tab:
+    properties:
+      id:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      relation_id:
+        type: string
+      sections:
+        items:
+          $ref: '#/definitions/object_builder_service.Section'
+        type: array
+      type:
+        type: string
+    type: object
   object_builder_service.Table:
     properties:
       author_id:
@@ -3331,6 +3376,25 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.UpdateTable'
         type: array
+    type: object
+  object_builder_service.UpdateLayoutRequest:
+    properties:
+      id:
+        type: string
+      label:
+        type: string
+      order:
+        type: string
+      project_id:
+        type: string
+      table_id:
+        type: string
+      tabs:
+        items:
+          $ref: '#/definitions/object_builder_service.Tab'
+        type: array
+      type:
+        type: string
     type: object
   object_builder_service.UpdatePanelCoordinatesRequest:
     properties:
@@ -12925,6 +12989,100 @@ paths:
       summary: Invoke Function By Path
       tags:
       - Function
+  /v1/layout:
+    put:
+      consumes:
+      - application/json
+      description: Update layouts
+      operationId: update_layout
+      parameters:
+      - description: table_id
+        in: path
+        name: table_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.UpdateLayoutRequest'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update layouts
+      tags:
+      - Layout
+  /v1/layout/{table_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get list layouts
+      operationId: get_list_layouts
+      parameters:
+      - description: table_id
+        in: path
+        name: table_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetListLayoutResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get list layouts
+      tags:
+      - Layout
   /v1/many-to-many:
     delete:
       consumes:
