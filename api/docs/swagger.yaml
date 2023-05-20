@@ -2448,6 +2448,13 @@ definitions:
       value:
         type: string
     type: object
+  object_builder_service.ActionRelation2:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    type: object
   object_builder_service.App:
     properties:
       description:
@@ -2489,12 +2496,30 @@ definitions:
       field_to:
         type: string
     type: object
+  object_builder_service.AutoFilter2:
+    properties:
+      field_from:
+        type: string
+      field_to:
+        type: string
+    type: object
   object_builder_service.BarcodeGenerateRes:
     properties:
       number:
         type: string
     type: object
   object_builder_service.Cascading:
+    properties:
+      field_slug:
+        type: string
+      label:
+        type: string
+      order:
+        type: integer
+      table_slug:
+        type: string
+    type: object
+  object_builder_service.Cascading2:
     properties:
       field_slug:
         type: string
@@ -2541,6 +2566,21 @@ definitions:
         type: string
     type: object
   object_builder_service.CommitInfo:
+    properties:
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+    type: object
+  object_builder_service.CommitInfo2:
     properties:
       commit_type:
         type: string
@@ -2956,6 +2996,15 @@ definitions:
           type: string
         type: array
     type: object
+  object_builder_service.DynamicTable2:
+    properties:
+      table_slug:
+        type: string
+      view_fields:
+        items:
+          type: string
+        type: array
+    type: object
   object_builder_service.Event:
     properties:
       does:
@@ -3004,6 +3053,45 @@ definitions:
         type: string
       project_id:
         type: string
+      version_id:
+        type: string
+    type: object
+  object_builder_service.Field2:
+    properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      autofill_field:
+        type: string
+      autofill_table:
+        type: string
+      automatic:
+        type: boolean
+      commit_id:
+        type: string
+      default:
+        type: string
+      id:
+        type: string
+      index:
+        type: string
+      is_visible:
+        type: boolean
+      label:
+        type: string
+      project_id:
+        type: string
+      relation_id:
+        type: string
+      required:
+        type: boolean
+      slug:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      unique:
+        type: boolean
       version_id:
         type: string
     type: object
@@ -3141,14 +3229,25 @@ definitions:
       with_increment_id:
         type: boolean
     type: object
+  object_builder_service.IncrementID2:
+    properties:
+      digit_number:
+        type: integer
+      prefix:
+        type: string
+      with_increment_id:
+        type: boolean
+    type: object
   object_builder_service.Layout:
     properties:
+      icon:
+        type: string
       id:
         type: string
       label:
         type: string
       order:
-        type: string
+        type: integer
       table_id:
         type: string
       tabs:
@@ -3207,6 +3306,13 @@ definitions:
       field_id:
         type: string
     type: object
+  object_builder_service.QuickFilter2:
+    properties:
+      default_value:
+        type: string
+      field_id:
+        type: string
+    type: object
   object_builder_service.RecordPermission:
     properties:
       client_type_id:
@@ -3224,6 +3330,91 @@ definitions:
       update:
         type: string
       write:
+        type: string
+    type: object
+  object_builder_service.RelationForGetAll2:
+    properties:
+      action_relations:
+        items:
+          $ref: '#/definitions/object_builder_service.ActionRelation2'
+        type: array
+      auto_filters:
+        items:
+          $ref: '#/definitions/object_builder_service.AutoFilter2'
+        type: array
+      cascading_tree_field_slug:
+        type: string
+      cascading_tree_table_slug:
+        type: string
+      cascadings:
+        items:
+          $ref: '#/definitions/object_builder_service.Cascading2'
+        type: array
+      columns:
+        items:
+          type: string
+        type: array
+      default_limit:
+        type: string
+      default_values:
+        items:
+          type: string
+        type: array
+      dynamic_tables:
+        items:
+          $ref: '#/definitions/object_builder_service.DynamicTable2'
+        type: array
+      editable:
+        type: boolean
+      field_from:
+        type: string
+      field_to:
+        type: string
+      group_fields:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      is_editable:
+        type: boolean
+      is_user_id_default:
+        type: boolean
+      multiple_insert:
+        type: boolean
+      multiple_insert_field:
+        type: string
+      object_id_from_jwt:
+        type: boolean
+      quick_filters:
+        items:
+          $ref: '#/definitions/object_builder_service.QuickFilter2'
+        type: array
+      relation_field_slug:
+        type: string
+      relation_table_slug:
+        type: string
+      summaries:
+        items:
+          $ref: '#/definitions/object_builder_service.Summary2'
+        type: array
+      table_from:
+        $ref: '#/definitions/object_builder_service.Table2'
+      table_to:
+        $ref: '#/definitions/object_builder_service.Table2'
+      title:
+        type: string
+      type:
+        type: string
+      updated_fields:
+        items:
+          type: string
+        type: array
+      view_fields:
+        items:
+          $ref: '#/definitions/object_builder_service.Field2'
+        type: array
+      view_type:
         type: string
     type: object
   object_builder_service.Role:
@@ -3265,16 +3456,31 @@ definitions:
       formula_name:
         type: string
     type: object
+  object_builder_service.Summary2:
+    properties:
+      field_name:
+        type: string
+      formula_name:
+        type: string
+    type: object
   object_builder_service.Tab:
     properties:
+      icon:
+        type: string
       id:
         type: string
       label:
         type: string
       layout_id:
         type: string
+      order:
+        type: integer
       relation_id:
         type: string
+      relations:
+        items:
+          $ref: '#/definitions/object_builder_service.RelationForGetAll2'
+        type: array
       sections:
         items:
           $ref: '#/definitions/object_builder_service.Section'
@@ -3298,6 +3504,39 @@ definitions:
         type: string
       increment_id:
         $ref: '#/definitions/object_builder_service.IncrementID'
+      is_cached:
+        type: boolean
+      is_own_table:
+        type: boolean
+      is_visible:
+        type: boolean
+      label:
+        type: string
+      project_id:
+        type: string
+      show_in_menu:
+        type: boolean
+      slug:
+        type: string
+      subtitle_field_slug:
+        type: string
+    type: object
+  object_builder_service.Table2:
+    properties:
+      author_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/object_builder_service.CommitInfo2'
+      description:
+        type: string
+      folder_id:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      increment_id:
+        $ref: '#/definitions/object_builder_service.IncrementID2'
       is_cached:
         type: boolean
       is_own_table:
@@ -3379,21 +3618,11 @@ definitions:
     type: object
   object_builder_service.UpdateLayoutRequest:
     properties:
-      id:
-        type: string
-      label:
-        type: string
-      order:
-        type: string
-      project_id:
-        type: string
-      table_id:
-        type: string
-      tabs:
+      layouts:
         items:
-          $ref: '#/definitions/object_builder_service.Tab'
+          $ref: '#/definitions/object_builder_service.Layout'
         type: array
-      type:
+      project_id:
         type: string
     type: object
   object_builder_service.UpdatePanelCoordinatesRequest:

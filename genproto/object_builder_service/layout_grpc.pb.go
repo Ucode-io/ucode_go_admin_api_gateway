@@ -26,7 +26,6 @@ type LayoutServiceClient interface {
 	CreateAll(ctx context.Context, in *CreateLayoutRequest, opts ...grpc.CallOption) (*GetListLayoutResponse, error)
 	Update(ctx context.Context, in *UpdateLayoutRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetAll(ctx context.Context, in *GetListLayoutRequest, opts ...grpc.CallOption) (*GetListLayoutResponse, error)
-	GetByID(ctx context.Context, in *LayoutPrimaryKey, opts ...grpc.CallOption) (*Layout, error)
 }
 
 type layoutServiceClient struct {
@@ -64,15 +63,6 @@ func (c *layoutServiceClient) GetAll(ctx context.Context, in *GetListLayoutReque
 	return out, nil
 }
 
-func (c *layoutServiceClient) GetByID(ctx context.Context, in *LayoutPrimaryKey, opts ...grpc.CallOption) (*Layout, error) {
-	out := new(Layout)
-	err := c.cc.Invoke(ctx, "/object_builder_service.LayoutService/GetByID", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // LayoutServiceServer is the server API for LayoutService service.
 // All implementations must embed UnimplementedLayoutServiceServer
 // for forward compatibility
@@ -80,7 +70,6 @@ type LayoutServiceServer interface {
 	CreateAll(context.Context, *CreateLayoutRequest) (*GetListLayoutResponse, error)
 	Update(context.Context, *UpdateLayoutRequest) (*emptypb.Empty, error)
 	GetAll(context.Context, *GetListLayoutRequest) (*GetListLayoutResponse, error)
-	GetByID(context.Context, *LayoutPrimaryKey) (*Layout, error)
 	mustEmbedUnimplementedLayoutServiceServer()
 }
 
@@ -96,9 +85,6 @@ func (UnimplementedLayoutServiceServer) Update(context.Context, *UpdateLayoutReq
 }
 func (UnimplementedLayoutServiceServer) GetAll(context.Context, *GetListLayoutRequest) (*GetListLayoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
-}
-func (UnimplementedLayoutServiceServer) GetByID(context.Context, *LayoutPrimaryKey) (*Layout, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetByID not implemented")
 }
 func (UnimplementedLayoutServiceServer) mustEmbedUnimplementedLayoutServiceServer() {}
 
@@ -167,24 +153,6 @@ func _LayoutService_GetAll_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LayoutService_GetByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LayoutPrimaryKey)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LayoutServiceServer).GetByID(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/object_builder_service.LayoutService/GetByID",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LayoutServiceServer).GetByID(ctx, req.(*LayoutPrimaryKey))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // LayoutService_ServiceDesc is the grpc.ServiceDesc for LayoutService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -203,10 +171,6 @@ var LayoutService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAll",
 			Handler:    _LayoutService_GetAll_Handler,
-		},
-		{
-			MethodName: "GetByID",
-			Handler:    _LayoutService_GetByID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
