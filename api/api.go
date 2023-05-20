@@ -568,7 +568,11 @@ func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 
 func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	path := c.Request.URL.Path
-	projectId := c.DefaultQuery("project-id", "")
+	projectId, ok := c.Get("project_id")
+	if !ok {
+		return c, errors.New("something went wrong")
+	}
+
 	envId, ok := c.Get("environment_id")
 	if !ok {
 		return c, errors.New("something went wrong")
@@ -583,7 +587,7 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	start := time.Now()
 
 	pathM, err := helper.FindUrlTo(svcs, helper.MatchingData{
-		ProjectId: projectId,
+		ProjectId: projectId.(string),
 		EnvId:     envId.(string),
 		Path:      path,
 	})
