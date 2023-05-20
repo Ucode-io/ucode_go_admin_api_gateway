@@ -7,21 +7,23 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
 import "field.proto";
 import "section.proto";
+import "relation.proto";
 
 service LayoutService {
     rpc CreateAll(CreateLayoutRequest) returns (GetListLayoutResponse) {}
     rpc Update(UpdateLayoutRequest) returns (google.protobuf.Empty) {}
     rpc GetAll(GetListLayoutRequest) returns (GetListLayoutResponse) {}
-    rpc GetByID(LayoutPrimaryKey) returns (Layout) {}
 }
 
 message Layout {
     string id = 1;
     string label = 2;
-    string order = 3;
+    int32 order = 3;
     string table_id = 4;
     string type = 5;
     repeated Tab tabs = 6;
+    string icon = 7;
+    repeated RelationForGetAll relations = 8;
 }
 
 message GetListLayoutResponse {
@@ -35,6 +37,9 @@ message Tab {
     string relation_id = 4;
     string type = 5;
     repeated Section sections = 6;
+    int32 order = 7;
+    string icon = 8;
+    repeated string relations = 9;
 }
 
 message CreateLayoutRequest {
@@ -42,13 +47,8 @@ message CreateLayoutRequest {
 }
 
 message UpdateLayoutRequest {
-    string id = 1;
-    string label = 2;
-    string order = 3;
-    string table_id = 4;
-    string type = 5;
-    repeated Tab tabs = 6;
-    string project_id = 7;
+    repeated Layout layouts = 1;
+    string project_id = 2;
 }
 
 message LayoutPrimaryKey {
