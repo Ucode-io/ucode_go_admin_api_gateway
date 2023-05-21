@@ -165,6 +165,7 @@ message CreateLayoutRequest {
 message UpdateLayoutRequest {
     repeated Layout layouts = 1;
     string project_id = 2;
+    string table_id = 3;
 }
 
 message LayoutPrimaryKey {

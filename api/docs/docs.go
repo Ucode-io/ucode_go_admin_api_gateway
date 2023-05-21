@@ -40229,6 +40229,9 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
                 }
             }
         },

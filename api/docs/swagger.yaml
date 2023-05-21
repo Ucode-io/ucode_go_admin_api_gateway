@@ -3624,6 +3624,8 @@ definitions:
         type: array
       project_id:
         type: string
+      table_id:
+        type: string
     type: object
   object_builder_service.UpdatePanelCoordinatesRequest:
     properties:
