@@ -23,7 +23,7 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 		return
 	}
 	client := &http.Client{
-		Timeout: time.Duration(5 * time.Second),
+		Timeout: time.Duration(30 * time.Second),
 	}
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
