@@ -35,7 +35,7 @@ serviceAccount:
 
 podAnnotations:
   vault.hashicorp.com/agent-inject: "true"
-  vault.hashicorp.com/auth-path: "auth/kubernetes-ucode"
+  vault.hashicorp.com/auth-path: "auth/kubernetes-ucode-hzn"
   vault.hashicorp.com/agent-inject-secret-.env: "secret/data/k8s/ucode-test/go-admin-api-gateway"
   vault.hashicorp.com/secret-volume-path-.env: "/app"
   vault.hashicorp.com/role: "ucode-test"
