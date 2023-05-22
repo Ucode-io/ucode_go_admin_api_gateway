@@ -31494,6 +31494,11 @@
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "name": "app_id",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -37270,6 +37275,9 @@
         "models.CreateTableFolderRequest": {
             "type": "object",
             "properties": {
+                "app_id": {
+                    "type": "string"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -40137,6 +40145,9 @@
         "object_builder_service.TableFolder": {
             "type": "object",
             "properties": {
+                "app_id": {
+                    "type": "string"
+                },
                 "icon": {
                     "type": "string"
                 },

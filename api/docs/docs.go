@@ -31506,6 +31506,11 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "name": "app_id",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -37282,6 +37287,9 @@ const docTemplate = `{
         "models.CreateTableFolderRequest": {
             "type": "object",
             "properties": {
+                "app_id": {
+                    "type": "string"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -40149,6 +40157,9 @@ const docTemplate = `{
         "object_builder_service.TableFolder": {
             "type": "object",
             "properties": {
+                "app_id": {
+                    "type": "string"
+                },
                 "icon": {
                     "type": "string"
                 },

@@ -100,6 +100,7 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 			ParentId:  tableFolder.ParentdId,
 			ProjectId: resourceEnvironmentId,
 			Icon:      tableFolder.Icon,
+			AppId:     tableFolder.AppId,
 		},
 	)
 
@@ -288,6 +289,7 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 			Offset:    int32(offset),
 			Limit:     int32(limit),
 			ProjectId: resourceEnvironmentId,
+			AppId:     c.Query("app_id"),
 		},
 	)
 
