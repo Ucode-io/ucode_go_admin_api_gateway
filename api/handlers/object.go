@@ -16,6 +16,9 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
+	"encoding/base64"
+	"encoding/json"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -461,16 +464,21 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 	//	return
 	//}
 
-	redisResp, err := h.redis.Get(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))
+	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 	if err == nil {
-		fmt.Println("REDIS_RESULT")
-		h.handleResponse(c, status_http.OK, redisResp+" FROM REDIS")
-		return
+		resp := make(map[string]interface{})
+		m := make(map[string]interface{})
+		err = json.Unmarshal([]byte(redisResp), &m)
+		if err != nil {
+			h.log.Error("Error while unmarshal redis", logger.Error(err))
+		} else {
+			resp["data"] = m
+			h.handleResponse(c, status_http.OK, m)
+			return
+		}
 	} else {
 		h.log.Error("Error while getting redis", logger.Error(err))
 	}
-	fmt.Println("redisResp", redisResp)
-	fmt.Println("redisErr", err)
 
 	resp, err := services.BuilderService().ObjectBuilder().GetSingleSlim(
 		context.Background(),
@@ -485,12 +493,13 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 		return
 	}
 
-	err = h.redis.SetX(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId), resp.String(), 5*time.Second)
+	jsonData, _ := resp.GetData().MarshalJSON()
+	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
 	if err != nil {
 		h.log.Error("Error while setting redis", logger.Error(err))
 	}
 
-	h.handleResponse(c, status_http.OK, resp.String()+" FROM GRPC")
+	h.handleResponse(c, status_http.OK, resp)
 }
 
 // UpdateObject godoc
@@ -1116,10 +1125,18 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	//	return
 	//}
 
-	redisResp, err := h.redis.Get(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))
+	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 	if err == nil {
-		h.handleResponse(c, status_http.OK, redisResp+" FROM REDIS")
-		return
+		resp := make(map[string]interface{})
+		m := make(map[string]interface{})
+		err = json.Unmarshal([]byte(redisResp), &m)
+		if err != nil {
+			h.log.Error("Error while unmarshal redis", logger.Error(err))
+		} else {
+			resp["data"] = m
+			h.handleResponse(c, status_http.OK, m)
+			return
+		}
 	} else {
 		h.log.Error("Error while getting redis", logger.Error(err))
 	}
@@ -1138,7 +1155,8 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	err = h.redis.SetX(context.Background(), fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId), resp.String(), 5*time.Second)
+	jsonData, _ := resp.GetData().MarshalJSON()
+	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
 	if err != nil {
 		h.log.Error("Error while setting redis", logger.Error(err))
 	}
