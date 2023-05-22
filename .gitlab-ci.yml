@@ -34,9 +34,6 @@ build-prod:
   only:
     - master
 
-
-
-
 # migrate-staging:
 #   stage: migrate
 #   extends: .migrate_template
@@ -68,9 +65,9 @@ deploy-staging:
   stage: deploy
   extends: .deploy_template
   variables:
-    NAMESPACE: test
+    NAMESPACE: ucode-test
     VALUES_FILE: .helm/values-test.yml
-    K8SCONFIGJSON: $UCODE_KUBECONFIG
+    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
   only:
     - staging
 
@@ -83,16 +80,6 @@ deploy-dev:
     K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
   only: 
     - dev
-
-# deploy-demo:
-#   stage: deploy
-#   extends: .deploy_template
-#   variables:
-#     NAMESPACE: ucode-demo
-#     VALUES_FILE: .helm/values-demo.yml
-#     K8SCONFIGJSON: $UCODE_KUBECONFIG
-#   only:
-#     - staging
 
 deploy-prod:
   stage: deploy
@@ -108,8 +95,8 @@ rollback-staging:
   stage: rollback
   extends: .rollback_template
   variables:
-    NAMESPACE: test
-    K8SCONFIGJSON: $UCODE_KUBECONFIG
+    NAMESPACE: ucode-test
+    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
   when: manual
 
 
