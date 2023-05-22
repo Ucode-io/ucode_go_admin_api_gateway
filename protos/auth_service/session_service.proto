@@ -87,6 +87,7 @@ message V2HasAccessUserRes {
     string client_type_id = 11;
     string role_id = 12;
     string login_table_slug = 13;
+    string env_id = 14;
 }
 
 message LoginRequest {
@@ -150,6 +151,7 @@ message HasAccessResponse {
     string updated_at = 11;
     repeated TableBody tables = 12;
     string login_table_slug = 13;
+    string env_id = 14;
 }
 
 message HasAccessSuperAdminReq {
@@ -331,6 +333,7 @@ message V2MultiCompanyLoginRes {
         string updated_at = 6;
         string owner_id = 7;
         repeated Project projects = 8;
+        string user_id = 9;
     }
     repeated Company companies = 1;
 }
