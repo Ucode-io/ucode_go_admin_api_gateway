@@ -38,6 +38,13 @@ message App {
     string description = 3;
     repeated Table tables = 4;
     string icon = 5;
+    message Permission {
+        bool read = 1;
+        bool update = 2;
+        bool delete = 3;
+        bool create = 4;
+    }
+    Permission permission = 6;
 }
 
 message UpdateAppRequest {
@@ -57,6 +64,7 @@ message GetAllAppsResponse {
 message AppPrimaryKey {
     string id = 1;
     string project_id = 2;
+    string role_id = 3;
 }
 
 message GetAllAppsRequest {
@@ -64,6 +72,7 @@ message GetAllAppsRequest {
     int32 limit = 2;
     string search = 3;
     string project_id = 4;
+    string role_id = 5;
 }
 
 message UpdateTable {

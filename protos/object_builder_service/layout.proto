@@ -36,7 +36,7 @@ message Tab {
     repeated Section sections = 6;
     int32 order = 7;
     string icon = 8;
-    repeated RelationForGetAll2 relations = 9;
+    RelationForGetAll2 relation = 9;
 }
 
 message IncrementID2 {

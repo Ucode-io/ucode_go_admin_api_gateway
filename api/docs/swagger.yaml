@@ -2467,10 +2467,23 @@ definitions:
         type: string
       name:
         type: string
+      permission:
+        $ref: '#/definitions/object_builder_service.App_Permission'
       tables:
         items:
           $ref: '#/definitions/object_builder_service.Table'
         type: array
+    type: object
+  object_builder_service.App_Permission:
+    properties:
+      create:
+        type: boolean
+      delete:
+        type: boolean
+      read:
+        type: boolean
+      update:
+        type: boolean
     type: object
   object_builder_service.AppRequest:
     properties:
@@ -3301,6 +3314,23 @@ definitions:
       link:
         type: string
     type: object
+  object_builder_service.Permission:
+    properties:
+      delete:
+        type: string
+      guid:
+        type: string
+      is_have_condition:
+        type: boolean
+      is_public:
+        type: boolean
+      read:
+        type: string
+      update:
+        type: string
+      write:
+        type: string
+    type: object
   object_builder_service.QuickFilter:
     properties:
       default_value:
@@ -3477,12 +3507,10 @@ definitions:
         type: string
       order:
         type: integer
+      relation:
+        $ref: '#/definitions/object_builder_service.RelationForGetAll2'
       relation_id:
         type: string
-      relations:
-        items:
-          $ref: '#/definitions/object_builder_service.RelationForGetAll2'
-        type: array
       sections:
         items:
           $ref: '#/definitions/object_builder_service.Section'
@@ -3516,6 +3544,8 @@ definitions:
         type: string
       project_id:
         type: string
+      record_permissions:
+        $ref: '#/definitions/object_builder_service.Permission'
       show_in_menu:
         type: boolean
       slug:
@@ -7710,6 +7740,9 @@ paths:
         type: integer
       - in: query
         name: project_id
+        type: string
+      - in: query
+        name: role_id
         type: string
       - in: query
         name: search
