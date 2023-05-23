@@ -13264,22 +13264,23 @@ paths:
       description: Update layouts
       operationId: update_layout
       parameters:
-      - description: table_id
-        in: path
-        name: table_id
+      - description: UpdateLayoutRequest
+        in: body
+        name: table
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateLayoutRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: TableBody
+          description: Layout data
           schema:
             allOf:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/object_builder_service.UpdateLayoutRequest'
+                  type: string
               type: object
         "400":
           description: Invalid Argument

@@ -13534,16 +13534,18 @@ const docTemplate = `{
                 "operationId": "update_layout",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "table_id",
-                        "name": "table_id",
-                        "in": "path",
-                        "required": true
+                        "description": "UpdateLayoutRequest",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpdateLayoutRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "TableBody",
+                        "description": "Layout data",
                         "schema": {
                             "allOf": [
                                 {
@@ -13553,7 +13555,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.UpdateLayoutRequest"
+                                            "type": "string"
                                         }
                                     }
                                 }

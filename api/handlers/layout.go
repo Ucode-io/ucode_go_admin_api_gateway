@@ -107,8 +107,8 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 // @Tags Layout
 // @Accept json
 // @Produce json
-// @Param table_id path string true "table_id"
-// @Success 200 {object} status_http.Response{data=object_builder_service.UpdateLayoutRequest} "TableBody"
+// @Param table body object_builder_service.UpdateLayoutRequest true "UpdateLayoutRequest"
+// @Success 200 {object} status_http.Response{data=string} "Layout data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateLayout(c *gin.Context) {
@@ -125,6 +125,10 @@ func (h *Handler) UpdateLayout(c *gin.Context) {
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+	if input.TableId == "" {
+		h.handleResponse(c, status_http.BadRequest, errors.New("table id is required"))
 		return
 	}
 
