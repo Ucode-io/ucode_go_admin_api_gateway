@@ -265,7 +265,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/category", h.GetAllCategories)
 
 		v1.GET("/layout/:table_id", h.GetListLayouts)
-		v1.PUT("/layout/", h.UpdateLayout)
+		v1.PUT("/layout", h.UpdateLayout)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))
