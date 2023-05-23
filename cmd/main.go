@@ -44,7 +44,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	redis := redis.NewRedis(cfg)
+	newRedis := redis.NewRedis(cfg)
 
 	authSrvc, err := services.NewAuthGrpcClient(ctx, cfg)
 	if err != nil {
@@ -65,7 +65,7 @@ func main() {
 
 	r.Use(gin.Recovery())
 
-	h := handlers.NewHandler(cfg, log, serviceNodes, grpcSvcs, authSrvc, redis)
+	h := handlers.NewHandler(cfg, log, serviceNodes, grpcSvcs, authSrvc, newRedis)
 
 	api.SetUpAPI(r, h, cfg)
 	cronjobs := crons.ExecuteCron()

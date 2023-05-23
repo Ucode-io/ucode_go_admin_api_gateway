@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateCategory godoc
+// CreateCategoryScenario godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
@@ -72,7 +72,7 @@ func (h *Handler) CreateCategoryScenario(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// UpdateCategory godoc
+// GetCategoryScenario godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
@@ -131,7 +131,7 @@ func (h *Handler) GetCategoryScenario(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// GetListCategory godoc
+// GetListCategoryScenario godoc
 // @Security ApiKeyAuth
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"

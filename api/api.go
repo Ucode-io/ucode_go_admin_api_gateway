@@ -1,13 +1,17 @@
 package api
 
 import (
-	"ucode/ucode_go_api_gateway/api/docs"
-	"ucode/ucode_go_api_gateway/api/handlers"
-	"ucode/ucode_go_api_gateway/config"
-
+	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"time"
+	"ucode/ucode_go_api_gateway/api/docs"
+	"ucode/ucode_go_api_gateway/api/handlers"
+	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 )
 
 // SetUpAPI @description This is an api gateway
@@ -432,6 +436,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/table-history/:id", h.GetTableHistoryById)
 		v1Admin.PUT("/table-history/revert", h.RevertTableHistory)
 		v1Admin.PUT("/table-history", h.InsetrVersionsIdsToTableHistory)
+
+		v1Admin.POST("/redirect-url", h.CreateRedirectUrl)
+		v1Admin.PUT("/redirect-url", h.UpdateRedirectUrl)
+		v1Admin.GET("/redirect-url", h.GetListRedirectUrl)
+		v1Admin.GET("/redirect-url/:redirect-url-id", h.GetSingleRedirectUrl)
+		v1Admin.DELETE("/redirect-url/:redirect-url-id", h.DeleteRedirectUrl)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())
@@ -486,6 +496,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 	}
 
+	r.Any("/api/*any", h.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.Proxy)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 }
@@ -530,6 +542,77 @@ func MaxAllowed(n int) gin.HandlerFunc {
 		c.Set("sem", sem)
 		c.Set("count_request", countReq)
 
+		c.Next()
+	}
+}
+
+func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		var (
+			err error
+		)
+		fmt.Println("::::::::::::PROXY before:::::::::::::::::::", len(r.Routes()), c.Request.URL.Path, c.Request.URL)
+		c, err = RedirectUrl(c, h)
+		if err == nil {
+			//fmt.Println("here:::::::::::::1")
+			//fmt.Println("::::::::::::PROXY before:::::::::::::::::::", len(r.Routes()), c.Request.URL.Path)
+			r.HandleContext(c)
+		}
+		//fmt.Println("here:::::::::::::2")
+		fmt.Println("time in proxyMiddleware:::::", time.Since(start).Milliseconds())
+		c.Next()
+		fmt.Println("::::::::::::PROXY after:::::::::::::::::::", c.Request.URL.Path)
+	}
+}
+
+func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
+	path := c.Request.URL.Path
+	projectId, ok := c.Get("project_id")
+	if !ok {
+		return c, errors.New("something went wrong")
+	}
+
+	envId, ok := c.Get("environment_id")
+	if !ok {
+		return c, errors.New("something went wrong")
+	}
+
+	namespace := c.GetString("namespace")
+	svcs, err := h.GetService(namespace)
+	if err != nil {
+		return c, errors.New("something went wrong")
+	}
+
+	start := time.Now()
+
+	pathM, err := helper.FindUrlTo(svcs, helper.MatchingData{
+		ProjectId: projectId.(string),
+		EnvId:     envId.(string),
+		Path:      path,
+	})
+	if err != nil {
+		fmt.Println("cant parse url", logger.Error(err))
+		return c, errors.New("cant change")
+	}
+
+	fmt.Println("time in RedirectUrl:::::::", time.Since(start).Milliseconds())
+
+	if path == pathM {
+		return c, errors.New("identical path")
+	}
+
+	c.Request.URL.Path = pathM
+	fmt.Println("path", c.Request.URL.Path)
+	return c, nil
+}
+
+func testAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("environment_id", "063dad1e-4596-483a-8638-14f9b99922c3")
+		u := c.Request.URL.Query()
+		u.Set("project-id", "d6042238-0f60-4f30-8c1a-af78883f1d52")
+		c.Request.URL.RawQuery = u.Encode()
 		c.Next()
 	}
 }
