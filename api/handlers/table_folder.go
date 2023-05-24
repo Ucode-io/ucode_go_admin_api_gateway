@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -216,6 +217,7 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 		//resourceEnvironment *company_service.ResourceEnvironment
 		resourceEnvironmentId string
 	)
+	fmt.Println(">>>>>> test get all table folders")
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())

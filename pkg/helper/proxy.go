@@ -36,6 +36,10 @@ func FindUrlTo(s services.ServiceManagerI, data MatchingData) (string, error) {
 		path := strings.Split(data.Path, "/")
 		isEqual := true
 
+		if len(path) != len(from) {
+			continue
+		}
+
 		for i, el := range from {
 			if len(el) >= 1 && el[0] == '{' && el[len(el)-1] == '}' {
 				m[el] = path[i]
