@@ -61,6 +61,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
+			projectId := c.GetHeader("Project-Id")
 
 			if _, err := uuid.Parse(resourceId); err != nil {
 				resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
@@ -81,6 +82,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			}
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
+			c.Set("project_id", projectId)
 
 		case "API-KEY":
 			app_id := c.GetHeader("X-API-KEY")
