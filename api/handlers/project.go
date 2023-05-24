@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -82,6 +83,7 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 			CompanyId: c.DefaultQuery("company_id", ""),
 		},
 	)
+	fmt.Println("projects::", resp.GetProjects())
 
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
