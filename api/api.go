@@ -85,7 +85,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/object-slim/get-list/:table_slug", h.GetListSlim)
 		v1.PUT("/object/:table_slug", h.UpdateObject)
 		v1.DELETE("/object/:table_slug/:object_id", h.DeleteObject)
-		v1.POST("/object/object-details/:table_slug", h.GetObjectDetails)
 		v1.POST("/object/excel/:table_slug", h.GetListInExcel)
 		v1.POST("/object-upsert/:table_slug", h.UpsertObject)
 		v1.PUT("/object/multiple-update/:table_slug", h.MultipleUpdateObject)

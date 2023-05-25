@@ -3259,6 +3259,8 @@ definitions:
         type: string
       id:
         type: string
+      is_default:
+        type: boolean
       label:
         type: string
       order:
@@ -15486,74 +15488,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Multiple Update object
-      tags:
-      - Object
-  /v1/object/object-details/{table_slug}:
-    post:
-      consumes:
-      - application/json
-      description: object details
-      operationId: get_object_details
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: table_slug
-        in: path
-        name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: GetObjectDetailsBody
-        in: body
-        name: object
-        required: true
-        schema:
-          $ref: '#/definitions/models.CommonMessage'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Object data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get object details
       tags:
       - Object
   /v1/offline_appointment:

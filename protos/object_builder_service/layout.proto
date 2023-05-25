@@ -21,6 +21,7 @@ message Layout {
     string type = 5;
     repeated Tab tabs = 6;
     string icon = 7;
+    bool is_default = 8;
 }
 
 message GetListLayoutResponse {
