@@ -86,12 +86,17 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 
 		resourceEnvironmentId = resourceEnvironment.GetId()
 	}
+	var isDefault = false
+	if c.Query("is_defualt") == "true" {
+		isDefault = true
+	}
 
 	resp, err := services.BuilderService().Layout().GetAll(
 		context.Background(),
 		&object_builder_service.GetListLayoutRequest{
 			TableId:   TableId,
 			ProjectId: resourceEnvironmentId,
+			IsDefualt: isDefault,
 		},
 	)
 
