@@ -733,6 +733,7 @@ func (h *Handler) GetList(c *gin.Context) {
 	//}
 
 	projectId := c.Query("project-id")
+	fmt.Println("::::::::::::::::::::::::::::::PROJECT ID::::::::::::::::::::::::::::::", projectId)
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
