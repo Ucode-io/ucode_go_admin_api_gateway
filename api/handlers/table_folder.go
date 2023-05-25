@@ -386,6 +386,7 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 			ProjectId: resourceEnvironmentId,
 			Id:        tableFolder.Id,
 			Icon:      tableFolder.Icon,
+			AppId:     tableFolder.AppId,
 		},
 	)
 
