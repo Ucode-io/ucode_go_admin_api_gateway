@@ -99,6 +99,8 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
+
+			fmt.Println("\n\n >>>> api key ", apikeys, "\n\n")
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			c.Set("project_id", apikeys.GetProjectId())
