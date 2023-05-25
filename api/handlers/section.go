@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -93,6 +94,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 	//	return
 	//}
 
+	fmt.Println("\n\n >>>>>>  auth")
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Section().GetAll(
