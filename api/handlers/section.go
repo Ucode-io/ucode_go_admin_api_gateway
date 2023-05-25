@@ -94,7 +94,7 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 	//	return
 	//}
 
-	fmt.Println("\n\n >>>>>>  auth")
+	fmt.Println("\n\n >>>>>>  auth", authInfo)
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Section().GetAll(
