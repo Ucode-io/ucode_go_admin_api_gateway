@@ -13114,12 +13114,14 @@ paths:
         name: table_slug
         required: true
         type: string
-      - description: GetListObjectRequestBody
-        in: body
-        name: object
-        required: true
-        schema:
-          $ref: '#/definitions/models.CommonMessage'
+      - description: limit
+        in: query
+        name: limit
+        type: number
+      - description: offset
+        in: query
+        name: offset
+        type: number
       produces:
       - application/json
       responses:
@@ -13150,6 +13152,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get all objects slim
       tags:
       - Object

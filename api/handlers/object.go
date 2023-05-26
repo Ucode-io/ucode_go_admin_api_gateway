@@ -1011,7 +1011,6 @@ func (h *Handler) GetList(c *gin.Context) {
 
 // GetListSlim godoc
 // @Security ApiKeyAuth
-
 // @ID get_list_objects_slim
 // @Router /v1/object-slim/get-list/{table_slug} [GET]
 // @Summary Get all objects slim
@@ -1020,7 +1019,8 @@ func (h *Handler) GetList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
-// @Param object body models.CommonMessage true "GetListObjectRequestBody"
+// @Param limit query number false "limit"
+// @Param offset query number false "offset"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -1033,6 +1033,7 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	// 	return
 	// }
 	// fmt.Println("::::	objectRequest::", queryParams)
+	fmt.Println(":::test:::")
 
 	queryParams := c.Request.URL.Query()
 	queryMap := make(map[string]interface{})
