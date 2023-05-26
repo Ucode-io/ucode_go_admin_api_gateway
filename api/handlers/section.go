@@ -15,8 +15,6 @@ import (
 
 // GetAllSections godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_sections
 // @Router /v1/section [GET]
 // @Summary Get all sections
@@ -133,8 +131,6 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 
 // UpdateSection godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_section
 // @Router /v1/section [PUT]
 // @Summary Update section

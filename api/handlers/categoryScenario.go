@@ -12,8 +12,6 @@ import (
 
 // CreateCategoryScenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_category_for_scenario
 // @Router /v1/scenario/category [POST]
 // @Summary Create category
@@ -21,7 +19,6 @@ import (
 // @Tags Scenario-category
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param app body models.CreateCategory true "Request body"
 // @Success 201 {object} status_http.Response{data=models.Category} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -74,8 +71,6 @@ func (h *Handler) CreateCategoryScenario(c *gin.Context) {
 
 // GetCategoryScenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_category_for_scenario
 // @Router /v1/scenario/category/{id} [GET]
 // @Summary Get single category
@@ -83,7 +78,6 @@ func (h *Handler) CreateCategoryScenario(c *gin.Context) {
 // @Tags Scenario-category
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param id path string true "id"
 // @Success 200 {object} status_http.Response{data=models.Category} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -133,8 +127,6 @@ func (h *Handler) GetCategoryScenario(c *gin.Context) {
 
 // GetListCategoryScenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_category_for_scenario
 // @Router /v1/scenario/category [GET]
 // @Summary Get list category
@@ -142,7 +134,6 @@ func (h *Handler) GetCategoryScenario(c *gin.Context) {
 // @Tags Scenario-category
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
 // @Param page query string false "page"

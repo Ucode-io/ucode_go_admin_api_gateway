@@ -10,8 +10,6 @@ import (
 
 // CreateUserToken godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create-user-token
 // @Router /v1/notification/user-fcmtoken [POST]
 // @Summary Create User Token
@@ -64,8 +62,6 @@ func (h *Handler) CreateUserFCMToken(c *gin.Context) {
 
 // CreateNotificationUsers godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create-user-notifications
 // @Router /v1/notification [POST]
 // @Summary Create User Notifications
@@ -131,8 +127,6 @@ func (h *Handler) CreateNotificationUsers(c *gin.Context) {
 
 // GetAllNotification godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get-all-notifications
 // @Router /v1/notification [GET]
 // @Summary Get All Notifications
@@ -201,8 +195,6 @@ func (h *Handler) GetAllNotifications(c *gin.Context) {
 
 // GetNotificationById godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get-notification-by-id
 // @Router /v1/notification/{id} [GET]
 // @Summary Get Notification By Id
