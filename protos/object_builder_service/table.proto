@@ -6,6 +6,7 @@ option go_package="genproto/object_builder_service";
 import "google/protobuf/empty.proto";
 import "field.proto";
 import "section.proto";
+import "layout.proto";
 
 service TableService {
     rpc Create(CreateTableRequest) returns (CreateTableResponse) {}
@@ -76,6 +77,7 @@ message CreateTableRequest {
     string commit_type = 16;
     string name = 17;
     bool is_cached = 18;
+    repeated Layout layouts = 19;
 }
 
 message IncrementID {

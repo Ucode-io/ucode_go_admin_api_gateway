@@ -15,8 +15,6 @@ import (
 
 // GetEventLogs godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_event_logs
 // @Router /v1/event-log [GET]
 // @Summary Get event logs
@@ -24,7 +22,6 @@ import (
 // @Tags Event
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param filters query models.GetEventLogsListRequest true "filters"
 // @Success 200 {object} status_http.Response{data=obs.GetEventLogListsResponse} "EventLogsBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -118,8 +115,6 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 
 // GetEventLogById godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_event_log
 // @Router /v1/event-log/{event_log_id} [GET]
 // @Summary Get event log
@@ -127,7 +122,6 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 // @Tags Event
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param event_log_id path string true "event_log_id"
 // @Success 200 {object} status_http.Response{data=obs.EventLog} "EventLogBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"

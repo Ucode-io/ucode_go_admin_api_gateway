@@ -13,8 +13,6 @@ import (
 
 // GetAllSettings godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string false "Environment-Id"
 // @ID get_list_setting
 // @Router /v1/project/setting [GET]
 // @Summary Get List settings

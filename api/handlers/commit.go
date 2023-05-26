@@ -105,13 +105,19 @@ func (h *Handler) GetAllCommits(c *gin.Context) {
 		return
 	}
 
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	resp, err := h.companyServices.VersioningService().Commit().GetList(
 		context.Background(),
 		&obs.GetCommitListRequest{
 			Limit:         int32(limit),
 			Offset:        int32(offset),
 			Search:        c.Query("search"),
-			ProjectId:     c.Query("project_id"),
+			ProjectId:     projectId.(string),
 			EnvironmentId: c.Query("environment_id"),
 			CommitType:    c.Query("commit_type"),
 		},

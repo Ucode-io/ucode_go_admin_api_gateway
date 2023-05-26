@@ -17,12 +17,16 @@ message TableFolderRequest {
     string title = 1;
     string project_id = 2;
     string parent_id = 3;
+    string icon = 4;
+    string app_id = 5;
 }
 
 message CreateTableFolderResponse {
     string id = 1;
     string title = 2;
     string project_id = 3;
+    string icon = 4;
+    string app_id = 5;
 }
 
 message TableFolder {
@@ -30,6 +34,8 @@ message TableFolder {
     string title = 2;
     string project_id = 3;
     string parent_id = 4;
+    string icon = 5;
+    string app_id = 6;
 }
 
 
@@ -48,4 +54,5 @@ message GetAllTableFoldersRequest {
     int32 limit = 2;
     string search = 3;
     string project_id = 4;
+    string app_id = 5;
 }

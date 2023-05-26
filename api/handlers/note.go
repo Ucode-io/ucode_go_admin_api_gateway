@@ -15,8 +15,6 @@ import (
 
 // CreateNoteFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_note_folder
 // @Router /v1/note-folder [POST]
 // @Summary Create Note Folder
@@ -24,7 +22,6 @@ import (
 // @Tags Note
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param Note_Folder body tmp.CreateFolderNoteReq true "CreateFolderNoteReq"
 // @Success 201 {object} status_http.Response{data=tmp.FolderNote} "Note Folder data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -140,8 +137,6 @@ func (h *Handler) CreateNoteFolder(c *gin.Context) {
 
 // GetSingleNoteFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_note_folder
 // @Router /v1/note-folder/{note-folder-id} [GET]
 // @Summary Get single Note Folder
@@ -149,7 +144,6 @@ func (h *Handler) CreateNoteFolder(c *gin.Context) {
 // @Tags Note
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param note-folder-id path string true "note-folder-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetSingleFolderNoteRes} "NoteFolderBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -256,8 +250,6 @@ func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 
 // UpdateNoteFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_note_folder
 // @Router /v1/note-folder [PUT]
 // @Summary Update Note Folder
@@ -265,7 +257,6 @@ func (h *Handler) GetSingleNoteFolder(c *gin.Context) {
 // @Tags Note
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param FolderNote body tmp.UpdateFolderNoteReq true "UpdateFolderNoteReqBody"
 // @Success 200 {object} status_http.Response{data=tmp.FolderNote} "FolderNote data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -381,8 +372,6 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 
 // DeleteNoteFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_note_folder
 // @Router /v1/note-folder/{note-folder-id} [DELETE]
 // @Summary Delete Note Folder
@@ -390,7 +379,6 @@ func (h *Handler) UpdateNoteFolder(c *gin.Context) {
 // @Tags Note
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param note-folder-id path string true "note-folder-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -497,8 +485,6 @@ func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 
 // GetListNoteFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_note_folder
 // @Router /v1/note-folder [GET]
 // @Summary Get List Note Folder
@@ -506,7 +492,6 @@ func (h *Handler) DeleteNoteFolder(c *gin.Context) {
 // @Tags Note
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetListFolderNoteRes} "FolderNoteBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -606,8 +591,6 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 
 // GetNoteFolderCommits godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_commits_note_folder
 // @Router /v1/note-folder/commits/{note-folder-id} [GET]
 // @Summary Get Commits note folder
@@ -615,7 +598,6 @@ func (h *Handler) GetListNoteFolder(c *gin.Context) {
 // @Tags Note
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param note-folder-id path string true "note-folder-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetListFolderNoteRes} "GetListFolderNoteRes"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -716,8 +698,6 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 
 // CreateNote godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_note
 // @Router /v1/note [POST]
 // @Summary Create Note
@@ -725,7 +705,6 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 // @Tags Note
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param Note body tmp.CreateNoteReq true "CreateNoteReq"
 // @Success 201 {object} status_http.Response{data=tmp.Note} "Note data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -841,8 +820,6 @@ func (h *Handler) CreateNote(c *gin.Context) {
 
 // GetSingleNote godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_note
 // @Router /v1/note/{note-id} [GET]
 // @Summary Get single Note
@@ -850,7 +827,6 @@ func (h *Handler) CreateNote(c *gin.Context) {
 // @Tags Note
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param note-id path string true "note-id"
 // @Success 200 {object} status_http.Response{data=tmp.Note} "NoteBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -957,8 +933,6 @@ func (h *Handler) GetSingleNote(c *gin.Context) {
 
 // UpdateNote godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_note
 // @Router /v1/note [PUT]
 // @Summary Update Note
@@ -966,7 +940,6 @@ func (h *Handler) GetSingleNote(c *gin.Context) {
 // @Tags Note
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param Note body tmp.UpdateNoteReq true "UpdateNoteReqBody"
 // @Success 200 {object} status_http.Response{data=tmp.Note} "Note data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1082,8 +1055,6 @@ func (h *Handler) UpdateNote(c *gin.Context) {
 
 // DeleteNote godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_note
 // @Router /v1/note/{note-id} [DELETE]
 // @Summary Delete Note
@@ -1091,7 +1062,6 @@ func (h *Handler) UpdateNote(c *gin.Context) {
 // @Tags Note
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param note-id path string true "note-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -1198,8 +1168,6 @@ func (h *Handler) DeleteNote(c *gin.Context) {
 
 // GetListNote godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_Note
 // @Router /v1/note [GET]
 // @Summary Get List Note
@@ -1207,7 +1175,6 @@ func (h *Handler) DeleteNote(c *gin.Context) {
 // @Tags Note
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param folder-id query string true "folder-id"
 // @Param limit query string false "limit"
 // @Param offset query string false "offset"
@@ -1324,8 +1291,6 @@ func (h *Handler) GetListNote(c *gin.Context) {
 
 // GetNoteCommits godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_commits_note
 // @Router /v1/note/commits/{note-id} [GET]
 // @Summary Get Commits note
@@ -1333,7 +1298,6 @@ func (h *Handler) GetListNote(c *gin.Context) {
 // @Tags Note
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param note-id path string true "note-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetListNoteRes} "GetListNoteRes"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"

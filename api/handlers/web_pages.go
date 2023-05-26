@@ -15,8 +15,6 @@ import (
 
 // CreateWebPage godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_web_page
 // @Router /v3/web_pages [POST]
 // @Summary Create Web Page
@@ -121,8 +119,6 @@ func (h *Handler) CreateWebPage(c *gin.Context) {
 
 // GetWebPagesById godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_web_page_by_id
 // @Router /v3/web_pages/{guid} [GET]
 // @Summary Get Web Page By Id
@@ -167,8 +163,6 @@ func (h *Handler) GetWebPagesById(c *gin.Context) {
 
 // GetWebPagesList godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_web_page_list
 // @Router /v3/web_pages [GET]
 // @Summary Get Web Page List
@@ -271,8 +265,6 @@ func (h *Handler) GetWebPagesList(c *gin.Context) {
 
 // UpdateWebPage godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_web_page
 // @Router /v3/web_pages/{guid} [PUT]
 // @Summary Update Web Page
@@ -380,8 +372,6 @@ func (h *Handler) UpdateWebPage(c *gin.Context) {
 
 // DeleteWebPage godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_web_page
 // @Router /v3/web_pages/{guid} [DELETE]
 // @Summary Delete Query Folder

@@ -143,10 +143,16 @@ ingress:
         - host: "api.admin.u-code.io"
           path: /
           servicePort: 8080
+        - host: "api.easyto.travel"
+          path: /
+          servicePort: 8080
       tls:
         - secretName: api-admin-tls
           hosts:
             - "api.admin.u-code.io"
+        - secretName: easyto-travel-tls
+          hosts:
+            - "api.easyto.travel"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic

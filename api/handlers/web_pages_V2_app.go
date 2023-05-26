@@ -13,7 +13,6 @@ import (
 
 // CreateWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_web_page_app
 // @Router /v1/webpage-app [POST]
 // @Summary Create web page app
@@ -21,7 +20,6 @@ import (
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param webpage_app body models.CreateAppReqModel true "CreateAppReqModel"
 // @Success 201 {object} status_http.Response{data=tmp.App} "WebPage app data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -128,7 +126,6 @@ func (h *Handler) CreateWebPageApp(c *gin.Context) {
 
 // GetSingleWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_web_page_app
 // @Router /v1/webpage-app/{webpage-app-id} [GET]
 // @Summary Get single webpage app
@@ -136,7 +133,6 @@ func (h *Handler) CreateWebPageApp(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param webpage-app-id path string true "webpage-app-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetSingleAppRes} "GetSingleAppRes"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -243,7 +239,6 @@ func (h *Handler) GetSingleWebPageApp(c *gin.Context) {
 
 // UpdateWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_web_page_app
 // @Router /v1/webpage-app [PUT]
 // @Summary Update webpage app
@@ -251,7 +246,6 @@ func (h *Handler) GetSingleWebPageApp(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param app body models.UpdateAppReqModel true "UpdateAppReqModel"
 // @Success 200 {object} status_http.Response{data=tmp.App} "App data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -357,7 +351,6 @@ func (h *Handler) UpdateWebPageApp(c *gin.Context) {
 
 // DeleteWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_web_page_app
 // @Router /v1/webpage-app/{webpage-app-id} [DELETE]
 // @Summary Delete webpage app
@@ -365,7 +358,6 @@ func (h *Handler) UpdateWebPageApp(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param webpage-app-id path string true "webpage-app-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -473,7 +465,6 @@ func (h *Handler) DeleteWebPageApp(c *gin.Context) {
 
 // GetListWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_web_page_app
 // @Router /v1/webpage-app [GET]
 // @Summary Get List webpage app
@@ -481,7 +472,6 @@ func (h *Handler) DeleteWebPageApp(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetListAppRes} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

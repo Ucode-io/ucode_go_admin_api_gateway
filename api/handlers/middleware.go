@@ -32,10 +32,10 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
-			res          = &auth_service.V2HasAccessUserRes{}
-			ok           bool
-			origin       = c.GetHeader("Origin")
-			platformType = c.GetHeader("Platform-Type")
+			res    = &auth_service.V2HasAccessUserRes{}
+			ok     bool
+			origin = c.GetHeader("Origin")
+			//platformType = c.GetHeader("Platform-Type")
 		)
 
 		bearerToken := c.GetHeader("Authorization")
@@ -48,20 +48,20 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		}
 		switch strArr[0] {
 		case "Bearer":
-			if platformType != cfg.PlatformType {
-				fmt.Println(origin)
-				res, ok = h.hasAccess(c)
-				if !ok {
-					h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
-					c.Abort()
-					return
-				}
+			//if platformType != cfg.PlatformType {
+			fmt.Println(origin)
+			res, ok = h.hasAccess(c)
+			if !ok {
+				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
+				c.Abort()
+				return
 			}
+			//}
 
 			fmt.Println("/nresponse V2hasaccessuser", res)
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
-			projectId := c.GetHeader("project-id")
+			projectId := c.Query("Project-Id")
 
 			if res.ProjectId != "" {
 				projectId = res.ProjectId
@@ -99,8 +99,11 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
+
+			fmt.Println("\n\n >>>> api key ", apikeys, "\n\n")
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
+			c.Set("project_id", apikeys.GetProjectId())
 		default:
 			err := errors.New("error invalid authorization method")
 			h.log.Error("--AuthMiddleware--", logger.Error(err))
