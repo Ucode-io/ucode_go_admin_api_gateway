@@ -13755,6 +13755,11 @@ const docTemplate = `{
         },
         "/v1/object-slim/get-list/{table_slug}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get all objects slim",
                 "consumes": [
                     "application/json"
@@ -13776,13 +13781,16 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "GetListObjectRequestBody",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CommonMessage"
-                        }
+                        "type": "number",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
                     }
                 ],
                 "responses": {
