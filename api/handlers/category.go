@@ -26,7 +26,6 @@ import (
 // @Accept json
 // @Produce json
 // @Param app body models.CreateCategory true "CreateApiReferenceRequestBody"
-// @Param project-id query string true "project-id"
 // @Success 201 {object} status_http.Response{data=models.Category} "Categoryç data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -122,7 +121,6 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param category_id path string true "category_id"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.Category} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -205,7 +203,6 @@ func (h *Handler) GetApiCategoryByID(c *gin.Context) {
 // @Tags ApiReference
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param filters query ars.GetListCategoryRequest true "filters"
 // @Success 200 {object} status_http.Response{data=models.GetAllCategoriesResponse} "GetAllCategoriesBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -404,7 +401,6 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param category_id path string true "category_id"
-// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

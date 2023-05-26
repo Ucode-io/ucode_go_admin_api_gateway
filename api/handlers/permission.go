@@ -17,8 +17,6 @@ import (
 
 // UpsertPermissionsByAppId godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID upsert_permission
 // @Router /v1/permission-upsert/{app_id} [POST]
 // @Summary Upsert permissions
@@ -27,7 +25,6 @@ import (
 // @Accept json
 // @Produce json
 // @Param app_id path string true "app_id"
-// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "UpsertPermissionRequestBody"
 // @Success 201 {object} status_http.Response{data=models.CommonMessage} "Upsert Permission data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -136,8 +133,6 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 
 // GetAllPermissionByRoleId godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_permission_by_role_id
 // @Router /v1/permission-get-all/{role_id} [GET]
 // @Summary Get all permissions by role id
@@ -146,7 +141,6 @@ func (h *Handler) UpsertPermissionsByAppId(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param role_id path string true "role_id"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "Get All Permission data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -228,8 +222,6 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 
 // GetFieldPermissions godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_field_permission
 // @Router /v1/field-permission/{role_id}/{table_slug} [GET]
 // @Summary Get all field permissions
@@ -239,7 +231,6 @@ func (h *Handler) GetAllPermissionByRoleId(c *gin.Context) {
 // @Produce json
 // @Param role_id path string true "role_id"
 // @Param table_slug path string true "table_slug"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "Get All Field Permission data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -322,8 +313,6 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 
 // GetActionPermissions godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_action_permission
 // @Router /v1/action-permission/{role_id}/{table_slug} [GET]
 // @Summary Get all action permissions
@@ -333,7 +322,6 @@ func (h *Handler) GetFieldPermissions(c *gin.Context) {
 // @Produce json
 // @Param role_id path string true "role_id"
 // @Param table_slug path string true "table_slug"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "Get All Action Permission data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -416,8 +404,6 @@ func (h *Handler) GetActionPermissions(c *gin.Context) {
 
 // GetViewRelationPermissions godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_view_relation_permission
 // @Router /v1/view-relation-permission/{role_id}/{table_slug} [GET]
 // @Summary Get all view relation permissions
@@ -427,7 +413,6 @@ func (h *Handler) GetActionPermissions(c *gin.Context) {
 // @Produce json
 // @Param role_id path string true "role_id"
 // @Param table_slug path string true "table_slug"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "Get All View Relation Permission data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

@@ -16,8 +16,6 @@ import (
 
 // CreateQuery godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_query
 // @Router /v3/query [POST]
 // @Summary Create Query
@@ -63,8 +61,6 @@ func (h *Handler) CreateQuery(c *gin.Context) {
 
 // GetQueryByID godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_query_item
 // @Router /v3/query/{guid} [GET]
 // @Summary Get Query By Id
@@ -95,8 +91,6 @@ func (h *Handler) GetQueryByID(c *gin.Context) {
 
 // GetQueryList godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_query_list
 // @Router /v3/query [GET]
 // @Summary Get Query Folder List
@@ -201,8 +195,6 @@ func (h *Handler) GetQueryList(c *gin.Context) {
 
 // UpdateQuery godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_query
 // @Router /v3/query/{guid} [PUT]
 // @Summary Update Query
@@ -311,8 +303,6 @@ func (h *Handler) UpdateQuery(c *gin.Context) {
 
 // DeleteQuery godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_query
 // @Router /v3/query/{guid} [DELETE]
 // @Summary Delete Query

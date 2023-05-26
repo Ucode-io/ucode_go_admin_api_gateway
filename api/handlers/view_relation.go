@@ -14,8 +14,6 @@ import (
 
 // GetViewRelation godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_view_relation
 // @Router /v1/view_relation [GET]
 // @Summary Get single view relation
@@ -132,8 +130,6 @@ func (h *Handler) GetViewRelation(c *gin.Context) {
 
 // UpsertViewRelations godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID upsert_view_relation
 // @Router /v1/view_relation [PUT]
 // @Summary Upsert view relation

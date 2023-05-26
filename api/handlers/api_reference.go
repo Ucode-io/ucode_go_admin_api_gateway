@@ -28,7 +28,6 @@ import (
 // @Accept json
 // @Produce json
 // @Param api_reference body models.CreateApiReferenceModel true "CreateApiReferenceRequestBody"
-// @Param project-id query string true "project-id"
 // @Success 201 {object} status_http.Response{data=models.ApiReference} "Api Reference data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -257,7 +256,6 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filters query ars.GetListApiReferenceRequest true "filters"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.GetAllApiReferenceResponse} "ApiReferencesBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -347,7 +345,6 @@ func (h *Handler) GetAllApiReferences(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param api_reference body models.ApiReference  true "UpdateApiReferenceRequestBody"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.ApiReference} "Api Reference data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -456,7 +453,6 @@ func (h *Handler) UpdateApiReference(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param api_reference_id path string true "api_reference_id"
-// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -536,7 +532,6 @@ func (h *Handler) DeleteApiReference(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param api_reference_id path string true "api_reference_id"
-// @Param project-id query string true "project-id"
 // @Param page query int false "page"
 // @Param per_page query int false "per_page"
 // @Param sort query string false "sort"
@@ -693,9 +688,7 @@ func (h *Handler) GetApiReferenceChanges(c *gin.Context) {
 // @Param per_page query int false "per_page"
 // @Param sort query string false "sort"
 // @Param order query string false "order"
-// @Param Environment-Id header string true "Environment-Id"
 // @Param revert_api_reference body ars.ApiRevertApiReferenceRequest true "Request Body"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=ars.ApiReference} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -798,9 +791,7 @@ func (h *Handler) RevertApiReference(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param api_reference_id path string true "api_reference_id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Param body body ars.ApiManyVersions true "Request Body"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=ars.ApiReference} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

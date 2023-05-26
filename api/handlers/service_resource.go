@@ -12,8 +12,6 @@ import (
 
 // UpdateServiceResource godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_service_resource
 // @Router /v1/company/project/service-resource [PUT]
 // @Summary Update service resource
@@ -21,7 +19,6 @@ import (
 // @Tags Service Resource
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param data body pb.UpdateServiceResourceReq true "data"
 // @Success 200 {object} status_http.Response{data=pb.UpdateServiceResourceRes} "data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -66,8 +63,6 @@ func (h *Handler) UpdateServiceResource(c *gin.Context) {
 
 // GetListServiceResource godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_service_resource
 // @Router /v1/company/project/service-resource [GET]
 // @Summary get list service resource
@@ -75,7 +70,6 @@ func (h *Handler) UpdateServiceResource(c *gin.Context) {
 // @Tags Service Resource
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=pb.GetListServiceResourceRes} "data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

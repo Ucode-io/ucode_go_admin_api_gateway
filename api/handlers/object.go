@@ -27,8 +27,6 @@ import (
 
 // CreateObject godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_object
 // @Router /v1/object/{table_slug}/ [POST]
 // @Summary Create object
@@ -37,7 +35,6 @@ import (
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
-// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "CreateObjectRequestBody"
 // @Success 201 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -245,8 +242,6 @@ func (h *Handler) CreateObject(c *gin.Context) {
 
 // GetSingle godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_object_by_id
 // @Router /v1/object/{table_slug}/{object_id} [GET]
 // @Summary Get object by id
@@ -256,7 +251,6 @@ func (h *Handler) CreateObject(c *gin.Context) {
 // @Produce json
 // @Param table_slug path string true "table_slug"
 // @Param object_id path string true "object_id"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -373,8 +367,6 @@ func (h *Handler) GetSingle(c *gin.Context) {
 
 // GetSingleSlim godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_object_by_id_slim
 // @Router /v1/object-slim/{table_slug}/{object_id} [GET]
 // @Summary Get object by id slim
@@ -384,7 +376,6 @@ func (h *Handler) GetSingle(c *gin.Context) {
 // @Produce json
 // @Param table_slug path string true "table_slug"
 // @Param object_id path string true "object_id"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -505,8 +496,6 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 
 // UpdateObject godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_object
 // @Router /v1/object/{table_slug} [PUT]
 // @Summary Update object
@@ -515,7 +504,6 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
-// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "UpdateObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -698,8 +686,6 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 
 // DeleteObject godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_object
 // @Router /v1/object/{table_slug}/{object_id} [DELETE]
 // @Summary Delete object
@@ -710,7 +696,6 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 // @Param table_slug path string true "table_slug"
 // @Param object body models.CommonMessage true "DeleteObjectRequestBody"
 // @Param object_id path string true "object_id"
-// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -889,8 +874,6 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 
 // GetList godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_objects
 // @Router /v1/object/get-list/{table_slug} [POST]
 // @Summary Get all objects
@@ -899,7 +882,6 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
-// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -1029,29 +1011,55 @@ func (h *Handler) GetList(c *gin.Context) {
 
 // GetListSlim godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
+
 // @ID get_list_objects_slim
-// @Router /v1/object-slim/get-list/{table_slug} [POST]
+// @Router /v1/object-slim/get-list/{table_slug} [GET]
 // @Summary Get all objects slim
 // @Description Get all objects slim
 // @Tags Object
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
-// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetListSlim(c *gin.Context) {
 	var objectRequest models.CommonMessage
+	// queryParams := make(map[string]interface{})
+	// err := c.ShouldBindQuery(&queryParams)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
+	// 	return
+	// }
+	// fmt.Println("::::	objectRequest::", queryParams)
 
-	err := c.ShouldBindJSON(&objectRequest)
+	queryParams := c.Request.URL.Query()
+	queryMap := make(map[string]interface{})
+	for key, values := range queryParams {
+		fmt.Println(values)
+		fmt.Println(len(values))
+		if len(values) == 1 {
+			queryMap[key] = values[0]
+		} else if len(values) > 1 {
+			queryMap[key] = values
+		}
+	}
+	offset, err := h.getOffsetParam(c)
 	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	queryMap["limit"] = limit
+	queryMap["offset"] = offset
+	objectRequest.Data = queryMap
+	fmt.Println("objectRequest::", queryMap)
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
@@ -1167,8 +1175,6 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 
 // GetListInExcel godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_objects_in_excel
 // @Router /v1/object/excel/{table_slug} [POST]
 // @Summary Get all objects in excel
@@ -1177,7 +1183,6 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
-// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -1294,8 +1299,6 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 
 // DeleteManyToMany godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_many2many
 // @Router /v1/many-to-many [DELETE]
 // @Summary Delete Many2Many
@@ -1303,7 +1306,6 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param object body obs.ManyToManyMessage true "DeleteManyToManyBody"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -1445,8 +1447,6 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 
 // AppendManyToMany godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID append_many2many
 // @Router /v1/many-to-many [PUT]
 // @Summary Update many-to-many
@@ -1454,7 +1454,6 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 // @Tags Object
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param object body obs.ManyToManyMessage true "UpdateMany2ManyRequestBody"
 // @Success 200 {object} status_http.Response{data=string} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1597,8 +1596,6 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 
 // UpsertObject godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID upsert_object
 // @Router /v1/object-upsert/{table_slug} [POST]
 // @Summary Upsert object
@@ -1607,7 +1604,6 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
-// @Param project-id query string true "project-id"
 // @Param object body models.UpsertCommonMessage true "CreateObjectRequestBody"
 // @Success 201 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1828,8 +1824,6 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 
 // MultipleUpdateObject godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID multiple_update_object
 // @Router /v1/object/multiple-update/{table_slug} [PUT]
 // @Summary Multiple Update object
@@ -1838,7 +1832,6 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
-// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "MultipleUpdateObjectRequestBody"
 // @Success 201 {object} status_http.Response{data=models.CommonMessage} "Object data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -2014,8 +2007,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 
 // GetFinancialAnalytics godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_financial_analytics
 // @Router /v1/object/get-financial-analytics/{table_slug} [POST]
 // @Summary Get financial analytics
@@ -2024,7 +2015,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
-// @Param project-id query string true "project-id"
 // @Param object body models.CommonMessage true "GetFinancialAnalyticsRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
