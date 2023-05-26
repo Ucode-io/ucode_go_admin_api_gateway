@@ -17,8 +17,6 @@ import (
 
 // Scenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_scenario
 // @Router /v1/scenario [POST]
 // @Summary Create scenario
@@ -26,7 +24,6 @@ import (
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param body body models.CreateScenarioRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=models.DAG} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -160,8 +157,6 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 
 // Scenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_scenario
 // @Router /v1/scenario [PUT]
 // @Summary Update scenario
@@ -169,7 +164,6 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param body body models.CreateScenarioRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=models.DAG} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -303,8 +297,6 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 
 // Scenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID scenario_history
 // @Router /v1/scenario/{id}/history/ [GET]
 // @Summary Get History scenario
@@ -313,7 +305,6 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "dag-id"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=pb.GetScenarioHistoryResponse} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -365,8 +356,6 @@ func (h *Handler) GetScenarioHistory(c *gin.Context) {
 
 // Scenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID select_version_scenario
 // @Router /v1/scenario/{id}/select-versions [PUT]
 // @Summary Select Versions scenario
@@ -375,7 +364,6 @@ func (h *Handler) GetScenarioHistory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "dag-id"
-// @Param project-id query string true "project-id"
 // @Param body body pb.CommitWithRelease  true "Request body"
 // @Success 200 {object} status_http.Response{data=emptypb.Empty} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -436,8 +424,6 @@ func (h *Handler) SelectVersionsScenario(c *gin.Context) {
 
 // Scenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID revert_scenario
 // @Router /v1/scenario/revert [POST]
 // @Summary Revert scenario
@@ -445,7 +431,6 @@ func (h *Handler) SelectVersionsScenario(c *gin.Context) {
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param body body pb.RevertScenarioRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=emptypb.Empty} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"

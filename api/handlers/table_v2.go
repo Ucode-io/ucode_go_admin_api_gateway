@@ -19,8 +19,6 @@ import (
 
 // V2CreateTable godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID v2_create_table
 // @Router /v2/table [POST]
 // @Summary v2 Create table
@@ -28,7 +26,6 @@ import (
 // @Tags V2Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table body models.CreateTableRequest true "CreateTableRequestBody"
 // @Success 201 {object} status_http.Response{data=postgres_object_builder_service.Table} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -160,8 +157,6 @@ func (h *Handler) V2CreateTable(c *gin.Context) {
 
 // V2GetTableByID godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID v2_get_table_by_id
 // @Router /v2/table/{table_id} [GET]
 // @Summary V2 Get table by id
@@ -169,7 +164,6 @@ func (h *Handler) V2CreateTable(c *gin.Context) {
 // @Tags V2Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table_id path string true "table_id"
 // @Success 200 {object} status_http.Response{data=models.CreateTableResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -257,8 +251,6 @@ func (h *Handler) V2GetTableByID(c *gin.Context) {
 
 // GetAllTables godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID v2_get_all_tables
 // @Router /v2/table [GET]
 // @Summary V2 Get all tables
@@ -266,7 +258,6 @@ func (h *Handler) V2GetTableByID(c *gin.Context) {
 // @Tags V2Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param filters query object_builder_service.GetAllTablesRequest true "filters"
 // @Success 200 {object} status_http.Response{data=postgres_object_builder_service.GetAllTablesResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -382,8 +373,6 @@ func (h *Handler) V2GetAllTables(c *gin.Context) {
 
 // V2UpdateTable godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID v2_update_table
 // @Router /v2/table [PUT]
 // @Summary Update table
@@ -391,7 +380,6 @@ func (h *Handler) V2GetAllTables(c *gin.Context) {
 // @Tags V2Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table body postgres_object_builder_service.Table  true "UpdateTableRequestBody"
 // @Success 200 {object} status_http.Response{data=postgres_object_builder_service.Table} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -503,8 +491,6 @@ func (h *Handler) V2UpdateTable(c *gin.Context) {
 
 // V2DeleteTable godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID v2_delete_table
 // @Router /v2/table/{table_id} [DELETE]
 // @Summary V2 Delete Table
@@ -512,7 +498,6 @@ func (h *Handler) V2UpdateTable(c *gin.Context) {
 // @Tags V2Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table_id path string true "table_id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"

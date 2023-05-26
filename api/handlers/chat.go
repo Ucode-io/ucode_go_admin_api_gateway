@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"errors"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/chat_service"
@@ -13,8 +13,6 @@ import (
 
 // CreateChat godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID CreateChat
 // @Router /v3/chat [POST]
 // @Summary Create Chat
@@ -38,10 +36,14 @@ func (h *Handler) CreatChat(c *gin.Context) {
 		return
 	}
 
-	EnvironmentId := c.GetHeader("Environment-Id")
-
-	if !util.IsValidUUID(EnvironmentId) {
-		h.handleResponse(c, status_http.BadRequest, "Environment-Id not found")
+	environmentID, ok := c.Get("environment_id")
+	if !ok {
+		err = errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
+		return
+	}
+	if !util.IsValidUUID(environmentID.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
 		return
 	}
 
@@ -51,7 +53,7 @@ func (h *Handler) CreatChat(c *gin.Context) {
 			SenderName:    body.Chat.Sender_name,
 			PhoneNumber:   body.Chat.PhoneNumber,
 			PlatformType:  body.Chat.PlatformType,
-			EnvironmentId: EnvironmentId,
+			EnvironmentId: environmentID.(string),
 			Check:         false,
 		},
 	})
@@ -66,8 +68,6 @@ func (h *Handler) CreatChat(c *gin.Context) {
 
 // GetChatlist godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID GetChatlist
 // @Router /v3/chat [GET]
 // @Summary GetChatlist
@@ -82,16 +82,20 @@ func (h *Handler) CreatChat(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetChatList(c *gin.Context) {
 
-	EnvironmentId := c.GetHeader("Environment-Id")
-
-	if !util.IsValidUUID(EnvironmentId) {
-		h.handleResponse(c, status_http.BadRequest, "Environment-Id not found")
+	environmentID, ok := c.Get("environment_id")
+	if !ok {
+		err := errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
+		return
+	}
+	if !util.IsValidUUID(environmentID.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
 		return
 	}
 
 	Search := c.Query("search")
 	resp, err := h.companyServices.ChatService().Chat().GetChatList(c.Request.Context(), &chat_service.GetChatListRequest{
-		EnvironmentId: EnvironmentId,
+		EnvironmentId: environmentID.(string),
 		Search:        Search,
 	})
 
@@ -105,8 +109,6 @@ func (h *Handler) GetChatList(c *gin.Context) {
 
 // GetChatByChatID godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID GetChatByChatID
 // @Router /v3/chat/{id} [GET]
 // @Summary GetChatByChatID
@@ -140,8 +142,6 @@ func (h *Handler) GetChatByChatID(c *gin.Context) {
 
 // CreateBot godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID CreateBot
 // @Router /v3/bot [POST]
 // @Summary Create bot
@@ -165,17 +165,19 @@ func (h *Handler) CreateBot(c *gin.Context) {
 		return
 	}
 
-	EnvironmentId := c.GetHeader("Environment-Id")
-	fmt.Println("environment_id: ", EnvironmentId)
-
-	if !util.IsValidUUID(EnvironmentId) {
-		h.handleResponse(c, status_http.BadRequest, "Environment-Id not found")
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err := errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
 		return
 	}
-
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
+		return
+	}
 	resp, err := h.companyServices.ChatService().Chat().CreateBot(c.Request.Context(), &chat_service.CreateBotRequest{
 		BotToken:      body.BotToken,
-		EnvironmentId: EnvironmentId,
+		EnvironmentId: environmentId.(string),
 	})
 
 	if err != nil {
@@ -188,8 +190,6 @@ func (h *Handler) CreateBot(c *gin.Context) {
 
 // GetBotTokenlist godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID GetBotTokenlist
 // @Router /v3/bot [GET]
 // @Summary GetBotTokenlist
@@ -202,10 +202,20 @@ func (h *Handler) CreateBot(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetBotTokenList(c *gin.Context) {
-	EnvironmentId := c.GetHeader("Environment-Id")
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		err := errors.New("error getting environment id")
+		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))
+		return
+	}
+	if !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, status_http.BadRequest, "environment_id not found")
+		return
+	}
 
 	resp, err := h.companyServices.ChatService().Chat().GetBotTokenList(c.Request.Context(), &chat_service.GetBotTokenListRequest{
-		EnvironmentId: EnvironmentId,
+		EnvironmentId: environmentId.(string),
 	})
 
 	if err != nil {
@@ -218,7 +228,6 @@ func (h *Handler) GetBotTokenList(c *gin.Context) {
 
 // UpdateBotToken godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
 // @ID UpdateBotToken
 // @Router /v3/bot [PUT]
 // @Summary UpdateBotToken
@@ -258,8 +267,6 @@ func (h *Handler) UpdateBotToken(c *gin.Context) {
 
 // DeleteBotToken godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string false "Environment-Id"
 // @ID DeleteBotToken
 // @Router /v3/bot/{id} [DELETE]
 // @Summary DeleteBotToken
@@ -292,8 +299,6 @@ func (h *Handler) DeleteBotToken(c *gin.Context) {
 
 // GetBotTokenByBotID godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID GetBotTokenByBotID
 // @Router /v3/bot/{id} [GET]
 // @Summary GetBotTokenByBotID

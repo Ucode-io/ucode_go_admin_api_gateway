@@ -24,15 +24,12 @@ import (
 // CreateNewFunction godoc
 // @Security ApiKeyAuth
 // @ID create_new_function
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/function [POST]
 // @Summary Create New Function
 // @Description Create New Function
 // @Tags Function
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param Function body models.CreateFunctionRequest true "CreateFunctionRequestBody"
 // @Success 201 {object} status_http.Response{data=fc.Function} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -182,7 +179,6 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 
 // GetNewFunctionByID godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_new_function_by_id
 // @Router /v2/function/{function_id} [GET]
 // @Summary Get Function by id
@@ -326,7 +322,6 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 
 // GetAllNewFunctions godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_new_functions
 // @Router /v2/function [GET]
 // @Summary Get all functions
@@ -334,7 +329,6 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 // @Tags Function
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param limit query number false "limit"
 // @Param offset query number false "offset"
 // @Param search query string false "search"
@@ -450,7 +444,6 @@ func (h *Handler) GetAllNewFunctions(c *gin.Context) {
 
 // UpdateNewFunction godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_new_function
 // @Router /v2/function [PUT]
 // @Summary Update new function
@@ -458,7 +451,6 @@ func (h *Handler) GetAllNewFunctions(c *gin.Context) {
 // @Tags Function
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param Function body models.Function  true "UpdateFunctionRequestBody"
 // @Success 200 {object} status_http.Response{data=models.Function} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -562,7 +554,6 @@ func (h *Handler) UpdateNewFunction(c *gin.Context) {
 
 // DeleteNewFunction godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_new_function
 // @Router /v2/function/{function_id} [DELETE]
 // @Summary Delete New Function
@@ -571,7 +562,6 @@ func (h *Handler) UpdateNewFunction(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param function_id path string true "function_id"
-// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -700,8 +690,6 @@ func (h *Handler) DeleteNewFunction(c *gin.Context) {
 
 // GetAllNewFunctionsForApp godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
-// @Param Resource-Id header string true "Resource-Id"
 // @ID get_all_new_functions_for_app
 // @Router /v2/function-for-app [GET]
 // @Summary Get all functions
@@ -709,7 +697,6 @@ func (h *Handler) DeleteNewFunction(c *gin.Context) {
 // @Tags Function
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param limit query number false "limit"
 // @Param offset query number false "offset"
 // @Param search query string false "search"
@@ -804,8 +791,6 @@ func (h *Handler) GetAllNewFunctionsForApp(c *gin.Context) {
 
 // InvokeFunctionByPath godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Param function-path path string true "function-path"
 // @ID invoke_function_by_path
 // @Router /v1/invoke_function/{function-path} [POST]
@@ -814,7 +799,6 @@ func (h *Handler) GetAllNewFunctionsForApp(c *gin.Context) {
 // @Tags Function
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param InvokeFunctionByPathRequest body models.CommonMessage true "InvokeFunctionByPathRequest"
 // @Success 201 {object} status_http.Response{data=models.InvokeFunctionRequest} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
