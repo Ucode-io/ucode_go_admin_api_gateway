@@ -12,8 +12,6 @@ import (
 
 // ScenarioDAG godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID run_scenario
 // @Router /v1/scenario/run [POST]
 // @Summary Run scenario
@@ -21,7 +19,6 @@ import (
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param body body models.RunScenarioRequest true "Request body"
 // @Success 200 {object} status_http.Response{data=pb.RunScenarioResponse} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"

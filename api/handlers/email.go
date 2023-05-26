@@ -18,15 +18,12 @@ import (
 
 // SendMessageToEmail godoc
 // @ID send_message_to_email
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Router /send-message [POST]
 // @Summary Send Message To Email
 // @Description Send Message to Email
 // @Tags Email
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param send_message body models.Email true "SendMessageToEmailRequestBody"
 // @Success 201 {object} status_http.Response{data=models.SendCodeResponse} "User data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -168,14 +165,11 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 // VerifyEmail godoc
 // @ID verify_email
 // @Router /verify-email/{sms_id}/{otp} [POST]
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Summary Verify
 // @Description Verify
 // @Tags Email
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param sms_id path string true "sms_id"
 // @Param otp path string true "otp"
 // @Param verifyBody body models.Verify true "verify_body"
@@ -290,14 +284,11 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 // RegisterEmailOtp godoc
 // @ID registerEmailOtp
 // @Router /register-email-otp/{table_slug} [POST]
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Summary RegisterEmailOtp
 // @Description RegisterOtp
 // @Tags Email
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param registerBody body models.RegisterOtp true "register_body"
 // @Param table_slug path string true "table_slug"
 // @Success 201 {object} status_http.Response{data=pbAuth.V2LoginResponse} "User data"

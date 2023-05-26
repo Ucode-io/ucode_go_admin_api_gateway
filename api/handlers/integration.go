@@ -11,15 +11,12 @@ import (
 // CreateIntegration godoc
 // @ID create_Integration
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string false "Environment-Id"
 // @Router /integration [POST]
 // @Summary Create Integration
 // @Description Create Integration
 // @Tags Integration
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param Integration body auth_service.CreateIntegrationRequest true "CreateIntegrationRequestBody"
 // @Success 201 {object} status_http.Response{data=auth_service.Integration} "Integration data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
