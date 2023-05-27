@@ -12,8 +12,6 @@ import (
 
 // GetCompanyProjectById godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_company_project_id
 // @Router /v1/company-project/{project_id} [GET]
 // @Summary Get Project By Id
@@ -47,8 +45,6 @@ func (h *Handler) GetCompanyProjectById(c *gin.Context) {
 
 // GetCompanyProjectList godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_project_list
 // @Router /v1/company-project [GET]
 // @Summary Get all projects
@@ -95,8 +91,6 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 
 // UpdateCompanyProject godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_project
 // @Router /v1/company-project/{project_id} [PUT]
 // @Summary Update Project
@@ -136,8 +130,6 @@ func (h *Handler) UpdateCompanyProject(c *gin.Context) {
 
 // DeleteCompanyProject godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_project
 // @Router /v1/company-project/{project_id} [DELETE]
 // @Summary Delete Project

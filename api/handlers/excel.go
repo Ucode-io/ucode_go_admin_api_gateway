@@ -16,8 +16,6 @@ import (
 
 // ExcelReader godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID excel_reader
 // @Router /v1/excel/{excel_id} [GET]
 // @Summary Get excel writer
@@ -26,7 +24,6 @@ import (
 // @Accept json
 // @Produce json
 // @Param excel_id path string true "excel_id"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=object_builder_service.ExcelReadResponse} "ExcelReadResponse"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -125,8 +122,6 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 
 // ExcelToDb godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID excel_to_db
 // @Router /v1/excel/excel_to_db/{excel_id} [POST]
 // @Summary Post excel writer
@@ -135,7 +130,6 @@ func (h *Handler) ExcelReader(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param excel_id path string true "excel_id"
-// @Param project-id query string true "project-id"
 // @Param table body models.ExcelToDbRequest true "ExcelToDbRequest"
 // @Success 200 {object} status_http.Response{data=models.ExcelToDbResponse} "ExcelToDbResponse"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"

@@ -13,8 +13,6 @@ import (
 
 // CreateQueryRequestFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_query_request_folder
 // @Router /v1/query-folder [POST]
 // @Summary Create query request folder
@@ -22,7 +20,6 @@ import (
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query_folder body tmp.CreateFolderReq true "CreateFolderReq"
 // @Success 201 {object} status_http.Response{data=tmp.Folder} "Query folder data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -141,8 +138,6 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 
 // GetSingleQueryRequestFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_query_request_folder
 // @Router /v1/query-folder/{query-folder-id} [GET]
 // @Summary Get single query request folder
@@ -150,7 +145,6 @@ func (h *Handler) CreateQueryRequestFolder(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query-folder-id path string true "query-folder-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetSingleFolderRes} "GetSingleFolderRes"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -257,8 +251,6 @@ func (h *Handler) GetSingleQueryRequestFolder(c *gin.Context) {
 
 // UpdateQueryRequestFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_query_request_folder
 // @Router /v1/query-folder [PUT]
 // @Summary Update query request folder
@@ -266,7 +258,6 @@ func (h *Handler) GetSingleQueryRequestFolder(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param folder body tmp.UpdateFolderReq true "UpdateFolderReq"
 // @Success 200 {object} status_http.Response{data=tmp.Folder} "Folder data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -383,8 +374,6 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 
 // DeleteQueryRequestFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_query_request_folder
 // @Router /v1/query-folder/{query-folder-id} [DELETE]
 // @Summary Delete query folder
@@ -392,7 +381,6 @@ func (h *Handler) UpdateQueryRequestFolder(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query-folder-id path string true "query-folder-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -499,8 +487,6 @@ func (h *Handler) DeleteQueryRequestFolder(c *gin.Context) {
 
 // GetListQueryRequestFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_query_request_folder
 // @Router /v1/query-folder [GET]
 // @Summary Get List query folder
@@ -508,7 +494,6 @@ func (h *Handler) DeleteQueryRequestFolder(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetListFolderRes} "FolderBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

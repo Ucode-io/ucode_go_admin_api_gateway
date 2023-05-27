@@ -15,8 +15,6 @@ import (
 
 // UpdateCoordinates godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID panel_coordinates
 // @Router /v1/analytics/panel/updateCoordinates [POST]
 // @Summary Update panel coordinates
@@ -112,8 +110,6 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 
 // GetSinglePanel godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_panel_by_id
 // @Router /v1/analytics/panel/{panel_id} [GET]
 // @Summary Get single panel
@@ -122,7 +118,6 @@ func (h *Handler) UpdateCoordinates(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param panel_id path string true "panel_id"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.Panel} "PanelBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -210,8 +205,6 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 
 // CreatePanel godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_panel
 // @Router /v1/analytics/panel [POST]
 // @Summary Create panel
@@ -219,7 +212,6 @@ func (h *Handler) GetSinglePanel(c *gin.Context) {
 // @Tags Panel
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table body models.CreatePanelRequest true "CreatePanelRequestBody"
 // @Success 201 {object} status_http.Response{data=models.Panel} "Panel data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -332,8 +324,6 @@ func (h *Handler) CreatePanel(c *gin.Context) {
 
 // GetAllPanels godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_panels
 // @Router /v1/analytics/panel [GET]
 // @Summary Get all panels
@@ -425,8 +415,6 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 
 // UpdatePanel godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_panel
 // @Router /v1/analytics/panel [PUT]
 // @Summary Update panel
@@ -434,7 +422,6 @@ func (h *Handler) GetAllPanels(c *gin.Context) {
 // @Tags Panel
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param relation body models.Panel  true "UpdatePanelRequestBody"
 // @Success 200 {object} status_http.Response{data=models.Panel} "Panel data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -539,8 +526,6 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 
 // DeletePanel godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_panel
 // @Router /v1/analytics/panel/{panel_id} [DELETE]
 // @Summary Delete Panel
@@ -549,7 +534,6 @@ func (h *Handler) UpdatePanel(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param panel_id path string true "panel_id"
-// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

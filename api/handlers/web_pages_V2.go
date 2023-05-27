@@ -22,7 +22,6 @@ import (
 
 // CreateWebPageFolder godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_web_page_folder
 // @Router /v1/webpage-folder [POST]
 // @Summary Create web page folder
@@ -30,7 +29,6 @@ import (
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param webpage_folder body models.CreateFolderReqModel true "CreateFolderReqModel"
 // @Success 201 {object} status_http.Response{data=tmp.Folder} "WebPage folder data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -139,7 +137,6 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 
 // GetSingleWebPageFolder godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_web_page_folder
 // @Router /v1/webpage-folder/{webpage-folder-id} [GET]
 // @Summary Get single webpage folder
@@ -147,7 +144,6 @@ func (h *Handler) CreateWebPageFolder(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param webpage-folder-id path string true "webpage-folder-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetSingleFolderRes} "GetSingleFolderRes"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -255,7 +251,6 @@ func (h *Handler) GetSingleWebPageFolder(c *gin.Context) {
 
 // UpdateWebPageFolder godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_web_page_folder
 // @Router /v1/webpage-folder [PUT]
 // @Summary Update webpage folder
@@ -368,7 +363,6 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 
 // DeleteWebPageFolder godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_web_page_folder
 // @Router /v1/webpage-folder/{webpage-folder-id} [DELETE]
 // @Summary Delete webpage folder
@@ -376,7 +370,6 @@ func (h *Handler) UpdateWebPageFolder(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param webpage-folder-id path string true "webpage-folder-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -484,7 +477,6 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 
 // GetListWebPageFolder godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_web_page_folder
 // @Router /v1/webpage-folder [GET]
 // @Summary Get List webpage folder
@@ -492,7 +484,6 @@ func (h *Handler) DeleteWebPageFolder(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetListFolderRes} "FolderBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -593,7 +584,6 @@ func (h *Handler) GetListWebPageFolder(c *gin.Context) {
 
 // CreateWebPageV2 godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_web_pageV2
 // @Router /v1/webpageV2 [POST]
 // @Summary Create webpage
@@ -732,7 +722,6 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 
 // GetSingleWebPageV2 godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_web_pageV2
 // @Router /v1/webpageV2/{webpage-id} [GET]
 // @Summary Get single webpage
@@ -740,7 +729,6 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param webpage-id path string true "webpage-id"
 // @Param commit-id query string false "commit-id"
 // @Param version-id query string false "version-id"
@@ -879,7 +867,6 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 
 // UpdateWebPageV2 godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_web_pageV2
 // @Router /v1/webpageV2 [PUT]
 // @Summary Update web page
@@ -887,7 +874,6 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param webpage body models.UpdateWebPageReqModel true "UpdateWebPageReqModel"
 // @Success 200 {object} status_http.Response{data=tmp.WebPage} "WebPage data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1023,7 +1009,6 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 
 // DeleteWebPageV2 godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_web_pageV2
 // @Router /v1/webpageV2/{webpage-id} [DELETE]
 // @Summary Delete webpage
@@ -1031,7 +1016,6 @@ func (h *Handler) UpdateWebPageV2(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param webpage-id path string true "webpage-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -1140,7 +1124,6 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 
 // GetListWebPageV2 godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_web_pageV2
 // @Router /v1/webpageV2 [GET]
 // @Summary Get List web page
@@ -1148,7 +1131,6 @@ func (h *Handler) DeleteWebPageV2(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param folder-id query string true "folder-id"
 // @Param app-id query string true "app-id"
 // @Param limit query string false "limit"
@@ -1268,7 +1250,6 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 
 // GetWebPageHistory godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_web_page_history
 // @Router /v1/webpageV2/{webpage-id}/history [GET]
 // @Summary Get Api webpage history
@@ -1277,7 +1258,6 @@ func (h *Handler) GetListWebPageV2(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param webpage-id path string true "webpage-id"
-// @Param project-id query string true "project-id"
 // @Param limit query string true "limit"
 // @Param offset query string true "offset"
 // @Success 200 {object} status_http.Response{data=tmp.GetWebPageHistoryRes} "GetWebPageHistoryRes"
@@ -1427,7 +1407,6 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 
 // RevertWebPage godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID revert_web_pageV2
 // @Router /v1/webpageV2/{webpage-id}/revert [POST]
 // @Summary Revert webpage
@@ -1436,7 +1415,6 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param webpage-id path string true "webpage-id"
-// @Param project-id query string true "project-id"
 // @Param RevertWebPageReq body models.RevertWebPageReqModel true "Request Body"
 // @Success 200 {object} status_http.Response{data=tmp.WebPage} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1534,7 +1512,6 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 
 // InsertManyVersionForWebPageService godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID insert_many_web_pageV2
 // @Router /v1/webpageV2/select-versions/{webpage-id} [POST]
 // @Summary Insert Many webpageV2
@@ -1543,7 +1520,6 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param webpage-id path string true "webpage-id"
-// @Param project-id query string true "project-id"
 // @Param ManyVersionsModel body models.ManyVersionsModel true "Request Body"
 // @Success 200 {object} status_http.Response{data=empty.Empty} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
