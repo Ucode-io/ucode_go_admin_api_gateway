@@ -309,6 +309,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	limit = 100
 
 	// We get resource_environment relation
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(

@@ -72,7 +72,7 @@ func (h *Handler) Upload(c *gin.Context) {
 		Secure: h.cfg.MinioProtocol,
 	})
 	fmt.Println("access key::", h.cfg.MinioAccessKeyID)
-	h.log.Info("info", logger.String("access_key: ",
+	h.log.Info("info", logger.String("MinioEndpoint: ", h.cfg.MinioEndpoint), logger.String("access_key: ",
 		h.cfg.MinioAccessKeyID), logger.String("access_secret: ", h.cfg.MinioSecretAccessKey))
 
 	if err != nil {
