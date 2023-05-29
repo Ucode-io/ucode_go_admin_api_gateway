@@ -1052,12 +1052,9 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
+	if _, ok := queryMap["limit"]; !ok {
+		queryMap["limit"] = 10
 	}
-	queryMap["limit"] = limit
 	queryMap["offset"] = offset
 	objectRequest.Data = queryMap
 	fmt.Println("objectRequest::", queryMap)
