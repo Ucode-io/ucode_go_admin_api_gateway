@@ -1,0 +1,276 @@
+syntax="proto3";
+
+package company_service;
+option go_package="genproto/company_service";
+
+import "company.proto";
+import "google/protobuf/struct.proto";
+
+service ProjectService {
+    rpc Create(CreateProjectRequest) returns (CreateProjectResponse) {}
+    rpc GetList(GetProjectListRequest) returns (GetProjectListResponse) {}
+    rpc GetById(GetProjectByIdRequest) returns (Project) {}
+    rpc Update(Project) returns (Project) {}
+    rpc Delete(DeleteProjectRequest) returns (EmptyProto) {}
+    rpc GetProjects(GetProjectsRequest) returns (GetProjectsResponse) {}
+    rpc GetProjectsByCompanyId(GetProjectsByCompanyIdReq) returns (GetProjectsByCompanyIdRes) {}
+    rpc UpdateProjectUserData (UpdateProjectUserDataReq) returns (UpdateProjectUserDataRes) {}
+    rpc GetListSetting(GetListSettingReq) returns (Setting) {};
+}
+
+message Setting {
+    google.protobuf.Struct data = 1;
+    int32 count = 2;
+}
+
+message GetListSettingReq {
+    SettingType type = 1;
+    string search = 2;
+    string project_id = 3;
+    int32 limit = 4;
+    int32 offset = 5;
+}
+
+message UpdateProjectUserDataReq {
+    string user_id = 1;
+    string project_id = 2;
+    string client_type_id = 3;
+    string client_platform_id = 4;
+    string role_id = 5;
+}
+
+message UpdateProjectUserDataRes {
+
+}
+
+
+message GetProjectsByCompanyIdReq {
+    string company_id = 1;
+}
+
+message GetProjectsByCompanyIdRes {
+    message Company {
+        message Project {
+            string id = 1;
+            string company_id = 2;
+            string name = 3;
+            string domain = 4;
+            string created_at = 5;
+            string updated_at = 6;
+            string logo = 7;
+        }
+        string id = 1;
+        string name = 2;
+        string logo = 3;
+        string description = 4;
+        string created_at = 5;
+        string updated_at = 6;
+        string owner_id = 7;
+        repeated Project projects = 8;
+    }
+
+    Company company = 1;
+}
+
+message GetProjectsRequest {
+    string k8s_namespace = 1;
+}
+
+message GetProjectsResponse {
+    string id = 1;
+    string title = 2;
+    string created_at = 3;
+    string updated_at = 4;
+    string company_id = 5;
+}
+
+message ProjectWithoutResource {
+    string id = 1;
+    string company_id = 2;
+    string k8s_namespace = 3;
+    string name = 4;
+}
+
+message ResourceWithoutPassword {
+    message Credentials {
+        string host = 1;
+        string port = 2;
+        string username = 3;
+        string database = 4;
+    }
+    message Environment {
+        string resource_environment_id = 1;
+        string name = 2;
+        string display_color = 3;
+        string description = 4;
+        bool is_configured = 5;
+        string id = 6;
+        bool default = 7;
+    }
+
+    ResourceType resource_type = 1;
+    Credentials credentials = 2;
+    string id = 3;
+    string project_id = 4;
+    string title = 5;
+    repeated Environment environments = 6;
+}
+
+message Project {
+    string project_id = 1;
+    string company_id = 2;
+    string k8s_namespace = 3;
+    string title = 4;
+    repeated ResourceWithoutPassword resources = 5;
+    string logo = 6;
+    Language language = 7;
+    Currency currency = 8;
+    Timezone timezone = 9;
+}
+
+message CreateProjectRequest {
+    string company_id = 1;
+    string k8s_namespace = 2;
+    string title = 3;
+    repeated Resource resources = 4;
+}
+
+message CreateProjectResponse {
+    string project_id = 1;
+}
+
+message GetProjectListRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+    string company_id = 3;
+    string search = 4;
+}
+
+message GetProjectListResponse {
+    int32 count = 1;
+    repeated Project projects = 2;
+}
+
+message GetProjectByIdRequest {
+    string project_id = 1;
+    string company_id = 2;
+}
+
+message DeleteProjectRequest {
+    string project_id = 1;
+    string company_id = 2;
+}
+
+message EmptyProto {
+    
+}
+
+message AddResourceRequest {
+    string project_id = 1;
+    string environment_id = 2;
+    ResourceType resource_type = 3;
+    string title = 4;
+    bool is_configured = 5;
+    Resource.Credentials credentials = 6;
+    ServiceType service_type = 7;
+    string company_id = 8;
+    string user_id = 9;
+    bool is_default = 10;
+}
+
+message ConfigureResourceRequest {
+    string project_id = 1;
+    string environment_id = 2;
+    ResourceType resource_type = 3;
+    string title = 4;
+    bool is_configured = 5;
+    Resource.Credentials credentials = 6;
+    ServiceType service_type = 7;
+    string company_id = 8;
+    string user_id = 9;
+    string resource_id = 10;
+    bool default = 11;
+}
+
+message AddResourceInUcodeRequest {
+    string project_id = 1;
+    string company_id = 2;
+    string user_id = 3;
+    string project_title = 4;
+}
+
+message AddResourceResponse {
+    string id = 1;
+}
+
+message ConfigureResourceResponse {
+    string id = 1;
+}
+
+message RemoveResourceRequest {
+    string id = 5;
+}
+
+message GetResourceRequest {
+    string id = 1;
+}
+
+message ReconnectResourceRequest {
+    string id = 1;
+    string project_id = 2;
+}
+
+message ReconnectResourceRes {
+    message ReconnectStatus {
+        ServiceType service_type = 1;
+        bool status = 2;
+    }
+    repeated ReconnectStatus reconnect_status = 1;
+}
+
+message GetResourceWithPathResponse {
+    message Credentials {
+        string host = 1;
+        string port = 2;
+        string username = 3;
+        string database = 4;
+    }
+    ServiceType service_type = 1;
+    ResourceType resource_type = 2;
+    Credentials credentials = 3;
+    string id = 4;
+    string project_id = 5;
+    string path = 6;
+    string title = 7;
+}
+
+message GetResourceManyRequest {
+    repeated GetProjectsResponse id = 1;
+}
+
+message GetResourceManyWithPathResponse {
+    message ResourceEnvironment {
+        message Credentials {
+            string host = 1;
+            string port = 2;
+            string username = 3;
+            string database = 4;
+            string password = 5;
+        }
+        ServiceType service_type = 1;
+        ResourceType resource_type = 2;
+        Credentials credentials = 3;
+        string id = 4;
+        string project_id = 5;
+        string path = 6;
+        string title = 7;
+        string resource_id = 8;
+        string environment_id = 9;
+        string version_id = 10;
+    }
+    repeated ResourceEnvironment res = 1;
+}
+
+message GetProjectRes {
+    repeated GetProjectsResponse response = 1;
+}

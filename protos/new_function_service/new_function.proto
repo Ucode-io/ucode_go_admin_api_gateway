@@ -1,0 +1,77 @@
+syntax="proto3";
+
+package new_function_service;
+option go_package="genproto/new_function_service";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+
+
+service FunctionServiceV2 {
+    rpc Create(CreateFunctionRequest) returns (Function) {}
+    rpc GetList(GetAllFunctionsRequest) returns (GetAllFunctionsResponse) {}
+    rpc GetSingle(FunctionPrimaryKey) returns (Function) {}
+    rpc Update(Function) returns (google.protobuf.Empty) {}
+    rpc Delete(FunctionPrimaryKey) returns (google.protobuf.Empty) {}
+    rpc GetListByRequestTime(GetListByRequestTimeRequest) returns (GetAllFunctionsResponse) {}
+    rpc UpdateManyByRequestTime(UpdateManyUrlAndPassword) returns (google.protobuf.Empty) {}
+}
+
+message CreateFunctionRequest {
+    string path = 1;
+    string name = 2;
+    string description = 3;
+    string project_id = 4;
+    string version_id = 5;
+    string commit_id = 6;
+    string commit_guid = 7;
+    string environment_id = 8;
+    string function_folder_id = 9;
+    string url = 10;
+    string password = 11;
+    string ssh_url = 12;
+}
+
+message Function {
+    string id = 1;
+    string path = 2;
+    string name = 3;
+    string description = 4;
+    string project_id = 5;
+    string function_folder_id = 7;
+    string environment_id = 8;
+    string url = 9;
+    string password = 10;
+    string ssh_url = 11;
+}
+
+message GetAllFunctionsRequest {
+    string search = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+    string project_id = 4;
+    string environment_id = 5;
+}
+
+message GetAllFunctionsResponse {
+    repeated Function functions = 1;
+    int32 count = 2;
+}
+
+message FunctionPrimaryKey {
+    string id = 1;
+    string project_id = 2;
+}
+
+message UpdateManyUrlAndPassword {
+    repeated string ids = 1;
+    string project_id = 2;
+}
+
+message GetListByRequestTimeRequest {
+    string search = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+    string project_id = 4;
+    string environment_id = 5;
+}
