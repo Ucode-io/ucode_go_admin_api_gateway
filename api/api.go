@@ -465,6 +465,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 	// v3 for ucode version 2
 	v3 := r.Group("/v3")
+	v3.Use(h.AdminAuthMiddleware())
 	{
 		// query folder
 		v3.POST("/query_folder", h.CreateQueryFolder)

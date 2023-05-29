@@ -253,6 +253,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	limit = 100
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Field().GetAll(

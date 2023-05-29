@@ -275,6 +275,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+	limit = 100
 
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
