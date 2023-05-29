@@ -3451,6 +3451,11 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "search",
                         "in": "query"
                     }
@@ -33067,6 +33072,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "permission": {
+                    "$ref": "#/definitions/object_builder_service.App_Permission"
+                },
                 "tables": {
                     "type": "array",
                     "items": {
@@ -33101,6 +33109,23 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "object_builder_service.App_Permission": {
+            "type": "object",
+            "properties": {
+                "create": {
+                    "type": "boolean"
+                },
+                "delete": {
+                    "type": "boolean"
+                },
+                "read": {
+                    "type": "boolean"
+                },
+                "update": {
+                    "type": "boolean"
                 }
             }
         },
@@ -34346,6 +34371,32 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.Permission": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "is_have_condition": {
+                    "type": "boolean"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "read": {
+                    "type": "string"
+                },
+                "update": {
+                    "type": "string"
+                },
+                "write": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.QuickFilter": {
             "type": "object",
             "properties": {
@@ -34669,6 +34720,9 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "record_permissions": {
+                    "$ref": "#/definitions/object_builder_service.Permission"
                 },
                 "show_in_menu": {
                     "type": "boolean"
