@@ -473,7 +473,7 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 			h.log.Error("Error while unmarshal redis", logger.Error(err))
 		} else {
 			resp["data"] = m
-			h.handleResponse(c, status_http.OK, m)
+			h.handleResponse(c, status_http.OK, resp)
 			return
 		}
 	} else {
