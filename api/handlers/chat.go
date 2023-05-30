@@ -166,6 +166,7 @@ func (h *Handler) CreateBot(c *gin.Context) {
 	}
 
 	environmentId, ok := c.Get("environment_id")
+
 	if !ok {
 		err := errors.New("error getting environment id")
 		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"+err.Error()))

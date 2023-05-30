@@ -69,6 +69,7 @@ message Field {
     string project_id = 16;
     string commit_id = 17;
     string version_id = 18;
+    bool is_system = 19;
 }
 
 message GetAllFieldsResponse {
