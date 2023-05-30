@@ -12,8 +12,6 @@ import (
 
 // GetAllOfflineAppointments godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_offline_appointments
 // @Router /v1/offline_appointment [GET]
 // @Summary Get all offline appointments
@@ -82,8 +80,6 @@ func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
 
 // GetAllBookedAppointments godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_booked_appointments
 // @Router /v1/booked_appointment [GET]
 // @Summary Get all booked appointments
@@ -136,8 +132,6 @@ func (h *Handler) GetAllBookedAppointments(c *gin.Context) {
 
 // GetSingleOfflineAppointment godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_offline_appointment_by_id
 // @Router /v1/offline_appointment/{offline_appointment_id} [GET]
 // @Summary Get single offline appointment
@@ -180,8 +174,6 @@ func (h *Handler) GetSingleOfflineAppointment(c *gin.Context) {
 
 // GetSingleBookedAppointment godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_booked_appointment_by_id
 // @Router /v1/booked_appointment/{booked_appointment_id} [GET]
 // @Summary Get single booked appointment
@@ -224,8 +216,6 @@ func (h *Handler) GetSingleBookedAppointment(c *gin.Context) {
 
 // UpdateAppointmentPaymentStatus godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_appointment_payment_status
 // @Router /v1/payment_status/{appointment_id} [PUT]
 // @Summary Update appointment payment status
@@ -283,8 +273,6 @@ func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 
 // GetCloseCashboxInfo godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID close_cashbox_info
 // @Router /v1/close-cashbox [GET]
 // @Summary Get close cashbox
@@ -334,8 +322,6 @@ func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 
 // GetOpenCashboxInfo godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID open_cashbox_info
 // @Router /v1/open-cashbox [GET]
 // @Summary Get open cashbox
@@ -387,8 +373,6 @@ func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
 
 // CashboxTransaction godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_cashbox_transaction
 // @Router /v1/cashbox_transaction [POST]
 // @Summary Create cashbox transaction

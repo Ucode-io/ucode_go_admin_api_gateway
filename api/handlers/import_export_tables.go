@@ -19,7 +19,6 @@ import (
 // @Tags ExportToJSON
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param export_to_json body object_builder_service.ExportToJSONRequest true "ExportToJSONRequestBody"
 // @Success 201 {object} status_http.Response{data=object_builder_service.ExportToJSONReponse} "Link"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -47,8 +46,8 @@ func (h *Handler) ExportToJSON(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -63,7 +62,7 @@ func (h *Handler) ExportToJSON(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -106,7 +105,6 @@ func (h *Handler) ExportToJSON(c *gin.Context) {
 // @Tags ExportToJSON
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param export_to_json body object_builder_service.ImportFromJSONRequest true "ImportFromJSONRequestBody"
 // @Success 201 {object} status_http.Response{data=string} "Response"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -134,8 +132,8 @@ func (h *Handler) ImportFromJSON(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -150,7 +148,7 @@ func (h *Handler) ImportFromJSON(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},

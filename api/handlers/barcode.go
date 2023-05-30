@@ -13,8 +13,6 @@ import (
 
 // GetNewGeneratedBarCode godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID generate_new_barcode_for_items
 // @Router /v1/barcode-generator/{table_slug} [GET]
 // @Summary get barcode
@@ -49,8 +47,8 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -65,7 +63,7 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -105,8 +103,6 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 
 // GetNewGeneratedCode godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID generate_new_code_with_prefix
 // @Router /v1/code-generator/{table_slug}/{field_id} [GET]
 // @Summary get code with prefix
@@ -143,8 +139,8 @@ func (h *Handler) GetNewGeneratedCode(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -159,7 +155,7 @@ func (h *Handler) GetNewGeneratedCode(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},

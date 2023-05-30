@@ -13,13 +13,14 @@ import (
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
+	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+
 	"github.com/minio/minio-go/v7"
 )
 
@@ -39,8 +40,6 @@ type Path struct {
 // Upload godoc
 // @ID upload_image
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Param from-chat query string false "from-chat"
 // @Router /v1/upload [POST]
 // @Summary Upload
@@ -73,7 +72,7 @@ func (h *Handler) Upload(c *gin.Context) {
 		Secure: h.cfg.MinioProtocol,
 	})
 	fmt.Println("access key::", h.cfg.MinioAccessKeyID)
-	h.log.Info("info", logger.String("access_key: ",
+	h.log.Info("info", logger.String("MinioEndpoint: ", h.cfg.MinioEndpoint), logger.String("access_key: ",
 		h.cfg.MinioAccessKeyID), logger.String("access_secret: ", h.cfg.MinioSecretAccessKey))
 
 	if err != nil {
@@ -126,8 +125,6 @@ func (h *Handler) Upload(c *gin.Context) {
 
 // UploadFile godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID upload_file
 // @Router /v1/upload-file/{table_slug}/{object_id} [POST]
 // @Summary Upload file
@@ -138,7 +135,6 @@ func (h *Handler) Upload(c *gin.Context) {
 // @Param file formData file true "file"
 // @Param table_slug path string true "table_slug"
 // @Param object_id path string true "object_id"
-// @Param project-id query string true "project-id"
 // @Param tags query string false "tags"
 // @Success 200 {object} status_http.Response{data=Path} "Path"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -245,8 +241,8 @@ func (h *Handler) UploadFile(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -261,7 +257,7 @@ func (h *Handler) UploadFile(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},

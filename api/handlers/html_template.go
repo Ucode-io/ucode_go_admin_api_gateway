@@ -13,8 +13,6 @@ import (
 
 // CreateHtmlTemplate godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_html_template
 // @Router /v1/html-template [POST]
 // @Summary Create htmlTemplate
@@ -55,8 +53,8 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -71,7 +69,7 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -110,8 +108,6 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 
 // GetSingleHtmlTemplate godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_html_template_by_id
 // @Router /v1/html-template/{html_template_id} [GET]
 // @Summary Get single html template
@@ -119,7 +115,6 @@ func (h *Handler) CreateHtmlTemplate(c *gin.Context) {
 // @Tags HtmlTemplate
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param html_template_id path string true "html_template_id"
 // @Success 200 {object} status_http.Response{data=obs.HtmlTemplate} "HtmlTemplateBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -151,8 +146,8 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -167,7 +162,7 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -207,8 +202,6 @@ func (h *Handler) GetSingleHtmlTemplate(c *gin.Context) {
 
 // UpdateHtmlTemplate godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_html_template
 // @Router /v1/html-template [PUT]
 // @Summary Update html template
@@ -249,8 +242,8 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -265,7 +258,7 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -304,8 +297,6 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 
 // DeleteHtmlTemplate godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_html_template_id
 // @Router /v1/html-template/{html_template_id} [DELETE]
 // @Summary Delete html template
@@ -314,7 +305,6 @@ func (h *Handler) UpdateHtmlTemplate(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param html_template_id path string true "html_template_id"
-// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -346,8 +336,8 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -362,7 +352,7 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -403,8 +393,6 @@ func (h *Handler) DeleteHtmlTemplate(c *gin.Context) {
 
 // GetHtmlTemplateList godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_html_template_list
 // @Router /v1/html-template [GET]
 // @Summary Get html template list
@@ -438,8 +426,8 @@ func (h *Handler) GetHtmlTemplateList(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -454,7 +442,7 @@ func (h *Handler) GetHtmlTemplateList(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},

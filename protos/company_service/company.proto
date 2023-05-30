@@ -3,6 +3,8 @@ syntax="proto3";
 package company_service;
 option go_package="genproto/company_service";
 
+import "google/protobuf/struct.proto";
+
 enum ServiceType {
     NOT_SPECIFIED = 0;
     BUILDER_SERVICE = 1;
@@ -51,6 +53,8 @@ message Environment {
     string name = 3;
     string display_color = 4;
     string description = 5;
+    google.protobuf.Struct data = 6;
+
 }
 
 message EnvironmentWithResources {
@@ -65,6 +69,7 @@ message EnvironmentWithResources {
     string display_color = 4;
     string description = 5;
     Resources resources = 6;
+    google.protobuf.Struct data = 7;
 }
 
 message NewResource {

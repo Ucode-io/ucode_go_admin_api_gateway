@@ -18,8 +18,6 @@ import (
 
 // CreateFunction godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_function
 // @Router /v1/function [POST]
 // @Summary Create Function
@@ -27,7 +25,6 @@ import (
 // @Tags Function
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param Function body models.CreateFunctionRequest true "CreateFunctionRequestBody"
 // @Success 201 {object} status_http.Response{data=models.Function} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -67,8 +64,8 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -83,7 +80,7 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -136,8 +133,6 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 
 // GetFunctionByID godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_function_by_id
 // @Router /v1/function/{function_id} [GET]
 // @Summary Get Function by id
@@ -146,7 +141,6 @@ func (h *Handler) CreateFunction(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param function_id path string true "function_id"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=models.Function} "FunctionBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -178,8 +172,8 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -194,7 +188,7 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -234,8 +228,6 @@ func (h *Handler) GetFunctionByID(c *gin.Context) {
 
 // GetAllFunctions godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_functions
 // @Router /v1/function [GET]
 // @Summary Get all functions
@@ -275,8 +267,8 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -291,7 +283,7 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -333,8 +325,6 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 
 // UpdateFunction godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_function
 // @Router /v1/function [PUT]
 // @Summary Update function
@@ -342,7 +332,6 @@ func (h *Handler) GetAllFunctions(c *gin.Context) {
 // @Tags Function
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param Function body models.Function  true "UpdateFunctionRequestBody"
 // @Success 200 {object} status_http.Response{data=models.Function} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -382,8 +371,8 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -398,7 +387,7 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -443,8 +432,6 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 
 // DeleteFunction godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_function
 // @Router /v1/function/{function_id} [DELETE]
 // @Summary Delete Function
@@ -453,7 +440,6 @@ func (h *Handler) UpdateFunction(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param function_id path string true "function_id"
-// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -485,8 +471,8 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -501,7 +487,7 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -542,8 +528,6 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 
 // InvokeFunction godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID invoke_function
 // @Router /v1/invoke_function [POST]
 // @Summary Invoke Function
@@ -551,7 +535,6 @@ func (h *Handler) DeleteFunction(c *gin.Context) {
 // @Tags Function
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param InvokeFunctionRequest body models.InvokeFunctionRequest true "InvokeFunctionRequest"
 // @Success 201 {object} status_http.Response{data=models.InvokeFunctionRequest} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -585,8 +568,8 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -601,7 +584,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},

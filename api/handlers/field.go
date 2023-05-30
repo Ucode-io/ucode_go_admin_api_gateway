@@ -16,8 +16,6 @@ import (
 
 // CreateField godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_field
 // @Router /v1/field [POST]
 // @Summary Create field
@@ -25,7 +23,6 @@ import (
 // @Tags Field
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table body models.CreateFieldRequest true "CreateFieldRequestBody"
 // @Success 201 {object} status_http.Response{data=models.Field} "Field data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -83,8 +80,8 @@ func (h *Handler) CreateField(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -99,7 +96,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -162,8 +159,6 @@ func (h *Handler) CreateField(c *gin.Context) {
 
 // GetAllFields godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_fields
 // @Router /v1/field [GET]
 // @Summary Get all fields
@@ -220,8 +215,8 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -236,7 +231,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -258,6 +253,7 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	limit = 100
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Field().GetAll(
@@ -304,8 +300,6 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 
 // UpdateField godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_field
 // @Router /v1/field [PUT]
 // @Summary Update field
@@ -313,7 +307,6 @@ func (h *Handler) GetAllFields(c *gin.Context) {
 // @Tags Field
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param relation body models.Field  true "UpdateFieldRequestBody"
 // @Success 200 {object} status_http.Response{data=models.Field} "Field data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -374,8 +367,8 @@ func (h *Handler) UpdateField(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -390,7 +383,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -441,8 +434,6 @@ func (h *Handler) UpdateField(c *gin.Context) {
 
 // DeleteField godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_field
 // @Router /v1/field/{field_id} [DELETE]
 // @Summary Delete Field
@@ -450,7 +441,6 @@ func (h *Handler) UpdateField(c *gin.Context) {
 // @Tags Field
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param field_id path string true "field_id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -486,8 +476,8 @@ func (h *Handler) DeleteField(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -502,7 +492,7 @@ func (h *Handler) DeleteField(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},

@@ -20,7 +20,6 @@ import (
 // @Accept json
 // @Produce json
 // @Param release body obs.ApiCreateReleaseRequest true "Request Body"
-// @Param Environment-Id header string true "Environment-Id"
 // @Success 201 {object} status_http.Response{data=string} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -90,7 +89,6 @@ func (h *Handler) CreateRelease(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param version_id path string true "version_id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Param project_id path string true "project_id"
 // @Success 200 {object} status_http.Response{data=obs.ReleaseWithCommit} "ReleaseBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -103,9 +101,9 @@ func (h *Handler) GetReleaseByID(c *gin.Context) {
 		return
 	}
 
-	projectID := c.Param("project_id")
-	if !util.IsValidUUID(projectID) {
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -125,7 +123,7 @@ func (h *Handler) GetReleaseByID(c *gin.Context) {
 		&obs.ReleasePrimaryKey{
 			Id:            versionID,
 			EnvironmentId: environmentId.(string),
-			ProjectId:     projectID,
+			ProjectId:     projectId.(string),
 		},
 	)
 	if err != nil {
@@ -145,7 +143,6 @@ func (h *Handler) GetReleaseByID(c *gin.Context) {
 // @Tags Release
 // @Accept json
 // @Produce json
-// @Param Environment-Id header string true "Environment-Id"
 // @Param project_id path string true "project_id"
 // @Param offset query int false "offset"
 // @Param limit query int false "limit"
@@ -165,9 +162,9 @@ func (h *Handler) GetAllReleases(c *gin.Context) {
 		return
 	}
 
-	projectID := c.Param("project_id")
-	if !util.IsValidUUID(projectID) {
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -188,7 +185,7 @@ func (h *Handler) GetAllReleases(c *gin.Context) {
 			Limit:         int32(limit),
 			Offset:        int32(offset),
 			Search:        c.Query("search"),
-			ProjectId:     projectID,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -211,7 +208,6 @@ func (h *Handler) GetAllReleases(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param version_id path string true "version_id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Param release body obs.ApiUpdateReleaseRequest  true "Request Body"
 // @Success 200 {object} status_http.Response{data=obs.ReleaseWithCommit} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -272,7 +268,6 @@ func (h *Handler) UpdateRelease(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param version_id path string true "version_id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Param release body obs.ApiDeleteReleaseRequest true "Request Body"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -330,7 +325,6 @@ func (h *Handler) DeleteRelease(c *gin.Context) {
 // @Tags Release
 // @Accept json
 // @Produce json
-// @Param Environment-Id header string true "Environment-Id"
 // @Param release body obs.ApiSetCurrentReleaseRequest  true "Request Body"
 // @Success 200 {object} status_http.Response{data=string} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"

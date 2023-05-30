@@ -13,8 +13,6 @@ import (
 
 // CreateUserTemplate godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_user_template
 // @Router /v1/template-note/users [POST]
 // @Summary Create user template
@@ -22,7 +20,6 @@ import (
 // @Tags Template
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param template body tmp.CreateUserPermissionReq true "CreateUserPermissionReq"
 // @Success 201 {object} status_http.Response{data=tmp.UserPermission} "UserPermission data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -52,8 +49,8 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -75,7 +72,7 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -102,7 +99,7 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -110,7 +107,7 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	user.ProjectId = projectId
+	user.ProjectId = projectId.(string)
 	user.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
@@ -135,8 +132,6 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 
 // GetSingleUserTemplate godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_user_template
 // @Router /v1/template-note/users/{user-permission-id} [GET]
 // @Summary Get single user template
@@ -144,7 +139,6 @@ func (h *Handler) CreateUserTemplate(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param user-permission-id path string true "user-permission-id"
 // @Success 200 {object} status_http.Response{data=tmp.UserPermission} "UserPermissionBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -167,8 +161,8 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -195,7 +189,7 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -222,7 +216,7 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -235,7 +229,7 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleUserPermissionReq{
 			Id:         userPermissionId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
@@ -250,8 +244,6 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 
 // UpdateUserTemplate godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_user_template
 // @Router /v1/template-note/users [PUT]
 // @Summary Update user template
@@ -259,7 +251,6 @@ func (h *Handler) GetSingleUserTemplate(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param user body tmp.UpdateUserPermissionReq true "UpdateUserPermissionReq"
 // @Success 200 {object} status_http.Response{data=tmp.UserPermission} "UserPermission data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -289,8 +280,8 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -312,7 +303,7 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -339,7 +330,7 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -347,7 +338,7 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	user.ProjectId = projectId
+	user.ProjectId = projectId.(string)
 	user.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
@@ -372,8 +363,6 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 
 // DeleteUserTemplate godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_user_template
 // @Router /v1/template-note/users/{user-permission-id} [DELETE]
 // @Summary Delete user template
@@ -381,7 +370,6 @@ func (h *Handler) UpdateUserTemplate(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param user-permission-id path string true "user-permission-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -404,8 +392,8 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -432,7 +420,7 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -459,7 +447,7 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -472,7 +460,7 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteUserPermissionReq{
 			Id:         userPermissionId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 		},
 	)
@@ -487,8 +475,6 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 
 // GetListUserTemplate godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_user_template
 // @Router /v1/template-note/users [GET]
 // @Summary Get List user template
@@ -496,7 +482,6 @@ func (h *Handler) DeleteUserTemplate(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param object-id query string true "object-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetListUserPermissionRes} "GetListUserPermissionResBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -513,17 +498,13 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	objectId := c.Query("object-id")
-	if !util.IsValidUUID(projectId) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
@@ -547,7 +528,7 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -574,7 +555,7 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -586,7 +567,7 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 	res, err := services.TemplateService().UserPermission().GetListUserPermission(
 		context.Background(),
 		&tmp.GetListUserPermissionReq{
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			ObjectId:   objectId,
 		},
@@ -602,8 +583,6 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 
 // CreateSharingToken godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_share_template
 // @Router /v1/template-note/share [POST]
 // @Summary Create share template
@@ -611,7 +590,6 @@ func (h *Handler) GetListUserTemplate(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param share body tmp.CreateTokenReq true "CreateTokenReq"
 // @Success 201 {object} status_http.Response{data=tmp.CreateTokenRes} "CreateTokenRes data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -641,8 +619,8 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -664,7 +642,7 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -691,7 +669,7 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -699,7 +677,7 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	share.ProjectId = projectId
+	share.ProjectId = projectId.(string)
 	share.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
@@ -724,8 +702,6 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 
 // UpdateSharingToken godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_share_template
 // @Router /v1/template-note/share [PUT]
 // @Summary Update share template
@@ -733,7 +709,6 @@ func (h *Handler) CreateSharingToken(c *gin.Context) {
 // @Tags Template
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param share body tmp.UpdateTokenReq true "UpdateTokenReq"
 // @Success 201 {object} status_http.Response{data=tmp.UpdateTokenRes} "UpdateTokenRes data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -763,8 +738,8 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -786,7 +761,7 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},
@@ -813,7 +788,7 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -821,7 +796,7 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	share.ProjectId = projectId
+	share.ProjectId = projectId.(string)
 	share.ResourceId = resource.ResourceEnvironmentId
 
 	//uuID, err := uuid.NewRandom()
@@ -853,7 +828,6 @@ func (h *Handler) UpdateSharingToken(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param share body tmp.GetObjectTokenReq true "GetObjectTokenReq"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetObjectTokenRes} "GetObjectTokenRes"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -875,9 +849,7 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//projectId := c.Query("project-id")
-	//if !util.IsValidUUID(projectId) {
+	//if !util.IsValidUUID(projectId.(string)) {
 	//	h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 	//	return
 	//}
@@ -918,7 +890,7 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -926,8 +898,8 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -941,7 +913,7 @@ func (h *Handler) GetObjectToken(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_TEMPLATE_SERVICE,
 		},

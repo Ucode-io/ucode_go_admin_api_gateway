@@ -21,8 +21,6 @@ import (
 
 // CreateQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_query_request
 // @Router /v1/query-request [POST]
 // @Summary Create query
@@ -30,7 +28,6 @@ import (
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query body tmp.CreateQueryReq true "CreateQueryReq"
 // @Success 201 {object} status_http.Response{data=tmp.Query} "Query data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -67,8 +64,8 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -83,7 +80,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -110,7 +107,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -119,7 +116,7 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 	//	}
 	//}
 
-	query.ProjectId = projectId
+	query.ProjectId = projectId.(string)
 	query.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -155,8 +152,6 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 
 // GetSingleQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_query_request
 // @Router /v1/query-request/{query-id} [GET]
 // @Summary Get single query
@@ -164,7 +159,6 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query-id path string true "query-id"
 // @Param commit-id query string false "commit-id"
 // @Success 200 {object} status_http.Response{data=tmp.Query} "Query"
@@ -190,8 +184,8 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -218,7 +212,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -245,7 +239,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -258,7 +252,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleQueryReq{
 			Id:         queryId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  versionId,
 			CommitId:   commitId,
@@ -300,8 +294,6 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 
 // UpdateQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_query_request
 // @Router /v1/query-request [PUT]
 // @Summary Update query
@@ -309,7 +301,6 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query body tmp.UpdateQueryReq true "UpdateQueryReq"
 // @Success 200 {object} status_http.Response{data=tmp.Query} "Query data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -339,8 +330,8 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -362,7 +353,7 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -389,7 +380,7 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -398,7 +389,7 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 	//	}
 	//}
 
-	query.ProjectId = projectId
+	query.ProjectId = projectId.(string)
 	query.ResourceId = resource.ResourceEnvironmentId
 
 	uuID, err := uuid.NewRandom()
@@ -446,8 +437,6 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 
 // DeleteQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_query_request
 // @Router /v1/query-request/{query-id} [DELETE]
 // @Summary Delete query
@@ -455,7 +444,6 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query-id path string true "query-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -477,8 +465,8 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -505,7 +493,7 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -532,7 +520,7 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -545,7 +533,7 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteQueryReq{
 			Id:         queryId,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  uuid.NewString(),
 		},
@@ -561,8 +549,6 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 
 // GetListQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_query_request
 // @Router /v1/query-request [GET]
 // @Summary Get List query
@@ -570,7 +556,6 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param folder-id query string true "folder-id"
 // @Param limit query string false "limit"
 // @Param offset query string false "offset"
@@ -601,8 +586,8 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -629,7 +614,7 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -656,7 +641,7 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -668,7 +653,7 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 	res, err := services.QueryService().Query().GetListQuery(
 		context.Background(),
 		&tmp.GetListQueryReq{
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			VersionId:  "",
 			FolderId:   c.DefaultQuery("folder-id", ""),
@@ -687,8 +672,6 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 
 // QueryRun godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID run_query_request
 // @Router /v1/query-request/run [POST]
 // @Summary Run query
@@ -696,7 +679,6 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query body tmp.Query true "Query"
 // @Success 201 {object} status_http.Response{data=tmp.RunQueryRes} "RunQueryRes data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -726,8 +708,8 @@ func (h *Handler) QueryRun(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -749,7 +731,7 @@ func (h *Handler) QueryRun(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -776,7 +758,7 @@ func (h *Handler) QueryRun(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -786,7 +768,7 @@ func (h *Handler) QueryRun(c *gin.Context) {
 	//}
 
 	query.ResourceId = resource.ResourceEnvironmentId
-	query.ProjectId = projectId
+	query.ProjectId = projectId.(string)
 
 	uuID, err := uuid.NewRandom()
 	if err != nil {
@@ -814,8 +796,6 @@ func (h *Handler) QueryRun(c *gin.Context) {
 
 // GetQueryHistory godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_query_history
 // @Router /v1/query-request/{query-id}/history [GET]
 // @Summary Get Api query history
@@ -824,7 +804,6 @@ func (h *Handler) QueryRun(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param query-id path string true "query-id"
-// @Param project-id query string true "project-id"
 // @Param limit query string true "limit"
 // @Param offset query string true "offset"
 // @Success 200 {object} status_http.Response{data=tmp.GetQueryHistoryRes} "QueryHistory"
@@ -836,7 +815,11 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 	)
 
 	id := c.Param("query-id")
-	projectId := c.Query("project-id")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
 
 	if !util.IsValidUUID(id) {
 		err := errors.New("query is an invalid uuid")
@@ -845,7 +828,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(projectId) {
+	if !util.IsValidUUID(projectId.(string)) {
 		err := errors.New("project_id is an invalid uuid")
 		h.log.Error("project_id is an invalid uuid", logger.Error(err))
 		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
@@ -891,7 +874,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -918,7 +901,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -931,7 +914,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 		context.Background(),
 		&tmp.GetQueryHistoryReq{
 			Id:         id,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 			ResourceId: resource.ResourceEnvironmentId,
 			Offset:     int64(offset),
 			Limit:      int64(limit),
@@ -955,7 +938,7 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 		c.Request.Context(),
 		&vcs.GetMultipleVersionInfoRequest{
 			VersionIds: versionIds,
-			ProjectId:  projectId,
+			ProjectId:  projectId.(string),
 		},
 	)
 
@@ -1011,8 +994,6 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 
 // RevertQuery godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID revert_query
 // @Router /v1/query-request/{query-id}/revert [POST]
 // @Summary Revert query
@@ -1021,7 +1002,6 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param query-id path string true "query-id"
-// @Param project-id query string true "project-id"
 // @Param RevertQueryReq body models.QueryRevertRequest true "Request Body"
 // @Success 200 {object} status_http.Response{data=tmp.Query} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1048,11 +1028,9 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 		return
 	}
 
-	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("project_id is an invalid uuid")
-		h.log.Error("project_id is an invalid uuid", logger.Error(err))
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -1081,7 +1059,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -1130,7 +1108,7 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 			VersionId:   versionGuid,
 			OldCommitId: body.CommitId,
 			NewCommitId: commitGuid,
-			ProjectId:   projectId,
+			ProjectId:   projectId.(string),
 			ResourceId:  resource.ResourceEnvironmentId,
 		},
 	)
@@ -1145,8 +1123,6 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 
 // InsertManyVersionForQueryService godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID insert_many_query_reference
 // @Router /v1/query-request/select-versions/{query-id} [POST]
 // @Summary Insert Many query
@@ -1155,7 +1131,6 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param query-id path string true "query-id"
-// @Param project-id query string true "project-id"
 // @Param data body tmp.QueryManyVersions true "Request Body"
 // @Success 200 {object} status_http.Response{data=string} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1179,11 +1154,9 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 		return
 	}
 
-	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("project_id is an invalid uuid")
-		h.log.Error("project_id is an invalid uuid", logger.Error(err))
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -1212,7 +1185,7 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -1248,7 +1221,7 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 	//	}
 	//}
 
-	body.ProjectId = projectId
+	body.ProjectId = projectId.(string)
 	body.ResourceId = resource.ResourceEnvironmentId
 	body.EnvironmentId = environmentId.(string)
 	body.Id = queryId
@@ -1270,8 +1243,6 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 
 // GetSingleQueryLog godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_query_log
 // @Router /v1/query-request/{query-id}/log/{log-id} [GET]
 // @Summary get single log
@@ -1281,7 +1252,6 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 // @Produce json
 // @Param query-id path string true "query-id"
 // @Param log-id path string true "log-id"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=tmp.Log} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -1305,11 +1275,9 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 		return
 	}
 
-	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("project_id is an invalid uuid")
-		h.log.Error("project_id is an invalid uuid", logger.Error(err))
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -1338,7 +1306,7 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -1365,7 +1333,7 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -1378,7 +1346,7 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleLogReq{
 			Id:            logId,
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
@@ -1394,8 +1362,6 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 
 // GetListQueryLog godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_query_log
 // @Router /v1/query-request/{query-id}/log [GET]
 // @Summary get list log
@@ -1404,7 +1370,6 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param query-id path string true "query-id"
-// @Param project-id query string true "project-id"
 // @Param limit query string true "limit"
 // @Param offset query string true "offset"
 // @Success 200 {object} status_http.Response{data=tmp.GetListLogRes} "Response Body"
@@ -1422,11 +1387,9 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 		return
 	}
 
-	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("project_id is an invalid uuid")
-		h.log.Error("project_id is an invalid uuid", logger.Error(err))
-		h.handleResponse(c, status_http.InvalidArgument, "project_id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -1469,7 +1432,7 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_QUERY_SERVICE,
 		},
@@ -1496,7 +1459,7 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {
@@ -1509,7 +1472,7 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 		context.Background(),
 		&tmp.GetListLogReq{
 			QueryId:       queryId,
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 			Limit:         int64(limit),

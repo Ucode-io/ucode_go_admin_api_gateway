@@ -13,8 +13,6 @@ import (
 
 // CreateDocument godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_document
 // @Router /v1/document [POST]
 // @Summary Create Document
@@ -55,8 +53,8 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -71,7 +69,7 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -110,8 +108,6 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 
 // GetSingleDocument godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_document_by_id
 // @Router /v1/document/{document_id} [GET]
 // @Summary Get single document
@@ -119,7 +115,6 @@ func (h *Handler) CreateDocument(c *gin.Context) {
 // @Tags Document
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param document_id path string true "document_id"
 // @Success 200 {object} status_http.Response{data=obs.Document} "DocumentBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -152,8 +147,8 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -168,7 +163,7 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -213,8 +208,6 @@ func (h *Handler) GetSingleDocument(c *gin.Context) {
 
 // UpdateDocument godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_document
 // @Router /v1/document [PUT]
 // @Summary Update Document
@@ -255,8 +248,8 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -271,7 +264,7 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -310,8 +303,6 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 
 // DeleteDocument godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_document
 // @Router /v1/document/{document_id} [DELETE]
 // @Summary Delete Document
@@ -319,7 +310,6 @@ func (h *Handler) UpdateDocument(c *gin.Context) {
 // @Tags Document
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param document_id path string true "document_id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -351,8 +341,8 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -367,7 +357,7 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -408,8 +398,6 @@ func (h *Handler) DeleteDocument(c *gin.Context) {
 
 // GetDocumentList godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_document_list
 // @Router /v1/document [GET]
 // @Summary Get Document list
@@ -448,8 +436,8 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -464,7 +452,7 @@ func (h *Handler) GetDocumentList(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},

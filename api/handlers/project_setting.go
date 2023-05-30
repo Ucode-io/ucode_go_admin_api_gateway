@@ -3,18 +3,16 @@ package handlers
 import (
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"strconv"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	obs "ucode/ucode_go_api_gateway/genproto/company_service"
-	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
 )
 
 // GetAllSettings godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string false "Environment-Id"
 // @ID get_list_setting
 // @Router /v1/project/setting [GET]
 // @Summary Get List settings
@@ -71,10 +69,6 @@ func (h *Handler) GetAllSettings(c *gin.Context) {
 	}
 
 	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
 
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
@@ -112,7 +106,7 @@ func (h *Handler) GetAllSettings(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId,
+	//			ProjectId:     projectId.(string),
 	//		},
 	//	)
 	//	if err != nil {

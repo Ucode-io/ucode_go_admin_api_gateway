@@ -15,8 +15,6 @@ import (
 
 // CreateQueryFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_query_folder
 // @Router /v3/query_folder [POST]
 // @Summary Create Query Folder
@@ -57,8 +55,8 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -73,7 +71,7 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -115,8 +113,6 @@ func (h *Handler) CreateQueryFolder(c *gin.Context) {
 
 // GetQueryFolderByID godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_query_folder
 // @Router /v3/query_folder/{guid} [GET]
 // @Summary Get Query Folder By Id
@@ -161,8 +157,6 @@ func (h *Handler) GetQueryFolderByID(c *gin.Context) {
 
 // GetQueryFolderList godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_query_folder_list
 // @Router /v3/query_folder [GET]
 // @Summary Get Query Folder List
@@ -207,8 +201,8 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -223,7 +217,7 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -267,8 +261,6 @@ func (h *Handler) GetQueryFolderList(c *gin.Context) {
 
 // UpdateQueryFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_query_folder
 // @Router /v3/query_folder/{guid} [PUT]
 // @Summary Update Query Folder
@@ -311,8 +303,8 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -327,7 +319,7 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -370,8 +362,6 @@ func (h *Handler) UpdateQueryFolder(c *gin.Context) {
 
 // DeleteQueryFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_query_folder
 // @Router /v3/query_folder/{guid} [DELETE]
 // @Summary Delete Query Folder

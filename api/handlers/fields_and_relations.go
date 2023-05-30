@@ -12,8 +12,6 @@ import (
 
 // CreateFieldsAndRelations godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_fields_and_relations
 // @Router /v1/fields-relations [POST]
 // @Summary Create field
@@ -21,7 +19,6 @@ import (
 // @Tags Field
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table body obs.CreateFieldsAndRelationsRequest true "Request Body"
 // @Success 201 {object} status_http.Response{data=obs.CreateFieldsAndRelationsResponse} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -50,8 +47,8 @@ func (h *Handler) CreateFieldsAndRelations(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -66,7 +63,7 @@ func (h *Handler) CreateFieldsAndRelations(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},

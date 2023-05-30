@@ -24,6 +24,7 @@ service SessionService {
     rpc MultiCompanyLogin(MultiCompanyLoginRequest) returns (MultiCompanyLoginResponse) {}
     rpc V2MultiCompanyLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyLoginRes) {}
     rpc V2MultiCompanyOneLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyOneLoginRes) {}
+    rpc V2LoginWithOption(V2LoginWithOptionRequest) returns (V2LoginWithOptionsResponse) {}
 }
 
 message ResourceEnvironmentV2MultiCompany {
@@ -87,6 +88,7 @@ message V2HasAccessUserRes {
     string client_type_id = 11;
     string role_id = 12;
     string login_table_slug = 13;
+    string env_id = 14;
 }
 
 message LoginRequest {
@@ -112,7 +114,11 @@ message LogoutRequest {
 }
 
 message RefreshTokenRequest {
-    string refresh_token = 2;
+    string refresh_token = 1;
+    string role_id = 2;
+    string client_type_id = 3;
+    string env_id = 4;
+    string project_id = 5;
 }
 
 message RefreshTokenResponse {
@@ -150,6 +156,7 @@ message HasAccessResponse {
     string updated_at = 11;
     repeated TableBody tables = 12;
     string login_table_slug = 13;
+    string env_id = 14;
 }
 
 message HasAccessSuperAdminReq {
@@ -169,6 +176,7 @@ message HasAccessSuperAdminRes {
     string created_at = 10;
     string updated_at = 11;
     repeated TableBody tables = 12;
+    string env_id = 13;
 }
 
 message TableBody {
@@ -186,6 +194,7 @@ message CreateSessionRequest {
     string data = 8;
     string expires_at = 9;
     string integration_id = 10;
+    string env_id = 11;
 }
 
 message UpdateSessionRequest {
@@ -199,6 +208,7 @@ message UpdateSessionRequest {
     string data = 8;
     string expires_at = 9;
     bool is_changed = 10;
+    string env_id = 11;
 }
 
 message SessionPrimaryKey {
@@ -249,6 +259,24 @@ message V2LoginResponse {
     repeated Object tables = 14;
     google.protobuf.Struct addational_table = 15;
 }
+message V2LoginWithOptionsResponse {
+    bool user_found = 1;
+    ClientPlatform client_platform = 2;
+    ClientType client_type = 3;
+    string user_id = 4;
+    Role role = 5;
+    Token token = 6;
+    repeated RecordPermission permissions = 7;
+    repeated Session sessions = 8;
+    string login_table_slug = 9;
+    repeated RecordPermission app_permissions = 10;
+    string resource_id = 11;
+    string environment_id = 12;
+    User user = 13;
+    repeated Object tables = 14;
+    google.protobuf.Struct addational_table = 15;
+    repeated Company companies = 16;
+}
 message V2LoginRequest {
     string username = 1;
     string password = 2;
@@ -258,6 +286,11 @@ message V2LoginRequest {
     string project_id = 6;
     string resource_environment_id = 7;
     int32 resource_type = 8;
+}
+
+message V2LoginWithOptionRequest {
+    map<string, string> data = 1;
+    string login_strategy = 2;
 }
 
 message V2LoginSuperAdminRes {
@@ -331,6 +364,7 @@ message V2MultiCompanyLoginRes {
         string updated_at = 6;
         string owner_id = 7;
         repeated Project projects = 8;
+        string user_id = 9;
     }
     repeated Company companies = 1;
 }

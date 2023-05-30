@@ -19,8 +19,6 @@ import (
 
 // CreateTable godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_table
 // @Router /v1/table [POST]
 // @Summary Create table
@@ -28,7 +26,6 @@ import (
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table body models.CreateTableRequest true "CreateTableRequestBody"
 // @Success 201 {object} status_http.Response{data=obs.Table} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -63,8 +60,8 @@ func (h *Handler) CreateTable(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -80,7 +77,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -145,6 +142,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		Fields:            fields,
 		SubtitleFieldSlug: tableRequest.SubtitleFieldSlug,
 		Sections:          tableRequest.Sections,
+		Layouts:           tableRequest.Layouts,
 		AppId:             tableRequest.AppID,
 		IncrementId: &obs.IncrementID{
 			WithIncrementId: tableRequest.IncrementID.WithIncrementID,
@@ -186,8 +184,6 @@ func (h *Handler) CreateTable(c *gin.Context) {
 
 // GetTableByID godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_table_by_id
 // @Router /v1/table/{table_id} [GET]
 // @Summary Get table by id
@@ -195,7 +191,6 @@ func (h *Handler) CreateTable(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table_id path string true "table_id"
 // @Success 200 {object} status_http.Response{data=models.CreateTableResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -223,8 +218,8 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -240,7 +235,7 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -303,8 +298,6 @@ func (h *Handler) GetTableByID(c *gin.Context) {
 
 // GetAllTables godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_tables
 // @Router /v1/table [GET]
 // @Summary Get all tables
@@ -344,8 +337,8 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -361,7 +354,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -429,8 +422,6 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 
 // UpdateTable godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_table
 // @Router /v1/table [PUT]
 // @Summary Update table
@@ -439,7 +430,6 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table body obs.Table  true "UpdateTableRequestBody"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=obs.Table} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -477,8 +467,8 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -494,7 +484,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -553,8 +543,6 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 
 // DeleteTable godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_table
 // @Router /v1/table/{table_id} [DELETE]
 // @Summary Delete Table
@@ -562,7 +550,6 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table_id path string true "table_id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -595,8 +582,8 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 
 	resourceId, resourceIdOk := c.Get("resource_id")
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -612,7 +599,7 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 		resource, err := services.CompanyService().ServiceResource().GetSingle(
 			c.Request.Context(),
 			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectId,
+				ProjectId:     projectId.(string),
 				EnvironmentId: environmentId.(string),
 				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 			},
@@ -677,8 +664,6 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 
 // GetTableHistories godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_table_histories
 // @Router /v1/table-history/list/{table_id} [GET]
 // @Summary Get table histories
@@ -686,7 +671,6 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table_id path string true "table_id"
 // @Success 200 {object} status_http.Response{data=object_builder_service.GetTableHistoryResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -703,11 +687,12 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
+
 	fmt.Println(c.Get("environment_id"))
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
@@ -719,7 +704,7 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -747,8 +732,6 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 
 // GetTableHistoryById godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_table_history_by_id
 // @Router /v1/table-history/{id} [GET]
 // @Summary Get table history by id
@@ -756,7 +739,6 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param id path string true "id"
 // @Success 200 {object} status_http.Response{data=object_builder_service.Table} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -773,8 +755,8 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -789,7 +771,7 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -817,8 +799,6 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 
 // RevertTableHistory godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID revert_table_history
 // @Router /v1/table-history/revert [PUT]
 // @Summary Get table history by id
@@ -826,7 +806,6 @@ func (h *Handler) GetTableHistoryById(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table body models.RevertHistoryRequest  true "UpdateTableRequestBody"
 // @Success 200 {object} status_http.Response{data=object_builder_service.TableHistory} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -855,8 +834,8 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -871,7 +850,7 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -902,8 +881,6 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 
 // InsetrVersionsIdsToTableHistory godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID insert into table history
 // @Router /v1/table-history [PUT]
 // @Summary Get table history by id
@@ -911,7 +888,6 @@ func (h *Handler) RevertTableHistory(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table body models.InsertVersionsToCommitRequest  true "UpdateTableRequestBody"
 // @Success 200 {object} status_http.Response{data=object_builder_service.TableHistory} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -934,8 +910,8 @@ func (h *Handler) InsetrVersionsIdsToTableHistory(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -950,7 +926,7 @@ func (h *Handler) InsetrVersionsIdsToTableHistory(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},

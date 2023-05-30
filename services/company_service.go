@@ -15,6 +15,7 @@ type CompanyServiceI interface {
 	Environment() company_service.EnvironmentServiceClient
 	Resource() company_service.ResourceServiceClient
 	ServiceResource() company_service.MicroserviceResourceClient
+	Redirect() company_service.RedirectUrlServiceClient
 }
 
 type companyServiceClient struct {
@@ -23,6 +24,7 @@ type companyServiceClient struct {
 	environmentService company_service.EnvironmentServiceClient
 	resourceService    company_service.ResourceServiceClient
 	serviceResource    company_service.MicroserviceResourceClient
+	redirectService    company_service.RedirectUrlServiceClient
 }
 
 func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanyServiceI, error) {
@@ -42,6 +44,7 @@ func NewCompanyServiceClient(ctx context.Context, cfg config.Config) (CompanySer
 		environmentService: company_service.NewEnvironmentServiceClient(connCompanyService),
 		resourceService:    company_service.NewResourceServiceClient(connCompanyService),
 		serviceResource:    company_service.NewMicroserviceResourceClient(connCompanyService),
+		redirectService:    company_service.NewRedirectUrlServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -63,4 +66,8 @@ func (g *companyServiceClient) Resource() company_service.ResourceServiceClient 
 
 func (g *companyServiceClient) ServiceResource() company_service.MicroserviceResourceClient {
 	return g.serviceResource
+}
+
+func (g *companyServiceClient) Redirect() company_service.RedirectUrlServiceClient {
+	return g.redirectService
 }

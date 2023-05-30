@@ -14,8 +14,6 @@ import (
 
 // CreateDashboard godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_dashboard
 // @Router /v1/analytics/dashboard [POST]
 // @Summary Create dashboard
@@ -23,7 +21,6 @@ import (
 // @Tags Dashboard
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param dashboard body models.CreateDashboardRequest true "CreateDashboardRequestBody"
 // @Success 201 {object} status_http.Response{data=models.Dashboard} "Dashboard data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -57,8 +54,8 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -73,7 +70,7 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -127,8 +124,6 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 
 // GetSingleDashboard godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_dashboard_by_id
 // @Router /v1/analytics/dashboard/{dashboard_id} [GET]
 // @Summary Get single dashboard
@@ -136,7 +131,6 @@ func (h *Handler) CreateDashboard(c *gin.Context) {
 // @Tags Dashboard
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param dashboard_id path string true "dashboard_id"
 // @Success 200 {object} status_http.Response{data=models.Dashboard} "DashboardBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -169,8 +163,8 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -185,7 +179,7 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -225,8 +219,6 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 
 // UpdateDashboard godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_dashboard
 // @Router /v1/analytics/dashboard [PUT]
 // @Summary Update dashboard
@@ -234,7 +226,6 @@ func (h *Handler) GetSingleDashboard(c *gin.Context) {
 // @Tags Dashboard
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param dashboard body models.Dashboard true "UpdateDashboardRequestBody"
 // @Success 200 {object} status_http.Response{data=models.Dashboard} "Dashboard data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -268,8 +259,8 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -284,7 +275,7 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -323,8 +314,6 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 
 // DeleteDashboard godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_dashboard
 // @Router /v1/analytics/dashboard/{dashboard_id} [DELETE]
 // @Summary Delete dashboard
@@ -332,7 +321,6 @@ func (h *Handler) UpdateDashboard(c *gin.Context) {
 // @Tags Dashboard
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param dashboard_id path string true "dashboard_id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -365,8 +353,8 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -381,7 +369,7 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
@@ -422,8 +410,6 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 
 // GetAllDashboards godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_dashboard_list
 // @Router /v1/analytics/dashboard [GET]
 // @Summary Get dashboard list
@@ -431,7 +417,6 @@ func (h *Handler) DeleteDashboard(c *gin.Context) {
 // @Tags Dashboard
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param filters query models.GetAllDashboardsRequest true "filters"
 // @Success 200 {object} status_http.Response{data=models.GetAllDashboardsResponse} "DashboardBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -457,8 +442,8 @@ func (h *Handler) GetAllDashboards(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -473,7 +458,7 @@ func (h *Handler) GetAllDashboards(c *gin.Context) {
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},

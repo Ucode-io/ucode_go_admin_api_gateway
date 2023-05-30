@@ -13,7 +13,6 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // const (
@@ -33,10 +32,10 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
-			res          = &auth_service.V2HasAccessUserRes{}
-			ok           bool
-			origin       = c.GetHeader("Origin")
-			platformType = c.GetHeader("Platform-Type")
+			res    = &auth_service.V2HasAccessUserRes{}
+			ok     bool
+			origin = c.GetHeader("Origin")
+			//platformType = c.GetHeader("Platform-Type")
 		)
 
 		bearerToken := c.GetHeader("Authorization")
@@ -49,38 +48,31 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		}
 		switch strArr[0] {
 		case "Bearer":
-			if platformType != cfg.PlatformType {
-				fmt.Println(origin)
-				res, ok = h.hasAccess(c)
-				if !ok {
-					h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
-					c.Abort()
-					return
-				}
+			//if platformType != cfg.PlatformType {
+			fmt.Println(origin)
+			res, ok = h.hasAccess(c)
+			if !ok {
+				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
+				c.Abort()
+				return
 			}
+			//}
 
+			fmt.Println("/nresponse V2hasaccessuser", res)
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
+			projectId := c.Query("Project-Id")
 
-			if _, err := uuid.Parse(resourceId); err != nil {
-				resource, err := h.companyServices.CompanyService().Resource().GetResourceByEnvID(
-					c.Request.Context(),
-					&company_service.GetResourceByEnvIDRequest{
-						EnvId: environmentId,
-					},
-				)
-				if err != nil {
-					h.log.Error("--ERR-->GetResourceByEnvID->", logger.Error(err))
-					h.handleResponse(c, status_http.BadRequest, err.Error())
-					c.Abort()
-					return
-				}
-				fmt.Println(resource)
-
-				resourceId = resource.GetResource().Id
+			if res.ProjectId != "" {
+				projectId = res.ProjectId
 			}
+			if res.EnvId != "" {
+				environmentId = res.EnvId
+			}
+
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
+			c.Set("project_id", projectId)
 
 		case "API-KEY":
 			app_id := c.GetHeader("X-API-KEY")
@@ -107,8 +99,11 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
+
+			fmt.Println("\n\n >>>> api key ", apikeys, "\n\n")
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
+			c.Set("project_id", apikeys.GetProjectId())
 		default:
 			err := errors.New("error invalid authorization method")
 			h.log.Error("--AuthMiddleware--", logger.Error(err))
