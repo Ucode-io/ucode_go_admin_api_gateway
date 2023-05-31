@@ -18,15 +18,12 @@ import (
 // CreateFunctionFolder godoc
 // @Security ApiKeyAuth
 // @ID create_function_folder
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Router /v1/function-folder [POST]
 // @Summary Create Function Folder
 // @Description Create Function Folder
 // @Tags FunctionFolder
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param Function body models.CreateFunctionFolderRequest true "CreateFunctionFolderRequestBody"
 // @Success 201 {object} status_http.Response{data=models.FunctionFolder} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -137,7 +134,6 @@ func (h *Handler) CreateFunctionFolder(c *gin.Context) {
 
 // GetFunctionFolderById godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_function_folder_by_id
 // @Router /v1/function-folder/{function_folder_id} [GET]
 // @Summary Get Function by id
@@ -145,7 +141,6 @@ func (h *Handler) CreateFunctionFolder(c *gin.Context) {
 // @Tags FunctionFolder
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param function_folder_id path string true "function_folder_id"
 // @Success 200 {object} status_http.Response{data=models.FunctionFolder} "FunctionBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -251,7 +246,6 @@ func (h *Handler) GetFunctionFolderById(c *gin.Context) {
 
 // GetAllFunctionFolder godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_function_folders
 // @Router /v1/function-folder [GET]
 // @Summary Get all function folders
@@ -259,7 +253,6 @@ func (h *Handler) GetFunctionFolderById(c *gin.Context) {
 // @Tags FunctionFolder
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param limit query number false "limit"
 // @Param offset query number false "offset"
 // @Param search query string false "search"
@@ -382,7 +375,6 @@ func (h *Handler) GetAllFunctionFolder(c *gin.Context) {
 
 // UpdateFunctionFolder godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_function_folder
 // @Router /v1/function-folder [PUT]
 // @Summary Update function folder
@@ -390,7 +382,6 @@ func (h *Handler) GetAllFunctionFolder(c *gin.Context) {
 // @Tags FunctionFolder
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param Function body models.FunctionFolder  true "UpdateFunctionFolderRequestBody"
 // @Success 200 {object} status_http.Response{data=models.FunctionFolder} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -500,7 +491,6 @@ func (h *Handler) UpdateFunctionFolder(c *gin.Context) {
 
 // DeleteFunctionFolder godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_function_folder
 // @Router /v1/function-folder/{function_folder_id} [DELETE]
 // @Summary Delete Function Folder
@@ -509,7 +499,6 @@ func (h *Handler) UpdateFunctionFolder(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param function_folder_id path string true "function_folder_id"
-// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

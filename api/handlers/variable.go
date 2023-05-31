@@ -13,8 +13,6 @@ import (
 
 // CreateVariable godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_variable
 // @Router /v1/analytics/variable [POST]
 // @Summary Create variable
@@ -119,8 +117,6 @@ func (h *Handler) CreateVariable(c *gin.Context) {
 
 // GetSingleVariable godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_variable_by_id
 // @Router /v1/analytics/variable/{variable_id} [GET]
 // @Summary Get single variable
@@ -216,8 +212,6 @@ func (h *Handler) GetSingleVariable(c *gin.Context) {
 
 // UpdateVariable godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_variable
 // @Router /v1/analytics/variable [PUT]
 // @Summary Update variable
@@ -313,8 +307,6 @@ func (h *Handler) UpdateVariable(c *gin.Context) {
 
 // DeleteVariable godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_variable
 // @Router /v1/analytics/variable/{variable_id} [DELETE]
 // @Summary Delete variable
@@ -406,8 +398,6 @@ func (h *Handler) DeleteVariable(c *gin.Context) {
 
 // GetAllVariables godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_variable_list
 // @Router /v1/analytics/variable [GET]
 // @Summary Get variable list

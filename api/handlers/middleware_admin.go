@@ -43,8 +43,9 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
-
+			fmt.Println(">>>>>>>>>>>>>>. adminhasaccess ", res)
 			if res.ProjectId != "" {
+				fmt.Println(">>>>>>>>>>>>>>>>>>>. res project id")
 				c.Set("project_id", res.ProjectId)
 			}
 			if res.EnvId != "" {
@@ -68,6 +69,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			}
 
 			c.Set("environment_id", apikeys.GetEnvironmentId())
+			c.Set("project_id", apikeys.GetProjectId())
 		default:
 			err := errors.New("error invalid authorization method")
 			h.log.Error("--AuthMiddleware--", logger.Error(err))

@@ -13,8 +13,6 @@ import (
 
 // CreateEvent godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_event
 // @Router /v1/event [POST]
 // @Summary Create event
@@ -110,8 +108,6 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 
 // GetEventByID godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_event_by_id
 // @Router /v1/event/{event_id} [GET]
 // @Summary Get event by id
@@ -119,7 +115,6 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 // @Tags Event
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param event_id path string true "event_id"
 // @Success 200 {object} status_http.Response{data=obs.Event} "EventBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -208,8 +203,6 @@ func (h *Handler) GetEventByID(c *gin.Context) {
 
 // GetAllEvents godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_events
 // @Router /v1/event [GET]
 // @Summary Get all events
@@ -299,8 +292,6 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 
 // UpdateEvent godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_event
 // @Router /v1/event [PUT]
 // @Summary Update event
@@ -396,8 +387,6 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 
 // DeleteEvent godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_event
 // @Router /v1/event/{evet_id} [DELETE]
 // @Summary Delete Event
@@ -406,7 +395,6 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param event_id path string true "event_id"
-// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

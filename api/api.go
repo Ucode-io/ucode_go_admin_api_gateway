@@ -1,9 +1,14 @@
 package api
 
 import (
+	"errors"
+	"fmt"
+	"time"
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -77,10 +82,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/object/:table_slug/:object_id", h.GetSingle)
 		v1.POST("/object/get-list/:table_slug", h.GetList)
 		v1.GET("/object-slim/:table_slug/:object_id", h.GetSingleSlim)
-		v1.POST("/object-slim/get-list/:table_slug", h.GetListSlim)
+		v1.GET("/object-slim/get-list/:table_slug", h.GetListSlim)
 		v1.PUT("/object/:table_slug", h.UpdateObject)
 		v1.DELETE("/object/:table_slug/:object_id", h.DeleteObject)
-		v1.POST("/object/object-details/:table_slug", h.GetObjectDetails)
 		v1.POST("/object/excel/:table_slug", h.GetListInExcel)
 		v1.POST("/object-upsert/:table_slug", h.UpsertObject)
 		v1.PUT("/object/multiple-update/:table_slug", h.MultipleUpdateObject)
@@ -258,6 +262,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/api-reference/:api_reference_id", h.GetApiReferenceByID)
 		v1.GET("/category/:category_id", h.GetApiCategoryByID)
 		v1.GET("/category", h.GetAllCategories)
+
+		v1.GET("/layout/:table_id", h.GetListLayouts)
+		v1.PUT("/layout", h.UpdateLayout)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))
@@ -432,27 +439,33 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/table-history/:id", h.GetTableHistoryById)
 		v1Admin.PUT("/table-history/revert", h.RevertTableHistory)
 		v1Admin.PUT("/table-history", h.InsetrVersionsIdsToTableHistory)
+
+		v1Admin.POST("/redirect-url", h.CreateRedirectUrl)
+		v1Admin.PUT("/redirect-url", h.UpdateRedirectUrl)
+		v1Admin.GET("/redirect-url", h.GetListRedirectUrl)
+		v1Admin.GET("/redirect-url/:redirect-url-id", h.GetSingleRedirectUrl)
+		v1Admin.DELETE("/redirect-url/:redirect-url-id", h.DeleteRedirectUrl)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())
-	{
+	v2Admin.POST("/table-folder", h.CreateTableFolder)
+	v2Admin.PUT("/table-folder", h.UpdateTableFolder)
+	v2Admin.GET("/table-folder", h.GetAllTableFolders)
+	v2Admin.GET("/table-folder/:id", h.GetTableFolderByID)
+	v2Admin.DELETE("/table-folder/:id", h.DeleteTableFolder)
 
+	{
 		// function
 		v2Admin.POST("/function", h.CreateNewFunction)
 		v2Admin.GET("/function/:function_id", h.GetNewFunctionByID)
 		v2Admin.GET("/function", h.GetAllNewFunctions)
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
-
-		v2Admin.POST("/table-folder", h.CreateTableFolder)
-		v2Admin.PUT("/table-folder", h.UpdateTableFolder)
-		v2Admin.GET("/table-folder", h.GetAllTableFolders)
-		v2Admin.GET("/table-folder/:id", h.GetTableFolderByID)
-		v2Admin.DELETE("/table-folder/:id", h.DeleteTableFolder)
 	}
 
 	// v3 for ucode version 2
 	v3 := r.Group("/v3")
+	v3.Use(h.AdminAuthMiddleware())
 	{
 		// query folder
 		v3.POST("/query_folder", h.CreateQueryFolder)
@@ -486,6 +499,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 	}
 
+	r.Any("/api/*any", h.AuthMiddleware(cfg), proxyMiddleware(r, &h), h.Proxy)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 }
@@ -495,7 +510,7 @@ func customCORSMiddleware() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, Platform-Type, X-API-KEY")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, Platform-Type, X-API-KEY, Project-Id")
 		c.Header("Access-Control-Max-Age", "3600")
 
 		if c.Request.Method == "OPTIONS" {
@@ -530,6 +545,79 @@ func MaxAllowed(n int) gin.HandlerFunc {
 		c.Set("sem", sem)
 		c.Set("count_request", countReq)
 
+		c.Next()
+	}
+}
+
+func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		var (
+			err error
+		)
+		fmt.Println("::::::::::::PROXY before:::::::::::::::::::", len(r.Routes()), c.Request.URL.Path, c.Request.URL)
+		c, err = RedirectUrl(c, h)
+		if err == nil {
+			//fmt.Println("here:::::::::::::1")
+			//fmt.Println("::::::::::::PROXY before:::::::::::::::::::", len(r.Routes()), c.Request.URL.Path)
+			r.HandleContext(c)
+		}
+		//fmt.Println("here:::::::::::::2")
+		fmt.Println("time in proxyMiddleware:::::", time.Since(start).Milliseconds())
+		c.Next()
+		fmt.Println("::::::::::::PROXY after:::::::::::::::::::", c.Request.URL.Path)
+	}
+}
+
+func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
+	path := c.Request.URL.Path
+	projectId, ok := c.Get("project_id")
+	if !ok {
+		return c, errors.New("something went wrong")
+	}
+
+	envId, ok := c.Get("environment_id")
+	fmt.Println("project_id::::::PROXY::::::::", projectId)
+	fmt.Println("env_id::::::PROXY::::::::", envId)
+	if !ok {
+		return c, errors.New("something went wrong")
+	}
+
+	namespace := c.GetString("namespace")
+	svcs, err := h.GetService(namespace)
+	if err != nil {
+		return c, errors.New("something went wrong")
+	}
+
+	start := time.Now()
+
+	pathM, err := helper.FindUrlTo(svcs, helper.MatchingData{
+		ProjectId: projectId.(string),
+		EnvId:     envId.(string),
+		Path:      path,
+	})
+	if err != nil {
+		fmt.Println("cant parse url", logger.Error(err))
+		return c, errors.New("cant change")
+	}
+
+	fmt.Println("time in RedirectUrl:::::::", time.Since(start).Milliseconds())
+
+	if path == pathM {
+		return c, errors.New("identical path")
+	}
+
+	c.Request.URL.Path = pathM
+	fmt.Println("path", c.Request.URL.Path)
+	return c, nil
+}
+
+func testAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("environment_id", "063dad1e-4596-483a-8638-14f9b99922c3")
+		u := c.Request.URL.Query()
+		u.Set("project-id", "d6042238-0f60-4f30-8c1a-af78883f1d52")
+		c.Request.URL.RawQuery = u.Encode()
 		c.Next()
 	}
 }

@@ -699,6 +699,8 @@ definitions:
     type: object
   company_service.Environment:
     properties:
+      data:
+        $ref: '#/definitions/structpb.Struct'
       description:
         type: string
       display_color:
@@ -712,6 +714,8 @@ definitions:
     type: object
   company_service.EnvironmentWithResources:
     properties:
+      data:
+        $ref: '#/definitions/structpb.Struct'
       description:
         type: string
       display_color:
@@ -755,6 +759,15 @@ definitions:
       environments:
         items:
           $ref: '#/definitions/company_service.EnvironmentWithResources'
+        type: array
+    type: object
+  company_service.GetListRedirectUrlRes:
+    properties:
+      count:
+        type: integer
+      redirect_urls:
+        items:
+          $ref: '#/definitions/company_service.RedirectUrl'
         type: array
     type: object
   company_service.GetListServiceResourceRes:
@@ -893,6 +906,23 @@ definitions:
         $ref: '#/definitions/company_service.ServiceType'
       status:
         type: boolean
+    type: object
+  company_service.RedirectUrl:
+    properties:
+      created_at:
+        type: string
+      env_id:
+        type: string
+      from:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      to:
+        type: string
+      updated_at:
+        type: string
     type: object
   company_service.RemoveResourceRequest:
     properties:
@@ -1148,6 +1178,14 @@ definitions:
       functionServiceHost:
         type: string
       functionServicePort:
+        type: string
+      getRequestRedisDatabase:
+        type: integer
+      getRequestRedisHost:
+        type: string
+      getRequestRedisPassword:
+        type: string
+      getRequestRedisPort:
         type: string
       gitlabGroupId:
         type: integer
@@ -1656,6 +1694,10 @@ definitions:
     type: object
   models.CreateTableFolderRequest:
     properties:
+      app_id:
+        type: string
+      icon:
+        type: string
       parent_id:
         type: string
       title:
@@ -1677,6 +1719,10 @@ definitions:
         $ref: '#/definitions/models.IncrementId'
       label:
         type: string
+      layouts:
+        items:
+          $ref: '#/definitions/object_builder_service.Layout'
+        type: array
       sections:
         items:
           $ref: '#/definitions/object_builder_service.Section'
@@ -1831,6 +1877,22 @@ definitions:
       client_type:
         type: string
       email:
+        type: string
+    type: object
+  models.Environment:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+      description:
+        type: string
+      display_color:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
         type: string
     type: object
   models.ExcelToDbRequest:
@@ -2388,6 +2450,13 @@ definitions:
       value:
         type: string
     type: object
+  object_builder_service.ActionRelation2:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    type: object
   object_builder_service.App:
     properties:
       description:
@@ -2429,12 +2498,30 @@ definitions:
       field_to:
         type: string
     type: object
+  object_builder_service.AutoFilter2:
+    properties:
+      field_from:
+        type: string
+      field_to:
+        type: string
+    type: object
   object_builder_service.BarcodeGenerateRes:
     properties:
       number:
         type: string
     type: object
   object_builder_service.Cascading:
+    properties:
+      field_slug:
+        type: string
+      label:
+        type: string
+      order:
+        type: integer
+      table_slug:
+        type: string
+    type: object
+  object_builder_service.Cascading2:
     properties:
       field_slug:
         type: string
@@ -2481,6 +2568,21 @@ definitions:
         type: string
     type: object
   object_builder_service.CommitInfo:
+    properties:
+      commit_type:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      version_ids:
+        items:
+          type: string
+        type: array
+    type: object
+  object_builder_service.CommitInfo2:
     properties:
       commit_type:
         type: string
@@ -2896,6 +2998,15 @@ definitions:
           type: string
         type: array
     type: object
+  object_builder_service.DynamicTable2:
+    properties:
+      table_slug:
+        type: string
+      view_fields:
+        items:
+          type: string
+        type: array
+    type: object
   object_builder_service.Event:
     properties:
       does:
@@ -2944,6 +3055,45 @@ definitions:
         type: string
       project_id:
         type: string
+      version_id:
+        type: string
+    type: object
+  object_builder_service.Field2:
+    properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      autofill_field:
+        type: string
+      autofill_table:
+        type: string
+      automatic:
+        type: boolean
+      commit_id:
+        type: string
+      default:
+        type: string
+      id:
+        type: string
+      index:
+        type: string
+      is_visible:
+        type: boolean
+      label:
+        type: string
+      project_id:
+        type: string
+      relation_id:
+        type: string
+      required:
+        type: boolean
+      slug:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      unique:
+        type: boolean
       version_id:
         type: string
     type: object
@@ -3032,6 +3182,13 @@ definitions:
           $ref: '#/definitions/object_builder_service.Event'
         type: array
     type: object
+  object_builder_service.GetListLayoutResponse:
+    properties:
+      layouts:
+        items:
+          $ref: '#/definitions/object_builder_service.Layout'
+        type: array
+    type: object
   object_builder_service.GetTableHistoryResponse:
     properties:
       items:
@@ -3073,6 +3230,36 @@ definitions:
         type: string
       with_increment_id:
         type: boolean
+    type: object
+  object_builder_service.IncrementID2:
+    properties:
+      digit_number:
+        type: integer
+      prefix:
+        type: string
+      with_increment_id:
+        type: boolean
+    type: object
+  object_builder_service.Layout:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      is_default:
+        type: boolean
+      label:
+        type: string
+      order:
+        type: integer
+      table_id:
+        type: string
+      tabs:
+        items:
+          $ref: '#/definitions/object_builder_service.Tab'
+        type: array
+      type:
+        type: string
     type: object
   object_builder_service.ManyToManyMessage:
     properties:
@@ -3123,6 +3310,13 @@ definitions:
       field_id:
         type: string
     type: object
+  object_builder_service.QuickFilter2:
+    properties:
+      default_value:
+        type: string
+      field_id:
+        type: string
+    type: object
   object_builder_service.RecordPermission:
     properties:
       client_type_id:
@@ -3140,6 +3334,91 @@ definitions:
       update:
         type: string
       write:
+        type: string
+    type: object
+  object_builder_service.RelationForGetAll2:
+    properties:
+      action_relations:
+        items:
+          $ref: '#/definitions/object_builder_service.ActionRelation2'
+        type: array
+      auto_filters:
+        items:
+          $ref: '#/definitions/object_builder_service.AutoFilter2'
+        type: array
+      cascading_tree_field_slug:
+        type: string
+      cascading_tree_table_slug:
+        type: string
+      cascadings:
+        items:
+          $ref: '#/definitions/object_builder_service.Cascading2'
+        type: array
+      columns:
+        items:
+          type: string
+        type: array
+      default_limit:
+        type: string
+      default_values:
+        items:
+          type: string
+        type: array
+      dynamic_tables:
+        items:
+          $ref: '#/definitions/object_builder_service.DynamicTable2'
+        type: array
+      editable:
+        type: boolean
+      field_from:
+        type: string
+      field_to:
+        type: string
+      group_fields:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      is_editable:
+        type: boolean
+      is_user_id_default:
+        type: boolean
+      multiple_insert:
+        type: boolean
+      multiple_insert_field:
+        type: string
+      object_id_from_jwt:
+        type: boolean
+      quick_filters:
+        items:
+          $ref: '#/definitions/object_builder_service.QuickFilter2'
+        type: array
+      relation_field_slug:
+        type: string
+      relation_table_slug:
+        type: string
+      summaries:
+        items:
+          $ref: '#/definitions/object_builder_service.Summary2'
+        type: array
+      table_from:
+        $ref: '#/definitions/object_builder_service.Table2'
+      table_to:
+        $ref: '#/definitions/object_builder_service.Table2'
+      title:
+        type: string
+      type:
+        type: string
+      updated_fields:
+        items:
+          type: string
+        type: array
+      view_fields:
+        items:
+          $ref: '#/definitions/object_builder_service.Field2'
+        type: array
+      view_type:
         type: string
     type: object
   object_builder_service.Role:
@@ -3181,6 +3460,36 @@ definitions:
       formula_name:
         type: string
     type: object
+  object_builder_service.Summary2:
+    properties:
+      field_name:
+        type: string
+      formula_name:
+        type: string
+    type: object
+  object_builder_service.Tab:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      order:
+        type: integer
+      relation:
+        $ref: '#/definitions/object_builder_service.RelationForGetAll2'
+      relation_id:
+        type: string
+      sections:
+        items:
+          $ref: '#/definitions/object_builder_service.Section'
+        type: array
+      type:
+        type: string
+    type: object
   object_builder_service.Table:
     properties:
       author_id:
@@ -3197,6 +3506,39 @@ definitions:
         type: string
       increment_id:
         $ref: '#/definitions/object_builder_service.IncrementID'
+      is_cached:
+        type: boolean
+      is_own_table:
+        type: boolean
+      is_visible:
+        type: boolean
+      label:
+        type: string
+      project_id:
+        type: string
+      show_in_menu:
+        type: boolean
+      slug:
+        type: string
+      subtitle_field_slug:
+        type: string
+    type: object
+  object_builder_service.Table2:
+    properties:
+      author_id:
+        type: string
+      commit_info:
+        $ref: '#/definitions/object_builder_service.CommitInfo2'
+      description:
+        type: string
+      folder_id:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      increment_id:
+        $ref: '#/definitions/object_builder_service.IncrementID2'
       is_cached:
         type: boolean
       is_own_table:
@@ -3231,6 +3573,10 @@ definitions:
     type: object
   object_builder_service.TableFolder:
     properties:
+      app_id:
+        type: string
+      icon:
+        type: string
       id:
         type: string
       parent_id:
@@ -3273,6 +3619,17 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.UpdateTable'
         type: array
+    type: object
+  object_builder_service.UpdateLayoutRequest:
+    properties:
+      layouts:
+        items:
+          $ref: '#/definitions/object_builder_service.Layout'
+        type: array
+      project_id:
+        type: string
+      table_id:
+        type: string
     type: object
   object_builder_service.UpdatePanelCoordinatesRequest:
     properties:
@@ -5212,19 +5569,6 @@ paths:
       description: Create Integration
       operationId: create_Integration
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateIntegrationRequestBody
         in: body
         name: Integration
@@ -5565,21 +5909,6 @@ paths:
       description: RegisterOtp
       operationId: registerEmailOtp
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: register_body
         in: body
         name: registerBody
@@ -5728,21 +6057,6 @@ paths:
       description: Send Message to Email
       operationId: send_message_to_email
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: SendMessageToEmailRequestBody
         in: body
         name: send_message
@@ -5795,11 +6109,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/template_service.GetObjectTokenReq'
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -5840,16 +6149,6 @@ paths:
       description: Get all action permissions
       operationId: get_all_action_permission
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: role_id
         in: path
         name: role_id
@@ -5858,11 +6157,6 @@ paths:
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -5907,21 +6201,6 @@ paths:
       description: Get dashboard list
       operationId: get_dashboard_list
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: name
         type: string
@@ -5966,21 +6245,6 @@ paths:
       description: Create dashboard
       operationId: create_dashboard
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateDashboardRequestBody
         in: body
         name: dashboard
@@ -6028,21 +6292,6 @@ paths:
       description: Update dashboard
       operationId: update_dashboard
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateDashboardRequestBody
         in: body
         name: dashboard
@@ -6091,21 +6340,6 @@ paths:
       description: Delete dashboard
       operationId: delete_dashboard
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: dashboard_id
         in: path
         name: dashboard_id
@@ -6145,21 +6379,6 @@ paths:
       description: Get single dashboard
       operationId: get_dashboard_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: dashboard_id
         in: path
         name: dashboard_id
@@ -6207,16 +6426,6 @@ paths:
       description: Get all panels
       operationId: get_all_panels
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -6264,21 +6473,6 @@ paths:
       description: Create panel
       operationId: create_panel
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreatePanelRequestBody
         in: body
         name: table
@@ -6326,21 +6520,6 @@ paths:
       description: Update panel
       operationId: update_panel
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdatePanelRequestBody
         in: body
         name: relation
@@ -6389,24 +6568,9 @@ paths:
       description: Delete Panel
       operationId: delete_panel
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: panel_id
         in: path
         name: panel_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -6443,24 +6607,9 @@ paths:
       description: Get single panel
       operationId: get_panel_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: panel_id
         in: path
         name: panel_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -6505,16 +6654,6 @@ paths:
       description: Update panel coordinates
       operationId: panel_coordinates
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdatePanelCoordinatesRequestBody
         in: body
         name: panel_coordinates
@@ -6563,16 +6702,6 @@ paths:
       description: Get variable list
       operationId: get_variable_list
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: dashboard_id
         type: string
@@ -6623,16 +6752,6 @@ paths:
       description: Create variable
       operationId: create_variable
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateVariableRequestBody
         in: body
         name: variable
@@ -6680,16 +6799,6 @@ paths:
       description: Update variable
       operationId: update_variable
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateVariableRequestBody
         in: body
         name: variable
@@ -6738,16 +6847,6 @@ paths:
       description: Delete variable
       operationId: delete_variable
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: variable_id
         in: path
         name: variable_id
@@ -6787,16 +6886,6 @@ paths:
       description: Get single variable
       operationId: get_variable_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: variable_id
         in: path
         name: variable_id
@@ -6865,11 +6954,6 @@ paths:
       - in: query
         name: version_id
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -6917,11 +7001,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.CreateApiReferenceModel'
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -6969,11 +7048,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.ApiReference'
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -7080,11 +7154,6 @@ paths:
         name: api_reference_id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -7123,11 +7192,6 @@ paths:
       - description: api_reference_id
         in: path
         name: api_reference_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: page
@@ -7209,22 +7273,12 @@ paths:
         in: query
         name: order
         type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: Request Body
         in: body
         name: revert_api_reference
         required: true
         schema:
           $ref: '#/definitions/api_reference_service.ApiRevertApiReferenceRequest'
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -7272,22 +7326,12 @@ paths:
         name: api_reference_id
         required: true
         type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: Request Body
         in: body
         name: body
         required: true
         schema:
           $ref: '#/definitions/api_reference_service.ApiManyVersions'
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -7330,16 +7374,6 @@ paths:
       description: Get all apps
       operationId: get_all_apps
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: API key for the endpoint
         in: header
         name: X-API-KEY
@@ -7398,16 +7432,6 @@ paths:
       description: Create app
       operationId: create_app
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateAppRequestBody
         in: body
         name: app
@@ -7455,16 +7479,6 @@ paths:
       description: Update app
       operationId: update_app
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateAppRequestBody
         in: body
         name: app
@@ -7513,24 +7527,9 @@ paths:
       description: Delete App
       operationId: delete_app
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: app_id
         in: path
         name: app_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -7567,16 +7566,6 @@ paths:
       description: Get app by id
       operationId: get_app_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: app_id
         in: path
         name: app_id
@@ -7624,16 +7613,6 @@ paths:
       description: Get new barcode for items
       operationId: generate_new_barcode_for_items
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -7681,16 +7660,6 @@ paths:
       description: Get all booked appointments
       operationId: get_all_booked_appointments
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: branch_id
         type: string
@@ -7754,16 +7723,6 @@ paths:
       description: Get single booked appointment
       operationId: get_booked_appointment_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: booked_appointment_id
         in: path
         name: booked_appointment_id
@@ -7811,16 +7770,6 @@ paths:
       description: Create cashbox transaction
       operationId: create_cashbox_transaction
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateTransactionBody
         in: body
         name: app
@@ -7862,11 +7811,6 @@ paths:
       description: Get all categories
       operationId: get_all_category
       parameters:
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: commit_id
         type: string
@@ -7932,11 +7876,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.CreateCategory'
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -8035,11 +7974,6 @@ paths:
         name: category_id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -8077,11 +8011,6 @@ paths:
       - description: category_id
         in: path
         name: category_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -8125,17 +8054,6 @@ paths:
       - application/json
       description: Get close cashbox
       operationId: close_cashbox_info
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -8178,16 +8096,6 @@ paths:
       description: Get Code with prefix
       operationId: generate_new_code_with_prefix
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -8395,16 +8303,6 @@ paths:
       description: Get all companies
       operationId: get_company_list
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: comany_id
         type: string
@@ -8462,16 +8360,6 @@ paths:
       description: Get all projects
       operationId: get_project_list
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: company_id
         type: string
@@ -8525,16 +8413,6 @@ paths:
       description: Create Company
       operationId: create_project
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CompanyProjectCreateRequest
         in: body
         name: Project
@@ -8583,16 +8461,6 @@ paths:
       description: Delete Project
       operationId: delete_project
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: project_id
         in: path
         name: project_id
@@ -8639,16 +8507,6 @@ paths:
       description: Get Project By Id
       operationId: get_company_project_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: project_id
         in: path
         name: project_id
@@ -8699,16 +8557,6 @@ paths:
       description: Update Project
       operationId: update_project
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: project_id
         in: path
         name: project_id
@@ -8762,16 +8610,6 @@ paths:
       description: Delete Company
       operationId: delete_company
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: company_id
         in: path
         name: company_id
@@ -8811,16 +8649,6 @@ paths:
       description: Get Company by id
       operationId: get_company_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: company_id
         in: path
         name: company_id
@@ -8867,16 +8695,6 @@ paths:
       description: Update company
       operationId: update_company
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: company_id
         in: path
         name: company_id
@@ -8930,16 +8748,6 @@ paths:
       description: Configure ProjectResource
       operationId: configure_project_resource
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: ProjectResourceConfigureRequest
         in: body
         name: ProjectResource
@@ -8988,16 +8796,6 @@ paths:
       description: Create ProjectResource
       operationId: create_project_resource
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: ProjectResourceCreateRequest
         in: body
         name: ProjectResource
@@ -9046,16 +8844,6 @@ paths:
       description: Remove ProjectResource
       operationId: remove_project_resource
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: ProjectResourceRemoveRequest
         in: body
         name: ProjectResource
@@ -9103,16 +8891,6 @@ paths:
       description: Get all companies
       operationId: get_resource_list
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: environment_id
         type: string
@@ -9169,16 +8947,6 @@ paths:
       description: Add ProjectResource
       operationId: add_project_resource
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: ProjectResourceAddRequest
         in: body
         name: ProjectResource
@@ -9226,17 +8994,6 @@ paths:
       - application/json
       description: Get Service Resource
       operationId: get_service_resources
-      parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -9278,16 +9035,6 @@ paths:
       description: Set Default Resource
       operationId: set_default_resource
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: data
         in: body
         name: data
@@ -9336,16 +9083,6 @@ paths:
       description: Get Resource Environment by id
       operationId: get_resource_environment_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: resource_id
         in: path
         name: resource_id
@@ -9393,16 +9130,6 @@ paths:
       description: Get Resource by id
       operationId: get_resource_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: resource_id
         in: path
         name: resource_id
@@ -9449,16 +9176,6 @@ paths:
       description: Update Resource by id
       operationId: put_resource_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateResourceRequestBody
         in: body
         name: UpdateResourceRequestBody
@@ -9507,21 +9224,6 @@ paths:
       description: Reconnect ProjectResource
       operationId: reconnect_project_resource
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: ProjectResourceReconnectRequest
         in: body
         name: ProjectResource
@@ -9569,21 +9271,6 @@ paths:
       - application/json
       description: get list service resource
       operationId: get_list_service_resource
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -9625,20 +9312,6 @@ paths:
       description: Update service resource
       operationId: update_service_resource
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: data
         in: body
         name: data
@@ -9687,16 +9360,6 @@ paths:
       description: Get all custom events
       operationId: get_all_custom_events
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: method
         type: string
@@ -9753,16 +9416,6 @@ paths:
       description: Create CustomEvent
       operationId: create_custom_event
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateCustomEventRequestBody
         in: body
         name: Customevent
@@ -9810,21 +9463,6 @@ paths:
       description: Update custom event
       operationId: update_Customevent
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateCustomEventRequestBody
         in: body
         name: Customevent
@@ -9873,21 +9511,6 @@ paths:
       description: Delete CustomEvent
       operationId: delete_custom_event
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: custom_event_id
         in: path
         name: custom_event_id
@@ -9927,21 +9550,6 @@ paths:
       description: Get CustomEvent by id
       operationId: get_custom_event_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: custom_event_id
         in: path
         name: custom_event_id
@@ -9989,16 +9597,6 @@ paths:
       description: Get Document list
       operationId: get_document_list
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: end_date
         type: string
@@ -10055,16 +9653,6 @@ paths:
       description: Create Document
       operationId: create_document
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateDocumentRequestBody
         in: body
         name: Document
@@ -10112,16 +9700,6 @@ paths:
       description: Update Document
       operationId: update_document
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateDocumentRequestBody
         in: body
         name: Document
@@ -10170,21 +9748,6 @@ paths:
       description: Delete Document
       operationId: delete_document
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: document_id
         in: path
         name: document_id
@@ -10224,21 +9787,6 @@ paths:
       description: Get single document
       operationId: get_document_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: document_id
         in: path
         name: document_id
@@ -10286,16 +9834,6 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: limit
         type: integer
@@ -10349,16 +9887,6 @@ paths:
       description: Create environment
       operationId: create_environment
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateEnvironmentRequestBody
         in: body
         name: environment
@@ -10406,22 +9934,12 @@ paths:
       description: Update environment
       operationId: update_environment
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateEnvironmentRequestBody
         in: body
         name: environment
         required: true
         schema:
-          $ref: '#/definitions/company_service.Environment'
+          $ref: '#/definitions/models.Environment'
       produces:
       - application/json
       responses:
@@ -10464,16 +9982,6 @@ paths:
       description: Delete environment
       operationId: delete_environment
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: environment_id
         in: path
         name: environment_id
@@ -10513,16 +10021,6 @@ paths:
       description: Get single environment
       operationId: get_environment_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: environment_id
         in: path
         name: environment_id
@@ -10570,16 +10068,6 @@ paths:
       description: Get all events
       operationId: get_all_events
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -10627,16 +10115,6 @@ paths:
       description: Create event
       operationId: create_event
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateEventRequestBody
         in: body
         name: event
@@ -10684,16 +10162,6 @@ paths:
       description: Update event
       operationId: update_event
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateEventRequestBody
         in: body
         name: event
@@ -10742,21 +10210,6 @@ paths:
       description: Get event logs
       operationId: get_event_logs
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: limit
         type: string
@@ -10808,21 +10261,6 @@ paths:
       description: Get event log
       operationId: get_event_log
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: event_log_id
         in: path
         name: event_log_id
@@ -10870,21 +10308,6 @@ paths:
       description: Get event by id
       operationId: get_event_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: event_id
         in: path
         name: event_id
@@ -10932,24 +10355,9 @@ paths:
       description: Delete Event
       operationId: delete_event
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: event_id
         in: path
         name: event_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -10987,24 +10395,9 @@ paths:
       description: Get excel writer
       operationId: excel_reader
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: excel_id
         in: path
         name: excel_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -11049,24 +10442,9 @@ paths:
       description: Post excel writer
       operationId: excel_to_db
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: excel_id
         in: path
         name: excel_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: ExcelToDbRequest
@@ -11117,11 +10495,6 @@ paths:
       description: export to json
       operationId: export_to_json
       parameters:
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: ExportToJSONRequestBody
         in: body
         name: export_to_json
@@ -11170,16 +10543,6 @@ paths:
       description: Get all fields
       operationId: get_all_fields
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: limit
         type: integer
@@ -11251,21 +10614,6 @@ paths:
       description: Create field
       operationId: create_field
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateFieldRequestBody
         in: body
         name: table
@@ -11313,21 +10661,6 @@ paths:
       description: Update field
       operationId: update_field
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateFieldRequestBody
         in: body
         name: relation
@@ -11376,16 +10709,6 @@ paths:
       description: Get all field permissions
       operationId: get_all_field_permission
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: role_id
         in: path
         name: role_id
@@ -11394,11 +10717,6 @@ paths:
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -11443,21 +10761,6 @@ paths:
       description: Delete Field
       operationId: delete_field
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: field_id
         in: path
         name: field_id
@@ -11498,21 +10801,6 @@ paths:
       description: Create field
       operationId: create_fields_and_relations
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Request Body
         in: body
         name: table
@@ -11561,16 +10849,6 @@ paths:
       description: Get all functions
       operationId: get_all_functions
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: limit
         type: integer
@@ -11621,21 +10899,6 @@ paths:
       description: Create Function
       operationId: create_function
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateFunctionRequestBody
         in: body
         name: Function
@@ -11683,21 +10946,6 @@ paths:
       description: Update function
       operationId: update_function
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateFunctionRequestBody
         in: body
         name: Function
@@ -11746,16 +10994,6 @@ paths:
       description: Get all function folders
       operationId: get_all_function_folders
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: limit
         in: query
         name: limit
@@ -11809,20 +11047,6 @@ paths:
       description: Create Function Folder
       operationId: create_function_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateFunctionFolderRequestBody
         in: body
         name: Function
@@ -11870,16 +11094,6 @@ paths:
       description: Update function folder
       operationId: update_function_folder
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateFunctionFolderRequestBody
         in: body
         name: Function
@@ -11928,19 +11142,9 @@ paths:
       description: Delete Function Folder
       operationId: delete_function_folder
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: function_folder_id
         in: path
         name: function_folder_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -11977,16 +11181,6 @@ paths:
       description: Get Function by id
       operationId: get_function_folder_by_id
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: function_folder_id
         in: path
         name: function_folder_id
@@ -12034,24 +11228,9 @@ paths:
       description: Delete Function
       operationId: delete_function
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: function_id
         in: path
         name: function_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -12088,24 +11267,9 @@ paths:
       description: Get Function by id
       operationId: get_function_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: function_id
         in: path
         name: function_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -12150,16 +11314,6 @@ paths:
       description: Generate IntegrationPayze
       operationId: generate-payze-link
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: PayzeLinkRequestBody
         in: body
         name: Integration
@@ -12208,34 +11362,9 @@ paths:
       description: Get all relations
       operationId: get_relation_cascaders
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -12281,16 +11410,6 @@ paths:
       description: Get html template list
       operationId: get_html_template_list
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -12338,16 +11457,6 @@ paths:
       description: Create htmlTemplate
       operationId: create_html_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateHtmlTemplateRequestBody
         in: body
         name: html_template
@@ -12395,16 +11504,6 @@ paths:
       description: Update html template
       operationId: update_html_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateHtmlTemplateRequestBody
         in: body
         name: html_template
@@ -12453,24 +11552,9 @@ paths:
       description: Delete html template
       operationId: delete_html_template_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: html_template_id
         in: path
         name: html_template_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -12507,21 +11591,6 @@ paths:
       description: Get single html template
       operationId: get_html_template_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: html_template_id
         in: path
         name: html_template_id
@@ -12569,16 +11638,6 @@ paths:
       description: Convert html to pdf
       operationId: convert_html_to_pdf
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: HtmlBody
         in: body
         name: view
@@ -12627,21 +11686,6 @@ paths:
       description: Convert html to pdf
       operationId: convert_html_to_pdfV2
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: HtmlBody
         in: body
         name: template
@@ -12690,11 +11734,6 @@ paths:
       description: import from json
       operationId: import_from_json
       parameters:
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: ImportFromJSONRequestBody
         in: body
         name: export_to_json
@@ -12743,21 +11782,6 @@ paths:
       description: Invoke Function
       operationId: invoke_function
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: InvokeFunctionRequest
         in: body
         name: InvokeFunctionRequest
@@ -12806,24 +11830,9 @@ paths:
       description: Invoke Function By Path
       operationId: invoke_function_by_path
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: function-path
         in: path
         name: function-path
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: InvokeFunctionByPathRequest
@@ -12867,6 +11876,101 @@ paths:
       summary: Invoke Function By Path
       tags:
       - Function
+  /v1/layout:
+    put:
+      consumes:
+      - application/json
+      description: Update layouts
+      operationId: update_layout
+      parameters:
+      - description: UpdateLayoutRequest
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateLayoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Layout data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update layouts
+      tags:
+      - Layout
+  /v1/layout/{table_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get list layouts
+      operationId: get_list_layouts
+      parameters:
+      - description: table_id
+        in: path
+        name: table_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetListLayoutResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get list layouts
+      tags:
+      - Layout
   /v1/many-to-many:
     delete:
       consumes:
@@ -12874,21 +11978,6 @@ paths:
       description: Delete Many2Many
       operationId: delete_many2many
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: DeleteManyToManyBody
         in: body
         name: object
@@ -12929,21 +12018,6 @@ paths:
       description: Update many-to-many
       operationId: append_many2many
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateMany2ManyRequestBody
         in: body
         name: object
@@ -12992,21 +12066,6 @@ paths:
       description: Get List Note
       operationId: get_list_Note
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: folder-id
         in: query
         name: folder-id
@@ -13061,21 +12120,6 @@ paths:
       description: Create Note
       operationId: create_note
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateNoteReq
         in: body
         name: Note
@@ -13123,21 +12167,6 @@ paths:
       description: Update Note
       operationId: update_note
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateNoteReqBody
         in: body
         name: Note
@@ -13185,22 +12214,6 @@ paths:
       - application/json
       description: Get List Note Folder
       operationId: get_list_note_folder
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -13242,21 +12255,6 @@ paths:
       description: Create Note Folder
       operationId: create_note_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateFolderNoteReq
         in: body
         name: Note_Folder
@@ -13304,21 +12302,6 @@ paths:
       description: Update Note Folder
       operationId: update_note_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateFolderNoteReqBody
         in: body
         name: FolderNote
@@ -13367,21 +12350,6 @@ paths:
       description: Delete Note Folder
       operationId: delete_note_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: note-folder-id
         in: path
         name: note-folder-id
@@ -13421,21 +12389,6 @@ paths:
       description: Get single Note Folder
       operationId: get_single_note_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: note-folder-id
         in: path
         name: note-folder-id
@@ -13483,21 +12436,6 @@ paths:
       description: Get Commits note folder
       operationId: get_commits_note_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: note-folder-id
         in: path
         name: note-folder-id
@@ -13545,21 +12483,6 @@ paths:
       description: Delete Note
       operationId: delete_note
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: note-id
         in: path
         name: note-id
@@ -13599,21 +12522,6 @@ paths:
       description: Get single Note
       operationId: get_single_note
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: note-id
         in: path
         name: note-id
@@ -13661,21 +12569,6 @@ paths:
       description: Get Commits note
       operationId: get_commits_note
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: note-id
         in: path
         name: note-id
@@ -13723,15 +12616,6 @@ paths:
       description: Get All Notifications
       operationId: get-all-notifications
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: category-id
         in: query
         name: category-id
@@ -13785,15 +12669,6 @@ paths:
       description: Create User Notifications
       operationId: create-user-notifications
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: project-id
         in: query
         name: project-id
@@ -13846,15 +12721,6 @@ paths:
       description: Get Notification By Id
       operationId: get-notification-by-id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: Notification Id
         in: path
         name: id
@@ -13902,20 +12768,6 @@ paths:
       description: Get list category
       operationId: get_list_category_for_notification
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: offset
         in: query
         name: offset
@@ -13969,20 +12821,6 @@ paths:
       description: Create category
       operationId: create_category_for_notification
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Request body
         in: body
         name: app
@@ -14030,20 +12868,6 @@ paths:
       description: Update category
       operationId: update_category_for_notification
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: body
         in: body
         name: body
@@ -14092,20 +12916,6 @@ paths:
       description: Delete category
       operationId: delete_category_for_notification
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: id
         in: path
         name: id
@@ -14152,20 +12962,6 @@ paths:
       description: Get single category
       operationId: get_single_category_for_notification
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: id
         in: path
         name: id
@@ -14213,15 +13009,6 @@ paths:
       description: Create User Token
       operationId: create-user-token
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: Request Body
         in: body
         name: body
@@ -14270,15 +13057,6 @@ paths:
       description: Get object by id slim
       operationId: get_object_by_id_slim
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -14287,11 +13065,6 @@ paths:
       - description: object_id
         in: path
         name: object_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -14330,38 +13103,25 @@ paths:
       tags:
       - Object
   /v1/object-slim/get-list/{table_slug}:
-    post:
+    get:
       consumes:
       - application/json
       description: Get all objects slim
       operationId: get_list_objects_slim
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
         required: true
         type: string
-      - description: project-id
+      - description: limit
         in: query
-        name: project-id
-        required: true
-        type: string
-      - description: GetListObjectRequestBody
-        in: body
-        name: object
-        required: true
-        schema:
-          $ref: '#/definitions/models.CommonMessage'
+        name: limit
+        type: number
+      - description: offset
+        in: query
+        name: offset
+        type: number
       produces:
       - application/json
       responses:
@@ -14404,24 +13164,9 @@ paths:
       description: Upsert object
       operationId: upsert_object
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: CreateObjectRequestBody
@@ -14472,24 +13217,9 @@ paths:
       description: Update object
       operationId: update_object
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpdateObjectRequestBody
@@ -14540,23 +13270,9 @@ paths:
       description: Create object
       operationId: create_object
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: CreateObjectRequestBody
@@ -14607,16 +13323,6 @@ paths:
       description: Delete object
       operationId: delete_object
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -14631,11 +13337,6 @@ paths:
       - description: object_id
         in: path
         name: object_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -14672,15 +13373,6 @@ paths:
       description: Get object by id
       operationId: get_object_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
@@ -14689,11 +13381,6 @@ paths:
       - description: object_id
         in: path
         name: object_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -14738,24 +13425,9 @@ paths:
       description: Get all objects in excel
       operationId: get_list_objects_in_excel
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: GetListObjectRequestBody
@@ -14806,24 +13478,9 @@ paths:
       description: Get financial analytics
       operationId: get_financial_analytics
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: GetFinancialAnalyticsRequestBody
@@ -14874,24 +13531,9 @@ paths:
       description: Get all objects
       operationId: get_list_objects
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: GetListObjectRequestBody
@@ -14942,24 +13584,9 @@ paths:
       description: Multiple Update object
       operationId: multiple_update_object
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: MultipleUpdateObjectRequestBody
@@ -15003,74 +13630,6 @@ paths:
       summary: Multiple Update object
       tags:
       - Object
-  /v1/object/object-details/{table_slug}:
-    post:
-      consumes:
-      - application/json
-      description: object details
-      operationId: get_object_details
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: table_slug
-        in: path
-        name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: GetObjectDetailsBody
-        in: body
-        name: object
-        required: true
-        schema:
-          $ref: '#/definitions/models.CommonMessage'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Object data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get object details
-      tags:
-      - Object
   /v1/offline_appointment:
     get:
       consumes:
@@ -15078,16 +13637,6 @@ paths:
       description: Get all offline appointments
       operationId: get_all_offline_appointments
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: branch_id
         type: string
@@ -15154,16 +13703,6 @@ paths:
       description: Get single offline appointment
       operationId: get_offline_appointment_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: offline_appointment_id
         in: path
         name: offline_appointment_id
@@ -15210,17 +13749,6 @@ paths:
       - application/json
       description: Get open cashbox
       operationId: open_cashbox_info
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -15263,16 +13791,6 @@ paths:
       description: Update appointment payment status
       operationId: update_appointment_payment_status
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateAppointmentStatus
         in: body
         name: view
@@ -15321,16 +13839,6 @@ paths:
       description: SaveCard IntegrationPayze
       operationId: PayzeSaveCard
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: PayzeLinkRequestBody
         in: body
         name: Integration
@@ -15379,24 +13887,9 @@ paths:
       description: Get all permissions by role id
       operationId: get_all_permission_by_role_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: role_id
         in: path
         name: role_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -15441,24 +13934,9 @@ paths:
       description: Upsert permissions
       operationId: upsert_permission
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: app_id
         in: path
         name: app_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: UpsertPermissionRequestBody
@@ -15509,14 +13987,6 @@ paths:
       description: Get List settings
       operationId: get_list_setting
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        type: string
       - description: project-id
         in: query
         name: project-id
@@ -15579,16 +14049,6 @@ paths:
       description: Get all query rows
       operationId: get_list_query_rows
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: GetAllQueryRowsRequestBody
         in: body
         name: object
@@ -15636,21 +14096,6 @@ paths:
       - application/json
       description: Get List query folder
       operationId: get_list_query_request_folder
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -15692,20 +14137,6 @@ paths:
       description: Create query request folder
       operationId: create_query_request_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateFolderReq
         in: body
         name: query_folder
@@ -15753,20 +14184,6 @@ paths:
       description: Update query folder
       operationId: update_query_request_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateFolderReq
         in: body
         name: folder
@@ -15815,20 +14232,6 @@ paths:
       description: Delete query folder
       operationId: delete_query_request_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: query-folder-id
         in: path
         name: query-folder-id
@@ -15868,20 +14271,6 @@ paths:
       description: Get single query request folder
       operationId: get_single_query_request_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: query-folder-id
         in: path
         name: query-folder-id
@@ -15929,20 +14318,6 @@ paths:
       description: Get List query
       operationId: get_list_query_request
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: folder-id
         in: query
         name: folder-id
@@ -15997,20 +14372,6 @@ paths:
       description: Create query
       operationId: create_query_request
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateQueryReq
         in: body
         name: query
@@ -16058,20 +14419,6 @@ paths:
       description: Update query
       operationId: update_query_request
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateQueryReq
         in: body
         name: query
@@ -16120,20 +14467,6 @@ paths:
       description: Delete query
       operationId: delete_query_request
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: query-id
         in: path
         name: query-id
@@ -16173,20 +14506,6 @@ paths:
       description: Get single query
       operationId: get_single_query_request
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: query-id
         in: path
         name: query-id
@@ -16238,23 +14557,9 @@ paths:
       description: Get query history
       operationId: get_query_history
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: query-id
         in: path
         name: query-id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: limit
@@ -16309,23 +14614,9 @@ paths:
       description: get list log
       operationId: get_list_query_log
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: query-id
         in: path
         name: query-id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: limit
@@ -16380,15 +14671,6 @@ paths:
       description: get single log
       operationId: get_single_query_log
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: query-id
         in: path
         name: query-id
@@ -16397,11 +14679,6 @@ paths:
       - description: log-id
         in: path
         name: log-id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -16446,23 +14723,9 @@ paths:
       description: Revert query
       operationId: revert_query
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: query-id
         in: path
         name: query-id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: Request Body
@@ -16513,20 +14776,6 @@ paths:
       description: Run query
       operationId: run_query_request
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Query
         in: body
         name: query
@@ -16575,23 +14824,9 @@ paths:
       description: Insert Many query
       operationId: insert_many_query_reference
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: query-id
         in: path
         name: query-id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: Request Body
@@ -16635,6 +14870,236 @@ paths:
       summary: Insert Many query
       tags:
       - Query
+  /v1/redirect-url:
+    get:
+      consumes:
+      - application/json
+      description: Get List redirect url
+      operationId: get_list_redirect_url
+      parameters:
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response body
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetListRedirectUrlRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List redirect url
+      tags:
+      - RedirectUrl
+    post:
+      consumes:
+      - application/json
+      description: Create redirect url
+      operationId: create_redirect_url
+      parameters:
+      - description: CreateRedirectUrl
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.RedirectUrl'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Redirect Url response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.RedirectUrl'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create redirect url
+      tags:
+      - RedirectUrl
+    put:
+      consumes:
+      - application/json
+      description: Update redirect url
+      operationId: update_redirect_url
+      parameters:
+      - description: UpdateRedirectUrl
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.RedirectUrl'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: RedirectUrl response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.RedirectUrl'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update redirect url
+      tags:
+      - RedirectUrl
+  /v1/redirect-url/{redirect-url-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete redirect url
+      operationId: delete_redirect_url
+      parameters:
+      - description: redirect-url-id
+        in: path
+        name: redirect-url-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete redirect url
+      tags:
+      - RedirectUrl
+    get:
+      consumes:
+      - application/json
+      description: Get single redirect url
+      operationId: get_single_redirect_url
+      parameters:
+      - description: redirect-url-id
+        in: path
+        name: redirect-url-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetSingleRedirectUrl response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.RedirectUrl'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single redirect url
+      tags:
+      - RedirectUrl
   /v1/relation:
     get:
       consumes:
@@ -16642,26 +15107,6 @@ paths:
       description: Get all relations
       operationId: get_all_relations
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: limit
         type: integer
@@ -16725,16 +15170,6 @@ paths:
       description: Create relation
       operationId: create_relation
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateRelationRequestBody
         in: body
         name: table
@@ -16782,26 +15217,6 @@ paths:
       description: Update relation
       operationId: update_relation
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateRelationRequestBody
         in: body
         name: relation
@@ -16851,34 +15266,9 @@ paths:
       description: Delete Relation
       operationId: delete_relation
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: relation_id
         in: path
         name: relation_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -16923,11 +15313,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/versioning_service.ApiCreateReleaseRequest'
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -16970,11 +15355,6 @@ paths:
       description: Get all releases
       operationId: get_all_releases
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: project_id
         in: path
         name: project_id
@@ -17035,11 +15415,6 @@ paths:
         name: version_id
         required: true
         type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: project_id
         in: path
         name: project_id
@@ -17092,11 +15467,6 @@ paths:
         name: version_id
         required: true
         type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: Request Body
         in: body
         name: release
@@ -17140,11 +15510,6 @@ paths:
       - description: version_id
         in: path
         name: version_id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
         required: true
         type: string
       - description: Request Body
@@ -17195,11 +15560,6 @@ paths:
       description: SetCurrent release
       operationId: set_current_release
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: Request Body
         in: body
         name: release
@@ -17295,20 +15655,6 @@ paths:
       description: Create scenario
       operationId: create_scenario
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Request body
         in: body
         name: body
@@ -17356,20 +15702,6 @@ paths:
       description: Update scenario
       operationId: update_scenario
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Request body
         in: body
         name: body
@@ -17418,23 +15750,9 @@ paths:
       description: Get History scenario
       operationId: scenario_history
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: dag-id
         in: path
         name: id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -17479,23 +15797,9 @@ paths:
       description: Select Versions scenario
       operationId: select_version_scenario
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: dag-id
         in: path
         name: id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: Request body
@@ -17546,20 +15850,6 @@ paths:
       description: Get list category
       operationId: get_list_category_for_scenario
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: offset
         in: query
         name: offset
@@ -17613,20 +15903,6 @@ paths:
       description: Create category
       operationId: create_category_for_scenario
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Request body
         in: body
         name: app
@@ -17675,20 +15951,6 @@ paths:
       description: Get single category
       operationId: get_single_category_for_scenario
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: id
         in: path
         name: id
@@ -17736,20 +15998,6 @@ paths:
       description: Get all scenario dag
       operationId: get_all_scenario_dag
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: limit
         in: query
         name: limit
@@ -17815,20 +16063,6 @@ paths:
       description: Create scenario dag
       operationId: create_scenario_dag
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Request body
         in: body
         name: body
@@ -17876,20 +16110,6 @@ paths:
       description: Update scenario dag
       operationId: update_scenario_dag
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Request body
         in: body
         name: table
@@ -17938,20 +16158,6 @@ paths:
       description: Get All scenario dag step
       operationId: get_all_scenario_dag_step
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: dag-id
         in: query
         name: dag-id
@@ -17998,20 +16204,6 @@ paths:
       description: Create scenario dag step
       operationId: create_scenario_dag_step
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Request body
         in: body
         name: body
@@ -18059,20 +16251,6 @@ paths:
       description: Update scenario dag step
       operationId: update_scenario_dag_step
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Request body
         in: body
         name: body
@@ -18121,20 +16299,6 @@ paths:
       description: Delete scenario dag step
       operationId: delete_scenario_dag_step
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: id
         in: path
         name: id
@@ -18181,20 +16345,6 @@ paths:
       description: Get scenario dag step
       operationId: get_scenario_dag_step
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: id
         in: path
         name: id
@@ -18248,23 +16398,9 @@ paths:
       description: Delete scenario dag
       operationId: delete_scenario_dag
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: id
         in: path
         name: id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -18308,20 +16444,6 @@ paths:
       description: Get scenario dag
       operationId: get_scenario_dag
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Request body
         in: body
         name: table
@@ -18361,20 +16483,6 @@ paths:
       description: Revert scenario
       operationId: revert_scenario
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Request body
         in: body
         name: body
@@ -18423,20 +16531,6 @@ paths:
       description: Run scenario
       operationId: run_scenario
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: Request body
         in: body
         name: body
@@ -18485,16 +16579,6 @@ paths:
       description: Get all sections
       operationId: get_all_sections
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -18551,16 +16635,6 @@ paths:
       description: Update section
       operationId: update_section
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateSectionRequestBody
         in: body
         name: table
@@ -18609,14 +16683,6 @@ paths:
       description: Get all tables
       operationId: get_all_tables
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        type: string
       - in: query
         name: folder_id
         type: string
@@ -18676,20 +16742,6 @@ paths:
       description: Create table
       operationId: create_table
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateTableRequestBody
         in: body
         name: table
@@ -18737,26 +16789,12 @@ paths:
       description: Update table
       operationId: update_table
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateTableRequestBody
         in: body
         name: table
         required: true
         schema:
           $ref: '#/definitions/object_builder_service.Table'
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -18799,20 +16837,6 @@ paths:
       description: Get table history by id
       operationId: insert into table history
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateTableRequestBody
         in: body
         name: table
@@ -18861,20 +16885,6 @@ paths:
       description: Get table history by id
       operationId: get_table_history_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: id
         in: path
         name: id
@@ -18922,20 +16932,6 @@ paths:
       description: Get table histories
       operationId: get_table_histories
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: table_id
         in: path
         name: table_id
@@ -18983,20 +16979,6 @@ paths:
       description: Get table history by id
       operationId: revert_table_history
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateTableRequestBody
         in: body
         name: table
@@ -19045,20 +17027,6 @@ paths:
       description: Delete Table
       operationId: delete_table
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: table_id
         in: path
         name: table_id
@@ -19098,20 +17066,6 @@ paths:
       description: Get table by id
       operationId: get_table_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: table_id
         in: path
         name: table_id
@@ -19159,21 +17113,6 @@ paths:
       description: Get List template
       operationId: get_list_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: folder-id
         in: query
         name: folder-id
@@ -19228,21 +17167,6 @@ paths:
       description: Create template
       operationId: create_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateTemplateReq
         in: body
         name: template
@@ -19290,21 +17214,6 @@ paths:
       description: Update template
       operationId: update_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateTemplateReqBody
         in: body
         name: template
@@ -19352,22 +17261,6 @@ paths:
       - application/json
       description: Get List template folder
       operationId: get_list_template_folder
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -19409,21 +17302,6 @@ paths:
       description: Create template folder
       operationId: create_template_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateFolderReq
         in: body
         name: template_folder
@@ -19471,21 +17349,6 @@ paths:
       description: Update template folder
       operationId: update_template_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateFolderReqBody
         in: body
         name: folder
@@ -19534,21 +17397,6 @@ paths:
       description: Delete template folder
       operationId: delete_template_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: template-folder-id
         in: path
         name: template-folder-id
@@ -19588,21 +17436,6 @@ paths:
       description: Get single template folder
       operationId: get_single_template_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: template-folder-id
         in: path
         name: template-folder-id
@@ -19650,21 +17483,6 @@ paths:
       description: Get Commits template folder
       operationId: get_commits_template_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: template-folder-id
         in: path
         name: template-folder-id
@@ -19712,21 +17530,6 @@ paths:
       description: Create share template
       operationId: create_share_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateTokenReq
         in: body
         name: share
@@ -19774,21 +17577,6 @@ paths:
       description: Update share template
       operationId: update_share_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateTokenReq
         in: body
         name: share
@@ -19837,21 +17625,6 @@ paths:
       description: Get List user template
       operationId: get_list_user_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: object-id
         in: query
         name: object-id
@@ -19898,21 +17671,6 @@ paths:
       description: Create user template
       operationId: create_user_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateUserPermissionReq
         in: body
         name: template
@@ -19960,21 +17718,6 @@ paths:
       description: Update user template
       operationId: update_user_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateUserPermissionReq
         in: body
         name: user
@@ -20023,21 +17766,6 @@ paths:
       description: Delete user template
       operationId: delete_user_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: user-permission-id
         in: path
         name: user-permission-id
@@ -20077,21 +17805,6 @@ paths:
       description: Get single user template
       operationId: get_single_user_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: user-permission-id
         in: path
         name: user-permission-id
@@ -20139,16 +17852,6 @@ paths:
       description: Convert template to html
       operationId: convert_template_to_html
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: TemplateBody
         in: body
         name: view
@@ -20197,21 +17900,6 @@ paths:
       description: Convert template to html
       operationId: convert_template_to_htmlV2
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: TemplateBody
         in: body
         name: view
@@ -20260,21 +17948,6 @@ paths:
       description: Delete template
       operationId: delete_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: template-id
         in: path
         name: template-id
@@ -20314,21 +17987,6 @@ paths:
       description: Get single template
       operationId: get_single_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: template-id
         in: path
         name: template-id
@@ -20376,21 +18034,6 @@ paths:
       description: Get Commits template
       operationId: get_commits_template
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: template-id
         in: path
         name: template-id
@@ -20438,16 +18081,6 @@ paths:
       description: Upload
       operationId: upload_image
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: from-chat
         in: query
         name: from-chat
@@ -20499,16 +18132,6 @@ paths:
       description: Upload file
       operationId: upload_file
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: file
         in: formData
         name: file
@@ -20522,11 +18145,6 @@ paths:
       - description: object_id
         in: path
         name: object_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: tags
@@ -20575,16 +18193,6 @@ paths:
       description: Get view list
       operationId: get_view_list
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: app_id
         type: string
@@ -20635,16 +18243,6 @@ paths:
       description: Create view
       operationId: create_view
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateViewRequestBody
         in: body
         name: view
@@ -20692,16 +18290,6 @@ paths:
       description: Update view
       operationId: update_view
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateViewRequestBody
         in: body
         name: view
@@ -20750,16 +18338,6 @@ paths:
       description: Get all view relation permissions
       operationId: get_all_view_relation_permission
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: role_id
         in: path
         name: role_id
@@ -20768,11 +18346,6 @@ paths:
       - description: table_slug
         in: path
         name: table_slug
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -20817,16 +18390,6 @@ paths:
       description: Delete view
       operationId: delete_view
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: view_id
         in: path
         name: view_id
@@ -20866,16 +18429,6 @@ paths:
       description: Get single view
       operationId: get_view_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: view_id
         in: path
         name: view_id
@@ -20925,16 +18478,6 @@ paths:
         get list view relation switch to get single view relation because for one table be one view relation
       operationId: get_single_view_relation
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: project_id
         type: string
@@ -20991,16 +18534,6 @@ paths:
       description: Upsert view relation
       operationId: upsert_view_relation
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpsertViewRelationsBody
         in: body
         name: table
@@ -21048,17 +18581,6 @@ paths:
       - application/json
       description: Get List webpage app
       operationId: get_list_web_page_app
-      parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -21100,16 +18622,6 @@ paths:
       description: Create web page app
       operationId: create_web_page_app
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateAppReqModel
         in: body
         name: webpage_app
@@ -21157,16 +18669,6 @@ paths:
       description: Update webpage app
       operationId: update_web_page_app
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateAppReqModel
         in: body
         name: app
@@ -21215,16 +18717,6 @@ paths:
       description: Delete webpage app
       operationId: delete_web_page_app
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: webpage-app-id
         in: path
         name: webpage-app-id
@@ -21264,16 +18756,6 @@ paths:
       description: Get single webpage app
       operationId: get_single_web_page_app
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: webpage-app-id
         in: path
         name: webpage-app-id
@@ -21320,17 +18802,6 @@ paths:
       - application/json
       description: Get List webpage folder
       operationId: get_list_web_page_folder
-      parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -21372,16 +18843,6 @@ paths:
       description: Create web page folder
       operationId: create_web_page_folder
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateFolderReqModel
         in: body
         name: webpage_folder
@@ -21429,11 +18890,6 @@ paths:
       description: Update webpage folder
       operationId: update_web_page_folder
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: UpdateFolderReqModel
         in: body
         name: folder
@@ -21482,16 +18938,6 @@ paths:
       description: Delete webpage folder
       operationId: delete_web_page_folder
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: webpage-folder-id
         in: path
         name: webpage-folder-id
@@ -21531,16 +18977,6 @@ paths:
       description: Get single webpage folder
       operationId: get_single_web_page_folder
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: webpage-folder-id
         in: path
         name: webpage-folder-id
@@ -21588,16 +19024,6 @@ paths:
       description: Get List web page
       operationId: get_list_web_pageV2
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: folder-id
         in: query
         name: folder-id
@@ -21657,11 +19083,6 @@ paths:
       description: Create webpage
       operationId: create_web_pageV2
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateWebPageReqModel
         in: body
         name: webpage
@@ -21709,16 +19130,6 @@ paths:
       description: Update web page
       operationId: update_web_pageV2
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateWebPageReqModel
         in: body
         name: webpage
@@ -21767,16 +19178,6 @@ paths:
       description: Delete webpage
       operationId: delete_web_pageV2
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: webpage-id
         in: path
         name: webpage-id
@@ -21816,16 +19217,6 @@ paths:
       description: Get single webpage
       operationId: get_single_web_pageV2
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: webpage-id
         in: path
         name: webpage-id
@@ -21881,19 +19272,9 @@ paths:
       description: Get webpage history
       operationId: get_web_page_history
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: webpage-id
         in: path
         name: webpage-id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: limit
@@ -21948,19 +19329,9 @@ paths:
       description: Revert webpage
       operationId: revert_web_pageV2
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: webpage-id
         in: path
         name: webpage-id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: Request Body
@@ -22011,19 +19382,9 @@ paths:
       description: Insert Many webpageV2
       operationId: insert_many_web_pageV2
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: webpage-id
         in: path
         name: webpage-id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       - description: Request Body
@@ -22074,16 +19435,6 @@ paths:
       description: Get all custom events
       operationId: get_new_all_custom_events
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: environment_id
         type: string
@@ -22140,16 +19491,6 @@ paths:
       description: Create New CustomEvent
       operationId: create_new_custom_event
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateCustomEventRequestBody
         in: body
         name: Customevent
@@ -22197,21 +19538,6 @@ paths:
       description: Update new custom event
       operationId: update_new_custom_event
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateCustomEventRequestBody
         in: body
         name: Customevent
@@ -22260,16 +19586,6 @@ paths:
       description: Delete CustomEvent
       operationId: delete_new_custom_event
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: custom_event_id
         in: path
         name: custom_event_id
@@ -22309,21 +19625,6 @@ paths:
       description: Get CustomEvent by id
       operationId: get_new_custom_event_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: custom_event_id
         in: path
         name: custom_event_id
@@ -22371,16 +19672,6 @@ paths:
       description: Get all functions
       operationId: get_all_new_functions
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: limit
         in: query
         name: limit
@@ -22434,20 +19725,6 @@ paths:
       description: Create New Function
       operationId: create_new_function
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateFunctionRequestBody
         in: body
         name: Function
@@ -22495,16 +19772,6 @@ paths:
       description: Update new function
       operationId: update_new_function
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateFunctionRequestBody
         in: body
         name: Function
@@ -22553,21 +19820,6 @@ paths:
       description: Get all functions
       operationId: get_all_new_functions_for_app
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: limit
         in: query
         name: limit
@@ -22622,19 +19874,9 @@ paths:
       description: Delete New Function
       operationId: delete_new_function
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: function_id
         in: path
         name: function_id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         required: true
         type: string
       produces:
@@ -22671,11 +19913,6 @@ paths:
       description: Get Function by id
       operationId: get_new_function_by_id
       parameters:
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: function_id
         in: path
         name: function_id
@@ -22723,20 +19960,6 @@ paths:
       description: V2 Get all tables
       operationId: v2_get_all_tables
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - in: query
         name: folder_id
         type: string
@@ -22796,20 +20019,6 @@ paths:
       description: v2 Create table
       operationId: v2_create_table
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateTableRequestBody
         in: body
         name: table
@@ -22857,20 +20066,6 @@ paths:
       description: Update table
       operationId: v2_update_table
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: UpdateTableRequestBody
         in: body
         name: table
@@ -22919,19 +20114,8 @@ paths:
       description: Get all table folders
       operationId: get_all_table_folders
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
+      - in: query
+        name: app_id
         type: string
       - in: query
         name: limit
@@ -22983,20 +20167,6 @@ paths:
       description: Create table folder
       operationId: create_table_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: CreateTableFolderRequest
         in: body
         name: table
@@ -23044,20 +20214,6 @@ paths:
       description: Update table folder
       operationId: update_table_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: TableFolder
         in: body
         name: table
@@ -23106,20 +20262,6 @@ paths:
       description: Delete Table Folder
       operationId: delete_table_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: id
         in: path
         name: id
@@ -23159,20 +20301,6 @@ paths:
       description: Get table folder by id
       operationId: get_table_folder_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: id
         in: path
         name: id
@@ -23220,20 +20348,6 @@ paths:
       description: V2 Delete Table
       operationId: v2_delete_table
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: table_id
         in: path
         name: table_id
@@ -23273,20 +20387,6 @@ paths:
       description: V2 Get table by id
       operationId: v2_get_table_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: table_id
         in: path
         name: table_id
@@ -23334,15 +20434,6 @@ paths:
       description: GetBotTokenlist
       operationId: GetBotTokenlist
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: project-id
         in: query
         name: project-id
@@ -23388,15 +20479,6 @@ paths:
       description: Create bot
       operationId: CreateBot
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: body
         in: body
         name: bot_token
@@ -23444,10 +20526,6 @@ paths:
       description: UpdateBotToken
       operationId: UpdateBotToken
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
       - description: project-id
         in: query
         name: project-id
@@ -23500,14 +20578,6 @@ paths:
       description: DeleteBotToken
       operationId: DeleteBotToken
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        type: string
       - description: bot-id
         in: path
         name: id
@@ -23554,15 +20624,6 @@ paths:
       description: GetBotTokenByBotID
       operationId: GetBotTokenByBotID
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: bot-id
         in: path
         name: id
@@ -23610,15 +20671,6 @@ paths:
       description: GetChatlist
       operationId: GetChatlist
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: project-id
         in: query
         name: project-id
@@ -23668,15 +20720,6 @@ paths:
       description: Create Chat
       operationId: CreateChat
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: Chat body
         in: body
         name: chat_service
@@ -23725,15 +20768,6 @@ paths:
       description: GetChatByChatID
       operationId: GetChatByChatID
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: chat-id
         in: path
         name: id
@@ -23781,16 +20815,6 @@ paths:
       description: Get Query Folder Lit
       operationId: get_query_list
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: limit
         type: integer
@@ -23847,16 +20871,6 @@ paths:
       description: Create Query
       operationId: create_query
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateQueryRequest
         in: body
         name: table
@@ -23905,16 +20919,6 @@ paths:
       description: Delete Query
       operationId: delete_query
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: guid
         in: path
         name: guid
@@ -23954,16 +20958,6 @@ paths:
       description: Get Query By Id
       operationId: get_query_item
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: guid
         in: path
         name: guid
@@ -24010,16 +21004,6 @@ paths:
       description: Update Query
       operationId: update_query
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: guid
         in: path
         name: guid
@@ -24073,16 +21057,6 @@ paths:
       description: Get Query Folder Lit
       operationId: get_query_folder_list
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: limit
         type: integer
@@ -24139,16 +21113,6 @@ paths:
       description: Create Query Folder
       operationId: create_query_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateQueryFolderRequest
         in: body
         name: table
@@ -24197,16 +21161,6 @@ paths:
       description: Delete Query Folder
       operationId: delete_query_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: guid
         in: path
         name: guid
@@ -24246,16 +21200,6 @@ paths:
       description: Get Query Folder By Id
       operationId: get_query_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: guid
         in: path
         name: guid
@@ -24302,16 +21246,6 @@ paths:
       description: Update Query Folder
       operationId: update_query_folder
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: guid
         in: path
         name: guid
@@ -24365,16 +21299,6 @@ paths:
       description: Get Web Page List
       operationId: get_web_page_list
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - in: query
         name: limit
         type: integer
@@ -24425,16 +21349,6 @@ paths:
       description: Create Web Page
       operationId: create_web_page
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: CreateWebPageRequest
         in: body
         name: table
@@ -24483,16 +21397,6 @@ paths:
       description: Delete Web Page
       operationId: delete_web_page
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: guid
         in: path
         name: guid
@@ -24532,16 +21436,6 @@ paths:
       description: Get Web Page By Id
       operationId: get_web_page_by_id
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: guid
         in: path
         name: guid
@@ -24588,16 +21482,6 @@ paths:
       description: Update Web Page
       operationId: update_web_page
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
       - description: guid
         in: path
         name: guid
@@ -24651,21 +21535,6 @@ paths:
       description: Verify
       operationId: verify_email
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
       - description: sms_id
         in: path
         name: sms_id

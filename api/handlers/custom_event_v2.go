@@ -17,8 +17,6 @@ import (
 
 // CreateNewCustomEvent godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_new_custom_event
 // @Router /v2/custom-event [POST]
 // @Summary Create New CustomEvent
@@ -137,8 +135,6 @@ func (h *Handler) CreateNewCustomEvent(c *gin.Context) {
 
 // GetNewCustomEventByID godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_new_custom_event_by_id
 // @Router /v2/custom-event/{custom_event_id} [GET]
 // @Summary Get CustomEvent by id
@@ -146,7 +142,6 @@ func (h *Handler) CreateNewCustomEvent(c *gin.Context) {
 // @Tags NewCustomEvent
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param custom_event_id path string true "custom_event_id"
 // @Success 200 {object} status_http.Response{data=string} "CustomEventBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -235,8 +230,6 @@ func (h *Handler) GetNewCustomEventByID(c *gin.Context) {
 
 // GetAllNewCustomEvents godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_new_all_custom_events
 // @Router /v2/custom-event [GET]
 // @Summary Get all custom events
@@ -328,8 +321,6 @@ func (h *Handler) GetAllNewCustomEvents(c *gin.Context) {
 
 // UpdateNewCustomEvent godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_new_custom_event
 // @Router /v2/custom-event [PUT]
 // @Summary Update New Customevent
@@ -337,7 +328,6 @@ func (h *Handler) GetAllNewCustomEvents(c *gin.Context) {
 // @Tags NewCustomEvent
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param Customevent body models.CustomEvent true "UpdateCustomEventRequestBody"
 // @Success 200 {object} status_http.Response{data=string} "CustomEvent data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -442,8 +432,6 @@ func (h *Handler) UpdateNewCustomEvent(c *gin.Context) {
 
 // DeleteNewCustomEvent godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_new_custom_event
 // @Router /v2/custom-event/{custom_event_id} [DELETE]
 // @Summary Delete CustomEvent

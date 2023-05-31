@@ -24,6 +24,7 @@ service SessionService {
     rpc MultiCompanyLogin(MultiCompanyLoginRequest) returns (MultiCompanyLoginResponse) {}
     rpc V2MultiCompanyLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyLoginRes) {}
     rpc V2MultiCompanyOneLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyOneLoginRes) {}
+    rpc V2LoginWithOption(V2LoginWithOptionRequest) returns (V2LoginWithOptionsResponse) {}
 }
 
 message ResourceEnvironmentV2MultiCompany {
@@ -258,6 +259,24 @@ message V2LoginResponse {
     repeated Object tables = 14;
     google.protobuf.Struct addational_table = 15;
 }
+message V2LoginWithOptionsResponse {
+    bool user_found = 1;
+    ClientPlatform client_platform = 2;
+    ClientType client_type = 3;
+    string user_id = 4;
+    Role role = 5;
+    Token token = 6;
+    repeated RecordPermission permissions = 7;
+    repeated Session sessions = 8;
+    string login_table_slug = 9;
+    repeated RecordPermission app_permissions = 10;
+    string resource_id = 11;
+    string environment_id = 12;
+    User user = 13;
+    repeated Object tables = 14;
+    google.protobuf.Struct addational_table = 15;
+    repeated Company companies = 16;
+}
 message V2LoginRequest {
     string username = 1;
     string password = 2;
@@ -267,6 +286,11 @@ message V2LoginRequest {
     string project_id = 6;
     string resource_environment_id = 7;
     int32 resource_type = 8;
+}
+
+message V2LoginWithOptionRequest {
+    map<string, string> data = 1;
+    string login_strategy = 2;
 }
 
 message V2LoginSuperAdminRes {

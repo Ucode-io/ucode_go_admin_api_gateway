@@ -21,8 +21,6 @@ import (
 
 // CreateQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_query_request
 // @Router /v1/query-request [POST]
 // @Summary Create query
@@ -30,7 +28,6 @@ import (
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query body tmp.CreateQueryReq true "CreateQueryReq"
 // @Success 201 {object} status_http.Response{data=tmp.Query} "Query data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -155,8 +152,6 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 
 // GetSingleQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_query_request
 // @Router /v1/query-request/{query-id} [GET]
 // @Summary Get single query
@@ -164,7 +159,6 @@ func (h *Handler) CreateQueryRequest(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query-id path string true "query-id"
 // @Param commit-id query string false "commit-id"
 // @Success 200 {object} status_http.Response{data=tmp.Query} "Query"
@@ -300,8 +294,6 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 
 // UpdateQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_query_request
 // @Router /v1/query-request [PUT]
 // @Summary Update query
@@ -309,7 +301,6 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query body tmp.UpdateQueryReq true "UpdateQueryReq"
 // @Success 200 {object} status_http.Response{data=tmp.Query} "Query data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -446,8 +437,6 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 
 // DeleteQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_query_request
 // @Router /v1/query-request/{query-id} [DELETE]
 // @Summary Delete query
@@ -455,7 +444,6 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query-id path string true "query-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -561,8 +549,6 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 
 // GetListQueryRequest godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_query_request
 // @Router /v1/query-request [GET]
 // @Summary Get List query
@@ -570,7 +556,6 @@ func (h *Handler) DeleteQueryRequest(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param folder-id query string true "folder-id"
 // @Param limit query string false "limit"
 // @Param offset query string false "offset"
@@ -687,8 +672,6 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 
 // QueryRun godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID run_query_request
 // @Router /v1/query-request/run [POST]
 // @Summary Run query
@@ -696,7 +679,6 @@ func (h *Handler) GetListQueryRequest(c *gin.Context) {
 // @Tags Query
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param query body tmp.Query true "Query"
 // @Success 201 {object} status_http.Response{data=tmp.RunQueryRes} "RunQueryRes data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -814,8 +796,6 @@ func (h *Handler) QueryRun(c *gin.Context) {
 
 // GetQueryHistory godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_query_history
 // @Router /v1/query-request/{query-id}/history [GET]
 // @Summary Get Api query history
@@ -824,7 +804,6 @@ func (h *Handler) QueryRun(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param query-id path string true "query-id"
-// @Param project-id query string true "project-id"
 // @Param limit query string true "limit"
 // @Param offset query string true "offset"
 // @Success 200 {object} status_http.Response{data=tmp.GetQueryHistoryRes} "QueryHistory"
@@ -1015,8 +994,6 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 
 // RevertQuery godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID revert_query
 // @Router /v1/query-request/{query-id}/revert [POST]
 // @Summary Revert query
@@ -1025,7 +1002,6 @@ func (h *Handler) GetQueryHistory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param query-id path string true "query-id"
-// @Param project-id query string true "project-id"
 // @Param RevertQueryReq body models.QueryRevertRequest true "Request Body"
 // @Success 200 {object} status_http.Response{data=tmp.Query} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1147,8 +1123,6 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 
 // InsertManyVersionForQueryService godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID insert_many_query_reference
 // @Router /v1/query-request/select-versions/{query-id} [POST]
 // @Summary Insert Many query
@@ -1157,7 +1131,6 @@ func (h *Handler) RevertQuery(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param query-id path string true "query-id"
-// @Param project-id query string true "project-id"
 // @Param data body tmp.QueryManyVersions true "Request Body"
 // @Success 200 {object} status_http.Response{data=string} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -1270,8 +1243,6 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 
 // GetSingleQueryLog godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_query_log
 // @Router /v1/query-request/{query-id}/log/{log-id} [GET]
 // @Summary get single log
@@ -1281,7 +1252,6 @@ func (h *Handler) InsertManyVersionForQueryService(c *gin.Context) {
 // @Produce json
 // @Param query-id path string true "query-id"
 // @Param log-id path string true "log-id"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=tmp.Log} "Response Body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -1392,8 +1362,6 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 
 // GetListQueryLog godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_query_log
 // @Router /v1/query-request/{query-id}/log [GET]
 // @Summary get list log
@@ -1402,7 +1370,6 @@ func (h *Handler) GetSingleQueryLog(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param query-id path string true "query-id"
-// @Param project-id query string true "project-id"
 // @Param limit query string true "limit"
 // @Param offset query string true "offset"
 // @Success 200 {object} status_http.Response{data=tmp.GetListLogRes} "Response Body"

@@ -15,8 +15,6 @@ import (
 
 // CreateApp godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_app
 // @Router /v1/app [POST]
 // @Summary Create app
@@ -132,8 +130,6 @@ func (h *Handler) CreateApp(c *gin.Context) {
 
 // GetAppByID godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_app_by_id
 // @Router /v1/app/{app_id} [GET]
 // @Summary Get app by id
@@ -246,8 +242,6 @@ func (h *Handler) GetAppByID(c *gin.Context) {
 
 // GetAllApps godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_apps
 // @Router /v1/app [GET]
 // @Summary Get all apps
@@ -281,6 +275,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+	limit = 100
 
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
@@ -314,6 +309,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	limit = 100
 
 	// We get resource_environment relation
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
@@ -328,6 +324,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	limit = 100
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().App().GetAll(
@@ -355,8 +352,6 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 
 // UpdateApp godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_app
 // @Router /v1/app [PUT]
 // @Summary Update app
@@ -467,8 +462,6 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 
 // DeleteApp godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_app
 // @Router /v1/app/{app_id} [DELETE]
 // @Summary Delete App
@@ -477,7 +470,6 @@ func (h *Handler) UpdateApp(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param app_id path string true "app_id"
-// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"

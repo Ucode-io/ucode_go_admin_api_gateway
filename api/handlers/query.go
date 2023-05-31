@@ -16,8 +16,6 @@ import (
 
 // GetQueryRows godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_query_rows
 // @Router /v1/query [POST]
 // @Summary Get all query rows

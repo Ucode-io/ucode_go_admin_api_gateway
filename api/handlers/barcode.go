@@ -13,8 +13,6 @@ import (
 
 // GetNewGeneratedBarCode godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID generate_new_barcode_for_items
 // @Router /v1/barcode-generator/{table_slug} [GET]
 // @Summary get barcode
@@ -105,8 +103,6 @@ func (h *Handler) GetNewGeneratedBarCode(c *gin.Context) {
 
 // GetNewGeneratedCode godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID generate_new_code_with_prefix
 // @Router /v1/code-generator/{table_slug}/{field_id} [GET]
 // @Summary get code with prefix

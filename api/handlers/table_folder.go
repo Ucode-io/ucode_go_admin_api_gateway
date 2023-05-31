@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -16,8 +17,6 @@ import (
 
 // CreateTableFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_table_folder
 // @Router /v2/table-folder [POST]
 // @Summary Create table folder
@@ -25,7 +24,6 @@ import (
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table body models.CreateTableFolderRequest true "CreateTableFolderRequest"
 // @Success 201 {object} status_http.Response{data=object_builder_service.TableFolder} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -99,6 +97,8 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 			Title:     tableFolder.Title,
 			ParentId:  tableFolder.ParentdId,
 			ProjectId: resourceEnvironmentId,
+			Icon:      tableFolder.Icon,
+			AppId:     tableFolder.AppId,
 		},
 	)
 
@@ -108,8 +108,6 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 
 // GetTableFolderByID godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_table_folder_by_id
 // @Router /v2/table-folder/{id} [GET]
 // @Summary Get table folder by id
@@ -117,7 +115,6 @@ func (h *Handler) CreateTableFolder(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param id path string true "id"
 // @Success 200 {object} status_http.Response{data=object_builder_service.TableFolder} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -197,8 +194,6 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 
 // GetAllTableFolders godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_table_folders
 // @Router /v2/table-folder [GET]
 // @Summary Get all table folders
@@ -206,7 +201,6 @@ func (h *Handler) GetTableFolderByID(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param filters query models.GetAllTableFoldersRequest true "filters"
 // @Success 200 {object} status_http.Response{data=object_builder_service.GetAllTablesResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -216,6 +210,7 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 		//resourceEnvironment *company_service.ResourceEnvironment
 		resourceEnvironmentId string
 	)
+	fmt.Println(">>>>>> test get all table folders")
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -287,6 +282,7 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 			Offset:    int32(offset),
 			Limit:     int32(limit),
 			ProjectId: resourceEnvironmentId,
+			AppId:     c.Query("app_id"),
 		},
 	)
 
@@ -295,8 +291,6 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 
 // UpdateTableFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_table_folder
 // @Router /v2/table-folder [PUT]
 // @Summary Update table folder
@@ -304,7 +298,6 @@ func (h *Handler) GetAllTableFolders(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param table body object_builder_service.TableFolder  true "TableFolder"
 // @Success 200 {object} status_http.Response{data=object_builder_service.TableFolder} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -382,6 +375,8 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 			ParentId:  tableFolder.ParentId,
 			ProjectId: resourceEnvironmentId,
 			Id:        tableFolder.Id,
+			Icon:      tableFolder.Icon,
+			AppId:     tableFolder.AppId,
 		},
 	)
 
@@ -390,8 +385,6 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 
 // DeleteTableFolder godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_table_folder
 // @Router /v2/table-folder/{id} [DELETE]
 // @Summary Delete Table Folder
@@ -399,7 +392,6 @@ func (h *Handler) UpdateTableFolder(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param id path string true "id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
