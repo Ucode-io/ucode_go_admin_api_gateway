@@ -94,17 +94,17 @@ environment:
 volumes:
   enabled: true
   hostpath:
-    enabled: true
+    enabled: false
     name: code-server
     path: /functions
     mountPath: /functions
     type: Directory
   pvc:
-    enabled: false
-    existing_claim:
-    name: pvc
+    enabled: true
+    existing_claim: code-server
+    name:
     mountPath: /functions
-    size: 1G
+    size: 2G
     class:
     accessModes:
       - ReadWriteMany
@@ -186,7 +186,7 @@ affinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
         - matchExpressions:
-            - key: kubernetes.io/code-server
+            - key: kubernetes.io/ucode-dev
               operator: In
               values:
                 - "true"
