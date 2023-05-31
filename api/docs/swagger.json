@@ -31712,6 +31712,9 @@
                 "label": {
                     "type": "string"
                 },
+                "relation_field": {
+                    "type": "string"
+                },
                 "required": {
                     "type": "boolean"
                 },
@@ -32233,6 +32236,9 @@
                     "type": "boolean"
                 },
                 "label": {
+                    "type": "string"
+                },
+                "relation_field": {
                     "type": "string"
                 },
                 "relation_id": {
@@ -33455,6 +33461,9 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "relation_field": {
                     "type": "string"
                 },
                 "slug": {
