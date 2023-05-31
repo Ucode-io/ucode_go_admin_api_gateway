@@ -3451,6 +3451,11 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "search",
                         "in": "query"
                     }
@@ -13755,6 +13760,11 @@ const docTemplate = `{
         },
         "/v1/object-slim/get-list/{table_slug}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get all objects slim",
                 "consumes": [
                     "application/json"
@@ -13776,13 +13786,16 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "GetListObjectRequestBody",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CommonMessage"
-                        }
+                        "type": "number",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -33059,6 +33072,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "permission": {
+                    "$ref": "#/definitions/object_builder_service.App_Permission"
+                },
                 "tables": {
                     "type": "array",
                     "items": {
@@ -33093,6 +33109,23 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "object_builder_service.App_Permission": {
+            "type": "object",
+            "properties": {
+                "create": {
+                    "type": "boolean"
+                },
+                "delete": {
+                    "type": "boolean"
+                },
+                "read": {
+                    "type": "boolean"
+                },
+                "update": {
+                    "type": "boolean"
                 }
             }
         },
@@ -34338,6 +34371,32 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.Permission": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "is_have_condition": {
+                    "type": "boolean"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "read": {
+                    "type": "string"
+                },
+                "update": {
+                    "type": "string"
+                },
+                "write": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.QuickFilter": {
             "type": "object",
             "properties": {
@@ -34661,6 +34720,9 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "record_permissions": {
+                    "$ref": "#/definitions/object_builder_service.Permission"
                 },
                 "show_in_menu": {
                     "type": "boolean"

@@ -56,6 +56,15 @@ message GetListWithRoleAppTablePermissionsRequest {
 
 message RoleWithAppTablePermissions {
     message App {
+        message Permission {
+            bool create = 1;
+            bool read = 2;
+            bool update = 3;
+            bool delete = 4;
+            string guid = 5;
+            string role_id = 7;
+            string app_id = 8;
+        }
         message Table {
             message RecordPermission {
                 string read = 1;
@@ -118,6 +127,7 @@ message RoleWithAppTablePermissions {
         string icon = 3;
         string id = 4;
         repeated Table tables = 5;
+        Permission permission = 6;
     }
 
     string name = 1;

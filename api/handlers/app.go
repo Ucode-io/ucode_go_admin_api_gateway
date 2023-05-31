@@ -275,6 +275,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
+	limit = 100
 
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
@@ -308,6 +309,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	limit = 100
 
 	// We get resource_environment relation
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
@@ -322,6 +324,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	authInfo, _ := h.GetAuthInfo(c)
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().App().GetAll(
@@ -331,6 +334,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 				Offset:    int32(offset),
 				Search:    c.DefaultQuery("search", ""),
 				ProjectId: resource.ResourceEnvironmentId,
+				RoleId:    authInfo.GetRoleId(),
 			},
 		)
 	case pb.ResourceType_POSTGRESQL:
@@ -341,6 +345,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 				Offset:    int32(offset),
 				Search:    c.DefaultQuery("search", ""),
 				ProjectId: resource.ResourceEnvironmentId,
+				RoleId:    authInfo.GetRoleId(),
 			},
 		)
 	}

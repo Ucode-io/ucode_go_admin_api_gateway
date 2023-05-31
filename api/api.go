@@ -82,7 +82,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/object/:table_slug/:object_id", h.GetSingle)
 		v1.POST("/object/get-list/:table_slug", h.GetList)
 		v1.GET("/object-slim/:table_slug/:object_id", h.GetSingleSlim)
-		v1.POST("/object-slim/get-list/:table_slug", h.GetListSlim)
+		v1.GET("/object-slim/get-list/:table_slug", h.GetListSlim)
 		v1.PUT("/object/:table_slug", h.UpdateObject)
 		v1.DELETE("/object/:table_slug/:object_id", h.DeleteObject)
 		v1.POST("/object/excel/:table_slug", h.GetListInExcel)
@@ -465,6 +465,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 	// v3 for ucode version 2
 	v3 := r.Group("/v3")
+	v3.Use(h.AdminAuthMiddleware())
 	{
 		// query folder
 		v3.POST("/query_folder", h.CreateQueryFolder)
