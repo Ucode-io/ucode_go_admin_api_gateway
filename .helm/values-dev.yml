@@ -101,7 +101,7 @@ volumes:
     type: Directory
   pvc:
     enabled: true
-    existing_claim: code-server
+    existing_claim: code-server.code-server
     name:
     mountPath: /functions
     size: 2G
