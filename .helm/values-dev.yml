@@ -94,13 +94,13 @@ environment:
 volumes:
   enabled: true
   hostpath:
-    enabled: false
+    enabled: true
     name: code-server
     path: /functions
     mountPath: /functions
     type: Directory
   pvc:
-    enabled: true
+    enabled: false
     existing_claim: code-server.code-server
     name:
     mountPath: /functions
