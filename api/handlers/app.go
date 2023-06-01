@@ -324,6 +324,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	authInfo, _ := h.GetAuthInfo(c)
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().App().GetAll(
@@ -333,6 +334,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 				Offset:    int32(offset),
 				Search:    c.DefaultQuery("search", ""),
 				ProjectId: resource.ResourceEnvironmentId,
+				RoleId:    authInfo.GetRoleId(),
 			},
 		)
 	case pb.ResourceType_POSTGRESQL:
@@ -343,6 +345,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 				Offset:    int32(offset),
 				Search:    c.DefaultQuery("search", ""),
 				ProjectId: resource.ResourceEnvironmentId,
+				RoleId:    authInfo.GetRoleId(),
 			},
 		)
 	}

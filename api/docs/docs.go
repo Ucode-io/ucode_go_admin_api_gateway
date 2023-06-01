@@ -32166,6 +32166,9 @@ const docTemplate = `{
                 "label": {
                     "type": "string"
                 },
+                "relation_field": {
+                    "type": "string"
+                },
                 "required": {
                     "type": "boolean"
                 },
@@ -32710,6 +32713,9 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "label": {
+                    "type": "string"
+                },
+                "relation_field": {
                     "type": "string"
                 },
                 "relation_id": {

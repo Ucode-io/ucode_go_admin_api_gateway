@@ -1584,6 +1584,8 @@ definitions:
         type: boolean
       label:
         type: string
+      relation_field:
+        type: string
       required:
         type: boolean
       slug:
@@ -1943,6 +1945,8 @@ definitions:
       is_visible:
         type: boolean
       label:
+        type: string
+      relation_field:
         type: string
       relation_id:
         type: string
