@@ -136,7 +136,6 @@ message Table {
     CommitInfo commit_info = 14;
     bool is_cached = 15;
     Permission record_permissions = 16;
-    bool is_system = 17;
 }
 
 message CommitInfo {
