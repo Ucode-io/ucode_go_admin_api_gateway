@@ -265,6 +265,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		v1.GET("/layout/:table_id", h.GetListLayouts)
 		v1.PUT("/layout", h.UpdateLayout)
+
+		//menu
+		v1.POST("/menu", h.CreateMenu)
+		v1.GET("/menu/:menu_id", h.GetMenuByID)
+		v1.GET("/menu", h.GetAllMenus)
+		v1.PUT("/menu", h.UpdateMenu)
+		v1.DELETE("/menu/:menu_id", h.DeleteMenu)
+
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))

@@ -1,0 +1,67 @@
+syntax="proto3";
+
+package object_builder_service;
+option go_package="genproto/object_builder_service";
+
+import "google/protobuf/empty.proto";
+import "table.proto";
+
+service MenuService {
+    rpc Create(CreateMenuRequest) returns (Menu) {}
+    rpc GetByID(MenuPrimaryKey) returns (Menu) {}
+    rpc GetAll(GetAllMenusRequest) returns (GetAllMenusResponse) {}
+    rpc Update(Menu) returns (google.protobuf.Empty) {}
+    rpc Delete(MenuPrimaryKey) returns (google.protobuf.Empty) {}
+}
+
+message CreateMenuRequest {
+    string label = 1;
+    string icon = 2;
+    string table_id = 3;
+    string layout_id = 4;
+    string parent_id = 5;
+    string type = 6;
+    string project_id = 7;
+}
+
+message Menu {
+    string label = 1;
+    string icon = 2;
+    string table_id = 3;
+    string layout_id = 4;
+    string parent_id = 5;
+    string type = 6;
+    string id = 7;
+    string project_id = 8;
+}
+
+message MenuForGetAll {
+    string label = 1;
+    string icon = 2;
+    string table_id = 3;
+    string layout_id = 4;
+    string parent_id = 5;
+    string type = 6;
+    string id = 7;
+    string project_id = 8;
+    repeated Menu child_menus = 9;
+}
+
+message GetAllMenusResponse {
+    repeated MenuForGetAll menus = 1;
+    int32 count = 2;
+}
+
+message MenuPrimaryKey {
+    string id = 1;
+    string project_id = 2;
+}
+
+message GetAllMenusRequest {
+    int32 offset = 1;
+    int32 limit = 2;
+    string search = 3;
+    string project_id = 4;
+    string role_id = 5;
+    string parent_id = 6;
+}

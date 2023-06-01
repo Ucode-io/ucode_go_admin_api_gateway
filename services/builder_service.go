@@ -40,6 +40,7 @@ type BuilderServiceI interface {
 	TableHelpers() object_builder_service.TableHelpersServiceClient
 	FieldsAndRelations() object_builder_service.FieldAndRelationServiceClient
 	Setting() object_builder_service.SettingServiceClient
+	Menu() object_builder_service.MenuServiceClient
 }
 
 func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderServiceI, error) {
@@ -85,6 +86,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		fieldsAndRelations:       object_builder_service.NewFieldAndRelationServiceClient(connObjectBuilderService),
 		settingService:           object_builder_service.NewSettingServiceClient(connObjectBuilderService),
 		layoutService:            object_builder_service.NewLayoutServiceClient(connObjectBuilderService),
+		menuService:              object_builder_service.NewMenuServiceClient(connObjectBuilderService),
 	}, nil
 }
 
@@ -119,6 +121,7 @@ type builderServiceClient struct {
 	fieldsAndRelations       object_builder_service.FieldAndRelationServiceClient
 	settingService           object_builder_service.SettingServiceClient
 	layoutService            object_builder_service.LayoutServiceClient
+	menuService              object_builder_service.MenuServiceClient
 }
 
 func (g *builderServiceClient) Table() object_builder_service.TableServiceClient {
@@ -238,4 +241,8 @@ func (g *builderServiceClient) FieldsAndRelations() object_builder_service.Field
 
 func (g *builderServiceClient) Setting() object_builder_service.SettingServiceClient {
 	return g.settingService
+}
+
+func (g *builderServiceClient) Menu() object_builder_service.MenuServiceClient {
+	return g.menuService
 }
