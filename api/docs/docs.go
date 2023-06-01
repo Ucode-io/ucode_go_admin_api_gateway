@@ -33075,6 +33075,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -34719,6 +34722,9 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "is_own_table": {
+                    "type": "boolean"
+                },
+                "is_system": {
                     "type": "boolean"
                 },
                 "is_visible": {
