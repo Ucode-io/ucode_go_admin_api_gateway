@@ -33690,6 +33690,35 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.ChildMenu": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "layout_id": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.ClientPlatform": {
             "type": "object",
             "properties": {
@@ -34898,7 +34927,7 @@ const docTemplate = `{
                 "child_menus": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Menu"
+                        "$ref": "#/definitions/object_builder_service.ChildMenu"
                     }
                 },
                 "icon": {
@@ -34918,6 +34947,9 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "table": {
+                    "$ref": "#/definitions/object_builder_service.Table"
                 },
                 "table_id": {
                     "type": "string"

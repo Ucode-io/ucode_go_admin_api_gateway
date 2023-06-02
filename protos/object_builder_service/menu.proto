@@ -35,6 +35,17 @@ message Menu {
     string project_id = 8;
 }
 
+message ChildMenu {
+    string label = 1;
+    string icon = 2;
+    string table_id = 3;
+    string layout_id = 4;
+    string parent_id = 5;
+    string type = 6;
+    string id = 7;
+    string project_id = 8;
+}
+
 message MenuForGetAll {
     string label = 1;
     string icon = 2;
@@ -44,7 +55,8 @@ message MenuForGetAll {
     string type = 6;
     string id = 7;
     string project_id = 8;
-    repeated Menu child_menus = 9;
+    Table table = 9;
+    repeated ChildMenu child_menus = 10;
 }
 
 message GetAllMenusResponse {
