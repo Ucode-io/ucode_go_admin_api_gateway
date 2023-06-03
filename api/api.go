@@ -461,6 +461,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2Admin.GET("/function", h.GetAllNewFunctions)
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
+
+		functions := v2Admin.Group("functions")
+		{
+			functions.POST("/micro-frontend", h.CreateMicroFrontEnd)
+			functions.GET("/micro-frontend/:micro-frontend-id", h.GetMicroFrontEndByID)
+			functions.GET("/micro-frontend", h.GetAllMicroFrontEnd)
+			functions.PUT("/micro-frontend", h.UpdateMicroFrontEnd)
+			functions.DELETE("/micro-frontend/:micro-frontend-id", h.DeleteMicroFrontEnd)
+		}
 	}
 
 	// v3 for ucode version 2

@@ -116,6 +116,19 @@ type Config struct {
 	GetRequestRedisPort     string
 	GetRequestRedisDatabase int
 	GetRequestRedisPassword string
+
+	HelmRepoAddFunction    string
+	HelmRepoUpdateFunction string
+	HelmInstallFunction    string
+	HelmUninstallFunction  string
+
+	HelmRepoAddFMicroFE    string
+	HelmRepoUpdateMicroFE  string
+	HelmInstallMicroFE     string
+	HelmUninstallMicroFE   string
+	GitlabGroupIdMicroFE   int
+	GitlabProjectIdMicroFE int
+	PathToCloneMicroFE     string
 }
 
 // Load ...
@@ -222,6 +235,14 @@ func Load() Config {
 	config.GetRequestRedisPort = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", "6601"))
 	config.GetRequestRedisDatabase = cast.ToInt(GetOrReturnDefaultValue("GET_REQUEST_REDIS_DATABASE", 0))
 	config.GetRequestRedisPassword = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PASSWORD", "redis_password"))
+
+	config.HelmRepoAddFunction = cast.ToString(GetOrReturnDefaultValue("HELM_REPO_ADD_FUNCTION", ""))
+	config.HelmRepoUpdateFunction = cast.ToString(GetOrReturnDefaultValue("HELM_REPO_UPDATE_FUNCTION", ""))
+	config.HelmInstallFunction = cast.ToString(GetOrReturnDefaultValue("HELM_INSTALL_FUNCTION", ""))
+	config.HelmUninstallFunction = cast.ToString(GetOrReturnDefaultValue("HELM_UNINSTALL_FUNCTION", ""))
+
+	config.GitlabGroupIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID_MICROFE", 2595))
+	config.GitlabProjectIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFE", 1993))
 
 	return config
 }

@@ -1,4 +1,4 @@
-package gitlab_integration
+package gitlab
 
 import (
 	"bytes"
