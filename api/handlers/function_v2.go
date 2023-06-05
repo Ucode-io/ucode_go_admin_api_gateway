@@ -883,6 +883,8 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
 		return
 	}
+	authInfo, _ := h.GetAuthInfo(c)
+	invokeFunction.Data["user_id"] = authInfo.GetUserId()
 	invokeFunction.Data["app_id"] = apiKeys.GetData()[0].GetAppId()
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+c.Param("function-path"), "POST", models.NewInvokeFunctionRequest{
 		Data: invokeFunction.Data,
