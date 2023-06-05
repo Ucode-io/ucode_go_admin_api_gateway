@@ -33,6 +33,7 @@ message CreateFieldRequest {
     string commit_id = 15;
     string version_id = 16;
     string relation_field = 17;
+    bool show_label = 18;
 }
 
 message CreateFieldsRequest {
@@ -72,6 +73,7 @@ message Field {
     string version_id = 18;
     bool is_system = 19;
     string relation_field = 20;
+    bool show_label = 21;
 }
 
 message GetAllFieldsResponse {
