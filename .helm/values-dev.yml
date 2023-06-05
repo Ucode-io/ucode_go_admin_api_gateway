@@ -55,6 +55,17 @@ podAnnotations:
     {{ $key }}: {{ $value }}
     {{- end }}
     {{ end -}}
+    {{- with secret "secret/data/k8s/ucode-dev/gitlab" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
+    {{- with secret "secret/data/k8s/ucode-dev/openfaas" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
+
 podLabels:
   app: ucode-go-admin-api-gateway
 
@@ -90,10 +101,10 @@ volumes:
     type: Directory
   pvc:
     enabled: false
-    existing_claim:
-    name: pvc
+    existing_claim: code-server.code-server
+    name:
     mountPath: /functions
-    size: 1G
+    size: 2G
     class:
     accessModes:
       - ReadWriteMany
@@ -175,7 +186,7 @@ affinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
         - matchExpressions:
-            - key: kubernetes.io/code-server
+            - key: kubernetes.io/ucode-dev
               operator: In
               values:
                 - "true"
