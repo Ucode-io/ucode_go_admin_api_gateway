@@ -25,6 +25,8 @@ func CreateProjectFork(projectName string, data IntegrationData) (response model
 		Visibility:           "private",
 	})
 
+	fmt.Println("res:::::::::::", resp)
+
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
 	} else if resp.Code >= 500 {
@@ -51,7 +53,7 @@ func DeleteForkedProject(repoName string, cfg config.Config) (response models.Gi
 func UpdateProject(cfg IntegrationData, data map[string]interface{}) (response models.GitlabIntegrationResponse, err error) {
 	// create repo in given group by existing project in gitlab
 
-	projectId := data["id"].(int)
+	projectId := cfg.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
 	fmt.Println("config::::::", cfg.GitlabIntegrationUrl, cfg.GitlabIntegrationToken)
 

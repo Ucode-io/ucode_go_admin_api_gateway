@@ -3,6 +3,8 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
+	"github.com/google/uuid"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -10,6 +12,7 @@ import (
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -104,7 +107,7 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 	}
 	projectName := strings.ReplaceAll(strings.TrimSpace(project.Title), " ", "-")
 	projectName = strings.ToLower(projectName)
-	var functionPath = projectName + "-" + function.Path
+	var functionPath = projectName + "_" + strings.ReplaceAll(function.Path, "-", "_")
 
 	respCreateFork, err := gitlab.CreateProjectFork(functionPath, gitlab.IntegrationData{
 		GitlabIntegrationUrl:   h.cfg.GitlabIntegrationURL,
@@ -117,10 +120,13 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("response", respCreateFork.Message["id"])
+	//projectId := respCreateFork.Message["id"].(float64)
+
 	_, err = gitlab.UpdateProject(gitlab.IntegrationData{
 		GitlabIntegrationUrl:   h.cfg.GitlabIntegrationURL,
 		GitlabIntegrationToken: h.cfg.GitlabIntegrationToken,
-		GitlabProjectId:        respCreateFork.Message["id"].(int),
+		GitlabProjectId:        int(respCreateFork.Message["id"].(float64)),
 		GitlabGroupId:          h.cfg.GitlabGroupIdMicroFE,
 	}, map[string]interface{}{
 		"ci_config_path": ".gitlab-ci.yml",
@@ -130,17 +136,35 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 		return
 	}
 
-	_, err = gitlab.CreatePipeline(gitlab.IntegrationData{
+	id, _ := uuid.NewRandom()
+	repoHost := fmt.Sprintf("%s-%s", id.String(), h.cfg.GitlabHostMicroFE)
+	h.log.Info("CreateMicroFrontEnd [ci/cd]",
+		logger.Any("host", repoHost),
+		logger.Any("repo_name", functionPath),
+	)
+
+	data := make([]map[string]interface{}, 0)
+	host := make(map[string]interface{})
+	host["key"] = "INGRESS_HOST"
+	host["value"] = repoHost
+	data = append(data, host)
+
+	resPipeline, err := gitlab.CreatePipeline(gitlab.IntegrationData{
 		GitlabIntegrationUrl:   h.cfg.GitlabIntegrationURL,
 		GitlabIntegrationToken: h.cfg.GitlabIntegrationToken,
-		GitlabProjectId:        respCreateFork.Message["id"].(int),
+		GitlabProjectId:        int(respCreateFork.Message["id"].(float64)),
 		GitlabGroupId:          h.cfg.GitlabGroupIdMicroFE,
-	}, map[string]interface{}{})
+	}, map[string]interface{}{
+		"variables": data,
+	})
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	fmt.Println("response [resPipeline]", resPipeline)
 
+	//h.handleResponse(c, status_http.OK, resPipeline)
+	//return
 	response, err := services.FunctionService().FunctionService().Create(
 		context.Background(),
 		&fc.CreateFunctionRequest{
@@ -151,6 +175,7 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 			EnvironmentId:    environmentId.(string),
 			FunctionFolderId: function.FunctionFolderId,
 			Type:             MICROFE,
+			Url:              repoHost,
 		},
 	)
 

@@ -10,12 +10,13 @@ import (
 
 func CreatePipeline(cfg IntegrationData, data map[string]interface{}) (response models.GitlabIntegrationResponse, err error) {
 
-	projectId := data["id"].(int)
+	projectId := cfg.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
 	fmt.Println("config::::::", cfg.GitlabIntegrationUrl, cfg.GitlabIntegrationToken)
 
-	resp, err := DoRequest(cfg.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/pipeline?ref=main", cfg.GitlabIntegrationToken, "POST", data)
+	resp, err := DoRequest(cfg.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/pipeline", cfg.GitlabIntegrationToken+"&"+"ref=staging", "POST", data)
 
+	fmt.Println("resp::::::::::::::::::::", resp)
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
 	} else if resp.Code >= 500 {

@@ -20,7 +20,7 @@ func DoRequest(url, token string, method string, body interface{}) (responseMode
 	}
 
 	url += "?access_token=" + token
-	fmt.Println(url)
+	fmt.Println(url, string(data))
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
 	if err != nil {
 		return
