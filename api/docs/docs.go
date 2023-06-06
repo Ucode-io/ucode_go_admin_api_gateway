@@ -34969,6 +34969,9 @@ const docTemplate = `{
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend": {
+                    "$ref": "#/definitions/object_builder_service.MicroFrontend"
+                },
                 "microfrontend_id": {
                     "type": "string"
                 },
@@ -34985,6 +34988,41 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.MicroFrontend": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "function_folder_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "ssh_url": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }

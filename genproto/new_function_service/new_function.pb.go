@@ -165,6 +165,7 @@ func (x *CreateFunctionRequest) GetType() string {
 	return ""
 }
 
+// if you change this message you must be change Microfrontend message in object_builder_service's menu.proto
 type Function struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
