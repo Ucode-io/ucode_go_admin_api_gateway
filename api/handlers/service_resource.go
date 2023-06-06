@@ -3,16 +3,15 @@ package handlers
 import (
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
 )
 
 // UpdateServiceResource godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_service_resource
 // @Router /v1/company/project/service-resource [PUT]
 // @Summary Update service resource
@@ -20,7 +19,6 @@ import (
 // @Tags Service Resource
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param data body pb.UpdateServiceResourceReq true "data"
 // @Success 200 {object} status_http.Response{data=pb.UpdateServiceResourceRes} "data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -35,13 +33,12 @@ func (h *Handler) UpdateServiceResource(c *gin.Context) {
 		return
 	}
 
-	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("invalid projectId")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-	data.ProjectId = projectId
+	data.ProjectId = projectId.(string)
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
@@ -66,8 +63,6 @@ func (h *Handler) UpdateServiceResource(c *gin.Context) {
 
 // GetListServiceResource godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_service_resource
 // @Router /v1/company/project/service-resource [GET]
 // @Summary get list service resource
@@ -75,16 +70,14 @@ func (h *Handler) UpdateServiceResource(c *gin.Context) {
 // @Tags Service Resource
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=pb.GetListServiceResourceRes} "data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetListServiceResource(c *gin.Context) {
 
-	projectId := c.DefaultQuery("project-id", "")
-	if !util.IsValidUUID(projectId) {
-		err := errors.New("invalid projectId")
-		h.handleResponse(c, status_http.BadRequest, err.Error())
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -98,7 +91,7 @@ func (h *Handler) GetListServiceResource(c *gin.Context) {
 	resp, err := h.companyServices.CompanyService().ServiceResource().GetList(
 		context.Background(),
 		&pb.GetListServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 		},
 	)

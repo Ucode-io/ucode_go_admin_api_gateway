@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
+	"time"
 	pb "ucode/ucode_go_api_gateway/genproto/project_service"
 )
 
@@ -20,4 +21,9 @@ type ProjectRepoI interface {
 	GetByPK(ctx context.Context, pKey *pb.ProjectPrimaryKey) (res *pb.Project, err error)
 	Update(ctx context.Context, entity *pb.UpdateProjectRequest) (rowsAffected int64, err error)
 	Delete(ctx context.Context, pKey *pb.ProjectPrimaryKey) (namespace string, rowsAffected int64, err error)
+}
+
+type RedisStorageI interface {
+	SetX(ctx context.Context, key string, value string, duration time.Duration) error
+	Get(ctx context.Context, key string) (string, error)
 }

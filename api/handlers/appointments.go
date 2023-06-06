@@ -12,8 +12,6 @@ import (
 
 // GetAllOfflineAppointments godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_offline_appointments
 // @Router /v1/offline_appointment [GET]
 // @Summary Get all offline appointments
@@ -21,8 +19,8 @@ import (
 // @Tags Appointment
 // @Accept json
 // @Produce json
-// @Param filters query pos_service.GetAllOfflineAppointmentsRequest true "filters"
-// @Success 200 {object} status_http.Response{data=pos_service.GetAllOfflineAppointmentsResponse} "OfflineAppointmentBody"
+// @Param filters query ps.GetAllOfflineAppointmentsRequest true "filters"
+// @Success 200 {object} status_http.Response{data=ps.GetAllOfflineAppointmentsResponse} "OfflineAppointmentBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
@@ -82,8 +80,6 @@ func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
 
 // GetAllBookedAppointments godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_booked_appointments
 // @Router /v1/booked_appointment [GET]
 // @Summary Get all booked appointments
@@ -91,8 +87,8 @@ func (h *Handler) GetAllOfflineAppointments(c *gin.Context) {
 // @Tags Appointment
 // @Accept json
 // @Produce json
-// @Param filters query pos_service.GetAllBookedAppointmentsRequest true "filters"
-// @Success 200 {object} status_http.Response{data=pos_service.GetAllBookedAppointmentsResponse} "BookedAppointmentBody"
+// @Param filters query ps.GetAllBookedAppointmentsRequest true "filters"
+// @Success 200 {object} status_http.Response{data=ps.GetAllBookedAppointmentsResponse} "BookedAppointmentBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllBookedAppointments(c *gin.Context) {
@@ -136,8 +132,6 @@ func (h *Handler) GetAllBookedAppointments(c *gin.Context) {
 
 // GetSingleOfflineAppointment godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_offline_appointment_by_id
 // @Router /v1/offline_appointment/{offline_appointment_id} [GET]
 // @Summary Get single offline appointment
@@ -146,7 +140,7 @@ func (h *Handler) GetAllBookedAppointments(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param offline_appointment_id path string true "offline_appointment_id"
-// @Success 200 {object} status_http.Response{data=pos_service.GetSingleOfflineAppointmentResponse} "OfflineAppointmentBody"
+// @Success 200 {object} status_http.Response{data=ps.GetSingleOfflineAppointmentResponse} "OfflineAppointmentBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleOfflineAppointment(c *gin.Context) {
@@ -180,8 +174,6 @@ func (h *Handler) GetSingleOfflineAppointment(c *gin.Context) {
 
 // GetSingleBookedAppointment godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_booked_appointment_by_id
 // @Router /v1/booked_appointment/{booked_appointment_id} [GET]
 // @Summary Get single booked appointment
@@ -190,7 +182,7 @@ func (h *Handler) GetSingleOfflineAppointment(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param booked_appointment_id path string true "booked_appointment_id"
-// @Success 200 {object} status_http.Response{data=pos_service.GetSingleBookedAppointmentResponse} "BookedAppointmentBody"
+// @Success 200 {object} status_http.Response{data=ps.GetSingleBookedAppointmentResponse} "BookedAppointmentBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleBookedAppointment(c *gin.Context) {
@@ -224,8 +216,6 @@ func (h *Handler) GetSingleBookedAppointment(c *gin.Context) {
 
 // UpdateAppointmentPaymentStatus godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_appointment_payment_status
 // @Router /v1/payment_status/{appointment_id} [PUT]
 // @Summary Update appointment payment status
@@ -233,8 +223,8 @@ func (h *Handler) GetSingleBookedAppointment(c *gin.Context) {
 // @Tags Appointment
 // @Accept json
 // @Produce json
-// @Param view body pos_service.UpdatePaymentStatusBody true "UpdateAppointmentStatus"
-// @Success 200 {object} status_http.Response{data=pos_service.OfflineAppointment} "Appointment data"
+// @Param view body ps.UpdatePaymentStatusBody true "UpdateAppointmentStatus"
+// @Success 200 {object} status_http.Response{data=ps.OfflineAppointment} "Appointment data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
@@ -283,8 +273,6 @@ func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 
 // GetCloseCashboxInfo godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID close_cashbox_info
 // @Router /v1/close-cashbox [GET]
 // @Summary Get close cashbox
@@ -292,7 +280,7 @@ func (h *Handler) UpdateAppointmentPaymentStatus(c *gin.Context) {
 // @Tags Appointment
 // @Accept json
 // @Produce json
-// @Success 200 {object} status_http.Response{data=pos_service.CashboxResponse} "Cashbox data"
+// @Success 200 {object} status_http.Response{data=ps.CashboxResponse} "Cashbox data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
@@ -334,8 +322,6 @@ func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 
 // GetOpenCashboxInfo godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID open_cashbox_info
 // @Router /v1/open-cashbox [GET]
 // @Summary Get open cashbox
@@ -343,7 +329,7 @@ func (h *Handler) GetCloseCashboxInfo(c *gin.Context) {
 // @Tags Appointment
 // @Accept json
 // @Produce json
-// @Success 200 {object} status_http.Response{data=pos_service.CashboxResponse} "Cashbox data"
+// @Success 200 {object} status_http.Response{data=ps.CashboxResponse} "Cashbox data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
@@ -387,8 +373,6 @@ func (h *Handler) GetOpenCashboxInfo(c *gin.Context) {
 
 // CashboxTransaction godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_cashbox_transaction
 // @Router /v1/cashbox_transaction [POST]
 // @Summary Create cashbox transaction

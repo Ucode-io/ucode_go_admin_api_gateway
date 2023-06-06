@@ -17,8 +17,6 @@ import (
 
 // Scenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_scenario
 // @Router /v1/scenario [POST]
 // @Summary Create scenario
@@ -26,7 +24,6 @@ import (
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param body body models.CreateScenarioRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=models.DAG} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -55,8 +52,12 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -122,7 +123,7 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 	}
 
 	serviceReq := pb.CreateScenarioRequest{
-		ProjectId:     ProjectId,
+		ProjectId:     projectId.(string),
 		EnvironmentId: EnvironmentId.(string),
 		Dag:           dag,
 		Steps:         dagSteps,
@@ -139,7 +140,7 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 		CommitType: config.COMMIT_TYPE_SCENARIO,
 		Name:       fmt.Sprintf("Auto Created Commit Create Scenario - %s", time.Now().Format(time.RFC1123)),
 		AuthorId:   authInfo.GetUserId(),
-		ProjectId:  ProjectId,
+		ProjectId:  projectId.(string),
 	}
 
 	resp, err := services.ScenarioService().DagService().CreateScenario(
@@ -156,8 +157,6 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 
 // Scenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_scenario
 // @Router /v1/scenario [PUT]
 // @Summary Update scenario
@@ -165,7 +164,6 @@ func (h *Handler) CreateFullScenario(c *gin.Context) {
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param body body models.CreateScenarioRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=models.DAG} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -194,8 +192,12 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -261,7 +263,7 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 	}
 
 	serviceReq := pb.CreateScenarioRequest{
-		ProjectId:     ProjectId,
+		ProjectId:     projectId.(string),
 		EnvironmentId: EnvironmentId.(string),
 		Dag:           dag,
 		Steps:         dagSteps,
@@ -278,7 +280,7 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 		CommitType: config.COMMIT_TYPE_SCENARIO,
 		Name:       fmt.Sprintf("Auto Created Commit Update Scenario - %s", time.Now().Format(time.RFC1123)),
 		AuthorId:   authInfo.GetUserId(),
-		ProjectId:  ProjectId,
+		ProjectId:  projectId.(string),
 	}
 
 	resp, err := services.ScenarioService().DagService().Update(
@@ -295,8 +297,6 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 
 // Scenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID scenario_history
 // @Router /v1/scenario/{id}/history/ [GET]
 // @Summary Get History scenario
@@ -305,7 +305,6 @@ func (h *Handler) UpdateFullScenario(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "dag-id"
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=pb.GetScenarioHistoryResponse} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -324,8 +323,12 @@ func (h *Handler) GetScenarioHistory(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -338,7 +341,7 @@ func (h *Handler) GetScenarioHistory(c *gin.Context) {
 	resp, err := services.ScenarioService().DagService().GetScenarioHistory(
 		c.Request.Context(),
 		&pb.GetScenarioHistoryRequest{
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 			DagId:         c.Param("id"),
 		},
@@ -353,8 +356,6 @@ func (h *Handler) GetScenarioHistory(c *gin.Context) {
 
 // Scenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID select_version_scenario
 // @Router /v1/scenario/{id}/select-versions [PUT]
 // @Summary Select Versions scenario
@@ -363,7 +364,6 @@ func (h *Handler) GetScenarioHistory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "dag-id"
-// @Param project-id query string true "project-id"
 // @Param body body pb.CommitWithRelease  true "Request body"
 // @Success 200 {object} status_http.Response{data=emptypb.Empty} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -391,8 +391,12 @@ func (h *Handler) SelectVersionsScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -402,7 +406,7 @@ func (h *Handler) SelectVersionsScenario(c *gin.Context) {
 		return
 	}
 
-	req.ProjectId = ProjectId
+	req.ProjectId = projectId.(string)
 	req.EnvironmentId = EnvironmentId.(string)
 	req.Id = c.Param("id")
 
@@ -420,8 +424,6 @@ func (h *Handler) SelectVersionsScenario(c *gin.Context) {
 
 // Scenario godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID revert_scenario
 // @Router /v1/scenario/revert [POST]
 // @Summary Revert scenario
@@ -429,7 +431,6 @@ func (h *Handler) SelectVersionsScenario(c *gin.Context) {
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param body body pb.RevertScenarioRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=emptypb.Empty} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -457,13 +458,13 @@ func (h *Handler) RevertScenario(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project-id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
-	req.ProjectId = ProjectId
+	req.ProjectId = projectId.(string)
 	req.EnvironmentId = EnvironmentId.(string)
 
 	authInfo, err := h.adminAuthInfo(c)
@@ -477,7 +478,7 @@ func (h *Handler) RevertScenario(c *gin.Context) {
 		CommitType: config.COMMIT_TYPE_SCENARIO,
 		Name:       fmt.Sprintf("Auto Created Commit revert Scenario - %s", time.Now().Format(time.RFC1123)),
 		AuthorId:   authInfo.GetUserId(),
-		ProjectId:  ProjectId,
+		ProjectId:  projectId.(string),
 		VersionIds: req.GetVersionIds(),
 	}
 

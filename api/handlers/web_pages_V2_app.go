@@ -3,15 +3,16 @@ package handlers
 import (
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/web_page_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_web_page_app
 // @Router /v1/webpage-app [POST]
 // @Summary Create web page app
@@ -48,11 +49,6 @@ func (h *Handler) CreateWebPageApp(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(app.ProjectId) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
 	//	err = errors.New("error getting resource id")
@@ -60,10 +56,29 @@ func (h *Handler) CreateWebPageApp(c *gin.Context) {
 	//	return
 	//}
 	//
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
@@ -85,7 +100,7 @@ func (h *Handler) CreateWebPageApp(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -93,7 +108,8 @@ func (h *Handler) CreateWebPageApp(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	//app.ProjectId = resourceEnvironment.GetId()
+	app.ProjectId = projectId.(string)
+	app.ResourceId = resource.ResourceEnvironmentId
 
 	res, err := services.WebPageService().App().CreateApp(
 		context.Background(),
@@ -110,7 +126,6 @@ func (h *Handler) CreateWebPageApp(c *gin.Context) {
 
 // GetSingleWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_web_page_app
 // @Router /v1/webpage-app/{webpage-app-id} [GET]
 // @Summary Get single webpage app
@@ -118,7 +133,6 @@ func (h *Handler) CreateWebPageApp(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param webpage-app-id path string true "webpage-app-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetSingleAppRes} "GetSingleAppRes"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -141,8 +155,8 @@ func (h *Handler) GetSingleWebPageApp(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -158,11 +172,24 @@ func (h *Handler) GetSingleWebPageApp(c *gin.Context) {
 	//	h.handleResponse(c, status_http.BadRequest, err.Error())
 	//	return
 	//}
-	//
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	//
@@ -183,7 +210,7 @@ func (h *Handler) GetSingleWebPageApp(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -196,7 +223,8 @@ func (h *Handler) GetSingleWebPageApp(c *gin.Context) {
 		context.Background(),
 		&tmp.GetSingleAppReq{
 			Id:            appId,
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
+			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -211,7 +239,6 @@ func (h *Handler) GetSingleWebPageApp(c *gin.Context) {
 
 // UpdateWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_web_page_app
 // @Router /v1/webpage-app [PUT]
 // @Summary Update webpage app
@@ -248,11 +275,6 @@ func (h *Handler) UpdateWebPageApp(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(app.ProjectId) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
 	//	err = errors.New("error getting resource id")
@@ -260,10 +282,29 @@ func (h *Handler) UpdateWebPageApp(c *gin.Context) {
 	//	return
 	//}
 	//
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	app.EnvironmentId = environmentId.(string)
@@ -284,7 +325,7 @@ func (h *Handler) UpdateWebPageApp(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -292,7 +333,8 @@ func (h *Handler) UpdateWebPageApp(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	//app.ProjectId = resourceEnvironment.GetId()
+	app.ProjectId = projectId.(string)
+	app.ResourceId = resource.ResourceEnvironmentId
 
 	res, err := services.WebPageService().App().UpdateApp(
 		context.Background(),
@@ -309,7 +351,6 @@ func (h *Handler) UpdateWebPageApp(c *gin.Context) {
 
 // DeleteWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_web_page_app
 // @Router /v1/webpage-app/{webpage-app-id} [DELETE]
 // @Summary Delete webpage app
@@ -317,7 +358,6 @@ func (h *Handler) UpdateWebPageApp(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param webpage-app-id path string true "webpage-app-id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -340,8 +380,8 @@ func (h *Handler) DeleteWebPageApp(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -358,10 +398,24 @@ func (h *Handler) DeleteWebPageApp(c *gin.Context) {
 	//	return
 	//}
 	//
+
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	//
@@ -382,7 +436,7 @@ func (h *Handler) DeleteWebPageApp(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -395,7 +449,8 @@ func (h *Handler) DeleteWebPageApp(c *gin.Context) {
 		context.Background(),
 		&tmp.DeleteAppReq{
 			Id:            appId,
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
+			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)
@@ -410,7 +465,6 @@ func (h *Handler) DeleteWebPageApp(c *gin.Context) {
 
 // GetListWebPageApp godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_web_page_app
 // @Router /v1/webpage-app [GET]
 // @Summary Get List webpage app
@@ -418,7 +472,6 @@ func (h *Handler) DeleteWebPageApp(c *gin.Context) {
 // @Tags WebPage
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=tmp.GetListAppRes} "AppBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -440,8 +493,8 @@ func (h *Handler) GetListWebPageApp(c *gin.Context) {
 	//	return
 	//}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -454,9 +507,22 @@ func (h *Handler) GetListWebPageApp(c *gin.Context) {
 	//}
 	//
 	environmentId, ok := c.Get("environment_id")
-	if !ok {
-		err = errors.New("error getting environment id")
-		h.handleResponse(c, status_http.BadRequest, errors.New("cant get environment_id"))
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_WEB_PAGE_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	//
@@ -477,7 +543,7 @@ func (h *Handler) GetListWebPageApp(c *gin.Context) {
 	//		c.Request.Context(),
 	//		&obs.GetDefaultResourceEnvironmentReq{
 	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
+	//			ProjectId:  projectId.(string)
 	//		},
 	//	)
 	//	if err != nil {
@@ -489,7 +555,8 @@ func (h *Handler) GetListWebPageApp(c *gin.Context) {
 	res, err := services.WebPageService().App().GetListApp(
 		context.Background(),
 		&tmp.GetListAppReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
+			ResourceId:    resource.ResourceEnvironmentId,
 			EnvironmentId: environmentId.(string),
 		},
 	)

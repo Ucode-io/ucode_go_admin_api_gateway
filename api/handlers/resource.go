@@ -14,8 +14,6 @@ import (
 
 // GetResource godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_resource_id
 // @Router /v1/company/project/resource/{resource_id} [GET]
 // @Summary Get Resource by id
@@ -46,8 +44,6 @@ func (h *Handler) GetResource(c *gin.Context) {
 
 // AddProjectResource godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID add_project_resource
 // @Router /v1/company/project/resource [POST]
 // @Summary Add ProjectResource
@@ -75,6 +71,8 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE
 		case company_service.ResourceType_CLICKHOUSE:
 			company.ServiceType = company_service.ServiceType_ANALYTICS_SERVICE
+		case company_service.ResourceType_POSTGRESQL:
+			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE
 		default:
 			err := errors.New("err resource type not supported yet")
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -97,8 +95,6 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 
 // ConfigureProjectResource godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID configure_project_resource
 // @Router /v1/company/project/configure-resource [POST]
 // @Summary Configure ProjectResource
@@ -126,6 +122,8 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE
 		case company_service.ResourceType_CLICKHOUSE:
 			company.ServiceType = company_service.ServiceType_ANALYTICS_SERVICE
+		case company_service.ResourceType_POSTGRESQL:
+			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE
 		default:
 			err := errors.New("err resource type not supported yet")
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -148,8 +146,6 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 
 // CreateProjectResource godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_project_resource
 // @Router /v1/company/project/create-resource [POST]
 // @Summary Create ProjectResource
@@ -185,8 +181,6 @@ func (h *Handler) CreateProjectResource(c *gin.Context) {
 
 // RemoveProjectResource godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID remove_project_resource
 // @Router /v1/company/project/resource [DELETE]
 // @Summary Remove ProjectResource
@@ -222,8 +216,6 @@ func (h *Handler) RemoveProjectResource(c *gin.Context) {
 
 // UpdateResource godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID put_resource_id
 // @Router /v1/company/project/resource/{resource_id} [PUT]
 // @Summary Update Resource by id
@@ -259,8 +251,6 @@ func (h *Handler) UpdateResource(c *gin.Context) {
 
 // GetResourceList godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_resource_list
 // @Router /v1/company/project/resource [GET]
 // @Summary Get all companies
@@ -306,8 +296,6 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 
 // ReconnectProjectResource godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID reconnect_project_resource
 // @Router /v1/company/project/resource/reconnect [POST]
 // @Summary Reconnect ProjectResource
@@ -315,9 +303,8 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 // @Tags Company Resource
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param ProjectResource body company_service.ReconnectResourceRequest true "ProjectResourceReconnectRequest"
-// @Success 201 {object} status_http.Response{data=company_service.EmptyProto} "ProjectResource data"
+// @Success 201 {object} status_http.Response{data=company_service.ReconnectResourceRes} "ProjectResource data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) ReconnectProjectResource(c *gin.Context) {
@@ -329,12 +316,13 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-	company.ProjectId = projectId
+
+	company.ProjectId = projectId.(string)
 
 	resp, err := h.companyServices.CompanyService().Resource().ReconnectResource(
 		c.Request.Context(),
@@ -351,8 +339,6 @@ func (h *Handler) ReconnectProjectResource(c *gin.Context) {
 
 // GetResourceEnvironment godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_resource_environment_id
 // @Router /v1/company/project/resource-environment/{resource_id} [GET]
 // @Summary Get Resource Environment by id
@@ -383,7 +369,6 @@ func (h *Handler) GetResourceEnvironment(c *gin.Context) {
 
 // GetServiceResources godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_service_resources
 // @Router /v1/company/project/resource-default [GET]
 // @Summary Get Service Resource
@@ -391,7 +376,6 @@ func (h *Handler) GetResourceEnvironment(c *gin.Context) {
 // @Tags Company Resource
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Success 200 {object} status_http.Response{data=company_service.GetServiceResourcesRes} "Resource data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -417,7 +401,6 @@ func (h *Handler) GetServiceResources(c *gin.Context) {
 
 // SetDefaultResource godoc
 // @Security ApiKeyAuth
-// @Param Environment-Id header string true "Environment-Id"
 // @ID set_default_resource
 // @Router /v1/company/project/resource-default [PUT]
 // @Summary Set Default Resource
@@ -425,7 +408,6 @@ func (h *Handler) GetServiceResources(c *gin.Context) {
 // @Tags Company Resource
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param data body company_service.SetDefaultResourceReq true "data"
 // @Success 200 {object} status_http.Response{data=company_service.SetDefaultResourceRes} "Resource data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"

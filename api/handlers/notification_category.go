@@ -13,8 +13,6 @@ import (
 
 // CreateCategory godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_category_for_notification
 // @Router /v1/notification/category [POST]
 // @Summary Create category
@@ -22,7 +20,6 @@ import (
 // @Tags Notification-Category
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param app body models.CreateCategory true "Request body"
 // @Success 201 {object} status_http.Response{data=models.Category} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -51,9 +48,9 @@ func (h *Handler) CreateCategoryNotification(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -61,7 +58,7 @@ func (h *Handler) CreateCategoryNotification(c *gin.Context) {
 		context.Background(),
 		&pb.CreateCategoryRequest{
 			Name:          req.Name,
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 			ParentId:      req.ParentID,
 		},
@@ -76,8 +73,6 @@ func (h *Handler) CreateCategoryNotification(c *gin.Context) {
 
 // GetCategory godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_single_category_for_notification
 // @Router /v1/notification/category/{id} [GET]
 // @Summary Get single category
@@ -85,7 +80,6 @@ func (h *Handler) CreateCategoryNotification(c *gin.Context) {
 // @Tags Notification-Category
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param id path string true "id"
 // @Success 200 {object} status_http.Response{data=models.Category} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -111,16 +105,16 @@ func (h *Handler) GetCategoryNotification(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	resp, err := services.NotificationService().Category().Get(
 		context.Background(),
 		&pb.GetCategoryRequest{
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 			Guid:          id,
 		},
@@ -135,8 +129,6 @@ func (h *Handler) GetCategoryNotification(c *gin.Context) {
 
 // GetListCategory godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_list_category_for_notification
 // @Router /v1/notification/category [GET]
 // @Summary Get list category
@@ -144,7 +136,6 @@ func (h *Handler) GetCategoryNotification(c *gin.Context) {
 // @Tags Notification-Category
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
 // @Param page query string false "page"
@@ -166,16 +157,16 @@ func (h *Handler) GetListCategoryNotification(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	resp, err := services.NotificationService().Category().GetList(
 		c.Request.Context(),
 		&pb.GetListCategoryRequest{
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 		},
 	)
@@ -189,8 +180,6 @@ func (h *Handler) GetListCategoryNotification(c *gin.Context) {
 
 // UpdateCategory godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_category_for_notification
 // @Router /v1/notification/category [PUT]
 // @Summary Update category
@@ -198,7 +187,6 @@ func (h *Handler) GetListCategoryNotification(c *gin.Context) {
 // @Tags Notification-Category
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param body body models.UpdateCategoryRequest true "body"
 // @Success 200 {object} status_http.Response{data=models.Category} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -225,9 +213,9 @@ func (h *Handler) UpdateCategoryNotification(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -240,7 +228,7 @@ func (h *Handler) UpdateCategoryNotification(c *gin.Context) {
 	resp, err := services.NotificationService().Category().Update(
 		context.Background(),
 		&pb.Category{
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 			Guid:          req.Id,
 			Name:          req.Name,
@@ -256,8 +244,6 @@ func (h *Handler) UpdateCategoryNotification(c *gin.Context) {
 
 // DeleteCategory godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_category_for_notification
 // @Router /v1/notification/category/{id} [DELETE]
 // @Summary Delete category
@@ -265,7 +251,6 @@ func (h *Handler) UpdateCategoryNotification(c *gin.Context) {
 // @Tags Notification-Category
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param id path string true "id"
 // @Success 200 {object} status_http.Response{data=string} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -292,16 +277,16 @@ func (h *Handler) DeleteCategoryNotification(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
-		h.handleResponse(c, status_http.BadRequest, "project_id not found")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
 	resp, err := services.NotificationService().Category().Delete(
 		c.Request.Context(),
 		&pb.DeleteCategoryRequest{
-			ProjectId:     ProjectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: EnvironmentId.(string),
 			Guid:          id,
 		},

@@ -20,10 +20,10 @@ import (
 
 func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, bool) {
 	bearerToken := c.GetHeader("Authorization")
-	projectId := c.DefaultQuery("project_id", "")
+	// projectId := c.DefaultQuery("project_id", "")
 
-	fmt.Println("---hasAccess->-project_id---" + projectId)
 	strArr := strings.Split(bearerToken, " ")
+
 	if len(strArr) != 2 || strArr[0] != "Bearer" {
 		h.log.Error("---ERR->HasAccess->Unexpected token format")
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
@@ -35,10 +35,8 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 		c.Request.Context(),
 		&auth_service.V2HasAccessUserReq{
 			AccessToken: accessToken,
-			ProjectId:   projectId,
-			// ClientPlatformId: "3f6320a6-b6ed-4f5f-ad90-14a154c95ed3",
-			Path:   helper.GetURLWithTableSlug(c),
-			Method: c.Request.Method,
+			Path:        helper.GetURLWithTableSlug(c),
+			Method:      c.Request.Method,
 		},
 	)
 	if err != nil {
@@ -77,7 +75,7 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessU
 		return nil, errors.New("token error: wrong format")
 	}
 
-	fmt.Println(":::::accessResponse", accessResponse)
+	// fmt.Println(":::::accessResponse", accessResponse)
 
 	return accessResponse, nil
 }

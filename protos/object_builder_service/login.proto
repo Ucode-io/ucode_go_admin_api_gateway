@@ -12,6 +12,7 @@ service LoginService {
     rpc LoginWithOtp (PhoneOtpRequst) returns (V2LoginResponse) {}
     rpc LoginWithEmailOtp (EmailOtpRequest) returns (V2LoginResponse) {}
     rpc GetUserUpdatedPermission (GetUserUpdatedPermissionRequest) returns(V2LoginResponse) {}
+    rpc LoginDataByUserId (LoginDataReq) returns (LoginDataRes) {}
 }
 
 message LoginDataReq {

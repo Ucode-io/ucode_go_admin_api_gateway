@@ -13,8 +13,6 @@ import (
 
 // ScenarioDAG godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID create_scenario_dag_step
 // @Router /v1/scenario/dag-step [POST]
 // @Summary Create scenario dag step
@@ -22,7 +20,6 @@ import (
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param body body pb.CreateDAGStepRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=pb.DAGStep} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -51,8 +48,12 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -89,8 +90,6 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 
 // ScenarioDAG godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_all_scenario_dag_step
 // @Router /v1/scenario/dag-step [GET]
 // @Summary Get All scenario dag step
@@ -98,7 +97,6 @@ func (h *Handler) CreateDagStep(c *gin.Context) {
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param dag-id query string true "dag-id"
 // @Success 200 {object} status_http.Response{data=models.GetAllDAGStepResponse} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -122,8 +120,12 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -201,8 +203,6 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 
 // ScenarioDAG godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID get_scenario_dag_step
 // @Router /v1/scenario/dag-step/{id} [GET]
 // @Summary Get scenario dag step
@@ -210,7 +210,6 @@ func (h *Handler) GetAllDagStep(c *gin.Context) {
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param id path string true "id"
 // @Param body body pb.GetDAGStepRequest  true "Request body"
 // @Success 200 {object} status_http.Response{data=pb.DAGStep} "Response body"
@@ -247,8 +246,12 @@ func (h *Handler) GetDagStep(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -267,8 +270,6 @@ func (h *Handler) GetDagStep(c *gin.Context) {
 
 // ScenarioDAG godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID update_scenario_dag_step
 // @Router /v1/scenario/dag-step [PUT]
 // @Summary Update scenario dag step
@@ -276,7 +277,6 @@ func (h *Handler) GetDagStep(c *gin.Context) {
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param body body pb.DAGStep  true "Request body"
 // @Success 200 {object} status_http.Response{data=pb.DAGStep} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -310,8 +310,12 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}
@@ -351,8 +355,6 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 
 // ScenarioDAG godoc
 // @Security ApiKeyAuth
-// @Param Resource-Id header string false "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @ID delete_scenario_dag_step
 // @Router /v1/scenario/dag-step/{id} [DELETE]
 // @Summary Delete scenario dag step
@@ -360,7 +362,6 @@ func (h *Handler) UpdateDagStep(c *gin.Context) {
 // @Tags Scenario
 // @Accept json
 // @Produce json
-// @Param project-id query string true "project-id"
 // @Param id path string true "id"
 // @Success 200 {object} status_http.Response{data=string} "Response body"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
@@ -386,8 +387,12 @@ func (h *Handler) DeleteDagStep(c *gin.Context) {
 		return
 	}
 
-	ProjectId := c.Query("project-id")
-	if !util.IsValidUUID(ProjectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.BadRequest, "project-id not found")
 		return
 	}

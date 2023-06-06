@@ -11,9 +11,11 @@ import (
 
 type BuilderServiceI interface {
 	Table() object_builder_service.TableServiceClient
+	TableFolder() object_builder_service.TableFolderServiceClient
 	Field() object_builder_service.FieldServiceClient
 	ObjectBuilder() object_builder_service.ObjectBuilderServiceClient
 	Section() object_builder_service.SectionServiceClient
+	Layout() object_builder_service.LayoutServiceClient
 	Relation() object_builder_service.RelationServiceClient
 	View() object_builder_service.ViewServiceClient
 	App() object_builder_service.AppServiceClient
@@ -54,6 +56,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 
 	return &builderServiceClient{
 		tableService:             object_builder_service.NewTableServiceClient(connObjectBuilderService),
+		tableFolderService:       object_builder_service.NewTableFolderServiceClient(connObjectBuilderService),
 		fieldService:             object_builder_service.NewFieldServiceClient(connObjectBuilderService),
 		objectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
 		sectionService:           object_builder_service.NewSectionServiceClient(connObjectBuilderService),
@@ -81,11 +84,13 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		tableHelpersService:      object_builder_service.NewTableHelpersServiceClient(connObjectBuilderService),
 		fieldsAndRelations:       object_builder_service.NewFieldAndRelationServiceClient(connObjectBuilderService),
 		settingService:           object_builder_service.NewSettingServiceClient(connObjectBuilderService),
+		layoutService:            object_builder_service.NewLayoutServiceClient(connObjectBuilderService),
 	}, nil
 }
 
 type builderServiceClient struct {
 	tableService             object_builder_service.TableServiceClient
+	tableFolderService       object_builder_service.TableFolderServiceClient
 	fieldService             object_builder_service.FieldServiceClient
 	objectBuilderService     object_builder_service.ObjectBuilderServiceClient
 	sectionService           object_builder_service.SectionServiceClient
@@ -113,10 +118,15 @@ type builderServiceClient struct {
 	tableHelpersService      object_builder_service.TableHelpersServiceClient
 	fieldsAndRelations       object_builder_service.FieldAndRelationServiceClient
 	settingService           object_builder_service.SettingServiceClient
+	layoutService            object_builder_service.LayoutServiceClient
 }
 
 func (g *builderServiceClient) Table() object_builder_service.TableServiceClient {
 	return g.tableService
+}
+
+func (g *builderServiceClient) TableFolder() object_builder_service.TableFolderServiceClient {
+	return g.tableFolderService
 }
 
 func (g *builderServiceClient) Field() object_builder_service.FieldServiceClient {
@@ -129,6 +139,10 @@ func (g *builderServiceClient) ObjectBuilder() object_builder_service.ObjectBuil
 
 func (g *builderServiceClient) Section() object_builder_service.SectionServiceClient {
 	return g.sectionService
+}
+
+func (g *builderServiceClient) Layout() object_builder_service.LayoutServiceClient {
+	return g.layoutService
 }
 
 func (g *builderServiceClient) Relation() object_builder_service.RelationServiceClient {

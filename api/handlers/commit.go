@@ -54,7 +54,7 @@ func (h *Handler) CreateCommit(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Success 200 {object} status_http.Response{data=versioning_service.CommitWithRelease} "CommitBody"
+// @Success 200 {object} status_http.Response{data=obs.CommitWithRelease} "CommitBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetCommitByID(c *gin.Context) {
@@ -105,13 +105,19 @@ func (h *Handler) GetAllCommits(c *gin.Context) {
 		return
 	}
 
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	resp, err := h.companyServices.VersioningService().Commit().GetList(
 		context.Background(),
 		&obs.GetCommitListRequest{
 			Limit:         int32(limit),
 			Offset:        int32(offset),
 			Search:        c.Query("search"),
-			ProjectId:     c.Query("project_id"),
+			ProjectId:     projectId.(string),
 			EnvironmentId: c.Query("environment_id"),
 			CommitType:    c.Query("commit_type"),
 		},
