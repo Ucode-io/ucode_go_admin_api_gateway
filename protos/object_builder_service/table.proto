@@ -135,6 +135,7 @@ message Table {
     string author_id = 13;
     CommitInfo commit_info = 14;
     bool is_cached = 15;
+    Permission record_permissions = 16;
 }
 
 message CommitInfo {
@@ -166,4 +167,14 @@ message GetAllTablesRequest {
     string project_id = 4;
     string version_id = 5;
     string folder_id = 6;
+}
+
+message Permission {
+    string read = 1;
+    string write = 2;
+    string update = 3;
+    string delete = 4;
+    string guid = 5;
+    bool is_public = 6;
+    bool is_have_condition = 7;
 }
