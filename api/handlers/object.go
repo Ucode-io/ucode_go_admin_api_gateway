@@ -600,7 +600,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "CREATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "UPDATE", c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
@@ -794,7 +794,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "CREATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "DELETE", c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
@@ -1048,28 +1048,35 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	fmt.Println(":::test:::")
 
 	queryParams := c.Request.URL.Query()
+	queryData := queryParams.Get("data")
+
 	queryMap := make(map[string]interface{})
-	for key, values := range queryParams {
-		fmt.Println(values)
-		fmt.Println(len(values))
-		if len(values) == 1 {
-			queryMap[key] = values[0]
-		} else if len(values) > 1 {
-			queryMap[key] = values
-		}
+	err := json.Unmarshal([]byte(queryData), &queryMap)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
 	}
+	// for key, values := range queryParams {
+	// 	fmt.Println(values)
+	// 	fmt.Println(len(values))
+	// 	if len(values) == 1 {
+	// 		queryMap[key] = values[0]
+	// 	} else if len(values) > 1 {
+	// 		queryMap[key] = values
+	// 	}
+	// }
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-
 	if _, ok := queryMap["limit"]; !ok {
 		queryMap["limit"] = 10
 	}
 	queryMap["offset"] = offset
+
+	fmt.Println("query map:", queryMap)
 	objectRequest.Data = queryMap
-	fmt.Println("objectRequest::", queryMap)
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
@@ -1091,12 +1098,6 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
 
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
@@ -1393,7 +1394,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "CREATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "DELETE_MANY2MANY", c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
@@ -1546,7 +1547,7 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "CREATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "APPEND_MANY2MANY", c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
@@ -1713,7 +1714,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 	objectRequest.Data["objects"] = editedObjects
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "CREATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "MULTIPLE_UPDATE", c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
@@ -1956,7 +1957,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 
 	fromOfs := c.Query("from-ofs")
 	if fromOfs != "true" {
-		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "CREATE", c, h)
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "MULTIPLE_UPDATE", c, h)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
