@@ -32276,6 +32276,9 @@ const docTemplate = `{
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend_id": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -32953,6 +32956,9 @@ const docTemplate = `{
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend_id": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -33343,6 +33349,9 @@ const docTemplate = `{
                 "ssh_url": {
                     "type": "string"
                 },
+                "type": {
+                    "type": "string"
+                },
                 "url": {
                     "type": "string"
                 }
@@ -33566,6 +33575,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -33703,6 +33715,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "layout_id": {
+                    "type": "string"
+                },
+                "microfrontend_id": {
                     "type": "string"
                 },
                 "parent_id": {
@@ -33998,6 +34013,9 @@ const docTemplate = `{
                 "relation_field": {
                     "type": "string"
                 },
+                "show_label": {
+                    "type": "boolean"
+                },
                 "slug": {
                     "type": "string"
                 },
@@ -34123,6 +34141,9 @@ const docTemplate = `{
                 },
                 "editable": {
                     "type": "boolean"
+                },
+                "function_path": {
+                    "type": "string"
                 },
                 "group_fields": {
                     "type": "array",
@@ -34598,6 +34619,9 @@ const docTemplate = `{
                 },
                 "relation_type": {
                     "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
                 }
             }
         },
@@ -34907,6 +34931,9 @@ const docTemplate = `{
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend_id": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -34940,6 +34967,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "layout_id": {
+                    "type": "string"
+                },
+                "microfrontend_id": {
                     "type": "string"
                 },
                 "parent_id": {
@@ -35322,6 +35352,9 @@ const docTemplate = `{
                 "is_own_table": {
                     "type": "boolean"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "is_visible": {
                     "type": "boolean"
                 },
@@ -35577,6 +35610,9 @@ const docTemplate = `{
                 },
                 "editable": {
                     "type": "boolean"
+                },
+                "function_path": {
+                    "type": "string"
                 },
                 "group_fields": {
                     "type": "array",

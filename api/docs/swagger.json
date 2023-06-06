@@ -32264,6 +32264,9 @@
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend_id": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -32941,6 +32944,9 @@
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend_id": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -33331,6 +33337,9 @@
                 "ssh_url": {
                     "type": "string"
                 },
+                "type": {
+                    "type": "string"
+                },
                 "url": {
                     "type": "string"
                 }
@@ -33554,6 +33563,9 @@
                 "id": {
                     "type": "string"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -33691,6 +33703,9 @@
                     "type": "string"
                 },
                 "layout_id": {
+                    "type": "string"
+                },
+                "microfrontend_id": {
                     "type": "string"
                 },
                 "parent_id": {
@@ -33986,6 +34001,9 @@
                 "relation_field": {
                     "type": "string"
                 },
+                "show_label": {
+                    "type": "boolean"
+                },
                 "slug": {
                     "type": "string"
                 },
@@ -34111,6 +34129,9 @@
                 },
                 "editable": {
                     "type": "boolean"
+                },
+                "function_path": {
+                    "type": "string"
                 },
                 "group_fields": {
                     "type": "array",
@@ -34586,6 +34607,9 @@
                 },
                 "relation_type": {
                     "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
                 }
             }
         },
@@ -34895,6 +34919,9 @@
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend_id": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -34928,6 +34955,9 @@
                     "type": "string"
                 },
                 "layout_id": {
+                    "type": "string"
+                },
+                "microfrontend_id": {
                     "type": "string"
                 },
                 "parent_id": {
@@ -35310,6 +35340,9 @@
                 "is_own_table": {
                     "type": "boolean"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "is_visible": {
                     "type": "boolean"
                 },
@@ -35565,6 +35598,9 @@
                 },
                 "editable": {
                     "type": "boolean"
+                },
+                "function_path": {
+                    "type": "string"
                 },
                 "group_fields": {
                     "type": "array",

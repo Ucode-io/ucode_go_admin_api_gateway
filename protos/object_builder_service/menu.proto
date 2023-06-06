@@ -22,6 +22,7 @@ message CreateMenuRequest {
     string parent_id = 5;
     string type = 6;
     string project_id = 7;
+    string microfrontend_id = 8;
 }
 
 message Menu {
@@ -33,6 +34,7 @@ message Menu {
     string type = 6;
     string id = 7;
     string project_id = 8;
+    string microfrontend_id = 9;
 }
 
 message ChildMenu {
@@ -44,6 +46,7 @@ message ChildMenu {
     string type = 6;
     string id = 7;
     string project_id = 8;
+    string microfrontend_id = 9;
 }
 
 message MenuForGetAll {
@@ -57,6 +60,7 @@ message MenuForGetAll {
     string project_id = 8;
     Table table = 9;
     repeated ChildMenu child_menus = 10;
+    string microfrontend_id = 11;
 }
 
 message GetAllMenusResponse {

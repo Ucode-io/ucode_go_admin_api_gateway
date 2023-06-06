@@ -83,13 +83,14 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 		resp, err = services.BuilderService().Menu().Create(
 			context.Background(),
 			&obs.CreateMenuRequest{
-				Label:     menu.Label,
-				Icon:      menu.Icon,
-				TableId:   menu.TableId,
-				LayoutId:  menu.LayoutId,
-				ParentId:  menu.ParentId,
-				Type:      menu.Type,
-				ProjectId: resource.ResourceEnvironmentId,
+				Label:           menu.Label,
+				Icon:            menu.Icon,
+				TableId:         menu.TableId,
+				LayoutId:        menu.LayoutId,
+				ParentId:        menu.ParentId,
+				Type:            menu.Type,
+				ProjectId:       resource.ResourceEnvironmentId,
+				MicrofrontendId: menu.MicrofrontendId,
 			},
 		)
 
@@ -101,13 +102,14 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 		resp, err = services.PostgresBuilderService().Menu().Create(
 			context.Background(),
 			&obs.CreateMenuRequest{
-				Label:     menu.Label,
-				Icon:      menu.Icon,
-				TableId:   menu.TableId,
-				LayoutId:  menu.LayoutId,
-				ParentId:  menu.ParentId,
-				Type:      menu.Type,
-				ProjectId: resource.ResourceEnvironmentId,
+				Label:           menu.Label,
+				Icon:            menu.Icon,
+				TableId:         menu.TableId,
+				LayoutId:        menu.LayoutId,
+				ParentId:        menu.ParentId,
+				Type:            menu.Type,
+				ProjectId:       resource.ResourceEnvironmentId,
+				MicrofrontendId: menu.MicrofrontendId,
 			},
 		)
 
@@ -384,14 +386,15 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 		resp, err = services.BuilderService().Menu().Update(
 			context.Background(),
 			&obs.Menu{
-				Id:        menu.Id,
-				Icon:      menu.Icon,
-				TableId:   menu.TableId,
-				LayoutId:  menu.LayoutId,
-				Label:     menu.Label,
-				ParentId:  menu.ParentId,
-				Type:      menu.Type,
-				ProjectId: resource.ResourceEnvironmentId,
+				Id:              menu.Id,
+				Icon:            menu.Icon,
+				TableId:         menu.TableId,
+				LayoutId:        menu.LayoutId,
+				Label:           menu.Label,
+				ParentId:        menu.ParentId,
+				Type:            menu.Type,
+				ProjectId:       resource.ResourceEnvironmentId,
+				MicrofrontendId: menu.MicrofrontendId,
 			},
 		)
 
@@ -403,14 +406,15 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 		resp, err = services.PostgresBuilderService().Menu().Update(
 			context.Background(),
 			&obs.Menu{
-				Id:        menu.Id,
-				Icon:      menu.Icon,
-				TableId:   menu.TableId,
-				LayoutId:  menu.LayoutId,
-				Label:     menu.Label,
-				ParentId:  menu.ParentId,
-				Type:      menu.Type,
-				ProjectId: resource.ResourceEnvironmentId,
+				Id:              menu.Id,
+				Icon:            menu.Icon,
+				TableId:         menu.TableId,
+				LayoutId:        menu.LayoutId,
+				Label:           menu.Label,
+				ParentId:        menu.ParentId,
+				Type:            menu.Type,
+				ProjectId:       resource.ResourceEnvironmentId,
+				MicrofrontendId: menu.MicrofrontendId,
 			},
 		)
 	}
