@@ -31,6 +31,8 @@ message CreateFunctionRequest {
     string password = 11;
     string ssh_url = 12;
     string type = 13;
+    string gitlab_id = 14;
+    string gitlab_group_id = 15;
 }
 
 message Function {
@@ -45,6 +47,8 @@ message Function {
     string password = 10;
     string ssh_url = 11;
     string type = 12;
+    string gitlab_id = 13;
+    string gitlab_group_id = 14;
 }
 
 message GetAllFunctionsRequest {
