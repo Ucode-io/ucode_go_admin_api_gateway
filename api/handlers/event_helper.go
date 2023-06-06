@@ -198,7 +198,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
+	authInfo, _ := h.GetAuthInfo(c)
 	for _, customEvent := range request.CustomEvents {
 		//this is new invoke function request for befor and after actions
 		var invokeFunction models.NewInvokeFunctionRequest
@@ -206,6 +206,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		if err != nil {
 			return customEvent.GetFunctions()[0].Name, err
 		}
+
 		fmt.Println("idsssss::", request.IDs)
 		fmt.Println("dataaa::", request.ObjectData)
 		data["object_ids"] = request.IDs
@@ -213,6 +214,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		data["object_data"] = request.ObjectData
 		data["method"] = request.Method
 		data["app_id"] = appId
+		data["user_id"] = authInfo.GetUserId()
 		invokeFunction.Data = data
 
 		js, _ := json.Marshal(invokeFunction)

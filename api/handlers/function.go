@@ -634,6 +634,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 	if invokeFunction.Attributes == nil {
 		invokeFunction.Attributes = make(map[string]interface{}, 0)
 	}
+	authInfo, _ := h.GetAuthInfo(c)
 
 	fmt.Println(function.Path)
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.NewInvokeFunctionRequest{
@@ -641,6 +642,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 			"object_ids": invokeFunction.ObjectIDs,
 			"app_id":     apiKeys.GetData()[0].GetAppId(),
 			"attributes": invokeFunction.Attributes,
+			"user_id":    authInfo.GetUserId(),
 		},
 	})
 	if err != nil {
