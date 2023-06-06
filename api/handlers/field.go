@@ -58,6 +58,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 		AutofillTable: fieldRequest.AutoFillTable,
 		AutofillField: fieldRequest.AutoFillField,
 		Automatic:     fieldRequest.Automatic,
+		Unique:        fieldRequest.Unique,
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)

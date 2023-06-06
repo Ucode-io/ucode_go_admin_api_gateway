@@ -56,6 +56,15 @@ message GetListWithRoleAppTablePermissionsRequest {
 
 message RoleWithAppTablePermissions {
     message App {
+        message Permission {
+            bool create = 1;
+            bool read = 2;
+            bool update = 3;
+            bool delete = 4;
+            string guid = 5;
+            string role_id = 7;
+            string app_id = 8;
+        }
         message Table {
             message RecordPermission {
                 string read = 1;
@@ -72,23 +81,27 @@ message RoleWithAppTablePermissions {
                 bool view_permission = 3;
                 bool edit_permission = 4;
                 string label = 5;
+                string table_slug = 6;
             }
             message ViewPermission {
                 string guid = 1;
                 string label = 2;
                 string relation_id = 3;
                 bool view_permission = 4;
+                string table_slug = 5;
             }
             message AutomaticFilter {
                 string guid = 1;
                 string object_field = 2;
                 string custom_field = 3;
+                string table_slug = 4;
             }
             message ActionPermission {
                 string guid = 1;
                 string custom_event_id = 2;
                 bool permission = 3;
                 string label = 4;
+                string table_slug = 5;
             }
             message AutomaticFilterWithMethod {
                 repeated AutomaticFilter read = 1;
@@ -118,6 +131,7 @@ message RoleWithAppTablePermissions {
         string icon = 3;
         string id = 4;
         repeated Table tables = 5;
+        Permission permission = 6;
     }
 
     string name = 1;
