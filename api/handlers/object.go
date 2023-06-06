@@ -41,8 +41,9 @@ import (
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateObject(c *gin.Context) {
 	var (
-		objectRequest models.CommonMessage
-		resp          *obs.CommonMessage
+		objectRequest               models.CommonMessage
+		resp                        *obs.CommonMessage
+		beforeActions, afterActions []*obs.CustomEvent
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -158,10 +159,13 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 	//start = time.Now()
-	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "CREATE", c, h)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
+	fromOfs := c.Query("from-ofs")
+	if fromOfs != "true" {
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "CREATE", c, h)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
 	}
 	//fmt.Println("TIME_MANAGEMENT_LOGGING:::GetListCustomEvents", time.Since(start))
 	//start = time.Now()
@@ -510,8 +514,9 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateObject(c *gin.Context) {
 	var (
-		objectRequest models.CommonMessage
-		resp          *obs.CommonMessage
+		objectRequest               models.CommonMessage
+		resp                        *obs.CommonMessage
+		beforeActions, afterActions []*obs.CustomEvent
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -593,10 +598,14 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 	//	return
 	//}
 
-	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "UPDATE", c, h)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
+	fromOfs := c.Query("from-ofs")
+	fmt.Println("from-ofs::", fromOfs)
+	if fromOfs != "true" {
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "UPDATE", c, h)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
 	}
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
@@ -701,8 +710,9 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteObject(c *gin.Context) {
 	var (
-		objectRequest models.CommonMessage
-		resp          *obs.CommonMessage
+		objectRequest               models.CommonMessage
+		resp                        *obs.CommonMessage
+		beforeActions, afterActions []*obs.CustomEvent
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -783,10 +793,13 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 	//	return
 	//}
 
-	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "DELETE", c, h)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
+	fromOfs := c.Query("from-ofs")
+	if fromOfs != "true" {
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "DELETE", c, h)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
 	}
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
@@ -1036,28 +1049,35 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	fmt.Println(":::test:::")
 
 	queryParams := c.Request.URL.Query()
+	queryData := queryParams.Get("data")
+
 	queryMap := make(map[string]interface{})
-	for key, values := range queryParams {
-		fmt.Println(values)
-		fmt.Println(len(values))
-		if len(values) == 1 {
-			queryMap[key] = values[0]
-		} else if len(values) > 1 {
-			queryMap[key] = values
-		}
+	err := json.Unmarshal([]byte(queryData), &queryMap)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
 	}
+	// for key, values := range queryParams {
+	// 	fmt.Println(values)
+	// 	fmt.Println(len(values))
+	// 	if len(values) == 1 {
+	// 		queryMap[key] = values[0]
+	// 	} else if len(values) > 1 {
+	// 		queryMap[key] = values
+	// 	}
+	// }
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-
 	if _, ok := queryMap["limit"]; !ok {
 		queryMap["limit"] = 10
 	}
 	queryMap["offset"] = offset
+
+	fmt.Println("query map:", queryMap)
 	objectRequest.Data = queryMap
-	fmt.Println("objectRequest::", queryMap)
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
@@ -1080,12 +1100,6 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
 	//	err = errors.New("error getting resource id")
@@ -1093,7 +1107,7 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	//	return
 	//}
 
-	projectId, ok := c.Get("project_id")
+	projectId, ok := c.Get("project-id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
@@ -1310,8 +1324,9 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	var (
-		m2mMessage obs.ManyToManyMessage
-		resp       *emptypb.Empty
+		m2mMessage                  obs.ManyToManyMessage
+		resp                        *emptypb.Empty
+		beforeActions, afterActions []*obs.CustomEvent
 	)
 
 	err := c.ShouldBindJSON(&m2mMessage)
@@ -1378,10 +1393,13 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	//}
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
-	beforeActions, afterActions, err := GetListCustomEvents(m2mMessage.TableTo, "", "DELETE_MANY2MANY", c, h)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
+	fromOfs := c.Query("from-ofs")
+	if fromOfs != "true" {
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "DELETE_MANY2MANY", c, h)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
 	}
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
@@ -1458,8 +1476,9 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) AppendManyToMany(c *gin.Context) {
 	var (
-		m2mMessage obs.ManyToManyMessage
-		resp       *emptypb.Empty
+		m2mMessage                  obs.ManyToManyMessage
+		resp                        *emptypb.Empty
+		beforeActions, afterActions []*obs.CustomEvent
 	)
 
 	err := c.ShouldBindJSON(&m2mMessage)
@@ -1527,10 +1546,13 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 	//}
 
 	m2mMessage.ProjectId = resource.ResourceEnvironmentId
-	beforeActions, afterActions, err := GetListCustomEvents(m2mMessage.TableFrom, "", "APPEND_MANY2MANY", c, h)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
+	fromOfs := c.Query("from-ofs")
+	if fromOfs != "true" {
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "APPEND_MANY2MANY", c, h)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
 	}
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
@@ -1607,7 +1629,10 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpsertObject(c *gin.Context) {
-	var objectRequest models.UpsertCommonMessage
+	var (
+		objectRequest               models.UpsertCommonMessage
+		beforeActions, afterActions []*obs.CustomEvent
+	)
 
 	err := c.ShouldBindJSON(&objectRequest)
 	if err != nil {
@@ -1688,10 +1713,13 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		editedObjects = append(editedObjects, newObject)
 	}
 	objectRequest.Data["objects"] = editedObjects
-	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "MULTIPLE_UPDATE", c, h)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
+	fromOfs := c.Query("from-ofs")
+	if fromOfs != "true" {
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "MULTIPLE_UPDATE", c, h)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
 	}
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
@@ -1835,7 +1863,10 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) MultipleUpdateObject(c *gin.Context) {
-	var objectRequest models.CommonMessage
+	var (
+		objectRequest               models.CommonMessage
+		beforeActions, afterActions []*obs.CustomEvent
+	)
 
 	err := c.ShouldBindJSON(&objectRequest)
 	if err != nil {
@@ -1925,10 +1956,13 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 	//	return
 	//}
 
-	beforeActions, afterActions, err := GetListCustomEvents(c.Param("table_slug"), "", "MULTIPLE_UPDATE", c, h)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
+	fromOfs := c.Query("from-ofs")
+	if fromOfs != "true" {
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "MULTIPLE_UPDATE", c, h)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
 	}
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
