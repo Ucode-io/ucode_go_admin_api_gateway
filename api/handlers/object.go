@@ -599,6 +599,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 	//}
 
 	fromOfs := c.Query("from-ofs")
+	fmt.Println("from-ofs::", fromOfs)
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "UPDATE", c, h)
 		if err != nil {
