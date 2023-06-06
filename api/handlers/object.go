@@ -1036,28 +1036,35 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	fmt.Println(":::test:::")
 
 	queryParams := c.Request.URL.Query()
+	queryData := queryParams.Get("data")
+
 	queryMap := make(map[string]interface{})
-	for key, values := range queryParams {
-		fmt.Println(values)
-		fmt.Println(len(values))
-		if len(values) == 1 {
-			queryMap[key] = values[0]
-		} else if len(values) > 1 {
-			queryMap[key] = values
-		}
+	err := json.Unmarshal([]byte(queryData), &queryMap)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
 	}
+	// for key, values := range queryParams {
+	// 	fmt.Println(values)
+	// 	fmt.Println(len(values))
+	// 	if len(values) == 1 {
+	// 		queryMap[key] = values[0]
+	// 	} else if len(values) > 1 {
+	// 		queryMap[key] = values
+	// 	}
+	// }
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-
 	if _, ok := queryMap["limit"]; !ok {
 		queryMap["limit"] = 10
 	}
 	queryMap["offset"] = offset
+
+	fmt.Println("query map:", queryMap)
 	objectRequest.Data = queryMap
-	fmt.Println("objectRequest::", queryMap)
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
@@ -1079,12 +1086,6 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
 
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
