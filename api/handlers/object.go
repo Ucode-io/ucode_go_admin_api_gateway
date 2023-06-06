@@ -1107,7 +1107,7 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	//	return
 	//}
 
-	projectId, ok := c.Get("project-id")
+	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
