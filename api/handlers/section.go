@@ -212,6 +212,7 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 	//	return
 	//}
 	sections.ProjectId = resource.ResourceEnvironmentId
+	fmt.Println("project id::", resource.ResourceEnvironmentId)
 
 	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_SECTION)
 	// if err != nil {
