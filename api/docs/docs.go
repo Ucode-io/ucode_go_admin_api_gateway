@@ -12242,6 +12242,79 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/menu/menu-order/": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete menu",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "Delete menu",
+                "operationId": "update_menu_order",
+                "parameters": [
+                    {
+                        "description": "menu",
+                        "name": "menu",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpdateMenuOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/menu/{menu_id}": {
             "get": {
                 "security": [
@@ -34934,6 +35007,9 @@ const docTemplate = `{
                 "microfrontend_id": {
                     "type": "string"
                 },
+                "order": {
+                    "type": "integer"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -35577,6 +35653,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "table_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.UpdateMenuOrderRequest": {
+            "type": "object",
+            "properties": {
+                "menus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.Menu"
+                    }
+                },
+                "project_id": {
                     "type": "string"
                 }
             }

@@ -3396,6 +3396,8 @@ definitions:
         type: string
       microfrontend_id:
         type: string
+      order:
+        type: integer
       parent_id:
         type: string
       project_id:
@@ -3818,6 +3820,15 @@ definitions:
       project_id:
         type: string
       table_id:
+        type: string
+    type: object
+  object_builder_service.UpdateMenuOrderRequest:
+    properties:
+      menus:
+        items:
+          $ref: '#/definitions/object_builder_service.Menu'
+        type: array
+      project_id:
         type: string
     type: object
   object_builder_service.UpdatePanelCoordinatesRequest:
@@ -12495,6 +12506,47 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get menu by id
+      tags:
+      - Menu
+  /v1/menu/menu-order/:
+    put:
+      consumes:
+      - application/json
+      description: Delete menu
+      operationId: update_menu_order
+      parameters:
+      - description: menu
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateMenuOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu
       tags:
       - Menu
   /v1/note:

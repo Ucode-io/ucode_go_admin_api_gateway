@@ -12,6 +12,7 @@ service MenuService {
     rpc GetAll(GetAllMenusRequest) returns (GetAllMenusResponse) {}
     rpc Update(Menu) returns (google.protobuf.Empty) {}
     rpc Delete(MenuPrimaryKey) returns (google.protobuf.Empty) {}
+    rpc UpdateMenuOrder(UpdateMenuOrderRequest) returns (google.protobuf.Empty) {}
 }
 
 message CreateMenuRequest {
@@ -35,6 +36,7 @@ message Menu {
     string id = 7;
     string project_id = 8;
     string microfrontend_id = 9;
+    int32 order = 10;
 }
 
 message ChildMenu {
@@ -95,4 +97,9 @@ message GetAllMenusRequest {
     string project_id = 4;
     string role_id = 5;
     string parent_id = 6;
+}
+
+message UpdateMenuOrderRequest {
+    repeated Menu menus = 1;
+    string project_id = 2;
 }
