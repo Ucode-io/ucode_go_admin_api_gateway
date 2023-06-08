@@ -12242,6 +12242,79 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/menu/menu-order/": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete menu",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "Delete menu",
+                "operationId": "update_menu_order",
+                "parameters": [
+                    {
+                        "description": "menu",
+                        "name": "menu",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpdateMenuOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/menu/{menu_id}": {
             "get": {
                 "security": [
@@ -32276,6 +32349,9 @@ const docTemplate = `{
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend_id": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -32953,6 +33029,9 @@ const docTemplate = `{
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend_id": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -33343,6 +33422,9 @@ const docTemplate = `{
                 "ssh_url": {
                     "type": "string"
                 },
+                "type": {
+                    "type": "string"
+                },
                 "url": {
                     "type": "string"
                 }
@@ -33566,6 +33648,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -33703,6 +33788,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "layout_id": {
+                    "type": "string"
+                },
+                "microfrontend_id": {
                     "type": "string"
                 },
                 "parent_id": {
@@ -33998,6 +34086,9 @@ const docTemplate = `{
                 "relation_field": {
                     "type": "string"
                 },
+                "show_label": {
+                    "type": "boolean"
+                },
                 "slug": {
                     "type": "string"
                 },
@@ -34123,6 +34214,9 @@ const docTemplate = `{
                 },
                 "editable": {
                     "type": "boolean"
+                },
+                "function_path": {
+                    "type": "string"
                 },
                 "group_fields": {
                     "type": "array",
@@ -34598,6 +34692,9 @@ const docTemplate = `{
                 },
                 "relation_type": {
                     "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
                 }
             }
         },
@@ -34907,6 +35004,12 @@ const docTemplate = `{
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend_id": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -34942,6 +35045,12 @@ const docTemplate = `{
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend": {
+                    "$ref": "#/definitions/object_builder_service.MicroFrontend"
+                },
+                "microfrontend_id": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -34955,6 +35064,41 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.MicroFrontend": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "function_folder_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "ssh_url": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -35322,6 +35466,9 @@ const docTemplate = `{
                 "is_own_table": {
                     "type": "boolean"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "is_visible": {
                     "type": "boolean"
                 },
@@ -35510,6 +35657,20 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.UpdateMenuOrderRequest": {
+            "type": "object",
+            "properties": {
+                "menus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.Menu"
+                    }
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.UpdatePanelCoordinatesRequest": {
             "type": "object",
             "properties": {
@@ -35577,6 +35738,9 @@ const docTemplate = `{
                 },
                 "editable": {
                     "type": "boolean"
+                },
+                "function_path": {
+                    "type": "string"
                 },
                 "group_fields": {
                     "type": "array",

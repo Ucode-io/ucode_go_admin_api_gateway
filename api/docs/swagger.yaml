@@ -1656,6 +1656,8 @@ definitions:
         type: string
       layout_id:
         type: string
+      microfrontend_id:
+        type: string
       parent_id:
         type: string
       table_id:
@@ -2101,6 +2103,8 @@ definitions:
         type: string
       layout_id:
         type: string
+      microfrontend_id:
+        type: string
       parent_id:
         type: string
       table_id:
@@ -2356,6 +2360,8 @@ definitions:
         type: string
       ssh_url:
         type: string
+      type:
+        type: string
       url:
         type: string
     type: object
@@ -2501,6 +2507,8 @@ definitions:
         type: string
       id:
         type: string
+      is_system:
+        type: boolean
       name:
         type: string
       permission:
@@ -2590,6 +2598,8 @@ definitions:
       label:
         type: string
       layout_id:
+        type: string
+      microfrontend_id:
         type: string
       parent_id:
         type: string
@@ -2784,6 +2794,8 @@ definitions:
         type: string
       relation_field:
         type: string
+      show_label:
+        type: boolean
       slug:
         type: string
       table_id:
@@ -2867,6 +2879,8 @@ definitions:
         type: array
       editable:
         type: boolean
+      function_path:
+        type: string
       group_fields:
         items:
           type: string
@@ -3179,6 +3193,8 @@ definitions:
         type: integer
       relation_type:
         type: string
+      show_label:
+        type: boolean
     type: object
   object_builder_service.GetAllAppsResponse:
     properties:
@@ -3378,6 +3394,10 @@ definitions:
         type: string
       layout_id:
         type: string
+      microfrontend_id:
+        type: string
+      order:
+        type: integer
       parent_id:
         type: string
       project_id:
@@ -3401,6 +3421,10 @@ definitions:
         type: string
       layout_id:
         type: string
+      microfrontend:
+        $ref: '#/definitions/object_builder_service.MicroFrontend'
+      microfrontend_id:
+        type: string
       parent_id:
         type: string
       project_id:
@@ -3410,6 +3434,29 @@ definitions:
       table_id:
         type: string
       type:
+        type: string
+    type: object
+  object_builder_service.MicroFrontend:
+    properties:
+      description:
+        type: string
+      environment_id:
+        type: string
+      function_folder_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      path:
+        type: string
+      project_id:
+        type: string
+      ssh_url:
+        type: string
+      url:
         type: string
     type: object
   object_builder_service.PanelCoordinates:
@@ -3650,6 +3697,8 @@ definitions:
         type: boolean
       is_own_table:
         type: boolean
+      is_system:
+        type: boolean
       is_visible:
         type: boolean
       label:
@@ -3773,6 +3822,15 @@ definitions:
       table_id:
         type: string
     type: object
+  object_builder_service.UpdateMenuOrderRequest:
+    properties:
+      menus:
+        items:
+          $ref: '#/definitions/object_builder_service.Menu'
+        type: array
+      project_id:
+        type: string
+    type: object
   object_builder_service.UpdatePanelCoordinatesRequest:
     properties:
       panel_coordinates:
@@ -3818,6 +3876,8 @@ definitions:
         type: array
       editable:
         type: boolean
+      function_path:
+        type: string
       group_fields:
         items:
           type: string
@@ -12446,6 +12506,47 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get menu by id
+      tags:
+      - Menu
+  /v1/menu/menu-order/:
+    put:
+      consumes:
+      - application/json
+      description: Delete menu
+      operationId: update_menu_order
+      parameters:
+      - description: menu
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateMenuOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu
       tags:
       - Menu
   /v1/note:

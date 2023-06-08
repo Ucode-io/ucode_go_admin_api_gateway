@@ -12,6 +12,7 @@ service MenuService {
     rpc GetAll(GetAllMenusRequest) returns (GetAllMenusResponse) {}
     rpc Update(Menu) returns (google.protobuf.Empty) {}
     rpc Delete(MenuPrimaryKey) returns (google.protobuf.Empty) {}
+    rpc UpdateMenuOrder(UpdateMenuOrderRequest) returns (google.protobuf.Empty) {}
 }
 
 message CreateMenuRequest {
@@ -22,6 +23,7 @@ message CreateMenuRequest {
     string parent_id = 5;
     string type = 6;
     string project_id = 7;
+    string microfrontend_id = 8;
 }
 
 message Menu {
@@ -33,6 +35,8 @@ message Menu {
     string type = 6;
     string id = 7;
     string project_id = 8;
+    string microfrontend_id = 9;
+    int32 order = 10;
 }
 
 message ChildMenu {
@@ -44,6 +48,21 @@ message ChildMenu {
     string type = 6;
     string id = 7;
     string project_id = 8;
+    string microfrontend_id = 9;
+}
+
+// if you change this message you must be change Function message in new_function_service's new_function_service.proto 
+message MicroFrontend {
+    string id = 1;
+    string path = 2;
+    string name = 3;
+    string description = 4;
+    string project_id = 5;
+    string function_folder_id = 7;
+    string environment_id = 8;
+    string url = 9;
+    string password = 10;
+    string ssh_url = 11;
 }
 
 message MenuForGetAll {
@@ -57,6 +76,8 @@ message MenuForGetAll {
     string project_id = 8;
     Table table = 9;
     repeated ChildMenu child_menus = 10;
+    string microfrontend_id = 11;
+    MicroFrontend microfrontend = 12;
 }
 
 message GetAllMenusResponse {
@@ -76,4 +97,9 @@ message GetAllMenusRequest {
     string project_id = 4;
     string role_id = 5;
     string parent_id = 6;
+}
+
+message UpdateMenuOrderRequest {
+    repeated Menu menus = 1;
+    string project_id = 2;
 }

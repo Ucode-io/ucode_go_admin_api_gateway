@@ -12230,6 +12230,79 @@
                 }
             }
         },
+        "/v1/menu/menu-order/": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete menu",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "Delete menu",
+                "operationId": "update_menu_order",
+                "parameters": [
+                    {
+                        "description": "menu",
+                        "name": "menu",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpdateMenuOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/menu/{menu_id}": {
             "get": {
                 "security": [
@@ -32264,6 +32337,9 @@
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend_id": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -32941,6 +33017,9 @@
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend_id": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -33331,6 +33410,9 @@
                 "ssh_url": {
                     "type": "string"
                 },
+                "type": {
+                    "type": "string"
+                },
                 "url": {
                     "type": "string"
                 }
@@ -33554,6 +33636,9 @@
                 "id": {
                     "type": "string"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -33691,6 +33776,9 @@
                     "type": "string"
                 },
                 "layout_id": {
+                    "type": "string"
+                },
+                "microfrontend_id": {
                     "type": "string"
                 },
                 "parent_id": {
@@ -33986,6 +34074,9 @@
                 "relation_field": {
                     "type": "string"
                 },
+                "show_label": {
+                    "type": "boolean"
+                },
                 "slug": {
                     "type": "string"
                 },
@@ -34111,6 +34202,9 @@
                 },
                 "editable": {
                     "type": "boolean"
+                },
+                "function_path": {
+                    "type": "string"
                 },
                 "group_fields": {
                     "type": "array",
@@ -34586,6 +34680,9 @@
                 },
                 "relation_type": {
                     "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
                 }
             }
         },
@@ -34895,6 +34992,12 @@
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend_id": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -34930,6 +35033,12 @@
                 "layout_id": {
                     "type": "string"
                 },
+                "microfrontend": {
+                    "$ref": "#/definitions/object_builder_service.MicroFrontend"
+                },
+                "microfrontend_id": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -34943,6 +35052,41 @@
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.MicroFrontend": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "function_folder_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "ssh_url": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -35310,6 +35454,9 @@
                 "is_own_table": {
                     "type": "boolean"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "is_visible": {
                     "type": "boolean"
                 },
@@ -35498,6 +35645,20 @@
                 }
             }
         },
+        "object_builder_service.UpdateMenuOrderRequest": {
+            "type": "object",
+            "properties": {
+                "menus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.Menu"
+                    }
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.UpdatePanelCoordinatesRequest": {
             "type": "object",
             "properties": {
@@ -35565,6 +35726,9 @@
                 },
                 "editable": {
                     "type": "boolean"
+                },
+                "function_path": {
+                    "type": "string"
                 },
                 "group_fields": {
                     "type": "array",

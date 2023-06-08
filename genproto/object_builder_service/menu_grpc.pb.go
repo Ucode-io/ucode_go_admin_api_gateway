@@ -28,6 +28,7 @@ type MenuServiceClient interface {
 	GetAll(ctx context.Context, in *GetAllMenusRequest, opts ...grpc.CallOption) (*GetAllMenusResponse, error)
 	Update(ctx context.Context, in *Menu, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Delete(ctx context.Context, in *MenuPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateMenuOrder(ctx context.Context, in *UpdateMenuOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type menuServiceClient struct {
@@ -83,6 +84,15 @@ func (c *menuServiceClient) Delete(ctx context.Context, in *MenuPrimaryKey, opts
 	return out, nil
 }
 
+func (c *menuServiceClient) UpdateMenuOrder(ctx context.Context, in *UpdateMenuOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/object_builder_service.MenuService/UpdateMenuOrder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MenuServiceServer is the server API for MenuService service.
 // All implementations must embed UnimplementedMenuServiceServer
 // for forward compatibility
@@ -92,6 +102,7 @@ type MenuServiceServer interface {
 	GetAll(context.Context, *GetAllMenusRequest) (*GetAllMenusResponse, error)
 	Update(context.Context, *Menu) (*emptypb.Empty, error)
 	Delete(context.Context, *MenuPrimaryKey) (*emptypb.Empty, error)
+	UpdateMenuOrder(context.Context, *UpdateMenuOrderRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedMenuServiceServer()
 }
 
@@ -113,6 +124,9 @@ func (UnimplementedMenuServiceServer) Update(context.Context, *Menu) (*emptypb.E
 }
 func (UnimplementedMenuServiceServer) Delete(context.Context, *MenuPrimaryKey) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedMenuServiceServer) UpdateMenuOrder(context.Context, *UpdateMenuOrderRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateMenuOrder not implemented")
 }
 func (UnimplementedMenuServiceServer) mustEmbedUnimplementedMenuServiceServer() {}
 
@@ -217,6 +231,24 @@ func _MenuService_Delete_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MenuService_UpdateMenuOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMenuOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MenuServiceServer).UpdateMenuOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.MenuService/UpdateMenuOrder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MenuServiceServer).UpdateMenuOrder(ctx, req.(*UpdateMenuOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MenuService_ServiceDesc is the grpc.ServiceDesc for MenuService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -243,6 +275,10 @@ var MenuService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _MenuService_Delete_Handler,
+		},
+		{
+			MethodName: "UpdateMenuOrder",
+			Handler:    _MenuService_UpdateMenuOrder_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

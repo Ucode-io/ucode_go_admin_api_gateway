@@ -272,6 +272,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/menu", h.GetAllMenus)
 		v1.PUT("/menu", h.UpdateMenu)
 		v1.DELETE("/menu/:menu_id", h.DeleteMenu)
+		v1.PUT("menu/menu-order", h.UpdateMenuOrder)
 
 	}
 	v2 := r.Group("/v2")

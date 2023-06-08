@@ -105,6 +105,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 	for _, v := range resEnvsIds.GetData() {
 		functions, err := srvs.FunctionService().FunctionService().GetListByRequestTime(context.Background(), &pb.GetListByRequestTimeRequest{
 			ProjectId: v.GetId(),
+			Type: "FUNCTION",
 		})
 		if err != nil {
 			log.Println("error while getting functions for project id: "+v.GetProjectId(), err.Error())
