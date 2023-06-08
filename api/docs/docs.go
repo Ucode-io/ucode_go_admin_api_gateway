@@ -3451,6 +3451,11 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "search",
                         "in": "query"
                     }
@@ -11705,7 +11710,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/layout/{table_id}": {
+        "/v1/layout/{table_slug}": {
             "get": {
                 "security": [
                     {
@@ -11727,10 +11732,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "table_id",
-                        "name": "table_id",
-                        "in": "path",
-                        "required": true
+                        "description": "table-id",
+                        "name": "table-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "table-slug",
+                        "name": "table-slug",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -13790,6 +13800,12 @@ const docTemplate = `{
                         "type": "number",
                         "description": "offset",
                         "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "data",
+                        "name": "data",
                         "in": "query"
                     }
                 ],
@@ -33067,6 +33083,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "permission": {
+                    "$ref": "#/definitions/object_builder_service.App_Permission"
+                },
                 "tables": {
                     "type": "array",
                     "items": {
@@ -33101,6 +33120,23 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "object_builder_service.App_Permission": {
+            "type": "object",
+            "properties": {
+                "create": {
+                    "type": "boolean"
+                },
+                "delete": {
+                    "type": "boolean"
+                },
+                "read": {
+                    "type": "boolean"
+                },
+                "update": {
+                    "type": "boolean"
                 }
             }
         },
@@ -33442,6 +33478,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "relation_field": {
                     "type": "string"
                 },
                 "slug": {
@@ -34346,6 +34385,32 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.Permission": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "is_have_condition": {
+                    "type": "boolean"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "read": {
+                    "type": "string"
+                },
+                "update": {
+                    "type": "string"
+                },
+                "write": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.QuickFilter": {
             "type": "object",
             "properties": {
@@ -34669,6 +34734,9 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "record_permissions": {
+                    "$ref": "#/definitions/object_builder_service.Permission"
                 },
                 "show_in_menu": {
                     "type": "boolean"
