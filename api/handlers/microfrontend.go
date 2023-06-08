@@ -149,6 +149,17 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 	host["value"] = repoHost
 	data = append(data, host)
 
+	_, err = gitlab.CreateProjectVariable(gitlab.IntegrationData{
+		GitlabIntegrationUrl:   h.cfg.GitlabIntegrationURL,
+		GitlabIntegrationToken: h.cfg.GitlabIntegrationToken,
+		GitlabProjectId:        int(respCreateFork.Message["id"].(float64)),
+		GitlabGroupId:          h.cfg.GitlabGroupIdMicroFE,
+	}, host)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
 	resPipeline, err := gitlab.CreatePipeline(gitlab.IntegrationData{
 		GitlabIntegrationUrl:   h.cfg.GitlabIntegrationURL,
 		GitlabIntegrationToken: h.cfg.GitlabIntegrationToken,
@@ -487,11 +498,11 @@ func (h *Handler) DeleteMicroFrontEnd(c *gin.Context) {
 	}
 
 	// delete cloned repo
-	err = gitlab.DeletedClonedRepoByPath(resp.Path, h.cfg)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	//err = gitlab.DeletedClonedRepoByPath(resp.Path, h.cfg)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
 
 	// delete repo by path from gitlab
 	_, err = gitlab.DeleteForkedProject(resp.Path, h.cfg)
