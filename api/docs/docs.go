@@ -3451,6 +3451,11 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "search",
                         "in": "query"
                     }
@@ -11618,13 +11623,13 @@ const docTemplate = `{
             }
         },
         "/v1/layout": {
-            "put": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Update layouts",
+                "description": "Get list layouts",
                 "consumes": [
                     "application/json"
                 ],
@@ -11634,22 +11639,25 @@ const docTemplate = `{
                 "tags": [
                     "Layout"
                 ],
-                "summary": "Update layouts",
-                "operationId": "update_layout",
+                "summary": "Get list layouts",
+                "operationId": "get_list_layouts",
                 "parameters": [
                     {
-                        "description": "UpdateLayoutRequest",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/object_builder_service.UpdateLayoutRequest"
-                        }
+                        "type": "string",
+                        "description": "table-id",
+                        "name": "table-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "table-slug",
+                        "name": "table-slug",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Layout data",
+                        "description": "TableBody",
                         "schema": {
                             "allOf": [
                                 {
@@ -11659,7 +11667,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/object_builder_service.GetListLayoutResponse"
                                         }
                                     }
                                 }
@@ -11703,16 +11711,14 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/v1/layout/{table_id}": {
-            "get": {
+            },
+            "put": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get list layouts",
+                "description": "Update layouts",
                 "consumes": [
                     "application/json"
                 ],
@@ -11722,20 +11728,22 @@ const docTemplate = `{
                 "tags": [
                     "Layout"
                 ],
-                "summary": "Get list layouts",
-                "operationId": "get_list_layouts",
+                "summary": "Update layouts",
+                "operationId": "update_layout",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "table_id",
-                        "name": "table_id",
-                        "in": "path",
-                        "required": true
+                        "description": "UpdateLayoutRequest",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpdateLayoutRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "TableBody",
+                        "description": "Layout data",
                         "schema": {
                             "allOf": [
                                 {
@@ -11745,7 +11753,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.GetListLayoutResponse"
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -13790,6 +13798,12 @@ const docTemplate = `{
                         "type": "number",
                         "description": "offset",
                         "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "data",
+                        "name": "data",
                         "in": "query"
                     }
                 ],
@@ -33067,6 +33081,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "permission": {
+                    "$ref": "#/definitions/object_builder_service.App_Permission"
+                },
                 "tables": {
                     "type": "array",
                     "items": {
@@ -33101,6 +33118,23 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "object_builder_service.App_Permission": {
+            "type": "object",
+            "properties": {
+                "create": {
+                    "type": "boolean"
+                },
+                "delete": {
+                    "type": "boolean"
+                },
+                "read": {
+                    "type": "boolean"
+                },
+                "update": {
+                    "type": "boolean"
                 }
             }
         },
@@ -33442,6 +33476,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "relation_field": {
                     "type": "string"
                 },
                 "slug": {
@@ -34346,6 +34383,32 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.Permission": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "is_have_condition": {
+                    "type": "boolean"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "read": {
+                    "type": "string"
+                },
+                "update": {
+                    "type": "string"
+                },
+                "write": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.QuickFilter": {
             "type": "object",
             "properties": {
@@ -34669,6 +34732,9 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "record_permissions": {
+                    "$ref": "#/definitions/object_builder_service.Permission"
                 },
                 "show_in_menu": {
                     "type": "boolean"

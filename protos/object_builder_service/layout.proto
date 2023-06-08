@@ -175,7 +175,8 @@ message LayoutPrimaryKey {
 }
 
 message GetListLayoutRequest {
-    string table_id = 1;
+    string table_slug = 1;
     string project_id = 2;
     bool is_defualt = 3;
+    string table_id = 4;
 }
