@@ -11914,54 +11914,6 @@ paths:
       tags:
       - Function
   /v1/layout:
-    put:
-      consumes:
-      - application/json
-      description: Update layouts
-      operationId: update_layout
-      parameters:
-      - description: UpdateLayoutRequest
-        in: body
-        name: table
-        required: true
-        schema:
-          $ref: '#/definitions/object_builder_service.UpdateLayoutRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Layout data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Update layouts
-      tags:
-      - Layout
-  /v1/layout/{table_slug}:
     get:
       consumes:
       - application/json
@@ -12009,6 +11961,53 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get list layouts
+      tags:
+      - Layout
+    put:
+      consumes:
+      - application/json
+      description: Update layouts
+      operationId: update_layout
+      parameters:
+      - description: UpdateLayoutRequest
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateLayoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Layout data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update layouts
       tags:
       - Layout
   /v1/many-to-many:
