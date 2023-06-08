@@ -11630,13 +11630,13 @@ const docTemplate = `{
             }
         },
         "/v1/layout": {
-            "put": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Update layouts",
+                "description": "Get list layouts",
                 "consumes": [
                     "application/json"
                 ],
@@ -11646,22 +11646,25 @@ const docTemplate = `{
                 "tags": [
                     "Layout"
                 ],
-                "summary": "Update layouts",
-                "operationId": "update_layout",
+                "summary": "Get list layouts",
+                "operationId": "get_list_layouts",
                 "parameters": [
                     {
-                        "description": "UpdateLayoutRequest",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/object_builder_service.UpdateLayoutRequest"
-                        }
+                        "type": "string",
+                        "description": "table-id",
+                        "name": "table-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "table-slug",
+                        "name": "table-slug",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Layout data",
+                        "description": "TableBody",
                         "schema": {
                             "allOf": [
                                 {
@@ -11671,7 +11674,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/object_builder_service.GetListLayoutResponse"
                                         }
                                     }
                                 }
@@ -11715,16 +11718,14 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/v1/layout/{table_id}": {
-            "get": {
+            },
+            "put": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get list layouts",
+                "description": "Update layouts",
                 "consumes": [
                     "application/json"
                 ],
@@ -11734,20 +11735,22 @@ const docTemplate = `{
                 "tags": [
                     "Layout"
                 ],
-                "summary": "Get list layouts",
-                "operationId": "get_list_layouts",
+                "summary": "Update layouts",
+                "operationId": "update_layout",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "table_id",
-                        "name": "table_id",
-                        "in": "path",
-                        "required": true
+                        "description": "UpdateLayoutRequest",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpdateLayoutRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "TableBody",
+                        "description": "Layout data",
                         "schema": {
                             "allOf": [
                                 {
@@ -11757,7 +11760,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.GetListLayoutResponse"
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -14317,6 +14320,12 @@ const docTemplate = `{
                         "type": "number",
                         "description": "offset",
                         "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "data",
+                        "name": "data",
                         "in": "query"
                     }
                 ],

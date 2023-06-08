@@ -350,6 +350,7 @@ func (h *Handler) GetAllApps(c *gin.Context) {
 			},
 		)
 	}
+	
 	h.handleResponse(c, status_http.OK, resp)
 }
 

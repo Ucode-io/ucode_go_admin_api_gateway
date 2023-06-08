@@ -12119,6 +12119,55 @@ paths:
       tags:
       - Function
   /v1/layout:
+    get:
+      consumes:
+      - application/json
+      description: Get list layouts
+      operationId: get_list_layouts
+      parameters:
+      - description: table-id
+        in: query
+        name: table-id
+        type: string
+      - description: table-slug
+        in: query
+        name: table-slug
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetListLayoutResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get list layouts
+      tags:
+      - Layout
     put:
       consumes:
       - application/json
@@ -12164,53 +12213,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update layouts
-      tags:
-      - Layout
-  /v1/layout/{table_id}:
-    get:
-      consumes:
-      - application/json
-      description: Get list layouts
-      operationId: get_list_layouts
-      parameters:
-      - description: table_id
-        in: path
-        name: table_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: TableBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/object_builder_service.GetListLayoutResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get list layouts
       tags:
       - Layout
   /v1/many-to-many:
@@ -13649,6 +13651,10 @@ paths:
         in: query
         name: offset
         type: number
+      - description: data
+        in: query
+        name: data
+        type: string
       produces:
       - application/json
       responses:
