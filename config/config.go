@@ -116,6 +116,20 @@ type Config struct {
 	GetRequestRedisPort     string
 	GetRequestRedisDatabase int
 	GetRequestRedisPassword string
+
+	HelmRepoAddFunction    string
+	HelmRepoUpdateFunction string
+	HelmInstallFunction    string
+	HelmUninstallFunction  string
+
+	HelmRepoAddFMicroFE    string
+	HelmRepoUpdateMicroFE  string
+	HelmInstallMicroFE     string
+	HelmUninstallMicroFE   string
+	GitlabGroupIdMicroFE   int
+	GitlabProjectIdMicroFE int
+	GitlabHostMicroFE      string
+	PathToCloneMicroFE     string
 }
 
 // Load ...
@@ -187,8 +201,8 @@ func Load() Config {
 
 	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", "localhost"))
 	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_GRPC_PORT", ":8100"))
-	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", ""))
-	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", ""))
+	config.GitlabIntegrationToken = cast.ToString(GetOrReturnDefaultValue("GITLAB_TOKEN", "glpat-aPL4syqxcHdqWyhxVTMP"))
+	config.GitlabIntegrationURL = cast.ToString(GetOrReturnDefaultValue("GITLAB_URL", "https://gitlab.udevs.io"))
 	config.GitlabGroupId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID", 0))
 	config.GitlabProjectId = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID", 0))
 	config.PathToClone = cast.ToString(GetOrReturnDefaultValue("CLONE_PATH", "./app"))
@@ -222,6 +236,15 @@ func Load() Config {
 	config.GetRequestRedisPort = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", "6601"))
 	config.GetRequestRedisDatabase = cast.ToInt(GetOrReturnDefaultValue("GET_REQUEST_REDIS_DATABASE", 0))
 	config.GetRequestRedisPassword = cast.ToString(GetOrReturnDefaultValue("GET_REQUEST_REDIS_PASSWORD", "redis_password"))
+
+	config.HelmRepoAddFunction = cast.ToString(GetOrReturnDefaultValue("HELM_REPO_ADD_FUNCTION", ""))
+	config.HelmRepoUpdateFunction = cast.ToString(GetOrReturnDefaultValue("HELM_REPO_UPDATE_FUNCTION", ""))
+	config.HelmInstallFunction = cast.ToString(GetOrReturnDefaultValue("HELM_INSTALL_FUNCTION", ""))
+	config.HelmUninstallFunction = cast.ToString(GetOrReturnDefaultValue("HELM_UNINSTALL_FUNCTION", ""))
+
+	config.GitlabGroupIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_GROUP_ID_MICROFE", 2604))
+	config.GitlabProjectIdMicroFE = cast.ToInt(GetOrReturnDefaultValue("GITLAB_PROJECT_ID_MICROFE", 1993))
+	config.GitlabHostMicroFE = cast.ToString(GetOrReturnDefaultValue("GITLAB_HOST_MICROFE", "test-page.ucode.run"))
 
 	return config
 }
