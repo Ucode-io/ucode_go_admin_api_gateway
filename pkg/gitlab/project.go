@@ -67,3 +67,21 @@ func UpdateProject(cfg IntegrationData, data map[string]interface{}) (response m
 
 	return resp, err
 }
+
+func CreateProjectVariable(cfg IntegrationData, data map[string]interface{}) (response models.GitlabIntegrationResponse, err error) {
+	// create repo in given group by existing project in gitlab
+
+	projectId := cfg.GitlabProjectId
+	strProjectId := strconv.Itoa(projectId)
+	fmt.Println("config::::::", cfg.GitlabIntegrationUrl, cfg.GitlabIntegrationToken)
+
+	resp, err := DoRequest(cfg.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/variables", cfg.GitlabIntegrationToken, "POST", data)
+
+	if resp.Code >= 400 {
+		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
+	} else if resp.Code >= 500 {
+		return models.GitlabIntegrationResponse{}, errors.New(status_http.InternalServerError.Description)
+	}
+
+	return resp, err
+}
