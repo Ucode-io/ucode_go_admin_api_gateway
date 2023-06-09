@@ -26,10 +26,10 @@ type PayzeLinkRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Method      string                `protobuf:"bytes,1,opt,name=method,proto3" json:"method,omitempty"`
-	ProjectId   string                `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Environment string                `protobuf:"bytes,3,opt,name=environment,proto3" json:"environment,omitempty"`
-	Data        *PayzeLinkRequestData `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
+	Method      string                `protobuf:"bytes,1,opt,name=method,proto3" json:"method"`
+	ProjectId   string                `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Environment string                `protobuf:"bytes,3,opt,name=environment,proto3" json:"environment"`
+	Data        *PayzeLinkRequestData `protobuf:"bytes,4,opt,name=data,proto3" json:"data"`
 }
 
 func (x *PayzeLinkRequest) Reset() {
@@ -97,14 +97,14 @@ type PayzeLinkRequestData struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Amount        int32  `protobuf:"varint,1,opt,name=amount,proto3" json:"amount,omitempty"`
-	Currency      string `protobuf:"bytes,2,opt,name=currency,proto3" json:"currency,omitempty"`
-	Callback      string `protobuf:"bytes,3,opt,name=callback,proto3" json:"callback,omitempty"`
-	CallbackError string `protobuf:"bytes,4,opt,name=callbackError,proto3" json:"callbackError,omitempty"`
-	Preauthorize  bool   `protobuf:"varint,5,opt,name=preauthorize,proto3" json:"preauthorize,omitempty"`
-	Lang          string `protobuf:"bytes,6,opt,name=lang,proto3" json:"lang,omitempty"`
-	HookUrl       string `protobuf:"bytes,7,opt,name=hookUrl,proto3" json:"hookUrl,omitempty"`
-	HookRefund    bool   `protobuf:"varint,8,opt,name=hookRefund,proto3" json:"hookRefund,omitempty"`
+	Amount        int32  `protobuf:"varint,1,opt,name=amount,proto3" json:"amount"`
+	Currency      string `protobuf:"bytes,2,opt,name=currency,proto3" json:"currency"`
+	Callback      string `protobuf:"bytes,3,opt,name=callback,proto3" json:"callback"`
+	CallbackError string `protobuf:"bytes,4,opt,name=callbackError,proto3" json:"callbackError"`
+	Preauthorize  bool   `protobuf:"varint,5,opt,name=preauthorize,proto3" json:"preauthorize"`
+	Lang          string `protobuf:"bytes,6,opt,name=lang,proto3" json:"lang"`
+	HookUrl       string `protobuf:"bytes,7,opt,name=hookUrl,proto3" json:"hookUrl"`
+	HookRefund    bool   `protobuf:"varint,8,opt,name=hookRefund,proto3" json:"hookRefund"`
 }
 
 func (x *PayzeLinkRequestData) Reset() {
@@ -200,21 +200,21 @@ type PayzeLinkResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	OrderId       string           `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	Status        string           `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	TransactionId string           `protobuf:"bytes,4,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
-	Action        int32            `protobuf:"varint,5,opt,name=action,proto3" json:"action,omitempty"`
-	Currency      string           `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"`
-	Price         float32          `protobuf:"fixed32,7,opt,name=price,proto3" json:"price,omitempty"`
-	CreatedDate   string           `protobuf:"bytes,8,opt,name=created_date,json=createdDate,proto3" json:"created_date,omitempty"`
-	CreatedAt     string           `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string           `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt     string           `protobuf:"bytes,11,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
-	Data          *structpb.Struct `protobuf:"bytes,12,opt,name=data,proto3" json:"data,omitempty"`
-	ProductId     string           `protobuf:"bytes,13,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
-	Amount        int32            `protobuf:"varint,14,opt,name=amount,proto3" json:"amount,omitempty"`
-	RespId        string           `protobuf:"bytes,15,opt,name=resp_id,json=respId,proto3" json:"resp_id,omitempty"`
+	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	OrderId       string           `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id"`
+	Status        string           `protobuf:"bytes,3,opt,name=status,proto3" json:"status"`
+	TransactionId string           `protobuf:"bytes,4,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id"`
+	Action        int32            `protobuf:"varint,5,opt,name=action,proto3" json:"action"`
+	Currency      string           `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency"`
+	Price         float32          `protobuf:"fixed32,7,opt,name=price,proto3" json:"price"`
+	CreatedDate   string           `protobuf:"bytes,8,opt,name=created_date,json=createdDate,proto3" json:"created_date"`
+	CreatedAt     string           `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt     string           `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	DeletedAt     string           `protobuf:"bytes,11,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at"`
+	Data          *structpb.Struct `protobuf:"bytes,12,opt,name=data,proto3" json:"data"`
+	ProductId     string           `protobuf:"bytes,13,opt,name=product_id,json=productId,proto3" json:"product_id"`
+	Amount        int32            `protobuf:"varint,14,opt,name=amount,proto3" json:"amount"`
+	RespId        string           `protobuf:"bytes,15,opt,name=resp_id,json=respId,proto3" json:"resp_id"`
 }
 
 func (x *PayzeLinkResponse) Reset() {
@@ -359,22 +359,22 @@ type PayzeLinkResponseSaveCard struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	OrderId       string           `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	Status        string           `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	TransactionId string           `protobuf:"bytes,4,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
-	Action        int32            `protobuf:"varint,5,opt,name=action,proto3" json:"action,omitempty"`
-	Currency      string           `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"`
-	Price         float32          `protobuf:"fixed32,7,opt,name=price,proto3" json:"price,omitempty"`
-	CreatedDate   string           `protobuf:"bytes,8,opt,name=created_date,json=createdDate,proto3" json:"created_date,omitempty"`
-	CreatedAt     string           `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string           `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt     string           `protobuf:"bytes,11,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
-	Data          *structpb.Struct `protobuf:"bytes,12,opt,name=data,proto3" json:"data,omitempty"`
-	ProductId     string           `protobuf:"bytes,13,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
-	Amount        int32            `protobuf:"varint,14,opt,name=amount,proto3" json:"amount,omitempty"`
-	RespId        string           `protobuf:"bytes,15,opt,name=resp_id,json=respId,proto3" json:"resp_id,omitempty"`
-	CardId        string           `protobuf:"bytes,16,opt,name=card_id,json=cardId,proto3" json:"card_id,omitempty"`
+	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	OrderId       string           `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id"`
+	Status        string           `protobuf:"bytes,3,opt,name=status,proto3" json:"status"`
+	TransactionId string           `protobuf:"bytes,4,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id"`
+	Action        int32            `protobuf:"varint,5,opt,name=action,proto3" json:"action"`
+	Currency      string           `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency"`
+	Price         float32          `protobuf:"fixed32,7,opt,name=price,proto3" json:"price"`
+	CreatedDate   string           `protobuf:"bytes,8,opt,name=created_date,json=createdDate,proto3" json:"created_date"`
+	CreatedAt     string           `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt     string           `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	DeletedAt     string           `protobuf:"bytes,11,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at"`
+	Data          *structpb.Struct `protobuf:"bytes,12,opt,name=data,proto3" json:"data"`
+	ProductId     string           `protobuf:"bytes,13,opt,name=product_id,json=productId,proto3" json:"product_id"`
+	Amount        int32            `protobuf:"varint,14,opt,name=amount,proto3" json:"amount"`
+	RespId        string           `protobuf:"bytes,15,opt,name=resp_id,json=respId,proto3" json:"resp_id"`
+	CardId        string           `protobuf:"bytes,16,opt,name=card_id,json=cardId,proto3" json:"card_id"`
 }
 
 func (x *PayzeLinkResponseSaveCard) Reset() {

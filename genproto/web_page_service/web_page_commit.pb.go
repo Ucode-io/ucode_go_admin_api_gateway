@@ -27,14 +27,14 @@ type CommitWithRelease struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId     string                     `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string                     `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	AuthorId      string                     `protobuf:"bytes,4,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
-	Name          string                     `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
-	CreatedAt     string                     `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	ReleaseInfo   *CommitWithRelease_Release `protobuf:"bytes,7,opt,name=release_info,json=releaseInfo,proto3" json:"release_info,omitempty"`
-	CommitType    string                     `protobuf:"bytes,8,opt,name=commit_type,json=commitType,proto3" json:"commit_type,omitempty"`
+	Id            string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId     string                     `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string                     `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	AuthorId      string                     `protobuf:"bytes,4,opt,name=author_id,json=authorId,proto3" json:"author_id"`
+	Name          string                     `protobuf:"bytes,5,opt,name=name,proto3" json:"name"`
+	CreatedAt     string                     `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	ReleaseInfo   *CommitWithRelease_Release `protobuf:"bytes,7,opt,name=release_info,json=releaseInfo,proto3" json:"release_info"`
+	CommitType    string                     `protobuf:"bytes,8,opt,name=commit_type,json=commitType,proto3" json:"commit_type"`
 }
 
 func (x *CommitWithRelease) Reset() {
@@ -130,12 +130,12 @@ type CreateCommitRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string   `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string   `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	AuthorId      string   `protobuf:"bytes,3,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
-	Name          string   `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	CommitType    string   `protobuf:"bytes,5,opt,name=commit_type,json=commitType,proto3" json:"commit_type,omitempty"`
-	VersionIds    []string `protobuf:"bytes,6,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
+	ProjectId     string   `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string   `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	AuthorId      string   `protobuf:"bytes,3,opt,name=author_id,json=authorId,proto3" json:"author_id"`
+	Name          string   `protobuf:"bytes,4,opt,name=name,proto3" json:"name"`
+	CommitType    string   `protobuf:"bytes,5,opt,name=commit_type,json=commitType,proto3" json:"commit_type"`
+	VersionIds    []string `protobuf:"bytes,6,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
 }
 
 func (x *CreateCommitRequest) Reset() {
@@ -217,7 +217,7 @@ type CommitPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *CommitPrimaryKey) Reset() {
@@ -264,13 +264,13 @@ type GetCommitListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit         int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset        int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
-	Search        string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
-	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	CreatedAt     string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	CommitType    string `protobuf:"bytes,7,opt,name=commit_type,json=commitType,proto3" json:"commit_type,omitempty"`
+	Limit         int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
+	Offset        int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
+	Search        string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
+	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	CreatedAt     string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	CommitType    string `protobuf:"bytes,7,opt,name=commit_type,json=commitType,proto3" json:"commit_type"`
 }
 
 func (x *GetCommitListRequest) Reset() {
@@ -359,8 +359,8 @@ type GetCommitListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count   int32                `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	Commits []*CommitWithRelease `protobuf:"bytes,2,rep,name=commits,proto3" json:"commits,omitempty"`
+	Count   int32                `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
+	Commits []*CommitWithRelease `protobuf:"bytes,2,rep,name=commits,proto3" json:"commits"`
 }
 
 func (x *GetCommitListResponse) Reset() {
@@ -414,9 +414,9 @@ type RestoreCommitRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	Id            string `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	Id            string `protobuf:"bytes,3,opt,name=id,proto3" json:"id"`
 }
 
 func (x *RestoreCommitRequest) Reset() {
@@ -477,8 +477,8 @@ type InsertCommitResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommitId  string `protobuf:"bytes,1,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	CommitId  string `protobuf:"bytes,1,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id"`
 }
 
 func (x *InsertCommitResponse) Reset() {
@@ -532,8 +532,8 @@ type GetMultipleCommitInfoRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommitIds []string `protobuf:"bytes,1,rep,name=commit_ids,json=commitIds,proto3" json:"commit_ids,omitempty"`
-	ProjectId string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CommitIds []string `protobuf:"bytes,1,rep,name=commit_ids,json=commitIds,proto3" json:"commit_ids"`
+	ProjectId string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetMultipleCommitInfoRequest) Reset() {
@@ -587,15 +587,15 @@ type CommitInfo struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id           string         `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	VersionIds   []string       `protobuf:"bytes,2,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
-	ProjectId    string         `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	AuthorId     string         `protobuf:"bytes,4,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
-	Name         string         `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
-	CommitType   string         `protobuf:"bytes,6,opt,name=commit_type,json=commitType,proto3" json:"commit_type,omitempty"`
-	CreatedAt    string         `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt    string         `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	VersionInfos []*VersionInfo `protobuf:"bytes,9,rep,name=version_infos,json=versionInfos,proto3" json:"version_infos,omitempty"`
+	Id           string         `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	VersionIds   []string       `protobuf:"bytes,2,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
+	ProjectId    string         `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	AuthorId     string         `protobuf:"bytes,4,opt,name=author_id,json=authorId,proto3" json:"author_id"`
+	Name         string         `protobuf:"bytes,5,opt,name=name,proto3" json:"name"`
+	CommitType   string         `protobuf:"bytes,6,opt,name=commit_type,json=commitType,proto3" json:"commit_type"`
+	CreatedAt    string         `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt    string         `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	VersionInfos []*VersionInfo `protobuf:"bytes,9,rep,name=version_infos,json=versionInfos,proto3" json:"version_infos"`
 }
 
 func (x *CommitInfo) Reset() {
@@ -698,13 +698,13 @@ type VersionInfo struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AuthorId  string `protobuf:"bytes,3,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
-	CreatedAt string `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt string `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	Desc      string `protobuf:"bytes,6,opt,name=desc,proto3" json:"desc,omitempty"`
-	IsCurrent bool   `protobuf:"varint,7,opt,name=is_current,json=isCurrent,proto3" json:"is_current,omitempty"`
-	Version   string `protobuf:"bytes,8,opt,name=version,proto3" json:"version,omitempty"`
-	VersionId string `protobuf:"bytes,9,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	AuthorId  string `protobuf:"bytes,3,opt,name=author_id,json=authorId,proto3" json:"author_id"`
+	CreatedAt string `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt string `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	Desc      string `protobuf:"bytes,6,opt,name=desc,proto3" json:"desc"`
+	IsCurrent bool   `protobuf:"varint,7,opt,name=is_current,json=isCurrent,proto3" json:"is_current"`
+	Version   string `protobuf:"bytes,8,opt,name=version,proto3" json:"version"`
+	VersionId string `protobuf:"bytes,9,opt,name=version_id,json=versionId,proto3" json:"version_id"`
 }
 
 func (x *VersionInfo) Reset() {
@@ -793,8 +793,8 @@ type GetMultipleCommitInfoResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Commits map[string]*CommitInfo `protobuf:"bytes,1,rep,name=commits,proto3" json:"commits,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	Count   int64                  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Commits map[string]*CommitInfo `protobuf:"bytes,1,rep,name=commits,proto3" json:"commits" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Count   int64                  `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetMultipleCommitInfoResponse) Reset() {
@@ -848,9 +848,9 @@ type CommitWithRelease_Release struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Ids       []string `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
-	Version   string   `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-	IsCurrent bool     `protobuf:"varint,3,opt,name=is_current,json=isCurrent,proto3" json:"is_current,omitempty"`
+	Ids       []string `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids"`
+	Version   string   `protobuf:"bytes,2,opt,name=version,proto3" json:"version"`
+	IsCurrent bool     `protobuf:"varint,3,opt,name=is_current,json=isCurrent,proto3" json:"is_current"`
 }
 
 func (x *CommitWithRelease_Release) Reset() {

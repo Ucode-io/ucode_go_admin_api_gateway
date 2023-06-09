@@ -26,8 +26,8 @@ type InsertVersionsToCommitRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	VersionIds []string `protobuf:"bytes,2,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
+	Id         string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	VersionIds []string `protobuf:"bytes,2,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
 }
 
 func (x *InsertVersionsToCommitRequest) Reset() {
@@ -81,7 +81,7 @@ type GetTableHistoryRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableId string `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	TableId string `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id"`
 }
 
 func (x *GetTableHistoryRequest) Reset() {
@@ -128,7 +128,7 @@ type TableHistoryPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *TableHistoryPrimaryKey) Reset() {
@@ -175,9 +175,9 @@ type TableHistory struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	CreatedAt  string   `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	VersionIds []string `protobuf:"bytes,3,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
+	Id         string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	CreatedAt  string   `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	VersionIds []string `protobuf:"bytes,3,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
 }
 
 func (x *TableHistory) Reset() {
@@ -238,7 +238,7 @@ type GetTableHistoryResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Items []*TableHistory `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Items []*TableHistory `protobuf:"bytes,1,rep,name=items,proto3" json:"items"`
 }
 
 func (x *GetTableHistoryResponse) Reset() {
@@ -285,19 +285,19 @@ type CreateTableRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Label             string                 `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
-	Description       string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Slug              string                 `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
-	Fields            []*CreateFieldsRequest `protobuf:"bytes,4,rep,name=fields,proto3" json:"fields,omitempty"`
-	ShowInMenu        bool                   `protobuf:"varint,5,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu,omitempty"`
-	Icon              string                 `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
-	SubtitleFieldSlug string                 `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug,omitempty"`
-	Sections          []*Section             `protobuf:"bytes,8,rep,name=sections,proto3" json:"sections,omitempty"`
-	AppId             string                 `protobuf:"bytes,9,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
-	IncrementId       *IncrementID           `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id,omitempty"`
-	ProjectId         string                 `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	CommitId          string                 `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId         string                 `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	Label             string                 `protobuf:"bytes,1,opt,name=label,proto3" json:"label"`
+	Description       string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description"`
+	Slug              string                 `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug"`
+	Fields            []*CreateFieldsRequest `protobuf:"bytes,4,rep,name=fields,proto3" json:"fields"`
+	ShowInMenu        bool                   `protobuf:"varint,5,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu"`
+	Icon              string                 `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon"`
+	SubtitleFieldSlug string                 `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug"`
+	Sections          []*Section             `protobuf:"bytes,8,rep,name=sections,proto3" json:"sections"`
+	AppId             string                 `protobuf:"bytes,9,opt,name=app_id,json=appId,proto3" json:"app_id"`
+	IncrementId       *IncrementID           `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id"`
+	ProjectId         string                 `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	CommitId          string                 `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId         string                 `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id"`
 }
 
 func (x *CreateTableRequest) Reset() {
@@ -428,9 +428,9 @@ type IncrementID struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	WithIncrementId bool   `protobuf:"varint,1,opt,name=with_increment_id,json=withIncrementId,proto3" json:"with_increment_id,omitempty"`
-	DigitNumber     int32  `protobuf:"varint,2,opt,name=digit_number,json=digitNumber,proto3" json:"digit_number,omitempty"`
-	Prefix          string `protobuf:"bytes,3,opt,name=prefix,proto3" json:"prefix,omitempty"`
+	WithIncrementId bool   `protobuf:"varint,1,opt,name=with_increment_id,json=withIncrementId,proto3" json:"with_increment_id"`
+	DigitNumber     int32  `protobuf:"varint,2,opt,name=digit_number,json=digitNumber,proto3" json:"digit_number"`
+	Prefix          string `protobuf:"bytes,3,opt,name=prefix,proto3" json:"prefix"`
 }
 
 func (x *IncrementID) Reset() {
@@ -491,16 +491,16 @@ type CreateTableResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Label             string       `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
-	Description       string       `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Slug              string       `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug,omitempty"`
-	Fields            []*Field     `protobuf:"bytes,5,rep,name=fields,proto3" json:"fields,omitempty"`
-	ShowInMenu        bool         `protobuf:"varint,6,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu,omitempty"`
-	Icon              string       `protobuf:"bytes,7,opt,name=icon,proto3" json:"icon,omitempty"`
-	SubtitleFieldSlug string       `protobuf:"bytes,8,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug,omitempty"`
-	Sections          []*Section   `protobuf:"bytes,9,rep,name=sections,proto3" json:"sections,omitempty"`
-	IncrementId       *IncrementID `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id,omitempty"`
+	Id                string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Label             string       `protobuf:"bytes,2,opt,name=label,proto3" json:"label"`
+	Description       string       `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	Slug              string       `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug"`
+	Fields            []*Field     `protobuf:"bytes,5,rep,name=fields,proto3" json:"fields"`
+	ShowInMenu        bool         `protobuf:"varint,6,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu"`
+	Icon              string       `protobuf:"bytes,7,opt,name=icon,proto3" json:"icon"`
+	SubtitleFieldSlug string       `protobuf:"bytes,8,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug"`
+	Sections          []*Section   `protobuf:"bytes,9,rep,name=sections,proto3" json:"sections"`
+	IncrementId       *IncrementID `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id"`
 }
 
 func (x *CreateTableResponse) Reset() {
@@ -610,17 +610,17 @@ type Table struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Label             string       `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
-	Description       string       `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Slug              string       `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug,omitempty"`
-	ShowInMenu        bool         `protobuf:"varint,5,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu,omitempty"`
-	Icon              string       `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
-	SubtitleFieldSlug string       `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug,omitempty"`
-	IsVisible         bool         `protobuf:"varint,8,opt,name=is_visible,json=isVisible,proto3" json:"is_visible,omitempty"`
-	IsOwnTable        bool         `protobuf:"varint,9,opt,name=is_own_table,json=isOwnTable,proto3" json:"is_own_table,omitempty"`
-	IncrementId       *IncrementID `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id,omitempty"`
-	ProjectId         string       `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id                string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Label             string       `protobuf:"bytes,2,opt,name=label,proto3" json:"label"`
+	Description       string       `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	Slug              string       `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug"`
+	ShowInMenu        bool         `protobuf:"varint,5,opt,name=show_in_menu,json=showInMenu,proto3" json:"show_in_menu"`
+	Icon              string       `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon"`
+	SubtitleFieldSlug string       `protobuf:"bytes,7,opt,name=subtitle_field_slug,json=subtitleFieldSlug,proto3" json:"subtitle_field_slug"`
+	IsVisible         bool         `protobuf:"varint,8,opt,name=is_visible,json=isVisible,proto3" json:"is_visible"`
+	IsOwnTable        bool         `protobuf:"varint,9,opt,name=is_own_table,json=isOwnTable,proto3" json:"is_own_table"`
+	IncrementId       *IncrementID `protobuf:"bytes,10,opt,name=increment_id,json=incrementId,proto3" json:"increment_id"`
+	ProjectId         string       `protobuf:"bytes,11,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *Table) Reset() {
@@ -737,8 +737,8 @@ type GetAllTablesResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Tables []*Table `protobuf:"bytes,1,rep,name=tables,proto3" json:"tables,omitempty"`
-	Count  int32    `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Tables []*Table `protobuf:"bytes,1,rep,name=tables,proto3" json:"tables"`
+	Count  int32    `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetAllTablesResponse) Reset() {
@@ -792,9 +792,9 @@ type TablePrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	VersionId string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
 }
 
 func (x *TablePrimaryKey) Reset() {
@@ -855,10 +855,10 @@ type GetAllTablesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Offset    int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
-	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Search    string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
-	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Offset    int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset"`
+	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
+	Search    string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
+	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetAllTablesRequest) Reset() {

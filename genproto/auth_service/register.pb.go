@@ -27,7 +27,7 @@ type RegisterUserRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Data *structpb.Struct `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	Data *structpb.Struct `protobuf:"bytes,1,opt,name=data,proto3" json:"data"`
 }
 
 func (x *RegisterUserRequest) Reset() {

@@ -97,7 +97,7 @@ type UpdateRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	LoginStrategies []*LoginStrategy `protobuf:"bytes,1,rep,name=login_strategies,json=loginStrategies,proto3" json:"login_strategies,omitempty"`
+	LoginStrategies []*LoginStrategy `protobuf:"bytes,1,rep,name=login_strategies,json=loginStrategies,proto3" json:"login_strategies"`
 }
 
 func (x *UpdateRequest) Reset() {
@@ -144,7 +144,7 @@ type UpdateResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RowsAffected int32 `protobuf:"varint,1,opt,name=rows_affected,json=rowsAffected,proto3" json:"rows_affected,omitempty"`
+	RowsAffected int32 `protobuf:"varint,1,opt,name=rows_affected,json=rowsAffected,proto3" json:"rows_affected"`
 }
 
 func (x *UpdateResponse) Reset() {
@@ -191,7 +191,7 @@ type GetListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	LoginStrategies []*LoginStrategy `protobuf:"bytes,1,rep,name=login_strategies,json=loginStrategies,proto3" json:"login_strategies,omitempty"`
+	LoginStrategies []*LoginStrategy `protobuf:"bytes,1,rep,name=login_strategies,json=loginStrategies,proto3" json:"login_strategies"`
 }
 
 func (x *GetListResponse) Reset() {
@@ -238,10 +238,10 @@ type CreateRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Type      string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvId     string `protobuf:"bytes,4,opt,name=env_id,json=envId,proto3" json:"env_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Type      string `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvId     string `protobuf:"bytes,4,opt,name=env_id,json=envId,proto3" json:"env_id"`
 }
 
 func (x *CreateRequest) Reset() {
@@ -309,10 +309,10 @@ type LoginStrategy struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Type      string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvId     string `protobuf:"bytes,4,opt,name=env_id,json=envId,proto3" json:"env_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Type      string `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvId     string `protobuf:"bytes,4,opt,name=env_id,json=envId,proto3" json:"env_id"`
 }
 
 func (x *LoginStrategy) Reset() {
@@ -380,7 +380,7 @@ type GetListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetListRequest) Reset() {
@@ -427,7 +427,7 @@ type LoginStrategyPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *LoginStrategyPrimaryKey) Reset() {

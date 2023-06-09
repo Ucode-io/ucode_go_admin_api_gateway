@@ -26,7 +26,7 @@ type GetIntegrationRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *GetIntegrationRequest) Reset() {
@@ -73,7 +73,7 @@ type InsertIntegrationResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *InsertIntegrationResponse) Reset() {
@@ -120,10 +120,10 @@ type GetAllIntegrationsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit       int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset      int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
-	ProjectId   string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Environment string `protobuf:"bytes,4,opt,name=environment,proto3" json:"environment,omitempty"`
+	Limit       int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
+	Offset      int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
+	ProjectId   string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Environment string `protobuf:"bytes,4,opt,name=environment,proto3" json:"environment"`
 }
 
 func (x *GetAllIntegrationsRequest) Reset() {
@@ -191,15 +191,15 @@ type Integration struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	NumId       int32  `protobuf:"varint,2,opt,name=num_id,json=numId,proto3" json:"num_id,omitempty"`
-	ApiKey      string `protobuf:"bytes,3,opt,name=api_key,json=apiKey,proto3" json:"api_key,omitempty"`
-	Secret      string `protobuf:"bytes,4,opt,name=secret,proto3" json:"secret,omitempty"`
-	Environment string `protobuf:"bytes,5,opt,name=environment,proto3" json:"environment,omitempty"`
-	Status      int32  `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`
-	UpdatedAt   string `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	CreatedAt   string `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	ProjectId   string `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id          string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	NumId       int32  `protobuf:"varint,2,opt,name=num_id,json=numId,proto3" json:"num_id"`
+	ApiKey      string `protobuf:"bytes,3,opt,name=api_key,json=apiKey,proto3" json:"api_key"`
+	Secret      string `protobuf:"bytes,4,opt,name=secret,proto3" json:"secret"`
+	Environment string `protobuf:"bytes,5,opt,name=environment,proto3" json:"environment"`
+	Status      int32  `protobuf:"varint,6,opt,name=status,proto3" json:"status"`
+	UpdatedAt   string `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	CreatedAt   string `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	ProjectId   string `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *Integration) Reset() {
@@ -302,8 +302,8 @@ type GetAllIntegrationsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count   int32          `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	Objects []*Integration `protobuf:"bytes,2,rep,name=objects,proto3" json:"objects,omitempty"`
+	Count   int32          `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
+	Objects []*Integration `protobuf:"bytes,2,rep,name=objects,proto3" json:"objects"`
 }
 
 func (x *GetAllIntegrationsResponse) Reset() {

@@ -27,12 +27,12 @@ type RunScenarioRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DagId     string            `protobuf:"bytes,1,opt,name=dag_id,json=dagId,proto3" json:"dag_id,omitempty"`
-	Header    map[string]string `protobuf:"bytes,2,rep,name=header,proto3" json:"header,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	Body      *structpb.Struct  `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`
-	Url       string            `protobuf:"bytes,4,opt,name=url,proto3" json:"url,omitempty"`
-	DagStepId string            `protobuf:"bytes,5,opt,name=dag_step_id,json=dagStepId,proto3" json:"dag_step_id,omitempty"`
-	Method    string            `protobuf:"bytes,6,opt,name=method,proto3" json:"method,omitempty"`
+	DagId     string            `protobuf:"bytes,1,opt,name=dag_id,json=dagId,proto3" json:"dag_id"`
+	Header    map[string]string `protobuf:"bytes,2,rep,name=header,proto3" json:"header" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Body      *structpb.Struct  `protobuf:"bytes,3,opt,name=body,proto3" json:"body"`
+	Url       string            `protobuf:"bytes,4,opt,name=url,proto3" json:"url"`
+	DagStepId string            `protobuf:"bytes,5,opt,name=dag_step_id,json=dagStepId,proto3" json:"dag_step_id"`
+	Method    string            `protobuf:"bytes,6,opt,name=method,proto3" json:"method"`
 }
 
 func (x *RunScenarioRequest) Reset() {
@@ -114,7 +114,7 @@ type RunScenarioResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Response *structpb.Struct `protobuf:"bytes,1,opt,name=response,proto3" json:"response,omitempty"`
+	Response *structpb.Struct `protobuf:"bytes,1,opt,name=response,proto3" json:"response"`
 }
 
 func (x *RunScenarioResponse) Reset() {
