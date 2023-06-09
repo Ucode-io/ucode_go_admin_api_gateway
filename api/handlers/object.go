@@ -990,6 +990,7 @@ func (h *Handler) GetList(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+		fmt.Println("begin:", time.Now())
 		resp, err = services.BuilderService().ObjectBuilder().GetList(
 			context.Background(),
 			&obs.CommonMessage{
@@ -998,6 +999,7 @@ func (h *Handler) GetList(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
+		fmt.Println("end:", time.Now())
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
