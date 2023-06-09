@@ -33589,12 +33589,6 @@ const docTemplate = `{
                 "commit_id": {
                     "type": "string"
                 },
-                "creatable": {
-                    "type": "boolean"
-                },
-                "default_editable": {
-                    "type": "boolean"
-                },
                 "default_limit": {
                     "type": "string"
                 },
@@ -33754,9 +33748,6 @@ const docTemplate = `{
                 },
                 "commit_id": {
                     "type": "integer"
-                },
-                "default_editable": {
-                    "type": "boolean"
                 },
                 "default_limit": {
                     "type": "string"
@@ -34712,9 +34703,6 @@ const docTemplate = `{
                 "commit_info": {
                     "$ref": "#/definitions/object_builder_service.CommitInfo"
                 },
-                "default_editable": {
-                    "type": "boolean"
-                },
                 "description": {
                     "type": "string"
                 },
@@ -34974,12 +34962,6 @@ const docTemplate = `{
                 "commit_id": {
                     "type": "string"
                 },
-                "creatable": {
-                    "type": "boolean"
-                },
-                "default_editable": {
-                    "type": "boolean"
-                },
                 "default_limit": {
                     "type": "string"
                 },
@@ -35231,9 +35213,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "default_editable": {
-                    "type": "boolean"
                 },
                 "default_limit": {
                     "type": "string"

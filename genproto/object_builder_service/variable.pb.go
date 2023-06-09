@@ -26,17 +26,17 @@ type CreateVariableRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Slug          string   `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug"`
-	Type          string   `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
-	Label         string   `protobuf:"bytes,3,opt,name=label,proto3" json:"label"`
-	DashboardId   string   `protobuf:"bytes,4,opt,name=dashboard_id,json=dashboardId,proto3" json:"dashboard_id"`
-	FieldSlug     string   `protobuf:"bytes,5,opt,name=field_slug,json=fieldSlug,proto3" json:"field_slug"`
-	Options       []string `protobuf:"bytes,6,rep,name=options,proto3" json:"options"`
-	ViewFieldSlug string   `protobuf:"bytes,7,opt,name=view_field_slug,json=viewFieldSlug,proto3" json:"view_field_slug"`
-	Query         string   `protobuf:"bytes,8,opt,name=query,proto3" json:"query"`
-	ProjectId     string   `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	CommitId      int64    `protobuf:"varint,10,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	CommitGuid    string   `protobuf:"bytes,11,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid"`
+	Slug          string   `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
+	Type          string   `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Label         string   `protobuf:"bytes,3,opt,name=label,proto3" json:"label,omitempty"`
+	DashboardId   string   `protobuf:"bytes,4,opt,name=dashboard_id,json=dashboardId,proto3" json:"dashboard_id,omitempty"`
+	FieldSlug     string   `protobuf:"bytes,5,opt,name=field_slug,json=fieldSlug,proto3" json:"field_slug,omitempty"`
+	Options       []string `protobuf:"bytes,6,rep,name=options,proto3" json:"options,omitempty"`
+	ViewFieldSlug string   `protobuf:"bytes,7,opt,name=view_field_slug,json=viewFieldSlug,proto3" json:"view_field_slug,omitempty"`
+	Query         string   `protobuf:"bytes,8,opt,name=query,proto3" json:"query,omitempty"`
+	ProjectId     string   `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CommitId      int64    `protobuf:"varint,10,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	CommitGuid    string   `protobuf:"bytes,11,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid,omitempty"`
 }
 
 func (x *CreateVariableRequest) Reset() {
@@ -153,16 +153,16 @@ type Variable struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Slug          string   `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug"`
-	Type          string   `protobuf:"bytes,3,opt,name=type,proto3" json:"type"`
-	Label         string   `protobuf:"bytes,4,opt,name=label,proto3" json:"label"`
-	DashboardId   string   `protobuf:"bytes,5,opt,name=dashboard_id,json=dashboardId,proto3" json:"dashboard_id"`
-	FieldSlug     string   `protobuf:"bytes,6,opt,name=field_slug,json=fieldSlug,proto3" json:"field_slug"`
-	Options       []string `protobuf:"bytes,7,rep,name=options,proto3" json:"options"`
-	ViewFieldSlug string   `protobuf:"bytes,8,opt,name=view_field_slug,json=viewFieldSlug,proto3" json:"view_field_slug"`
-	Query         string   `protobuf:"bytes,9,opt,name=query,proto3" json:"query"`
-	ProjectId     string   `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id            string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Slug          string   `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
+	Type          string   `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Label         string   `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
+	DashboardId   string   `protobuf:"bytes,5,opt,name=dashboard_id,json=dashboardId,proto3" json:"dashboard_id,omitempty"`
+	FieldSlug     string   `protobuf:"bytes,6,opt,name=field_slug,json=fieldSlug,proto3" json:"field_slug,omitempty"`
+	Options       []string `protobuf:"bytes,7,rep,name=options,proto3" json:"options,omitempty"`
+	ViewFieldSlug string   `protobuf:"bytes,8,opt,name=view_field_slug,json=viewFieldSlug,proto3" json:"view_field_slug,omitempty"`
+	Query         string   `protobuf:"bytes,9,opt,name=query,proto3" json:"query,omitempty"`
+	ProjectId     string   `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *Variable) Reset() {
@@ -272,8 +272,8 @@ type GetAllVariablesResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Variables []*Variable `protobuf:"bytes,1,rep,name=variables,proto3" json:"variables"`
-	Count     int32       `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Variables []*Variable `protobuf:"bytes,1,rep,name=variables,proto3" json:"variables,omitempty"`
+	Count     int32       `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetAllVariablesResponse) Reset() {
@@ -327,9 +327,9 @@ type GetAllVariablesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Slug        string `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug"`
-	DashboardId string `protobuf:"bytes,2,opt,name=dashboard_id,json=dashboardId,proto3" json:"dashboard_id"`
-	ProjectId   string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Slug        string `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
+	DashboardId string `protobuf:"bytes,2,opt,name=dashboard_id,json=dashboardId,proto3" json:"dashboard_id,omitempty"`
+	ProjectId   string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *GetAllVariablesRequest) Reset() {
@@ -390,8 +390,8 @@ type VariablePrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *VariablePrimaryKey) Reset() {

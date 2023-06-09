@@ -25,12 +25,12 @@ type Filters struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit  int64  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
-	Offset int64  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
-	Sort   string `protobuf:"bytes,3,opt,name=sort,proto3" json:"sort"`
-	Order  string `protobuf:"bytes,4,opt,name=order,proto3" json:"order"`
-	Search string `protobuf:"bytes,5,opt,name=search,proto3" json:"search"`
-	Page   int64  `protobuf:"varint,6,opt,name=page,proto3" json:"page"`
+	Limit  int64  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset int64  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Sort   string `protobuf:"bytes,3,opt,name=sort,proto3" json:"sort,omitempty"`
+	Order  string `protobuf:"bytes,4,opt,name=order,proto3" json:"order,omitempty"`
+	Search string `protobuf:"bytes,5,opt,name=search,proto3" json:"search,omitempty"`
+	Page   int64  `protobuf:"varint,6,opt,name=page,proto3" json:"page,omitempty"`
 }
 
 func (x *Filters) Reset() {

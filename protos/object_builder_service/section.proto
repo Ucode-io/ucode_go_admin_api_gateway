@@ -77,6 +77,8 @@ message RelationForSection {
     bool multiple_insert = 19;
     repeated string updated_fields = 20;
     string multiple_insert_field = 21;
+    bool creatable = 22;
+    bool default_editable = 23;
 }
 
 message ActionRelationForSection {

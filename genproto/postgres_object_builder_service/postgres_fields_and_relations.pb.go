@@ -27,12 +27,12 @@ type CreateFieldsAndRelationsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string                   `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	VersionId string                   `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	CommitId  string                   `protobuf:"bytes,3,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	TableId   string                   `protobuf:"bytes,4,opt,name=table_id,json=tableId,proto3" json:"table_id"`
-	Fields    []*CreateFieldRequest    `protobuf:"bytes,5,rep,name=fields,proto3" json:"fields"`
-	Relations []*CreateRelationRequest `protobuf:"bytes,6,rep,name=relations,proto3" json:"relations"`
+	ProjectId string                   `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	VersionId string                   `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	CommitId  string                   `protobuf:"bytes,3,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	TableId   string                   `protobuf:"bytes,4,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	Fields    []*CreateFieldRequest    `protobuf:"bytes,5,rep,name=fields,proto3" json:"fields,omitempty"`
+	Relations []*CreateRelationRequest `protobuf:"bytes,6,rep,name=relations,proto3" json:"relations,omitempty"`
 }
 
 func (x *CreateFieldsAndRelationsRequest) Reset() {
