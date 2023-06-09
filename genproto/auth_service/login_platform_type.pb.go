@@ -26,7 +26,7 @@ type GetListLoginPlatformTypeRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	EnvironmentId string `protobuf:"bytes,1,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	EnvironmentId string `protobuf:"bytes,1,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
 }
 
 func (x *GetListLoginPlatformTypeRequest) Reset() {
@@ -73,7 +73,7 @@ type LoginPlatformTypePrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *LoginPlatformTypePrimaryKey) Reset() {
@@ -120,7 +120,7 @@ type GetListLoginPlatformTypeResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Items []*LoginPlatform `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Items []*LoginPlatform `protobuf:"bytes,1,rep,name=items,proto3" json:"items"`
 }
 
 func (x *GetListLoginPlatformTypeResponse) Reset() {
@@ -167,11 +167,11 @@ type LoginPlatform struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId     string             `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string             `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	Type          string             `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
-	Data          *LoginPlatformType `protobuf:"bytes,5,opt,name=data,proto3" json:"data,omitempty"`
+	Id            string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId     string             `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string             `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	Type          string             `protobuf:"bytes,4,opt,name=type,proto3" json:"type"`
+	Data          *LoginPlatformType `protobuf:"bytes,5,opt,name=data,proto3" json:"data"`
 }
 
 func (x *LoginPlatform) Reset() {
@@ -246,12 +246,12 @@ type LoginPlatformType struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TeamId   string `protobuf:"bytes,1,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
-	ClientId string `protobuf:"bytes,2,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
-	KeyId    string `protobuf:"bytes,3,opt,name=key_id,json=keyId,proto3" json:"key_id,omitempty"`
-	Secret   string `protobuf:"bytes,4,opt,name=secret,proto3" json:"secret,omitempty"`
-	Email    string `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
-	Password string `protobuf:"bytes,6,opt,name=password,proto3" json:"password,omitempty"`
+	TeamId   string `protobuf:"bytes,1,opt,name=team_id,json=teamId,proto3" json:"team_id"`
+	ClientId string `protobuf:"bytes,2,opt,name=client_id,json=clientId,proto3" json:"client_id"`
+	KeyId    string `protobuf:"bytes,3,opt,name=key_id,json=keyId,proto3" json:"key_id"`
+	Secret   string `protobuf:"bytes,4,opt,name=secret,proto3" json:"secret"`
+	Email    string `protobuf:"bytes,5,opt,name=email,proto3" json:"email"`
+	Password string `protobuf:"bytes,6,opt,name=password,proto3" json:"password"`
 }
 
 func (x *LoginPlatformType) Reset() {
@@ -333,13 +333,13 @@ type UpdateLoginPlatformTypeRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TeamId   string `protobuf:"bytes,1,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
-	ClientId string `protobuf:"bytes,2,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
-	KeyId    string `protobuf:"bytes,3,opt,name=key_id,json=keyId,proto3" json:"key_id,omitempty"`
-	Secret   string `protobuf:"bytes,4,opt,name=secret,proto3" json:"secret,omitempty"`
-	Email    string `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
-	Password string `protobuf:"bytes,6,opt,name=password,proto3" json:"password,omitempty"`
-	Id       string `protobuf:"bytes,7,opt,name=id,proto3" json:"id,omitempty"`
+	TeamId   string `protobuf:"bytes,1,opt,name=team_id,json=teamId,proto3" json:"team_id"`
+	ClientId string `protobuf:"bytes,2,opt,name=client_id,json=clientId,proto3" json:"client_id"`
+	KeyId    string `protobuf:"bytes,3,opt,name=key_id,json=keyId,proto3" json:"key_id"`
+	Secret   string `protobuf:"bytes,4,opt,name=secret,proto3" json:"secret"`
+	Email    string `protobuf:"bytes,5,opt,name=email,proto3" json:"email"`
+	Password string `protobuf:"bytes,6,opt,name=password,proto3" json:"password"`
+	Id       string `protobuf:"bytes,7,opt,name=id,proto3" json:"id"`
 }
 
 func (x *UpdateLoginPlatformTypeRequest) Reset() {

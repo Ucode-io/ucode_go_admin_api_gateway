@@ -26,23 +26,23 @@ type Transaction struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string  `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	OrderId       string  `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	Status        int32   `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`
-	TransactionId string  `protobuf:"bytes,4,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
-	Action        int32   `protobuf:"varint,5,opt,name=action,proto3" json:"action,omitempty"`
-	Currency      string  `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"`
-	Price         float32 `protobuf:"fixed32,7,opt,name=price,proto3" json:"price,omitempty"`
-	CreatedDate   string  `protobuf:"bytes,8,opt,name=created_date,json=createdDate,proto3" json:"created_date,omitempty"`
-	CreatedAt     string  `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string  `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt     string  `protobuf:"bytes,11,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
-	Data          string  `protobuf:"bytes,12,opt,name=data,proto3" json:"data,omitempty"`
-	ProductId     string  `protobuf:"bytes,13,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
-	Amount        int32   `protobuf:"varint,14,opt,name=amount,proto3" json:"amount,omitempty"`
-	RespId        string  `protobuf:"bytes,15,opt,name=resp_id,json=respId,proto3" json:"resp_id,omitempty"`
-	ProjectId     string  `protobuf:"bytes,16,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Environment   string  `protobuf:"bytes,17,opt,name=environment,proto3" json:"environment,omitempty"`
+	Id            string  `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	OrderId       string  `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id"`
+	Status        int32   `protobuf:"varint,3,opt,name=status,proto3" json:"status"`
+	TransactionId string  `protobuf:"bytes,4,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id"`
+	Action        int32   `protobuf:"varint,5,opt,name=action,proto3" json:"action"`
+	Currency      string  `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency"`
+	Price         float32 `protobuf:"fixed32,7,opt,name=price,proto3" json:"price"`
+	CreatedDate   string  `protobuf:"bytes,8,opt,name=created_date,json=createdDate,proto3" json:"created_date"`
+	CreatedAt     string  `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt     string  `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	DeletedAt     string  `protobuf:"bytes,11,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at"`
+	Data          string  `protobuf:"bytes,12,opt,name=data,proto3" json:"data"`
+	ProductId     string  `protobuf:"bytes,13,opt,name=product_id,json=productId,proto3" json:"product_id"`
+	Amount        int32   `protobuf:"varint,14,opt,name=amount,proto3" json:"amount"`
+	RespId        string  `protobuf:"bytes,15,opt,name=resp_id,json=respId,proto3" json:"resp_id"`
+	ProjectId     string  `protobuf:"bytes,16,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Environment   string  `protobuf:"bytes,17,opt,name=environment,proto3" json:"environment"`
 }
 
 func (x *Transaction) Reset() {
@@ -201,22 +201,22 @@ type SaveCardTransaction struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string  `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	OrderId       string  `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	Status        int32   `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`
-	TransactionId string  `protobuf:"bytes,4,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
-	Action        int32   `protobuf:"varint,5,opt,name=action,proto3" json:"action,omitempty"`
-	Currency      string  `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"`
-	Price         float32 `protobuf:"fixed32,7,opt,name=price,proto3" json:"price,omitempty"`
-	CreatedDate   string  `protobuf:"bytes,8,opt,name=created_date,json=createdDate,proto3" json:"created_date,omitempty"`
-	CreatedAt     string  `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string  `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt     string  `protobuf:"bytes,11,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
-	Data          string  `protobuf:"bytes,12,opt,name=data,proto3" json:"data,omitempty"`
-	ProductId     string  `protobuf:"bytes,13,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
-	Amount        int32   `protobuf:"varint,14,opt,name=amount,proto3" json:"amount,omitempty"`
-	RespId        string  `protobuf:"bytes,15,opt,name=resp_id,json=respId,proto3" json:"resp_id,omitempty"`
-	CardId        string  `protobuf:"bytes,16,opt,name=card_id,json=cardId,proto3" json:"card_id,omitempty"`
+	Id            string  `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	OrderId       string  `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id"`
+	Status        int32   `protobuf:"varint,3,opt,name=status,proto3" json:"status"`
+	TransactionId string  `protobuf:"bytes,4,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id"`
+	Action        int32   `protobuf:"varint,5,opt,name=action,proto3" json:"action"`
+	Currency      string  `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency"`
+	Price         float32 `protobuf:"fixed32,7,opt,name=price,proto3" json:"price"`
+	CreatedDate   string  `protobuf:"bytes,8,opt,name=created_date,json=createdDate,proto3" json:"created_date"`
+	CreatedAt     string  `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt     string  `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	DeletedAt     string  `protobuf:"bytes,11,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at"`
+	Data          string  `protobuf:"bytes,12,opt,name=data,proto3" json:"data"`
+	ProductId     string  `protobuf:"bytes,13,opt,name=product_id,json=productId,proto3" json:"product_id"`
+	Amount        int32   `protobuf:"varint,14,opt,name=amount,proto3" json:"amount"`
+	RespId        string  `protobuf:"bytes,15,opt,name=resp_id,json=respId,proto3" json:"resp_id"`
+	CardId        string  `protobuf:"bytes,16,opt,name=card_id,json=cardId,proto3" json:"card_id"`
 }
 
 func (x *SaveCardTransaction) Reset() {
@@ -368,8 +368,8 @@ type GetAllTransactionResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Transactions []*Transaction `protobuf:"bytes,1,rep,name=transactions,proto3" json:"transactions,omitempty"`
-	Count        int32          `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Transactions []*Transaction `protobuf:"bytes,1,rep,name=transactions,proto3" json:"transactions"`
+	Count        int32          `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetAllTransactionResponse) Reset() {
@@ -423,7 +423,7 @@ type TransactionResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *TransactionResponse) Reset() {
@@ -470,7 +470,7 @@ type GetTransactionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *GetTransactionRequest) Reset() {
@@ -517,8 +517,8 @@ type UpdateTransactionStatusRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id     string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status int32  `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"`
+	Id     string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Status int32  `protobuf:"varint,2,opt,name=status,proto3" json:"status"`
 }
 
 func (x *UpdateTransactionStatusRequest) Reset() {
@@ -572,12 +572,12 @@ type GetAllTransactionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Offset      int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
-	Limit       int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Search      string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
-	ProjectId   string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Environment string `protobuf:"bytes,5,opt,name=environment,proto3" json:"environment,omitempty"`
-	Status      int32  `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`
+	Offset      int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset"`
+	Limit       int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
+	Search      string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
+	ProjectId   string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Environment string `protobuf:"bytes,5,opt,name=environment,proto3" json:"environment"`
+	Status      int32  `protobuf:"varint,6,opt,name=status,proto3" json:"status"`
 }
 
 func (x *GetAllTransactionRequest) Reset() {

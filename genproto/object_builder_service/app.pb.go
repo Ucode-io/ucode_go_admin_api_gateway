@@ -26,13 +26,13 @@ type AppRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name        string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Description string   `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	TableIds    []string `protobuf:"bytes,3,rep,name=table_ids,json=tableIds,proto3" json:"table_ids,omitempty"`
-	Icon        string   `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
-	ProjectId   string   `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	CommitId    int64    `protobuf:"varint,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	CommitGuid  string   `protobuf:"bytes,7,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid,omitempty"`
+	Name        string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`
+	Description string   `protobuf:"bytes,2,opt,name=description,proto3" json:"description"`
+	TableIds    []string `protobuf:"bytes,3,rep,name=table_ids,json=tableIds,proto3" json:"table_ids"`
+	Icon        string   `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon"`
+	ProjectId   string   `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	CommitId    int64    `protobuf:"varint,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	CommitGuid  string   `protobuf:"bytes,7,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid"`
 }
 
 func (x *AppRequest) Reset() {
@@ -121,11 +121,11 @@ type CreateAppResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name        string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description string   `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	TableIds    []string `protobuf:"bytes,4,rep,name=table_ids,json=tableIds,proto3" json:"table_ids,omitempty"`
-	Icon        string   `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon,omitempty"`
+	Id          string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name        string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Description string   `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	TableIds    []string `protobuf:"bytes,4,rep,name=table_ids,json=tableIds,proto3" json:"table_ids"`
+	Icon        string   `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon"`
 }
 
 func (x *CreateAppResponse) Reset() {
@@ -200,12 +200,12 @@ type App struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string          `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name        string          `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description string          `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Tables      []*Table        `protobuf:"bytes,4,rep,name=tables,proto3" json:"tables,omitempty"`
-	Icon        string          `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon,omitempty"`
-	Permission  *App_Permission `protobuf:"bytes,6,opt,name=permission,proto3" json:"permission,omitempty"`
+	Id          string          `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name        string          `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Description string          `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	Tables      []*Table        `protobuf:"bytes,4,rep,name=tables,proto3" json:"tables"`
+	Icon        string          `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon"`
+	Permission  *App_Permission `protobuf:"bytes,6,opt,name=permission,proto3" json:"permission"`
 }
 
 func (x *App) Reset() {
@@ -287,12 +287,12 @@ type UpdateAppRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string         `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name        string         `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description string         `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Tables      []*UpdateTable `protobuf:"bytes,4,rep,name=tables,proto3" json:"tables,omitempty"`
-	Icon        string         `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon,omitempty"`
-	ProjectId   string         `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id          string         `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name        string         `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Description string         `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	Tables      []*UpdateTable `protobuf:"bytes,4,rep,name=tables,proto3" json:"tables"`
+	Icon        string         `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon"`
+	ProjectId   string         `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *UpdateAppRequest) Reset() {
@@ -374,8 +374,8 @@ type GetAllAppsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Apps  []*App `protobuf:"bytes,1,rep,name=apps,proto3" json:"apps,omitempty"`
-	Count int32  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Apps  []*App `protobuf:"bytes,1,rep,name=apps,proto3" json:"apps"`
+	Count int32  `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetAllAppsResponse) Reset() {
@@ -429,9 +429,9 @@ type AppPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	RoleId    string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	RoleId    string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id"`
 }
 
 func (x *AppPrimaryKey) Reset() {
@@ -492,11 +492,11 @@ type GetAllAppsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Offset    int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
-	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Search    string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
-	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	RoleId    string `protobuf:"bytes,5,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	Offset    int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset"`
+	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
+	Search    string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
+	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	RoleId    string `protobuf:"bytes,5,opt,name=role_id,json=roleId,proto3" json:"role_id"`
 }
 
 func (x *GetAllAppsRequest) Reset() {
@@ -571,9 +571,9 @@ type UpdateTable struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TableId    string `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
-	IsVisible  bool   `protobuf:"varint,2,opt,name=is_visible,json=isVisible,proto3" json:"is_visible,omitempty"`
-	IsOwnTable bool   `protobuf:"varint,3,opt,name=is_own_table,json=isOwnTable,proto3" json:"is_own_table,omitempty"`
+	TableId    string `protobuf:"bytes,1,opt,name=table_id,json=tableId,proto3" json:"table_id"`
+	IsVisible  bool   `protobuf:"varint,2,opt,name=is_visible,json=isVisible,proto3" json:"is_visible"`
+	IsOwnTable bool   `protobuf:"varint,3,opt,name=is_own_table,json=isOwnTable,proto3" json:"is_own_table"`
 }
 
 func (x *UpdateTable) Reset() {
@@ -634,10 +634,10 @@ type App_Permission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Read   bool `protobuf:"varint,1,opt,name=read,proto3" json:"read,omitempty"`
-	Update bool `protobuf:"varint,2,opt,name=update,proto3" json:"update,omitempty"`
-	Delete bool `protobuf:"varint,3,opt,name=delete,proto3" json:"delete,omitempty"`
-	Create bool `protobuf:"varint,4,opt,name=create,proto3" json:"create,omitempty"`
+	Read   bool `protobuf:"varint,1,opt,name=read,proto3" json:"read"`
+	Update bool `protobuf:"varint,2,opt,name=update,proto3" json:"update"`
+	Delete bool `protobuf:"varint,3,opt,name=delete,proto3" json:"delete"`
+	Create bool `protobuf:"varint,4,opt,name=create,proto3" json:"create"`
 }
 
 func (x *App_Permission) Reset() {

@@ -27,10 +27,10 @@ type CreateFunctionFolderRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Title         string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title         string `protobuf:"bytes,1,opt,name=title,proto3" json:"title"`
+	Description   string `protobuf:"bytes,2,opt,name=description,proto3" json:"description"`
+	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *CreateFunctionFolderRequest) Reset() {
@@ -98,11 +98,11 @@ type FunctionFolder struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title         string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	EnvironmentId string `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ProjectId     string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Title         string `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
+	Description   string `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	EnvironmentId string `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ProjectId     string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *FunctionFolder) Reset() {
@@ -177,11 +177,11 @@ type GetAllFunctionFoldersRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Search        string `protobuf:"bytes,1,opt,name=search,proto3" json:"search,omitempty"`
-	Limit         int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset        int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
-	EnvironmentId string `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ProjectId     string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Search        string `protobuf:"bytes,1,opt,name=search,proto3" json:"search"`
+	Limit         int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
+	Offset        int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset"`
+	EnvironmentId string `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ProjectId     string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetAllFunctionFoldersRequest) Reset() {
@@ -256,8 +256,8 @@ type GetAllFunctionFoldersResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FunctionFolders []*FunctionFolder `protobuf:"bytes,1,rep,name=function_folders,json=functionFolders,proto3" json:"function_folders,omitempty"`
-	Count           int32             `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	FunctionFolders []*FunctionFolder `protobuf:"bytes,1,rep,name=function_folders,json=functionFolders,proto3" json:"function_folders"`
+	Count           int32             `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetAllFunctionFoldersResponse) Reset() {
@@ -311,8 +311,8 @@ type FunctionFolderPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *FunctionFolderPrimaryKey) Reset() {

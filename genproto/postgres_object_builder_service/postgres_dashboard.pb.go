@@ -26,11 +26,11 @@ type CreateDashboardRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name       string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Icon       string `protobuf:"bytes,2,opt,name=icon,proto3" json:"icon,omitempty"`
-	ProjectId  string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	CommitId   int64  `protobuf:"varint,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	CommitGuid string `protobuf:"bytes,5,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid,omitempty"`
+	Name       string `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`
+	Icon       string `protobuf:"bytes,2,opt,name=icon,proto3" json:"icon"`
+	ProjectId  string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	CommitId   int64  `protobuf:"varint,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	CommitGuid string `protobuf:"bytes,5,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid"`
 }
 
 func (x *CreateDashboardRequest) Reset() {
@@ -105,12 +105,12 @@ type Dashboard struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string      `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name      string      `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Icon      string      `protobuf:"bytes,3,opt,name=icon,proto3" json:"icon,omitempty"`
-	Panels    []*Panel    `protobuf:"bytes,4,rep,name=panels,proto3" json:"panels,omitempty"`
-	Variables []*Variable `protobuf:"bytes,5,rep,name=variables,proto3" json:"variables,omitempty"`
-	ProjectId string      `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string      `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name      string      `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Icon      string      `protobuf:"bytes,3,opt,name=icon,proto3" json:"icon"`
+	Panels    []*Panel    `protobuf:"bytes,4,rep,name=panels,proto3" json:"panels"`
+	Variables []*Variable `protobuf:"bytes,5,rep,name=variables,proto3" json:"variables"`
+	ProjectId string      `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *Dashboard) Reset() {
@@ -192,8 +192,8 @@ type GetAllDashboadsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Dashboards []*Dashboard `protobuf:"bytes,1,rep,name=dashboards,proto3" json:"dashboards,omitempty"`
-	Count      int32        `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Dashboards []*Dashboard `protobuf:"bytes,1,rep,name=dashboards,proto3" json:"dashboards"`
+	Count      int32        `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetAllDashboadsResponse) Reset() {
@@ -247,8 +247,8 @@ type GetAllDashboardsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name      string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Name      string `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetAllDashboardsRequest) Reset() {
@@ -302,8 +302,8 @@ type DashboardPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *DashboardPrimaryKey) Reset() {

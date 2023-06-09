@@ -26,13 +26,13 @@ type RedirectUrl struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvId     string `protobuf:"bytes,3,opt,name=env_id,json=envId,proto3" json:"env_id,omitempty"`
-	From      string `protobuf:"bytes,4,opt,name=from,proto3" json:"from,omitempty"`
-	To        string `protobuf:"bytes,5,opt,name=to,proto3" json:"to,omitempty"`
-	CreatedAt string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt string `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvId     string `protobuf:"bytes,3,opt,name=env_id,json=envId,proto3" json:"env_id"`
+	From      string `protobuf:"bytes,4,opt,name=from,proto3" json:"from"`
+	To        string `protobuf:"bytes,5,opt,name=to,proto3" json:"to"`
+	CreatedAt string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt string `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
 }
 
 func (x *RedirectUrl) Reset() {
@@ -121,7 +121,7 @@ type GetSingleRedirectUrlReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *GetSingleRedirectUrlReq) Reset() {
@@ -168,11 +168,11 @@ type GetListRedirectUrlReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvId     string `protobuf:"bytes,2,opt,name=env_id,json=envId,proto3" json:"env_id,omitempty"`
-	Search    string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
-	Limit     int32  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset    int32  `protobuf:"varint,5,opt,name=offset,proto3" json:"offset,omitempty"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvId     string `protobuf:"bytes,2,opt,name=env_id,json=envId,proto3" json:"env_id"`
+	Search    string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
+	Limit     int32  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit"`
+	Offset    int32  `protobuf:"varint,5,opt,name=offset,proto3" json:"offset"`
 }
 
 func (x *GetListRedirectUrlReq) Reset() {
@@ -247,8 +247,8 @@ type GetListRedirectUrlRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RedirectUrls []*RedirectUrl `protobuf:"bytes,1,rep,name=redirect_urls,json=redirectUrls,proto3" json:"redirect_urls,omitempty"`
-	Count        int32          `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	RedirectUrls []*RedirectUrl `protobuf:"bytes,1,rep,name=redirect_urls,json=redirectUrls,proto3" json:"redirect_urls"`
+	Count        int32          `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetListRedirectUrlRes) Reset() {
@@ -302,7 +302,7 @@ type DeleteRedirectUrlReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *DeleteRedirectUrlReq) Reset() {

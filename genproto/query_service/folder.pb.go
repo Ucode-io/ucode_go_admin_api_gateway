@@ -27,13 +27,13 @@ type Folder struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Title      string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
-	ParentId   string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	CommitId   string `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId  string `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	ResourceId string `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Title      string `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
+	ParentId   string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	CommitId   string `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId  string `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ResourceId string `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *Folder) Reset() {
@@ -122,12 +122,12 @@ type CreateFolderReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Title      string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	ParentId   string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	CommitId   string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId  string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	ResourceId string `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Title      string `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
+	ParentId   string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	CommitId   string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId  string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ResourceId string `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *CreateFolderReq) Reset() {
@@ -209,11 +209,11 @@ type GetListFolderReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Limit      int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset     int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
-	VersionId  string `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	ResourceId string `protobuf:"bytes,5,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Limit      int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
+	Offset     int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset"`
+	VersionId  string `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ResourceId string `protobuf:"bytes,5,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *GetListFolderReq) Reset() {
@@ -288,8 +288,8 @@ type GetListFolderRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Folders []*Folder `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders,omitempty"`
-	Count   int32     `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Folders []*Folder `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders"`
+	Count   int32     `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetListFolderRes) Reset() {
@@ -343,10 +343,10 @@ type GetSingleFolderReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	VersionId  string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	ResourceId string `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	VersionId  string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ResourceId string `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *GetSingleFolderReq) Reset() {
@@ -414,8 +414,8 @@ type GetSingleFolderRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Folders []*Folder `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders,omitempty"`
-	Count   int32     `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Folders []*Folder `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders"`
+	Count   int32     `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetSingleFolderRes) Reset() {
@@ -469,13 +469,13 @@ type UpdateFolderReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Title      string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
-	ParentId   string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	CommitId   string `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId  string `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	ResourceId string `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Title      string `protobuf:"bytes,3,opt,name=title,proto3" json:"title"`
+	ParentId   string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	CommitId   string `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId  string `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ResourceId string `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *UpdateFolderReq) Reset() {
@@ -564,10 +564,10 @@ type DeleteFolderReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	VersionId  string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	ResourceId string `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	VersionId  string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ResourceId string `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *DeleteFolderReq) Reset() {

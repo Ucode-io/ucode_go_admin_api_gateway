@@ -27,20 +27,20 @@ type Query struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title         string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Timeout       string           `protobuf:"bytes,4,opt,name=timeout,proto3" json:"timeout,omitempty"`
-	ProjectId     string           `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string           `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	FolderId      string           `protobuf:"bytes,7,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
-	QueryType     string           `protobuf:"bytes,8,opt,name=query_type,json=queryType,proto3" json:"query_type,omitempty"`
-	ResourceId    string           `protobuf:"bytes,9,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	Body          *structpb.Struct `protobuf:"bytes,10,opt,name=body,proto3" json:"body,omitempty"`
-	Variables     []*Variable      `protobuf:"bytes,11,rep,name=variables,proto3" json:"variables,omitempty"`
-	CommitId      string           `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId     string           `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CommitInfo    *CommitInfo      `protobuf:"bytes,14,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
+	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Title         string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
+	Description   string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	Timeout       string           `protobuf:"bytes,4,opt,name=timeout,proto3" json:"timeout"`
+	ProjectId     string           `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string           `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	FolderId      string           `protobuf:"bytes,7,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
+	QueryType     string           `protobuf:"bytes,8,opt,name=query_type,json=queryType,proto3" json:"query_type"`
+	ResourceId    string           `protobuf:"bytes,9,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	Body          *structpb.Struct `protobuf:"bytes,10,opt,name=body,proto3" json:"body"`
+	Variables     []*Variable      `protobuf:"bytes,11,rep,name=variables,proto3" json:"variables"`
+	CommitId      string           `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId     string           `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CommitInfo    *CommitInfo      `protobuf:"bytes,14,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
 }
 
 func (x *Query) Reset() {
@@ -178,12 +178,12 @@ type Variable struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id      string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Key     string `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
-	Value   string `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
-	Type    string `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
-	Default string `protobuf:"bytes,5,opt,name=default,proto3" json:"default,omitempty"`
-	QueryId string `protobuf:"bytes,6,opt,name=query_id,json=queryId,proto3" json:"query_id,omitempty"`
+	Id      string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Key     string `protobuf:"bytes,2,opt,name=key,proto3" json:"key"`
+	Value   string `protobuf:"bytes,3,opt,name=value,proto3" json:"value"`
+	Type    string `protobuf:"bytes,4,opt,name=type,proto3" json:"type"`
+	Default string `protobuf:"bytes,5,opt,name=default,proto3" json:"default"`
+	QueryId string `protobuf:"bytes,6,opt,name=query_id,json=queryId,proto3" json:"query_id"`
 }
 
 func (x *Variable) Reset() {
@@ -265,19 +265,19 @@ type CreateQueryReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Title         string           `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string           `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Timeout       string           `protobuf:"bytes,3,opt,name=timeout,proto3" json:"timeout,omitempty"`
-	ProjectId     string           `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string           `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	FolderId      string           `protobuf:"bytes,6,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
-	QueryType     string           `protobuf:"bytes,7,opt,name=query_type,json=queryType,proto3" json:"query_type,omitempty"`
-	ResourceId    string           `protobuf:"bytes,8,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	Body          *structpb.Struct `protobuf:"bytes,9,opt,name=body,proto3" json:"body,omitempty"`
-	Variables     []*Variable      `protobuf:"bytes,10,rep,name=variables,proto3" json:"variables,omitempty"`
-	CommitId      string           `protobuf:"bytes,11,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId     string           `protobuf:"bytes,12,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CommitInfo    *CommitInfo      `protobuf:"bytes,13,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
+	Title         string           `protobuf:"bytes,1,opt,name=title,proto3" json:"title"`
+	Description   string           `protobuf:"bytes,2,opt,name=description,proto3" json:"description"`
+	Timeout       string           `protobuf:"bytes,3,opt,name=timeout,proto3" json:"timeout"`
+	ProjectId     string           `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string           `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	FolderId      string           `protobuf:"bytes,6,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
+	QueryType     string           `protobuf:"bytes,7,opt,name=query_type,json=queryType,proto3" json:"query_type"`
+	ResourceId    string           `protobuf:"bytes,8,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	Body          *structpb.Struct `protobuf:"bytes,9,opt,name=body,proto3" json:"body"`
+	Variables     []*Variable      `protobuf:"bytes,10,rep,name=variables,proto3" json:"variables"`
+	CommitId      string           `protobuf:"bytes,11,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId     string           `protobuf:"bytes,12,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CommitInfo    *CommitInfo      `protobuf:"bytes,13,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
 }
 
 func (x *CreateQueryReq) Reset() {
@@ -408,13 +408,13 @@ type GetListQueryReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	FolderId   string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
-	VersionId  string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CommitId   string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	Limit      int32  `protobuf:"varint,5,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset     int32  `protobuf:"varint,6,opt,name=offset,proto3" json:"offset,omitempty"`
-	ResourceId string `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	FolderId   string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
+	VersionId  string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CommitId   string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	Limit      int32  `protobuf:"varint,5,opt,name=limit,proto3" json:"limit"`
+	Offset     int32  `protobuf:"varint,6,opt,name=offset,proto3" json:"offset"`
+	ResourceId string `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *GetListQueryReq) Reset() {
@@ -503,8 +503,8 @@ type GetListQueryRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Queries []*Query `protobuf:"bytes,1,rep,name=queries,proto3" json:"queries,omitempty"`
-	Count   int32    `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Queries []*Query `protobuf:"bytes,1,rep,name=queries,proto3" json:"queries"`
+	Count   int32    `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetListQueryRes) Reset() {
@@ -558,11 +558,11 @@ type GetSingleQueryReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Id         string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
-	VersionId  string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CommitId   string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	ResourceId string `protobuf:"bytes,5,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id         string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
+	VersionId  string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CommitId   string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	ResourceId string `protobuf:"bytes,5,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *GetSingleQueryReq) Reset() {
@@ -637,20 +637,20 @@ type UpdateQueryReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title         string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Timeout       string           `protobuf:"bytes,4,opt,name=timeout,proto3" json:"timeout,omitempty"`
-	ProjectId     string           `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string           `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	FolderId      string           `protobuf:"bytes,7,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
-	QueryType     string           `protobuf:"bytes,8,opt,name=query_type,json=queryType,proto3" json:"query_type,omitempty"`
-	ResourceId    string           `protobuf:"bytes,9,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	Body          *structpb.Struct `protobuf:"bytes,10,opt,name=body,proto3" json:"body,omitempty"`
-	Variables     []*Variable      `protobuf:"bytes,11,rep,name=variables,proto3" json:"variables,omitempty"`
-	CommitId      string           `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId     string           `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CommitInfo    *CommitInfo      `protobuf:"bytes,14,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
+	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Title         string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
+	Description   string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	Timeout       string           `protobuf:"bytes,4,opt,name=timeout,proto3" json:"timeout"`
+	ProjectId     string           `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string           `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	FolderId      string           `protobuf:"bytes,7,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
+	QueryType     string           `protobuf:"bytes,8,opt,name=query_type,json=queryType,proto3" json:"query_type"`
+	ResourceId    string           `protobuf:"bytes,9,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	Body          *structpb.Struct `protobuf:"bytes,10,opt,name=body,proto3" json:"body"`
+	Variables     []*Variable      `protobuf:"bytes,11,rep,name=variables,proto3" json:"variables"`
+	CommitId      string           `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId     string           `protobuf:"bytes,13,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CommitInfo    *CommitInfo      `protobuf:"bytes,14,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
 }
 
 func (x *UpdateQueryReq) Reset() {
@@ -788,10 +788,10 @@ type DeleteQueryReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Id         string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
-	VersionId  string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	ResourceId string `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	ProjectId  string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id         string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
+	VersionId  string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ResourceId string `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *DeleteQueryReq) Reset() {
@@ -859,9 +859,9 @@ type RunQueryRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Res        string `protobuf:"bytes,1,opt,name=res,proto3" json:"res,omitempty"`
-	Status     string `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	StatusCode int32  `protobuf:"varint,3,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
+	Res        string `protobuf:"bytes,1,opt,name=res,proto3" json:"res"`
+	Status     string `protobuf:"bytes,2,opt,name=status,proto3" json:"status"`
+	StatusCode int32  `protobuf:"varint,3,opt,name=status_code,json=statusCode,proto3" json:"status_code"`
 }
 
 func (x *RunQueryRes) Reset() {
@@ -922,11 +922,11 @@ type GetQueryHistoryReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Limit      int64  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset     int64  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
-	ResourceId string `protobuf:"bytes,5,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Limit      int64  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit"`
+	Offset     int64  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset"`
+	ResourceId string `protobuf:"bytes,5,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *GetQueryHistoryReq) Reset() {
@@ -1001,9 +1001,9 @@ type GetQueryHistoryRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count   int32                              `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	Id      string                             `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
-	Queries []*GetQueryHistoryRes_QueryHistory `protobuf:"bytes,3,rep,name=queries,proto3" json:"queries,omitempty"`
+	Count   int32                              `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
+	Id      string                             `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
+	Queries []*GetQueryHistoryRes_QueryHistory `protobuf:"bytes,3,rep,name=queries,proto3" json:"queries"`
 }
 
 func (x *GetQueryHistoryRes) Reset() {
@@ -1064,14 +1064,14 @@ type RevertQueryReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	NewCommitId   string      `protobuf:"bytes,1,opt,name=new_commit_id,json=newCommitId,proto3" json:"new_commit_id,omitempty"`
-	VersionId     string      `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	Id            string      `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
-	OldCommitId   string      `protobuf:"bytes,4,opt,name=old_commit_id,json=oldCommitId,proto3" json:"old_commit_id,omitempty"`
-	ProjectId     string      `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string      `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	CommitInfo    *CommitInfo `protobuf:"bytes,7,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
-	ResourceId    string      `protobuf:"bytes,8,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	NewCommitId   string      `protobuf:"bytes,1,opt,name=new_commit_id,json=newCommitId,proto3" json:"new_commit_id"`
+	VersionId     string      `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id            string      `protobuf:"bytes,3,opt,name=id,proto3" json:"id"`
+	OldCommitId   string      `protobuf:"bytes,4,opt,name=old_commit_id,json=oldCommitId,proto3" json:"old_commit_id"`
+	ProjectId     string      `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string      `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	CommitInfo    *CommitInfo `protobuf:"bytes,7,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
+	ResourceId    string      `protobuf:"bytes,8,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *RevertQueryReq) Reset() {
@@ -1167,15 +1167,15 @@ type ManyVersions struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	VersionIds    []string    `protobuf:"bytes,1,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
-	NewCommitId   string      `protobuf:"bytes,2,opt,name=new_commit_id,json=newCommitId,proto3" json:"new_commit_id,omitempty"`
-	ProjectId     string      `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string      `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	Id            string      `protobuf:"bytes,5,opt,name=id,proto3" json:"id,omitempty"`
-	OldCommitId   string      `protobuf:"bytes,6,opt,name=old_commit_id,json=oldCommitId,proto3" json:"old_commit_id,omitempty"`
-	CommitInfo    *CommitInfo `protobuf:"bytes,7,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
-	VersionId     string      `protobuf:"bytes,8,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	ResourceId    string      `protobuf:"bytes,9,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	VersionIds    []string    `protobuf:"bytes,1,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
+	NewCommitId   string      `protobuf:"bytes,2,opt,name=new_commit_id,json=newCommitId,proto3" json:"new_commit_id"`
+	ProjectId     string      `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string      `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	Id            string      `protobuf:"bytes,5,opt,name=id,proto3" json:"id"`
+	OldCommitId   string      `protobuf:"bytes,6,opt,name=old_commit_id,json=oldCommitId,proto3" json:"old_commit_id"`
+	CommitInfo    *CommitInfo `protobuf:"bytes,7,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
+	VersionId     string      `protobuf:"bytes,8,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ResourceId    string      `protobuf:"bytes,9,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *ManyVersions) Reset() {
@@ -1278,10 +1278,10 @@ type QueryManyVersions struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	VersionIds  []string `protobuf:"bytes,1,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
-	ProjectId   string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	OldcommitId string   `protobuf:"bytes,3,opt,name=oldcommit_id,json=oldcommitId,proto3" json:"oldcommit_id,omitempty"`
-	ResourceId  string   `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	VersionIds  []string `protobuf:"bytes,1,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
+	ProjectId   string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	OldcommitId string   `protobuf:"bytes,3,opt,name=oldcommit_id,json=oldcommitId,proto3" json:"oldcommit_id"`
+	ResourceId  string   `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *QueryManyVersions) Reset() {
@@ -1349,10 +1349,10 @@ type CommonInput struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Query      string           `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
-	Data       *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
-	ProjectId  string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	ResourceId string           `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	Query      string           `protobuf:"bytes,1,opt,name=query,proto3" json:"query"`
+	Data       *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
+	ProjectId  string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	ResourceId string           `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
 }
 
 func (x *CommonInput) Reset() {
@@ -1420,10 +1420,10 @@ type GetQueryHistoryRes_QueryHistory struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommitInfo   *CommitInfo             `protobuf:"bytes,1,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
-	VersionInfos map[string]*VersionInfo `protobuf:"bytes,2,rep,name=version_infos,json=versionInfos,proto3" json:"version_infos,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	CreatedAt    string                  `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt    string                  `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CommitInfo   *CommitInfo             `protobuf:"bytes,1,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
+	VersionInfos map[string]*VersionInfo `protobuf:"bytes,2,rep,name=version_infos,json=versionInfos,proto3" json:"version_infos" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	CreatedAt    string                  `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt    string                  `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
 }
 
 func (x *GetQueryHistoryRes_QueryHistory) Reset() {

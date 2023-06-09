@@ -27,14 +27,14 @@ type CreateCategoryRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name          string           `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	BaseUrl       string           `protobuf:"bytes,2,opt,name=base_url,json=baseUrl,proto3" json:"base_url,omitempty"`
-	Attributes    *structpb.Struct `protobuf:"bytes,3,opt,name=attributes,proto3" json:"attributes,omitempty"`
-	ProjectId     string           `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	CommitId      string           `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId     string           `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	EnvironmentId string           `protobuf:"bytes,7,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ParentId      string           `protobuf:"bytes,8,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	Name          string           `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`
+	BaseUrl       string           `protobuf:"bytes,2,opt,name=base_url,json=baseUrl,proto3" json:"base_url"`
+	Attributes    *structpb.Struct `protobuf:"bytes,3,opt,name=attributes,proto3" json:"attributes"`
+	ProjectId     string           `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	CommitId      string           `protobuf:"bytes,5,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId     string           `protobuf:"bytes,6,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	EnvironmentId string           `protobuf:"bytes,7,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ParentId      string           `protobuf:"bytes,8,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
 }
 
 func (x *CreateCategoryRequest) Reset() {
@@ -130,17 +130,17 @@ type Category struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid          string           `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
-	Name          string           `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	BaseUrl       string           `protobuf:"bytes,3,opt,name=base_url,json=baseUrl,proto3" json:"base_url,omitempty"`
-	Attributes    *structpb.Struct `protobuf:"bytes,4,opt,name=attributes,proto3" json:"attributes,omitempty"`
-	ProjectId     string           `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	CommitId      string           `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId     string           `protobuf:"bytes,7,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CreatedAt     string           `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string           `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	ParentId      string           `protobuf:"bytes,10,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	EnvironmentId string           `protobuf:"bytes,11,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	Guid          string           `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
+	Name          string           `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	BaseUrl       string           `protobuf:"bytes,3,opt,name=base_url,json=baseUrl,proto3" json:"base_url"`
+	Attributes    *structpb.Struct `protobuf:"bytes,4,opt,name=attributes,proto3" json:"attributes"`
+	ProjectId     string           `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	CommitId      string           `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId     string           `protobuf:"bytes,7,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CreatedAt     string           `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt     string           `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	ParentId      string           `protobuf:"bytes,10,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	EnvironmentId string           `protobuf:"bytes,11,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
 }
 
 func (x *Category) Reset() {
@@ -257,11 +257,11 @@ type GetCategoryRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid          string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
-	CommitId      string `protobuf:"bytes,2,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId     string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	Guid          string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
+	CommitId      string `protobuf:"bytes,2,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId     string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
 }
 
 func (x *GetCategoryRequest) Reset() {
@@ -336,11 +336,11 @@ type GetListCategoryRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	CommitId      string `protobuf:"bytes,3,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId     string `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ResEnvId      string `protobuf:"bytes,6,opt,name=res_env_id,json=resEnvId,proto3" json:"res_env_id,omitempty"`
+	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	CommitId      string `protobuf:"bytes,3,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId     string `protobuf:"bytes,4,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ResEnvId      string `protobuf:"bytes,6,opt,name=res_env_id,json=resEnvId,proto3" json:"res_env_id"`
 }
 
 func (x *GetListCategoryRequest) Reset() {
@@ -415,8 +415,8 @@ type GetListCategoryResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count      int64       `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	Categories []*Category `protobuf:"bytes,2,rep,name=categories,proto3" json:"categories,omitempty"`
+	Count      int64       `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
+	Categories []*Category `protobuf:"bytes,2,rep,name=categories,proto3" json:"categories"`
 }
 
 func (x *GetListCategoryResponse) Reset() {
@@ -470,12 +470,12 @@ type DeleteCategoryRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Guid          string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
-	CommitId      string `protobuf:"bytes,2,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	VersionId     string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	ResEnvId      string `protobuf:"bytes,6,opt,name=res_env_id,json=resEnvId,proto3" json:"res_env_id,omitempty"`
+	Guid          string `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid"`
+	CommitId      string `protobuf:"bytes,2,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	VersionId     string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ResEnvId      string `protobuf:"bytes,6,opt,name=res_env_id,json=resEnvId,proto3" json:"res_env_id"`
 }
 
 func (x *DeleteCategoryRequest) Reset() {

@@ -27,18 +27,18 @@ type CreateFunctionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Path             string `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
-	Name             string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description      string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	ProjectId        string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	VersionId        string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CommitId         string `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	CommitGuid       string `protobuf:"bytes,7,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid,omitempty"`
-	EnvironmentId    string `protobuf:"bytes,8,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	FunctionFolderId string `protobuf:"bytes,9,opt,name=function_folder_id,json=functionFolderId,proto3" json:"function_folder_id,omitempty"`
-	Url              string `protobuf:"bytes,10,opt,name=url,proto3" json:"url,omitempty"`
-	Password         string `protobuf:"bytes,11,opt,name=password,proto3" json:"password,omitempty"`
-	SshUrl           string `protobuf:"bytes,12,opt,name=ssh_url,json=sshUrl,proto3" json:"ssh_url,omitempty"`
+	Path             string `protobuf:"bytes,1,opt,name=path,proto3" json:"path"`
+	Name             string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Description      string `protobuf:"bytes,3,opt,name=description,proto3" json:"description"`
+	ProjectId        string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	VersionId        string `protobuf:"bytes,5,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CommitId         string `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	CommitGuid       string `protobuf:"bytes,7,opt,name=commit_guid,json=commitGuid,proto3" json:"commit_guid"`
+	EnvironmentId    string `protobuf:"bytes,8,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	FunctionFolderId string `protobuf:"bytes,9,opt,name=function_folder_id,json=functionFolderId,proto3" json:"function_folder_id"`
+	Url              string `protobuf:"bytes,10,opt,name=url,proto3" json:"url"`
+	Password         string `protobuf:"bytes,11,opt,name=password,proto3" json:"password"`
+	SshUrl           string `protobuf:"bytes,12,opt,name=ssh_url,json=sshUrl,proto3" json:"ssh_url"`
 }
 
 func (x *CreateFunctionRequest) Reset() {
@@ -162,16 +162,16 @@ type Function struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Path             string `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
-	Name             string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Description      string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	ProjectId        string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	FunctionFolderId string `protobuf:"bytes,7,opt,name=function_folder_id,json=functionFolderId,proto3" json:"function_folder_id,omitempty"`
-	EnvironmentId    string `protobuf:"bytes,8,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	Url              string `protobuf:"bytes,9,opt,name=url,proto3" json:"url,omitempty"`
-	Password         string `protobuf:"bytes,10,opt,name=password,proto3" json:"password,omitempty"`
-	SshUrl           string `protobuf:"bytes,11,opt,name=ssh_url,json=sshUrl,proto3" json:"ssh_url,omitempty"`
+	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Path             string `protobuf:"bytes,2,opt,name=path,proto3" json:"path"`
+	Name             string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	Description      string `protobuf:"bytes,4,opt,name=description,proto3" json:"description"`
+	ProjectId        string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	FunctionFolderId string `protobuf:"bytes,7,opt,name=function_folder_id,json=functionFolderId,proto3" json:"function_folder_id"`
+	EnvironmentId    string `protobuf:"bytes,8,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	Url              string `protobuf:"bytes,9,opt,name=url,proto3" json:"url"`
+	Password         string `protobuf:"bytes,10,opt,name=password,proto3" json:"password"`
+	SshUrl           string `protobuf:"bytes,11,opt,name=ssh_url,json=sshUrl,proto3" json:"ssh_url"`
 }
 
 func (x *Function) Reset() {
@@ -281,11 +281,11 @@ type GetAllFunctionsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Search        string `protobuf:"bytes,1,opt,name=search,proto3" json:"search,omitempty"`
-	Limit         int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset        int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
-	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	Search        string `protobuf:"bytes,1,opt,name=search,proto3" json:"search"`
+	Limit         int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
+	Offset        int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset"`
+	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
 }
 
 func (x *GetAllFunctionsRequest) Reset() {
@@ -360,8 +360,8 @@ type GetAllFunctionsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Functions []*Function `protobuf:"bytes,1,rep,name=functions,proto3" json:"functions,omitempty"`
-	Count     int32       `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Functions []*Function `protobuf:"bytes,1,rep,name=functions,proto3" json:"functions"`
+	Count     int32       `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetAllFunctionsResponse) Reset() {
@@ -415,8 +415,8 @@ type FunctionPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *FunctionPrimaryKey) Reset() {
@@ -470,8 +470,8 @@ type UpdateManyUrlAndPassword struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Ids       []string `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
-	ProjectId string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Ids       []string `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids"`
+	ProjectId string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *UpdateManyUrlAndPassword) Reset() {
@@ -525,11 +525,11 @@ type GetListByRequestTimeRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Search        string `protobuf:"bytes,1,opt,name=search,proto3" json:"search,omitempty"`
-	Limit         int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset        int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
-	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	Search        string `protobuf:"bytes,1,opt,name=search,proto3" json:"search"`
+	Limit         int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
+	Offset        int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset"`
+	ProjectId     string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
 }
 
 func (x *GetListByRequestTimeRequest) Reset() {

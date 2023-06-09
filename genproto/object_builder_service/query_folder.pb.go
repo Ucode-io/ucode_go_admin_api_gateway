@@ -26,9 +26,9 @@ type CreateQueryFolderRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Title     string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	ParentId  string `protobuf:"bytes,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Title     string `protobuf:"bytes,1,opt,name=title,proto3" json:"title"`
+	ParentId  string `protobuf:"bytes,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *CreateQueryFolderRequest) Reset() {
@@ -89,10 +89,10 @@ type QueryFolder struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	ParentId  string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
+	ParentId  string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *QueryFolder) Reset() {
@@ -160,8 +160,8 @@ type QueryFolderId struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *QueryFolderId) Reset() {
@@ -215,11 +215,11 @@ type GetAllQueryFolderRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ParentId  string `protobuf:"bytes,1,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset    int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
-	Search    string `protobuf:"bytes,4,opt,name=search,proto3" json:"search,omitempty"`
-	ProjectId string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ParentId  string `protobuf:"bytes,1,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
+	Offset    int32  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset"`
+	Search    string `protobuf:"bytes,4,opt,name=search,proto3" json:"search"`
+	ProjectId string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetAllQueryFolderRequest) Reset() {
@@ -294,8 +294,8 @@ type GetAllQueryFolderResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Folders []*QueryFolder `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders,omitempty"`
-	Count   int32          `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Folders []*QueryFolder `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders"`
+	Count   int32          `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetAllQueryFolderResponse) Reset() {

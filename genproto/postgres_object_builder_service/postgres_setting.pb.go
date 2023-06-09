@@ -75,10 +75,10 @@ type Language struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name       string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	ShortName  string `protobuf:"bytes,3,opt,name=short_name,json=shortName,proto3" json:"short_name,omitempty"`
-	NativeName string `protobuf:"bytes,4,opt,name=native_name,json=nativeName,proto3" json:"native_name,omitempty"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name       string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	ShortName  string `protobuf:"bytes,3,opt,name=short_name,json=shortName,proto3" json:"short_name"`
+	NativeName string `protobuf:"bytes,4,opt,name=native_name,json=nativeName,proto3" json:"native_name"`
 }
 
 func (x *Language) Reset() {
@@ -146,14 +146,14 @@ type Currency struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Symbol        string `protobuf:"bytes,2,opt,name=symbol,proto3" json:"symbol,omitempty"`
-	Name          string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	SymbolNative  string `protobuf:"bytes,4,opt,name=symbol_native,json=symbolNative,proto3" json:"symbol_native,omitempty"`
-	DecimalDigits int32  `protobuf:"varint,5,opt,name=decimal_digits,json=decimalDigits,proto3" json:"decimal_digits,omitempty"`
-	Rounding      int32  `protobuf:"varint,6,opt,name=rounding,proto3" json:"rounding,omitempty"`
-	Code          string `protobuf:"bytes,7,opt,name=code,proto3" json:"code,omitempty"`
-	NamePlural    string `protobuf:"bytes,8,opt,name=name_plural,json=namePlural,proto3" json:"name_plural,omitempty"`
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Symbol        string `protobuf:"bytes,2,opt,name=symbol,proto3" json:"symbol"`
+	Name          string `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	SymbolNative  string `protobuf:"bytes,4,opt,name=symbol_native,json=symbolNative,proto3" json:"symbol_native"`
+	DecimalDigits int32  `protobuf:"varint,5,opt,name=decimal_digits,json=decimalDigits,proto3" json:"decimal_digits"`
+	Rounding      int32  `protobuf:"varint,6,opt,name=rounding,proto3" json:"rounding"`
+	Code          string `protobuf:"bytes,7,opt,name=code,proto3" json:"code"`
+	NamePlural    string `protobuf:"bytes,8,opt,name=name_plural,json=namePlural,proto3" json:"name_plural"`
 }
 
 func (x *Currency) Reset() {
@@ -249,9 +249,9 @@ type Timezone struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id   string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Text string `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`
+	Id   string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Text string `protobuf:"bytes,3,opt,name=text,proto3" json:"text"`
 }
 
 func (x *Timezone) Reset() {
@@ -312,8 +312,8 @@ type Setting struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Data  *structpb.Struct `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
-	Count int32            `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Data  *structpb.Struct `protobuf:"bytes,1,opt,name=data,proto3" json:"data"`
+	Count int32            `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *Setting) Reset() {
@@ -367,7 +367,7 @@ type GetDefaultSettingsReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetDefaultSettingsReq) Reset() {
@@ -414,9 +414,9 @@ type GetDefaultSettingsRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Language *Language `protobuf:"bytes,1,opt,name=language,proto3" json:"language,omitempty"`
-	Currency *Currency `protobuf:"bytes,2,opt,name=currency,proto3" json:"currency,omitempty"`
-	Timezone *Timezone `protobuf:"bytes,3,opt,name=timezone,proto3" json:"timezone,omitempty"`
+	Language *Language `protobuf:"bytes,1,opt,name=language,proto3" json:"language"`
+	Currency *Currency `protobuf:"bytes,2,opt,name=currency,proto3" json:"currency"`
+	Timezone *Timezone `protobuf:"bytes,3,opt,name=timezone,proto3" json:"timezone"`
 }
 
 func (x *GetDefaultSettingsRes) Reset() {
@@ -477,11 +477,11 @@ type GetAllReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Type      SettingType `protobuf:"varint,1,opt,name=type,proto3,enum=postgres_object_builder_service.SettingType" json:"type,omitempty"`
-	Search    string      `protobuf:"bytes,2,opt,name=search,proto3" json:"search,omitempty"`
-	ProjectId string      `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Limit     int32       `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset    int32       `protobuf:"varint,5,opt,name=offset,proto3" json:"offset,omitempty"`
+	Type      SettingType `protobuf:"varint,1,opt,name=type,proto3,enum=postgres_object_builder_service.SettingType" json:"type"`
+	Search    string      `protobuf:"bytes,2,opt,name=search,proto3" json:"search"`
+	ProjectId string      `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Limit     int32       `protobuf:"varint,4,opt,name=limit,proto3" json:"limit"`
+	Offset    int32       `protobuf:"varint,5,opt,name=offset,proto3" json:"offset"`
 }
 
 func (x *GetAllReq) Reset() {
@@ -556,9 +556,9 @@ type SetDefaultSettingsReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Type      SettingType `protobuf:"varint,1,opt,name=type,proto3,enum=postgres_object_builder_service.SettingType" json:"type,omitempty"`
-	Id        string      `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string      `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Type      SettingType `protobuf:"varint,1,opt,name=type,proto3,enum=postgres_object_builder_service.SettingType" json:"type"`
+	Id        string      `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
+	ProjectId string      `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *SetDefaultSettingsReq) Reset() {

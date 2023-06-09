@@ -27,9 +27,9 @@ type ConnectInfo struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Method string            `protobuf:"bytes,1,opt,name=method,proto3" json:"method,omitempty"`
-	Url    string            `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
-	Header map[string]string `protobuf:"bytes,3,rep,name=header,proto3" json:"header,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Method string            `protobuf:"bytes,1,opt,name=method,proto3" json:"method"`
+	Url    string            `protobuf:"bytes,2,opt,name=url,proto3" json:"url"`
+	Header map[string]string `protobuf:"bytes,3,rep,name=header,proto3" json:"header" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (x *ConnectInfo) Reset() {
@@ -90,21 +90,21 @@ type DAGStep struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id              string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Slug            string             `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
-	ParentId        string             `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	DagId           string             `protobuf:"bytes,4,opt,name=dag_id,json=dagId,proto3" json:"dag_id,omitempty"`
-	Type            string             `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
-	ConnectInfo     *ConnectInfo       `protobuf:"bytes,6,opt,name=connect_info,json=connectInfo,proto3" json:"connect_info,omitempty"`
-	RequestInfo     *structpb.Struct   `protobuf:"bytes,7,opt,name=request_info,json=requestInfo,proto3" json:"request_info,omitempty"`
-	ConditionAction []*structpb.Struct `protobuf:"bytes,8,rep,name=condition_action,json=conditionAction,proto3" json:"condition_action,omitempty"`
-	IsParallel      bool               `protobuf:"varint,9,opt,name=is_parallel,json=isParallel,proto3" json:"is_parallel,omitempty"`
-	UiComponent     *structpb.Struct   `protobuf:"bytes,10,opt,name=ui_component,json=uiComponent,proto3" json:"ui_component,omitempty"`
-	Title           string             `protobuf:"bytes,11,opt,name=title,proto3" json:"title,omitempty"`
-	Description     string             `protobuf:"bytes,12,opt,name=description,proto3" json:"description,omitempty"`
-	CallbackType    string             `protobuf:"bytes,13,opt,name=callback_type,json=callbackType,proto3" json:"callback_type,omitempty"`
-	CommitId        string             `protobuf:"bytes,14,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	CreatedAt       string             `protobuf:"bytes,15,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Id              string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Slug            string             `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug"`
+	ParentId        string             `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	DagId           string             `protobuf:"bytes,4,opt,name=dag_id,json=dagId,proto3" json:"dag_id"`
+	Type            string             `protobuf:"bytes,5,opt,name=type,proto3" json:"type"`
+	ConnectInfo     *ConnectInfo       `protobuf:"bytes,6,opt,name=connect_info,json=connectInfo,proto3" json:"connect_info"`
+	RequestInfo     *structpb.Struct   `protobuf:"bytes,7,opt,name=request_info,json=requestInfo,proto3" json:"request_info"`
+	ConditionAction []*structpb.Struct `protobuf:"bytes,8,rep,name=condition_action,json=conditionAction,proto3" json:"condition_action"`
+	IsParallel      bool               `protobuf:"varint,9,opt,name=is_parallel,json=isParallel,proto3" json:"is_parallel"`
+	UiComponent     *structpb.Struct   `protobuf:"bytes,10,opt,name=ui_component,json=uiComponent,proto3" json:"ui_component"`
+	Title           string             `protobuf:"bytes,11,opt,name=title,proto3" json:"title"`
+	Description     string             `protobuf:"bytes,12,opt,name=description,proto3" json:"description"`
+	CallbackType    string             `protobuf:"bytes,13,opt,name=callback_type,json=callbackType,proto3" json:"callback_type"`
+	CommitId        string             `protobuf:"bytes,14,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	CreatedAt       string             `protobuf:"bytes,15,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
 }
 
 func (x *DAGStep) Reset() {
@@ -249,18 +249,18 @@ type CreateDAGStepRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Slug            string             `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
-	ParentId        string             `protobuf:"bytes,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	DagId           string             `protobuf:"bytes,3,opt,name=dag_id,json=dagId,proto3" json:"dag_id,omitempty"`
-	Type            string             `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
-	ConnectInfo     *ConnectInfo       `protobuf:"bytes,5,opt,name=connect_info,json=connectInfo,proto3" json:"connect_info,omitempty"`
-	RequestInfo     *structpb.Struct   `protobuf:"bytes,6,opt,name=request_info,json=requestInfo,proto3" json:"request_info,omitempty"`
-	ConditionAction []*structpb.Struct `protobuf:"bytes,7,rep,name=condition_action,json=conditionAction,proto3" json:"condition_action,omitempty"`
-	IsParallel      bool               `protobuf:"varint,8,opt,name=is_parallel,json=isParallel,proto3" json:"is_parallel,omitempty"`
-	Title           string             `protobuf:"bytes,9,opt,name=title,proto3" json:"title,omitempty"`
-	Description     string             `protobuf:"bytes,10,opt,name=description,proto3" json:"description,omitempty"`
-	CallbackType    string             `protobuf:"bytes,11,opt,name=callback_type,json=callbackType,proto3" json:"callback_type,omitempty"`
-	CommitId        string             `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	Slug            string             `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug"`
+	ParentId        string             `protobuf:"bytes,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	DagId           string             `protobuf:"bytes,3,opt,name=dag_id,json=dagId,proto3" json:"dag_id"`
+	Type            string             `protobuf:"bytes,4,opt,name=type,proto3" json:"type"`
+	ConnectInfo     *ConnectInfo       `protobuf:"bytes,5,opt,name=connect_info,json=connectInfo,proto3" json:"connect_info"`
+	RequestInfo     *structpb.Struct   `protobuf:"bytes,6,opt,name=request_info,json=requestInfo,proto3" json:"request_info"`
+	ConditionAction []*structpb.Struct `protobuf:"bytes,7,rep,name=condition_action,json=conditionAction,proto3" json:"condition_action"`
+	IsParallel      bool               `protobuf:"varint,8,opt,name=is_parallel,json=isParallel,proto3" json:"is_parallel"`
+	Title           string             `protobuf:"bytes,9,opt,name=title,proto3" json:"title"`
+	Description     string             `protobuf:"bytes,10,opt,name=description,proto3" json:"description"`
+	CallbackType    string             `protobuf:"bytes,11,opt,name=callback_type,json=callbackType,proto3" json:"callback_type"`
+	CommitId        string             `protobuf:"bytes,12,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
 }
 
 func (x *CreateDAGStepRequest) Reset() {
@@ -384,9 +384,9 @@ type GetDAGStepRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id    string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Type  string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	DagId string `protobuf:"bytes,3,opt,name=dag_id,json=dagId,proto3" json:"dag_id,omitempty"`
+	Id    string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Type  string `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
+	DagId string `protobuf:"bytes,3,opt,name=dag_id,json=dagId,proto3" json:"dag_id"`
 }
 
 func (x *GetDAGStepRequest) Reset() {
@@ -447,7 +447,7 @@ type DeleteDAGStepRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *DeleteDAGStepRequest) Reset() {
@@ -494,8 +494,8 @@ type DAGStepList struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Dag      *DAG       `protobuf:"bytes,1,opt,name=dag,proto3" json:"dag,omitempty"`
-	DagSteps []*DAGStep `protobuf:"bytes,2,rep,name=dag_steps,json=dagSteps,proto3" json:"dag_steps,omitempty"`
+	Dag      *DAG       `protobuf:"bytes,1,opt,name=dag,proto3" json:"dag"`
+	DagSteps []*DAGStep `protobuf:"bytes,2,rep,name=dag_steps,json=dagSteps,proto3" json:"dag_steps"`
 }
 
 func (x *DAGStepList) Reset() {
@@ -549,7 +549,7 @@ type UpdateDAGStepRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DagStep *DAGStep `protobuf:"bytes,1,opt,name=dag_step,json=dagStep,proto3" json:"dag_step,omitempty"`
+	DagStep *DAGStep `protobuf:"bytes,1,opt,name=dag_step,json=dagStep,proto3" json:"dag_step"`
 }
 
 func (x *UpdateDAGStepRequest) Reset() {
@@ -596,13 +596,13 @@ type GetAllDAGStepRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Filters      *Filters `protobuf:"bytes,1,opt,name=filters,proto3" json:"filters,omitempty"`
-	Type         string   `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	DagId        string   `protobuf:"bytes,3,opt,name=dag_id,json=dagId,proto3" json:"dag_id,omitempty"`
-	ParentId     string   `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	CallbackType string   `protobuf:"bytes,5,opt,name=callback_type,json=callbackType,proto3" json:"callback_type,omitempty"`
-	StepId       string   `protobuf:"bytes,6,opt,name=step_id,json=stepId,proto3" json:"step_id,omitempty"`
-	CommitId     string   `protobuf:"bytes,7,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	Filters      *Filters `protobuf:"bytes,1,opt,name=filters,proto3" json:"filters"`
+	Type         string   `protobuf:"bytes,2,opt,name=type,proto3" json:"type"`
+	DagId        string   `protobuf:"bytes,3,opt,name=dag_id,json=dagId,proto3" json:"dag_id"`
+	ParentId     string   `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	CallbackType string   `protobuf:"bytes,5,opt,name=callback_type,json=callbackType,proto3" json:"callback_type"`
+	StepId       string   `protobuf:"bytes,6,opt,name=step_id,json=stepId,proto3" json:"step_id"`
+	CommitId     string   `protobuf:"bytes,7,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
 }
 
 func (x *GetAllDAGStepRequest) Reset() {
@@ -691,8 +691,8 @@ type DAGStepRunRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Type      string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
-	DagStepId string `protobuf:"bytes,2,opt,name=dag_step_id,json=dagStepId,proto3" json:"dag_step_id,omitempty"`
+	Type      string `protobuf:"bytes,1,opt,name=type,proto3" json:"type"`
+	DagStepId string `protobuf:"bytes,2,opt,name=dag_step_id,json=dagStepId,proto3" json:"dag_step_id"`
 }
 
 func (x *DAGStepRunRequest) Reset() {
@@ -746,7 +746,7 @@ type DAGStepRunResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Result string `protobuf:"bytes,1,opt,name=result,proto3" json:"result,omitempty"`
+	Result string `protobuf:"bytes,1,opt,name=result,proto3" json:"result"`
 }
 
 func (x *DAGStepRunResponse) Reset() {
@@ -793,16 +793,16 @@ type DAG struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title      string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Slug       string           `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
-	Type       string           `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
-	Status     string           `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
-	CategoryId string           `protobuf:"bytes,6,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
-	Attributes *structpb.Struct `protobuf:"bytes,7,opt,name=attributes,proto3" json:"attributes,omitempty"`
-	CommitId   string           `protobuf:"bytes,8,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
-	CommitInfo *CommitInfo      `protobuf:"bytes,9,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
-	CreatedAt  string           `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Id         string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Title      string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
+	Slug       string           `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug"`
+	Type       string           `protobuf:"bytes,4,opt,name=type,proto3" json:"type"`
+	Status     string           `protobuf:"bytes,5,opt,name=status,proto3" json:"status"`
+	CategoryId string           `protobuf:"bytes,6,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
+	Attributes *structpb.Struct `protobuf:"bytes,7,opt,name=attributes,proto3" json:"attributes"`
+	CommitId   string           `protobuf:"bytes,8,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
+	CommitInfo *CommitInfo      `protobuf:"bytes,9,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
+	CreatedAt  string           `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
 }
 
 func (x *DAG) Reset() {
@@ -912,7 +912,7 @@ type CreateDAGRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Dag *DAG `protobuf:"bytes,1,opt,name=dag,proto3" json:"dag,omitempty"`
+	Dag *DAG `protobuf:"bytes,1,opt,name=dag,proto3" json:"dag"`
 }
 
 func (x *CreateDAGRequest) Reset() {
@@ -959,9 +959,9 @@ type GetDAGRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CommitId  string `protobuf:"bytes,3,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	VersionId string `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CommitId  string `protobuf:"bytes,3,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
 }
 
 func (x *GetDAGRequest) Reset() {
@@ -1022,10 +1022,10 @@ type GetAllDAGRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Filter     *Filters `protobuf:"bytes,1,opt,name=filter,proto3" json:"filter,omitempty"`
-	CategoryId string   `protobuf:"bytes,2,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
-	VersionId  string   `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	CommitId   string   `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	Filter     *Filters `protobuf:"bytes,1,opt,name=filter,proto3" json:"filter"`
+	CategoryId string   `protobuf:"bytes,2,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
+	VersionId  string   `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	CommitId   string   `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
 }
 
 func (x *GetAllDAGRequest) Reset() {
@@ -1093,8 +1093,8 @@ type DAGList struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DAGs  []*DAG `protobuf:"bytes,1,rep,name=DAGs,proto3" json:"DAGs,omitempty"`
-	Count int64  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	DAGs  []*DAG `protobuf:"bytes,1,rep,name=DAGs,proto3" json:"DAGs"`
+	Count int64  `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *DAGList) Reset() {
@@ -1148,7 +1148,7 @@ type DeleteDAGRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
 func (x *DeleteDAGRequest) Reset() {
@@ -1195,7 +1195,7 @@ type UpdateDAGRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Dag *DAG `protobuf:"bytes,1,opt,name=dag,proto3" json:"dag,omitempty"`
+	Dag *DAG `protobuf:"bytes,1,opt,name=dag,proto3" json:"dag"`
 }
 
 func (x *UpdateDAGRequest) Reset() {
@@ -1242,12 +1242,12 @@ type CreateScenarioRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Dag           *DAG        `protobuf:"bytes,1,opt,name=dag,proto3" json:"dag,omitempty"`
-	Steps         []*DAGStep  `protobuf:"bytes,2,rep,name=steps,proto3" json:"steps,omitempty"`
-	CommitInfo    *CommitInfo `protobuf:"bytes,3,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
-	ProjectId     string      `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string      `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	CommitId      string      `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	Dag           *DAG        `protobuf:"bytes,1,opt,name=dag,proto3" json:"dag"`
+	Steps         []*DAGStep  `protobuf:"bytes,2,rep,name=steps,proto3" json:"steps"`
+	CommitInfo    *CommitInfo `protobuf:"bytes,3,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
+	ProjectId     string      `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string      `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	CommitId      string      `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
 }
 
 func (x *CreateScenarioRequest) Reset() {
@@ -1329,9 +1329,9 @@ type GetScenarioHistoryRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	DagId         string `protobuf:"bytes,3,opt,name=dag_id,json=dagId,proto3" json:"dag_id,omitempty"`
+	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	DagId         string `protobuf:"bytes,3,opt,name=dag_id,json=dagId,proto3" json:"dag_id"`
 }
 
 func (x *GetScenarioHistoryRequest) Reset() {
@@ -1392,10 +1392,10 @@ type Commit struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommitInfo   *CommitInfo `protobuf:"bytes,1,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
-	VersionInfos []string    `protobuf:"bytes,2,rep,name=version_infos,json=versionInfos,proto3" json:"version_infos,omitempty"`
-	CreatedAt    string      `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt    string      `protobuf:"bytes,4,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CommitInfo   *CommitInfo `protobuf:"bytes,1,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
+	VersionInfos []string    `protobuf:"bytes,2,rep,name=version_infos,json=versionInfos,proto3" json:"version_infos"`
+	CreatedAt    string      `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdatedAt    string      `protobuf:"bytes,4,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
 }
 
 func (x *Commit) Reset() {
@@ -1463,9 +1463,9 @@ type GetScenarioHistoryResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Commits []*Commit `protobuf:"bytes,1,rep,name=commits,proto3" json:"commits,omitempty"`
-	Count   int64     `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
-	Id      string    `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
+	Commits []*Commit `protobuf:"bytes,1,rep,name=commits,proto3" json:"commits"`
+	Count   int64     `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Id      string    `protobuf:"bytes,3,opt,name=id,proto3" json:"id"`
 }
 
 func (x *GetScenarioHistoryResponse) Reset() {
@@ -1526,14 +1526,14 @@ type RevertScenarioRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	NewCommitId   string      `protobuf:"bytes,1,opt,name=new_commit_id,json=newCommitId,proto3" json:"new_commit_id,omitempty"`
-	VersionId     string      `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	Id            string      `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
-	OldCommitId   string      `protobuf:"bytes,4,opt,name=old_commit_id,json=oldCommitId,proto3" json:"old_commit_id,omitempty"`
-	ProjectId     string      `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	EnvironmentId string      `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
-	CommitInfo    *CommitInfo `protobuf:"bytes,7,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
-	VersionIds    []string    `protobuf:"bytes,8,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
+	NewCommitId   string      `protobuf:"bytes,1,opt,name=new_commit_id,json=newCommitId,proto3" json:"new_commit_id"`
+	VersionId     string      `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id"`
+	Id            string      `protobuf:"bytes,3,opt,name=id,proto3" json:"id"`
+	OldCommitId   string      `protobuf:"bytes,4,opt,name=old_commit_id,json=oldCommitId,proto3" json:"old_commit_id"`
+	ProjectId     string      `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	EnvironmentId string      `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	CommitInfo    *CommitInfo `protobuf:"bytes,7,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
+	VersionIds    []string    `protobuf:"bytes,8,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
 }
 
 func (x *RevertScenarioRequest) Reset() {
@@ -1629,8 +1629,8 @@ type RevertScenarioResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id       string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	CommitId string `protobuf:"bytes,2,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	Id       string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	CommitId string `protobuf:"bytes,2,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
 }
 
 func (x *RevertScenarioResponse) Reset() {
