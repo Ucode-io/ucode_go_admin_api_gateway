@@ -33577,6 +33577,12 @@
                 "commit_id": {
                     "type": "string"
                 },
+                "creatable": {
+                    "type": "boolean"
+                },
+                "default_editable": {
+                    "type": "boolean"
+                },
                 "default_limit": {
                     "type": "string"
                 },
@@ -34952,6 +34958,12 @@
                 },
                 "commit_id": {
                     "type": "string"
+                },
+                "creatable": {
+                    "type": "boolean"
+                },
+                "default_editable": {
+                    "type": "boolean"
                 },
                 "default_limit": {
                     "type": "string"
