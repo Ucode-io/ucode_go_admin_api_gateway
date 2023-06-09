@@ -2906,6 +2906,8 @@ definitions:
         type: string
       commit_id:
         type: integer
+      default_editable:
+        type: string
       default_limit:
         type: string
       disable_dates:
@@ -3864,6 +3866,8 @@ definitions:
         items:
           type: string
         type: array
+      default_editable:
+        type: string
       default_limit:
         type: string
       disable_dates:

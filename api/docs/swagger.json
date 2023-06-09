@@ -33737,6 +33737,9 @@
                 "commit_id": {
                     "type": "integer"
                 },
+                "default_editable": {
+                    "type": "string"
+                },
                 "default_limit": {
                     "type": "string"
                 },
@@ -35201,6 +35204,9 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "default_editable": {
+                    "type": "string"
                 },
                 "default_limit": {
                     "type": "string"

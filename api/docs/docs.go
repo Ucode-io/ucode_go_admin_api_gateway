@@ -33749,6 +33749,9 @@ const docTemplate = `{
                 "commit_id": {
                     "type": "integer"
                 },
+                "default_editable": {
+                    "type": "string"
+                },
                 "default_limit": {
                     "type": "string"
                 },
@@ -35213,6 +35216,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "default_editable": {
+                    "type": "string"
                 },
                 "default_limit": {
                     "type": "string"
