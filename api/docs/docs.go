@@ -33750,7 +33750,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "default_editable": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "default_limit": {
                     "type": "string"
@@ -35218,7 +35218,7 @@ const docTemplate = `{
                     }
                 },
                 "default_editable": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "default_limit": {
                     "type": "string"

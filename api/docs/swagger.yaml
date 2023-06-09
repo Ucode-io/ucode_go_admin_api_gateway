@@ -2907,7 +2907,7 @@ definitions:
       commit_id:
         type: integer
       default_editable:
-        type: string
+        type: boolean
       default_limit:
         type: string
       disable_dates:
@@ -3867,7 +3867,7 @@ definitions:
           type: string
         type: array
       default_editable:
-        type: string
+        type: boolean
       default_limit:
         type: string
       disable_dates:
