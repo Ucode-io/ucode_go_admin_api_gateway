@@ -33738,7 +33738,7 @@
                     "type": "integer"
                 },
                 "default_editable": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "default_limit": {
                     "type": "string"
@@ -35206,7 +35206,7 @@
                     }
                 },
                 "default_editable": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "default_limit": {
                     "type": "string"
