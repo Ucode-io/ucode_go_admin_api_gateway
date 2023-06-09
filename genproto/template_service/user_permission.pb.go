@@ -26,16 +26,16 @@ type UserPermission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ObjectId  string `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id"`
-	Email     string `protobuf:"bytes,3,opt,name=email,proto3" json:"email"`
-	Username  string `protobuf:"bytes,4,opt,name=username,proto3" json:"username"`
-	UserId    string `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	PhotoUrl  string `protobuf:"bytes,6,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url"`
-	Type      string `protobuf:"bytes,7,opt,name=type,proto3" json:"type"`
-	Role      string `protobuf:"bytes,8,opt,name=role,proto3" json:"role"`
-	IsDeleted bool   `protobuf:"varint,9,opt,name=is_deleted,json=isDeleted,proto3" json:"is_deleted"`
-	ProjectId string `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ObjectId  string `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	Email     string `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Username  string `protobuf:"bytes,4,opt,name=username,proto3" json:"username,omitempty"`
+	UserId    string `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	PhotoUrl  string `protobuf:"bytes,6,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url,omitempty"`
+	Type      string `protobuf:"bytes,7,opt,name=type,proto3" json:"type,omitempty"`
+	Role      string `protobuf:"bytes,8,opt,name=role,proto3" json:"role,omitempty"`
+	IsDeleted bool   `protobuf:"varint,9,opt,name=is_deleted,json=isDeleted,proto3" json:"is_deleted,omitempty"`
+	ProjectId string `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *UserPermission) Reset() {
@@ -145,16 +145,16 @@ type CreateUserPermissionReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ObjectId   string `protobuf:"bytes,1,opt,name=object_id,json=objectId,proto3" json:"object_id"`
-	Email      string `protobuf:"bytes,2,opt,name=email,proto3" json:"email"`
-	Username   string `protobuf:"bytes,3,opt,name=username,proto3" json:"username"`
-	UserId     string `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	PhotoUrl   string `protobuf:"bytes,5,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url"`
-	Type       string `protobuf:"bytes,6,opt,name=type,proto3" json:"type"`
-	Role       string `protobuf:"bytes,7,opt,name=role,proto3" json:"role"`
-	IsDeleted  bool   `protobuf:"varint,8,opt,name=is_deleted,json=isDeleted,proto3" json:"is_deleted"`
-	ProjectId  string `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ResourceId string `protobuf:"bytes,10,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	ObjectId   string `protobuf:"bytes,1,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	Email      string `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Username   string `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
+	UserId     string `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	PhotoUrl   string `protobuf:"bytes,5,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url,omitempty"`
+	Type       string `protobuf:"bytes,6,opt,name=type,proto3" json:"type,omitempty"`
+	Role       string `protobuf:"bytes,7,opt,name=role,proto3" json:"role,omitempty"`
+	IsDeleted  bool   `protobuf:"varint,8,opt,name=is_deleted,json=isDeleted,proto3" json:"is_deleted,omitempty"`
+	ProjectId  string `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ResourceId string `protobuf:"bytes,10,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
 }
 
 func (x *CreateUserPermissionReq) Reset() {
@@ -264,9 +264,9 @@ type GetListUserPermissionReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ObjectId   string `protobuf:"bytes,1,opt,name=object_id,json=objectId,proto3" json:"object_id"`
-	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ResourceId string `protobuf:"bytes,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	ObjectId   string `protobuf:"bytes,1,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ResourceId string `protobuf:"bytes,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
 }
 
 func (x *GetListUserPermissionReq) Reset() {
@@ -327,8 +327,8 @@ type GetListUserPermissionRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Users []*UserPermission `protobuf:"bytes,1,rep,name=users,proto3" json:"users"`
-	Count int32             `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Users []*UserPermission `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	Count int32             `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetListUserPermissionRes) Reset() {
@@ -382,9 +382,9 @@ type GetSingleUserPermissionReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ResourceId string `protobuf:"bytes,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ResourceId string `protobuf:"bytes,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
 }
 
 func (x *GetSingleUserPermissionReq) Reset() {
@@ -445,17 +445,17 @@ type UpdateUserPermissionReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ObjectId   string `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id"`
-	Email      string `protobuf:"bytes,3,opt,name=email,proto3" json:"email"`
-	Username   string `protobuf:"bytes,4,opt,name=username,proto3" json:"username"`
-	UserId     string `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	PhotoUrl   string `protobuf:"bytes,6,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url"`
-	Type       string `protobuf:"bytes,7,opt,name=type,proto3" json:"type"`
-	Role       string `protobuf:"bytes,8,opt,name=role,proto3" json:"role"`
-	IsDeleted  bool   `protobuf:"varint,9,opt,name=is_deleted,json=isDeleted,proto3" json:"is_deleted"`
-	ProjectId  string `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ResourceId string `protobuf:"bytes,11,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ObjectId   string `protobuf:"bytes,2,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	Email      string `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Username   string `protobuf:"bytes,4,opt,name=username,proto3" json:"username,omitempty"`
+	UserId     string `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	PhotoUrl   string `protobuf:"bytes,6,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url,omitempty"`
+	Type       string `protobuf:"bytes,7,opt,name=type,proto3" json:"type,omitempty"`
+	Role       string `protobuf:"bytes,8,opt,name=role,proto3" json:"role,omitempty"`
+	IsDeleted  bool   `protobuf:"varint,9,opt,name=is_deleted,json=isDeleted,proto3" json:"is_deleted,omitempty"`
+	ProjectId  string `protobuf:"bytes,10,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ResourceId string `protobuf:"bytes,11,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
 }
 
 func (x *UpdateUserPermissionReq) Reset() {
@@ -572,9 +572,9 @@ type DeleteUserPermissionReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ResourceId string `protobuf:"bytes,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId  string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ResourceId string `protobuf:"bytes,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
 }
 
 func (x *DeleteUserPermissionReq) Reset() {

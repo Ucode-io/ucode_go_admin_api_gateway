@@ -74,8 +74,8 @@ type Setting struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Data  *structpb.Struct `protobuf:"bytes,1,opt,name=data,proto3" json:"data"`
-	Count int32            `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	Data  *structpb.Struct `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	Count int32            `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *Setting) Reset() {
@@ -129,11 +129,11 @@ type GetListSettingReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Type      SettingType `protobuf:"varint,1,opt,name=type,proto3,enum=auth_service.SettingType" json:"type"`
-	Search    string      `protobuf:"bytes,2,opt,name=search,proto3" json:"search"`
-	ProjectId string      `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Limit     int32       `protobuf:"varint,4,opt,name=limit,proto3" json:"limit"`
-	Offset    int32       `protobuf:"varint,5,opt,name=offset,proto3" json:"offset"`
+	Type      SettingType `protobuf:"varint,1,opt,name=type,proto3,enum=auth_service.SettingType" json:"type,omitempty"`
+	Search    string      `protobuf:"bytes,2,opt,name=search,proto3" json:"search,omitempty"`
+	ProjectId string      `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Limit     int32       `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset    int32       `protobuf:"varint,5,opt,name=offset,proto3" json:"offset,omitempty"`
 }
 
 func (x *GetListSettingReq) Reset() {
@@ -208,13 +208,13 @@ type RegisterWithGoogleRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Email                 string `protobuf:"bytes,1,opt,name=email,proto3" json:"email"`
-	ProjectId             string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	CompanyId             string `protobuf:"bytes,3,opt,name=company_id,json=companyId,proto3" json:"company_id"`
-	ClientTypeId          string `protobuf:"bytes,4,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	ResourceEnvironmentId string `protobuf:"bytes,5,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
-	Name                  string `protobuf:"bytes,6,opt,name=name,proto3" json:"name"`
-	ResourceType          int32  `protobuf:"varint,7,opt,name=resource_type,json=resourceType,proto3" json:"resource_type"`
+	Email                 string `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	ProjectId             string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CompanyId             string `protobuf:"bytes,3,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"`
+	ClientTypeId          string `protobuf:"bytes,4,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	ResourceEnvironmentId string `protobuf:"bytes,5,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
+	Name                  string `protobuf:"bytes,6,opt,name=name,proto3" json:"name,omitempty"`
+	ResourceType          int32  `protobuf:"varint,7,opt,name=resource_type,json=resourceType,proto3" json:"resource_type,omitempty"`
 }
 
 func (x *RegisterWithGoogleRequest) Reset() {
@@ -303,7 +303,7 @@ type GetUserByLoginTypesResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
 func (x *GetUserByLoginTypesResponse) Reset() {
@@ -350,10 +350,10 @@ type GetUserByLoginTypesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Email        string `protobuf:"bytes,1,opt,name=email,proto3" json:"email"`
-	Phone        string `protobuf:"bytes,2,opt,name=phone,proto3" json:"phone"`
-	Login        string `protobuf:"bytes,3,opt,name=login,proto3" json:"login"`
-	ResourceType int32  `protobuf:"varint,4,opt,name=resource_type,json=resourceType,proto3" json:"resource_type"`
+	Email        string `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	Phone        string `protobuf:"bytes,2,opt,name=phone,proto3" json:"phone,omitempty"`
+	Login        string `protobuf:"bytes,3,opt,name=login,proto3" json:"login,omitempty"`
+	ResourceType int32  `protobuf:"varint,4,opt,name=resource_type,json=resourceType,proto3" json:"resource_type,omitempty"`
 }
 
 func (x *GetUserByLoginTypesRequest) Reset() {
@@ -421,7 +421,7 @@ type GetProjectsByUserIdReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
 func (x *GetProjectsByUserIdReq) Reset() {
@@ -468,7 +468,7 @@ type GetProjectsByUserIdRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectIds []string `protobuf:"bytes,1,rep,name=project_ids,json=projectIds,proto3" json:"project_ids"`
+	ProjectIds []string `protobuf:"bytes,1,rep,name=project_ids,json=projectIds,proto3" json:"project_ids,omitempty"`
 }
 
 func (x *GetProjectsByUserIdRes) Reset() {
@@ -515,12 +515,12 @@ type AddUserToProjectReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId       string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	ProjectId    string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	RoleId       string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	Active       int32  `protobuf:"varint,4,opt,name=active,proto3" json:"active"`
-	CompanyId    string `protobuf:"bytes,5,opt,name=company_id,json=companyId,proto3" json:"company_id"`
-	ResourceType int32  `protobuf:"varint,6,opt,name=resource_type,json=resourceType,proto3" json:"resource_type"`
+	UserId       string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ProjectId    string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	RoleId       string `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	Active       int32  `protobuf:"varint,4,opt,name=active,proto3" json:"active,omitempty"`
+	CompanyId    string `protobuf:"bytes,5,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"`
+	ResourceType int32  `protobuf:"varint,6,opt,name=resource_type,json=resourceType,proto3" json:"resource_type,omitempty"`
 }
 
 func (x *AddUserToProjectReq) Reset() {
@@ -602,9 +602,9 @@ type AddUserToProjectRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId    string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	CompanyId string `protobuf:"bytes,2,opt,name=company_id,json=companyId,proto3" json:"company_id"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	UserId    string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	CompanyId string `protobuf:"bytes,2,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *AddUserToProjectRes) Reset() {
@@ -665,8 +665,8 @@ type UpsertUserInfoRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string           `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	Data   *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data"`
+	UserId string           `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Data   *structpb.Struct `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (x *UpsertUserInfoRequest) Reset() {
@@ -720,23 +720,23 @@ type CreateUserRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Login                 string `protobuf:"bytes,1,opt,name=login,proto3" json:"login"`
-	Password              string `protobuf:"bytes,2,opt,name=password,proto3" json:"password"`
-	Email                 string `protobuf:"bytes,3,opt,name=email,proto3" json:"email"`
-	Phone                 string `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone"`
-	Name                  string `protobuf:"bytes,5,opt,name=name,proto3" json:"name"`
-	PhotoUrl              string `protobuf:"bytes,6,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url"`
-	CompanyId             string `protobuf:"bytes,7,opt,name=company_id,json=companyId,proto3" json:"company_id"`
-	ProjectId             string `protobuf:"bytes,8,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	RoleId                string `protobuf:"bytes,9,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	ClientTypeId          string `protobuf:"bytes,10,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	ClientPlatformId      string `protobuf:"bytes,11,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	Active                int32  `protobuf:"varint,12,opt,name=active,proto3" json:"active"`
-	ExpiresAt             string `protobuf:"bytes,13,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at"`
-	ResourceEnvironmentId string `protobuf:"bytes,14,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
-	BaseUrl               string `protobuf:"bytes,15,opt,name=base_url,json=baseUrl,proto3" json:"base_url"`
-	YearOfBirth           string `protobuf:"bytes,16,opt,name=year_of_birth,json=yearOfBirth,proto3" json:"year_of_birth"`
-	ResourceType          int32  `protobuf:"varint,17,opt,name=resource_type,json=resourceType,proto3" json:"resource_type"`
+	Login                 string `protobuf:"bytes,1,opt,name=login,proto3" json:"login,omitempty"`
+	Password              string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Email                 string `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Phone                 string `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`
+	Name                  string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
+	PhotoUrl              string `protobuf:"bytes,6,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url,omitempty"`
+	CompanyId             string `protobuf:"bytes,7,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"`
+	ProjectId             string `protobuf:"bytes,8,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	RoleId                string `protobuf:"bytes,9,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	ClientTypeId          string `protobuf:"bytes,10,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	ClientPlatformId      string `protobuf:"bytes,11,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	Active                int32  `protobuf:"varint,12,opt,name=active,proto3" json:"active,omitempty"`
+	ExpiresAt             string `protobuf:"bytes,13,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	ResourceEnvironmentId string `protobuf:"bytes,14,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
+	BaseUrl               string `protobuf:"bytes,15,opt,name=base_url,json=baseUrl,proto3" json:"base_url,omitempty"`
+	YearOfBirth           string `protobuf:"bytes,16,opt,name=year_of_birth,json=yearOfBirth,proto3" json:"year_of_birth,omitempty"`
+	ResourceType          int32  `protobuf:"varint,17,opt,name=resource_type,json=resourceType,proto3" json:"resource_type,omitempty"`
 }
 
 func (x *CreateUserRequest) Reset() {
@@ -895,9 +895,9 @@ type UserPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId    string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ResourceType int32  `protobuf:"varint,3,opt,name=resource_type,json=resourceType,proto3" json:"resource_type"`
+	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId    string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ResourceType int32  `protobuf:"varint,3,opt,name=resource_type,json=resourceType,proto3" json:"resource_type,omitempty"`
 }
 
 func (x *UserPrimaryKey) Reset() {
@@ -958,9 +958,9 @@ type UserPrimaryKeyList struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Ids          []string `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids"`
-	ProjectId    string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ResourceType int32    `protobuf:"varint,3,opt,name=resource_type,json=resourceType,proto3" json:"resource_type"`
+	Ids          []string `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
+	ProjectId    string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ResourceType int32    `protobuf:"varint,3,opt,name=resource_type,json=resourceType,proto3" json:"resource_type,omitempty"`
 }
 
 func (x *UserPrimaryKeyList) Reset() {
@@ -1021,14 +1021,14 @@ type GetUserListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit                 int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit"`
-	Offset                int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset"`
-	Search                string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
-	ClientPlatformId      string `protobuf:"bytes,4,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	ClientTypeId          string `protobuf:"bytes,5,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	ProjectId             string `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ResourceEnvironmentId string `protobuf:"bytes,7,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id"`
-	ResourceType          int32  `protobuf:"varint,8,opt,name=resource_type,json=resourceType,proto3" json:"resource_type"`
+	Limit                 int32  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset                int32  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Search                string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
+	ClientPlatformId      string `protobuf:"bytes,4,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	ClientTypeId          string `protobuf:"bytes,5,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	ProjectId             string `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ResourceEnvironmentId string `protobuf:"bytes,7,opt,name=resource_environment_id,json=resourceEnvironmentId,proto3" json:"resource_environment_id,omitempty"`
+	ResourceType          int32  `protobuf:"varint,8,opt,name=resource_type,json=resourceType,proto3" json:"resource_type,omitempty"`
 }
 
 func (x *GetUserListRequest) Reset() {
@@ -1124,8 +1124,8 @@ type GetUserListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count int32   `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
-	Users []*User `protobuf:"bytes,2,rep,name=users,proto3" json:"users"`
+	Count int32   `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	Users []*User `protobuf:"bytes,2,rep,name=users,proto3" json:"users,omitempty"`
 }
 
 func (x *GetUserListResponse) Reset() {
@@ -1179,22 +1179,22 @@ type UpdateUserRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Login            string `protobuf:"bytes,2,opt,name=login,proto3" json:"login"`
-	Email            string `protobuf:"bytes,3,opt,name=email,proto3" json:"email"`
-	Phone            string `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone"`
-	Name             string `protobuf:"bytes,5,opt,name=name,proto3" json:"name"`
-	PhotoUrl         string `protobuf:"bytes,6,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url"`
-	CompanyId        string `protobuf:"bytes,7,opt,name=company_id,json=companyId,proto3" json:"company_id"`
-	ProjectId        string `protobuf:"bytes,8,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	RoleId           string `protobuf:"bytes,9,opt,name=role_id,json=roleId,proto3" json:"role_id"`
-	ClientTypeId     string `protobuf:"bytes,10,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id"`
-	ClientPlatformId string `protobuf:"bytes,11,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id"`
-	Active           int32  `protobuf:"varint,12,opt,name=active,proto3" json:"active"`
-	ExpiresAt        string `protobuf:"bytes,13,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at"`
-	LanguageId       string `protobuf:"bytes,14,opt,name=language_id,json=languageId,proto3" json:"language_id"`
-	TimezoneId       string `protobuf:"bytes,15,opt,name=timezone_id,json=timezoneId,proto3" json:"timezone_id"`
-	ResourceType     int32  `protobuf:"varint,16,opt,name=resource_type,json=resourceType,proto3" json:"resource_type"`
+	Id               string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Login            string `protobuf:"bytes,2,opt,name=login,proto3" json:"login,omitempty"`
+	Email            string `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Phone            string `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`
+	Name             string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
+	PhotoUrl         string `protobuf:"bytes,6,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url,omitempty"`
+	CompanyId        string `protobuf:"bytes,7,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"`
+	ProjectId        string `protobuf:"bytes,8,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	RoleId           string `protobuf:"bytes,9,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	ClientTypeId     string `protobuf:"bytes,10,opt,name=client_type_id,json=clientTypeId,proto3" json:"client_type_id,omitempty"`
+	ClientPlatformId string `protobuf:"bytes,11,opt,name=client_platform_id,json=clientPlatformId,proto3" json:"client_platform_id,omitempty"`
+	Active           int32  `protobuf:"varint,12,opt,name=active,proto3" json:"active,omitempty"`
+	ExpiresAt        string `protobuf:"bytes,13,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	LanguageId       string `protobuf:"bytes,14,opt,name=language_id,json=languageId,proto3" json:"language_id,omitempty"`
+	TimezoneId       string `protobuf:"bytes,15,opt,name=timezone_id,json=timezoneId,proto3" json:"timezone_id,omitempty"`
+	ResourceType     int32  `protobuf:"varint,16,opt,name=resource_type,json=resourceType,proto3" json:"resource_type,omitempty"`
 }
 
 func (x *UpdateUserRequest) Reset() {
@@ -1346,8 +1346,8 @@ type AddUserRelationRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId     string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	RelationId string `protobuf:"bytes,2,opt,name=relation_id,json=relationId,proto3" json:"relation_id"`
+	UserId     string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	RelationId string `protobuf:"bytes,2,opt,name=relation_id,json=relationId,proto3" json:"relation_id,omitempty"`
 }
 
 func (x *AddUserRelationRequest) Reset() {
@@ -1401,8 +1401,8 @@ type UserRelationPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId     string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	RelationId string `protobuf:"bytes,2,opt,name=relation_id,json=relationId,proto3" json:"relation_id"`
+	UserId     string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	RelationId string `protobuf:"bytes,2,opt,name=relation_id,json=relationId,proto3" json:"relation_id,omitempty"`
 }
 
 func (x *UserRelationPrimaryKey) Reset() {
@@ -1456,7 +1456,7 @@ type UserInfoPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
 func (x *UserInfoPrimaryKey) Reset() {
@@ -1503,9 +1503,9 @@ type ResetPasswordRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Token    string `protobuf:"bytes,1,opt,name=token,proto3" json:"token"`
-	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password"`
-	UserId   string `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	Token    string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	UserId   string `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
 func (x *ResetPasswordRequest) Reset() {
@@ -1566,9 +1566,9 @@ type SendMessageToEmailRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Email   string `protobuf:"bytes,1,opt,name=email,proto3" json:"email"`
-	BaseUrl string `protobuf:"bytes,2,opt,name=base_url,json=baseUrl,proto3" json:"base_url"`
-	Token   string `protobuf:"bytes,3,opt,name=token,proto3" json:"token"`
+	Email   string `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	BaseUrl string `protobuf:"bytes,2,opt,name=base_url,json=baseUrl,proto3" json:"base_url,omitempty"`
+	Token   string `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
 }
 
 func (x *SendMessageToEmailRequest) Reset() {

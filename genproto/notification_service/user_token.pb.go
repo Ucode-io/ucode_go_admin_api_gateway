@@ -26,11 +26,11 @@ type UserToken struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	UserId     string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	Token      string `protobuf:"bytes,3,opt,name=token,proto3" json:"token"`
-	CreatedAt  string `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	PlatformId string `protobuf:"bytes,5,opt,name=platform_id,json=platformId,proto3" json:"platform_id"`
+	Id         string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId     string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Token      string `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
+	CreatedAt  string `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	PlatformId string `protobuf:"bytes,5,opt,name=platform_id,json=platformId,proto3" json:"platform_id,omitempty"`
 }
 
 func (x *UserToken) Reset() {
@@ -105,9 +105,9 @@ type CreateUserTokenRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId     string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	Token      string `protobuf:"bytes,2,opt,name=token,proto3" json:"token"`
-	PlatformId string `protobuf:"bytes,3,opt,name=platform_id,json=platformId,proto3" json:"platform_id"`
+	UserId     string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Token      string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	PlatformId string `protobuf:"bytes,3,opt,name=platform_id,json=platformId,proto3" json:"platform_id,omitempty"`
 }
 
 func (x *CreateUserTokenRequest) Reset() {
@@ -168,7 +168,7 @@ type CreateUserTokenResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserTokenId string `protobuf:"bytes,1,opt,name=user_token_id,json=userTokenId,proto3" json:"user_token_id"`
+	UserTokenId string `protobuf:"bytes,1,opt,name=user_token_id,json=userTokenId,proto3" json:"user_token_id,omitempty"`
 }
 
 func (x *CreateUserTokenResponse) Reset() {
@@ -215,7 +215,7 @@ type GetListUserTokenRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
 func (x *GetListUserTokenRequest) Reset() {
@@ -262,7 +262,7 @@ type ListUserToken struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserTokens []*UserToken `protobuf:"bytes,1,rep,name=user_tokens,json=userTokens,proto3" json:"user_tokens"`
+	UserTokens []*UserToken `protobuf:"bytes,1,rep,name=user_tokens,json=userTokens,proto3" json:"user_tokens,omitempty"`
 }
 
 func (x *ListUserToken) Reset() {
@@ -309,7 +309,7 @@ type DeleteUserTokenRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserTokenId string `protobuf:"bytes,1,opt,name=user_token_id,json=userTokenId,proto3" json:"user_token_id"`
+	UserTokenId string `protobuf:"bytes,1,opt,name=user_token_id,json=userTokenId,proto3" json:"user_token_id,omitempty"`
 }
 
 func (x *DeleteUserTokenRequest) Reset() {
@@ -356,7 +356,7 @@ type GetUsersTokenListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserIds []string `protobuf:"bytes,1,rep,name=user_ids,json=userIds,proto3" json:"user_ids"`
+	UserIds []string `protobuf:"bytes,1,rep,name=user_ids,json=userIds,proto3" json:"user_ids,omitempty"`
 }
 
 func (x *GetUsersTokenListRequest) Reset() {
@@ -403,7 +403,7 @@ type GetUsersTokenListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserTokens []*UserToken `protobuf:"bytes,1,rep,name=user_tokens,json=userTokens,proto3" json:"user_tokens"`
+	UserTokens []*UserToken `protobuf:"bytes,1,rep,name=user_tokens,json=userTokens,proto3" json:"user_tokens,omitempty"`
 }
 
 func (x *GetUsersTokenListResponse) Reset() {

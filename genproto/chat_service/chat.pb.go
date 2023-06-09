@@ -26,12 +26,12 @@ type Bot struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BotId         string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
-	BotToken      string `protobuf:"bytes,2,opt,name=bot_token,json=botToken,proto3" json:"bot_token"`
-	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	CreatedAt     string `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UpdatedAt     string `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
-	Status        string `protobuf:"bytes,6,opt,name=status,proto3" json:"status"`
+	BotId         string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
+	BotToken      string `protobuf:"bytes,2,opt,name=bot_token,json=botToken,proto3" json:"bot_token,omitempty"`
+	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	CreatedAt     string `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Status        string `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
 }
 
 func (x *Bot) Reset() {
@@ -113,8 +113,8 @@ type CreateBotRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BotToken      string `protobuf:"bytes,1,opt,name=bot_token,json=botToken,proto3" json:"bot_token"`
-	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	BotToken      string `protobuf:"bytes,1,opt,name=bot_token,json=botToken,proto3" json:"bot_token,omitempty"`
+	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
 }
 
 func (x *CreateBotRequest) Reset() {
@@ -168,7 +168,7 @@ type CreateBotResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BotId string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
+	BotId string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
 }
 
 func (x *CreateBotResponse) Reset() {
@@ -215,7 +215,7 @@ type DeleteBotTokenRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BotId string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
+	BotId string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
 }
 
 func (x *DeleteBotTokenRequest) Reset() {
@@ -262,8 +262,8 @@ type UpdateBotStatusRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BotToken string `protobuf:"bytes,1,opt,name=bot_token,json=botToken,proto3" json:"bot_token"`
-	Status   string `protobuf:"bytes,2,opt,name=status,proto3" json:"status"`
+	BotToken string `protobuf:"bytes,1,opt,name=bot_token,json=botToken,proto3" json:"bot_token,omitempty"`
+	Status   string `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
 }
 
 func (x *UpdateBotStatusRequest) Reset() {
@@ -317,8 +317,8 @@ type UpdateBotTokenRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BotId    string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
-	BotToken string `protobuf:"bytes,2,opt,name=bot_token,json=botToken,proto3" json:"bot_token"`
+	BotId    string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
+	BotToken string `protobuf:"bytes,2,opt,name=bot_token,json=botToken,proto3" json:"bot_token,omitempty"`
 }
 
 func (x *UpdateBotTokenRequest) Reset() {
@@ -372,7 +372,7 @@ type GetBotByBotIdRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BotId string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
+	BotId string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
 }
 
 func (x *GetBotByBotIdRequest) Reset() {
@@ -419,7 +419,7 @@ type GetBotStatusRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BotToken string `protobuf:"bytes,1,opt,name=bot_token,json=botToken,proto3" json:"bot_token"`
+	BotToken string `protobuf:"bytes,1,opt,name=bot_token,json=botToken,proto3" json:"bot_token,omitempty"`
 }
 
 func (x *GetBotStatusRequest) Reset() {
@@ -466,7 +466,7 @@ type GetBotStatusResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Status string `protobuf:"bytes,1,opt,name=status,proto3" json:"status"`
+	Status string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
 }
 
 func (x *GetBotStatusResponse) Reset() {
@@ -513,7 +513,7 @@ type GetBotTokenListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Bottokenlist []*Bot `protobuf:"bytes,1,rep,name=bottokenlist,proto3" json:"bottokenlist"`
+	Bottokenlist []*Bot `protobuf:"bytes,1,rep,name=bottokenlist,proto3" json:"bottokenlist,omitempty"`
 }
 
 func (x *GetBotTokenListResponse) Reset() {
@@ -560,7 +560,7 @@ type GetBotTokenListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	EnvironmentId string `protobuf:"bytes,1,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	EnvironmentId string `protobuf:"bytes,1,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
 }
 
 func (x *GetBotTokenListRequest) Reset() {
@@ -607,7 +607,7 @@ type GetBotByBotIdResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BotToken string `protobuf:"bytes,1,opt,name=bot_token,json=botToken,proto3" json:"bot_token"`
+	BotToken string `protobuf:"bytes,1,opt,name=bot_token,json=botToken,proto3" json:"bot_token,omitempty"`
 }
 
 func (x *GetBotByBotIdResponse) Reset() {
@@ -654,7 +654,7 @@ type DeleteBotToken struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BotId string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
+	BotId string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
 }
 
 func (x *DeleteBotToken) Reset() {
@@ -702,13 +702,13 @@ type Chat struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PhoneNumber   string `protobuf:"bytes,1,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number"`
-	SenderName    string `protobuf:"bytes,2,opt,name=sender_name,json=senderName,proto3" json:"sender_name"`
-	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message"`
-	PlatformType  string `protobuf:"bytes,4,opt,name=platform_type,json=platformType,proto3" json:"platform_type"`
-	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	CreatedAt     string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	Check         bool   `protobuf:"varint,7,opt,name=check,proto3" json:"check"`
+	PhoneNumber   string `protobuf:"bytes,1,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
+	SenderName    string `protobuf:"bytes,2,opt,name=sender_name,json=senderName,proto3" json:"sender_name,omitempty"`
+	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	PlatformType  string `protobuf:"bytes,4,opt,name=platform_type,json=platformType,proto3" json:"platform_type,omitempty"`
+	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	CreatedAt     string `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Check         bool   `protobuf:"varint,7,opt,name=check,proto3" json:"check,omitempty"`
 }
 
 func (x *Chat) Reset() {
@@ -797,10 +797,10 @@ type CreateChatRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId              string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	BotId               string `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
-	Chat                *Chat  `protobuf:"bytes,3,opt,name=chat,proto3" json:"chat"`
-	UserProfilePhotoUrl string `protobuf:"bytes,4,opt,name=user_profile_photo_url,json=userProfilePhotoUrl,proto3" json:"user_profile_photo_url"`
+	UserId              string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	BotId               string `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
+	Chat                *Chat  `protobuf:"bytes,3,opt,name=chat,proto3" json:"chat,omitempty"`
+	UserProfilePhotoUrl string `protobuf:"bytes,4,opt,name=user_profile_photo_url,json=userProfilePhotoUrl,proto3" json:"user_profile_photo_url,omitempty"`
 }
 
 func (x *CreateChatRequest) Reset() {
@@ -868,7 +868,7 @@ type CreateChatResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId string `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id"`
+	ChatId string `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 }
 
 func (x *CreateChatResponse) Reset() {
@@ -915,15 +915,15 @@ type UserMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	SenderName   string `protobuf:"bytes,1,opt,name=sender_name,json=senderName,proto3" json:"sender_name"`
-	Message      string `protobuf:"bytes,2,opt,name=message,proto3" json:"message"`
-	CreatedAt    string `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UserId       string `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	PlatformType string `protobuf:"bytes,5,opt,name=platform_type,json=platformType,proto3" json:"platform_type"`
-	Check        bool   `protobuf:"varint,6,opt,name=check,proto3" json:"check"`
-	MessageId    string `protobuf:"bytes,7,opt,name=message_id,json=messageId,proto3" json:"message_id"`
-	BotId        string `protobuf:"bytes,8,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
-	MessageType  string `protobuf:"bytes,9,opt,name=message_type,json=messageType,proto3" json:"message_type"`
+	SenderName   string `protobuf:"bytes,1,opt,name=sender_name,json=senderName,proto3" json:"sender_name,omitempty"`
+	Message      string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	CreatedAt    string `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UserId       string `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	PlatformType string `protobuf:"bytes,5,opt,name=platform_type,json=platformType,proto3" json:"platform_type,omitempty"`
+	Check        bool   `protobuf:"varint,6,opt,name=check,proto3" json:"check,omitempty"`
+	MessageId    string `protobuf:"bytes,7,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	BotId        string `protobuf:"bytes,8,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
+	MessageType  string `protobuf:"bytes,9,opt,name=message_type,json=messageType,proto3" json:"message_type,omitempty"`
 }
 
 func (x *UserMessage) Reset() {
@@ -1026,7 +1026,7 @@ type GetChatByChatIdRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId string `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id"`
+	ChatId string `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 }
 
 func (x *GetChatByChatIdRequest) Reset() {
@@ -1073,8 +1073,8 @@ type GetChatByUserIdRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	BotId  string `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
+	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	BotId  string `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
 }
 
 func (x *GetChatByUserIdRequest) Reset() {
@@ -1128,7 +1128,7 @@ type GetBotIDByChatIDRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId string `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id"`
+	ChatId string `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 }
 
 func (x *GetBotIDByChatIDRequest) Reset() {
@@ -1175,8 +1175,8 @@ type UpdateProfilePhotoUrlRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId              string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	UserProfilePhotoUrl string `protobuf:"bytes,2,opt,name=user_profile_photo_url,json=userProfilePhotoUrl,proto3" json:"user_profile_photo_url"`
+	UserId              string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserProfilePhotoUrl string `protobuf:"bytes,2,opt,name=user_profile_photo_url,json=userProfilePhotoUrl,proto3" json:"user_profile_photo_url,omitempty"`
 }
 
 func (x *UpdateProfilePhotoUrlRequest) Reset() {
@@ -1230,7 +1230,7 @@ type GetBotIDByChatIDResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BotId string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
+	BotId string `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
 }
 
 func (x *GetBotIDByChatIDResponse) Reset() {
@@ -1277,13 +1277,13 @@ type GetChatByChatIdResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId              string         `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id"`
-	Messages            []*UserMessage `protobuf:"bytes,2,rep,name=messages,proto3" json:"messages"`
-	PlatformType        string         `protobuf:"bytes,3,opt,name=platform_type,json=platformType,proto3" json:"platform_type"`
-	UserId              string         `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	BotId               string         `protobuf:"bytes,5,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
-	UserProfilePhotoUrl string         `protobuf:"bytes,6,opt,name=user_profile_photo_url,json=userProfilePhotoUrl,proto3" json:"user_profile_photo_url"`
-	UnreadMessageCount  int32          `protobuf:"varint,7,opt,name=unread_message_count,json=unreadMessageCount,proto3" json:"unread_message_count"`
+	ChatId              string         `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	Messages            []*UserMessage `protobuf:"bytes,2,rep,name=messages,proto3" json:"messages,omitempty"`
+	PlatformType        string         `protobuf:"bytes,3,opt,name=platform_type,json=platformType,proto3" json:"platform_type,omitempty"`
+	UserId              string         `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	BotId               string         `protobuf:"bytes,5,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
+	UserProfilePhotoUrl string         `protobuf:"bytes,6,opt,name=user_profile_photo_url,json=userProfilePhotoUrl,proto3" json:"user_profile_photo_url,omitempty"`
+	UnreadMessageCount  int32          `protobuf:"varint,7,opt,name=unread_message_count,json=unreadMessageCount,proto3" json:"unread_message_count,omitempty"`
 }
 
 func (x *GetChatByChatIdResponse) Reset() {
@@ -1372,10 +1372,10 @@ type GetChatByUserIdResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId              string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	ChatId              string `protobuf:"bytes,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id"`
-	BotId               string `protobuf:"bytes,3,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
-	UserProfilePhotoUrl string `protobuf:"bytes,4,opt,name=user_profile_photo_url,json=userProfilePhotoUrl,proto3" json:"user_profile_photo_url"`
+	UserId              string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId              string `protobuf:"bytes,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	BotId               string `protobuf:"bytes,3,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
+	UserProfilePhotoUrl string `protobuf:"bytes,4,opt,name=user_profile_photo_url,json=userProfilePhotoUrl,proto3" json:"user_profile_photo_url,omitempty"`
 }
 
 func (x *GetChatByUserIdResponse) Reset() {
@@ -1443,8 +1443,8 @@ type GetChatListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	EnvironmentId string `protobuf:"bytes,1,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	Search        string `protobuf:"bytes,2,opt,name=search,proto3" json:"search"`
+	EnvironmentId string `protobuf:"bytes,1,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	Search        string `protobuf:"bytes,2,opt,name=search,proto3" json:"search,omitempty"`
 }
 
 func (x *GetChatListRequest) Reset() {
@@ -1498,18 +1498,18 @@ type ChatWithLastMessageData struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId              string       `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id"`
-	SenderName          string       `protobuf:"bytes,2,opt,name=sender_name,json=senderName,proto3" json:"sender_name"`
-	Message             *UserMessage `protobuf:"bytes,3,opt,name=message,proto3" json:"message"`
-	EnvironmentId       string       `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	Check               bool         `protobuf:"varint,5,opt,name=check,proto3" json:"check"`
-	CreatedAt           string       `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	PlatformType        string       `protobuf:"bytes,7,opt,name=platform_type,json=platformType,proto3" json:"platform_type"`
-	UserId              string       `protobuf:"bytes,8,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	BotId               string       `protobuf:"bytes,9,opt,name=bot_id,json=botId,proto3" json:"bot_id"`
-	MessageType         string       `protobuf:"bytes,10,opt,name=message_type,json=messageType,proto3" json:"message_type"`
-	UserProfilePhotoUrl string       `protobuf:"bytes,11,opt,name=user_profile_photo_url,json=userProfilePhotoUrl,proto3" json:"user_profile_photo_url"`
-	UnreadMessageCount  int32        `protobuf:"varint,12,opt,name=unread_message_count,json=unreadMessageCount,proto3" json:"unread_message_count"`
+	ChatId              string       `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	SenderName          string       `protobuf:"bytes,2,opt,name=sender_name,json=senderName,proto3" json:"sender_name,omitempty"`
+	Message             *UserMessage `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	EnvironmentId       string       `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	Check               bool         `protobuf:"varint,5,opt,name=check,proto3" json:"check,omitempty"`
+	CreatedAt           string       `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	PlatformType        string       `protobuf:"bytes,7,opt,name=platform_type,json=platformType,proto3" json:"platform_type,omitempty"`
+	UserId              string       `protobuf:"bytes,8,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	BotId               string       `protobuf:"bytes,9,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
+	MessageType         string       `protobuf:"bytes,10,opt,name=message_type,json=messageType,proto3" json:"message_type,omitempty"`
+	UserProfilePhotoUrl string       `protobuf:"bytes,11,opt,name=user_profile_photo_url,json=userProfilePhotoUrl,proto3" json:"user_profile_photo_url,omitempty"`
+	UnreadMessageCount  int32        `protobuf:"varint,12,opt,name=unread_message_count,json=unreadMessageCount,proto3" json:"unread_message_count,omitempty"`
 }
 
 func (x *ChatWithLastMessageData) Reset() {
@@ -1633,8 +1633,8 @@ type GetChatListResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	EnvironmentId string                     `protobuf:"bytes,1,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	Chats         []*ChatWithLastMessageData `protobuf:"bytes,2,rep,name=chats,proto3" json:"chats"`
+	EnvironmentId string                     `protobuf:"bytes,1,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	Chats         []*ChatWithLastMessageData `protobuf:"bytes,2,rep,name=chats,proto3" json:"chats,omitempty"`
 }
 
 func (x *GetChatListResponse) Reset() {
@@ -1688,8 +1688,8 @@ type CreateMessageRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId  string       `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id"`
-	Message *UserMessage `protobuf:"bytes,2,opt,name=message,proto3" json:"message"`
+	ChatId  string       `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	Message *UserMessage `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 }
 
 func (x *CreateMessageRequest) Reset() {
@@ -1743,8 +1743,8 @@ type GetSelfChatContent struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId        string `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id"`
-	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
+	ChatId        string `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	EnvironmentId string `protobuf:"bytes,2,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
 }
 
 func (x *GetSelfChatContent) Reset() {
@@ -1798,7 +1798,7 @@ type GetSelfChatContentResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Message *ChatWithLastMessageData `protobuf:"bytes,1,opt,name=message,proto3" json:"message"`
+	Message *ChatWithLastMessageData `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 }
 
 func (x *GetSelfChatContentResponse) Reset() {
@@ -1845,7 +1845,7 @@ type UpdateChatRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId string `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id"`
+	ChatId string `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 }
 
 func (x *UpdateChatRequest) Reset() {
@@ -1892,7 +1892,7 @@ type UpdateChatMessageRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MessageId string `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id"`
+	MessageId string `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 }
 
 func (x *UpdateChatMessageRequest) Reset() {
@@ -1939,7 +1939,7 @@ type UpdateChatMessageCountRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId string `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id"`
+	ChatId string `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 }
 
 func (x *UpdateChatMessageCountRequest) Reset() {

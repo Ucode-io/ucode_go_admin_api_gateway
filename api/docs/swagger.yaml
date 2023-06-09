@@ -2800,10 +2800,6 @@ definitions:
         type: array
       commit_id:
         type: string
-      creatable:
-        type: boolean
-      default_editable:
-        type: boolean
       default_limit:
         type: string
       default_values:
@@ -2911,7 +2907,7 @@ definitions:
       commit_id:
         type: integer
       default_editable:
-        type: boolean
+        type: string
       default_limit:
         type: string
       disable_dates:
@@ -3534,8 +3530,6 @@ definitions:
         type: string
       commit_info:
         $ref: '#/definitions/object_builder_service.CommitInfo'
-      default_editable:
-        type: boolean
       description:
         type: string
       folder_id:
@@ -3706,10 +3700,6 @@ definitions:
         type: array
       commit_id:
         type: string
-      creatable:
-        type: boolean
-      default_editable:
-        type: boolean
       default_limit:
         type: string
       default_values:
@@ -3877,7 +3867,7 @@ definitions:
           type: string
         type: array
       default_editable:
-        type: boolean
+        type: string
       default_limit:
         type: string
       disable_dates:

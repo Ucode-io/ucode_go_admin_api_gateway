@@ -27,18 +27,18 @@ type WebPage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	Title         string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
-	ProjectId     string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	EnvironmentId string           `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	FolderId      string           `protobuf:"bytes,5,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	ResourceId    string           `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
-	Components    *structpb.Struct `protobuf:"bytes,7,opt,name=components,proto3" json:"components"`
-	CommitId      string           `protobuf:"bytes,8,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	CommitInfo    *CommitInfo      `protobuf:"bytes,9,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
-	VersionId     string           `protobuf:"bytes,10,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	Icon          string           `protobuf:"bytes,11,opt,name=icon,proto3" json:"icon"`
-	AppId         string           `protobuf:"bytes,12,opt,name=app_id,json=appId,proto3" json:"app_id"`
+	Id            string           `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title         string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	ProjectId     string           `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	EnvironmentId string           `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	FolderId      string           `protobuf:"bytes,5,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	ResourceId    string           `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	Components    *structpb.Struct `protobuf:"bytes,7,opt,name=components,proto3" json:"components,omitempty"`
+	CommitId      string           `protobuf:"bytes,8,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	CommitInfo    *CommitInfo      `protobuf:"bytes,9,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
+	VersionId     string           `protobuf:"bytes,10,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	Icon          string           `protobuf:"bytes,11,opt,name=icon,proto3" json:"icon,omitempty"`
+	AppId         string           `protobuf:"bytes,12,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
 }
 
 func (x *WebPage) Reset() {
@@ -162,17 +162,17 @@ type CreateWebPageReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Title         string           `protobuf:"bytes,1,opt,name=title,proto3" json:"title"`
-	ProjectId     string           `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	ResourceId    string           `protobuf:"bytes,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
-	EnvironmentId string           `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	FolderId      string           `protobuf:"bytes,5,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	CommitId      string           `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	Components    *structpb.Struct `protobuf:"bytes,7,opt,name=components,proto3" json:"components"`
-	CommitInfo    *CommitInfo      `protobuf:"bytes,8,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
-	VersionId     string           `protobuf:"bytes,9,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	Icon          string           `protobuf:"bytes,10,opt,name=icon,proto3" json:"icon"`
-	AppId         string           `protobuf:"bytes,11,opt,name=app_id,json=appId,proto3" json:"app_id"`
+	Title         string           `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	ProjectId     string           `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ResourceId    string           `protobuf:"bytes,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	EnvironmentId string           `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	FolderId      string           `protobuf:"bytes,5,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	CommitId      string           `protobuf:"bytes,6,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	Components    *structpb.Struct `protobuf:"bytes,7,opt,name=components,proto3" json:"components,omitempty"`
+	CommitInfo    *CommitInfo      `protobuf:"bytes,8,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
+	VersionId     string           `protobuf:"bytes,9,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	Icon          string           `protobuf:"bytes,10,opt,name=icon,proto3" json:"icon,omitempty"`
+	AppId         string           `protobuf:"bytes,11,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
 }
 
 func (x *CreateWebPageReq) Reset() {
@@ -289,14 +289,14 @@ type GetListWebPageReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	FolderId      string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	CommitId      string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	Limit         int32  `protobuf:"varint,5,opt,name=limit,proto3" json:"limit"`
-	Offset        int32  `protobuf:"varint,6,opt,name=offset,proto3" json:"offset"`
-	ResourceId    string `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
-	AppId         string `protobuf:"bytes,8,opt,name=app_id,json=appId,proto3" json:"app_id"`
+	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	FolderId      string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	EnvironmentId string `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	CommitId      string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	Limit         int32  `protobuf:"varint,5,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset        int32  `protobuf:"varint,6,opt,name=offset,proto3" json:"offset,omitempty"`
+	ResourceId    string `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	AppId         string `protobuf:"bytes,8,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
 }
 
 func (x *GetListWebPageReq) Reset() {
@@ -392,8 +392,8 @@ type GetListWebPageRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	WebPages []*WebPage `protobuf:"bytes,1,rep,name=web_pages,json=webPages,proto3" json:"web_pages"`
-	Count    int32      `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
+	WebPages []*WebPage `protobuf:"bytes,1,rep,name=web_pages,json=webPages,proto3" json:"web_pages,omitempty"`
+	Count    int32      `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
 func (x *GetListWebPageRes) Reset() {
@@ -447,12 +447,12 @@ type GetSingleWebPageReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Id            string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
-	VersionId     string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	CommitId      string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	ResourceId    string `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id            string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	VersionId     string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	CommitId      string `protobuf:"bytes,4,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	ResourceId    string `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
 }
 
 func (x *GetSingleWebPageReq) Reset() {
@@ -534,13 +534,13 @@ type DeleteWebPageReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Id            string `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
-	VersionId     string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	EnvironmentId string `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	ResourceId    string `protobuf:"bytes,5,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
-	FolderId      string `protobuf:"bytes,6,opt,name=folder_id,json=folderId,proto3" json:"folder_id"`
-	AppId         string `protobuf:"bytes,7,opt,name=app_id,json=appId,proto3" json:"app_id"`
+	ProjectId     string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id            string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	VersionId     string `protobuf:"bytes,3,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	EnvironmentId string `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	ResourceId    string `protobuf:"bytes,5,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	FolderId      string `protobuf:"bytes,6,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	AppId         string `protobuf:"bytes,7,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
 }
 
 func (x *DeleteWebPageReq) Reset() {
@@ -629,12 +629,12 @@ type GetWebPageHistoryReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	Limit         int64  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit"`
-	Offset        int64  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset"`
-	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	ResourceId    string `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId     string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Limit         int64  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset        int64  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
+	EnvironmentId string `protobuf:"bytes,5,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	ResourceId    string `protobuf:"bytes,6,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
 }
 
 func (x *GetWebPageHistoryReq) Reset() {
@@ -716,9 +716,9 @@ type GetWebPageHistoryRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Count    int32                                  `protobuf:"varint,1,opt,name=count,proto3" json:"count"`
-	Id       string                                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id"`
-	WebPages []*GetWebPageHistoryRes_WebPageHistory `protobuf:"bytes,3,rep,name=web_pages,json=webPages,proto3" json:"web_pages"`
+	Count    int32                                  `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	Id       string                                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	WebPages []*GetWebPageHistoryRes_WebPageHistory `protobuf:"bytes,3,rep,name=web_pages,json=webPages,proto3" json:"web_pages,omitempty"`
 }
 
 func (x *GetWebPageHistoryRes) Reset() {
@@ -779,14 +779,14 @@ type RevertWebPageReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	NewCommitId   string      `protobuf:"bytes,1,opt,name=new_commit_id,json=newCommitId,proto3" json:"new_commit_id"`
-	VersionId     string      `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	Id            string      `protobuf:"bytes,3,opt,name=id,proto3" json:"id"`
-	OldCommitId   string      `protobuf:"bytes,4,opt,name=old_commit_id,json=oldCommitId,proto3" json:"old_commit_id"`
-	ProjectId     string      `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	EnvironmentId string      `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	ResourceId    string      `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
-	CommitInfo    *CommitInfo `protobuf:"bytes,8,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
+	NewCommitId   string      `protobuf:"bytes,1,opt,name=new_commit_id,json=newCommitId,proto3" json:"new_commit_id,omitempty"`
+	VersionId     string      `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	Id            string      `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
+	OldCommitId   string      `protobuf:"bytes,4,opt,name=old_commit_id,json=oldCommitId,proto3" json:"old_commit_id,omitempty"`
+	ProjectId     string      `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	EnvironmentId string      `protobuf:"bytes,6,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	ResourceId    string      `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	CommitInfo    *CommitInfo `protobuf:"bytes,8,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
 }
 
 func (x *RevertWebPageReq) Reset() {
@@ -882,8 +882,8 @@ type RevertWebPagesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommitId  string `protobuf:"bytes,1,opt,name=commit_id,json=commitId,proto3" json:"commit_id"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	CommitId  string `protobuf:"bytes,1,opt,name=commit_id,json=commitId,proto3" json:"commit_id,omitempty"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *RevertWebPagesRequest) Reset() {
@@ -937,15 +937,15 @@ type ManyVersions struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	VersionIds    []string    `protobuf:"bytes,1,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
-	NewCommitId   string      `protobuf:"bytes,2,opt,name=new_commit_id,json=newCommitId,proto3" json:"new_commit_id"`
-	ProjectId     string      `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	EnvironmentId string      `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id"`
-	Id            string      `protobuf:"bytes,5,opt,name=id,proto3" json:"id"`
-	OldCommitId   string      `protobuf:"bytes,6,opt,name=old_commit_id,json=oldCommitId,proto3" json:"old_commit_id"`
-	CommitInfo    *CommitInfo `protobuf:"bytes,7,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
-	VersionId     string      `protobuf:"bytes,8,opt,name=version_id,json=versionId,proto3" json:"version_id"`
-	ResourceId    string      `protobuf:"bytes,9,opt,name=resource_id,json=resourceId,proto3" json:"resource_id"`
+	VersionIds    []string    `protobuf:"bytes,1,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
+	NewCommitId   string      `protobuf:"bytes,2,opt,name=new_commit_id,json=newCommitId,proto3" json:"new_commit_id,omitempty"`
+	ProjectId     string      `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	EnvironmentId string      `protobuf:"bytes,4,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
+	Id            string      `protobuf:"bytes,5,opt,name=id,proto3" json:"id,omitempty"`
+	OldCommitId   string      `protobuf:"bytes,6,opt,name=old_commit_id,json=oldCommitId,proto3" json:"old_commit_id,omitempty"`
+	CommitInfo    *CommitInfo `protobuf:"bytes,7,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
+	VersionId     string      `protobuf:"bytes,8,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	ResourceId    string      `protobuf:"bytes,9,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
 }
 
 func (x *ManyVersions) Reset() {
@@ -1048,9 +1048,9 @@ type WebPageManyVersions struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	VersionIds  []string `protobuf:"bytes,1,rep,name=version_ids,json=versionIds,proto3" json:"version_ids"`
-	ProjectId   string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
-	OldcommitId string   `protobuf:"bytes,3,opt,name=oldcommit_id,json=oldcommitId,proto3" json:"oldcommit_id"`
+	VersionIds  []string `protobuf:"bytes,1,rep,name=version_ids,json=versionIds,proto3" json:"version_ids,omitempty"`
+	ProjectId   string   `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	OldcommitId string   `protobuf:"bytes,3,opt,name=oldcommit_id,json=oldcommitId,proto3" json:"oldcommit_id,omitempty"`
 }
 
 func (x *WebPageManyVersions) Reset() {
@@ -1111,10 +1111,10 @@ type GetWebPageHistoryRes_WebPageHistory struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommitInfo   *CommitInfo             `protobuf:"bytes,1,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info"`
-	VersionInfos map[string]*VersionInfo `protobuf:"bytes,2,rep,name=version_infos,json=versionInfos,proto3" json:"version_infos" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	CreatedAt    string                  `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
-	UpdatedAt    string                  `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at"`
+	CommitInfo   *CommitInfo             `protobuf:"bytes,1,opt,name=commit_info,json=commitInfo,proto3" json:"commit_info,omitempty"`
+	VersionInfos map[string]*VersionInfo `protobuf:"bytes,2,rep,name=version_infos,json=versionInfos,proto3" json:"version_infos,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	CreatedAt    string                  `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt    string                  `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 }
 
 func (x *GetWebPageHistoryRes_WebPageHistory) Reset() {
