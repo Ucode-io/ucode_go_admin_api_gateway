@@ -1664,6 +1664,8 @@ definitions:
         type: string
       type:
         type: string
+      webpage_id:
+        type: string
     type: object
   models.CreatePanelRequest:
     properties:
@@ -2111,6 +2113,8 @@ definitions:
         type: string
       type:
         type: string
+      webpage_id:
+        type: string
     type: object
   models.Panel:
     properties:
@@ -2348,6 +2352,10 @@ definitions:
         type: string
       function_folder_id:
         type: string
+      gitlab_group_id:
+        type: string
+      gitlab_id:
+        type: string
       id:
         type: string
       name:
@@ -2507,8 +2515,6 @@ definitions:
         type: string
       id:
         type: string
-      is_system:
-        type: boolean
       name:
         type: string
       permission:
@@ -2587,27 +2593,6 @@ definitions:
       order:
         type: integer
       table_slug:
-        type: string
-    type: object
-  object_builder_service.ChildMenu:
-    properties:
-      icon:
-        type: string
-      id:
-        type: string
-      label:
-        type: string
-      layout_id:
-        type: string
-      microfrontend_id:
-        type: string
-      parent_id:
-        type: string
-      project_id:
-        type: string
-      table_id:
-        type: string
-      type:
         type: string
     type: object
   object_builder_service.ClientPlatform:
@@ -2794,8 +2779,6 @@ definitions:
         type: string
       relation_field:
         type: string
-      show_label:
-        type: boolean
       slug:
         type: string
       table_id:
@@ -2879,8 +2862,6 @@ definitions:
         type: array
       editable:
         type: boolean
-      function_path:
-        type: string
       group_fields:
         items:
           type: string
@@ -3193,8 +3174,6 @@ definitions:
         type: integer
       relation_type:
         type: string
-      show_label:
-        type: boolean
     type: object
   object_builder_service.GetAllAppsResponse:
     properties:
@@ -3406,13 +3385,13 @@ definitions:
         type: string
       type:
         type: string
+      webpage_id:
+        type: string
     type: object
   object_builder_service.MenuForGetAll:
     properties:
-      child_menus:
-        items:
-          $ref: '#/definitions/object_builder_service.ChildMenu'
-        type: array
+      data:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
@@ -3421,42 +3400,17 @@ definitions:
         type: string
       layout_id:
         type: string
-      microfrontend:
-        $ref: '#/definitions/object_builder_service.MicroFrontend'
       microfrontend_id:
         type: string
       parent_id:
         type: string
       project_id:
         type: string
-      table:
-        $ref: '#/definitions/object_builder_service.Table'
       table_id:
         type: string
       type:
         type: string
-    type: object
-  object_builder_service.MicroFrontend:
-    properties:
-      description:
-        type: string
-      environment_id:
-        type: string
-      function_folder_id:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-      path:
-        type: string
-      project_id:
-        type: string
-      ssh_url:
-        type: string
-      url:
+      webpage_id:
         type: string
     type: object
   object_builder_service.PanelCoordinates:
@@ -3697,8 +3651,6 @@ definitions:
         type: boolean
       is_own_table:
         type: boolean
-      is_system:
-        type: boolean
       is_visible:
         type: boolean
       label:
@@ -3876,8 +3828,6 @@ definitions:
         type: array
       editable:
         type: boolean
-      function_path:
-        type: string
       group_fields:
         items:
           type: string
