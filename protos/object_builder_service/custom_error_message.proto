@@ -7,8 +7,26 @@ import "google/protobuf/empty.proto";
 
 
 service CustomErrorMessageService {
+    rpc Create(CreateCustomErrorMessage) returns (CustomErrorMessage) {}
     rpc GetList(GetCustomErrorMessageListRequest) returns (GetCustomErrorMessageListResponse) {}
-    rpc Update(UpdateCustomErrorMessage) returns (google.protobuf.Empty) {}
+    rpc Update(CustomErrorMessage) returns (google.protobuf.Empty) {}
+    rpc GetById(CustomErrorMessagePK) returns (CustomErrorMessage) {}
+    rpc Delete(CustomErrorMessagePK) returns (google.protobuf.Empty) {}
+}
+
+
+message CustomErrorMessagePK {
+    string id = 1;
+    string project_id = 2;
+}
+
+message CreateCustomErrorMessage {
+    string project_id = 1;
+    string table_id = 2;
+    string message = 3;
+    string error_id = 4;
+    int32 code = 5;
+    string language_id = 6;
 }
 
 message CustomErrorMessage {
@@ -17,20 +35,14 @@ message CustomErrorMessage {
     string message = 3;
     string error_id = 4;
     int32 code = 5;
-    repeated VariableForCustomErrorMessage variables = 6;
+    string language_id = 6;
+    string project_id = 7;
 }
 
 message VariableForCustomErrorMessage {
     string key  = 1;
     string value  = 2;
 }
-
-message UpdateCustomErrorMessage {
-    repeated CustomErrorMessage custom_error_messages = 1;
-    string table_id = 2;
-    string project_id = 3;
-}
-
 
 message GetCustomErrorMessageListResponse {
     repeated CustomErrorMessage custom_error_messages = 1;

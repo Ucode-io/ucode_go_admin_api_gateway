@@ -23,8 +23,11 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CustomErrorMessageServiceClient interface {
+	Create(ctx context.Context, in *CreateCustomErrorMessage, opts ...grpc.CallOption) (*CustomErrorMessage, error)
 	GetList(ctx context.Context, in *GetCustomErrorMessageListRequest, opts ...grpc.CallOption) (*GetCustomErrorMessageListResponse, error)
-	Update(ctx context.Context, in *UpdateCustomErrorMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Update(ctx context.Context, in *CustomErrorMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetById(ctx context.Context, in *CustomErrorMessagePK, opts ...grpc.CallOption) (*CustomErrorMessage, error)
+	Delete(ctx context.Context, in *CustomErrorMessagePK, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type customErrorMessageServiceClient struct {
@@ -33,6 +36,15 @@ type customErrorMessageServiceClient struct {
 
 func NewCustomErrorMessageServiceClient(cc grpc.ClientConnInterface) CustomErrorMessageServiceClient {
 	return &customErrorMessageServiceClient{cc}
+}
+
+func (c *customErrorMessageServiceClient) Create(ctx context.Context, in *CreateCustomErrorMessage, opts ...grpc.CallOption) (*CustomErrorMessage, error) {
+	out := new(CustomErrorMessage)
+	err := c.cc.Invoke(ctx, "/object_builder_service.CustomErrorMessageService/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *customErrorMessageServiceClient) GetList(ctx context.Context, in *GetCustomErrorMessageListRequest, opts ...grpc.CallOption) (*GetCustomErrorMessageListResponse, error) {
@@ -44,9 +56,27 @@ func (c *customErrorMessageServiceClient) GetList(ctx context.Context, in *GetCu
 	return out, nil
 }
 
-func (c *customErrorMessageServiceClient) Update(ctx context.Context, in *UpdateCustomErrorMessage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *customErrorMessageServiceClient) Update(ctx context.Context, in *CustomErrorMessage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/object_builder_service.CustomErrorMessageService/Update", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *customErrorMessageServiceClient) GetById(ctx context.Context, in *CustomErrorMessagePK, opts ...grpc.CallOption) (*CustomErrorMessage, error) {
+	out := new(CustomErrorMessage)
+	err := c.cc.Invoke(ctx, "/object_builder_service.CustomErrorMessageService/GetById", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *customErrorMessageServiceClient) Delete(ctx context.Context, in *CustomErrorMessagePK, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/object_builder_service.CustomErrorMessageService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +87,11 @@ func (c *customErrorMessageServiceClient) Update(ctx context.Context, in *Update
 // All implementations must embed UnimplementedCustomErrorMessageServiceServer
 // for forward compatibility
 type CustomErrorMessageServiceServer interface {
+	Create(context.Context, *CreateCustomErrorMessage) (*CustomErrorMessage, error)
 	GetList(context.Context, *GetCustomErrorMessageListRequest) (*GetCustomErrorMessageListResponse, error)
-	Update(context.Context, *UpdateCustomErrorMessage) (*emptypb.Empty, error)
+	Update(context.Context, *CustomErrorMessage) (*emptypb.Empty, error)
+	GetById(context.Context, *CustomErrorMessagePK) (*CustomErrorMessage, error)
+	Delete(context.Context, *CustomErrorMessagePK) (*emptypb.Empty, error)
 	mustEmbedUnimplementedCustomErrorMessageServiceServer()
 }
 
@@ -66,11 +99,20 @@ type CustomErrorMessageServiceServer interface {
 type UnimplementedCustomErrorMessageServiceServer struct {
 }
 
+func (UnimplementedCustomErrorMessageServiceServer) Create(context.Context, *CreateCustomErrorMessage) (*CustomErrorMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
 func (UnimplementedCustomErrorMessageServiceServer) GetList(context.Context, *GetCustomErrorMessageListRequest) (*GetCustomErrorMessageListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetList not implemented")
 }
-func (UnimplementedCustomErrorMessageServiceServer) Update(context.Context, *UpdateCustomErrorMessage) (*emptypb.Empty, error) {
+func (UnimplementedCustomErrorMessageServiceServer) Update(context.Context, *CustomErrorMessage) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+}
+func (UnimplementedCustomErrorMessageServiceServer) GetById(context.Context, *CustomErrorMessagePK) (*CustomErrorMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetById not implemented")
+}
+func (UnimplementedCustomErrorMessageServiceServer) Delete(context.Context, *CustomErrorMessagePK) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedCustomErrorMessageServiceServer) mustEmbedUnimplementedCustomErrorMessageServiceServer() {
 }
@@ -84,6 +126,24 @@ type UnsafeCustomErrorMessageServiceServer interface {
 
 func RegisterCustomErrorMessageServiceServer(s grpc.ServiceRegistrar, srv CustomErrorMessageServiceServer) {
 	s.RegisterService(&CustomErrorMessageService_ServiceDesc, srv)
+}
+
+func _CustomErrorMessageService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCustomErrorMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomErrorMessageServiceServer).Create(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.CustomErrorMessageService/Create",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomErrorMessageServiceServer).Create(ctx, req.(*CreateCustomErrorMessage))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _CustomErrorMessageService_GetList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -105,7 +165,7 @@ func _CustomErrorMessageService_GetList_Handler(srv interface{}, ctx context.Con
 }
 
 func _CustomErrorMessageService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateCustomErrorMessage)
+	in := new(CustomErrorMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -117,7 +177,43 @@ func _CustomErrorMessageService_Update_Handler(srv interface{}, ctx context.Cont
 		FullMethod: "/object_builder_service.CustomErrorMessageService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CustomErrorMessageServiceServer).Update(ctx, req.(*UpdateCustomErrorMessage))
+		return srv.(CustomErrorMessageServiceServer).Update(ctx, req.(*CustomErrorMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CustomErrorMessageService_GetById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CustomErrorMessagePK)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomErrorMessageServiceServer).GetById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.CustomErrorMessageService/GetById",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomErrorMessageServiceServer).GetById(ctx, req.(*CustomErrorMessagePK))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CustomErrorMessageService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CustomErrorMessagePK)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomErrorMessageServiceServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.CustomErrorMessageService/Delete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomErrorMessageServiceServer).Delete(ctx, req.(*CustomErrorMessagePK))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -130,12 +226,24 @@ var CustomErrorMessageService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CustomErrorMessageServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Create",
+			Handler:    _CustomErrorMessageService_Create_Handler,
+		},
+		{
 			MethodName: "GetList",
 			Handler:    _CustomErrorMessageService_GetList_Handler,
 		},
 		{
 			MethodName: "Update",
 			Handler:    _CustomErrorMessageService_Update_Handler,
+		},
+		{
+			MethodName: "GetById",
+			Handler:    _CustomErrorMessageService_GetById_Handler,
+		},
+		{
+			MethodName: "Delete",
+			Handler:    _CustomErrorMessageService_Delete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
