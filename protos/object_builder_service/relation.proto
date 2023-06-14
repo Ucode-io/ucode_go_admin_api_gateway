@@ -49,6 +49,7 @@ message CreateRelationRequest {
     string version_id = 30;
     bool creatable = 31;
     bool default_editable = 32;
+    string function_path = 33;
     
 }
 
@@ -96,6 +97,7 @@ message UpdateRelationRequest {
     string version_id = 31;
     bool creatable = 32;
     bool default_editable = 33;
+    string function_path = 34;
 }
 
 
