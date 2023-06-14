@@ -53,6 +53,7 @@ message ViewRelation {
     RelationForTable relation = 4;
     string icon = 5;
     bool is_editable = 6;
+    string function_path = 7;
 }
 
 message RelationForSection {
@@ -79,6 +80,7 @@ message RelationForSection {
     string multiple_insert_field = 21;
     bool creatable = 22;
     bool default_editable = 23;
+    string function_path = 24;
 }
 
 message ActionRelationForSection {
