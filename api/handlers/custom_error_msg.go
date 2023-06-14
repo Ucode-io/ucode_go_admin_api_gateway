@@ -1,0 +1,184 @@
+package handlers
+
+import (
+	"context"
+	"errors"
+	"ucode/ucode_go_api_gateway/api/status_http"
+	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/types/known/emptypb"
+)
+
+// GetAllCustomErrorMessage godoc
+// @Security ApiKeyAuth
+// @ID get_all_custom_error_message
+// @Router /v1/custom-error-message [GET]
+// @Summary Get all custom error messages
+// @Description Get all custom error messages
+// @Tags CustomErrorMessage
+// @Accept json
+// @Produce json
+// @Param filters query obs.GetCustomErrorMessageListRequest true "filters"
+// @Success 200 {object} status_http.Response{data=string} "CustomErrorMessageBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetAllCustomErrorMessage(c *gin.Context) {
+
+	var (
+		resp *obs.GetCustomErrorMessageListResponse
+	)
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+	if c.Query("table_id") == "" && c.Query("table_slug") == "" {
+		h.handleResponse(c, status_http.BadEnvironment, "table_id or table_slug is required")
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().CustomErrorMessage().GetList(
+			context.Background(),
+			&obs.GetCustomErrorMessageListRequest{
+				TableId:   c.Query("table_id"),
+				TableSlug: c.Query("table_slug"),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().CustomErrorMessage().GetList(
+			context.Background(),
+			&obs.GetCustomErrorMessageListRequest{
+				TableId:   c.Query("table_id"),
+				TableSlug: c.Query("table_slug"),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// UpdateCustomErrorMessage godoc
+// @Security ApiKeyAuth
+// @ID update_custom_error_message
+// @Router /v1/custom-error-message [PUT]
+// @Summary Update custom error message
+// @Description Update custom error message
+// @Tags CustomErrorMessage
+// @Accept json
+// @Produce json
+// @Param table body obs.UpdateCustomErrorMessage  true "UpdateCustomErrorMessageBody"
+// @Success 200 {object} status_http.Response{data=string} "Custom Error Message data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) UpdateCustomErrorMessage(c *gin.Context) {
+	var (
+		customErrorMessages obs.UpdateCustomErrorMessage
+		resp                *emptypb.Empty
+	)
+
+	err := c.ShouldBindJSON(&customErrorMessages)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	customErrorMessages.ProjectId = resource.ResourceEnvironmentId
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().CustomErrorMessage().Update(
+			context.Background(),
+			&customErrorMessages,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().CustomErrorMessage().Update(
+			context.Background(),
+			&customErrorMessages,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+	}
+	h.handleResponse(c, status_http.OK, resp)
+}

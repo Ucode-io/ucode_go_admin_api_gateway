@@ -57,18 +57,24 @@ type GetAllFieldsResponse struct {
 	Data   map[string]interface{} `json:"data"`
 }
 
+type VariablesForCustomErrorMessage struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 type CreateTableRequest struct {
-	Label             string                            `json:"label"`
-	Description       string                            `json:"description"`
-	Slug              string                            `json:"slug"`
-	Fields            []CreateFieldsRequest             `json:"fields"`
-	ShowInMeny        bool                              `json:"show_in_menu"`
-	Icon              string                            `json:"icon"`
-	SubtitleFieldSlug string                            `json:"subtitle_field_slug"`
-	Sections          []*object_builder_service.Section `json:"sections"`
-	Layouts           []*object_builder_service.Layout  `json:"layouts"`
-	AppID             string                            `json:"app_id"`
-	IncrementID       IncrementId                       `json:"increment_id"`
+	Label              string                                       `json:"label"`
+	Description        string                                       `json:"description"`
+	Slug               string                                       `json:"slug"`
+	Fields             []CreateFieldsRequest                        `json:"fields"`
+	ShowInMeny         bool                                         `json:"show_in_menu"`
+	Icon               string                                       `json:"icon"`
+	SubtitleFieldSlug  string                                       `json:"subtitle_field_slug"`
+	Sections           []*object_builder_service.Section            `json:"sections"`
+	Layouts            []*object_builder_service.Layout             `json:"layouts"`
+	AppID              string                                       `json:"app_id"`
+	IncrementID        IncrementId                                  `json:"increment_id"`
+	CustomErrorMessage []*object_builder_service.CustomErrorMessage `json:"custom_error_messages"`
 }
 
 type IncrementId struct {

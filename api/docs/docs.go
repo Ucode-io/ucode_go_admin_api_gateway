@@ -7029,6 +7029,186 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/custom-error-message": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all custom error messages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomErrorMessage"
+                ],
+                "summary": "Get all custom error messages",
+                "operationId": "get_all_custom_error_message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "table_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "table_slug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomErrorMessageBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update custom error message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomErrorMessage"
+                ],
+                "summary": "Update custom error message",
+                "operationId": "update_custom_error_message",
+                "parameters": [
+                    {
+                        "description": "UpdateCustomErrorMessageBody",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpdateCustomErrorMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Custom Error Message data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/custom-event": {
             "get": {
                 "security": [
@@ -31921,6 +32101,12 @@ const docTemplate = `{
                 "app_id": {
                     "type": "string"
                 },
+                "custom_error_messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.CustomErrorMessage"
+                    }
+                },
                 "description": {
                     "type": "string"
                 },
@@ -33835,6 +34021,32 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.CustomErrorMessage": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "error_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "variables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.VariableForCustomErrorMessage"
+                    }
+                }
+            }
+        },
         "object_builder_service.DisableDates": {
             "type": "object",
             "properties": {
@@ -34904,6 +35116,23 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.UpdateCustomErrorMessage": {
+            "type": "object",
+            "properties": {
+                "custom_error_messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.CustomErrorMessage"
+                    }
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.UpdateLayoutRequest": {
             "type": "object",
             "properties": {
@@ -35204,6 +35433,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "view_field_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.VariableForCustomErrorMessage": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
                     "type": "string"
                 }
             }

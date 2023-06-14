@@ -265,6 +265,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		v1.GET("/layout", h.GetListLayouts)
 		v1.PUT("/layout", h.UpdateLayout)
+
+		//custom-error-message
+		v1.GET("/custom-error-message", h.GetAllCustomErrorMessage)
+		v1.PUT("/custom-error-message", h.UpdateCustomErrorMessage)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))
