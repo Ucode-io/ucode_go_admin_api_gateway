@@ -4,6 +4,7 @@ package object_builder_service;
 option go_package="genproto/object_builder_service";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
 import "table.proto";
 
 service MenuService {
@@ -24,6 +25,7 @@ message CreateMenuRequest {
     string type = 6;
     string project_id = 7;
     string microfrontend_id = 8;
+    string webpage_id = 9;
 }
 
 message Menu {
@@ -37,33 +39,22 @@ message Menu {
     string project_id = 8;
     string microfrontend_id = 9;
     int32 order = 10;
+    string webpage_id = 11;
 }
 
-message ChildMenu {
-    string label = 1;
-    string icon = 2;
-    string table_id = 3;
-    string layout_id = 4;
-    string parent_id = 5;
-    string type = 6;
-    string id = 7;
-    string project_id = 8;
-    string microfrontend_id = 9;
-}
-
-// if you change this message you must be change Function message in new_function_service's new_function_service.proto 
-message MicroFrontend {
-    string id = 1;
-    string path = 2;
-    string name = 3;
-    string description = 4;
-    string project_id = 5;
-    string function_folder_id = 7;
-    string environment_id = 8;
-    string url = 9;
-    string password = 10;
-    string ssh_url = 11;
-}
+// // if you change this message you must be change Function message in new_function_service's new_function_service.proto 
+// message MicroFrontend {
+//     string id = 1;
+//     string path = 2;
+//     string name = 3;
+//     string description = 4;
+//     string project_id = 5;
+//     string function_folder_id = 7;
+//     string environment_id = 8;
+//     string url = 9;
+//     string password = 10;
+//     string ssh_url = 11;
+// }
 
 message MenuForGetAll {
     string label = 1;
@@ -74,10 +65,9 @@ message MenuForGetAll {
     string type = 6;
     string id = 7;
     string project_id = 8;
-    Table table = 9;
-    repeated ChildMenu child_menus = 10;
-    string microfrontend_id = 11;
-    MicroFrontend microfrontend = 12;
+    google.protobuf.Struct data = 9;
+    string microfrontend_id = 10;
+    string webpage_id = 11;
 }
 
 message GetAllMenusResponse {

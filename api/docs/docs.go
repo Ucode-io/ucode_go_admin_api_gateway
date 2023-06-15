@@ -32793,6 +32793,9 @@ var doc = `{
                 },
                 "type": {
                     "type": "string"
+                },
+                "webpage_id": {
+                    "type": "string"
                 }
             }
         },
@@ -33476,6 +33479,9 @@ var doc = `{
                 },
                 "type": {
                     "type": "string"
+                },
+                "webpage_id": {
+                    "type": "string"
                 }
             }
         },
@@ -34090,9 +34096,6 @@ var doc = `{
                 "id": {
                     "type": "string"
                 },
-                "is_system": {
-                    "type": "boolean"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -34213,38 +34216,6 @@ var doc = `{
                     "type": "integer"
                 },
                 "table_slug": {
-                    "type": "string"
-                }
-            }
-        },
-        "object_builder_service.ChildMenu": {
-            "type": "object",
-            "properties": {
-                "icon": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "layout_id": {
-                    "type": "string"
-                },
-                "microfrontend_id": {
-                    "type": "string"
-                },
-                "parent_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "table_id": {
-                    "type": "string"
-                },
-                "type": {
                     "type": "string"
                 }
             }
@@ -34515,9 +34486,6 @@ var doc = `{
                 "relation_field": {
                     "type": "string"
                 },
-                "show_label": {
-                    "type": "boolean"
-                },
                 "slug": {
                     "type": "string"
                 },
@@ -34643,9 +34611,6 @@ var doc = `{
                 },
                 "editable": {
                     "type": "boolean"
-                },
-                "function_path": {
-                    "type": "string"
                 },
                 "group_fields": {
                     "type": "array",
@@ -35121,9 +35086,6 @@ var doc = `{
                 },
                 "relation_type": {
                     "type": "string"
-                },
-                "show_label": {
-                    "type": "boolean"
                 }
             }
         },
@@ -35450,17 +35412,17 @@ var doc = `{
                 },
                 "type": {
                     "type": "string"
+                },
+                "webpage_id": {
+                    "type": "string"
                 }
             }
         },
         "object_builder_service.MenuForGetAll": {
             "type": "object",
             "properties": {
-                "child_menus": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/object_builder_service.ChildMenu"
-                    }
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -35474,9 +35436,6 @@ var doc = `{
                 "layout_id": {
                     "type": "string"
                 },
-                "microfrontend": {
-                    "$ref": "#/definitions/object_builder_service.MicroFrontend"
-                },
                 "microfrontend_id": {
                     "type": "string"
                 },
@@ -35486,48 +35445,13 @@ var doc = `{
                 "project_id": {
                     "type": "string"
                 },
-                "table": {
-                    "$ref": "#/definitions/object_builder_service.Table"
-                },
                 "table_id": {
                     "type": "string"
                 },
                 "type": {
                     "type": "string"
-                }
-            }
-        },
-        "object_builder_service.MicroFrontend": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
                 },
-                "environment_id": {
-                    "type": "string"
-                },
-                "function_folder_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "ssh_url": {
-                    "type": "string"
-                },
-                "url": {
+                "webpage_id": {
                     "type": "string"
                 }
             }
@@ -35895,9 +35819,6 @@ var doc = `{
                 "is_own_table": {
                     "type": "boolean"
                 },
-                "is_system": {
-                    "type": "boolean"
-                },
                 "is_visible": {
                     "type": "boolean"
                 },
@@ -36167,9 +36088,6 @@ var doc = `{
                 },
                 "editable": {
                     "type": "boolean"
-                },
-                "function_path": {
-                    "type": "string"
                 },
                 "group_fields": {
                     "type": "array",

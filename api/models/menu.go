@@ -8,6 +8,7 @@ type CreateMenuRequest struct {
 	ParentId        string `json:"parent_id"`
 	Type            string `json:"type"`
 	MicrofrontendId string `json:"microfrontend_id"`
+	WebpageId       string `json:"webpage_id"`
 }
 
 type Menu struct {
@@ -19,4 +20,5 @@ type Menu struct {
 	ParentId        string `json:"parent_id"`
 	Type            string `json:"type"`
 	MicrofrontendId string `json:"microfrontend_id"`
+	WebpageId       string `json:"webpage_id"`
 }

@@ -91,6 +91,7 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 				Type:            menu.Type,
 				ProjectId:       resource.ResourceEnvironmentId,
 				MicrofrontendId: menu.MicrofrontendId,
+				WebpageId:       menu.WebpageId,
 			},
 		)
 
@@ -110,6 +111,7 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 				Type:            menu.Type,
 				ProjectId:       resource.ResourceEnvironmentId,
 				MicrofrontendId: menu.MicrofrontendId,
+				WebpageId:       menu.WebpageId,
 			},
 		)
 
@@ -395,6 +397,7 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 				Type:            menu.Type,
 				ProjectId:       resource.ResourceEnvironmentId,
 				MicrofrontendId: menu.MicrofrontendId,
+				WebpageId:       menu.WebpageId,
 			},
 		)
 
@@ -415,6 +418,7 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 				Type:            menu.Type,
 				ProjectId:       resource.ResourceEnvironmentId,
 				MicrofrontendId: menu.MicrofrontendId,
+				WebpageId:       menu.WebpageId,
 			},
 		)
 	}
