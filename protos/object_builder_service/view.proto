@@ -82,6 +82,19 @@ message View {
     google.protobuf.Struct attributes = 25;
     string project_id = 26;
     bool default_editable = 27;
+    Navigate navigate = 28;
+}
+
+message Navigate {
+    string url = 1;
+    repeated KeyStringValue params = 2;
+    repeated KeyStringValue cookie = 3;
+    repeated KeyStringValue headers = 4;
+}
+
+message KeyStringValue {
+    string key = 1;
+    string value = 2;
 }
 
 message GetAllViewsResponse {

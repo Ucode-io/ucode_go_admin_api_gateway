@@ -16,8 +16,8 @@ import (
 // @Security ApiKeyAuth
 // @ID update_custom_error_message
 // @Router /v1/custom-error-message [POST]
-// @Summary Update custom error message
-// @Description Update custom error message
+// @Summary Create custom error message
+// @Description Create custom error message
 // @Tags CustomErrorMessage
 // @Accept json
 // @Produce json
@@ -99,8 +99,8 @@ func (h *Handler) CreateCustomErrorMessage(c *gin.Context) {
 // @Security ApiKeyAuth
 // @ID update_custom_error_message
 // @Router /v1/custom-error-message/{id} [GET]
-// @Summary Update custom error message
-// @Description Update custom error message
+// @Summary Get by id custom error message
+// @Description Get by id custom error message
 // @Tags CustomErrorMessage
 // @Accept json
 // @Produce json

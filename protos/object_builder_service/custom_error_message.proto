@@ -27,6 +27,7 @@ message CreateCustomErrorMessage {
     string error_id = 4;
     int32 code = 5;
     string language_id = 6;
+    string action_type = 7;
 }
 
 message CustomErrorMessage {
@@ -37,6 +38,7 @@ message CustomErrorMessage {
     int32 code = 5;
     string language_id = 6;
     string project_id = 7;
+    string action_type = 8;
 }
 
 message VariableForCustomErrorMessage {
