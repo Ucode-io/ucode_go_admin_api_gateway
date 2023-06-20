@@ -1,9 +1,13 @@
 package gitlab
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -76,6 +80,36 @@ func CreateProjectVariable(cfg IntegrationData, data map[string]interface{}) (re
 	fmt.Println("config::::::", cfg.GitlabIntegrationUrl, cfg.GitlabIntegrationToken)
 
 	resp, err := DoRequest(cfg.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/variables", cfg.GitlabIntegrationToken, "POST", data)
+
+	if resp.Code >= 400 {
+		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
+	} else if resp.Code >= 500 {
+		return models.GitlabIntegrationResponse{}, errors.New(status_http.InternalServerError.Description)
+	}
+
+	return resp, err
+}
+
+func CreateProjectVariableV2(cfg IntegrationData, data interface{}) (response models.GitlabIntegrationResponse, err error) {
+
+	url := fmt.Sprintf("%s/api/v4/projects/%d/variables", cfg.GitlabIntegrationUrl, cfg.GitlabProjectId)
+
+	ctx, finish := context.WithTimeout(context.Background(), 10*time.Second)
+	defer finish()
+
+	dataJson, err := json.Marshal(data)
+	if err != nil {
+		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
+	}
+
+	resp, err := DoRequestV2(ctx, RequestForm{
+		Method: "POST",
+		RawUrl: url,
+		Headers: map[string]string{
+			"PRIVATE-TOKEN": cfg.GitlabIntegrationToken,
+		},
+		Body: bytes.NewBuffer(dataJson),
+	})
 
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
