@@ -1043,7 +1043,7 @@ func (h *Handler) GetList(c *gin.Context) {
 func (h *Handler) GetListSlim(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
-		queryData string
+		queryData     string
 	)
 	// queryParams := make(map[string]interface{})
 	// err := c.ShouldBindQuery(&queryParams)
@@ -1079,9 +1079,17 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	if _, ok := queryMap["limit"]; !ok {
-		queryMap["limit"] = 10
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
 	}
+
+	//if _, ok := queryMap["limit"]; !ok {
+	//	queryMap["limit"] = 10
+	//}
+	queryMap["limit"] = limit
 	queryMap["offset"] = offset
 
 	fmt.Println("query map:", queryMap)
