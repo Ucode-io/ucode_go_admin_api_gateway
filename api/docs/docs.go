@@ -33613,6 +33613,9 @@ const docTemplate = `{
                 "editable": {
                     "type": "boolean"
                 },
+                "function_path": {
+                    "type": "string"
+                },
                 "group_fields": {
                     "type": "array",
                     "items": {
@@ -33642,6 +33645,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.QuickFilter"
                     }
+                },
+                "relation_buttons": {
+                    "type": "boolean"
                 },
                 "relation_field_slug": {
                     "type": "string"
@@ -34295,6 +34301,17 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.KeyStringValue": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.Layout": {
             "type": "object",
             "properties": {
@@ -34366,6 +34383,32 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "right_field_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.Navigate": {
+            "type": "object",
+            "properties": {
+                "cookie": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.KeyStringValue"
+                    }
+                },
+                "headers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.KeyStringValue"
+                    }
+                },
+                "params": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.KeyStringValue"
+                    }
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -34712,6 +34755,9 @@ const docTemplate = `{
                 "commit_info": {
                     "$ref": "#/definitions/object_builder_service.CommitInfo"
                 },
+                "default_editable": {
+                    "type": "boolean"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -34995,6 +35041,9 @@ const docTemplate = `{
                 "editable": {
                     "type": "boolean"
                 },
+                "function_path": {
+                    "type": "string"
+                },
                 "group_fields": {
                     "type": "array",
                     "items": {
@@ -35027,6 +35076,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.QuickFilter"
                     }
+                },
+                "relation_buttons": {
+                    "type": "boolean"
                 },
                 "relation_field_slug": {
                     "type": "string"
@@ -35238,6 +35290,9 @@ const docTemplate = `{
                 "disable_dates": {
                     "$ref": "#/definitions/object_builder_service.DisableDates"
                 },
+                "function_path": {
+                    "type": "string"
+                },
                 "group_fields": {
                     "type": "array",
                     "items": {
@@ -35261,6 +35316,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "navigate": {
+                    "$ref": "#/definitions/object_builder_service.Navigate"
                 },
                 "project_id": {
                     "type": "string"
