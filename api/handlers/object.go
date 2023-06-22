@@ -599,7 +599,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 	//}
 
 	fromOfs := c.Query("from-ofs")
-	fmt.Println("from-ofs::", fromOfs)
+	// fmt.Println("from-ofs::", fromOfs)
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "UPDATE", c, h)
 		if err != nil {
@@ -990,6 +990,7 @@ func (h *Handler) GetList(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+		fmt.Println("begin:", time.Now())
 		resp, err = services.BuilderService().ObjectBuilder().GetList(
 			context.Background(),
 			&obs.CommonMessage{
@@ -998,6 +999,7 @@ func (h *Handler) GetList(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
+		fmt.Println("end:", time.Now())
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -1041,7 +1043,7 @@ func (h *Handler) GetList(c *gin.Context) {
 func (h *Handler) GetListSlim(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
-		queryData string
+		queryData     string
 	)
 	// queryParams := make(map[string]interface{})
 	// err := c.ShouldBindQuery(&queryParams)
@@ -1077,9 +1079,17 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	if _, ok := queryMap["limit"]; !ok {
-		queryMap["limit"] = 10
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
 	}
+
+	//if _, ok := queryMap["limit"]; !ok {
+	//	queryMap["limit"] = 10
+	//}
+	queryMap["limit"] = limit
 	queryMap["offset"] = offset
 
 	fmt.Println("query map:", queryMap)

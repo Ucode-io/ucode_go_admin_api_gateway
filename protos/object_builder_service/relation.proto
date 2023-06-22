@@ -47,7 +47,11 @@ message CreateRelationRequest {
     string project_id = 28;
     string commit_id = 29;
     string version_id = 30;
-    string function_path = 31;
+    bool creatable = 31;
+    bool default_editable = 32;
+    string function_path = 33;
+    bool relation_buttons = 34;
+    
 }
 
 message AutoFilter {
@@ -92,12 +96,12 @@ message UpdateRelationRequest {
     string project_id = 29;
     string commit_id = 30;
     string version_id = 31;
-<<<<<<< HEAD
-    string function_path = 32;
-=======
     bool creatable = 32;
     bool default_editable = 33;
->>>>>>> 6d0d616166e4943883197472b2d1f8c487a56b4c
+    bool creatable = 32;
+    bool default_editable = 33;
+    string function_path = 34;
+    bool relation_buttons = 35;
 }
 
 
@@ -132,12 +136,10 @@ message RelationForGetAll {
     bool multiple_insert = 28;
     repeated string updated_fields = 29;
     string multiple_insert_field = 30;
-<<<<<<< HEAD
-    bool is_system = 31;
-=======
     bool creatable = 31;
     bool default_editable = 32;
->>>>>>> 6d0d616166e4943883197472b2d1f8c487a56b4c
+    string function_path = 33;
+    bool relation_buttons = 34;
 }
 
 message GetAllRelationsResponse {

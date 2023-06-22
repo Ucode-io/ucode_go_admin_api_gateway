@@ -140,6 +140,7 @@ message Table {
     bool is_cached = 15;
     Permission record_permissions = 16;
     bool is_system = 17;
+    bool default_editable = 18;
 }
 
 message CommitInfo {
