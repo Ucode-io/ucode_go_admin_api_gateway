@@ -454,6 +454,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	v2Admin.GET("/table-folder/:id", h.GetTableFolderByID)
 	v2Admin.DELETE("/table-folder/:id", h.DeleteTableFolder)
 
+	function := v2Admin.Group("/functions")
+	{
+		function.Any("/:function-id/run")
+	}
+
 	{
 		// function
 		v2Admin.POST("/function", h.CreateNewFunction)

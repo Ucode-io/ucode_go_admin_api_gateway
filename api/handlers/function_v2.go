@@ -917,3 +917,151 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 	// }
 	h.handleResponse(c, status_http.Created, resp)
 }
+
+// FunctionRun godoc
+// @Security ApiKeyAuth
+// @ID function_run
+// @Router /v2/functions/{function-id}/run [ANY]
+// @Summary Function Run
+// @Description Function Run
+// @Tags Function
+// @Accept json
+// @Produce json
+// @Param InvokeFunctionRequest body models.InvokeFunctionRequest true "InvokeFunctionRequest"
+// @Success 201 {object} status_http.Response{data=models.InvokeFunctionRequest} "Function data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) FunctionRun(c *gin.Context) {
+	var invokeFunction models.InvokeFunctionRequest
+
+	err := c.ShouldBindJSON(&invokeFunction)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	//authInfo, err := h.GetAuthInfo(c)
+	//if err != nil {
+	//	h.handleResponse(c, status_http.Forbidden, err.Error())
+	//	return
+	//}
+
+	//resourceId, ok := c.Get("resource_id")
+	//if !ok {
+	//	err = errors.New("error getting resource id")
+	//	h.handleResponse(c, status_http.BadRequest, err.Error())
+	//	return
+	//}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
+	//	context.Background(),
+	//	&company_service.GetResEnvByResIdEnvIdRequest{
+	//		EnvironmentId: environmentId.(string),
+	//		ResourceId:    resourceId.(string),
+	//	},
+	//)
+	//if err != nil {
+	//	err = errors.New("error getting resource environment id")
+	//	h.handleResponse(c, status_http.GRPCError, err.Error())
+	//	return
+	//}
+
+	function, err := services.FunctionService().FunctionService().GetSingle(
+		context.Background(),
+		&new_function_service.FunctionPrimaryKey{
+			Id:        invokeFunction.FunctionID,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	apiKeys, err := services.AuthService().ApiKey().GetList(context.Background(), &auth_service.GetListReq{
+		EnvironmentId: environmentId.(string),
+		ProjectId:     resource.ProjectId,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	if len(apiKeys.Data) < 1 {
+		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
+		return
+	}
+
+	if invokeFunction.Attributes == nil {
+		invokeFunction.Attributes = make(map[string]interface{}, 0)
+	}
+	authInfo, _ := h.GetAuthInfo(c)
+
+	fmt.Println(function.Path)
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.NewInvokeFunctionRequest{
+		Data: map[string]interface{}{
+			"object_ids": invokeFunction.ObjectIDs,
+			"app_id":     apiKeys.GetData()[0].GetAppId(),
+			"attributes": invokeFunction.Attributes,
+			"user_id":    authInfo.GetUserId(),
+		},
+	})
+	if err != nil {
+		fmt.Println("error in do request", err)
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	} else if resp.Status == "error" {
+		fmt.Println("error in response status", err)
+		var errStr = resp.Status
+		if resp.Data != nil && resp.Data["message"] != nil {
+			errStr = resp.Data["message"].(string)
+		}
+		h.handleResponse(c, status_http.InvalidArgument, errStr)
+		return
+	}
+	// _, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
+	// 	context.Background(),
+	// 	&obs.UpdateByFunctionIdRequest{
+	// 		FunctionId: invokeFunction.FunctionID,
+	// 		ObjectIds:  invokeFunction.ObjectIDs,
+	// 		FieldSlug:  function.Path + "_disable",
+	// 		ProjectId:  resourceEnvironment.GetId(),
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
+	h.handleResponse(c, status_http.Created, resp)
+}
