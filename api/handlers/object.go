@@ -114,8 +114,15 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	//}
 	//fmt.Println("TIME_MANAGEMENT_LOGGING:::GetResEnvByResIdEnvId", time.Since(start))
 
-	id, _ := uuid.NewRandom()
-	objectRequest.Data["guid"] = id.String()
+	var id string
+	uid, _ := uuid.NewRandom()
+	id = uid.String()
+
+	if util.IsValidUUID(objectRequest.Data["guid"].(string)) {
+		id = objectRequest.Data["guid"].(string)
+	}
+
+	objectRequest.Data["guid"] = id
 
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
 	//start = time.Now()
@@ -172,7 +179,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
-			IDs:          []string{id.String()},
+			IDs:          []string{id},
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
@@ -226,7 +233,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
-				IDs:          []string{id.String()},
+				IDs:          []string{id},
 				TableSlug:    c.Param("table_slug"),
 				ObjectData:   objectRequest.Data,
 				Method:       "CREATE",
