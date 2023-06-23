@@ -119,7 +119,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	id = uid.String()
 
 	guid, ok := objectRequest.Data["guid"]
-	if !ok {
+	if ok {
 		if util.IsValidUUID(guid.(string)) {
 			id = objectRequest.Data["guid"].(string)
 		}
