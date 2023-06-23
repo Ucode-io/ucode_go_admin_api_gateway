@@ -118,8 +118,11 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	uid, _ := uuid.NewRandom()
 	id = uid.String()
 
-	if util.IsValidUUID(objectRequest.Data["guid"].(string)) {
-		id = objectRequest.Data["guid"].(string)
+	guid, ok := objectRequest.Data["guid"]
+	if !ok {
+		if util.IsValidUUID(guid.(string)) {
+			id = objectRequest.Data["guid"].(string)
+		}
 	}
 
 	objectRequest.Data["guid"] = id
