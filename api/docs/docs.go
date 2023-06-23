@@ -33264,12 +33264,6 @@ const docTemplate = `{
                 "function_folder_id": {
                     "type": "string"
                 },
-                "gitlab_group_id": {
-                    "type": "string"
-                },
-                "gitlab_id": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
@@ -33286,9 +33280,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "ssh_url": {
-                    "type": "string"
-                },
-                "type": {
                     "type": "string"
                 },
                 "url": {
@@ -33513,9 +33504,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
-                },
-                "is_system": {
-                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -33945,9 +33933,6 @@ const docTemplate = `{
                 },
                 "relation_field": {
                     "type": "string"
-                },
-                "show_label": {
-                    "type": "boolean"
                 },
                 "slug": {
                     "type": "string"
@@ -34587,9 +34572,6 @@ const docTemplate = `{
                 },
                 "relation_type": {
                     "type": "string"
-                },
-                "show_label": {
-                    "type": "boolean"
                 }
             }
         },
@@ -34795,17 +34777,6 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.KeyStringValue": {
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            }
-        },
         "object_builder_service.Layout": {
             "type": "object",
             "properties": {
@@ -34877,32 +34848,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "right_field_type": {
-                    "type": "string"
-                }
-            }
-        },
-        "object_builder_service.Navigate": {
-            "type": "object",
-            "properties": {
-                "cookie": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/object_builder_service.KeyStringValue"
-                    }
-                },
-                "headers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/object_builder_service.KeyStringValue"
-                    }
-                },
-                "params": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/object_builder_service.KeyStringValue"
-                    }
-                },
-                "url": {
                     "type": "string"
                 }
             }
@@ -35798,9 +35743,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                },
-                "navigate": {
-                    "$ref": "#/definitions/object_builder_service.Navigate"
                 },
                 "project_id": {
                     "type": "string"
@@ -37016,6 +36958,7 @@ const docTemplate = `{
         "status_http.Response": {
             "type": "object",
             "properties": {
+                "custom_message": {},
                 "data": {},
                 "description": {
                     "type": "string"

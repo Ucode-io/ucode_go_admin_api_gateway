@@ -33,7 +33,6 @@ type ResourceServiceClient interface {
 	ReconnectResource(ctx context.Context, in *ReconnectResourceRequest, opts ...grpc.CallOption) (*ReconnectResourceRes, error)
 	GetResourceWithPath(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*GetResourceWithPathResponse, error)
 	AutoConnect(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*GetResourceManyWithPathResponse, error)
-	AutoConnectByProjectId(ctx context.Context, in *AutoConnectByProjectIdRequest, opts ...grpc.CallOption) (*AutoConnectByProjectIdResponse, error)
 	GetResourceByResEnvironId(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error)
 	GetResEnvByResIdEnvId(ctx context.Context, in *GetResEnvByResIdEnvIdRequest, opts ...grpc.CallOption) (*ResourceEnvironment, error)
 	GetResourceById(ctx context.Context, in *GetResourceEnvironmentReq, opts ...grpc.CallOption) (*ResourceEnvironmentWithPassword, error)
@@ -155,15 +154,6 @@ func (c *resourceServiceClient) AutoConnect(ctx context.Context, in *GetProjects
 	return out, nil
 }
 
-func (c *resourceServiceClient) AutoConnectByProjectId(ctx context.Context, in *AutoConnectByProjectIdRequest, opts ...grpc.CallOption) (*AutoConnectByProjectIdResponse, error) {
-	out := new(AutoConnectByProjectIdResponse)
-	err := c.cc.Invoke(ctx, "/company_service.ResourceService/AutoConnectByProjectId", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *resourceServiceClient) GetResourceByResEnvironId(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*ResourceWithoutPassword, error) {
 	out := new(ResourceWithoutPassword)
 	err := c.cc.Invoke(ctx, "/company_service.ResourceService/GetResourceByResEnvironId", in, out, opts...)
@@ -278,7 +268,6 @@ type ResourceServiceServer interface {
 	ReconnectResource(context.Context, *ReconnectResourceRequest) (*ReconnectResourceRes, error)
 	GetResourceWithPath(context.Context, *GetResourceRequest) (*GetResourceWithPathResponse, error)
 	AutoConnect(context.Context, *GetProjectsRequest) (*GetResourceManyWithPathResponse, error)
-	AutoConnectByProjectId(context.Context, *AutoConnectByProjectIdRequest) (*AutoConnectByProjectIdResponse, error)
 	GetResourceByResEnvironId(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error)
 	GetResEnvByResIdEnvId(context.Context, *GetResEnvByResIdEnvIdRequest) (*ResourceEnvironment, error)
 	GetResourceById(context.Context, *GetResourceEnvironmentReq) (*ResourceEnvironmentWithPassword, error)
@@ -330,9 +319,6 @@ func (UnimplementedResourceServiceServer) GetResourceWithPath(context.Context, *
 }
 func (UnimplementedResourceServiceServer) AutoConnect(context.Context, *GetProjectsRequest) (*GetResourceManyWithPathResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AutoConnect not implemented")
-}
-func (UnimplementedResourceServiceServer) AutoConnectByProjectId(context.Context, *AutoConnectByProjectIdRequest) (*AutoConnectByProjectIdResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AutoConnectByProjectId not implemented")
 }
 func (UnimplementedResourceServiceServer) GetResourceByResEnvironId(context.Context, *GetResourceRequest) (*ResourceWithoutPassword, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResourceByResEnvironId not implemented")
@@ -574,24 +560,6 @@ func _ResourceService_AutoConnect_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ResourceServiceServer).AutoConnect(ctx, req.(*GetProjectsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ResourceService_AutoConnectByProjectId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AutoConnectByProjectIdRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ResourceServiceServer).AutoConnectByProjectId(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.ResourceService/AutoConnectByProjectId",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResourceServiceServer).AutoConnectByProjectId(ctx, req.(*AutoConnectByProjectIdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -844,10 +812,6 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AutoConnect",
 			Handler:    _ResourceService_AutoConnect_Handler,
-		},
-		{
-			MethodName: "AutoConnectByProjectId",
-			Handler:    _ResourceService_AutoConnectByProjectId_Handler,
 		},
 		{
 			MethodName: "GetResourceByResEnvironId",

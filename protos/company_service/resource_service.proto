@@ -19,7 +19,6 @@ service ResourceService {
     rpc ReconnectResource(ReconnectResourceRequest) returns (ReconnectResourceRes) {}
     rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
     rpc AutoConnect(GetProjectsRequest) returns (GetResourceManyWithPathResponse) {}
-    rpc AutoConnectByProjectId(AutoConnectByProjectIdRequest) returns (AutoConnectByProjectIdResponse) {}
     rpc GetResourceByResEnvironId(GetResourceRequest) returns (ResourceWithoutPassword) {}
     rpc GetResEnvByResIdEnvId(GetResEnvByResIdEnvIdRequest) returns (ResourceEnvironment) {}
     rpc GetResourceById(GetResourceEnvironmentReq) returns(ResourceEnvironmentWithPassword) {}

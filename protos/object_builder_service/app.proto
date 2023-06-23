@@ -45,7 +45,6 @@ message App {
         bool create = 4;
     }
     Permission permission = 6;
-    bool is_system = 7;
 }
 
 message UpdateAppRequest {

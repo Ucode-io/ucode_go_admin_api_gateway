@@ -159,7 +159,6 @@ message FieldResponse {
     int32 order = 10;
     google.protobuf.Struct attributes = 11;
     string relation_type = 12;
-    bool show_label = 13;
 } 
 
 message FieldForSection {
@@ -168,7 +167,6 @@ message FieldForSection {
     int32 order = 3;
     string field_name = 4;
     string relation_type = 5;
-    bool show_label = 6;
 }
 
 message UpdateSectionsRequest {

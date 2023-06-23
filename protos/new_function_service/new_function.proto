@@ -30,12 +30,8 @@ message CreateFunctionRequest {
     string url = 10;
     string password = 11;
     string ssh_url = 12;
-    string type = 13;
-    string gitlab_id = 14;
-    string gitlab_group_id = 15;
 }
 
-// if you change this message you must be change Microfrontend message in object_builder_service's menu.proto
 message Function {
     string id = 1;
     string path = 2;
@@ -47,9 +43,6 @@ message Function {
     string url = 9;
     string password = 10;
     string ssh_url = 11;
-    string type = 12;
-    string gitlab_id = 13;
-    string gitlab_group_id = 14;
 }
 
 message GetAllFunctionsRequest {
@@ -58,7 +51,6 @@ message GetAllFunctionsRequest {
     int32 offset = 3;
     string project_id = 4;
     string environment_id = 5;
-    string type = 6;
 }
 
 message GetAllFunctionsResponse {
@@ -82,5 +74,4 @@ message GetListByRequestTimeRequest {
     int32 offset = 3;
     string project_id = 4;
     string environment_id = 5;
-    string type = 6;
 }

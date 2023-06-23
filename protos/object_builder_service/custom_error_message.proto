@@ -9,9 +9,18 @@ import "google/protobuf/empty.proto";
 service CustomErrorMessageService {
     rpc Create(CreateCustomErrorMessage) returns (CustomErrorMessage) {}
     rpc GetList(GetCustomErrorMessageListRequest) returns (GetCustomErrorMessageListResponse) {}
+    rpc GetListForObject(GetListForObjectRequest) returns (GetCustomErrorMessageListResponse) {}
     rpc Update(CustomErrorMessage) returns (google.protobuf.Empty) {}
     rpc GetById(CustomErrorMessagePK) returns (CustomErrorMessage) {}
     rpc Delete(CustomErrorMessagePK) returns (google.protobuf.Empty) {}
+}
+
+message GetListForObjectRequest {
+    string project_id = 1;
+    string language_id = 2;
+    string action_type = 3;
+    string table_slug = 4;
+    string table_id = 5;
 }
 
 

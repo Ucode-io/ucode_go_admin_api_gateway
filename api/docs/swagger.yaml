@@ -2312,10 +2312,6 @@ definitions:
         type: string
       function_folder_id:
         type: string
-      gitlab_group_id:
-        type: string
-      gitlab_id:
-        type: string
       id:
         type: string
       name:
@@ -2327,8 +2323,6 @@ definitions:
       project_id:
         type: string
       ssh_url:
-        type: string
-      type:
         type: string
       url:
         type: string
@@ -2475,8 +2469,6 @@ definitions:
         type: string
       id:
         type: string
-      is_system:
-        type: boolean
       name:
         type: string
       permission:
@@ -2758,8 +2750,6 @@ definitions:
         type: string
       relation_field:
         type: string
-      show_label:
-        type: boolean
       slug:
         type: string
       table_id:
@@ -3180,8 +3170,6 @@ definitions:
         type: integer
       relation_type:
         type: string
-      show_label:
-        type: boolean
     type: object
   object_builder_service.GetAllAppsResponse:
     properties:
@@ -3313,13 +3301,6 @@ definitions:
       with_increment_id:
         type: boolean
     type: object
-  object_builder_service.KeyStringValue:
-    properties:
-      key:
-        type: string
-      value:
-        type: string
-    type: object
   object_builder_service.Layout:
     properties:
       icon:
@@ -3367,23 +3348,6 @@ definitions:
       right_field:
         type: string
       right_field_type:
-        type: string
-    type: object
-  object_builder_service.Navigate:
-    properties:
-      cookie:
-        items:
-          $ref: '#/definitions/object_builder_service.KeyStringValue'
-        type: array
-      headers:
-        items:
-          $ref: '#/definitions/object_builder_service.KeyStringValue'
-        type: array
-      params:
-        items:
-          $ref: '#/definitions/object_builder_service.KeyStringValue'
-        type: array
-      url:
         type: string
     type: object
   object_builder_service.PanelCoordinates:
@@ -3972,8 +3936,6 @@ definitions:
         type: string
       name:
         type: string
-      navigate:
-        $ref: '#/definitions/object_builder_service.Navigate'
       project_id:
         type: string
       quick_filters:
@@ -4766,6 +4728,7 @@ definitions:
     type: object
   status_http.Response:
     properties:
+      custom_message: {}
       data: {}
       description:
         type: string

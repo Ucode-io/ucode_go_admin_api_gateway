@@ -43,6 +43,11 @@ message LoginPlatformType {
 }
 
 message UpdateLoginPlatformTypeRequest {
-    string id = 1;
-    LoginPlatformType data = 2;
+    string team_id = 1;
+    string client_id = 2;
+    string key_id = 3;
+    string secret = 4;
+    string email = 5;
+    string password = 6;
+    string id = 7;
 }

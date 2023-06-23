@@ -50,21 +50,25 @@ func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data
 			logger.String("status", status.Status),
 			logger.Any("description", status.Description),
 			logger.Any("data", data),
+			logger.Any("custom_message", status.CustomMessage),
 		)
 	default:
+		// fmt.Println(customMessage)
 		h.log.Error(
 			"response",
 			logger.Int("code", status.Code),
 			logger.String("status", status.Status),
 			logger.Any("description", status.Description),
 			logger.Any("data", data),
+			logger.Any("custom_message", status.CustomMessage),
 		)
 	}
 
 	c.JSON(status.Code, status_http.Response{
-		Status:      status.Status,
-		Description: status.Description,
-		Data:        data,
+		Status:        status.Status,
+		Description:   status.Description,
+		Data:          data,
+		CustomMessage: status.CustomMessage,
 	})
 }
 
