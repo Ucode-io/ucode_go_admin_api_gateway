@@ -81,6 +81,7 @@ message RelationForSection {
     bool creatable = 22;
     bool default_editable = 23;
     string function_path = 24;
+    bool relation_buttons = 25;
 }
 
 message ActionRelationForSection {

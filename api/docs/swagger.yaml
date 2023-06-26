@@ -2816,6 +2816,8 @@ definitions:
         type: array
       editable:
         type: boolean
+      function_path:
+        type: string
       group_fields:
         items:
           type: string
@@ -2836,6 +2838,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.QuickFilter'
         type: array
+      relation_buttons:
+        type: boolean
       relation_field_slug:
         type: string
       relation_table_slug:
@@ -3261,6 +3265,13 @@ definitions:
       with_increment_id:
         type: boolean
     type: object
+  object_builder_service.KeyStringValue:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    type: object
   object_builder_service.Layout:
     properties:
       icon:
@@ -3308,6 +3319,23 @@ definitions:
       right_field:
         type: string
       right_field_type:
+        type: string
+    type: object
+  object_builder_service.Navigate:
+    properties:
+      cookie:
+        items:
+          $ref: '#/definitions/object_builder_service.KeyStringValue'
+        type: array
+      headers:
+        items:
+          $ref: '#/definitions/object_builder_service.KeyStringValue'
+        type: array
+      params:
+        items:
+          $ref: '#/definitions/object_builder_service.KeyStringValue'
+        type: array
+      url:
         type: string
     type: object
   object_builder_service.PanelCoordinates:
@@ -3534,6 +3562,8 @@ definitions:
         type: string
       commit_info:
         $ref: '#/definitions/object_builder_service.CommitInfo'
+      default_editable:
+        type: boolean
       description:
         type: string
       folder_id:
@@ -3560,6 +3590,8 @@ definitions:
         type: boolean
       slug:
         type: string
+      soft_delete:
+        type: boolean
       subtitle_field_slug:
         type: string
     type: object
@@ -3720,6 +3752,8 @@ definitions:
         type: array
       editable:
         type: boolean
+      function_path:
+        type: string
       group_fields:
         items:
           type: string
@@ -3742,6 +3776,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.QuickFilter'
         type: array
+      relation_buttons:
+        type: boolean
       relation_field_slug:
         type: string
       relation_table_slug:
@@ -3880,6 +3916,8 @@ definitions:
         type: string
       disable_dates:
         $ref: '#/definitions/object_builder_service.DisableDates'
+      function_path:
+        type: string
       group_fields:
         items:
           type: string
@@ -3896,6 +3934,8 @@ definitions:
         type: string
       name:
         type: string
+      navigate:
+        $ref: '#/definitions/object_builder_service.Navigate'
       project_id:
         type: string
       quick_filters:
