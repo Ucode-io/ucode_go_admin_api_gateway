@@ -197,6 +197,10 @@ func (h *Handler) UpdateLayout(c *gin.Context) {
 		context.Background(),
 		&input,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, status_http.OK, resp)
 }
