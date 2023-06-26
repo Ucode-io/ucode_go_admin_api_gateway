@@ -46,6 +46,7 @@ message CreateViewRequest {
     string project_id = 25;
     int64 commit_id = 26;
     string commit_guid = 27;
+    bool default_editable = 28;
 }
 
 message QuickFilter {
@@ -80,6 +81,21 @@ message View {
     string default_limit = 24;
     google.protobuf.Struct attributes = 25;
     string project_id = 26;
+    bool default_editable = 27;
+    Navigate navigate = 28;
+    string function_path = 29;
+}
+
+message Navigate {
+    string url = 1;
+    repeated KeyStringValue params = 2;
+    repeated KeyStringValue cookie = 3;
+    repeated KeyStringValue headers = 4;
+}
+
+message KeyStringValue {
+    string key = 1;
+    string value = 2;
 }
 
 message GetAllViewsResponse {

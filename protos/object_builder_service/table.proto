@@ -77,7 +77,7 @@ message CreateTableRequest {
     string commit_type = 16;
     string name = 17;
     bool is_cached = 18;
-    repeated Layout layouts = 19;
+    repeated LayoutRequest layouts = 19;
 }
 
 message IncrementID {
