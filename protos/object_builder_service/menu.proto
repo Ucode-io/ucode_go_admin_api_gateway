@@ -5,7 +5,6 @@ option go_package="genproto/object_builder_service";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
-import "table.proto";
 
 service MenuService {
     rpc Create(CreateMenuRequest) returns (Menu) {}
@@ -14,6 +13,24 @@ service MenuService {
     rpc Update(Menu) returns (google.protobuf.Empty) {}
     rpc Delete(MenuPrimaryKey) returns (google.protobuf.Empty) {}
     rpc UpdateMenuOrder(UpdateMenuOrderRequest) returns (google.protobuf.Empty) {}
+    rpc UpdateMenuPermission(UpdateMenuPermissionRequest) returns (google.protobuf.Empty) {}
+}
+
+message UpdateMenuPermissionRequest {
+    repeated MenuPermission permissions = 1;
+    string project_id = 2;
+}
+
+message MenuPermission {
+    string guid = 1;
+    string menu_id = 2;
+    bool read = 3;
+    bool delete = 4;
+    bool update = 5;
+    bool write = 6;
+    bool is_public = 7;
+    bool is_have_condition = 8;
+    string rol_id = 9;
 }
 
 message CreateMenuRequest {
@@ -42,20 +59,6 @@ message Menu {
     string webpage_id = 11;
 }
 
-// // if you change this message you must be change Function message in new_function_service's new_function_service.proto 
-// message MicroFrontend {
-//     string id = 1;
-//     string path = 2;
-//     string name = 3;
-//     string description = 4;
-//     string project_id = 5;
-//     string function_folder_id = 7;
-//     string environment_id = 8;
-//     string url = 9;
-//     string password = 10;
-//     string ssh_url = 11;
-// }
-
 message MenuForGetAll {
     string label = 1;
     string icon = 2;
@@ -68,6 +71,7 @@ message MenuForGetAll {
     google.protobuf.Struct data = 9;
     string microfrontend_id = 10;
     string webpage_id = 11;
+    MenuPermission permission = 12;
 }
 
 message GetAllMenusResponse {
@@ -87,6 +91,7 @@ message GetAllMenusRequest {
     string project_id = 4;
     string role_id = 5;
     string parent_id = 6;
+    string type = 7;
 }
 
 message UpdateMenuOrderRequest {

@@ -105,6 +105,8 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			fmt.Println("apikeys.GetProjectId()::::", apikeys.GetProjectId())
 			c.Set("project_id", apikeys.GetProjectId())
+			c.Set("client_type_id", apikeys.GetClientTypeId())
+			c.Set("role_id", apikeys.GetRoleId())
 		default:
 			err := errors.New("error invalid authorization method")
 			h.log.Error("--AuthMiddleware--", logger.Error(err))
