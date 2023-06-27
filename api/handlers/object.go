@@ -1103,6 +1103,23 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
 	objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 	objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+	if withRelation, ok := objectRequest.Data["with_relations"]; ok {
+		if withRelation.(bool) {
+			var (
+				client, role string
+			)
+			if clientTypeId, ok := c.Get("client_type_id"); ok {
+				client = clientTypeId.(string)
+			}
+			if roleId, ok := c.Get("role_id"); ok {
+				role = roleId.(string)
+			}
+			if client != "" && role != "" {
+				objectRequest.Data["client_type_id"] = client
+				objectRequest.Data["role_id"] = role
+			}
+		}
+	}
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
