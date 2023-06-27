@@ -91,6 +91,7 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 	if c.Query("is_defualt") == "true" {
 		isDefault = true
 	}
+	authInfo, _ := h.GetAuthInfo(c)
 
 	resp, err := services.BuilderService().Layout().GetAll(
 		context.Background(),
@@ -99,8 +100,13 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 			TableId:   tableId,
 			ProjectId: resourceEnvironmentId,
 			IsDefualt: isDefault,
+			RoleId:    authInfo.GetRoleId(),
 		},
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -191,6 +197,10 @@ func (h *Handler) UpdateLayout(c *gin.Context) {
 		context.Background(),
 		&input,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, status_http.OK, resp)
 }

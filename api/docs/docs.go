@@ -12020,6 +12020,11 @@ const docTemplate = `{
                         "type": "string",
                         "name": "search",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "type",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -32959,7 +32964,7 @@ const docTemplate = `{
                 "layouts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Layout"
+                        "$ref": "#/definitions/object_builder_service.LayoutRequest"
                     }
                 },
                 "sections": {
@@ -34119,7 +34124,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.ActionRelation2": {
+        "object_builder_service.ActionRelationForSection": {
             "type": "object",
             "properties": {
                 "key": {
@@ -34141,6 +34146,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "is_system": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -34213,17 +34221,6 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.AutoFilter2": {
-            "type": "object",
-            "properties": {
-                "field_from": {
-                    "type": "string"
-                },
-                "field_to": {
-                    "type": "string"
-                }
-            }
-        },
         "object_builder_service.BarcodeGenerateRes": {
             "type": "object",
             "properties": {
@@ -34233,23 +34230,6 @@ const docTemplate = `{
             }
         },
         "object_builder_service.Cascading": {
-            "type": "object",
-            "properties": {
-                "field_slug": {
-                    "type": "string"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "order": {
-                    "type": "integer"
-                },
-                "table_slug": {
-                    "type": "string"
-                }
-            }
-        },
-        "object_builder_service.Cascading2": {
             "type": "object",
             "properties": {
                 "field_slug": {
@@ -34321,29 +34301,6 @@ const docTemplate = `{
             }
         },
         "object_builder_service.CommitInfo": {
-            "type": "object",
-            "properties": {
-                "commit_type": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "version_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "object_builder_service.CommitInfo2": {
             "type": "object",
             "properties": {
                 "commit_type": {
@@ -34544,6 +34501,9 @@ const docTemplate = `{
                 },
                 "relation_field": {
                     "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
                 },
                 "slug": {
                     "type": "string"
@@ -34991,20 +34951,6 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.DynamicTable2": {
-            "type": "object",
-            "properties": {
-                "table_slug": {
-                    "type": "string"
-                },
-                "view_fields": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "object_builder_service.Event": {
             "type": "object",
             "properties": {
@@ -35084,7 +35030,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Field2": {
+        "object_builder_service.Field": {
             "type": "object",
             "properties": {
                 "attributes": {
@@ -35111,6 +35057,9 @@ const docTemplate = `{
                 "index": {
                     "type": "string"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "is_visible": {
                     "type": "boolean"
                 },
@@ -35120,10 +35069,16 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "relation_field": {
+                    "type": "string"
+                },
                 "relation_id": {
                     "type": "string"
                 },
                 "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
                     "type": "boolean"
                 },
                 "slug": {
@@ -35159,6 +35114,53 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "relation_type": {
+                    "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "object_builder_service.FieldResponse": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "column": {
+                    "type": "integer"
+                },
+                "default": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "index": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "relation_type": {
+                    "type": "string"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
+                    "type": "boolean"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }
@@ -35295,7 +35297,7 @@ const docTemplate = `{
                 "layouts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Layout"
+                        "$ref": "#/definitions/object_builder_service.LayoutResponse"
                     }
                 }
             }
@@ -35365,14 +35367,11 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.IncrementID2": {
+        "object_builder_service.IncrementIDForSection": {
             "type": "object",
             "properties": {
                 "digit_number": {
                     "type": "integer"
-                },
-                "prefix": {
-                    "type": "string"
                 },
                 "with_increment_id": {
                     "type": "boolean"
@@ -35390,7 +35389,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Layout": {
+        "object_builder_service.LayoutRequest": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -35408,13 +35407,57 @@ const docTemplate = `{
                 "order": {
                     "type": "integer"
                 },
+                "summary_fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.FieldForSection"
+                    }
+                },
                 "table_id": {
                     "type": "string"
                 },
                 "tabs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Tab"
+                        "$ref": "#/definitions/object_builder_service.TabRequest"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.LayoutResponse": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_default": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "summary_fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.FieldResponse"
+                    }
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "tabs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.TabResponse"
                     }
                 },
                 "type": {
@@ -35527,6 +35570,9 @@ const docTemplate = `{
                 "parent_id": {
                     "type": "string"
                 },
+                "permission": {
+                    "$ref": "#/definitions/object_builder_service.MenuPermission"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -35538,6 +35584,38 @@ const docTemplate = `{
                 },
                 "webpage_id": {
                     "type": "string"
+                }
+            }
+        },
+        "object_builder_service.MenuPermission": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "boolean"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "is_have_condition": {
+                    "type": "boolean"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "menu_id": {
+                    "type": "string"
+                },
+                "read": {
+                    "type": "boolean"
+                },
+                "rol_id": {
+                    "type": "string"
+                },
+                "update": {
+                    "type": "boolean"
+                },
+                "write": {
+                    "type": "boolean"
                 }
             }
         },
@@ -35626,7 +35704,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.QuickFilter2": {
+        "object_builder_service.QuickFilterForSection": {
             "type": "object",
             "properties": {
                 "default_value": {
@@ -35666,31 +35744,13 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.RelationForGetAll2": {
+        "object_builder_service.RelationForSection": {
             "type": "object",
             "properties": {
                 "action_relations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.ActionRelation2"
-                    }
-                },
-                "auto_filters": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/object_builder_service.AutoFilter2"
-                    }
-                },
-                "cascading_tree_field_slug": {
-                    "type": "string"
-                },
-                "cascading_tree_table_slug": {
-                    "type": "string"
-                },
-                "cascadings": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/object_builder_service.Cascading2"
+                        "$ref": "#/definitions/object_builder_service.ActionRelationForSection"
                     }
                 },
                 "columns": {
@@ -35699,28 +35759,19 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "creatable": {
+                    "type": "boolean"
+                },
+                "default_editable": {
+                    "type": "boolean"
+                },
                 "default_limit": {
                     "type": "string"
-                },
-                "default_values": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "dynamic_tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/object_builder_service.DynamicTable2"
-                    }
                 },
                 "editable": {
                     "type": "boolean"
                 },
-                "field_from": {
-                    "type": "string"
-                },
-                "field_to": {
+                "function_path": {
                     "type": "string"
                 },
                 "group_fields": {
@@ -35735,23 +35786,23 @@ const docTemplate = `{
                 "is_editable": {
                     "type": "boolean"
                 },
-                "is_user_id_default": {
-                    "type": "boolean"
-                },
                 "multiple_insert": {
                     "type": "boolean"
                 },
                 "multiple_insert_field": {
                     "type": "string"
                 },
-                "object_id_from_jwt": {
-                    "type": "boolean"
+                "permission": {
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "quick_filters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.QuickFilter2"
+                        "$ref": "#/definitions/object_builder_service.QuickFilterForSection"
                     }
+                },
+                "relation_buttons": {
+                    "type": "boolean"
                 },
                 "relation_field_slug": {
                     "type": "string"
@@ -35762,14 +35813,14 @@ const docTemplate = `{
                 "summaries": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Summary2"
+                        "$ref": "#/definitions/object_builder_service.SummaryInSection"
                     }
                 },
                 "table_from": {
-                    "$ref": "#/definitions/object_builder_service.Table2"
+                    "$ref": "#/definitions/object_builder_service.TableForSection"
                 },
                 "table_to": {
-                    "$ref": "#/definitions/object_builder_service.Table2"
+                    "$ref": "#/definitions/object_builder_service.TableForSection"
                 },
                 "title": {
                     "type": "string"
@@ -35786,7 +35837,7 @@ const docTemplate = `{
                 "view_fields": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Field2"
+                        "$ref": "#/definitions/object_builder_service.Field"
                     }
                 },
                 "view_type": {
@@ -35843,6 +35894,35 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.SectionResponse": {
+            "type": "object",
+            "properties": {
+                "column": {
+                    "type": "string"
+                },
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.FieldResponse"
+                    }
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_summary_section": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                }
+            }
+        },
         "object_builder_service.Summary": {
             "type": "object",
             "properties": {
@@ -35854,7 +35934,7 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Summary2": {
+        "object_builder_service.SummaryInSection": {
             "type": "object",
             "properties": {
                 "field_name": {
@@ -35865,7 +35945,39 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.Tab": {
+        "object_builder_service.TabRequest": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "layout_id": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "relation_id": {
+                    "type": "string"
+                },
+                "sections": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.Section"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.TabResponse": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -35884,7 +35996,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "relation": {
-                    "$ref": "#/definitions/object_builder_service.RelationForGetAll2"
+                    "$ref": "#/definitions/object_builder_service.RelationForSection"
                 },
                 "relation_id": {
                     "type": "string"
@@ -35892,7 +36004,7 @@ const docTemplate = `{
                 "sections": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Section"
+                        "$ref": "#/definitions/object_builder_service.SectionResponse"
                     }
                 },
                 "type": {
@@ -35908,9 +36020,6 @@ const docTemplate = `{
                 },
                 "commit_info": {
                     "$ref": "#/definitions/object_builder_service.CommitInfo"
-                },
-                "default_editable": {
-                    "type": "boolean"
                 },
                 "description": {
                     "type": "string"
@@ -35933,6 +36042,9 @@ const docTemplate = `{
                 "is_own_table": {
                     "type": "boolean"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "is_visible": {
                     "type": "boolean"
                 },
@@ -35944,56 +36056,6 @@ const docTemplate = `{
                 },
                 "record_permissions": {
                     "$ref": "#/definitions/object_builder_service.Permission"
-                },
-                "show_in_menu": {
-                    "type": "boolean"
-                },
-                "slug": {
-                    "type": "string"
-                },
-                "subtitle_field_slug": {
-                    "type": "string"
-                }
-            }
-        },
-        "object_builder_service.Table2": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "string"
-                },
-                "commit_info": {
-                    "$ref": "#/definitions/object_builder_service.CommitInfo2"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "folder_id": {
-                    "type": "string"
-                },
-                "icon": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "increment_id": {
-                    "$ref": "#/definitions/object_builder_service.IncrementID2"
-                },
-                "is_cached": {
-                    "type": "boolean"
-                },
-                "is_own_table": {
-                    "type": "boolean"
-                },
-                "is_visible": {
-                    "type": "boolean"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
                 },
                 "show_in_menu": {
                     "type": "boolean"
@@ -36048,6 +36110,41 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.TableForSection": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "increment_id": {
+                    "$ref": "#/definitions/object_builder_service.IncrementIDForSection"
+                },
+                "is_editable": {
+                    "type": "boolean"
+                },
+                "is_own_table": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "show_in_menu": {
+                    "type": "boolean"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "subtitle_field_slug": {
                     "type": "string"
                 }
             }
@@ -36110,7 +36207,7 @@ const docTemplate = `{
                 "layouts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Layout"
+                        "$ref": "#/definitions/object_builder_service.LayoutRequest"
                     }
                 },
                 "project_id": {

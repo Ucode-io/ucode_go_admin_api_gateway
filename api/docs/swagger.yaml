@@ -1768,7 +1768,7 @@ definitions:
         type: string
       layouts:
         items:
-          $ref: '#/definitions/object_builder_service.Layout'
+          $ref: '#/definitions/object_builder_service.LayoutRequest'
         type: array
       sections:
         items:
@@ -2528,7 +2528,7 @@ definitions:
       value:
         type: string
     type: object
-  object_builder_service.ActionRelation2:
+  object_builder_service.ActionRelationForSection:
     properties:
       key:
         type: string
@@ -2543,6 +2543,8 @@ definitions:
         type: string
       id:
         type: string
+      is_system:
+        type: boolean
       name:
         type: string
       permission:
@@ -2589,30 +2591,12 @@ definitions:
       field_to:
         type: string
     type: object
-  object_builder_service.AutoFilter2:
-    properties:
-      field_from:
-        type: string
-      field_to:
-        type: string
-    type: object
   object_builder_service.BarcodeGenerateRes:
     properties:
       number:
         type: string
     type: object
   object_builder_service.Cascading:
-    properties:
-      field_slug:
-        type: string
-      label:
-        type: string
-      order:
-        type: integer
-      table_slug:
-        type: string
-    type: object
-  object_builder_service.Cascading2:
     properties:
       field_slug:
         type: string
@@ -2659,21 +2643,6 @@ definitions:
         type: string
     type: object
   object_builder_service.CommitInfo:
-    properties:
-      commit_type:
-        type: string
-      created_at:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      version_ids:
-        items:
-          type: string
-        type: array
-    type: object
-  object_builder_service.CommitInfo2:
     properties:
       commit_type:
         type: string
@@ -2807,6 +2776,8 @@ definitions:
         type: string
       relation_field:
         type: string
+      show_label:
+        type: boolean
       slug:
         type: string
       table_id:
@@ -3101,15 +3072,6 @@ definitions:
           type: string
         type: array
     type: object
-  object_builder_service.DynamicTable2:
-    properties:
-      table_slug:
-        type: string
-      view_fields:
-        items:
-          type: string
-        type: array
-    type: object
   object_builder_service.Event:
     properties:
       does:
@@ -3161,7 +3123,7 @@ definitions:
       version_id:
         type: string
     type: object
-  object_builder_service.Field2:
+  object_builder_service.Field:
     properties:
       attributes:
         $ref: '#/definitions/structpb.Struct'
@@ -3179,15 +3141,21 @@ definitions:
         type: string
       index:
         type: string
+      is_system:
+        type: boolean
       is_visible:
         type: boolean
       label:
         type: string
       project_id:
         type: string
+      relation_field:
+        type: string
       relation_id:
         type: string
       required:
+        type: boolean
+      show_label:
         type: boolean
       slug:
         type: string
@@ -3211,6 +3179,37 @@ definitions:
       order:
         type: integer
       relation_type:
+        type: string
+      show_label:
+        type: boolean
+    type: object
+  object_builder_service.FieldResponse:
+    properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      column:
+        type: integer
+      default:
+        type: string
+      id:
+        type: string
+      index:
+        type: string
+      label:
+        type: string
+      order:
+        type: integer
+      relation_type:
+        type: string
+      required:
+        type: boolean
+      show_label:
+        type: boolean
+      slug:
+        type: string
+      table_id:
+        type: string
+      type:
         type: string
     type: object
   object_builder_service.GetAllAppsResponse:
@@ -3298,7 +3297,7 @@ definitions:
     properties:
       layouts:
         items:
-          $ref: '#/definitions/object_builder_service.Layout'
+          $ref: '#/definitions/object_builder_service.LayoutResponse'
         type: array
     type: object
   object_builder_service.GetTableHistoryResponse:
@@ -3343,12 +3342,10 @@ definitions:
       with_increment_id:
         type: boolean
     type: object
-  object_builder_service.IncrementID2:
+  object_builder_service.IncrementIDForSection:
     properties:
       digit_number:
         type: integer
-      prefix:
-        type: string
       with_increment_id:
         type: boolean
     type: object
@@ -3359,7 +3356,7 @@ definitions:
       value:
         type: string
     type: object
-  object_builder_service.Layout:
+  object_builder_service.LayoutRequest:
     properties:
       icon:
         type: string
@@ -3371,11 +3368,40 @@ definitions:
         type: string
       order:
         type: integer
+      summary_fields:
+        items:
+          $ref: '#/definitions/object_builder_service.FieldForSection'
+        type: array
       table_id:
         type: string
       tabs:
         items:
-          $ref: '#/definitions/object_builder_service.Tab'
+          $ref: '#/definitions/object_builder_service.TabRequest'
+        type: array
+      type:
+        type: string
+    type: object
+  object_builder_service.LayoutResponse:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      is_default:
+        type: boolean
+      label:
+        type: string
+      order:
+        type: integer
+      summary_fields:
+        items:
+          $ref: '#/definitions/object_builder_service.FieldResponse'
+        type: array
+      table_id:
+        type: string
+      tabs:
+        items:
+          $ref: '#/definitions/object_builder_service.TabResponse'
         type: array
       type:
         type: string
@@ -3449,6 +3475,8 @@ definitions:
         type: string
       parent_id:
         type: string
+      permission:
+        $ref: '#/definitions/object_builder_service.MenuPermission'
       project_id:
         type: string
       table_id:
@@ -3457,6 +3485,27 @@ definitions:
         type: string
       webpage_id:
         type: string
+    type: object
+  object_builder_service.MenuPermission:
+    properties:
+      delete:
+        type: boolean
+      guid:
+        type: string
+      is_have_condition:
+        type: boolean
+      is_public:
+        type: boolean
+      menu_id:
+        type: string
+      read:
+        type: boolean
+      rol_id:
+        type: string
+      update:
+        type: boolean
+      write:
+        type: boolean
     type: object
   object_builder_service.Navigate:
     properties:
@@ -3513,7 +3562,7 @@ definitions:
       field_id:
         type: string
     type: object
-  object_builder_service.QuickFilter2:
+  object_builder_service.QuickFilterForSection:
     properties:
       default_value:
         type: string
@@ -3539,43 +3588,25 @@ definitions:
       write:
         type: string
     type: object
-  object_builder_service.RelationForGetAll2:
+  object_builder_service.RelationForSection:
     properties:
       action_relations:
         items:
-          $ref: '#/definitions/object_builder_service.ActionRelation2'
-        type: array
-      auto_filters:
-        items:
-          $ref: '#/definitions/object_builder_service.AutoFilter2'
-        type: array
-      cascading_tree_field_slug:
-        type: string
-      cascading_tree_table_slug:
-        type: string
-      cascadings:
-        items:
-          $ref: '#/definitions/object_builder_service.Cascading2'
+          $ref: '#/definitions/object_builder_service.ActionRelationForSection'
         type: array
       columns:
         items:
           type: string
         type: array
+      creatable:
+        type: boolean
+      default_editable:
+        type: boolean
       default_limit:
         type: string
-      default_values:
-        items:
-          type: string
-        type: array
-      dynamic_tables:
-        items:
-          $ref: '#/definitions/object_builder_service.DynamicTable2'
-        type: array
       editable:
         type: boolean
-      field_from:
-        type: string
-      field_to:
+      function_path:
         type: string
       group_fields:
         items:
@@ -3585,30 +3616,30 @@ definitions:
         type: string
       is_editable:
         type: boolean
-      is_user_id_default:
-        type: boolean
       multiple_insert:
         type: boolean
       multiple_insert_field:
         type: string
-      object_id_from_jwt:
-        type: boolean
+      permission:
+        $ref: '#/definitions/structpb.Struct'
       quick_filters:
         items:
-          $ref: '#/definitions/object_builder_service.QuickFilter2'
+          $ref: '#/definitions/object_builder_service.QuickFilterForSection'
         type: array
+      relation_buttons:
+        type: boolean
       relation_field_slug:
         type: string
       relation_table_slug:
         type: string
       summaries:
         items:
-          $ref: '#/definitions/object_builder_service.Summary2'
+          $ref: '#/definitions/object_builder_service.SummaryInSection'
         type: array
       table_from:
-        $ref: '#/definitions/object_builder_service.Table2'
+        $ref: '#/definitions/object_builder_service.TableForSection'
       table_to:
-        $ref: '#/definitions/object_builder_service.Table2'
+        $ref: '#/definitions/object_builder_service.TableForSection'
       title:
         type: string
       type:
@@ -3619,7 +3650,7 @@ definitions:
         type: array
       view_fields:
         items:
-          $ref: '#/definitions/object_builder_service.Field2'
+          $ref: '#/definitions/object_builder_service.Field'
         type: array
       view_type:
         type: string
@@ -3656,6 +3687,25 @@ definitions:
       order:
         type: integer
     type: object
+  object_builder_service.SectionResponse:
+    properties:
+      column:
+        type: string
+      fields:
+        items:
+          $ref: '#/definitions/object_builder_service.FieldResponse'
+        type: array
+      icon:
+        type: string
+      id:
+        type: string
+      is_summary_section:
+        type: boolean
+      label:
+        type: string
+      order:
+        type: integer
+    type: object
   object_builder_service.Summary:
     properties:
       field_name:
@@ -3663,14 +3713,35 @@ definitions:
       formula_name:
         type: string
     type: object
-  object_builder_service.Summary2:
+  object_builder_service.SummaryInSection:
     properties:
       field_name:
         type: string
       formula_name:
         type: string
     type: object
-  object_builder_service.Tab:
+  object_builder_service.TabRequest:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      order:
+        type: integer
+      relation_id:
+        type: string
+      sections:
+        items:
+          $ref: '#/definitions/object_builder_service.Section'
+        type: array
+      type:
+        type: string
+    type: object
+  object_builder_service.TabResponse:
     properties:
       icon:
         type: string
@@ -3683,12 +3754,12 @@ definitions:
       order:
         type: integer
       relation:
-        $ref: '#/definitions/object_builder_service.RelationForGetAll2'
+        $ref: '#/definitions/object_builder_service.RelationForSection'
       relation_id:
         type: string
       sections:
         items:
-          $ref: '#/definitions/object_builder_service.Section'
+          $ref: '#/definitions/object_builder_service.SectionResponse'
         type: array
       type:
         type: string
@@ -3699,8 +3770,6 @@ definitions:
         type: string
       commit_info:
         $ref: '#/definitions/object_builder_service.CommitInfo'
-      default_editable:
-        type: boolean
       description:
         type: string
       folder_id:
@@ -3715,6 +3784,8 @@ definitions:
         type: boolean
       is_own_table:
         type: boolean
+      is_system:
+        type: boolean
       is_visible:
         type: boolean
       label:
@@ -3723,39 +3794,6 @@ definitions:
         type: string
       record_permissions:
         $ref: '#/definitions/object_builder_service.Permission'
-      show_in_menu:
-        type: boolean
-      slug:
-        type: string
-      subtitle_field_slug:
-        type: string
-    type: object
-  object_builder_service.Table2:
-    properties:
-      author_id:
-        type: string
-      commit_info:
-        $ref: '#/definitions/object_builder_service.CommitInfo2'
-      description:
-        type: string
-      folder_id:
-        type: string
-      icon:
-        type: string
-      id:
-        type: string
-      increment_id:
-        $ref: '#/definitions/object_builder_service.IncrementID2'
-      is_cached:
-        type: boolean
-      is_own_table:
-        type: boolean
-      is_visible:
-        type: boolean
-      label:
-        type: string
-      project_id:
-        type: string
       show_in_menu:
         type: boolean
       slug:
@@ -3791,6 +3829,29 @@ definitions:
       project_id:
         type: string
       title:
+        type: string
+    type: object
+  object_builder_service.TableForSection:
+    properties:
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      increment_id:
+        $ref: '#/definitions/object_builder_service.IncrementIDForSection'
+      is_editable:
+        type: boolean
+      is_own_table:
+        type: boolean
+      label:
+        type: string
+      show_in_menu:
+        type: boolean
+      slug:
+        type: string
+      subtitle_field_slug:
         type: string
     type: object
   object_builder_service.TableHistory:
@@ -3831,7 +3892,7 @@ definitions:
     properties:
       layouts:
         items:
-          $ref: '#/definitions/object_builder_service.Layout'
+          $ref: '#/definitions/object_builder_service.LayoutRequest'
         type: array
       project_id:
         type: string
@@ -12327,6 +12388,9 @@ paths:
         type: string
       - in: query
         name: search
+        type: string
+      - in: query
+        name: type
         type: string
       produces:
       - application/json
