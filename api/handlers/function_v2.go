@@ -12,7 +12,7 @@ import (
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
-	"ucode/ucode_go_api_gateway/pkg/gitlab_integration"
+	"ucode/ucode_go_api_gateway/pkg/gitlab"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -106,14 +106,19 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 	projectName = strings.ToLower(projectName)
 	var functionPath = projectName + "-" + function.Path
 
-	resp, err := gitlab_integration.CreateProjectFork(h.cfg, functionPath)
+	resp, err := gitlab.CreateProjectFork(functionPath, gitlab.IntegrationData{
+		GitlabIntegrationUrl:   h.cfg.GitlabIntegrationURL,
+		GitlabIntegrationToken: h.cfg.GitlabIntegrationToken,
+		GitlabGroupId:          h.cfg.GitlabGroupId,
+		GitlabProjectId:        h.cfg.GitlabProjectId,
+	})
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 	fmt.Println("test before clone")
 	var sshURL = resp.Message["ssh_url_to_repo"].(string)
-	err = gitlab_integration.CloneForkToPath(sshURL, h.cfg)
+	err = gitlab.CloneForkToPath(sshURL, h.cfg)
 	fmt.Println("clone err::", err)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -162,7 +167,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 			Description:      function.Description,
 			ProjectId:        resource.ResourceEnvironmentId,
 			EnvironmentId:    environmentId.(string),
-			FunctionFolderId: function.FuncitonFolderId,
+			FunctionFolderId: function.FunctionFolderId,
 			Url:              url,
 			Password:         password,
 			SshUrl:           sshURL,
@@ -285,7 +290,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 	log.Println("function::", function)
 
 	if function.Url == "" {
-		err = gitlab_integration.CloneForkToPath(function.GetSshUrl(), h.cfg)
+		err = gitlab.CloneForkToPath(function.GetSshUrl(), h.cfg)
 		fmt.Println("clone err::", err)
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -634,14 +639,14 @@ func (h *Handler) DeleteNewFunction(c *gin.Context) {
 	}
 
 	// delete cloned repo
-	err = gitlab_integration.DeletedClonedRepoByPath(resp.Path, h.cfg)
+	err = gitlab.DeletedClonedRepoByPath(resp.Path, h.cfg)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
 	// delete repo by path from gitlab
-	_, err = gitlab_integration.DeleteForkedProject(resp.Path, h.cfg)
+	_, err = gitlab.DeleteForkedProject(resp.Path, h.cfg)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return

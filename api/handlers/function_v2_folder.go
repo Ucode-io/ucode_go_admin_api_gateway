@@ -3,9 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
-	"ucode/ucode_go_api_gateway/genproto/company_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -29,9 +27,7 @@ import (
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateFunctionFolder(c *gin.Context) {
-
-	fmt.Println("test 11")
-	var functionFolder models.CreateFunctionFolderRequest
+	var functionFolder fc.CreateFunctionFolderRequest
 	//var resourceEnvironment *obs.ResourceEnvironment
 	err := c.ShouldBindJSON(&functionFolder)
 	if err != nil {
@@ -51,7 +47,7 @@ func (h *Handler) CreateFunctionFolder(c *gin.Context) {
 	//	h.handleResponse(c, status_http.BadRequest, errors.New("cant get en"))
 	//	return
 	//}
-	fmt.Println("test 12")
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -112,22 +108,24 @@ func (h *Handler) CreateFunctionFolder(c *gin.Context) {
 	//	}
 	//}
 
+	if functionFolder.Type == "" {
+		functionFolder.Type = "FUNCTION"
+	}
+
 	resp, err := services.FunctionService().FunctionFolderService().Create(
 		context.Background(),
 		&fc.CreateFunctionFolderRequest{
-			Title:         functionFolder.Title,
-			Description:   functionFolder.Description,
-			ProjectId:     resource.ResourceEnvironmentId,
-			EnvironmentId: environmentId.(string),
+			Title:       functionFolder.Title,
+			Description: functionFolder.Description,
+			ProjectId:   resource.ResourceEnvironmentId,
+			Type:        functionFolder.Type,
 		},
 	)
 
-	fmt.Println("test 13")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("test 14")
 
 	h.handleResponse(c, status_http.Created, resp)
 }
@@ -256,6 +254,7 @@ func (h *Handler) GetFunctionFolderById(c *gin.Context) {
 // @Param limit query number false "limit"
 // @Param offset query number false "offset"
 // @Param search query string false "search"
+// @Param type query string true "type"
 // @Success 200 {object} status_http.Response{data=string} "FunctionBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -272,6 +271,8 @@ func (h *Handler) GetAllFunctionFolder(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+
+	typeFolder := c.DefaultQuery("type", "FUNCTION")
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -317,17 +318,6 @@ func (h *Handler) GetAllFunctionFolder(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	environment, err := services.CompanyService().Environment().GetById(
-		context.Background(),
-		&company_service.EnvironmentPrimaryKey{
-			Id: environmentId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
 
 	//if util.IsValidUUID(resourceId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
@@ -354,15 +344,15 @@ func (h *Handler) GetAllFunctionFolder(c *gin.Context) {
 	//		return
 	//	}
 	//}
-	fmt.Println("test eeee")
+
 	resp, err := services.FunctionService().FunctionFolderService().GetList(
 		context.Background(),
 		&fc.GetAllFunctionFoldersRequest{
-			Search:        c.DefaultQuery("search", ""),
-			Limit:         int32(limit),
-			Offset:        int32(offset),
-			ProjectId:     resource.ResourceEnvironmentId,
-			EnvironmentId: environment.GetId(),
+			Search:    c.DefaultQuery("search", ""),
+			Limit:     int32(limit),
+			Offset:    int32(offset),
+			Type:      typeFolder,
+			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
 	if err != nil {
@@ -433,17 +423,7 @@ func (h *Handler) UpdateFunctionFolder(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	environment, err := services.CompanyService().Environment().GetById(
-		context.Background(),
-		&company_service.EnvironmentPrimaryKey{
-			Id: environmentId.(string),
-		},
-	)
-	if err != nil {
-		err = errors.New("error getting resource environment id")
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+
 	//if util.IsValidUUID(resourceId.(string)) {
 	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
 	//		c.Request.Context(),
@@ -470,14 +450,18 @@ func (h *Handler) UpdateFunctionFolder(c *gin.Context) {
 	//	}
 	//}
 
+	if functionFolder.Type == "" {
+		functionFolder.Type = "FUNCTION"
+	}
+
 	_, err = services.FunctionService().FunctionFolderService().Update(
 		context.Background(),
 		&fc.FunctionFolder{
-			Id:            functionFolder.Id,
-			Description:   functionFolder.Description,
-			Title:         functionFolder.Title,
-			EnvironmentId: environment.GetId(),
-			ProjectId:     resource.ResourceEnvironmentId,
+			Id:          functionFolder.Id,
+			Description: functionFolder.Description,
+			Title:       functionFolder.Title,
+			Type:        functionFolder.Type,
+			ProjectId:   resource.ResourceEnvironmentId,
 		},
 	)
 
