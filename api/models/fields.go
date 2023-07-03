@@ -18,6 +18,7 @@ type Field struct {
 	RelationId    string                 `json:"relation_id"`
 	Unique        bool                   `json:"unique"`
 	Automatic     bool                   `json:"automatic"`
+	RelationField string                 `json:"relation_field"`
 }
 
 type CreateFieldsRequest struct {
@@ -47,6 +48,7 @@ type CreateFieldRequest struct {
 	IsVisible     bool                   `json:"is_visible"`
 	AutoFillField string                 `json:"autofill_field"`
 	AutoFillTable string                 `json:"autofill_table"`
+	RelationField string                 `json:"relation_field"`
 	Unique        bool                   `json:"unique"`
 	Automatic     bool                   `json:"automatic"`
 }
