@@ -934,6 +934,8 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 func (h *Handler) FunctionRun(c *gin.Context) {
 	var invokeFunction models.InvokeFunctionRequest
 
+	functionId := c.Param("function-id")
+
 	err := c.ShouldBindJSON(&invokeFunction)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
@@ -946,19 +948,6 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -978,7 +967,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
 		},
 	)
 	if err != nil {
@@ -986,23 +975,10 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
-		&new_function_service.FunctionPrimaryKey{
-			Id:        invokeFunction.FunctionID,
+		&fc.FunctionPrimaryKey{
+			Id:        functionId,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
@@ -1010,26 +986,13 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	apiKeys, err := services.AuthService().ApiKey().GetList(context.Background(), &auth_service.GetListReq{
-		EnvironmentId: environmentId.(string),
-		ProjectId:     resource.ProjectId,
-	})
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-	if len(apiKeys.Data) < 1 {
-		h.handleResponse(c, status_http.InvalidArgument, "Api key not found")
-		return
-	}
 
 	if invokeFunction.Attributes == nil {
 		invokeFunction.Attributes = make(map[string]interface{}, 0)
 	}
-	authInfo, _ := h.GetAuthInfo(c)
 
 	fmt.Println(function.Path)
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.NewInvokeFunctionRequest{
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
 		Data: map[string]interface{}{
 			"object_ids": invokeFunction.ObjectIDs,
 			"app_id":     apiKeys.GetData()[0].GetAppId(),
@@ -1050,18 +1013,6 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
-	// _, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
-	// 	context.Background(),
-	// 	&obs.UpdateByFunctionIdRequest{
-	// 		FunctionId: invokeFunction.FunctionID,
-	// 		ObjectIds:  invokeFunction.ObjectIDs,
-	// 		FieldSlug:  function.Path + "_disable",
-	// 		ProjectId:  resourceEnvironment.GetId(),
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
+
 	h.handleResponse(c, status_http.Created, resp)
 }

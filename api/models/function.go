@@ -33,6 +33,24 @@ type NewInvokeFunctionRequest struct {
 	Data map[string]interface{} `json:"data"`
 }
 
+type HttpRequest struct {
+	Method  string                 `json:"method"`
+	Headers map[string]interface{} `json:"headers"`
+	Params  map[string]interface{} `json:"params"`
+	Body    interface{}            `json:"body"`
+}
+
+type AuthData struct {
+	Type string                 `json:"type"`
+	Data map[string]interface{} `json:"data"`
+}
+
+type FunctionRunV2 struct {
+	RequestData *HttpRequest           `json:"request_data"`
+	Auth        *AuthData              `json:"auth"`
+	Data        map[string]interface{} `json:"data"`
+}
+
 type InvokeFunctionRequestWithAppId struct {
 	ObjectIDs []string `json:"object_ids"`
 	AppID     string   `json:"app_id"`
