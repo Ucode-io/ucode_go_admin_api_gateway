@@ -752,7 +752,6 @@ func (h *Handler) GetAllMenuSettings(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	limit = 100
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -921,6 +920,9 @@ func (h *Handler) UpdateMenuSettings(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	menu.ProjectId = resource.ResourceEnvironmentId
+
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Menu().UpdateMenuSettings(
@@ -1180,7 +1182,6 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	limit = 100
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
@@ -1189,7 +1190,8 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 			&obs.GetAllMenuSettingsRequest{
 				Limit:     int32(limit),
 				Offset:    int32(offset),
-				ProjectId: resource.ResourceEnvironmentId,
+				ProjectId: "1",
+				// ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 	case pb.ResourceType_POSTGRESQL:
@@ -1268,7 +1270,8 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 			context.Background(),
 			&obs.MenuSettingPrimaryKey{
 				Id:        ID,
-				ProjectId: resource.ResourceEnvironmentId,
+				ProjectId: "1",
+				// ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if err != nil {
@@ -1349,6 +1352,8 @@ func (h *Handler) UpdateMenuTemplate(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	menu.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Menu().UpdateMenuTemplate(
