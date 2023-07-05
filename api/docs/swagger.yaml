@@ -149,7 +149,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/auth_service.ConfirmStrategies'
       id:
         type: string
       name:
@@ -165,6 +165,16 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
+  auth_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -545,9 +555,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
       user_id:
@@ -605,9 +615,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
       user_id:
@@ -662,9 +672,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.Currency:
     properties:
@@ -816,7 +826,7 @@ definitions:
           $ref: '#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources'
         type: array
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources:
     properties:
@@ -827,7 +837,7 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -893,7 +903,7 @@ definitions:
   company_service.ReconnectResourceRes_ReconnectStatus:
     properties:
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       status:
         type: boolean
     type: object
@@ -930,7 +940,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
       vault_path:
@@ -949,6 +959,18 @@ definitions:
       username:
         type: string
     type: object
+  company_service.ResourceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ResourceType_NOT_DECIDED
+    - ResourceType_MONGODB
+    - ResourceType_CLICKHOUSE
+    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -962,7 +984,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -1009,12 +1031,34 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
       title:
         type: string
     type: object
+  company_service.ServiceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    type: integer
+    x-enum-varnames:
+    - ServiceType_NOT_SPECIFIED
+    - ServiceType_BUILDER_SERVICE
+    - ServiceType_ANALYTICS_SERVICE
+    - ServiceType_TEMPLATE_SERVICE
+    - ServiceType_QUERY_SERVICE
+    - ServiceType_FUNCTION_SERVICE
+    - ServiceType_WEB_PAGE_SERVICE
+    - ServiceType_API_REF_SERVICE
+    - ServiceType_POSTGRES_BUILDER
   company_service.SetDefaultResourceReq:
     properties:
       environment_id:
@@ -1024,7 +1068,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.SetDefaultResourceRes:
     properties:
@@ -1035,7 +1079,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        type: integer
+        $ref: '#/definitions/company_service.ServiceType'
     type: object
   company_service.Setting:
     properties:
@@ -1068,7 +1112,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        type: integer
+        $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
     type: object
@@ -1147,6 +1191,8 @@ definitions:
         type: integer
       gitlabGroupIdMicroFE:
         type: integer
+      gitlabHostMicroFE:
+        type: string
       gitlabIntegrationToken:
         type: string
       gitlabIntegrationURL:
@@ -1562,6 +1608,8 @@ definitions:
         type: boolean
       label:
         type: string
+      relation_field:
+        type: string
       required:
         type: boolean
       slug:
@@ -1624,6 +1672,25 @@ definitions:
       name:
         type: string
       path:
+        type: string
+    type: object
+  models.CreateMenuRequest:
+    properties:
+      icon:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      microfrontend_id:
+        type: string
+      parent_id:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      webpage_id:
         type: string
     type: object
   models.CreatePanelRequest:
@@ -1701,7 +1768,7 @@ definitions:
         type: string
       layouts:
         items:
-          $ref: '#/definitions/object_builder_service.Layout'
+          $ref: '#/definitions/object_builder_service.LayoutRequest'
         type: array
       sections:
         items:
@@ -1909,6 +1976,8 @@ definitions:
         type: boolean
       label:
         type: string
+      relation_field:
+        type: string
       relation_id:
         type: string
       required:
@@ -2053,6 +2122,27 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  models.Menu:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      microfrontend_id:
+        type: string
+      parent_id:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      webpage_id:
+        type: string
     type: object
   models.Panel:
     properties:
@@ -2290,6 +2380,10 @@ definitions:
         type: string
       function_folder_id:
         type: string
+      gitlab_group_id:
+        type: string
+      gitlab_id:
+        type: string
       id:
         type: string
       name:
@@ -2434,7 +2528,7 @@ definitions:
       value:
         type: string
     type: object
-  object_builder_service.ActionRelation2:
+  object_builder_service.ActionRelationForSection:
     properties:
       key:
         type: string
@@ -2495,30 +2589,12 @@ definitions:
       field_to:
         type: string
     type: object
-  object_builder_service.AutoFilter2:
-    properties:
-      field_from:
-        type: string
-      field_to:
-        type: string
-    type: object
   object_builder_service.BarcodeGenerateRes:
     properties:
       number:
         type: string
     type: object
   object_builder_service.Cascading:
-    properties:
-      field_slug:
-        type: string
-      label:
-        type: string
-      order:
-        type: integer
-      table_slug:
-        type: string
-    type: object
-  object_builder_service.Cascading2:
     properties:
       field_slug:
         type: string
@@ -2543,7 +2619,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
       guid:
         type: string
       name:
@@ -2579,21 +2655,6 @@ definitions:
           type: string
         type: array
     type: object
-  object_builder_service.CommitInfo2:
-    properties:
-      commit_type:
-        type: string
-      created_at:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      version_ids:
-        items:
-          type: string
-        type: array
-    type: object
   object_builder_service.Condition:
     properties:
       match_fields:
@@ -2601,6 +2662,16 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
+  object_builder_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -2774,6 +2845,10 @@ definitions:
         type: array
       commit_id:
         type: string
+      creatable:
+        type: boolean
+      default_editable:
+        type: boolean
       default_limit:
         type: string
       default_values:
@@ -2786,6 +2861,8 @@ definitions:
         type: array
       editable:
         type: boolean
+      function_path:
+        type: string
       group_fields:
         items:
           type: string
@@ -2806,6 +2883,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.QuickFilter'
         type: array
+      relation_buttons:
+        type: boolean
       relation_field_slug:
         type: string
       relation_table_slug:
@@ -2880,6 +2959,8 @@ definitions:
         type: string
       commit_id:
         type: integer
+      default_editable:
+        type: boolean
       default_limit:
         type: string
       disable_dates:
@@ -2987,15 +3068,6 @@ definitions:
           type: string
         type: array
     type: object
-  object_builder_service.DynamicTable2:
-    properties:
-      table_slug:
-        type: string
-      view_fields:
-        items:
-          type: string
-        type: array
-    type: object
   object_builder_service.Event:
     properties:
       does:
@@ -3047,7 +3119,7 @@ definitions:
       version_id:
         type: string
     type: object
-  object_builder_service.Field2:
+  object_builder_service.Field:
     properties:
       attributes:
         $ref: '#/definitions/structpb.Struct'
@@ -3065,11 +3137,15 @@ definitions:
         type: string
       index:
         type: string
+      is_system:
+        type: boolean
       is_visible:
         type: boolean
       label:
         type: string
       project_id:
+        type: string
+      relation_field:
         type: string
       relation_id:
         type: string
@@ -3099,6 +3175,33 @@ definitions:
       relation_type:
         type: string
     type: object
+  object_builder_service.FieldResponse:
+    properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      column:
+        type: integer
+      default:
+        type: string
+      id:
+        type: string
+      index:
+        type: string
+      label:
+        type: string
+      order:
+        type: integer
+      relation_type:
+        type: string
+      required:
+        type: boolean
+      slug:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+    type: object
   object_builder_service.GetAllAppsResponse:
     properties:
       apps:
@@ -3124,6 +3227,15 @@ definitions:
       htmlTemplates:
         items:
           $ref: '#/definitions/object_builder_service.HtmlTemplate'
+        type: array
+    type: object
+  object_builder_service.GetAllMenusResponse:
+    properties:
+      count:
+        type: integer
+      menus:
+        items:
+          $ref: '#/definitions/object_builder_service.MenuForGetAll'
         type: array
     type: object
   object_builder_service.GetAllTablesResponse:
@@ -3175,7 +3287,7 @@ definitions:
     properties:
       layouts:
         items:
-          $ref: '#/definitions/object_builder_service.Layout'
+          $ref: '#/definitions/object_builder_service.LayoutResponse'
         type: array
     type: object
   object_builder_service.GetTableHistoryResponse:
@@ -3220,16 +3332,21 @@ definitions:
       with_increment_id:
         type: boolean
     type: object
-  object_builder_service.IncrementID2:
+  object_builder_service.IncrementIDForSection:
     properties:
       digit_number:
         type: integer
-      prefix:
-        type: string
       with_increment_id:
         type: boolean
     type: object
-  object_builder_service.Layout:
+  object_builder_service.KeyStringValue:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    type: object
+  object_builder_service.LayoutRequest:
     properties:
       icon:
         type: string
@@ -3241,11 +3358,40 @@ definitions:
         type: string
       order:
         type: integer
+      summary_fields:
+        items:
+          $ref: '#/definitions/object_builder_service.FieldForSection'
+        type: array
       table_id:
         type: string
       tabs:
         items:
-          $ref: '#/definitions/object_builder_service.Tab'
+          $ref: '#/definitions/object_builder_service.TabRequest'
+        type: array
+      type:
+        type: string
+    type: object
+  object_builder_service.LayoutResponse:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      is_default:
+        type: boolean
+      label:
+        type: string
+      order:
+        type: integer
+      summary_fields:
+        items:
+          $ref: '#/definitions/object_builder_service.FieldResponse'
+        type: array
+      table_id:
+        type: string
+      tabs:
+        items:
+          $ref: '#/definitions/object_builder_service.TabResponse'
         type: array
       type:
         type: string
@@ -3276,6 +3422,73 @@ definitions:
       right_field:
         type: string
       right_field_type:
+        type: string
+    type: object
+  object_builder_service.Menu:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      microfrontend_id:
+        type: string
+      order:
+        type: integer
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      webpage_id:
+        type: string
+    type: object
+  object_builder_service.MenuForGetAll:
+    properties:
+      data:
+        $ref: '#/definitions/structpb.Struct'
+      icon:
+        type: string
+      id:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      microfrontend_id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      webpage_id:
+        type: string
+    type: object
+  object_builder_service.Navigate:
+    properties:
+      cookie:
+        items:
+          $ref: '#/definitions/object_builder_service.KeyStringValue'
+        type: array
+      headers:
+        items:
+          $ref: '#/definitions/object_builder_service.KeyStringValue'
+        type: array
+      params:
+        items:
+          $ref: '#/definitions/object_builder_service.KeyStringValue'
+        type: array
+      url:
         type: string
     type: object
   object_builder_service.PanelCoordinates:
@@ -3316,7 +3529,7 @@ definitions:
       field_id:
         type: string
     type: object
-  object_builder_service.QuickFilter2:
+  object_builder_service.QuickFilterForSection:
     properties:
       default_value:
         type: string
@@ -3342,43 +3555,25 @@ definitions:
       write:
         type: string
     type: object
-  object_builder_service.RelationForGetAll2:
+  object_builder_service.RelationForSection:
     properties:
       action_relations:
         items:
-          $ref: '#/definitions/object_builder_service.ActionRelation2'
-        type: array
-      auto_filters:
-        items:
-          $ref: '#/definitions/object_builder_service.AutoFilter2'
-        type: array
-      cascading_tree_field_slug:
-        type: string
-      cascading_tree_table_slug:
-        type: string
-      cascadings:
-        items:
-          $ref: '#/definitions/object_builder_service.Cascading2'
+          $ref: '#/definitions/object_builder_service.ActionRelationForSection'
         type: array
       columns:
         items:
           type: string
         type: array
+      creatable:
+        type: boolean
+      default_editable:
+        type: boolean
       default_limit:
         type: string
-      default_values:
-        items:
-          type: string
-        type: array
-      dynamic_tables:
-        items:
-          $ref: '#/definitions/object_builder_service.DynamicTable2'
-        type: array
       editable:
         type: boolean
-      field_from:
-        type: string
-      field_to:
+      function_path:
         type: string
       group_fields:
         items:
@@ -3388,30 +3583,30 @@ definitions:
         type: string
       is_editable:
         type: boolean
-      is_user_id_default:
-        type: boolean
       multiple_insert:
         type: boolean
       multiple_insert_field:
         type: string
-      object_id_from_jwt:
-        type: boolean
+      permission:
+        $ref: '#/definitions/structpb.Struct'
       quick_filters:
         items:
-          $ref: '#/definitions/object_builder_service.QuickFilter2'
+          $ref: '#/definitions/object_builder_service.QuickFilterForSection'
         type: array
+      relation_buttons:
+        type: boolean
       relation_field_slug:
         type: string
       relation_table_slug:
         type: string
       summaries:
         items:
-          $ref: '#/definitions/object_builder_service.Summary2'
+          $ref: '#/definitions/object_builder_service.SummaryInSection'
         type: array
       table_from:
-        $ref: '#/definitions/object_builder_service.Table2'
+        $ref: '#/definitions/object_builder_service.TableForSection'
       table_to:
-        $ref: '#/definitions/object_builder_service.Table2'
+        $ref: '#/definitions/object_builder_service.TableForSection'
       title:
         type: string
       type:
@@ -3422,7 +3617,7 @@ definitions:
         type: array
       view_fields:
         items:
-          $ref: '#/definitions/object_builder_service.Field2'
+          $ref: '#/definitions/object_builder_service.Field'
         type: array
       view_type:
         type: string
@@ -3459,6 +3654,25 @@ definitions:
       order:
         type: integer
     type: object
+  object_builder_service.SectionResponse:
+    properties:
+      column:
+        type: string
+      fields:
+        items:
+          $ref: '#/definitions/object_builder_service.FieldResponse'
+        type: array
+      icon:
+        type: string
+      id:
+        type: string
+      is_summary_section:
+        type: boolean
+      label:
+        type: string
+      order:
+        type: integer
+    type: object
   object_builder_service.Summary:
     properties:
       field_name:
@@ -3466,14 +3680,35 @@ definitions:
       formula_name:
         type: string
     type: object
-  object_builder_service.Summary2:
+  object_builder_service.SummaryInSection:
     properties:
       field_name:
         type: string
       formula_name:
         type: string
     type: object
-  object_builder_service.Tab:
+  object_builder_service.TabRequest:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      order:
+        type: integer
+      relation_id:
+        type: string
+      sections:
+        items:
+          $ref: '#/definitions/object_builder_service.Section'
+        type: array
+      type:
+        type: string
+    type: object
+  object_builder_service.TabResponse:
     properties:
       icon:
         type: string
@@ -3486,12 +3721,12 @@ definitions:
       order:
         type: integer
       relation:
-        $ref: '#/definitions/object_builder_service.RelationForGetAll2'
+        $ref: '#/definitions/object_builder_service.RelationForSection'
       relation_id:
         type: string
       sections:
         items:
-          $ref: '#/definitions/object_builder_service.Section'
+          $ref: '#/definitions/object_builder_service.SectionResponse'
         type: array
       type:
         type: string
@@ -3531,39 +3766,6 @@ definitions:
       subtitle_field_slug:
         type: string
     type: object
-  object_builder_service.Table2:
-    properties:
-      author_id:
-        type: string
-      commit_info:
-        $ref: '#/definitions/object_builder_service.CommitInfo2'
-      description:
-        type: string
-      folder_id:
-        type: string
-      icon:
-        type: string
-      id:
-        type: string
-      increment_id:
-        $ref: '#/definitions/object_builder_service.IncrementID2'
-      is_cached:
-        type: boolean
-      is_own_table:
-        type: boolean
-      is_visible:
-        type: boolean
-      label:
-        type: string
-      project_id:
-        type: string
-      show_in_menu:
-        type: boolean
-      slug:
-        type: string
-      subtitle_field_slug:
-        type: string
-    type: object
   object_builder_service.TableClientType:
     properties:
       data:
@@ -3592,6 +3794,29 @@ definitions:
       project_id:
         type: string
       title:
+        type: string
+    type: object
+  object_builder_service.TableForSection:
+    properties:
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      increment_id:
+        $ref: '#/definitions/object_builder_service.IncrementIDForSection'
+      is_editable:
+        type: boolean
+      is_own_table:
+        type: boolean
+      label:
+        type: string
+      show_in_menu:
+        type: boolean
+      slug:
+        type: string
+      subtitle_field_slug:
         type: string
     type: object
   object_builder_service.TableHistory:
@@ -3632,11 +3857,20 @@ definitions:
     properties:
       layouts:
         items:
-          $ref: '#/definitions/object_builder_service.Layout'
+          $ref: '#/definitions/object_builder_service.LayoutRequest'
         type: array
       project_id:
         type: string
       table_id:
+        type: string
+    type: object
+  object_builder_service.UpdateMenuOrderRequest:
+    properties:
+      menus:
+        items:
+          $ref: '#/definitions/object_builder_service.Menu'
+        type: array
+      project_id:
         type: string
     type: object
   object_builder_service.UpdatePanelCoordinatesRequest:
@@ -3672,6 +3906,10 @@ definitions:
         type: array
       commit_id:
         type: string
+      creatable:
+        type: boolean
+      default_editable:
+        type: boolean
       default_limit:
         type: string
       default_values:
@@ -3684,6 +3922,8 @@ definitions:
         type: array
       editable:
         type: boolean
+      function_path:
+        type: string
       group_fields:
         items:
           type: string
@@ -3706,6 +3946,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.QuickFilter'
         type: array
+      relation_buttons:
+        type: boolean
       relation_field_slug:
         type: string
       relation_table_slug:
@@ -3838,10 +4080,14 @@ definitions:
         items:
           type: string
         type: array
+      default_editable:
+        type: boolean
       default_limit:
         type: string
       disable_dates:
         $ref: '#/definitions/object_builder_service.DisableDates'
+      function_path:
+        type: string
       group_fields:
         items:
           type: string
@@ -3858,6 +4104,8 @@ definitions:
         type: string
       name:
         type: string
+      navigate:
+        $ref: '#/definitions/object_builder_service.Navigate'
       project_id:
         type: string
       quick_filters:
@@ -5173,7 +5421,7 @@ definitions:
       project_id:
         type: string
       release_type:
-        type: integer
+        $ref: '#/definitions/versioning_service.ReleaseType'
     type: object
   versioning_service.ApiDeleteReleaseRequest:
     properties:
@@ -5258,6 +5506,18 @@ definitions:
           $ref: '#/definitions/versioning_service.ReleaseWithCommit'
         type: array
     type: object
+  versioning_service.ReleaseType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ReleaseType_UNDEFINED
+    - ReleaseType_MAJOR
+    - ReleaseType_MINOR
+    - ReleaseType_PATCH
   versioning_service.ReleaseWithCommit:
     properties:
       author_id:
@@ -5622,7 +5882,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -5804,7 +6064,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6345,7 +6605,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6573,7 +6833,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6852,7 +7112,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7154,7 +7414,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7535,7 +7795,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7779,7 +8039,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: ""
+          description: Created
         "400":
           description: Bad Request
           schema:
@@ -7977,7 +8237,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -8618,7 +8878,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -9519,7 +9779,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -9756,7 +10016,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -9990,7 +10250,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -10363,7 +10623,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -10769,7 +11029,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11155,7 +11415,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11241,7 +11501,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11565,7 +11825,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -11881,6 +12141,55 @@ paths:
       tags:
       - Function
   /v1/layout:
+    get:
+      consumes:
+      - application/json
+      description: Get list layouts
+      operationId: get_list_layouts
+      parameters:
+      - description: table-id
+        in: query
+        name: table-id
+        type: string
+      - description: table-slug
+        in: query
+        name: table-slug
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetListLayoutResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get list layouts
+      tags:
+      - Layout
     put:
       consumes:
       - application/json
@@ -11928,53 +12237,6 @@ paths:
       summary: Update layouts
       tags:
       - Layout
-  /v1/layout/{table_id}:
-    get:
-      consumes:
-      - application/json
-      description: Get list layouts
-      operationId: get_list_layouts
-      parameters:
-      - description: table_id
-        in: path
-        name: table_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: TableBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/object_builder_service.GetListLayoutResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get list layouts
-      tags:
-      - Layout
   /v1/many-to-many:
     delete:
       consumes:
@@ -11992,7 +12254,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12063,6 +12325,291 @@ paths:
       summary: Update many-to-many
       tags:
       - Object
+  /v1/menu:
+    get:
+      consumes:
+      - application/json
+      description: Get all menu
+      operationId: get_all_menus
+      parameters:
+      - description: API key for the endpoint
+        in: header
+        name: X-API-KEY
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: parent_id
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: role_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllMenusResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all menu
+      tags:
+      - Menu
+    post:
+      consumes:
+      - application/json
+      description: Create menu
+      operationId: create_menu
+      parameters:
+      - description: MenuRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMenuRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Menu data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create menu
+      tags:
+      - Menu
+    put:
+      consumes:
+      - application/json
+      description: Update menu
+      operationId: update_menu
+      parameters:
+      - description: UpdateMenuRequestBody
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.Menu'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: App data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update menu
+      tags:
+      - Menu
+  /v1/menu/{menu_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete menu
+      operationId: delete_menu
+      parameters:
+      - description: menu_id
+        in: path
+        name: menu_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu
+      tags:
+      - Menu
+    get:
+      consumes:
+      - application/json
+      description: Get menu by id
+      operationId: get_menu_by_id
+      parameters:
+      - description: menu_id
+        in: path
+        name: menu_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Menu'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get menu by id
+      tags:
+      - Menu
+  /v1/menu/menu-order/:
+    put:
+      consumes:
+      - application/json
+      description: Delete menu
+      operationId: update_menu_order
+      parameters:
+      - description: menu
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateMenuOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu
+      tags:
+      - Menu
   /v1/note:
     get:
       consumes:
@@ -12363,7 +12910,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -12496,7 +13043,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -13126,6 +13673,10 @@ paths:
         in: query
         name: offset
         type: number
+      - description: data
+        in: query
+        name: data
+        type: string
       produces:
       - application/json
       responses:
@@ -13347,7 +13898,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -14245,7 +14796,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -14480,7 +15031,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -15034,7 +15585,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -15279,7 +15830,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -15481,7 +16032,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -17040,7 +17591,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -17410,7 +17961,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -17779,7 +18330,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -17961,7 +18512,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -18403,7 +18954,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -18730,7 +19281,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -18951,7 +19502,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -19191,7 +19742,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -19599,7 +20150,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -19887,7 +20438,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -20121,7 +20672,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -20509,7 +21060,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -20595,7 +21146,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -21166,7 +21717,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -21408,7 +21959,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -21644,7 +22195,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:

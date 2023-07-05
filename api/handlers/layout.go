@@ -15,21 +15,22 @@ import (
 // GetListLayouts godoc
 // @Security ApiKeyAuth
 // @ID get_list_layouts
-// @Router /v1/layout/{table_id} [GET]
+// @Router /v1/layout [GET]
 // @Summary Get list layouts
 // @Description Get list layouts
 // @Tags Layout
 // @Accept json
 // @Produce json
-// @Param table_id path string true "table_id"
+// @Param table-id query string false "table-id"
+// @Param table-slug query string false "table-slug"
 // @Success 200 {object} status_http.Response{data=object_builder_service.GetListLayoutResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetListLayouts(c *gin.Context) {
-	TableId := c.Param("table_id")
-
-	if !util.IsValidUUID(TableId) {
-		h.handleResponse(c, status_http.InvalidArgument, "table id is an invalid uuid")
+	tableSlug := c.Query("table-slug")
+	tableId := c.Query("table-id")
+	if tableSlug == "" && tableId == "" {
+		h.handleResponse(c, status_http.BadRequest, "table-slug or table-id is required")
 		return
 	}
 
@@ -90,15 +91,22 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 	if c.Query("is_defualt") == "true" {
 		isDefault = true
 	}
+	authInfo, _ := h.GetAuthInfo(c)
 
 	resp, err := services.BuilderService().Layout().GetAll(
 		context.Background(),
 		&object_builder_service.GetListLayoutRequest{
-			TableId:   TableId,
+			TableSlug: tableSlug,
+			TableId:   tableId,
 			ProjectId: resourceEnvironmentId,
 			IsDefualt: isDefault,
+			RoleId:    authInfo.GetRoleId(),
 		},
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, status_http.OK, resp)
 }
@@ -189,6 +197,10 @@ func (h *Handler) UpdateLayout(c *gin.Context) {
 		context.Background(),
 		&input,
 	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
 	h.handleResponse(c, status_http.OK, resp)
 }

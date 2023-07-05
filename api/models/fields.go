@@ -18,6 +18,7 @@ type Field struct {
 	RelationId    string                 `json:"relation_id"`
 	Unique        bool                   `json:"unique"`
 	Automatic     bool                   `json:"automatic"`
+	RelationField string                 `json:"relation_field"`
 }
 
 type CreateFieldsRequest struct {
@@ -47,6 +48,7 @@ type CreateFieldRequest struct {
 	IsVisible     bool                   `json:"is_visible"`
 	AutoFillField string                 `json:"autofill_field"`
 	AutoFillTable string                 `json:"autofill_table"`
+	RelationField string                 `json:"relation_field"`
 	Unique        bool                   `json:"unique"`
 	Automatic     bool                   `json:"automatic"`
 }
@@ -58,17 +60,17 @@ type GetAllFieldsResponse struct {
 }
 
 type CreateTableRequest struct {
-	Label             string                            `json:"label"`
-	Description       string                            `json:"description"`
-	Slug              string                            `json:"slug"`
-	Fields            []CreateFieldsRequest             `json:"fields"`
-	ShowInMeny        bool                              `json:"show_in_menu"`
-	Icon              string                            `json:"icon"`
-	SubtitleFieldSlug string                            `json:"subtitle_field_slug"`
-	Sections          []*object_builder_service.Section `json:"sections"`
-	Layouts           []*object_builder_service.Layout  `json:"layouts"`
-	AppID             string                            `json:"app_id"`
-	IncrementID       IncrementId                       `json:"increment_id"`
+	Label             string                                  `json:"label"`
+	Description       string                                  `json:"description"`
+	Slug              string                                  `json:"slug"`
+	Fields            []CreateFieldsRequest                   `json:"fields"`
+	ShowInMeny        bool                                    `json:"show_in_menu"`
+	Icon              string                                  `json:"icon"`
+	SubtitleFieldSlug string                                  `json:"subtitle_field_slug"`
+	Sections          []*object_builder_service.Section       `json:"sections"`
+	Layouts           []*object_builder_service.LayoutRequest `json:"layouts"`
+	AppID             string                                  `json:"app_id"`
+	IncrementID       IncrementId                             `json:"increment_id"`
 }
 
 type IncrementId struct {

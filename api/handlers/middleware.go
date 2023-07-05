@@ -58,7 +58,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			}
 			//}
 
-			fmt.Println("/nresponse V2hasaccessuser", res)
+			// fmt.Println("/nresponse V2hasaccessuser", res)
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
 			projectId := c.Query("Project-Id")
@@ -100,7 +100,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 				return
 			}
 
-			fmt.Println("\n\n >>>> api key ", apikeys, "\n\n")
+			// fmt.Println("\n\n >>>> api key ", apikeys, "\n\n")
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			c.Set("project_id", apikeys.GetProjectId())

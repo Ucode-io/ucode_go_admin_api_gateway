@@ -35,6 +35,7 @@ message CreateFunctionRequest {
     string gitlab_group_id = 15;
 }
 
+// if you change this message you must be change Microfrontend message in object_builder_service's menu.proto
 message Function {
     string id = 1;
     string path = 2;

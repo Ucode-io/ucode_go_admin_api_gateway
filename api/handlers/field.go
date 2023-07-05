@@ -57,6 +57,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 		IsVisible:     fieldRequest.IsVisible,
 		AutofillTable: fieldRequest.AutoFillTable,
 		AutofillField: fieldRequest.AutoFillField,
+		RelationField: fieldRequest.RelationField,
 		Automatic:     fieldRequest.Automatic,
 		Unique:        fieldRequest.Unique,
 	}
@@ -346,6 +347,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		RelationId:    fieldRequest.RelationId,
 		Automatic:     fieldRequest.Automatic,
 		Unique:        fieldRequest.Unique,
+		RelationField: fieldRequest.RelationField,
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)

@@ -30,6 +30,7 @@ type PostgresBuilderServiceI interface {
 	Section() object_builder_service.SectionServiceClient
 	View() object_builder_service.ViewServiceClient
 	ObjectBuilder() object_builder_service.ObjectBuilderServiceClient
+	Menu() object_builder_service.MenuServiceClient
 }
 
 func NewPostgrespostgresBuilderServiceClient(ctx context.Context, cfg config.Config) (PostgresBuilderServiceI, error) {
@@ -65,6 +66,7 @@ func NewPostgrespostgresBuilderServiceClient(ctx context.Context, cfg config.Con
 		tableFolderService:   object_builder_service.NewTableFolderServiceClient(connObjectBuilderService),
 		viewService:          object_builder_service.NewViewServiceClient(connObjectBuilderService),
 		sectionService:       object_builder_service.NewSectionServiceClient(connObjectBuilderService),
+		menuService:          object_builder_service.NewMenuServiceClient(connObjectBuilderService),
 	}, nil
 }
 
@@ -90,6 +92,7 @@ type postgresBuilderServiceClient struct {
 	fieldsAndRelations       object_builder_service.FieldAndRelationServiceClient
 	settingService           object_builder_service.SettingServiceClient
 	tableFolderService       object_builder_service.TableFolderServiceClient
+	menuService              object_builder_service.MenuServiceClient
 }
 
 func (g *postgresBuilderServiceClient) Table() object_builder_service.TableServiceClient {
@@ -169,4 +172,8 @@ func (g *postgresBuilderServiceClient) TableFolder() object_builder_service.Tabl
 
 func (g *postgresBuilderServiceClient) ObjectBuilder() object_builder_service.ObjectBuilderServiceClient {
 	return g.objectBuilderService
+}
+
+func (g *postgresBuilderServiceClient) Menu() object_builder_service.MenuServiceClient {
+	return g.menuService
 }

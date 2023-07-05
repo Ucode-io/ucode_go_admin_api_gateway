@@ -114,8 +114,18 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	//}
 	//fmt.Println("TIME_MANAGEMENT_LOGGING:::GetResEnvByResIdEnvId", time.Since(start))
 
-	id, _ := uuid.NewRandom()
-	objectRequest.Data["guid"] = id.String()
+	var id string
+	uid, _ := uuid.NewRandom()
+	id = uid.String()
+
+	guid, ok := objectRequest.Data["guid"]
+	if ok {
+		if util.IsValidUUID(guid.(string)) {
+			id = objectRequest.Data["guid"].(string)
+		}
+	}
+
+	objectRequest.Data["guid"] = id
 
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
 	//start = time.Now()
@@ -172,7 +182,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
-			IDs:          []string{id.String()},
+			IDs:          []string{id},
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
@@ -226,7 +236,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
-				IDs:          []string{id.String()},
+				IDs:          []string{id},
 				TableSlug:    c.Param("table_slug"),
 				ObjectData:   objectRequest.Data,
 				Method:       "CREATE",
@@ -599,7 +609,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 	//}
 
 	fromOfs := c.Query("from-ofs")
-	fmt.Println("from-ofs::", fromOfs)
+	// fmt.Println("from-ofs::", fromOfs)
 	if fromOfs != "true" {
 		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "UPDATE", c, h)
 		if err != nil {
@@ -990,6 +1000,7 @@ func (h *Handler) GetList(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
+		fmt.Println("begin:", time.Now())
 		resp, err = services.BuilderService().ObjectBuilder().GetList(
 			context.Background(),
 			&obs.CommonMessage{
@@ -998,6 +1009,7 @@ func (h *Handler) GetList(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
+		fmt.Println("end:", time.Now())
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -1034,11 +1046,15 @@ func (h *Handler) GetList(c *gin.Context) {
 // @Param table_slug path string true "table_slug"
 // @Param limit query number false "limit"
 // @Param offset query number false "offset"
+// @Param data query string false "data"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetListSlim(c *gin.Context) {
-	var objectRequest models.CommonMessage
+	var (
+		objectRequest models.CommonMessage
+		queryData     string
+	)
 	// queryParams := make(map[string]interface{})
 	// err := c.ShouldBindQuery(&queryParams)
 	// if err != nil {
@@ -1049,7 +1065,9 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	fmt.Println(":::test:::")
 
 	queryParams := c.Request.URL.Query()
-	queryData := queryParams.Get("data")
+	if ok := queryParams.Has("data"); ok {
+		queryData = queryParams.Get("data")
+	}
 
 	queryMap := make(map[string]interface{})
 	err := json.Unmarshal([]byte(queryData), &queryMap)
@@ -1071,9 +1089,17 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	if _, ok := queryMap["limit"]; !ok {
-		queryMap["limit"] = 10
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
 	}
+
+	//if _, ok := queryMap["limit"]; !ok {
+	//	queryMap["limit"] = 10
+	//}
+	queryMap["limit"] = limit
 	queryMap["offset"] = offset
 
 	fmt.Println("query map:", queryMap)
@@ -1107,7 +1133,7 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	//	return
 	//}
 
-	projectId, ok := c.Get("project-id")
+	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
@@ -1146,21 +1172,21 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	//	return
 	//}
 
-	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
-	if err == nil {
-		resp := make(map[string]interface{})
-		m := make(map[string]interface{})
-		err = json.Unmarshal([]byte(redisResp), &m)
-		if err != nil {
-			h.log.Error("Error while unmarshal redis", logger.Error(err))
-		} else {
-			resp["data"] = m
-			h.handleResponse(c, status_http.OK, m)
-			return
-		}
-	} else {
-		h.log.Error("Error while getting redis", logger.Error(err))
-	}
+	//redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
+	//if err == nil {
+	//	resp := make(map[string]interface{})
+	//	m := make(map[string]interface{})
+	//	err = json.Unmarshal([]byte(redisResp), &m)
+	//	if err != nil {
+	//		h.log.Error("Error while unmarshal redis", logger.Error(err))
+	//	} else {
+	//		resp["data"] = m
+	//		h.handleResponse(c, status_http.OK, resp)
+	//		return
+	//	}
+	//} else {
+	//	h.log.Error("Error while getting redis", logger.Error(err))
+	//}
 
 	resp, err := services.BuilderService().ObjectBuilder().GetListSlim(
 		context.Background(),
