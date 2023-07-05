@@ -20976,7 +20976,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.Table"
+                            "$ref": "#/definitions/models.UpdateTableRequest"
                         }
                     }
                 ],
@@ -27234,6 +27234,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "folder_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "is_login_table",
                         "in": "query"
                     },
                     {
@@ -33752,6 +33757,66 @@ const docTemplate = `{
                 }
             }
         },
+        "models.UpdateTableRequest": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "author_id": {
+                    "type": "string"
+                },
+                "commit_type": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "folder_id": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "increment_id": {
+                    "$ref": "#/definitions/models.IncrementId"
+                },
+                "is_cached": {
+                    "type": "boolean"
+                },
+                "is_login_table": {
+                    "type": "boolean"
+                },
+                "is_own_table": {
+                    "type": "boolean"
+                },
+                "is_visible": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "show_in_menu": {
+                    "type": "boolean"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "subtitle_field_slug": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UpdateWebPageReqModel": {
             "type": "object",
             "properties": {
@@ -35960,6 +36025,9 @@ const docTemplate = `{
         "object_builder_service.Table": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "author_id": {
                     "type": "string"
                 },
@@ -35982,6 +36050,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/object_builder_service.IncrementID"
                 },
                 "is_cached": {
+                    "type": "boolean"
+                },
+                "is_login_table": {
                     "type": "boolean"
                 },
                 "is_own_table": {
