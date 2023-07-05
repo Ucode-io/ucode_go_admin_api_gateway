@@ -602,3 +602,859 @@ func (h *Handler) UpdateMenuOrder(c *gin.Context) {
 
 	h.handleResponse(c, status_http.NoContent, resp)
 }
+
+//// >>>>>>>>  Menu settings
+
+// CreateMenuSettings godoc
+// @Security ApiKeyAuth
+// @ID create_menu_settings
+// @Router /v1/menu-settings [POST]
+// @Summary Create menu settings
+// @Description Create menu settings
+// @Tags Menu settings
+// @Accept json
+// @Produce json
+// @Param menu body obs.CreateMenuSettingsRequest true "CreateMenuSettingsRequest"
+// @Success 201 {object} status_http.Response{data=obs.MenuSettings} "Menu data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) CreateMenuSettings(c *gin.Context) {
+	var (
+		menu obs.CreateMenuSettingsRequest
+		resp *obs.MenuSettings
+	)
+
+	err := c.ShouldBindJSON(&menu)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	menu.ProjectId = resource.ResourceEnvironmentId
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Menu().CreateMenuSettings(
+			context.Background(),
+			&menu,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Menu().CreateMenuSettings(
+			context.Background(),
+			&menu,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	h.handleResponse(c, status_http.Created, resp)
+}
+
+// GetAllMenuSettings godoc
+// @Security ApiKeyAuth
+// @ID get_all_menu_settings
+// @Router /v1/menu-settings [GET]
+// @Summary Get all menu settings
+// @Description Get all menu settings
+// @Tags Menu settings
+// @Accept json
+// @Produce json
+// @Param X-API-KEY header string false "API key for the endpoint"
+// @Param filters query obs.GetAllMenuSettingsRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GetAllMenuSettingsResponse} "MenuBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetAllMenuSettings(c *gin.Context) {
+	offset, err := h.getOffsetParam(c)
+	var (
+		resp *obs.GetAllMenuSettingsResponse
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	limit = 100
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Menu().GetAllMenuSettings(
+			context.Background(),
+			&obs.GetAllMenuSettingsRequest{
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Menu().GetAllMenuSettings(
+			context.Background(),
+			&obs.GetAllMenuSettingsRequest{
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+	}
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// GetMenuSettingsByID godoc
+// @Security ApiKeyAuth
+// @ID get_menu_settings_by_id
+// @Router /v1/menu-settings/{id} [GET]
+// @Summary Get menu settings by id
+// @Description Get menu settings by id
+// @Tags Menu settings
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 200 {object} status_http.Response{data=obs.MenuSettings} "MenuBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetMenuSettingByID(c *gin.Context) {
+	ID := c.Param("id")
+	var (
+		resp *obs.MenuSettings
+	)
+
+	if !util.IsValidUUID(ID) {
+		h.handleResponse(c, status_http.InvalidArgument, "menu id is an invalid uuid")
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Menu().GetByIDMenuSettings(
+			context.Background(),
+			&obs.MenuSettingPrimaryKey{
+				Id:        ID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Menu().GetByIDMenuSettings(
+			context.Background(),
+			&obs.MenuSettingPrimaryKey{
+				Id:        ID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// UpdateMenuSettings godoc
+// @Security ApiKeyAuth
+// @ID update_menu_settings
+// @Router /v1/menu-settings [PUT]
+// @Summary Update menu settings
+// @Description Update menu settings
+// @Tags Menu settings
+// @Accept json
+// @Produce json
+// @Param menu body obs.UpdateMenuSettingsRequest  true "UpdateMenuSettingsRequest"
+// @Success 200 {object} status_http.Response{data=obs.Menu} "App data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) UpdateMenuSettings(c *gin.Context) {
+	var (
+		menu obs.UpdateMenuSettingsRequest
+		resp *emptypb.Empty
+	)
+
+	err := c.ShouldBindJSON(&menu)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Menu().UpdateMenuSettings(
+			context.Background(),
+			&menu,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Menu().UpdateMenuSettings(
+			context.Background(),
+			&menu,
+		)
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// DeleteMenuSetting godoc
+// @Security ApiKeyAuth
+// @ID delete_menu_settings
+// @Router /v1/menu-settings/{id} [DELETE]
+// @Summary Delete menu setting
+// @Description Delete menu setting
+// @Tags Menu setting
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 204
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) DeleteMenuSettings(c *gin.Context) {
+	ID := c.Param("id")
+	var (
+		resp *emptypb.Empty
+	)
+
+	if !util.IsValidUUID(ID) {
+		h.handleResponse(c, status_http.InvalidArgument, "menu id is an invalid uuid")
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Menu().DeleteMenuSettings(
+			context.Background(),
+			&obs.MenuSettingPrimaryKey{
+				Id:        ID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Menu().DeleteMenuSettings(
+			context.Background(),
+			&obs.MenuSettingPrimaryKey{
+				Id:        ID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+	}
+
+	h.handleResponse(c, status_http.NoContent, resp)
+}
+
+//// >> Menu templates
+
+// CreateMenuTemplate godoc
+// @Security ApiKeyAuth
+// @ID create_menu_template
+// @Router /v1/menu-template [POST]
+// @Summary Create menu template
+// @Description Create menu template
+// @Tags Menu template
+// @Accept json
+// @Produce json
+// @Param menu body obs.CreateMenuTemplateRequest true "CreateMenuSettingsRequest"
+// @Success 201 {object} status_http.Response{data=obs.MenuTemplate} "Menu data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) CreateMenuTemplate(c *gin.Context) {
+	var (
+		menu obs.CreateMenuTemplateRequest
+		resp *obs.MenuTemplate
+	)
+
+	err := c.ShouldBindJSON(&menu)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	menu.ProjectId = resource.ResourceEnvironmentId
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Menu().CreateMenuTemplate(
+			context.Background(),
+			&menu,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Menu().CreateMenuTemplate(
+			context.Background(),
+			&menu,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	h.handleResponse(c, status_http.Created, resp)
+}
+
+// GetAllMenuTemplate godoc
+// @Security ApiKeyAuth
+// @ID get_all_menu_template
+// @Router /v1/menu-template [GET]
+// @Summary Get all menu template
+// @Description Get all menu template
+// @Tags Menu template
+// @Accept json
+// @Produce json
+// @Param X-API-KEY header string false "API key for the endpoint"
+// @Param filters query obs.GetAllMenuSettingsRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GatAllMenuTemplateResponse} "MenuBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
+	offset, err := h.getOffsetParam(c)
+	var (
+		resp *obs.GatAllMenuTemplateResponse
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	limit = 100
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Menu().GetAllMenuTemplate(
+			context.Background(),
+			&obs.GetAllMenuSettingsRequest{
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Menu().GetAllMenuTemplate(
+			context.Background(),
+			&obs.GetAllMenuSettingsRequest{
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+	}
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// GetMenuTemplateByID godoc
+// @Security ApiKeyAuth
+// @ID get_menu_template_by_id
+// @Router /v1/menu-template/{id} [GET]
+// @Summary Get menu template by id
+// @Description Get menu template by id
+// @Tags Menu template
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 200 {object} status_http.Response{data=obs.MenuTemplate} "MenuBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
+	ID := c.Param("id")
+	var (
+		resp *obs.MenuTemplate
+	)
+
+	if !util.IsValidUUID(ID) {
+		h.handleResponse(c, status_http.InvalidArgument, "menu id is an invalid uuid")
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Menu().GetByIDMenuTemplate(
+			context.Background(),
+			&obs.MenuSettingPrimaryKey{
+				Id:        ID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Menu().GetByIDMenuTemplate(
+			context.Background(),
+			&obs.MenuSettingPrimaryKey{
+				Id:        ID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// UpdateMenuTemplate godoc
+// @Security ApiKeyAuth
+// @ID update_menu_template
+// @Router /v1/menu-template [PUT]
+// @Summary Update menu template
+// @Description Update menu template
+// @Tags Menu template
+// @Accept json
+// @Produce json
+// @Param menu body obs.UpdateMenuTemplateRequest  true "UpdateMenuTemplateRequest"
+// @Success 200 {object} status_http.Response{data=obs.Menu} "App data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) UpdateMenuTemplate(c *gin.Context) {
+	var (
+		menu obs.UpdateMenuTemplateRequest
+		resp *emptypb.Empty
+	)
+
+	err := c.ShouldBindJSON(&menu)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Menu().UpdateMenuTemplate(
+			context.Background(),
+			&menu,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Menu().UpdateMenuTemplate(
+			context.Background(),
+			&menu,
+		)
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// DeleteMenuTemplate godoc
+// @Security ApiKeyAuth
+// @ID delete_menu_template
+// @Router /v1/menu-template/{id} [DELETE]
+// @Summary Delete menu template
+// @Description Delete menu template
+// @Tags Menu template
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 204
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) DeleteMenuTemplate(c *gin.Context) {
+	ID := c.Param("id")
+	var (
+		resp *emptypb.Empty
+	)
+
+	if !util.IsValidUUID(ID) {
+		h.handleResponse(c, status_http.InvalidArgument, "menu id is an invalid uuid")
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Menu().DeleteMenuTemplate(
+			context.Background(),
+			&obs.MenuSettingPrimaryKey{
+				Id:        ID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Menu().DeleteMenuTemplate(
+			context.Background(),
+			&obs.MenuSettingPrimaryKey{
+				Id:        ID,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+	}
+
+	h.handleResponse(c, status_http.NoContent, resp)
+}
