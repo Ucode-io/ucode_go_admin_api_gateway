@@ -1754,6 +1754,10 @@ definitions:
     properties:
       app_id:
         type: string
+      custom_error_messages:
+        items:
+          $ref: '#/definitions/object_builder_service.CustomErrorMessage'
+        type: array
       description:
         type: string
       fields:
@@ -2687,6 +2691,23 @@ definitions:
           type: string
         type: array
     type: object
+  object_builder_service.CreateCustomErrorMessage:
+    properties:
+      action_type:
+        type: string
+      code:
+        type: integer
+      error_id:
+        type: string
+      language_id:
+        type: string
+      message:
+        type: string
+      project_id:
+        type: string
+      table_id:
+        type: string
+    type: object
   object_builder_service.CreateCustomEventRequest:
     properties:
       action_type:
@@ -3011,6 +3032,25 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  object_builder_service.CustomErrorMessage:
+    properties:
+      action_type:
+        type: string
+      code:
+        type: integer
+      error_id:
+        type: string
+      id:
+        type: string
+      language_id:
+        type: string
+      message:
+        type: string
+      project_id:
+        type: string
+      table_id:
+        type: string
     type: object
   object_builder_service.DisableDates:
     properties:
@@ -4898,6 +4938,7 @@ definitions:
     type: object
   status_http.Response:
     properties:
+      custom_message: {}
       data: {}
       description:
         type: string
@@ -9612,6 +9653,237 @@ paths:
       summary: Update service resource
       tags:
       - Service Resource
+  /v1/custom-error-message:
+    get:
+      consumes:
+      - application/json
+      description: Get all custom error messages
+      operationId: get_all_custom_error_message
+      parameters:
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: table_id
+        type: string
+      - in: query
+        name: table_slug
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CustomErrorMessageBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all custom error messages
+      tags:
+      - CustomErrorMessage
+    post:
+      consumes:
+      - application/json
+      description: Create custom error message
+      operationId: update_custom_error_message
+      parameters:
+      - description: CreateCustomErrorMessageBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateCustomErrorMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Custom Error Message data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create custom error message
+      tags:
+      - CustomErrorMessage
+    put:
+      consumes:
+      - application/json
+      description: Update custom error message
+      operationId: update_custom_error_message
+      parameters:
+      - description: UpdateCustomErrorMessageBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CustomErrorMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Custom Error Message data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update custom error message
+      tags:
+      - CustomErrorMessage
+  /v1/custom-error-message/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete custom error message
+      operationId: update_custom_error_message
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete custom error message
+      tags:
+      - CustomErrorMessage
+    get:
+      consumes:
+      - application/json
+      description: Get by id custom error message
+      operationId: update_custom_error_message
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Custom Error Message data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get by id custom error message
+      tags:
+      - CustomErrorMessage
   /v1/custom-event:
     get:
       consumes:

@@ -22,7 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/grpc/status"
 )
 
 // CreateObject godoc
@@ -44,6 +44,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		objectRequest               models.CommonMessage
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
+		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -208,8 +209,15 @@ func (h *Handler) CreateObject(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
+		// this logic for custom error message, object builder service may be return 400, 404, 500
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -250,8 +258,8 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		}
 	}
 	//fmt.Println("TIME_MANAGEMENT_LOGGING:::DoInvokeFuntion", time.Since(start))
-
-	h.handleResponse(c, status_http.Created, resp)
+	statusHttp.CustomMessage = resp.GetCustomMessage()
+	h.handleResponse(c, statusHttp, resp)
 }
 
 // GetSingle godoc
@@ -270,8 +278,9 @@ func (h *Handler) CreateObject(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingle(c *gin.Context) {
 	var (
-		object models.CommonMessage
-		resp   *obs.CommonMessage
+		object     models.CommonMessage
+		resp       *obs.CommonMessage
+		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
 	object.Data = make(map[string]interface{})
@@ -358,7 +367,13 @@ func (h *Handler) GetSingle(c *gin.Context) {
 			},
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -375,8 +390,8 @@ func (h *Handler) GetSingle(c *gin.Context) {
 			return
 		}
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
+	statusHttp.CustomMessage = resp.GetCustomMessage()
+	h.handleResponse(c, statusHttp, resp)
 }
 
 // GetSingleSlim godoc
@@ -394,7 +409,10 @@ func (h *Handler) GetSingle(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleSlim(c *gin.Context) {
-	var object models.CommonMessage
+	var (
+		object     models.CommonMessage
+		statusHttp = status_http.GrpcStatusToHTTP["Ok"]
+	)
 
 	object.Data = make(map[string]interface{})
 
@@ -495,7 +513,13 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+		stat, ok := status.FromError(err)
+		if ok {
+			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+			statusHttp.CustomMessage = stat.Message()
+		}
+		h.handleResponse(c, statusHttp, err.Error())
 		return
 	}
 
@@ -504,8 +528,8 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 	if err != nil {
 		h.log.Error("Error while setting redis", logger.Error(err))
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
+	statusHttp.CustomMessage = resp.GetCustomMessage()
+	h.handleResponse(c, statusHttp, resp)
 }
 
 // UpdateObject godoc
@@ -527,6 +551,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 		objectRequest               models.CommonMessage
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
+		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -644,7 +669,13 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 			},
 		)
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -699,7 +730,7 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 			return
 		}
 	}
-
+	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, status_http.OK, resp)
 }
 
@@ -723,6 +754,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		objectRequest               models.CommonMessage
 		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
+		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -839,6 +871,12 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		)
 
 		if err != nil {
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
@@ -892,7 +930,8 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		}
 	}
 
-	h.handleResponse(c, status_http.NoContent, resp)
+	statusHttp.CustomMessage = resp.GetCustomMessage()
+	h.handleResponse(c, statusHttp, resp)
 }
 
 // GetList godoc
@@ -913,6 +952,7 @@ func (h *Handler) GetList(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
 		resp          *obs.CommonMessage
+		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -1012,7 +1052,13 @@ func (h *Handler) GetList(c *gin.Context) {
 		fmt.Println("end:", time.Now())
 
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -1030,8 +1076,8 @@ func (h *Handler) GetList(c *gin.Context) {
 			return
 		}
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
+	statusHttp.CustomMessage = resp.GetCustomMessage()
+	h.handleResponse(c, statusHttp, resp)
 }
 
 // GetListSlim godoc
@@ -1054,6 +1100,7 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
 		queryData     string
+		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
 	// queryParams := make(map[string]interface{})
 	// err := c.ShouldBindQuery(&queryParams)
@@ -1198,7 +1245,13 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+		stat, ok := status.FromError(err)
+		if ok {
+			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+			statusHttp.CustomMessage = stat.Message()
+		}
+		h.handleResponse(c, statusHttp, err.Error())
 		return
 	}
 
@@ -1207,8 +1260,8 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	if err != nil {
 		h.log.Error("Error while setting redis", logger.Error(err))
 	}
-
-	h.handleResponse(c, status_http.OK, resp)
+	statusHttp.CustomMessage = resp.GetCustomMessage()
+	h.handleResponse(c, statusHttp, resp)
 }
 
 // GetListInExcel godoc
@@ -1229,6 +1282,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 	var (
 		objectRequest models.CommonMessage
 		resp          *obs.CommonMessage
+		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -1313,7 +1367,13 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		)
 
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -1332,7 +1392,8 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 		}
 	}
 
-	h.handleResponse(c, status_http.OK, resp)
+	statusHttp.CustomMessage = resp.GetCustomMessage()
+	h.handleResponse(c, statusHttp, resp)
 }
 
 // DeleteManyToMany godoc
@@ -1351,8 +1412,9 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	var (
 		m2mMessage                  obs.ManyToManyMessage
-		resp                        *emptypb.Empty
+		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
+		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
 	)
 
 	err := c.ShouldBindJSON(&m2mMessage)
@@ -1451,7 +1513,13 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 		)
 
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -1483,7 +1551,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 			return
 		}
 	}
-
+	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, status_http.NoContent, resp)
 }
 
@@ -1503,8 +1571,9 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 func (h *Handler) AppendManyToMany(c *gin.Context) {
 	var (
 		m2mMessage                  obs.ManyToManyMessage
-		resp                        *emptypb.Empty
+		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
+		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
 	)
 
 	err := c.ShouldBindJSON(&m2mMessage)
@@ -1604,7 +1673,13 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 		)
 
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -1636,8 +1711,8 @@ func (h *Handler) AppendManyToMany(c *gin.Context) {
 			return
 		}
 	}
-
-	h.handleResponse(c, status_http.NoContent, resp)
+	statusHttp.CustomMessage = resp.GetCustomMessage()
+	h.handleResponse(c, statusHttp, resp)
 }
 
 // UpsertObject godoc
@@ -1658,6 +1733,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 	var (
 		objectRequest               models.UpsertCommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
+		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -1814,7 +1890,13 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 		)
 
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -1870,7 +1952,7 @@ func (h *Handler) UpsertObject(c *gin.Context) {
 			return
 		}
 	}
-
+	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, status_http.Created, resp)
 }
 
@@ -1892,6 +1974,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 	var (
 		objectRequest               models.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
+		statusHttp                  = status_http.GrpcStatusToHTTP["Created"]
 	)
 
 	err := c.ShouldBindJSON(&objectRequest)
@@ -2021,7 +2104,13 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		log.Println("----mulltiple_update ---->", resp.GetData().AsMap())
 
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, statusHttp, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
@@ -2059,7 +2148,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 			return
 		}
 	}
-
+	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, status_http.Created, resp)
 }
 
@@ -2078,7 +2167,10 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
-	var objectRequest models.CommonMessage
+	var (
+		objectRequest models.CommonMessage
+		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+	)
 
 	err := c.ShouldBindJSON(&objectRequest)
 	if err != nil {
@@ -2166,9 +2258,16 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 	)
 
 	if err != nil {
+		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+		stat, ok := status.FromError(err)
+		if ok {
+			statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+			statusHttp.CustomMessage = stat.Message()
+		}
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
+	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, status_http.OK, resp)
 }

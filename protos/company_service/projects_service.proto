@@ -76,6 +76,11 @@ message GetProjectsRequest {
     string k8s_namespace = 1;
 }
 
+message AutoConnectByProjectIdRequest {
+    string k8s_namespace = 1;
+    string project_id = 2;
+}
+
 message GetProjectsResponse {
     string id = 1;
     string title = 2;
@@ -246,6 +251,24 @@ message GetResourceWithPathResponse {
 
 message GetResourceManyRequest {
     repeated GetProjectsResponse id = 1;
+}
+
+message AutoConnectByProjectIdResponse {
+    message ResourceEnvironment {
+        message Credentials {
+            string host = 1;
+            string port = 2;
+            string username = 3;
+            string database = 4;
+            string password = 5;
+        }
+        ServiceType service_type = 1;
+        ResourceType resource_type = 2;
+        Credentials credentials = 3;
+        string id = 4;
+        string project_id = 5;
+    }
+    ResourceEnvironment res = 1;
 }
 
 message GetResourceManyWithPathResponse {
