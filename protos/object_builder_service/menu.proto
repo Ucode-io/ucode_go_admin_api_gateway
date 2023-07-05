@@ -13,8 +13,93 @@ service MenuService {
     rpc Update(Menu) returns (google.protobuf.Empty) {}
     rpc Delete(MenuPrimaryKey) returns (google.protobuf.Empty) {}
     rpc UpdateMenuOrder(UpdateMenuOrderRequest) returns (google.protobuf.Empty) {}
+
+    rpc CreateMenuSettings(CreateMenuSettingsRequest) returns (MenuSettings) {}
+    rpc GetAllMenuSettings(GetAllMenuSettingsRequest) returns (GetAllMenuSettingsResponse) {}
+    rpc GetByIDMenuSettings(MenuSettingPrimaryKey) returns (MenuSettings) {}
+    rpc UpdateMenuSettings(UpdateMenuSettingsRequest) returns (google.protobuf.Empty) {}
+    rpc DeleteMenuSettings(MenuSettingPrimaryKey) returns (google.protobuf.Empty) {}
+
+    rpc CreateMenuTemplate(CreateMenuTemplateRequest) returns (MenuTemplate) {}
+    rpc GetAllMenuTemplate(GetAllMenuSettingsRequest) returns (GatAllMenuTemplateResponse) {}
+    rpc GetByIDMenuTemplate(MenuSettingPrimaryKey) returns (MenuTemplate) {}
+    rpc UpdateMenuTemplate(UpdateMenuTemplateRequest) returns (google.protobuf.Empty) {}
+    rpc DeleteMenuTemplate(MenuSettingPrimaryKey) returns (google.protobuf.Empty) {}
 }
 
+// Menu templates
+message CreateMenuTemplateRequest {
+    string background = 1;
+    string active_background = 2;
+    string text = 3;
+    string active_text = 4;
+    string project_id = 5;
+}
+
+message GatAllMenuTemplateResponse {
+    repeated MenuTemplate menu_templates = 1;
+    int32 count = 2;
+}
+
+message MenuTemplate {
+    string id = 1;
+    string background = 2;
+    string active_background = 3;
+    string text = 4;
+    string active_text = 5;
+}
+
+message UpdateMenuTemplateRequest {
+    string id = 1;
+    string background = 2;
+    string active_background = 3;
+    string text = 4;
+    string active_text = 5;
+    string project_id = 6;
+}
+
+
+// Menu settings
+message UpdateMenuSettingsRequest {
+    string id = 1;
+    string icon_style = 2;
+    string icon_size = 3;
+    string menu_template_id = 4;
+    string project_id = 5;
+}
+
+message GetAllMenuSettingsResponse {
+    repeated MenuSettings menu_settings = 1;
+    int32 count = 2;
+}
+
+message MenuSettingPrimaryKey {
+    string id = 1;
+    string project_id = 2;
+}
+
+message  GetAllMenuSettingsRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+    string project_id = 3;
+}
+
+message CreateMenuSettingsRequest {
+    string icon_style = 1;
+    string icon_size = 2;
+    string project_id = 3;
+    string menu_template_id = 4;
+}
+
+message MenuSettings {
+    string id = 1;
+    string icon_style = 2;
+    string icon_size = 3;
+    string menu_template_id = 4;
+    MenuTemplate menu_template = 5;
+}
+
+// Menu
 message CreateMenuRequest {
     string label = 1;
     string icon = 2;
