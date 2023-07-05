@@ -21,6 +21,10 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	FUNCTION = "FUNCTION"
+)
+
 // CreateNewFunction godoc
 // @Security ApiKeyAuth
 // @ID create_new_function
@@ -171,6 +175,7 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 			Url:              url,
 			Password:         password,
 			SshUrl:           sshURL,
+			Type:             FUNCTION,
 		},
 	)
 
@@ -437,6 +442,7 @@ func (h *Handler) GetAllNewFunctions(c *gin.Context) {
 			Offset:        int32(offset),
 			ProjectId:     resource.ResourceEnvironmentId,
 			EnvironmentId: environment.GetId(),
+			Type:          FUNCTION,
 		},
 	)
 	if err != nil {
@@ -784,6 +790,7 @@ func (h *Handler) GetAllNewFunctionsForApp(c *gin.Context) {
 			Limit:     int32(limit),
 			Offset:    int32(offset),
 			ProjectId: resource.ResourceEnvironmentId,
+			Type:      FUNCTION,
 		},
 	)
 	if err != nil {
