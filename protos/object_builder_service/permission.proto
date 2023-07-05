@@ -17,7 +17,8 @@ service PermissionService {
     rpc GetViewRelationPermissions (GetActionPermissionRequest) returns (CommonMessage) {}
     rpc GetListWithRoleAppTablePermissions(GetListWithRoleAppTablePermissionsRequest) returns (GetListWithRoleAppTablePermissionsResponse) {}
     rpc UpdateRoleAppTablePermissions(UpdateRoleAppTablePermissionsRequest) returns (google.protobuf.Empty) {}
-
+    rpc GetAllMenuPermissions(GetAllMenuPermissionsRequest) returns (GetAllMenuPermissionsResponse) {}
+    rpc UpdateMenuPermissions(UpdateMenuPermissionsRequest) returns (google.protobuf.Empty) {}
 }
 
 message GetAllPermissionRequest {
@@ -139,7 +140,8 @@ message RoleWithAppTablePermissions {
     string project_id = 3;
     string client_platform_id = 4;
     string client_type_id = 5;
-    repeated App apps = 6;
+    bool grant_access = 6;
+    repeated App apps = 7;
 }
 
 message GetListWithRoleAppTablePermissionsResponse {
@@ -150,4 +152,31 @@ message GetListWithRoleAppTablePermissionsResponse {
 message UpdateRoleAppTablePermissionsRequest {
     string project_id = 1;
     RoleWithAppTablePermissions data = 2;
+}
+
+message MenuPermission {
+    message Permission { 
+        bool read = 2;
+        bool write = 3;
+        bool update = 4;
+        bool delete = 5;
+    };
+    string id = 1;
+    string label = 2;
+    Permission permission = 3;
+}
+
+message GetAllMenuPermissionsRequest {
+    string project_id = 1;
+    string parent_id = 2;
+    string role_id = 3;
+}
+message GetAllMenuPermissionsResponse {
+    repeated MenuPermission menus = 1;
+}
+
+message UpdateMenuPermissionsRequest {
+    string project_id = 1;
+    string role_id = 2;
+    repeated MenuPermission menus = 3;
 }

@@ -274,6 +274,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.DELETE("/menu/:menu_id", h.DeleteMenu)
 		v1.PUT("menu/menu-order", h.UpdateMenuOrder)
 
+		//custom-error-message
+		v1.GET("/custom-error-message", h.GetAllCustomErrorMessage)
+		v1.GET("/custom-error-message/:id", h.GetByIdCustomErrorMessage)
+		v1.PUT("/custom-error-message", h.UpdateCustomErrorMessage)
+		v1.POST("/custom-error-message", h.CreateCustomErrorMessage)
+		v1.DELETE("/custom-error-message/:id", h.DeleteCustomErrorMessage)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))
