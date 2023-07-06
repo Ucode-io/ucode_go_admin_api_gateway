@@ -1041,6 +1041,23 @@ func (h *Handler) GetList(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		fmt.Println("begin:", time.Now())
+
+		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
+		if err == nil {
+			resp := make(map[string]interface{})
+			m := make(map[string]interface{})
+			err = json.Unmarshal([]byte(redisResp), &m)
+			if err != nil {
+				h.log.Error("Error while unmarshal redis", logger.Error(err))
+			} else {
+				resp["data"] = m
+				h.handleResponse(c, status_http.OK, resp)
+				return
+			}
+		} else {
+			h.log.Error("Error while getting redis", logger.Error(err))
+		}
+
 		resp, err = services.BuilderService().ObjectBuilder().GetList(
 			context.Background(),
 			&obs.CommonMessage{
@@ -1049,16 +1066,20 @@ func (h *Handler) GetList(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
+
+		if err == nil {
+			if resp.IsCached == true {
+				jsonData, _ := resp.GetData().MarshalJSON()
+				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 60*time.Second)
+				if err != nil {
+					h.log.Error("Error while setting redis", logger.Error(err))
+				}
+			}
+		}
 		fmt.Println("end:", time.Now())
 
 		if err != nil {
-			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
-			stat, ok := status.FromError(err)
-			if ok {
-				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
-				statusHttp.CustomMessage = stat.Message()
-			}
-			h.handleResponse(c, statusHttp, err.Error())
+			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
