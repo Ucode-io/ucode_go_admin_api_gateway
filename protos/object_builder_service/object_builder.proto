@@ -31,6 +31,7 @@ message CommonMessage {
     string project_id = 3;
     string version_id = 4;
     string custom_message = 5;
+    bool is_cached = 6;
 }
 message ManyToManyMessage {
     string table_from = 1;
