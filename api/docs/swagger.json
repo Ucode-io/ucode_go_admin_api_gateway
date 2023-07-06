@@ -7213,7 +7213,7 @@
                     "CustomErrorMessage"
                 ],
                 "summary": "Create custom error message",
-                "operationId": "update_custom_error_message",
+                "operationId": "create_custom_error_message",
                 "parameters": [
                     {
                         "description": "CreateCustomErrorMessageBody",
@@ -7301,7 +7301,7 @@
                     "CustomErrorMessage"
                 ],
                 "summary": "Get by id custom error message",
-                "operationId": "update_custom_error_message",
+                "operationId": "Get_by_id_custom_error_message",
                 "parameters": [
                     {
                         "type": "string",
@@ -7385,7 +7385,7 @@
                     "CustomErrorMessage"
                 ],
                 "summary": "Delete custom error message",
-                "operationId": "update_custom_error_message",
+                "operationId": "delete_custom_error_message",
                 "parameters": [
                     {
                         "type": "string",
@@ -34557,6 +34557,9 @@
                 "id": {
                     "type": "string"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -34934,6 +34937,9 @@
                 },
                 "relation_field": {
                     "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
                 },
                 "slug": {
                     "type": "string"
@@ -35537,6 +35543,9 @@
                 "required": {
                     "type": "boolean"
                 },
+                "show_label": {
+                    "type": "boolean"
+                },
                 "slug": {
                     "type": "string"
                 },
@@ -35571,6 +35580,9 @@
                 },
                 "relation_type": {
                     "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
                 }
             }
         },
@@ -35602,6 +35614,9 @@
                     "type": "string"
                 },
                 "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
                     "type": "boolean"
                 },
                 "slug": {
@@ -36436,6 +36451,9 @@
                 "commit_info": {
                     "$ref": "#/definitions/object_builder_service.CommitInfo"
                 },
+                "default_editable": {
+                    "type": "boolean"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -36474,6 +36492,9 @@
                 },
                 "slug": {
                     "type": "string"
+                },
+                "soft_delete": {
+                    "type": "boolean"
                 },
                 "subtitle_field_slug": {
                     "type": "string"

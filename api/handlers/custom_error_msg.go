@@ -14,7 +14,7 @@ import (
 
 // CreateCustomErrorMessage godoc
 // @Security ApiKeyAuth
-// @ID update_custom_error_message
+// @ID create_custom_error_message
 // @Router /v1/custom-error-message [POST]
 // @Summary Create custom error message
 // @Description Create custom error message
@@ -97,7 +97,7 @@ func (h *Handler) CreateCustomErrorMessage(c *gin.Context) {
 
 // GetByIdCustomErrorMessage godoc
 // @Security ApiKeyAuth
-// @ID update_custom_error_message
+// @ID Get_by_id_custom_error_message
 // @Router /v1/custom-error-message/{id} [GET]
 // @Summary Get by id custom error message
 // @Description Get by id custom error message
@@ -353,7 +353,7 @@ func (h *Handler)UpdateCustomErrorMessage(c *gin.Context) {
 
 // DeleteCustomErrorMessage godoc
 // @Security ApiKeyAuth
-// @ID update_custom_error_message
+// @ID delete_custom_error_message
 // @Router /v1/custom-error-message/{id} [DELETE]
 // @Summary Delete custom error message
 // @Description Delete custom error message

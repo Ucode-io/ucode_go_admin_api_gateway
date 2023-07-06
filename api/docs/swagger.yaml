@@ -2547,6 +2547,8 @@ definitions:
         type: string
       id:
         type: string
+      is_system:
+        type: boolean
       name:
         type: string
       permission:
@@ -2795,6 +2797,8 @@ definitions:
         type: string
       relation_field:
         type: string
+      show_label:
+        type: boolean
       slug:
         type: string
       table_id:
@@ -3191,6 +3195,8 @@ definitions:
         type: string
       required:
         type: boolean
+      show_label:
+        type: boolean
       slug:
         type: string
       table_id:
@@ -3214,6 +3220,8 @@ definitions:
         type: integer
       relation_type:
         type: string
+      show_label:
+        type: boolean
     type: object
   object_builder_service.FieldResponse:
     properties:
@@ -3234,6 +3242,8 @@ definitions:
       relation_type:
         type: string
       required:
+        type: boolean
+      show_label:
         type: boolean
       slug:
         type: string
@@ -3777,6 +3787,8 @@ definitions:
         type: string
       commit_info:
         $ref: '#/definitions/object_builder_service.CommitInfo'
+      default_editable:
+        type: boolean
       description:
         type: string
       folder_id:
@@ -3803,6 +3815,8 @@ definitions:
         type: boolean
       slug:
         type: string
+      soft_delete:
+        type: boolean
       subtitle_field_slug:
         type: string
     type: object
@@ -9708,7 +9722,7 @@ paths:
       consumes:
       - application/json
       description: Create custom error message
-      operationId: update_custom_error_message
+      operationId: create_custom_error_message
       parameters:
       - description: CreateCustomErrorMessageBody
         in: body
@@ -9803,7 +9817,7 @@ paths:
       consumes:
       - application/json
       description: Delete custom error message
-      operationId: update_custom_error_message
+      operationId: delete_custom_error_message
       parameters:
       - description: id
         in: path
@@ -9842,7 +9856,7 @@ paths:
       consumes:
       - application/json
       description: Get by id custom error message
-      operationId: update_custom_error_message
+      operationId: Get_by_id_custom_error_message
       parameters:
       - description: id
         in: path

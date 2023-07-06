@@ -7225,7 +7225,7 @@ const docTemplate = `{
                     "CustomErrorMessage"
                 ],
                 "summary": "Create custom error message",
-                "operationId": "update_custom_error_message",
+                "operationId": "create_custom_error_message",
                 "parameters": [
                     {
                         "description": "CreateCustomErrorMessageBody",
@@ -7313,7 +7313,7 @@ const docTemplate = `{
                     "CustomErrorMessage"
                 ],
                 "summary": "Get by id custom error message",
-                "operationId": "update_custom_error_message",
+                "operationId": "Get_by_id_custom_error_message",
                 "parameters": [
                     {
                         "type": "string",
@@ -7397,7 +7397,7 @@ const docTemplate = `{
                     "CustomErrorMessage"
                 ],
                 "summary": "Delete custom error message",
-                "operationId": "update_custom_error_message",
+                "operationId": "delete_custom_error_message",
                 "parameters": [
                     {
                         "type": "string",
@@ -34569,6 +34569,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -34946,6 +34949,9 @@ const docTemplate = `{
                 },
                 "relation_field": {
                     "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
                 },
                 "slug": {
                     "type": "string"
@@ -35549,6 +35555,9 @@ const docTemplate = `{
                 "required": {
                     "type": "boolean"
                 },
+                "show_label": {
+                    "type": "boolean"
+                },
                 "slug": {
                     "type": "string"
                 },
@@ -35583,6 +35592,9 @@ const docTemplate = `{
                 },
                 "relation_type": {
                     "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
                 }
             }
         },
@@ -35614,6 +35626,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
                     "type": "boolean"
                 },
                 "slug": {
@@ -36448,6 +36463,9 @@ const docTemplate = `{
                 "commit_info": {
                     "$ref": "#/definitions/object_builder_service.CommitInfo"
                 },
+                "default_editable": {
+                    "type": "boolean"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -36486,6 +36504,9 @@ const docTemplate = `{
                 },
                 "slug": {
                     "type": "string"
+                },
+                "soft_delete": {
+                    "type": "boolean"
                 },
                 "subtitle_field_slug": {
                     "type": "string"
