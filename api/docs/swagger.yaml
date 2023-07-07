@@ -2825,6 +2825,32 @@ definitions:
       title:
         type: string
     type: object
+  object_builder_service.CreateMenuSettingsRequest:
+    properties:
+      icon_size:
+        type: string
+      icon_style:
+        type: string
+      menu_template_id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  object_builder_service.CreateMenuTemplateRequest:
+    properties:
+      active_background:
+        type: string
+      active_text:
+        type: string
+      background:
+        type: string
+      project_id:
+        type: string
+      text:
+        type: string
+      title:
+        type: string
+    type: object
   object_builder_service.CreateRelationRequest:
     properties:
       action_relations:
@@ -3212,6 +3238,15 @@ definitions:
       type:
         type: string
     type: object
+  object_builder_service.GatAllMenuTemplateResponse:
+    properties:
+      count:
+        type: integer
+      menu_templates:
+        items:
+          $ref: '#/definitions/object_builder_service.MenuTemplate'
+        type: array
+    type: object
   object_builder_service.GetAllAppsResponse:
     properties:
       apps:
@@ -3237,6 +3272,15 @@ definitions:
       htmlTemplates:
         items:
           $ref: '#/definitions/object_builder_service.HtmlTemplate'
+        type: array
+    type: object
+  object_builder_service.GetAllMenuSettingsResponse:
+    properties:
+      count:
+        type: integer
+      menu_settings:
+        items:
+          $ref: '#/definitions/object_builder_service.MenuSettings'
         type: array
     type: object
   object_builder_service.GetAllMenusResponse:
@@ -3486,6 +3530,7 @@ definitions:
       webpage_id:
         type: string
     type: object
+<<<<<<< HEAD
   object_builder_service.MenuPermission:
     properties:
       delete:
@@ -3506,6 +3551,35 @@ definitions:
         type: boolean
       write:
         type: boolean
+=======
+  object_builder_service.MenuSettings:
+    properties:
+      icon_size:
+        type: string
+      icon_style:
+        type: string
+      id:
+        type: string
+      menu_template:
+        $ref: '#/definitions/object_builder_service.MenuTemplate'
+      menu_template_id:
+        type: string
+    type: object
+  object_builder_service.MenuTemplate:
+    properties:
+      active_background:
+        type: string
+      active_text:
+        type: string
+      background:
+        type: string
+      id:
+        type: string
+      text:
+        type: string
+      title:
+        type: string
+>>>>>>> 1b6ced72746989f192cc333805df03a3d817f496
     type: object
   object_builder_service.Navigate:
     properties:
@@ -3906,6 +3980,36 @@ definitions:
           $ref: '#/definitions/object_builder_service.Menu'
         type: array
       project_id:
+        type: string
+    type: object
+  object_builder_service.UpdateMenuSettingsRequest:
+    properties:
+      icon_size:
+        type: string
+      icon_style:
+        type: string
+      id:
+        type: string
+      menu_template_id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  object_builder_service.UpdateMenuTemplateRequest:
+    properties:
+      active_background:
+        type: string
+      active_text:
+        type: string
+      background:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      text:
+        type: string
+      title:
         type: string
     type: object
   object_builder_service.UpdatePanelCoordinatesRequest:
@@ -12521,6 +12625,476 @@ paths:
       summary: Update menu
       tags:
       - Menu
+  /v1/menu-settings:
+    get:
+      consumes:
+      - application/json
+      description: Get all menu settings
+      operationId: get_all_menu_settings
+      parameters:
+      - description: API key for the endpoint
+        in: header
+        name: X-API-KEY
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllMenuSettingsResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all menu settings
+      tags:
+      - Menu settings
+    post:
+      consumes:
+      - application/json
+      description: Create menu settings
+      operationId: create_menu_settings
+      parameters:
+      - description: CreateMenuSettingsRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateMenuSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Menu data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.MenuSettings'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create menu settings
+      tags:
+      - Menu settings
+    put:
+      consumes:
+      - application/json
+      description: Update menu settings
+      operationId: update_menu_settings
+      parameters:
+      - description: UpdateMenuSettingsRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateMenuSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: App data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update menu settings
+      tags:
+      - Menu settings
+  /v1/menu-settings/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete menu setting
+      operationId: delete_menu_settings
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu setting
+      tags:
+      - Menu setting
+    get:
+      consumes:
+      - application/json
+      description: Get menu settings by id
+      operationId: get_menu_settings_by_id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.MenuSettings'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get menu settings by id
+      tags:
+      - Menu settings
+  /v1/menu-template:
+    get:
+      consumes:
+      - application/json
+      description: Get all menu template
+      operationId: get_all_menu_template
+      parameters:
+      - description: API key for the endpoint
+        in: header
+        name: X-API-KEY
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GatAllMenuTemplateResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all menu template
+      tags:
+      - Menu template
+    post:
+      consumes:
+      - application/json
+      description: Create menu template
+      operationId: create_menu_template
+      parameters:
+      - description: CreateMenuSettingsRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateMenuTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Menu data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.MenuTemplate'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create menu template
+      tags:
+      - Menu template
+    put:
+      consumes:
+      - application/json
+      description: Update menu template
+      operationId: update_menu_template
+      parameters:
+      - description: UpdateMenuTemplateRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateMenuTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: App data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update menu template
+      tags:
+      - Menu template
+  /v1/menu-template/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete menu template
+      operationId: delete_menu_template
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu template
+      tags:
+      - Menu template
+    get:
+      consumes:
+      - application/json
+      description: Get menu template by id
+      operationId: get_menu_template_by_id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.MenuTemplate'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get menu template by id
+      tags:
+      - Menu template
   /v1/menu/{menu_id}:
     delete:
       consumes:

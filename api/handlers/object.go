@@ -114,8 +114,18 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	//}
 	//fmt.Println("TIME_MANAGEMENT_LOGGING:::GetResEnvByResIdEnvId", time.Since(start))
 
-	id, _ := uuid.NewRandom()
-	objectRequest.Data["guid"] = id.String()
+	var id string
+	uid, _ := uuid.NewRandom()
+	id = uid.String()
+
+	guid, ok := objectRequest.Data["guid"]
+	if ok {
+		if util.IsValidUUID(guid.(string)) {
+			id = objectRequest.Data["guid"].(string)
+		}
+	}
+
+	objectRequest.Data["guid"] = id
 
 	// THIS for loop is written to create child objects (right now it is used in the case of One2One relation)
 	//start = time.Now()
@@ -172,7 +182,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	if len(beforeActions) > 0 {
 		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
 			CustomEvents: beforeActions,
-			IDs:          []string{id.String()},
+			IDs:          []string{id},
 			TableSlug:    c.Param("table_slug"),
 			ObjectData:   objectRequest.Data,
 			Method:       "CREATE",
@@ -226,7 +236,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
 				CustomEvents: afterActions,
-				IDs:          []string{id.String()},
+				IDs:          []string{id},
 				TableSlug:    c.Param("table_slug"),
 				ObjectData:   objectRequest.Data,
 				Method:       "CREATE",
@@ -1179,21 +1189,21 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	//	return
 	//}
 
-	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
-	if err == nil {
-		resp := make(map[string]interface{})
-		m := make(map[string]interface{})
-		err = json.Unmarshal([]byte(redisResp), &m)
-		if err != nil {
-			h.log.Error("Error while unmarshal redis", logger.Error(err))
-		} else {
-			resp["data"] = m
-			h.handleResponse(c, status_http.OK, resp)
-			return
-		}
-	} else {
-		h.log.Error("Error while getting redis", logger.Error(err))
-	}
+	//redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
+	//if err == nil {
+	//	resp := make(map[string]interface{})
+	//	m := make(map[string]interface{})
+	//	err = json.Unmarshal([]byte(redisResp), &m)
+	//	if err != nil {
+	//		h.log.Error("Error while unmarshal redis", logger.Error(err))
+	//	} else {
+	//		resp["data"] = m
+	//		h.handleResponse(c, status_http.OK, resp)
+	//		return
+	//	}
+	//} else {
+	//	h.log.Error("Error while getting redis", logger.Error(err))
+	//}
 
 	resp, err := services.BuilderService().ObjectBuilder().GetListSlim(
 		context.Background(),
