@@ -3530,28 +3530,30 @@ definitions:
       webpage_id:
         type: string
     type: object
-<<<<<<< HEAD
   object_builder_service.MenuPermission:
+    properties:
+      id:
+        type: string
+      label:
+        type: string
+      permission:
+        $ref: '#/definitions/object_builder_service.MenuPermission_Permission'
+      type:
+        type: string
+    type: object
+  object_builder_service.MenuPermission_Permission:
     properties:
       delete:
         type: boolean
-      guid:
-        type: string
-      is_have_condition:
+      menu_settings:
         type: boolean
-      is_public:
-        type: boolean
-      menu_id:
-        type: string
       read:
         type: boolean
-      rol_id:
-        type: string
       update:
         type: boolean
       write:
         type: boolean
-=======
+    type: object
   object_builder_service.MenuSettings:
     properties:
       icon_size:
@@ -3579,7 +3581,6 @@ definitions:
         type: string
       title:
         type: string
->>>>>>> 1b6ced72746989f192cc333805df03a3d817f496
     type: object
   object_builder_service.Navigate:
     properties:

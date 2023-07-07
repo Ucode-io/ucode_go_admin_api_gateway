@@ -36509,37 +36509,43 @@ const docTemplate = `{
                 }
             }
         },
-<<<<<<< HEAD
         "object_builder_service.MenuPermission": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "permission": {
+                    "$ref": "#/definitions/object_builder_service.MenuPermission_Permission"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.MenuPermission_Permission": {
             "type": "object",
             "properties": {
                 "delete": {
                     "type": "boolean"
                 },
-                "guid": {
-                    "type": "string"
-                },
-                "is_have_condition": {
+                "menu_settings": {
                     "type": "boolean"
-                },
-                "is_public": {
-                    "type": "boolean"
-                },
-                "menu_id": {
-                    "type": "string"
                 },
                 "read": {
                     "type": "boolean"
-                },
-                "rol_id": {
-                    "type": "string"
                 },
                 "update": {
                     "type": "boolean"
                 },
                 "write": {
                     "type": "boolean"
-=======
+                }
+            }
+        },
         "object_builder_service.MenuSettings": {
             "type": "object",
             "properties": {
@@ -36580,7 +36586,6 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
->>>>>>> 1b6ced72746989f192cc333805df03a3d817f496
                 }
             }
         },
