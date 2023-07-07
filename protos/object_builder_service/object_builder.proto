@@ -30,6 +30,7 @@ message CommonMessage {
     google.protobuf.Struct data = 2;
     string project_id = 3;
     string version_id = 4;
+    bool is_cached = 5;
 }
 message ManyToManyMessage {
     string table_from = 1;
