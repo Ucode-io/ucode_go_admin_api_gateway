@@ -43,6 +43,18 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	// @name Authorization
 	v1.Use(h.AuthMiddleware(cfg))
 	{
+		v1.POST("/menu-settings", h.CreateMenuSettings)
+		v1.PUT("/menu-settings", h.UpdateMenuSettings)
+		v1.GET("/menu-settings", h.GetAllMenuSettings)
+		v1.GET("/menu-settings/:id", h.GetMenuSettingByID)
+		v1.DELETE("/menu-settings/:id", h.DeleteMenuSettings)
+
+		v1.POST("/menu-template", h.CreateMenuTemplate)
+		v1.PUT("/menu-template", h.UpdateMenuTemplate)
+		v1.GET("/menu-template", h.GetAllMenuTemplates)
+		v1.GET("/menu-template/:id", h.GetMenuTemplateByID)
+		v1.DELETE("/menu-template/:id", h.DeleteMenuTemplate)
+
 		v1.POST("/upload", h.Upload)
 		v1.POST("/upload-file/:table_slug/:object_id", h.UploadFile)
 
