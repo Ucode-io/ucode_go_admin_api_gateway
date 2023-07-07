@@ -35454,6 +35454,9 @@ const docTemplate = `{
                 },
                 "text": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -36520,6 +36523,9 @@ const docTemplate = `{
                 },
                 "text": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -37172,6 +37178,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "text": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }

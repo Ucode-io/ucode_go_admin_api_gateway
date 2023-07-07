@@ -34,6 +34,7 @@ message CreateMenuTemplateRequest {
     string text = 3;
     string active_text = 4;
     string project_id = 5;
+    string title = 6;
 }
 
 message GatAllMenuTemplateResponse {
@@ -47,6 +48,7 @@ message MenuTemplate {
     string active_background = 3;
     string text = 4;
     string active_text = 5;
+    string title = 6;
 }
 
 message UpdateMenuTemplateRequest {
@@ -56,6 +58,7 @@ message UpdateMenuTemplateRequest {
     string text = 4;
     string active_text = 5;
     string project_id = 6;
+    string title = 7;
 }
 
 

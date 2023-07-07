@@ -1190,8 +1190,7 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 			&obs.GetAllMenuSettingsRequest{
 				Limit:     int32(limit),
 				Offset:    int32(offset),
-				ProjectId: "1",
-				// ProjectId: resource.ResourceEnvironmentId,
+				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 	case pb.ResourceType_POSTGRESQL:
@@ -1270,8 +1269,7 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 			context.Background(),
 			&obs.MenuSettingPrimaryKey{
 				Id:        ID,
-				ProjectId: "1",
-				// ProjectId: resource.ResourceEnvironmentId,
+				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if err != nil {

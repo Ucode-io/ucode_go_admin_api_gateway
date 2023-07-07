@@ -35442,6 +35442,9 @@
                 },
                 "text": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -36508,6 +36511,9 @@
                 },
                 "text": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -37160,6 +37166,9 @@
                     "type": "string"
                 },
                 "text": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }

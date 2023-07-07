@@ -2844,6 +2844,8 @@ definitions:
         type: string
       text:
         type: string
+      title:
+        type: string
     type: object
   object_builder_service.CreateRelationRequest:
     properties:
@@ -3541,6 +3543,8 @@ definitions:
         type: string
       text:
         type: string
+      title:
+        type: string
     type: object
   object_builder_service.Navigate:
     properties:
@@ -3967,6 +3971,8 @@ definitions:
       project_id:
         type: string
       text:
+        type: string
+      title:
         type: string
     type: object
   object_builder_service.UpdatePanelCoordinatesRequest:
