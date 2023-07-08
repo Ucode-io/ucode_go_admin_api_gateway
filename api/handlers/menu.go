@@ -297,6 +297,7 @@ func (h *Handler) GetAllMenus(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	authInfo, _ := h.GetAuthInfo(c)
 	limit = 100
 
 	switch resource.ResourceType {
@@ -309,6 +310,7 @@ func (h *Handler) GetAllMenus(c *gin.Context) {
 				Search:    c.DefaultQuery("search", ""),
 				ProjectId: resource.ResourceEnvironmentId,
 				ParentId:  c.DefaultQuery("parent_id", ""),
+				RoleId:    authInfo.GetRoleId(),
 			},
 		)
 	case pb.ResourceType_POSTGRESQL:
@@ -320,6 +322,7 @@ func (h *Handler) GetAllMenus(c *gin.Context) {
 				Search:    c.DefaultQuery("search", ""),
 				ProjectId: resource.ResourceEnvironmentId,
 				ParentId:  c.DefaultQuery("parent_id", ""),
+				RoleId:    authInfo.GetRoleId(),
 			},
 		)
 	}
