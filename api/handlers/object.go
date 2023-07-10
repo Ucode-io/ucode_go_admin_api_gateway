@@ -21,8 +21,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // CreateObject godoc
@@ -1351,7 +1349,7 @@ func (h *Handler) GetListInExcel(c *gin.Context) {
 func (h *Handler) DeleteManyToMany(c *gin.Context) {
 	var (
 		m2mMessage                  obs.ManyToManyMessage
-		resp                        *emptypb.Empty
+		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 	)
 
@@ -1503,7 +1501,7 @@ func (h *Handler) DeleteManyToMany(c *gin.Context) {
 func (h *Handler) AppendManyToMany(c *gin.Context) {
 	var (
 		m2mMessage                  obs.ManyToManyMessage
-		resp                        *emptypb.Empty
+		resp                        *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 	)
 

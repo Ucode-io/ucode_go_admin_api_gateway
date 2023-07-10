@@ -34195,6 +34195,9 @@
                 "id": {
                     "type": "string"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -34546,6 +34549,9 @@
                 },
                 "relation_field": {
                     "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
                 },
                 "slug": {
                     "type": "string"
@@ -35120,6 +35126,9 @@
                 "required": {
                     "type": "boolean"
                 },
+                "show_label": {
+                    "type": "boolean"
+                },
                 "slug": {
                     "type": "string"
                 },
@@ -35154,6 +35163,9 @@
                 },
                 "relation_type": {
                     "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
                 }
             }
         },
@@ -35185,6 +35197,9 @@
                     "type": "string"
                 },
                 "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
                     "type": "boolean"
                 },
                 "slug": {
@@ -36022,6 +36037,9 @@
                 "commit_info": {
                     "$ref": "#/definitions/object_builder_service.CommitInfo"
                 },
+                "default_editable": {
+                    "type": "boolean"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -36063,6 +36081,9 @@
                 },
                 "slug": {
                     "type": "string"
+                },
+                "soft_delete": {
+                    "type": "boolean"
                 },
                 "subtitle_field_slug": {
                     "type": "string"

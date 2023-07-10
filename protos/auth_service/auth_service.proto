@@ -12,3 +12,4 @@ import "company_service.proto";
 import "project_service.proto";
 import "apple.proto";
 import "login_strategy.proto";
+import "sync_user.proto";
