@@ -15,6 +15,7 @@ import (
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
