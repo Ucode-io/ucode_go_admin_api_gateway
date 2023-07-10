@@ -20,7 +20,7 @@ type CreateFunctionRequest struct {
 	CommitId         int64  `json:"-"`
 	CommitGuid       string `json:"-"`
 	VersionId        string `json:"-"`
-	FuncitonFolderId string `json:"function_folder_id"`
+	FunctionFolderId string `json:"function_folder_id"`
 }
 
 type InvokeFunctionRequest struct {

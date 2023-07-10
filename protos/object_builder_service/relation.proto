@@ -50,6 +50,7 @@ message CreateRelationRequest {
     bool creatable = 31;
     bool default_editable = 32;
     string function_path = 33;
+    bool relation_buttons = 34;
     
 }
 
@@ -98,6 +99,7 @@ message UpdateRelationRequest {
     bool creatable = 32;
     bool default_editable = 33;
     string function_path = 34;
+    bool relation_buttons = 35;
 }
 
 
@@ -135,6 +137,7 @@ message RelationForGetAll {
     bool creatable = 31;
     bool default_editable = 32;
     string function_path = 33;
+    bool relation_buttons = 34;
 }
 
 message GetAllRelationsResponse {

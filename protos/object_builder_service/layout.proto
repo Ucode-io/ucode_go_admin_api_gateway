@@ -13,22 +13,35 @@ service LayoutService {
     rpc GetAll(GetListLayoutRequest) returns (GetListLayoutResponse) {}
 }
 
-message Layout {
+message LayoutRequest {
     string id = 1;
     string label = 2;
     int32 order = 3;
     string table_id = 4;
     string type = 5;
-    repeated Tab tabs = 6;
+    repeated TabRequest tabs = 6;
     string icon = 7;
     bool is_default = 8;
+    repeated FieldForSection summary_fields = 9;
+}
+
+message LayoutResponse {
+    string id = 1;
+    string label = 2;
+    int32 order = 3;
+    string table_id = 4;
+    string type = 5;
+    repeated TabResponse tabs = 6;
+    string icon = 7;
+    bool is_default = 8;
+    repeated FieldResponse summary_fields = 9;
 }
 
 message GetListLayoutResponse {
-    repeated Layout layouts = 1;
+    repeated LayoutResponse layouts = 1;
 }
 
-message Tab {
+message TabRequest {
     string id = 1;
     string label = 2;
     string layout_id = 3;
@@ -37,7 +50,19 @@ message Tab {
     repeated Section sections = 6;
     int32 order = 7;
     string icon = 8;
-    RelationForGetAll2 relation = 9;
+}
+
+message TabResponse {
+    string id = 1;
+    string label = 2;
+    string layout_id = 3;
+    string relation_id = 4;
+    string type = 5;
+    repeated SectionResponse sections = 6;
+    int32 order = 7;
+    string icon = 8;
+    RelationForSection relation = 9;
+    
 }
 
 message IncrementID2 {
@@ -128,7 +153,7 @@ message ActionRelation2 {
 
 message RelationForGetAll2 {
     string id = 1;
-    Table2 table_from = 2; 
+    Table2 table_from = 2;
     Table2 table_to = 3;
     string type = 4;
     repeated Field2 view_fields = 5;
@@ -164,7 +189,7 @@ message CreateLayoutRequest {
 }
 
 message UpdateLayoutRequest {
-    repeated Layout layouts = 1;
+    repeated LayoutRequest layouts = 1;
     string project_id = 2;
     string table_id = 3;
 }
@@ -179,4 +204,5 @@ message GetListLayoutRequest {
     string project_id = 2;
     bool is_defualt = 3;
     string table_id = 4;
+    string role_id = 5;
 }

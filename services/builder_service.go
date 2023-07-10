@@ -40,6 +40,8 @@ type BuilderServiceI interface {
 	TableHelpers() object_builder_service.TableHelpersServiceClient
 	FieldsAndRelations() object_builder_service.FieldAndRelationServiceClient
 	Setting() object_builder_service.SettingServiceClient
+	Menu() object_builder_service.MenuServiceClient
+	CustomErrorMessage() object_builder_service.CustomErrorMessageServiceClient
 }
 
 func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderServiceI, error) {
@@ -55,70 +57,74 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 	}
 
 	return &builderServiceClient{
-		tableService:             object_builder_service.NewTableServiceClient(connObjectBuilderService),
-		tableFolderService:       object_builder_service.NewTableFolderServiceClient(connObjectBuilderService),
-		fieldService:             object_builder_service.NewFieldServiceClient(connObjectBuilderService),
-		objectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
-		sectionService:           object_builder_service.NewSectionServiceClient(connObjectBuilderService),
-		relationService:          object_builder_service.NewRelationServiceClient(connObjectBuilderService),
-		viewService:              object_builder_service.NewViewServiceClient(connObjectBuilderService),
-		dashboardService:         object_builder_service.NewDashboardServiceClient(connObjectBuilderService),
-		variableService:          object_builder_service.NewVariableServiceClient(connObjectBuilderService),
-		panelService:             object_builder_service.NewPanelServiceClient(connObjectBuilderService),
-		appService:               object_builder_service.NewAppServiceClient(connObjectBuilderService),
-		htmlTemplateService:      object_builder_service.NewHtmlTemplateServiceClient(connObjectBuilderService),
-		documentService:          object_builder_service.NewDocumentServiceClient(connObjectBuilderService),
-		eventService:             object_builder_service.NewEventServiceClient(connObjectBuilderService),
-		eventLogsService:         object_builder_service.NewEventLogsServiceClient(connObjectBuilderService),
-		excelService:             object_builder_service.NewExcelServiceClient(connObjectBuilderService),
-		permissionService:        object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
-		customEventService:       object_builder_service.NewCustomEventServiceClient(connObjectBuilderService),
-		functionService:          object_builder_service.NewFunctionServiceClient(connObjectBuilderService),
-		barcodeService:           object_builder_service.NewBarcodeServiceClient(connObjectBuilderService),
-		objectBuilderServiceAuth: object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
-		loginService:             object_builder_service.NewLoginServiceClient(connObjectBuilderService),
-		queryFolderService:       object_builder_service.NewQueryFolderServiceClient(connObjectBuilderService),
-		queriesService:           object_builder_service.NewQueryServiceClient(connObjectBuilderService),
-		webPageService:           object_builder_service.NewWebPageServiceClient(connObjectBuilderService),
-		cascadingService:         object_builder_service.NewCascadingServiceClient(connObjectBuilderService),
-		tableHelpersService:      object_builder_service.NewTableHelpersServiceClient(connObjectBuilderService),
-		fieldsAndRelations:       object_builder_service.NewFieldAndRelationServiceClient(connObjectBuilderService),
-		settingService:           object_builder_service.NewSettingServiceClient(connObjectBuilderService),
-		layoutService:            object_builder_service.NewLayoutServiceClient(connObjectBuilderService),
+		tableService:              object_builder_service.NewTableServiceClient(connObjectBuilderService),
+		tableFolderService:        object_builder_service.NewTableFolderServiceClient(connObjectBuilderService),
+		fieldService:              object_builder_service.NewFieldServiceClient(connObjectBuilderService),
+		objectBuilderService:      object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
+		sectionService:            object_builder_service.NewSectionServiceClient(connObjectBuilderService),
+		relationService:           object_builder_service.NewRelationServiceClient(connObjectBuilderService),
+		viewService:               object_builder_service.NewViewServiceClient(connObjectBuilderService),
+		dashboardService:          object_builder_service.NewDashboardServiceClient(connObjectBuilderService),
+		variableService:           object_builder_service.NewVariableServiceClient(connObjectBuilderService),
+		panelService:              object_builder_service.NewPanelServiceClient(connObjectBuilderService),
+		appService:                object_builder_service.NewAppServiceClient(connObjectBuilderService),
+		htmlTemplateService:       object_builder_service.NewHtmlTemplateServiceClient(connObjectBuilderService),
+		documentService:           object_builder_service.NewDocumentServiceClient(connObjectBuilderService),
+		eventService:              object_builder_service.NewEventServiceClient(connObjectBuilderService),
+		eventLogsService:          object_builder_service.NewEventLogsServiceClient(connObjectBuilderService),
+		excelService:              object_builder_service.NewExcelServiceClient(connObjectBuilderService),
+		permissionService:         object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
+		customEventService:        object_builder_service.NewCustomEventServiceClient(connObjectBuilderService),
+		functionService:           object_builder_service.NewFunctionServiceClient(connObjectBuilderService),
+		barcodeService:            object_builder_service.NewBarcodeServiceClient(connObjectBuilderService),
+		objectBuilderServiceAuth:  object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
+		loginService:              object_builder_service.NewLoginServiceClient(connObjectBuilderService),
+		queryFolderService:        object_builder_service.NewQueryFolderServiceClient(connObjectBuilderService),
+		queriesService:            object_builder_service.NewQueryServiceClient(connObjectBuilderService),
+		webPageService:            object_builder_service.NewWebPageServiceClient(connObjectBuilderService),
+		cascadingService:          object_builder_service.NewCascadingServiceClient(connObjectBuilderService),
+		tableHelpersService:       object_builder_service.NewTableHelpersServiceClient(connObjectBuilderService),
+		fieldsAndRelations:        object_builder_service.NewFieldAndRelationServiceClient(connObjectBuilderService),
+		settingService:            object_builder_service.NewSettingServiceClient(connObjectBuilderService),
+		layoutService:             object_builder_service.NewLayoutServiceClient(connObjectBuilderService),
+		menuService:               object_builder_service.NewMenuServiceClient(connObjectBuilderService),
+		customErrorMessageService: object_builder_service.NewCustomErrorMessageServiceClient(connObjectBuilderService),
 	}, nil
 }
 
 type builderServiceClient struct {
-	tableService             object_builder_service.TableServiceClient
-	tableFolderService       object_builder_service.TableFolderServiceClient
-	fieldService             object_builder_service.FieldServiceClient
-	objectBuilderService     object_builder_service.ObjectBuilderServiceClient
-	sectionService           object_builder_service.SectionServiceClient
-	relationService          object_builder_service.RelationServiceClient
-	viewService              object_builder_service.ViewServiceClient
-	dashboardService         object_builder_service.DashboardServiceClient
-	panelService             object_builder_service.PanelServiceClient
-	variableService          object_builder_service.VariableServiceClient
-	appService               object_builder_service.AppServiceClient
-	htmlTemplateService      object_builder_service.HtmlTemplateServiceClient
-	documentService          object_builder_service.DocumentServiceClient
-	eventService             object_builder_service.EventServiceClient
-	eventLogsService         object_builder_service.EventLogsServiceClient
-	excelService             object_builder_service.ExcelServiceClient
-	permissionService        object_builder_service.PermissionServiceClient
-	customEventService       object_builder_service.CustomEventServiceClient
-	functionService          object_builder_service.FunctionServiceClient
-	barcodeService           object_builder_service.BarcodeServiceClient
-	objectBuilderServiceAuth object_builder_service.ObjectBuilderServiceClient
-	loginService             object_builder_service.LoginServiceClient
-	queryFolderService       object_builder_service.QueryFolderServiceClient
-	queriesService           object_builder_service.QueryServiceClient
-	webPageService           object_builder_service.WebPageServiceClient
-	cascadingService         object_builder_service.CascadingServiceClient
-	tableHelpersService      object_builder_service.TableHelpersServiceClient
-	fieldsAndRelations       object_builder_service.FieldAndRelationServiceClient
-	settingService           object_builder_service.SettingServiceClient
-	layoutService            object_builder_service.LayoutServiceClient
+	tableService              object_builder_service.TableServiceClient
+	tableFolderService        object_builder_service.TableFolderServiceClient
+	fieldService              object_builder_service.FieldServiceClient
+	objectBuilderService      object_builder_service.ObjectBuilderServiceClient
+	sectionService            object_builder_service.SectionServiceClient
+	relationService           object_builder_service.RelationServiceClient
+	viewService               object_builder_service.ViewServiceClient
+	dashboardService          object_builder_service.DashboardServiceClient
+	panelService              object_builder_service.PanelServiceClient
+	variableService           object_builder_service.VariableServiceClient
+	appService                object_builder_service.AppServiceClient
+	htmlTemplateService       object_builder_service.HtmlTemplateServiceClient
+	documentService           object_builder_service.DocumentServiceClient
+	eventService              object_builder_service.EventServiceClient
+	eventLogsService          object_builder_service.EventLogsServiceClient
+	excelService              object_builder_service.ExcelServiceClient
+	permissionService         object_builder_service.PermissionServiceClient
+	customEventService        object_builder_service.CustomEventServiceClient
+	functionService           object_builder_service.FunctionServiceClient
+	barcodeService            object_builder_service.BarcodeServiceClient
+	objectBuilderServiceAuth  object_builder_service.ObjectBuilderServiceClient
+	loginService              object_builder_service.LoginServiceClient
+	queryFolderService        object_builder_service.QueryFolderServiceClient
+	queriesService            object_builder_service.QueryServiceClient
+	webPageService            object_builder_service.WebPageServiceClient
+	cascadingService          object_builder_service.CascadingServiceClient
+	tableHelpersService       object_builder_service.TableHelpersServiceClient
+	fieldsAndRelations        object_builder_service.FieldAndRelationServiceClient
+	settingService            object_builder_service.SettingServiceClient
+	layoutService             object_builder_service.LayoutServiceClient
+	menuService               object_builder_service.MenuServiceClient
+	customErrorMessageService object_builder_service.CustomErrorMessageServiceClient
 }
 
 func (g *builderServiceClient) Table() object_builder_service.TableServiceClient {
@@ -238,4 +244,11 @@ func (g *builderServiceClient) FieldsAndRelations() object_builder_service.Field
 
 func (g *builderServiceClient) Setting() object_builder_service.SettingServiceClient {
 	return g.settingService
+}
+
+func (g *builderServiceClient) Menu() object_builder_service.MenuServiceClient {
+	return g.menuService
+}
+func (g *builderServiceClient) CustomErrorMessage() object_builder_service.CustomErrorMessageServiceClient {
+	return g.customErrorMessageService
 }

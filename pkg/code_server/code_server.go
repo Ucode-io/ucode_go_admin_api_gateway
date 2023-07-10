@@ -14,6 +14,15 @@ import (
 	"ucode/ucode_go_api_gateway/services"
 )
 
+type CodeServer struct {
+	Id             string
+	Name           string
+	HelmRepoAdd    string
+	HelmRepoUpdate string
+	HelmInstall    string
+	HelmUninstall  string
+}
+
 func CreateCodeServer(functionName string, cfg config.Config, id string) (string, error) {
 
 	// command := fmt.Sprintf("--username udevs --password %s code-server https://gitlab.udevs.io/api/v4/projects/1512/packages/helm/stable", cfg.GitlabIntegrationToken)
@@ -81,6 +90,62 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	return "", nil
 }
 
+func CreateCodeServerV2(data CodeServer) error {
+	var (
+		stderr bytes.Buffer
+		stdout bytes.Buffer
+	)
+
+	if len(data.HelmRepoAdd) < 2 || len(data.HelmRepoUpdate) < 2 || len(data.HelmInstall) < 2 {
+		err := errors.New("invalid helm command")
+		return err
+	}
+	helmRepoAdd := strings.Split(strings.ReplaceAll(data.HelmRepoAdd, "  ", " "), " ")
+	helmRepoUpdate := strings.Split(strings.ReplaceAll(data.HelmRepoUpdate, "  ", " "), " ")
+
+	cmd := exec.Command(helmRepoAdd[0], helmRepoAdd[1:]...)
+	cmd.Stderr = &stderr
+	cmd.Stdout = &stdout
+
+	log.Println("----exec command----- [helmRepoAdd]", cmd.String())
+
+	err := cmd.Run()
+	if err != nil {
+		log.Println("error [helmRepoAdd]", err)
+		return errors.New("error while adding repo:" + stderr.String())
+	}
+
+	cmd = exec.Command(helmRepoUpdate[0], helmRepoUpdate[1:]...)
+
+	log.Println("----exec command----- [helmRepoUpdate]", cmd.String())
+
+	err = cmd.Run()
+	if err != nil {
+		log.Println("error [helmRepoUpdate]", err)
+		return errors.New("error while update repo:" + stderr.String())
+	}
+
+	data.HelmInstall = strings.ReplaceAll(data.HelmInstall, "{id}", data.Id)
+	data.HelmInstall = strings.ReplaceAll(data.HelmInstall, "{name}", data.Name)
+
+	helmInstall := strings.Split(strings.ReplaceAll(data.HelmInstall, "  ", " "), " ")
+
+	cmd = exec.Command(helmInstall[0], helmInstall[1:]...)
+
+	log.Println("----exec command----- [helmInstall]", cmd.String())
+
+	err = cmd.Run()
+	isErr := !strings.HasPrefix(stderr.String(), "WARNING:")
+	if err != nil && isErr {
+		log.Println("error [helmInstall]", err)
+		return errors.New("error while install code server:" + stderr.String())
+	}
+
+	log.Println("finish [code-server]")
+
+	return nil
+}
+
 func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg config.Config) error {
 	log.Println("!!!---DeleteCodeServer--->")
 	var (
@@ -105,6 +170,7 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 	for _, v := range resEnvsIds.GetData() {
 		functions, err := srvs.FunctionService().FunctionService().GetListByRequestTime(context.Background(), &pb.GetListByRequestTimeRequest{
 			ProjectId: v.GetId(),
+			Type:      "FUNCTION",
 		})
 		if err != nil {
 			log.Println("error while getting functions for project id: "+v.GetProjectId(), err.Error())

@@ -43,6 +43,18 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	// @name Authorization
 	v1.Use(h.AuthMiddleware(cfg))
 	{
+		v1.POST("/menu-settings", h.CreateMenuSettings)
+		v1.PUT("/menu-settings", h.UpdateMenuSettings)
+		v1.GET("/menu-settings", h.GetAllMenuSettings)
+		v1.GET("/menu-settings/:id", h.GetMenuSettingByID)
+		v1.DELETE("/menu-settings/:id", h.DeleteMenuSettings)
+
+		v1.POST("/menu-template", h.CreateMenuTemplate)
+		v1.PUT("/menu-template", h.UpdateMenuTemplate)
+		v1.GET("/menu-template", h.GetAllMenuTemplates)
+		v1.GET("/menu-template/:id", h.GetMenuTemplateByID)
+		v1.DELETE("/menu-template/:id", h.DeleteMenuTemplate)
+
 		v1.POST("/upload", h.Upload)
 		v1.POST("/upload-file/:table_slug/:object_id", h.UploadFile)
 
@@ -265,6 +277,21 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		v1.GET("/layout", h.GetListLayouts)
 		v1.PUT("/layout", h.UpdateLayout)
+
+		//menu
+		v1.POST("/menu", h.CreateMenu)
+		v1.GET("/menu/:menu_id", h.GetMenuByID)
+		v1.GET("/menu", h.GetAllMenus)
+		v1.PUT("/menu", h.UpdateMenu)
+		v1.DELETE("/menu/:menu_id", h.DeleteMenu)
+		v1.PUT("menu/menu-order", h.UpdateMenuOrder)
+
+		//custom-error-message
+		v1.GET("/custom-error-message", h.GetAllCustomErrorMessage)
+		v1.GET("/custom-error-message/:id", h.GetByIdCustomErrorMessage)
+		v1.PUT("/custom-error-message", h.UpdateCustomErrorMessage)
+		v1.POST("/custom-error-message", h.CreateCustomErrorMessage)
+		v1.DELETE("/custom-error-message/:id", h.DeleteCustomErrorMessage)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))
@@ -466,6 +493,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2Admin.GET("/function", h.GetAllNewFunctions)
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
+
+		functions := v2Admin.Group("functions")
+		{
+			functions.POST("/micro-frontend", h.CreateMicroFrontEnd)
+			functions.GET("/micro-frontend/:micro-frontend-id", h.GetMicroFrontEndByID)
+			functions.GET("/micro-frontend", h.GetAllMicroFrontEnd)
+			functions.PUT("/micro-frontend", h.UpdateMicroFrontEnd)
+			functions.DELETE("/micro-frontend/:micro-frontend-id", h.DeleteMicroFrontEnd)
+		}
 	}
 
 	// v3 for ucode version 2

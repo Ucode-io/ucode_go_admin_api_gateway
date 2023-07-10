@@ -46,13 +46,6 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -95,20 +88,20 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 	fmt.Println("\n\n >>>>>>  auth", authInfo)
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Section().GetAll(
-			context.Background(),
-			&obs.GetAllSectionsRequest{
-				TableId:   c.Query("table_id"),
-				TableSlug: c.Query("table_slug"),
-				RoleId:    authInfo.GetRoleId(),
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
+		// resp, err = services.BuilderService().Section().GetAll(
+		// 	context.Background(),
+		// 	&obs.GetAllSectionsRequest{
+		// 		TableId:   c.Query("table_id"),
+		// 		TableSlug: c.Query("table_slug"),
+		// 		RoleId:    authInfo.GetRoleId(),
+		// 		ProjectId: resource.ResourceEnvironmentId,
+		// 	},
+		// )
 
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// if err != nil {
+		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+		// 	return
+		// }
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Section().GetAll(
 			context.Background(),
@@ -224,15 +217,15 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 	// sections.CommitGuid = commitGuid
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Section().Update(
-			context.Background(),
-			&sections,
-		)
+		// resp, err = services.BuilderService().Section().Update(
+		// 	context.Background(),
+		// 	&sections,
+		// )
 
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// if err != nil {
+		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+		// 	return
+		// }
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Section().Update(
 			context.Background(),
