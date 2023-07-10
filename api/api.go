@@ -456,7 +456,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 	function := v2Admin.Group("/functions")
 	{
-		function.Any("/:function-id/run")
+		function.Any("/:function-id/run", h.FunctionRun)
 	}
 
 	{

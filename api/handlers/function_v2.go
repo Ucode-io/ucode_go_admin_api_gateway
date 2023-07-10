@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -13,6 +15,7 @@ import (
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab_integration"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -921,25 +924,32 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 // FunctionRun godoc
 // @Security ApiKeyAuth
 // @ID function_run
-// @Router /v2/functions/{function-id}/run [ANY]
+// @Router /v2/functions/{function-id}/run [POST]
 // @Summary Function Run
 // @Description Function Run
 // @Tags Function
 // @Accept json
 // @Produce json
 // @Param InvokeFunctionRequest body models.InvokeFunctionRequest true "InvokeFunctionRequest"
-// @Success 201 {object} status_http.Response{data=models.InvokeFunctionRequest} "Function data"
+// @Success 201 {object} status_http.Response{data=models.InvokeFunctionResponse} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) FunctionRun(c *gin.Context) {
-	var invokeFunction models.InvokeFunctionRequest
+	var (
+		requestData    models.HttpRequest
+		invokeFunction models.InvokeFunctionRequest
+	)
 
 	functionId := c.Param("function-id")
 
-	err := c.ShouldBindJSON(&invokeFunction)
+	bodyReq, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
+		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
+	}
+
+	_ = json.Unmarshal(bodyReq, &invokeFunction)
+	if err != nil {
+		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
 	}
 
 	namespace := c.GetString("namespace")
@@ -987,17 +997,28 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		return
 	}
 
-	if invokeFunction.Attributes == nil {
-		invokeFunction.Attributes = make(map[string]interface{}, 0)
+	authInfoAny, ok := c.Get("auth")
+	if !ok {
+		h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
+		return
 	}
 
-	fmt.Println(function.Path)
+	authInfo := authInfoAny.(models.AuthData)
+
+	requestData.Method = c.Request.Method
+	requestData.Headers = c.Request.Header
+	requestData.Path = c.Request.URL.Path
+	requestData.Params = c.Request.URL.Query()
+	requestData.Body = bodyReq
+
+	h.log.Info("\n\nFunction run request", logger.Any("auth", authInfo), logger.Any("request_data", requestData), logger.Any("req", c.Request))
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
+		Auth:        authInfo,
+		RequestData: requestData,
 		Data: map[string]interface{}{
 			"object_ids": invokeFunction.ObjectIDs,
-			"app_id":     apiKeys.GetData()[0].GetAppId(),
 			"attributes": invokeFunction.Attributes,
-			"user_id":    authInfo.GetUserId(),
+			"app_id":     authInfo.Data["app_id"],
 		},
 	})
 	if err != nil {

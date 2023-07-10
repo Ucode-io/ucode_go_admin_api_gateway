@@ -56,23 +56,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 				environmentId = res.EnvId
 			}
 
-			c.Set("environment_id", environmentId)
-			c.Set("resource_id", resourceId)
-		case "API-KEY":
-			appId := c.GetHeader("X-API-KEY")
-			apiKey, err := h.authService.ApiKey().GetEnvID(
-				c.Request.Context(),
-				&auth_service.GetReq{
-					Id: appId,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, status_http.BadRequest, err.Error())
-				c.Abort()
-				return
-			}
-
-			apiJson, err := json.Marshal(apiKey)
+			apiJson, err := json.Marshal(res)
 			if err != nil {
 				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 				c.Abort()
@@ -87,6 +71,42 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			}
 
 			c.Set("auth", models.AuthData{
+				Type: "BEARER",
+				Data: data,
+			})
+
+			c.Set("environment_id", environmentId)
+			c.Set("resource_id", resourceId)
+		case "API-KEY":
+			fmt.Println("TEST::::::::::::::::::2")
+			appId := c.GetHeader("X-API-KEY")
+			apiKey, err := h.authService.ApiKey().GetEnvID(
+				c.Request.Context(),
+				&auth_service.GetReq{
+					Id: appId,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				c.Abort()
+				return
+			}
+			fmt.Println("TEST::::::::::::::::::3", apiKey)
+			apiJson, err := json.Marshal(apiKey)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+				c.Abort()
+				return
+			}
+			fmt.Println("TEST::::::::::::::::::4")
+			err = json.Unmarshal(apiJson, &data)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+				c.Abort()
+				return
+			}
+			fmt.Println("TEST::::::::::::::::::5")
+			c.Set("auth", models.AuthData{
 				Type: "API-KEY",
 				Data: data,
 			})
@@ -98,6 +118,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			c.Abort()
 		}
+		fmt.Println("TEST::::::::::::::::::6")
 		c.Set("Auth_Admin", res)
 		c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
