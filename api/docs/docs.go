@@ -7036,6 +7036,427 @@ var doc = `{
                 }
             }
         },
+        "/v1/custom-error-message": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all custom error messages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomErrorMessage"
+                ],
+                "summary": "Get all custom error messages",
+                "operationId": "get_all_custom_error_message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "table_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "table_slug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomErrorMessageBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update custom error message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomErrorMessage"
+                ],
+                "summary": "Update custom error message",
+                "operationId": "update_custom_error_message",
+                "parameters": [
+                    {
+                        "description": "UpdateCustomErrorMessageBody",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.CustomErrorMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Custom Error Message data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create custom error message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomErrorMessage"
+                ],
+                "summary": "Create custom error message",
+                "operationId": "create_custom_error_message",
+                "parameters": [
+                    {
+                        "description": "CreateCustomErrorMessageBody",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.CreateCustomErrorMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Custom Error Message data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/custom-error-message/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get by id custom error message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomErrorMessage"
+                ],
+                "summary": "Get by id custom error message",
+                "operationId": "Get_by_id_custom_error_message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Custom Error Message data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete custom error message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomErrorMessage"
+                ],
+                "summary": "Delete custom error message",
+                "operationId": "delete_custom_error_message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/custom-event": {
             "get": {
                 "security": [
@@ -10047,6 +10468,13 @@ var doc = `{
                         "description": "search",
                         "name": "search",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "type",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -11920,6 +12348,1375 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/object_builder_service.ManyToManyMessage"
                         }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/menu": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all menu",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "Get all menu",
+                "operationId": "get_all_menus",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API key for the endpoint",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "parent_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MenuBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.GetAllMenusResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update menu",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "Update menu",
+                "operationId": "update_menu",
+                "parameters": [
+                    {
+                        "description": "UpdateMenuRequestBody",
+                        "name": "menu",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.Menu"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "App data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.Menu"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create menu",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "Create menu",
+                "operationId": "create_menu",
+                "parameters": [
+                    {
+                        "description": "MenuRequest",
+                        "name": "menu",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateMenuRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Menu data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Menu"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/menu-settings": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all menu settings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu settings"
+                ],
+                "summary": "Get all menu settings",
+                "operationId": "get_all_menu_settings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API key for the endpoint",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MenuBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.GetAllMenuSettingsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update menu settings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu settings"
+                ],
+                "summary": "Update menu settings",
+                "operationId": "update_menu_settings",
+                "parameters": [
+                    {
+                        "description": "UpdateMenuSettingsRequest",
+                        "name": "menu",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpdateMenuSettingsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "App data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.Menu"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create menu settings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu settings"
+                ],
+                "summary": "Create menu settings",
+                "operationId": "create_menu_settings",
+                "parameters": [
+                    {
+                        "description": "CreateMenuSettingsRequest",
+                        "name": "menu",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.CreateMenuSettingsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Menu data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.MenuSettings"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/menu-settings/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get menu settings by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu settings"
+                ],
+                "summary": "Get menu settings by id",
+                "operationId": "get_menu_settings_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MenuBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.MenuSettings"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete menu setting",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu setting"
+                ],
+                "summary": "Delete menu setting",
+                "operationId": "delete_menu_settings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/menu-template": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all menu template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu template"
+                ],
+                "summary": "Get all menu template",
+                "operationId": "get_all_menu_template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API key for the endpoint",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MenuBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.GatAllMenuTemplateResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update menu template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu template"
+                ],
+                "summary": "Update menu template",
+                "operationId": "update_menu_template",
+                "parameters": [
+                    {
+                        "description": "UpdateMenuTemplateRequest",
+                        "name": "menu",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpdateMenuTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "App data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.Menu"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create menu template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu template"
+                ],
+                "summary": "Create menu template",
+                "operationId": "create_menu_template",
+                "parameters": [
+                    {
+                        "description": "CreateMenuSettingsRequest",
+                        "name": "menu",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.CreateMenuTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Menu data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.MenuTemplate"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/menu-template/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get menu template by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu template"
+                ],
+                "summary": "Get menu template by id",
+                "operationId": "get_menu_template_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MenuBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.MenuTemplate"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete menu template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu template"
+                ],
+                "summary": "Delete menu template",
+                "operationId": "delete_menu_template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/menu/menu-order/": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete menu",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "Delete menu",
+                "operationId": "update_menu_order",
+                "parameters": [
+                    {
+                        "description": "menu",
+                        "name": "menu",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpdateMenuOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/menu/{menu_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get menu by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "Get menu by id",
+                "operationId": "get_menu_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "menu_id",
+                        "name": "menu_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MenuBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.Menu"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete menu",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "Delete menu",
+                "operationId": "delete_menu",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "menu_id",
+                        "name": "menu_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -26272,6 +28069,430 @@ var doc = `{
                 }
             }
         },
+        "/v2/functions/micro-frontend": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get All Micro Frontend",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Functions"
+                ],
+                "summary": "Get All Micro Frontend",
+                "operationId": "get_all_micro_frontend",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "search",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update Micro Frontend",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Functions"
+                ],
+                "summary": "Update Micro Frontend",
+                "operationId": "update_micro_frontend",
+                "parameters": [
+                    {
+                        "description": "Data",
+                        "name": "Data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Function"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Function"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create Micro Frontend",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Functions"
+                ],
+                "summary": "Create Micro Frontend",
+                "operationId": "create_micro_frontend",
+                "parameters": [
+                    {
+                        "description": "MicroFrontend",
+                        "name": "MicroFrontend",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateFunctionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/new_function_service.Function"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/functions/micro-frontend/{micro-frontend-id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Micro Frontend By Id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Functions"
+                ],
+                "summary": "Get Micro Frontend By Id",
+                "operationId": "get_micro_frontend_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "micro-frontend-id",
+                        "name": "micro-frontend-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/new_function_service.Function"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete Micro Frontend",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Functions"
+                ],
+                "summary": "Delete Micro Frontend",
+                "operationId": "delete_micro_frontend",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "micro-frontend-id",
+                        "name": "micro-frontend-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/functions/{function-id}/run": {
             "post": {
                 "security": [
@@ -26314,7 +28535,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.InvokeFunctionRequest"
+                                            "$ref": "#/definitions/models.InvokeFunctionResponse"
                                         }
                                     }
                                 }
@@ -31175,6 +33396,12 @@ var doc = `{
                 "gitlabGroupId": {
                     "type": "integer"
                 },
+                "gitlabGroupIdMicroFE": {
+                    "type": "integer"
+                },
+                "gitlabHostMicroFE": {
+                    "type": "string"
+                },
                 "gitlabIntegrationToken": {
                     "type": "string"
                 },
@@ -31183,6 +33410,33 @@ var doc = `{
                 },
                 "gitlabProjectId": {
                     "type": "integer"
+                },
+                "gitlabProjectIdMicroFE": {
+                    "type": "integer"
+                },
+                "helmInstallFunction": {
+                    "type": "string"
+                },
+                "helmInstallMicroFE": {
+                    "type": "string"
+                },
+                "helmRepoAddFMicroFE": {
+                    "type": "string"
+                },
+                "helmRepoAddFunction": {
+                    "type": "string"
+                },
+                "helmRepoUpdateFunction": {
+                    "type": "string"
+                },
+                "helmRepoUpdateMicroFE": {
+                    "type": "string"
+                },
+                "helmUninstallFunction": {
+                    "type": "string"
+                },
+                "helmUninstallMicroFE": {
+                    "type": "string"
                 },
                 "httpport": {
                     "type": "string"
@@ -31224,6 +33478,9 @@ var doc = `{
                     "type": "string"
                 },
                 "pathToClone": {
+                    "type": "string"
+                },
+                "pathToCloneMicroFE": {
                     "type": "string"
                 },
                 "platformType": {
@@ -31775,6 +34032,9 @@ var doc = `{
                 "label": {
                     "type": "string"
                 },
+                "relation_field": {
+                    "type": "string"
+                },
                 "required": {
                     "type": "boolean"
                 },
@@ -31850,6 +34110,9 @@ var doc = `{
                 },
                 "title": {
                     "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
@@ -31866,6 +34129,35 @@ var doc = `{
                     "type": "string"
                 },
                 "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateMenuRequest": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "layout_id": {
+                    "type": "string"
+                },
+                "microfrontend_id": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "webpage_id": {
                     "type": "string"
                 }
             }
@@ -31963,6 +34255,12 @@ var doc = `{
                 "app_id": {
                     "type": "string"
                 },
+                "custom_error_messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.CustomErrorMessage"
+                    }
+                },
                 "description": {
                     "type": "string"
                 },
@@ -31984,7 +34282,7 @@ var doc = `{
                 "layouts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Layout"
+                        "$ref": "#/definitions/object_builder_service.LayoutRequest"
                     }
                 },
                 "sections": {
@@ -32298,6 +34596,9 @@ var doc = `{
                 "label": {
                     "type": "string"
                 },
+                "relation_field": {
+                    "type": "string"
+                },
                 "relation_id": {
                     "type": "string"
                 },
@@ -32348,6 +34649,9 @@ var doc = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }
@@ -32498,6 +34802,18 @@ var doc = `{
                 }
             }
         },
+        "models.InvokeFunctionResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ManyVersionsModel": {
             "type": "object",
             "properties": {
@@ -32515,6 +34831,38 @@ var doc = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "models.Menu": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "layout_id": {
+                    "type": "string"
+                },
+                "microfrontend_id": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "webpage_id": {
+                    "type": "string"
                 }
             }
         },
@@ -32879,6 +35227,12 @@ var doc = `{
                 "function_folder_id": {
                     "type": "string"
                 },
+                "gitlab_group_id": {
+                    "type": "string"
+                },
+                "gitlab_id": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -32895,6 +35249,9 @@ var doc = `{
                     "type": "string"
                 },
                 "ssh_url": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 },
                 "url": {
@@ -33097,7 +35454,7 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.ActionRelation2": {
+        "object_builder_service.ActionRelationForSection": {
             "type": "object",
             "properties": {
                 "key": {
@@ -33119,6 +35476,9 @@ var doc = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "is_system": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -33191,17 +35551,6 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.AutoFilter2": {
-            "type": "object",
-            "properties": {
-                "field_from": {
-                    "type": "string"
-                },
-                "field_to": {
-                    "type": "string"
-                }
-            }
-        },
         "object_builder_service.BarcodeGenerateRes": {
             "type": "object",
             "properties": {
@@ -33211,23 +35560,6 @@ var doc = `{
             }
         },
         "object_builder_service.Cascading": {
-            "type": "object",
-            "properties": {
-                "field_slug": {
-                    "type": "string"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "order": {
-                    "type": "integer"
-                },
-                "table_slug": {
-                    "type": "string"
-                }
-            }
-        },
-        "object_builder_service.Cascading2": {
             "type": "object",
             "properties": {
                 "field_slug": {
@@ -33321,29 +35653,6 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.CommitInfo2": {
-            "type": "object",
-            "properties": {
-                "commit_type": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "version_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "object_builder_service.Condition": {
             "type": "object",
             "properties": {
@@ -33375,6 +35684,32 @@ var doc = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "object_builder_service.CreateCustomErrorMessage": {
+            "type": "object",
+            "properties": {
+                "action_type": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "error_id": {
+                    "type": "string"
+                },
+                "language_id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
                 }
             }
         },
@@ -33510,6 +35845,9 @@ var doc = `{
                 "relation_field": {
                     "type": "string"
                 },
+                "show_label": {
+                    "type": "boolean"
+                },
                 "slug": {
                     "type": "string"
                 },
@@ -33575,6 +35913,46 @@ var doc = `{
                     }
                 },
                 "table_slug": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.CreateMenuSettingsRequest": {
+            "type": "object",
+            "properties": {
+                "icon_size": {
+                    "type": "string"
+                },
+                "icon_style": {
+                    "type": "string"
+                },
+                "menu_template_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.CreateMenuTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "active_background": {
+                    "type": "string"
+                },
+                "active_text": {
+                    "type": "string"
+                },
+                "background": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "text": {
                     "type": "string"
                 },
                 "title": {
@@ -33674,6 +36052,9 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.QuickFilter"
                     }
+                },
+                "relation_buttons": {
+                    "type": "boolean"
                 },
                 "relation_field_slug": {
                     "type": "string"
@@ -33867,6 +36248,35 @@ var doc = `{
                 }
             }
         },
+        "object_builder_service.CustomErrorMessage": {
+            "type": "object",
+            "properties": {
+                "action_type": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "error_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "language_id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.DisableDates": {
             "type": "object",
             "properties": {
@@ -33940,20 +36350,6 @@ var doc = `{
             }
         },
         "object_builder_service.DynamicTable": {
-            "type": "object",
-            "properties": {
-                "table_slug": {
-                    "type": "string"
-                },
-                "view_fields": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "object_builder_service.DynamicTable2": {
             "type": "object",
             "properties": {
                 "table_slug": {
@@ -34046,7 +36442,7 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.Field2": {
+        "object_builder_service.Field": {
             "type": "object",
             "properties": {
                 "attributes": {
@@ -34073,6 +36469,9 @@ var doc = `{
                 "index": {
                     "type": "string"
                 },
+                "is_system": {
+                    "type": "boolean"
+                },
                 "is_visible": {
                     "type": "boolean"
                 },
@@ -34082,10 +36481,16 @@ var doc = `{
                 "project_id": {
                     "type": "string"
                 },
+                "relation_field": {
+                    "type": "string"
+                },
                 "relation_id": {
                     "type": "string"
                 },
                 "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
                     "type": "boolean"
                 },
                 "slug": {
@@ -34122,6 +36527,67 @@ var doc = `{
                 },
                 "relation_type": {
                     "type": "string"
+                },
+                "show_label": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "object_builder_service.FieldResponse": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "column": {
+                    "type": "integer"
+                },
+                "default": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "index": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "relation_type": {
+                    "type": "string"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
+                    "type": "boolean"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.GatAllMenuTemplateResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "menu_templates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.MenuTemplate"
+                    }
                 }
             }
         },
@@ -34163,6 +36629,34 @@ var doc = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/object_builder_service.HtmlTemplate"
+                    }
+                }
+            }
+        },
+        "object_builder_service.GetAllMenuSettingsResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "menu_settings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.MenuSettings"
+                    }
+                }
+            }
+        },
+        "object_builder_service.GetAllMenusResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "menus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.MenuForGetAll"
                     }
                 }
             }
@@ -34243,7 +36737,7 @@ var doc = `{
                 "layouts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Layout"
+                        "$ref": "#/definitions/object_builder_service.LayoutResponse"
                     }
                 }
             }
@@ -34313,14 +36807,11 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.IncrementID2": {
+        "object_builder_service.IncrementIDForSection": {
             "type": "object",
             "properties": {
                 "digit_number": {
                     "type": "integer"
-                },
-                "prefix": {
-                    "type": "string"
                 },
                 "with_increment_id": {
                     "type": "boolean"
@@ -34338,7 +36829,7 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.Layout": {
+        "object_builder_service.LayoutRequest": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -34356,13 +36847,57 @@ var doc = `{
                 "order": {
                     "type": "integer"
                 },
+                "summary_fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.FieldForSection"
+                    }
+                },
                 "table_id": {
                     "type": "string"
                 },
                 "tabs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Tab"
+                        "$ref": "#/definitions/object_builder_service.TabRequest"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.LayoutResponse": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_default": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "summary_fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.FieldResponse"
+                    }
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "tabs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.TabResponse"
                     }
                 },
                 "type": {
@@ -34409,6 +36944,125 @@ var doc = `{
                     "type": "string"
                 },
                 "right_field_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.Menu": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "layout_id": {
+                    "type": "string"
+                },
+                "microfrontend_id": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "webpage_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.MenuForGetAll": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "layout_id": {
+                    "type": "string"
+                },
+                "microfrontend_id": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "webpage_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.MenuSettings": {
+            "type": "object",
+            "properties": {
+                "icon_size": {
+                    "type": "string"
+                },
+                "icon_style": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menu_template": {
+                    "$ref": "#/definitions/object_builder_service.MenuTemplate"
+                },
+                "menu_template_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.MenuTemplate": {
+            "type": "object",
+            "properties": {
+                "active_background": {
+                    "type": "string"
+                },
+                "active_text": {
+                    "type": "string"
+                },
+                "background": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -34498,7 +37152,7 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.QuickFilter2": {
+        "object_builder_service.QuickFilterForSection": {
             "type": "object",
             "properties": {
                 "default_value": {
@@ -34538,31 +37192,13 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.RelationForGetAll2": {
+        "object_builder_service.RelationForSection": {
             "type": "object",
             "properties": {
                 "action_relations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.ActionRelation2"
-                    }
-                },
-                "auto_filters": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/object_builder_service.AutoFilter2"
-                    }
-                },
-                "cascading_tree_field_slug": {
-                    "type": "string"
-                },
-                "cascading_tree_table_slug": {
-                    "type": "string"
-                },
-                "cascadings": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/object_builder_service.Cascading2"
+                        "$ref": "#/definitions/object_builder_service.ActionRelationForSection"
                     }
                 },
                 "columns": {
@@ -34571,28 +37207,19 @@ var doc = `{
                         "type": "string"
                     }
                 },
+                "creatable": {
+                    "type": "boolean"
+                },
+                "default_editable": {
+                    "type": "boolean"
+                },
                 "default_limit": {
                     "type": "string"
-                },
-                "default_values": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "dynamic_tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/object_builder_service.DynamicTable2"
-                    }
                 },
                 "editable": {
                     "type": "boolean"
                 },
-                "field_from": {
-                    "type": "string"
-                },
-                "field_to": {
+                "function_path": {
                     "type": "string"
                 },
                 "group_fields": {
@@ -34607,23 +37234,23 @@ var doc = `{
                 "is_editable": {
                     "type": "boolean"
                 },
-                "is_user_id_default": {
-                    "type": "boolean"
-                },
                 "multiple_insert": {
                     "type": "boolean"
                 },
                 "multiple_insert_field": {
                     "type": "string"
                 },
-                "object_id_from_jwt": {
-                    "type": "boolean"
+                "permission": {
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "quick_filters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.QuickFilter2"
+                        "$ref": "#/definitions/object_builder_service.QuickFilterForSection"
                     }
+                },
+                "relation_buttons": {
+                    "type": "boolean"
                 },
                 "relation_field_slug": {
                     "type": "string"
@@ -34634,14 +37261,14 @@ var doc = `{
                 "summaries": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Summary2"
+                        "$ref": "#/definitions/object_builder_service.SummaryInSection"
                     }
                 },
                 "table_from": {
-                    "$ref": "#/definitions/object_builder_service.Table2"
+                    "$ref": "#/definitions/object_builder_service.TableForSection"
                 },
                 "table_to": {
-                    "$ref": "#/definitions/object_builder_service.Table2"
+                    "$ref": "#/definitions/object_builder_service.TableForSection"
                 },
                 "title": {
                     "type": "string"
@@ -34658,7 +37285,7 @@ var doc = `{
                 "view_fields": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Field2"
+                        "$ref": "#/definitions/object_builder_service.Field"
                     }
                 },
                 "view_type": {
@@ -34715,6 +37342,35 @@ var doc = `{
                 }
             }
         },
+        "object_builder_service.SectionResponse": {
+            "type": "object",
+            "properties": {
+                "column": {
+                    "type": "string"
+                },
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.FieldResponse"
+                    }
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_summary_section": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                }
+            }
+        },
         "object_builder_service.Summary": {
             "type": "object",
             "properties": {
@@ -34726,7 +37382,7 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.Summary2": {
+        "object_builder_service.SummaryInSection": {
             "type": "object",
             "properties": {
                 "field_name": {
@@ -34737,7 +37393,39 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.Tab": {
+        "object_builder_service.TabRequest": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "layout_id": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "relation_id": {
+                    "type": "string"
+                },
+                "sections": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.Section"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.TabResponse": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -34756,7 +37444,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "relation": {
-                    "$ref": "#/definitions/object_builder_service.RelationForGetAll2"
+                    "$ref": "#/definitions/object_builder_service.RelationForSection"
                 },
                 "relation_id": {
                     "type": "string"
@@ -34764,7 +37452,7 @@ var doc = `{
                 "sections": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Section"
+                        "$ref": "#/definitions/object_builder_service.SectionResponse"
                     }
                 },
                 "type": {
@@ -34823,55 +37511,8 @@ var doc = `{
                 "slug": {
                     "type": "string"
                 },
-                "subtitle_field_slug": {
-                    "type": "string"
-                }
-            }
-        },
-        "object_builder_service.Table2": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "string"
-                },
-                "commit_info": {
-                    "$ref": "#/definitions/object_builder_service.CommitInfo2"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "folder_id": {
-                    "type": "string"
-                },
-                "icon": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "increment_id": {
-                    "$ref": "#/definitions/object_builder_service.IncrementID2"
-                },
-                "is_cached": {
+                "soft_delete": {
                     "type": "boolean"
-                },
-                "is_own_table": {
-                    "type": "boolean"
-                },
-                "is_visible": {
-                    "type": "boolean"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "show_in_menu": {
-                    "type": "boolean"
-                },
-                "slug": {
-                    "type": "string"
                 },
                 "subtitle_field_slug": {
                     "type": "string"
@@ -34920,6 +37561,41 @@ var doc = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.TableForSection": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "increment_id": {
+                    "$ref": "#/definitions/object_builder_service.IncrementIDForSection"
+                },
+                "is_editable": {
+                    "type": "boolean"
+                },
+                "is_own_table": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "show_in_menu": {
+                    "type": "boolean"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "subtitle_field_slug": {
                     "type": "string"
                 }
             }
@@ -34982,13 +37658,73 @@ var doc = `{
                 "layouts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.Layout"
+                        "$ref": "#/definitions/object_builder_service.LayoutRequest"
                     }
                 },
                 "project_id": {
                     "type": "string"
                 },
                 "table_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.UpdateMenuOrderRequest": {
+            "type": "object",
+            "properties": {
+                "menus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.Menu"
+                    }
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.UpdateMenuSettingsRequest": {
+            "type": "object",
+            "properties": {
+                "icon_size": {
+                    "type": "string"
+                },
+                "icon_style": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menu_template_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.UpdateMenuTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "active_background": {
+                    "type": "string"
+                },
+                "active_text": {
+                    "type": "string"
+                },
+                "background": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -35102,6 +37838,9 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.QuickFilter"
                     }
+                },
+                "relation_buttons": {
+                    "type": "boolean"
                 },
                 "relation_field_slug": {
                     "type": "string"
@@ -36557,6 +39296,7 @@ var doc = `{
         "status_http.Response": {
             "type": "object",
             "properties": {
+                "custom_message": {},
                 "data": {},
                 "description": {
                     "type": "string"

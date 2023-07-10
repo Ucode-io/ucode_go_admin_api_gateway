@@ -1145,12 +1145,34 @@ definitions:
         type: string
       gitlabGroupId:
         type: integer
+      gitlabGroupIdMicroFE:
+        type: integer
+      gitlabHostMicroFE:
+        type: string
       gitlabIntegrationToken:
         type: string
       gitlabIntegrationURL:
         type: string
       gitlabProjectId:
         type: integer
+      gitlabProjectIdMicroFE:
+        type: integer
+      helmInstallFunction:
+        type: string
+      helmInstallMicroFE:
+        type: string
+      helmRepoAddFMicroFE:
+        type: string
+      helmRepoAddFunction:
+        type: string
+      helmRepoUpdateFunction:
+        type: string
+      helmRepoUpdateMicroFE:
+        type: string
+      helmUninstallFunction:
+        type: string
+      helmUninstallMicroFE:
+        type: string
       httpport:
         type: string
       httpscheme:
@@ -1178,6 +1200,8 @@ definitions:
       objectBuilderServiceHost:
         type: string
       pathToClone:
+        type: string
+      pathToCloneMicroFE:
         type: string
       platformType:
         type: string
@@ -1540,6 +1564,8 @@ definitions:
         type: boolean
       label:
         type: string
+      relation_field:
+        type: string
       required:
         type: boolean
       slug:
@@ -1590,6 +1616,8 @@ definitions:
         type: string
       title:
         type: string
+      type:
+        type: string
     type: object
   models.CreateFunctionRequest:
     properties:
@@ -1600,6 +1628,25 @@ definitions:
       name:
         type: string
       path:
+        type: string
+    type: object
+  models.CreateMenuRequest:
+    properties:
+      icon:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      microfrontend_id:
+        type: string
+      parent_id:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      webpage_id:
         type: string
     type: object
   models.CreatePanelRequest:
@@ -1663,6 +1710,10 @@ definitions:
     properties:
       app_id:
         type: string
+      custom_error_messages:
+        items:
+          $ref: '#/definitions/object_builder_service.CustomErrorMessage'
+        type: array
       description:
         type: string
       fields:
@@ -1677,7 +1728,7 @@ definitions:
         type: string
       layouts:
         items:
-          $ref: '#/definitions/object_builder_service.Layout'
+          $ref: '#/definitions/object_builder_service.LayoutRequest'
         type: array
       sections:
         items:
@@ -1885,6 +1936,8 @@ definitions:
         type: boolean
       label:
         type: string
+      relation_field:
+        type: string
       relation_id:
         type: string
       required:
@@ -1918,6 +1971,8 @@ definitions:
       id:
         type: string
       title:
+        type: string
+      type:
         type: string
     type: object
   models.GetAllApiReferenceResponse:
@@ -2015,6 +2070,14 @@ definitions:
           type: string
         type: array
     type: object
+  models.InvokeFunctionResponse:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+      status:
+        type: string
+    type: object
   models.ManyVersionsModel:
     properties:
       id:
@@ -2027,6 +2090,27 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  models.Menu:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      microfrontend_id:
+        type: string
+      parent_id:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      webpage_id:
+        type: string
     type: object
   models.Panel:
     properties:
@@ -2264,6 +2348,10 @@ definitions:
         type: string
       function_folder_id:
         type: string
+      gitlab_group_id:
+        type: string
+      gitlab_id:
+        type: string
       id:
         type: string
       name:
@@ -2275,6 +2363,8 @@ definitions:
       project_id:
         type: string
       ssh_url:
+        type: string
+      type:
         type: string
       url:
         type: string
@@ -2406,7 +2496,7 @@ definitions:
       value:
         type: string
     type: object
-  object_builder_service.ActionRelation2:
+  object_builder_service.ActionRelationForSection:
     properties:
       key:
         type: string
@@ -2421,6 +2511,8 @@ definitions:
         type: string
       id:
         type: string
+      is_system:
+        type: boolean
       name:
         type: string
       permission:
@@ -2467,30 +2559,12 @@ definitions:
       field_to:
         type: string
     type: object
-  object_builder_service.AutoFilter2:
-    properties:
-      field_from:
-        type: string
-      field_to:
-        type: string
-    type: object
   object_builder_service.BarcodeGenerateRes:
     properties:
       number:
         type: string
     type: object
   object_builder_service.Cascading:
-    properties:
-      field_slug:
-        type: string
-      label:
-        type: string
-      order:
-        type: integer
-      table_slug:
-        type: string
-    type: object
-  object_builder_service.Cascading2:
     properties:
       field_slug:
         type: string
@@ -2551,21 +2625,6 @@ definitions:
           type: string
         type: array
     type: object
-  object_builder_service.CommitInfo2:
-    properties:
-      commit_type:
-        type: string
-      created_at:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      version_ids:
-        items:
-          type: string
-        type: array
-    type: object
   object_builder_service.Condition:
     properties:
       match_fields:
@@ -2587,6 +2646,23 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  object_builder_service.CreateCustomErrorMessage:
+    properties:
+      action_type:
+        type: string
+      code:
+        type: integer
+      error_id:
+        type: string
+      language_id:
+        type: string
+      message:
+        type: string
+      project_id:
+        type: string
+      table_id:
+        type: string
     type: object
   object_builder_service.CreateCustomEventRequest:
     properties:
@@ -2675,6 +2751,8 @@ definitions:
         type: string
       relation_field:
         type: string
+      show_label:
+        type: boolean
       slug:
         type: string
       table_id:
@@ -2718,6 +2796,32 @@ definitions:
           type: string
         type: array
       table_slug:
+        type: string
+      title:
+        type: string
+    type: object
+  object_builder_service.CreateMenuSettingsRequest:
+    properties:
+      icon_size:
+        type: string
+      icon_style:
+        type: string
+      menu_template_id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  object_builder_service.CreateMenuTemplateRequest:
+    properties:
+      active_background:
+        type: string
+      active_text:
+        type: string
+      background:
+        type: string
+      project_id:
+        type: string
+      text:
         type: string
       title:
         type: string
@@ -2784,6 +2888,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.QuickFilter'
         type: array
+      relation_buttons:
+        type: boolean
       relation_field_slug:
         type: string
       relation_table_slug:
@@ -2911,6 +3017,25 @@ definitions:
           type: string
         type: array
     type: object
+  object_builder_service.CustomErrorMessage:
+    properties:
+      action_type:
+        type: string
+      code:
+        type: integer
+      error_id:
+        type: string
+      id:
+        type: string
+      language_id:
+        type: string
+      message:
+        type: string
+      project_id:
+        type: string
+      table_id:
+        type: string
+    type: object
   object_builder_service.DisableDates:
     properties:
       day_slug:
@@ -2959,15 +3084,6 @@ definitions:
         type: string
     type: object
   object_builder_service.DynamicTable:
-    properties:
-      table_slug:
-        type: string
-      view_fields:
-        items:
-          type: string
-        type: array
-    type: object
-  object_builder_service.DynamicTable2:
     properties:
       table_slug:
         type: string
@@ -3027,7 +3143,7 @@ definitions:
       version_id:
         type: string
     type: object
-  object_builder_service.Field2:
+  object_builder_service.Field:
     properties:
       attributes:
         $ref: '#/definitions/structpb.Struct'
@@ -3045,15 +3161,21 @@ definitions:
         type: string
       index:
         type: string
+      is_system:
+        type: boolean
       is_visible:
         type: boolean
       label:
         type: string
       project_id:
         type: string
+      relation_field:
+        type: string
       relation_id:
         type: string
       required:
+        type: boolean
+      show_label:
         type: boolean
       slug:
         type: string
@@ -3078,6 +3200,46 @@ definitions:
         type: integer
       relation_type:
         type: string
+      show_label:
+        type: boolean
+    type: object
+  object_builder_service.FieldResponse:
+    properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      column:
+        type: integer
+      default:
+        type: string
+      id:
+        type: string
+      index:
+        type: string
+      label:
+        type: string
+      order:
+        type: integer
+      relation_type:
+        type: string
+      required:
+        type: boolean
+      show_label:
+        type: boolean
+      slug:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+    type: object
+  object_builder_service.GatAllMenuTemplateResponse:
+    properties:
+      count:
+        type: integer
+      menu_templates:
+        items:
+          $ref: '#/definitions/object_builder_service.MenuTemplate'
+        type: array
     type: object
   object_builder_service.GetAllAppsResponse:
     properties:
@@ -3104,6 +3266,24 @@ definitions:
       htmlTemplates:
         items:
           $ref: '#/definitions/object_builder_service.HtmlTemplate'
+        type: array
+    type: object
+  object_builder_service.GetAllMenuSettingsResponse:
+    properties:
+      count:
+        type: integer
+      menu_settings:
+        items:
+          $ref: '#/definitions/object_builder_service.MenuSettings'
+        type: array
+    type: object
+  object_builder_service.GetAllMenusResponse:
+    properties:
+      count:
+        type: integer
+      menus:
+        items:
+          $ref: '#/definitions/object_builder_service.MenuForGetAll'
         type: array
     type: object
   object_builder_service.GetAllTablesResponse:
@@ -3155,7 +3335,7 @@ definitions:
     properties:
       layouts:
         items:
-          $ref: '#/definitions/object_builder_service.Layout'
+          $ref: '#/definitions/object_builder_service.LayoutResponse'
         type: array
     type: object
   object_builder_service.GetTableHistoryResponse:
@@ -3200,12 +3380,10 @@ definitions:
       with_increment_id:
         type: boolean
     type: object
-  object_builder_service.IncrementID2:
+  object_builder_service.IncrementIDForSection:
     properties:
       digit_number:
         type: integer
-      prefix:
-        type: string
       with_increment_id:
         type: boolean
     type: object
@@ -3216,7 +3394,7 @@ definitions:
       value:
         type: string
     type: object
-  object_builder_service.Layout:
+  object_builder_service.LayoutRequest:
     properties:
       icon:
         type: string
@@ -3228,11 +3406,40 @@ definitions:
         type: string
       order:
         type: integer
+      summary_fields:
+        items:
+          $ref: '#/definitions/object_builder_service.FieldForSection'
+        type: array
       table_id:
         type: string
       tabs:
         items:
-          $ref: '#/definitions/object_builder_service.Tab'
+          $ref: '#/definitions/object_builder_service.TabRequest'
+        type: array
+      type:
+        type: string
+    type: object
+  object_builder_service.LayoutResponse:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      is_default:
+        type: boolean
+      label:
+        type: string
+      order:
+        type: integer
+      summary_fields:
+        items:
+          $ref: '#/definitions/object_builder_service.FieldResponse'
+        type: array
+      table_id:
+        type: string
+      tabs:
+        items:
+          $ref: '#/definitions/object_builder_service.TabResponse'
         type: array
       type:
         type: string
@@ -3263,6 +3470,84 @@ definitions:
       right_field:
         type: string
       right_field_type:
+        type: string
+    type: object
+  object_builder_service.Menu:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      microfrontend_id:
+        type: string
+      order:
+        type: integer
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      webpage_id:
+        type: string
+    type: object
+  object_builder_service.MenuForGetAll:
+    properties:
+      data:
+        $ref: '#/definitions/structpb.Struct'
+      icon:
+        type: string
+      id:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      microfrontend_id:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      webpage_id:
+        type: string
+    type: object
+  object_builder_service.MenuSettings:
+    properties:
+      icon_size:
+        type: string
+      icon_style:
+        type: string
+      id:
+        type: string
+      menu_template:
+        $ref: '#/definitions/object_builder_service.MenuTemplate'
+      menu_template_id:
+        type: string
+    type: object
+  object_builder_service.MenuTemplate:
+    properties:
+      active_background:
+        type: string
+      active_text:
+        type: string
+      background:
+        type: string
+      id:
+        type: string
+      text:
+        type: string
+      title:
         type: string
     type: object
   object_builder_service.Navigate:
@@ -3320,7 +3605,7 @@ definitions:
       field_id:
         type: string
     type: object
-  object_builder_service.QuickFilter2:
+  object_builder_service.QuickFilterForSection:
     properties:
       default_value:
         type: string
@@ -3346,43 +3631,25 @@ definitions:
       write:
         type: string
     type: object
-  object_builder_service.RelationForGetAll2:
+  object_builder_service.RelationForSection:
     properties:
       action_relations:
         items:
-          $ref: '#/definitions/object_builder_service.ActionRelation2'
-        type: array
-      auto_filters:
-        items:
-          $ref: '#/definitions/object_builder_service.AutoFilter2'
-        type: array
-      cascading_tree_field_slug:
-        type: string
-      cascading_tree_table_slug:
-        type: string
-      cascadings:
-        items:
-          $ref: '#/definitions/object_builder_service.Cascading2'
+          $ref: '#/definitions/object_builder_service.ActionRelationForSection'
         type: array
       columns:
         items:
           type: string
         type: array
+      creatable:
+        type: boolean
+      default_editable:
+        type: boolean
       default_limit:
         type: string
-      default_values:
-        items:
-          type: string
-        type: array
-      dynamic_tables:
-        items:
-          $ref: '#/definitions/object_builder_service.DynamicTable2'
-        type: array
       editable:
         type: boolean
-      field_from:
-        type: string
-      field_to:
+      function_path:
         type: string
       group_fields:
         items:
@@ -3392,30 +3659,30 @@ definitions:
         type: string
       is_editable:
         type: boolean
-      is_user_id_default:
-        type: boolean
       multiple_insert:
         type: boolean
       multiple_insert_field:
         type: string
-      object_id_from_jwt:
-        type: boolean
+      permission:
+        $ref: '#/definitions/structpb.Struct'
       quick_filters:
         items:
-          $ref: '#/definitions/object_builder_service.QuickFilter2'
+          $ref: '#/definitions/object_builder_service.QuickFilterForSection'
         type: array
+      relation_buttons:
+        type: boolean
       relation_field_slug:
         type: string
       relation_table_slug:
         type: string
       summaries:
         items:
-          $ref: '#/definitions/object_builder_service.Summary2'
+          $ref: '#/definitions/object_builder_service.SummaryInSection'
         type: array
       table_from:
-        $ref: '#/definitions/object_builder_service.Table2'
+        $ref: '#/definitions/object_builder_service.TableForSection'
       table_to:
-        $ref: '#/definitions/object_builder_service.Table2'
+        $ref: '#/definitions/object_builder_service.TableForSection'
       title:
         type: string
       type:
@@ -3426,7 +3693,7 @@ definitions:
         type: array
       view_fields:
         items:
-          $ref: '#/definitions/object_builder_service.Field2'
+          $ref: '#/definitions/object_builder_service.Field'
         type: array
       view_type:
         type: string
@@ -3463,6 +3730,25 @@ definitions:
       order:
         type: integer
     type: object
+  object_builder_service.SectionResponse:
+    properties:
+      column:
+        type: string
+      fields:
+        items:
+          $ref: '#/definitions/object_builder_service.FieldResponse'
+        type: array
+      icon:
+        type: string
+      id:
+        type: string
+      is_summary_section:
+        type: boolean
+      label:
+        type: string
+      order:
+        type: integer
+    type: object
   object_builder_service.Summary:
     properties:
       field_name:
@@ -3470,14 +3756,35 @@ definitions:
       formula_name:
         type: string
     type: object
-  object_builder_service.Summary2:
+  object_builder_service.SummaryInSection:
     properties:
       field_name:
         type: string
       formula_name:
         type: string
     type: object
-  object_builder_service.Tab:
+  object_builder_service.TabRequest:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      order:
+        type: integer
+      relation_id:
+        type: string
+      sections:
+        items:
+          $ref: '#/definitions/object_builder_service.Section'
+        type: array
+      type:
+        type: string
+    type: object
+  object_builder_service.TabResponse:
     properties:
       icon:
         type: string
@@ -3490,12 +3797,12 @@ definitions:
       order:
         type: integer
       relation:
-        $ref: '#/definitions/object_builder_service.RelationForGetAll2'
+        $ref: '#/definitions/object_builder_service.RelationForSection'
       relation_id:
         type: string
       sections:
         items:
-          $ref: '#/definitions/object_builder_service.Section'
+          $ref: '#/definitions/object_builder_service.SectionResponse'
         type: array
       type:
         type: string
@@ -3534,39 +3841,8 @@ definitions:
         type: boolean
       slug:
         type: string
-      subtitle_field_slug:
-        type: string
-    type: object
-  object_builder_service.Table2:
-    properties:
-      author_id:
-        type: string
-      commit_info:
-        $ref: '#/definitions/object_builder_service.CommitInfo2'
-      description:
-        type: string
-      folder_id:
-        type: string
-      icon:
-        type: string
-      id:
-        type: string
-      increment_id:
-        $ref: '#/definitions/object_builder_service.IncrementID2'
-      is_cached:
+      soft_delete:
         type: boolean
-      is_own_table:
-        type: boolean
-      is_visible:
-        type: boolean
-      label:
-        type: string
-      project_id:
-        type: string
-      show_in_menu:
-        type: boolean
-      slug:
-        type: string
       subtitle_field_slug:
         type: string
     type: object
@@ -3598,6 +3874,29 @@ definitions:
       project_id:
         type: string
       title:
+        type: string
+    type: object
+  object_builder_service.TableForSection:
+    properties:
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      increment_id:
+        $ref: '#/definitions/object_builder_service.IncrementIDForSection'
+      is_editable:
+        type: boolean
+      is_own_table:
+        type: boolean
+      label:
+        type: string
+      show_in_menu:
+        type: boolean
+      slug:
+        type: string
+      subtitle_field_slug:
         type: string
     type: object
   object_builder_service.TableHistory:
@@ -3638,11 +3937,50 @@ definitions:
     properties:
       layouts:
         items:
-          $ref: '#/definitions/object_builder_service.Layout'
+          $ref: '#/definitions/object_builder_service.LayoutRequest'
         type: array
       project_id:
         type: string
       table_id:
+        type: string
+    type: object
+  object_builder_service.UpdateMenuOrderRequest:
+    properties:
+      menus:
+        items:
+          $ref: '#/definitions/object_builder_service.Menu'
+        type: array
+      project_id:
+        type: string
+    type: object
+  object_builder_service.UpdateMenuSettingsRequest:
+    properties:
+      icon_size:
+        type: string
+      icon_style:
+        type: string
+      id:
+        type: string
+      menu_template_id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  object_builder_service.UpdateMenuTemplateRequest:
+    properties:
+      active_background:
+        type: string
+      active_text:
+        type: string
+      background:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      text:
+        type: string
+      title:
         type: string
     type: object
   object_builder_service.UpdatePanelCoordinatesRequest:
@@ -3718,6 +4056,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.QuickFilter'
         type: array
+      relation_buttons:
+        type: boolean
       relation_field_slug:
         type: string
       relation_table_slug:
@@ -4668,6 +5008,7 @@ definitions:
     type: object
   status_http.Response:
     properties:
+      custom_message: {}
       data: {}
       description:
         type: string
@@ -9370,6 +9711,237 @@ paths:
       summary: Update service resource
       tags:
       - Service Resource
+  /v1/custom-error-message:
+    get:
+      consumes:
+      - application/json
+      description: Get all custom error messages
+      operationId: get_all_custom_error_message
+      parameters:
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: table_id
+        type: string
+      - in: query
+        name: table_slug
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CustomErrorMessageBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all custom error messages
+      tags:
+      - CustomErrorMessage
+    post:
+      consumes:
+      - application/json
+      description: Create custom error message
+      operationId: create_custom_error_message
+      parameters:
+      - description: CreateCustomErrorMessageBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateCustomErrorMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Custom Error Message data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create custom error message
+      tags:
+      - CustomErrorMessage
+    put:
+      consumes:
+      - application/json
+      description: Update custom error message
+      operationId: update_custom_error_message
+      parameters:
+      - description: UpdateCustomErrorMessageBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CustomErrorMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Custom Error Message data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update custom error message
+      tags:
+      - CustomErrorMessage
+  /v1/custom-error-message/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete custom error message
+      operationId: delete_custom_error_message
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete custom error message
+      tags:
+      - CustomErrorMessage
+    get:
+      consumes:
+      - application/json
+      description: Get by id custom error message
+      operationId: Get_by_id_custom_error_message
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Custom Error Message data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get by id custom error message
+      tags:
+      - CustomErrorMessage
   /v1/custom-event:
     get:
       consumes:
@@ -11023,6 +11595,11 @@ paths:
         in: query
         name: search
         type: string
+      - description: type
+        in: query
+        name: type
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -12078,6 +12655,761 @@ paths:
       summary: Update many-to-many
       tags:
       - Object
+  /v1/menu:
+    get:
+      consumes:
+      - application/json
+      description: Get all menu
+      operationId: get_all_menus
+      parameters:
+      - description: API key for the endpoint
+        in: header
+        name: X-API-KEY
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: parent_id
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: role_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllMenusResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all menu
+      tags:
+      - Menu
+    post:
+      consumes:
+      - application/json
+      description: Create menu
+      operationId: create_menu
+      parameters:
+      - description: MenuRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMenuRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Menu data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create menu
+      tags:
+      - Menu
+    put:
+      consumes:
+      - application/json
+      description: Update menu
+      operationId: update_menu
+      parameters:
+      - description: UpdateMenuRequestBody
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.Menu'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: App data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update menu
+      tags:
+      - Menu
+  /v1/menu-settings:
+    get:
+      consumes:
+      - application/json
+      description: Get all menu settings
+      operationId: get_all_menu_settings
+      parameters:
+      - description: API key for the endpoint
+        in: header
+        name: X-API-KEY
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllMenuSettingsResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all menu settings
+      tags:
+      - Menu settings
+    post:
+      consumes:
+      - application/json
+      description: Create menu settings
+      operationId: create_menu_settings
+      parameters:
+      - description: CreateMenuSettingsRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateMenuSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Menu data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.MenuSettings'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create menu settings
+      tags:
+      - Menu settings
+    put:
+      consumes:
+      - application/json
+      description: Update menu settings
+      operationId: update_menu_settings
+      parameters:
+      - description: UpdateMenuSettingsRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateMenuSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: App data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update menu settings
+      tags:
+      - Menu settings
+  /v1/menu-settings/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete menu setting
+      operationId: delete_menu_settings
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu setting
+      tags:
+      - Menu setting
+    get:
+      consumes:
+      - application/json
+      description: Get menu settings by id
+      operationId: get_menu_settings_by_id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.MenuSettings'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get menu settings by id
+      tags:
+      - Menu settings
+  /v1/menu-template:
+    get:
+      consumes:
+      - application/json
+      description: Get all menu template
+      operationId: get_all_menu_template
+      parameters:
+      - description: API key for the endpoint
+        in: header
+        name: X-API-KEY
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GatAllMenuTemplateResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all menu template
+      tags:
+      - Menu template
+    post:
+      consumes:
+      - application/json
+      description: Create menu template
+      operationId: create_menu_template
+      parameters:
+      - description: CreateMenuSettingsRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.CreateMenuTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Menu data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.MenuTemplate'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create menu template
+      tags:
+      - Menu template
+    put:
+      consumes:
+      - application/json
+      description: Update menu template
+      operationId: update_menu_template
+      parameters:
+      - description: UpdateMenuTemplateRequest
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateMenuTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: App data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Menu'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update menu template
+      tags:
+      - Menu template
+  /v1/menu-template/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete menu template
+      operationId: delete_menu_template
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu template
+      tags:
+      - Menu template
+    get:
+      consumes:
+      - application/json
+      description: Get menu template by id
+      operationId: get_menu_template_by_id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.MenuTemplate'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get menu template by id
+      tags:
+      - Menu template
+  /v1/menu/{menu_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete menu
+      operationId: delete_menu
+      parameters:
+      - description: menu_id
+        in: path
+        name: menu_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu
+      tags:
+      - Menu
+    get:
+      consumes:
+      - application/json
+      description: Get menu by id
+      operationId: get_menu_by_id
+      parameters:
+      - description: menu_id
+        in: path
+        name: menu_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.Menu'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get menu by id
+      tags:
+      - Menu
+  /v1/menu/menu-order/:
+    put:
+      consumes:
+      - application/json
+      description: Delete menu
+      operationId: update_menu_order
+      parameters:
+      - description: menu
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateMenuOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu
+      tags:
+      - Menu
   /v1/note:
     get:
       consumes:
@@ -19999,7 +21331,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.InvokeFunctionRequest'
+                  $ref: '#/definitions/models.InvokeFunctionResponse'
               type: object
         "400":
           description: Bad Request
@@ -20024,6 +21356,240 @@ paths:
       summary: Function Run
       tags:
       - Function
+  /v2/functions/micro-frontend:
+    get:
+      consumes:
+      - application/json
+      description: Get All Micro Frontend
+      operationId: get_all_micro_frontend
+      parameters:
+      - description: limit
+        in: query
+        name: limit
+        type: number
+      - description: offset
+        in: query
+        name: offset
+        type: number
+      - description: search
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get All Micro Frontend
+      tags:
+      - Functions
+    post:
+      consumes:
+      - application/json
+      description: Create Micro Frontend
+      operationId: create_micro_frontend
+      parameters:
+      - description: MicroFrontend
+        in: body
+        name: MicroFrontend
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateFunctionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/new_function_service.Function'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Micro Frontend
+      tags:
+      - Functions
+    put:
+      consumes:
+      - application/json
+      description: Update Micro Frontend
+      operationId: update_micro_frontend
+      parameters:
+      - description: Data
+        in: body
+        name: Data
+        required: true
+        schema:
+          $ref: '#/definitions/models.Function'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Function'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Micro Frontend
+      tags:
+      - Functions
+  /v2/functions/micro-frontend/{micro-frontend-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Micro Frontend
+      operationId: delete_micro_frontend
+      parameters:
+      - description: micro-frontend-id
+        in: path
+        name: micro-frontend-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Micro Frontend
+      tags:
+      - Functions
+    get:
+      consumes:
+      - application/json
+      description: Get Micro Frontend By Id
+      operationId: get_micro_frontend_by_id
+      parameters:
+      - description: micro-frontend-id
+        in: path
+        name: micro-frontend-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/new_function_service.Function'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Micro Frontend By Id
+      tags:
+      - Functions
   /v2/table:
     get:
       consumes:
