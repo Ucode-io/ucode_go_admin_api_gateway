@@ -37538,9 +37538,6 @@ var doc = `{
                 "is_own_table": {
                     "type": "boolean"
                 },
-                "is_system": {
-                    "type": "boolean"
-                },
                 "is_visible": {
                     "type": "boolean"
                 },

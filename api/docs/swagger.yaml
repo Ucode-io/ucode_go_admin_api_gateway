@@ -3855,8 +3855,6 @@ definitions:
         type: boolean
       is_own_table:
         type: boolean
-      is_system:
-        type: boolean
       is_visible:
         type: boolean
       label:
