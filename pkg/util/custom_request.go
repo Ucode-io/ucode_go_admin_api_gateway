@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -39,12 +40,12 @@ func DoRequest(url string, method string, body interface{}) (responseModel model
 	}
 	defer resp.Body.Close()
 
-	respByte, err := ioutil.ReadAll(resp.Body)
+	respByte, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("err:::::4", err.Error())
 		return
 	}
-	fmt.Println("check do::", string(respByte))
+	fmt.Println("\n\ncheck do::", string(respByte))
 
 	err = json.Unmarshal(respByte, &responseModel)
 	if err != nil {

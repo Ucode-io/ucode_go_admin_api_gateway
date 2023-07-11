@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -13,6 +15,7 @@ import (
 	fc "ucode/ucode_go_api_gateway/genproto/new_function_service"
 	"ucode/ucode_go_api_gateway/pkg/code_server"
 	"ucode/ucode_go_api_gateway/pkg/gitlab"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -927,5 +930,122 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
 	// 	return
 	// }
+	h.handleResponse(c, status_http.Created, resp)
+}
+
+// FunctionRun godoc
+// @Security ApiKeyAuth
+// @ID function_run
+// @Router /v2/functions/{function-id}/run [POST]
+// @Summary Function Run
+// @Description Function Run
+// @Tags Function
+// @Accept json
+// @Produce json
+// @Param InvokeFunctionRequest body models.InvokeFunctionRequest true "InvokeFunctionRequest"
+// @Success 201 {object} status_http.Response{data=models.InvokeFunctionResponse} "Function data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) FunctionRun(c *gin.Context) {
+	var (
+		requestData    models.HttpRequest
+		invokeFunction models.InvokeFunctionRequest
+	)
+
+	functionId := c.Param("function-id")
+
+	bodyReq, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
+	}
+
+	_ = json.Unmarshal(bodyReq, &invokeFunction)
+	if err != nil {
+		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	function, err := services.FunctionService().FunctionService().GetSingle(
+		context.Background(),
+		&fc.FunctionPrimaryKey{
+			Id:        functionId,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	authInfoAny, ok := c.Get("auth")
+	if !ok {
+		h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
+		return
+	}
+
+	authInfo := authInfoAny.(models.AuthData)
+
+	requestData.Method = c.Request.Method
+	requestData.Headers = c.Request.Header
+	requestData.Path = c.Request.URL.Path
+	requestData.Params = c.Request.URL.Query()
+	requestData.Body = bodyReq
+
+	h.log.Info("\n\nFunction run request", logger.Any("auth", authInfo), logger.Any("request_data", requestData), logger.Any("req", c.Request))
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
+		Auth:        authInfo,
+		RequestData: requestData,
+		Data: map[string]interface{}{
+			"object_ids": invokeFunction.ObjectIDs,
+			"attributes": invokeFunction.Attributes,
+			"app_id":     authInfo.Data["app_id"],
+		},
+	})
+	if err != nil {
+		fmt.Println("error in do request", err)
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	} else if resp.Status == "error" {
+		fmt.Println("error in response status", err)
+		var errStr = resp.Status
+		if resp.Data != nil && resp.Data["message"] != nil {
+			errStr = resp.Data["message"].(string)
+		}
+		h.handleResponse(c, status_http.InvalidArgument, errStr)
+		return
+	}
+
 	h.handleResponse(c, status_http.Created, resp)
 }

@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -22,6 +24,8 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			res = &auth_service.HasAccessSuperAdminRes{}
 			ok  bool
 		)
+
+		data := make(map[string]interface{})
 
 		bearerToken := c.GetHeader("Authorization")
 		strArr := strings.Split(bearerToken, " ")
@@ -52,14 +56,34 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 				environmentId = res.EnvId
 			}
 
+			apiJson, err := json.Marshal(res)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+				c.Abort()
+				return
+			}
+
+			err = json.Unmarshal(apiJson, &data)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+				c.Abort()
+				return
+			}
+
+			c.Set("auth", models.AuthData{
+				Type: "BEARER",
+				Data: data,
+			})
+
 			c.Set("environment_id", environmentId)
 			c.Set("resource_id", resourceId)
 		case "API-KEY":
-			app_id := c.GetHeader("X-API-KEY")
-			apikeys, err := h.authService.ApiKey().GetEnvID(
+			fmt.Println("TEST::::::::::::::::::2")
+			appId := c.GetHeader("X-API-KEY")
+			apiKey, err := h.authService.ApiKey().GetEnvID(
 				c.Request.Context(),
 				&auth_service.GetReq{
-					Id: app_id,
+					Id: appId,
 				},
 			)
 			if err != nil {
@@ -67,15 +91,34 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-
-			c.Set("environment_id", apikeys.GetEnvironmentId())
-			c.Set("project_id", apikeys.GetProjectId())
+			fmt.Println("TEST::::::::::::::::::3", apiKey)
+			apiJson, err := json.Marshal(apiKey)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+				c.Abort()
+				return
+			}
+			fmt.Println("TEST::::::::::::::::::4")
+			err = json.Unmarshal(apiJson, &data)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
+				c.Abort()
+				return
+			}
+			fmt.Println("TEST::::::::::::::::::5")
+			c.Set("auth", models.AuthData{
+				Type: "API-KEY",
+				Data: data,
+			})
+			c.Set("environment_id", apiKey.GetEnvironmentId())
+			c.Set("project_id", apiKey.GetProjectId())
 		default:
 			err := errors.New("error invalid authorization method")
 			h.log.Error("--AuthMiddleware--", logger.Error(err))
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			c.Abort()
 		}
+		fmt.Println("TEST::::::::::::::::::6")
 		c.Set("Auth_Admin", res)
 		c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()

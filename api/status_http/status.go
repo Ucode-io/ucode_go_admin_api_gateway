@@ -2,9 +2,10 @@ package status_http
 
 // Status ...
 type Status struct {
-	Code        int    `json:"code"`
-	Status      string `json:"status"`
-	Description string `json:"description"`
+	Code          int    `json:"code"`
+	Status        string `json:"status"`
+	Description   string `json:"description"`
+	CustomMessage string `json:"custom_message"`
 }
 
 var (
@@ -67,6 +68,14 @@ var (
 		Code:        404,
 		Status:      "NOT_FOUND",
 		Description: "The user not found",
+	}
+	GrpcStatusToHTTP = map[string]Status{
+		"Created":         Created,
+		"Ok":              OK,
+		"InvalidArgument": InvalidArgument,
+		"NotFound":        NotFound,
+		"Internal":        InternalServerError,
+		"NoContent":       NoContent,
 	}
 )
 

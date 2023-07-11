@@ -1,5 +1,10 @@
 package models
 
+import (
+	"net/http"
+	"net/url"
+)
+
 type Function struct {
 	ID               string `json:"id"`
 	Path             string `json:"path"`
@@ -31,6 +36,25 @@ type InvokeFunctionResponse struct {
 
 type NewInvokeFunctionRequest struct {
 	Data map[string]interface{} `json:"data"`
+}
+
+type HttpRequest struct {
+	Method  string      `json:"method"`
+	Path    string      `json:"path"`
+	Headers http.Header `json:"headers"`
+	Params  url.Values  `json:"params"`
+	Body    []byte      `json:"body"`
+}
+
+type AuthData struct {
+	Type string                 `json:"type"`
+	Data map[string]interface{} `json:"data"`
+}
+
+type FunctionRunV2 struct {
+	RequestData HttpRequest            `json:"request_data"`
+	Auth        AuthData               `json:"auth"`
+	Data        map[string]interface{} `json:"data"`
 }
 
 type InvokeFunctionRequestWithAppId struct {
