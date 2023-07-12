@@ -823,3 +823,88 @@ func (h *Handler) ConvertTemplateToHtml(c *gin.Context) {
 
 	h.handleResponse(c, status_http.Created, resp)
 }
+
+// UpdateViewOrder godoc
+// @Security ApiKeyAuth
+// @ID update_view_order
+// @Router /v1/update-view-order [PUT]
+// @Summary Update view order
+// @Description Update view order
+// @Tags View
+// @Accept json
+// @Produce json
+// @Param view body obs.UpdateViewOrderRequest true "UpdateViewOrderRequestBody"
+// @Success 200 {object} status_http.Response{data=string} "View data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) UpdateViewOrder(c *gin.Context) {
+	var (
+		view obs.UpdateViewOrderRequest
+		resp *emptypb.Empty
+	)
+
+	err := c.ShouldBindJSON(&view)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	view.ProjectId = resource.ResourceEnvironmentId
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().View().UpdateViewOrder(
+			context.Background(),
+			&view,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().View().UpdateViewOrder(
+			context.Background(),
+			&view,
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}

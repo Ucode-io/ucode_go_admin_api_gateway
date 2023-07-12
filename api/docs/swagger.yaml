@@ -4193,6 +4193,17 @@ definitions:
       table_id:
         type: string
     type: object
+  object_builder_service.UpdateViewOrderRequest:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+      project_id:
+        type: string
+      table_slug:
+        type: string
+    type: object
   object_builder_service.UpsertViewRelationsBody:
     properties:
       commit_guid:
@@ -19528,6 +19539,54 @@ paths:
       summary: Get Commits template
       tags:
       - Template
+  /v1/update-view-order:
+    put:
+      consumes:
+      - application/json
+      description: Update view order
+      operationId: update_view_order
+      parameters:
+      - description: UpdateViewOrderRequestBody
+        in: body
+        name: view
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdateViewOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: View data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update view order
+      tags:
+      - View
   /v1/upload:
     post:
       consumes:
