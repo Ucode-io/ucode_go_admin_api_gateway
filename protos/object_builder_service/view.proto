@@ -15,6 +15,14 @@ service ViewService {
     rpc Delete(ViewPrimaryKey) returns (google.protobuf.Empty) {}
     rpc ConvertHtmlToPdf(HtmlBody) returns (PdfBody) {}
     rpc ConvertTemplateToHtml(HtmlBody) returns (HtmlBody) {}
+    rpc UpdateViewOrder(UpdateViewOrderRequest) returns (google.protobuf.Empty) {}
+}
+
+message UpdateViewOrderRequest {
+    string table_slug = 1;
+    string project_id = 2;
+    repeated string ids = 3;
+
 }
 
 
@@ -47,6 +55,7 @@ message CreateViewRequest {
     int64 commit_id = 26;
     string commit_guid = 27;
     bool default_editable = 28;
+    int32 order = 29;
 }
 
 message QuickFilter {
@@ -84,6 +93,7 @@ message View {
     bool default_editable = 27;
     Navigate navigate = 28;
     string function_path = 29;
+    int32 order = 30;
 }
 
 message Navigate {
