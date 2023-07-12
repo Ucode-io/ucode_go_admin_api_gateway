@@ -344,7 +344,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -672,7 +672,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -1644,7 +1644,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2148,7 +2148,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2569,7 +2569,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3354,7 +3354,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3792,7 +3792,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4151,7 +4151,7 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": ""
+                        "description": "Created"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -4593,7 +4593,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -5154,6 +5154,92 @@
                     },
                     "400": {
                         "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create Company",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Create Company",
+                "operationId": "create_company",
+                "parameters": [
+                    {
+                        "description": "CompanyCreateRequest",
+                        "name": "Company",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CompanyCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Company data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.Company"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -6976,7 +7062,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -7397,7 +7483,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -7828,7 +7914,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8259,7 +8345,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8685,7 +8771,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -9283,7 +9369,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10017,7 +10103,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10802,7 +10888,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10957,7 +11043,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -11550,7 +11636,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -12333,7 +12419,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13047,7 +13133,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13474,7 +13560,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13547,7 +13633,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13702,7 +13788,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -14462,7 +14548,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -14703,7 +14789,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -16545,7 +16631,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -17785,7 +17871,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -18399,7 +18485,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -19205,7 +19291,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -19571,7 +19657,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -20197,7 +20283,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -22849,7 +22935,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -23609,7 +23695,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -24196,7 +24282,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -24613,7 +24699,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -25325,7 +25411,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -25919,7 +26005,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -26323,7 +26409,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -26862,7 +26948,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -27488,7 +27574,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -28009,7 +28095,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -28433,7 +28519,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -29228,7 +29314,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -29383,7 +29469,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -30517,7 +30603,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -30955,7 +31041,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -31383,7 +31469,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -31849,7 +31935,7 @@
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/auth_service.ConfirmStrategies"
                 },
                 "id": {
                     "type": "string"
@@ -31873,6 +31959,19 @@
                     }
                 }
             }
+        },
+        "auth_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
         },
         "auth_service.CreateIntegrationRequest": {
             "type": "object",
@@ -32454,10 +32553,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
@@ -32546,10 +32645,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
@@ -32634,10 +32733,10 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -32872,7 +32971,7 @@
                     }
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -32889,7 +32988,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -32991,7 +33090,7 @@
             "type": "object",
             "properties": {
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "status": {
                     "type": "boolean"
@@ -33048,7 +33147,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -33057,6 +33156,21 @@
                     "type": "string"
                 }
             }
+        },
+        "company_service.ResourceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ResourceType_NOT_DECIDED",
+                "ResourceType_MONGODB",
+                "ResourceType_CLICKHOUSE",
+                "ResourceType_POSTGRESQL"
+            ]
         },
         "company_service.ResourceWithoutPassword": {
             "type": "object",
@@ -33077,7 +33191,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -33169,15 +33283,40 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 },
                 "title": {
                     "type": "string"
                 }
             }
+        },
+        "company_service.ServiceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+            ],
+            "x-enum-varnames": [
+                "ServiceType_NOT_SPECIFIED",
+                "ServiceType_BUILDER_SERVICE",
+                "ServiceType_ANALYTICS_SERVICE",
+                "ServiceType_TEMPLATE_SERVICE",
+                "ServiceType_QUERY_SERVICE",
+                "ServiceType_FUNCTION_SERVICE",
+                "ServiceType_WEB_PAGE_SERVICE",
+                "ServiceType_API_REF_SERVICE",
+                "ServiceType_POSTGRES_BUILDER"
+            ]
         },
         "company_service.SetDefaultResourceReq": {
             "type": "object",
@@ -33192,7 +33331,7 @@
                     "type": "string"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -33209,7 +33348,7 @@
                     "type": "string"
                 },
                 "service_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ServiceType"
                 }
             }
         },
@@ -33260,7 +33399,7 @@
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -35578,7 +35717,7 @@
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
                 },
                 "guid": {
                     "type": "string"
@@ -35644,6 +35783,19 @@
                     }
                 }
             }
+        },
+        "object_builder_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
         },
         "object_builder_service.CreateAppResponse": {
             "type": "object",
@@ -36178,6 +36330,9 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "order": {
+                    "type": "integer"
                 },
                 "project_id": {
                     "type": "string"
@@ -38062,6 +38217,9 @@
                 },
                 "navigate": {
                     "$ref": "#/definitions/object_builder_service.Navigate"
+                },
+                "order": {
+                    "type": "integer"
                 },
                 "project_id": {
                     "type": "string"
@@ -40080,7 +40238,7 @@
                     "type": "string"
                 },
                 "release_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/versioning_service.ReleaseType"
                 }
             }
         },
@@ -40212,6 +40370,21 @@
                     }
                 }
             }
+        },
+        "versioning_service.ReleaseType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ReleaseType_UNDEFINED",
+                "ReleaseType_MAJOR",
+                "ReleaseType_MINOR",
+                "ReleaseType_PATCH"
+            ]
         },
         "versioning_service.ReleaseWithCommit": {
             "type": "object",

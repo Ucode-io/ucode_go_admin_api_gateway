@@ -13,44 +13,80 @@ import (
 	"github.com/google/uuid"
 )
 
-// // CreateCompany godoc
-// // @Security ApiKeyAuth
-// // @ID create_company
-// // @Router /v1/company [POST]
-// // @Summary Create Company
-// // @Description Create Company
-// // @Tags Company
-// // @Accept json
-// // @Produce json
-// // @Param Company body company_service.CreateCompanyRequest true "CompanyCreateRequest"
-// // @Success 201 {object} status_http.Response{data=company_service.CreateCompanyResponse} "Company data"
-// // @Response 400 {object} status_http.Response{data=string} "Bad Request"
-// // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-// func (h *Handler) CreateCompany(c *gin.Context) {
-// 	var company company_service.CreateCompanyRequest
+// CreateCompany godoc
+// @Security ApiKeyAuth
+// @ID create_company
+// @Router /v1/company [POST]
+// @Summary Create Company
+// @Description Create Company
+// @Tags Company
+// @Accept json
+// @Produce json
+// @Param Company body models.CompanyCreateRequest true "CompanyCreateRequest"
+// @Success 201 {object} status_http.Response{data=company_service.Company} "Company data"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) CreateCompany(c *gin.Context) {
+	var company models.CompanyCreateRequest
 
-// 	err := c.ShouldBindJSON(&company)
-// 	if err != nil {
-// 		h.handleResponse(c, status_http.BadRequest, err.Error())
-// 		return
-// 	}
+	err := c.ShouldBindJSON(&company)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	authInfo, _ := h.GetAuthInfo(c)
+	companyPKey, err := h.companyServices.CompanyService().Company().Create(context.Background(), &company_service.CreateCompanyRequest{
+		Title:       company.Name,
+		Logo:        "",
+		Description: "",
+		OwnerId:     authInfo.GetUserId(),
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
-// 	resp, err := h.companyServices.CompanyService().Company().CreateCompany(
-// 		context.Background(),
-// 		&company_service.CreateCompanyRequest{
-// 			Title:       company.Title,
-// 			Logo:        company.Logo,
-// 			Description: company.Description,
-// 		},
-// 	)
+	project, err := h.companyServices.CompanyService().Project().Create(context.Background(), &company_service.CreateProjectRequest{
+		CompanyId:    companyPKey.GetId(),
+		K8SNamespace: "cp-region-type-id",
+		Title:        company.Name,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
-// 	if err != nil {
-// 		h.handleResponse(c, status_http.GRPCError, err.Error())
-// 		return
-// 	}
+	_, err = h.companyServices.CompanyService().Environment().Create(
+		context.Background(),
+		&company_service.CreateEnvironmentRequest{
+			ProjectId:    project.GetProjectId(),
+			Name:         "Production",
+			DisplayColor: "#00FF00",
+			Description:  "Production Environment",
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
 
-// 	h.handleResponse(c, status_http.Created, resp)
-// }
+	_, err = h.authService.User().AddUserToProject(context.Background(), &auth_service.AddUserToProjectReq{
+		CompanyId: companyPKey.GetId(),
+		ProjectId: project.GetProjectId(),
+		UserId:    authInfo.GetUserId(),
+		RoleId:    authInfo.GetRoleId(),
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.Created, &company_service.Company{
+		Id:      companyPKey.GetId(),
+		Name:    company.Name,
+		OwnerId: authInfo.GetUserId(),
+	})
+}
 
 // GetCompanyByID godoc
 // @Security ApiKeyAuth
@@ -116,6 +152,7 @@ func (h *Handler) GetCompanyList(c *gin.Context) {
 			Offset:   int32(offset),
 			Search:   c.DefaultQuery("search", ""),
 			ComanyId: c.DefaultQuery("company_id", ""),
+			OwnerId:  c.DefaultQuery("owner_id", ""),
 		},
 	)
 
