@@ -119,6 +119,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/view", h.GetViewList)
 		v1.PUT("/view", h.UpdateView)
 		v1.DELETE("/view/:view_id", h.DeleteView)
+		v1.PUT("/update-view-order", h.UpdateViewOrder)
 
 		//anaytics dashboard
 		v1.POST("/analytics/dashboard", h.CreateDashboard)
