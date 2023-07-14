@@ -1206,6 +1206,21 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 			},
 		)
 	}
+	globalMenus, err := services.CompanyService().Company().GetAllMenuTemplate(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	for _, value := range globalMenus.GetMenuTemplates() {
+		resp.MenuTemplates = append(resp.MenuTemplates, &obs.MenuTemplate{
+			Id:               value.GetId(),
+			Background:       value.GetBackground(),
+			ActiveBackground: value.GetActiveBackground(),
+			Text:             value.GetText(),
+			ActiveText:       value.GetActiveText(),
+			Title:            value.GetTitle(),
+		})
+	}
 	h.handleResponse(c, status_http.OK, resp)
 }
 
