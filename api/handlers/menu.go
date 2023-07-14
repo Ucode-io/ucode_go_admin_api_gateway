@@ -1308,6 +1308,24 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 		}
 	}
 
+	if resp == (&obs.MenuTemplate{}) {
+		global, err := services.CompanyService().Company().GetMenuTemplateById(context.Background(), &pb.GetMenuTemplateRequest{
+			Id: ID,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		resp = &obs.MenuTemplate{
+			Id:               global.GetId(),
+			Background:       global.GetBackground(),
+			ActiveBackground: global.GetActiveBackground(),
+			Text:             global.GetText(),
+			ActiveText:       global.GetActiveText(),
+			Title:            global.GetTitle(),
+		}
+	}
+
 	h.handleResponse(c, status_http.OK, resp)
 }
 
