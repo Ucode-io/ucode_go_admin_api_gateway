@@ -12971,6 +12971,13 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "template-id",
+                        "name": "template-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -28688,6 +28695,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "boolean",
+                        "name": "is_login_table",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -31949,7 +31961,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "$ref": "#/definitions/auth_service.ConfirmStrategies"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "string"
@@ -31973,19 +31985,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "auth_service.ConfirmStrategies": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ConfirmStrategies_UNDECIDED",
-                "ConfirmStrategies_PHONE",
-                "ConfirmStrategies_EMAIL"
-            ]
         },
         "auth_service.CreateIntegrationRequest": {
             "type": "object",
@@ -32567,10 +32566,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -32659,10 +32658,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -32747,10 +32746,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -32985,7 +32984,7 @@ const docTemplate = `{
                     }
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -33002,7 +33001,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -33039,7 +33038,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "language": {
-                    "$ref": "#/definitions/company_service.Language"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Language"
+                    }
                 },
                 "logo": {
                     "type": "string"
@@ -33104,7 +33106,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "status": {
                     "type": "boolean"
@@ -33161,7 +33163,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -33170,21 +33172,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "company_service.ResourceType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "ResourceType_NOT_DECIDED",
-                "ResourceType_MONGODB",
-                "ResourceType_CLICKHOUSE",
-                "ResourceType_POSTGRESQL"
-            ]
         },
         "company_service.ResourceWithoutPassword": {
             "type": "object",
@@ -33205,7 +33192,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -33297,40 +33284,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
                 }
             }
-        },
-        "company_service.ServiceType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8
-            ],
-            "x-enum-varnames": [
-                "ServiceType_NOT_SPECIFIED",
-                "ServiceType_BUILDER_SERVICE",
-                "ServiceType_ANALYTICS_SERVICE",
-                "ServiceType_TEMPLATE_SERVICE",
-                "ServiceType_QUERY_SERVICE",
-                "ServiceType_FUNCTION_SERVICE",
-                "ServiceType_WEB_PAGE_SERVICE",
-                "ServiceType_API_REF_SERVICE",
-                "ServiceType_POSTGRES_BUILDER"
-            ]
         },
         "company_service.SetDefaultResourceReq": {
             "type": "object",
@@ -33345,7 +33307,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -33362,7 +33324,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "service_type": {
-                    "$ref": "#/definitions/company_service.ServiceType"
+                    "type": "integer"
                 }
             }
         },
@@ -33413,7 +33375,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -35731,7 +35693,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
+                    "type": "integer"
                 },
                 "guid": {
                     "type": "string"
@@ -35797,19 +35759,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "object_builder_service.ConfirmStrategies": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ConfirmStrategies_UNDECIDED",
-                "ConfirmStrategies_PHONE",
-                "ConfirmStrategies_EMAIL"
-            ]
         },
         "object_builder_service.CreateAppResponse": {
             "type": "object",
@@ -35973,6 +35922,12 @@ const docTemplate = `{
                 },
                 "default": {
                     "type": "string"
+                },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
+                "hide_multilanguage": {
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "string"
@@ -36612,6 +36567,12 @@ const docTemplate = `{
                 },
                 "default": {
                     "type": "string"
+                },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
+                "hide_multilanguage": {
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "string"
@@ -37613,6 +37574,9 @@ const docTemplate = `{
         "object_builder_service.Table": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "author_id": {
                     "type": "string"
                 },
@@ -37638,6 +37602,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/object_builder_service.IncrementID"
                 },
                 "is_cached": {
+                    "type": "boolean"
+                },
+                "is_login_table": {
                     "type": "boolean"
                 },
                 "is_own_table": {
@@ -40269,7 +40236,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release_type": {
-                    "$ref": "#/definitions/versioning_service.ReleaseType"
+                    "type": "integer"
                 }
             }
         },
@@ -40401,21 +40368,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "versioning_service.ReleaseType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "ReleaseType_UNDEFINED",
-                "ReleaseType_MAJOR",
-                "ReleaseType_MINOR",
-                "ReleaseType_PATCH"
-            ]
         },
         "versioning_service.ReleaseWithCommit": {
             "type": "object",

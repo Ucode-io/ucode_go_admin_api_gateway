@@ -8,6 +8,7 @@ import (
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
+	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -789,6 +790,7 @@ func (h *Handler) GetAllMenuSettings(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
+// @Param template-id query string true "template-id"
 // @Success 200 {object} status_http.Response{data=obs.MenuSettings} "MenuBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -797,7 +799,7 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 	var (
 		resp *obs.MenuSettings
 	)
-
+	template_id := c.Query("template-id")
 	if !util.IsValidUUID(ID) {
 		h.handleResponse(c, status_http.InvalidArgument, "menu id is an invalid uuid")
 		return
@@ -841,8 +843,9 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 		resp, err = services.BuilderService().Menu().GetByIDMenuSettings(
 			context.Background(),
 			&obs.MenuSettingPrimaryKey{
-				Id:        ID,
-				ProjectId: resource.ResourceEnvironmentId,
+				Id:         ID,
+				ProjectId:  resource.ResourceEnvironmentId,
+				TemplateId: template_id,
 			},
 		)
 		if err != nil {
@@ -861,6 +864,14 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
 		}
+	}
+	if resp.GetMenuTemplate() == (&obs.MenuTemplate{}) {
+		resp.MenuTemplate, err = GetMenuTemplateById(template_id, services)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		resp.MenuTemplateId = template_id
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
@@ -1196,6 +1207,10 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Menu().GetAllMenuTemplate(
 			context.Background(),
@@ -1205,6 +1220,10 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 	globalMenus, err := services.CompanyService().Company().GetAllMenuTemplate(context.Background(), &emptypb.Empty{})
 	if err != nil {
@@ -1221,6 +1240,7 @@ func (h *Handler) GetAllMenuTemplates(c *gin.Context) {
 			Title:            value.GetTitle(),
 		})
 	}
+	resp.Count += int32(len(globalMenus.GetMenuTemplates()))
 	h.handleResponse(c, status_http.OK, resp)
 }
 
@@ -1309,24 +1329,32 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 	}
 
 	if resp == (&obs.MenuTemplate{}) {
-		global, err := services.CompanyService().Company().GetMenuTemplateById(context.Background(), &pb.GetMenuTemplateRequest{
-			Id: ID,
-		})
+		resp, err = GetMenuTemplateById(ID, services)
 		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
 			return
-		}
-		resp = &obs.MenuTemplate{
-			Id:               global.GetId(),
-			Background:       global.GetBackground(),
-			ActiveBackground: global.GetActiveBackground(),
-			Text:             global.GetText(),
-			ActiveText:       global.GetActiveText(),
-			Title:            global.GetTitle(),
 		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
+}
+
+func GetMenuTemplateById(id string, services services.ServiceManagerI) (*obs.MenuTemplate, error) {
+	var resp *obs.MenuTemplate
+	global, err := services.CompanyService().Company().GetMenuTemplateById(context.Background(), &pb.GetMenuTemplateRequest{
+		Id: id,
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp = &obs.MenuTemplate{
+		Id:               global.GetId(),
+		Background:       global.GetBackground(),
+		ActiveBackground: global.GetActiveBackground(),
+		Text:             global.GetText(),
+		ActiveText:       global.GetActiveText(),
+		Title:            global.GetTitle(),
+	}
+	return resp, nil
 }
 
 // UpdateMenuTemplate godoc

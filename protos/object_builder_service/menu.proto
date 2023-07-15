@@ -79,6 +79,7 @@ message GetAllMenuSettingsResponse {
 message MenuSettingPrimaryKey {
     string id = 1;
     string project_id = 2;
+    string template_id = 3;
 }
 
 message  GetAllMenuSettingsRequest {

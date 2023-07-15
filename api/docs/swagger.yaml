@@ -149,7 +149,7 @@ definitions:
   auth_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/auth_service.ConfirmStrategies'
+        type: integer
       id:
         type: string
       name:
@@ -165,16 +165,6 @@ definitions:
           $ref: '#/definitions/auth_service.Table'
         type: array
     type: object
-  auth_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   auth_service.CreateIntegrationRequest:
     properties:
       active:
@@ -555,9 +545,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -615,9 +605,9 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
       user_id:
@@ -672,9 +662,9 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.Currency:
     properties:
@@ -826,7 +816,7 @@ definitions:
           $ref: '#/definitions/company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources'
         type: array
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.GetServiceResourcesRes_ServiceTypeResources_ServiceResources:
     properties:
@@ -837,7 +827,7 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -861,7 +851,9 @@ definitions:
       k8s_namespace:
         type: string
       language:
-        $ref: '#/definitions/company_service.Language'
+        items:
+          $ref: '#/definitions/company_service.Language'
+        type: array
       logo:
         type: string
       project_id:
@@ -903,7 +895,7 @@ definitions:
   company_service.ReconnectResourceRes_ReconnectStatus:
     properties:
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       status:
         type: boolean
     type: object
@@ -940,7 +932,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
       vault_path:
@@ -959,18 +951,6 @@ definitions:
       username:
         type: string
     type: object
-  company_service.ResourceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ResourceType_NOT_DECIDED
-    - ResourceType_MONGODB
-    - ResourceType_CLICKHOUSE
-    - ResourceType_POSTGRESQL
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -984,7 +964,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -1031,34 +1011,12 @@ definitions:
       resource_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
       title:
         type: string
     type: object
-  company_service.ServiceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    type: integer
-    x-enum-varnames:
-    - ServiceType_NOT_SPECIFIED
-    - ServiceType_BUILDER_SERVICE
-    - ServiceType_ANALYTICS_SERVICE
-    - ServiceType_TEMPLATE_SERVICE
-    - ServiceType_QUERY_SERVICE
-    - ServiceType_FUNCTION_SERVICE
-    - ServiceType_WEB_PAGE_SERVICE
-    - ServiceType_API_REF_SERVICE
-    - ServiceType_POSTGRES_BUILDER
   company_service.SetDefaultResourceReq:
     properties:
       environment_id:
@@ -1068,7 +1026,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.SetDefaultResourceRes:
     properties:
@@ -1079,7 +1037,7 @@ definitions:
       resource_id:
         type: string
       service_type:
-        $ref: '#/definitions/company_service.ServiceType'
+        type: integer
     type: object
   company_service.Setting:
     properties:
@@ -1112,7 +1070,7 @@ definitions:
       project_id:
         type: string
       resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
+        type: integer
       title:
         type: string
     type: object
@@ -2633,7 +2591,7 @@ definitions:
   object_builder_service.ClientType:
     properties:
       confirm_by:
-        $ref: '#/definitions/object_builder_service.ConfirmStrategies'
+        type: integer
       guid:
         type: string
       name:
@@ -2676,16 +2634,6 @@ definitions:
           $ref: '#/definitions/object_builder_service.MatchField'
         type: array
     type: object
-  object_builder_service.ConfirmStrategies:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ConfirmStrategies_UNDECIDED
-    - ConfirmStrategies_PHONE
-    - ConfirmStrategies_EMAIL
   object_builder_service.CreateAppResponse:
     properties:
       description:
@@ -2793,6 +2741,10 @@ definitions:
         type: string
       default:
         type: string
+      enable_multilanguage:
+        type: boolean
+      hide_multilanguage:
+        type: boolean
       id:
         type: string
       index:
@@ -3213,6 +3165,10 @@ definitions:
         type: string
       default:
         type: string
+      enable_multilanguage:
+        type: boolean
+      hide_multilanguage:
+        type: boolean
       id:
         type: string
       index:
@@ -3865,6 +3821,8 @@ definitions:
     type: object
   object_builder_service.Table:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       author_id:
         type: string
       commit_info:
@@ -3882,6 +3840,8 @@ definitions:
       increment_id:
         $ref: '#/definitions/object_builder_service.IncrementID'
       is_cached:
+        type: boolean
+      is_login_table:
         type: boolean
       is_own_table:
         type: boolean
@@ -5601,7 +5561,7 @@ definitions:
       project_id:
         type: string
       release_type:
-        $ref: '#/definitions/versioning_service.ReleaseType'
+        type: integer
     type: object
   versioning_service.ApiDeleteReleaseRequest:
     properties:
@@ -5686,18 +5646,6 @@ definitions:
           $ref: '#/definitions/versioning_service.ReleaseWithCommit'
         type: array
     type: object
-  versioning_service.ReleaseType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - ReleaseType_UNDEFINED
-    - ReleaseType_MAJOR
-    - ReleaseType_MINOR
-    - ReleaseType_PATCH
   versioning_service.ReleaseWithCommit:
     properties:
       author_id:
@@ -13092,6 +13040,11 @@ paths:
       - description: id
         in: path
         name: id
+        required: true
+        type: string
+      - description: template-id
+        in: query
+        name: template-id
         required: true
         type: string
       produces:
@@ -21729,6 +21682,9 @@ paths:
       - in: query
         name: folder_id
         type: string
+      - in: query
+        name: is_login_table
+        type: boolean
       - in: query
         name: limit
         type: integer
