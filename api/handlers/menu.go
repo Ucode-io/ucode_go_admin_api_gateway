@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"reflect"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -790,7 +791,7 @@ func (h *Handler) GetAllMenuSettings(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Param template-id query string true "template-id"
+// @Param template_id query string true "TemplateId"
 // @Success 200 {object} status_http.Response{data=obs.MenuSettings} "MenuBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -865,7 +866,7 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 			return
 		}
 	}
-	if resp.GetMenuTemplate() == (&obs.MenuTemplate{}) {
+	if IsEmptyStruct(resp.MenuTemplate) {
 		resp.MenuTemplate, err = GetMenuTemplateById(template_id, services)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -875,6 +876,10 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 	}
 
 	h.handleResponse(c, status_http.OK, resp)
+}
+
+func IsEmptyStruct(s interface{}) bool {
+	return reflect.DeepEqual(s, reflect.Zero(reflect.TypeOf(s)).Interface())
 }
 
 // UpdateMenuSettings godoc

@@ -12974,8 +12974,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "template-id",
-                        "name": "template-id",
+                        "description": "TemplateId",
+                        "name": "template_id",
                         "in": "query",
                         "required": true
                     }
