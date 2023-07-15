@@ -1292,7 +1292,7 @@ func (h *Handler) GetMenuTemplateByID(c *gin.Context) {
 		)
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
-			// return
+			return
 		}
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Menu().GetByIDMenuTemplate(
