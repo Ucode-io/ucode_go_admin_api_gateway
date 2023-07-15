@@ -800,11 +800,11 @@ func (h *Handler) GetMenuSettingByID(c *gin.Context) {
 	var (
 		resp *obs.MenuSettings
 	)
-	template_id := c.Query("template-id")
 	if !util.IsValidUUID(ID) {
 		h.handleResponse(c, status_http.InvalidArgument, "menu id is an invalid uuid")
 		return
 	}
+	template_id := c.Query("template_id")
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
