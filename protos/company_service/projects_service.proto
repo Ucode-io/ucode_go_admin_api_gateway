@@ -128,7 +128,7 @@ message Project {
     string title = 4;
     repeated ResourceWithoutPassword resources = 5;
     string logo = 6;
-    Language language = 7;
+    repeated Language language = 7;
     Currency currency = 8;
     Timezone timezone = 9;
 }

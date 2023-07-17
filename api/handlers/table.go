@@ -382,6 +382,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
 	}
+	authInfo, _ := h.GetAuthInfo(c)
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
@@ -393,6 +394,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 				Search:    c.DefaultQuery("search", ""),
 				ProjectId: resourceEnvironmentId,
 				FolderId:  c.Query("folder_id"),
+				RoleId:    authInfo.GetRoleId(),
 			},
 		)
 
@@ -408,6 +410,7 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 				Offset:    int32(offset),
 				Search:    c.DefaultQuery("search", ""),
 				ProjectId: resourceEnvironmentId,
+				RoleId:    authInfo.GetRoleId(),
 			},
 		)
 

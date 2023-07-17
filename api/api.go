@@ -292,6 +292,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.PUT("/custom-error-message", h.UpdateCustomErrorMessage)
 		v1.POST("/custom-error-message", h.CreateCustomErrorMessage)
 		v1.DELETE("/custom-error-message/:id", h.DeleteCustomErrorMessage)
+		// table-permission
+		v1.GET("/table-permission", h.GetTablePermission)
+		v1.PUT("/table-permission", h.UpdateTablePermission)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))

@@ -5,6 +5,8 @@ option go_package="genproto/company_service";
 
 import "company.proto";
 import "projects_service.proto";
+import "google/protobuf/empty.proto";
+
 
 service CompanyService {
     rpc Create(CreateCompanyRequest) returns (CreateCompanyResponse) {}
@@ -14,6 +16,26 @@ service CompanyService {
     rpc Delete(DeleteCompanyRequest) returns (Empty) {}
     rpc GetListWithProjects(GetListWithProjectsRequest) returns (GetListWithProjectsResponse) {}
     rpc GetCompaniesByOwnerId(GetCompaniesByOwnerIdReq) returns (GetCompaniesByOwnerIdRes) {}
+    rpc GetAllMenuTemplate(google.protobuf.Empty) returns (GatAllMenuTemplateResponse) {}
+    rpc GetMenuTemplateById(GetMenuTemplateRequest) returns (MenuTemplate) {}
+}
+
+message GetMenuTemplateRequest {
+    string id = 1;
+}
+
+message GatAllMenuTemplateResponse {
+    repeated MenuTemplate menu_templates = 1;
+    int32 count = 2;
+}
+
+message MenuTemplate {
+    string id = 1;
+    string background = 2;
+    string active_background = 3;
+    string text = 4;
+    string active_text = 5;
+    string title = 6;
 }
 
 message GetCompaniesByOwnerIdReq {
