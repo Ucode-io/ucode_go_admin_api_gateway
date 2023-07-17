@@ -242,17 +242,17 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 		return
 	}
 
-	_, err = h.authService.Company().Update(
-		c.Request.Context(),
-		&auth_service.UpdateCompanyRequest{
-			Id:   companyId,
-			Name: company.Name,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
+	// _, err = h.authService.Company().Update(
+	// 	c.Request.Context(),
+	// 	&auth_service.UpdateCompanyRequest{
+	// 		Id:   companyId,
+	// 		Name: company.Name,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
+	// 	return
+	// }
 
 	resp, err := h.companyServices.CompanyService().Company().Update(
 		context.Background(),
@@ -288,14 +288,14 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 func (h *Handler) DeleteCompany(c *gin.Context) {
 	companyId := c.Param("company_id")
 
-	_, err := h.authService.Company().Remove(
-		c.Request.Context(),
-		&auth_service.CompanyPrimaryKey{Id: companyId},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// _, err := h.authService.Company().Remove(
+	// 	c.Request.Context(),
+	// 	&auth_service.CompanyPrimaryKey{Id: companyId},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
 	resp, err := h.companyServices.CompanyService().Company().Delete(
 		context.Background(),
@@ -360,6 +360,7 @@ func (h *Handler) CreateCompanyProject(c *gin.Context) {
 			UserId:    authInfo.GetUserId(),
 			ProjectId: resp.GetProjectId(),
 			CompanyId: project.GetCompanyId(),
+			
 		},
 	)
 	if err != nil {
