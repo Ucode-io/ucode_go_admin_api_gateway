@@ -18222,6 +18222,9 @@ paths:
         name: folder_id
         type: string
       - in: query
+        name: is_login_table
+        type: boolean
+      - in: query
         name: limit
         type: integer
       - in: query
@@ -18559,7 +18562,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all tables permission
+      description: Get all table permission
       operationId: get_table_permission
       parameters:
       - in: query
@@ -21892,6 +21895,9 @@ paths:
         type: integer
       - in: query
         name: project_id
+        type: string
+      - in: query
+        name: role_id
         type: string
       - in: query
         name: search
