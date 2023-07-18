@@ -303,6 +303,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2.GET("/custom-event", h.GetAllNewCustomEvents)
 		v2.PUT("/custom-event", h.UpdateNewCustomEvent)
 		v2.DELETE("/custom-event/:custom_event_id", h.DeleteNewCustomEvent)
+
+		v2.GET("/language-json", h.GetLanguageJson)
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
