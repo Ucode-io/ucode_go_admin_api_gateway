@@ -32,6 +32,7 @@ func (h *Handler) GetLanguageJson(c *gin.Context) {
 		objectRequest models.CommonMessage
 		resp          *obs.CommonMessage
 		statusHttp    = status_http.GrpcStatusToHTTP["Ok"]
+		object        = make(map[string]interface{})
 		languages     = make(map[string]interface{})
 	)
 	tokenInfo, err := h.GetAuthInfo(c)
@@ -39,18 +40,19 @@ func (h *Handler) GetLanguageJson(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
+	fmt.Println("token info: ", tokenInfo)
 	if tokenInfo != nil {
 		if tokenInfo.Tables != nil {
-			objectRequest.Data["tables"] = tokenInfo.GetTables()
+			object["tables"] = tokenInfo.GetTables()
 		}
-		objectRequest.Data["user_id_from_token"] = tokenInfo.GetUserId()
-		objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
-		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
+		object["user_id_from_token"] = tokenInfo.GetUserId()
+		object["role_id_from_token"] = tokenInfo.GetRoleId()
+		object["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
 
-	objectRequest.Data["limit"] = math.MaxInt16
-	objectRequest.Data["offset"] = 0
+	object["limit"] = math.MaxInt16
 
+	objectRequest.Data = object
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
