@@ -21672,6 +21672,47 @@ paths:
       summary: Get Micro Frontend By Id
       tags:
       - Functions
+  /v2/language-json:
+    get:
+      consumes:
+      - application/json
+      description: Language json
+      operationId: language_json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Language json
+      tags:
+      - language
   /v2/table:
     get:
       consumes:
