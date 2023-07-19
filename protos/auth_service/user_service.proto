@@ -35,6 +35,16 @@ service UserService {
     rpc RegisterUserViaEmail(CreateUserRequest) returns (User) {}
     rpc RegisterWithGoogle(RegisterWithGoogleRequest) returns (User) {}
     rpc GetListSetting(GetListSettingReq) returns (Setting) {}
+    rpc GetUserProjects(UserPrimaryKey) returns (GetUserProjectsRes) {}
+}
+
+message UserCompany {
+    string id = 1;
+    repeated string project_ids = 2;
+}
+
+message GetUserProjectsRes {
+    repeated UserCompany companies = 1;
 }
 
 message Setting {

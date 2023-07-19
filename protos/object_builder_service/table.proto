@@ -4,6 +4,7 @@ package object_builder_service;
 option go_package="genproto/object_builder_service";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
 import "field.proto";
 import "section.proto";
 import "layout.proto";
@@ -123,6 +124,8 @@ message UpdateTableRequest {
     bool is_cached = 16;
     bool default_editable = 17;
     bool soft_delete = 18;
+    bool is_login_table = 19;
+    google.protobuf.Struct attributes = 20;
 }
 
 message Table {
@@ -144,6 +147,8 @@ message Table {
     Permission record_permissions = 16;
     bool default_editable = 17;
     bool soft_delete = 18;
+    bool is_login_table = 19;
+    google.protobuf.Struct attributes = 20;
 }
 
 message CommitInfo {
@@ -175,6 +180,7 @@ message GetAllTablesRequest {
     string project_id = 4;
     string version_id = 5;
     string folder_id = 6;
+    bool is_login_table = 7;
 }
 
 message Permission {

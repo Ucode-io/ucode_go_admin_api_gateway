@@ -34,6 +34,8 @@ message CreateFieldRequest {
     string version_id = 16;
     string relation_field = 17;
     bool show_label = 18;
+    bool enable_multilanguage = 19;
+    bool hide_multilanguage = 20;
 }
 
 message CreateFieldsRequest {
@@ -74,6 +76,8 @@ message Field {
     bool is_system = 19;
     string relation_field = 20;
     bool show_label = 21;
+    bool enable_multilanguage = 22;
+    bool hide_multilanguage = 23;
 }
 
 message GetAllFieldsResponse {
