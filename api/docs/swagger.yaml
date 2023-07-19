@@ -861,7 +861,9 @@ definitions:
       k8s_namespace:
         type: string
       language:
-        $ref: '#/definitions/company_service.Language'
+        items:
+          $ref: '#/definitions/company_service.Language'
+        type: array
       logo:
         type: string
       project_id:
@@ -2793,6 +2795,10 @@ definitions:
         type: string
       default:
         type: string
+      enable_multilanguage:
+        type: boolean
+      hide_multilanguage:
+        type: boolean
       id:
         type: string
       index:
@@ -3213,6 +3219,10 @@ definitions:
         type: string
       default:
         type: string
+      enable_multilanguage:
+        type: boolean
+      hide_multilanguage:
+        type: boolean
       id:
         type: string
       index:
@@ -3865,6 +3875,8 @@ definitions:
     type: object
   object_builder_service.Table:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       author_id:
         type: string
       commit_info:
@@ -3882,6 +3894,8 @@ definitions:
       increment_id:
         $ref: '#/definitions/object_builder_service.IncrementID'
       is_cached:
+        type: boolean
+      is_login_table:
         type: boolean
       is_own_table:
         type: boolean
@@ -21717,6 +21731,9 @@ paths:
       - in: query
         name: folder_id
         type: string
+      - in: query
+        name: is_login_table
+        type: boolean
       - in: query
         name: limit
         type: integer

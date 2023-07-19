@@ -28686,6 +28686,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "boolean",
+                        "name": "is_login_table",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -33037,7 +33042,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "language": {
-                    "$ref": "#/definitions/company_service.Language"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Language"
+                    }
                 },
                 "logo": {
                     "type": "string"
@@ -35972,6 +35980,12 @@ const docTemplate = `{
                 "default": {
                     "type": "string"
                 },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
+                "hide_multilanguage": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -36610,6 +36624,12 @@ const docTemplate = `{
                 },
                 "default": {
                     "type": "string"
+                },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
+                "hide_multilanguage": {
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "string"
@@ -37611,6 +37631,9 @@ const docTemplate = `{
         "object_builder_service.Table": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "author_id": {
                     "type": "string"
                 },
@@ -37636,6 +37659,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/object_builder_service.IncrementID"
                 },
                 "is_cached": {
+                    "type": "boolean"
+                },
+                "is_login_table": {
                     "type": "boolean"
                 },
                 "is_own_table": {

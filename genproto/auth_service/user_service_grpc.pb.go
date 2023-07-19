@@ -46,6 +46,7 @@ type UserServiceClient interface {
 	RegisterUserViaEmail(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 	RegisterWithGoogle(ctx context.Context, in *RegisterWithGoogleRequest, opts ...grpc.CallOption) (*User, error)
 	GetListSetting(ctx context.Context, in *GetListSettingReq, opts ...grpc.CallOption) (*Setting, error)
+	GetUserProjects(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*GetUserProjectsRes, error)
 }
 
 type userServiceClient struct {
@@ -263,6 +264,15 @@ func (c *userServiceClient) GetListSetting(ctx context.Context, in *GetListSetti
 	return out, nil
 }
 
+func (c *userServiceClient) GetUserProjects(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*GetUserProjectsRes, error) {
+	out := new(GetUserProjectsRes)
+	err := c.cc.Invoke(ctx, "/auth_service.UserService/GetUserProjects", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -290,6 +300,7 @@ type UserServiceServer interface {
 	RegisterUserViaEmail(context.Context, *CreateUserRequest) (*User, error)
 	RegisterWithGoogle(context.Context, *RegisterWithGoogleRequest) (*User, error)
 	GetListSetting(context.Context, *GetListSettingReq) (*Setting, error)
+	GetUserProjects(context.Context, *UserPrimaryKey) (*GetUserProjectsRes, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -365,6 +376,9 @@ func (UnimplementedUserServiceServer) RegisterWithGoogle(context.Context, *Regis
 }
 func (UnimplementedUserServiceServer) GetListSetting(context.Context, *GetListSettingReq) (*Setting, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListSetting not implemented")
+}
+func (UnimplementedUserServiceServer) GetUserProjects(context.Context, *UserPrimaryKey) (*GetUserProjectsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserProjects not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -793,6 +807,24 @@ func _UserService_GetListSetting_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetUserProjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserPrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUserProjects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.UserService/GetUserProjects",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUserProjects(ctx, req.(*UserPrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -891,6 +923,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetListSetting",
 			Handler:    _UserService_GetListSetting_Handler,
+		},
+		{
+			MethodName: "GetUserProjects",
+			Handler:    _UserService_GetUserProjects_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
