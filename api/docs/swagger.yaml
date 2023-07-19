@@ -8832,6 +8832,53 @@ paths:
       summary: Get all companies
       tags:
       - Company
+    post:
+      consumes:
+      - application/json
+      description: Create Company
+      operationId: create_company
+      parameters:
+      - description: CompanyCreateRequest
+        in: body
+        name: Company
+        required: true
+        schema:
+          $ref: '#/definitions/models.CompanyCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Company'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Company
+      tags:
+      - Company
   /v1/company-project:
     get:
       consumes:
