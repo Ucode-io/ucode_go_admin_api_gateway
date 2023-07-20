@@ -69,7 +69,7 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	authInfo, _ := h.GetAuthInfo(c)
+	authInfo, _ := h.GetAuthAdminInfo(c)
 	userProjects, err := h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
 		Id: authInfo.GetUserId(),
 	})
