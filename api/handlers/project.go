@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"fmt"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -69,6 +69,21 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
+	authInfo, _ := h.GetAuthAdminInfo(c)
+	userProjects, err := h.authService.User().GetUserProjects(context.Background(), &auth_service.UserPrimaryKey{
+		Id: authInfo.GetUserId(),
+	})
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	var projectIds []string
+	for _, userProject := range userProjects.GetCompanies() {
+		if userProject.GetId() == c.DefaultQuery("company_id", "") {
+			projectIds = userProject.GetProjectIds()
+		}
+	}
 
 	resp, err := h.companyServices.CompanyService().Project().GetList(
 		context.Background(),
@@ -79,12 +94,22 @@ func (h *Handler) GetCompanyProjectList(c *gin.Context) {
 			CompanyId: c.DefaultQuery("company_id", ""),
 		},
 	)
-	fmt.Println("projects::", resp.GetProjects())
+	projectsMap := make(map[string]*company_service.Project)
+	for _, project := range resp.GetProjects() {
+		projectsMap[project.GetProjectId()] = project
+	}
+	var availableProjects = make([]*company_service.Project, 0, len(projectIds))
+	for _, id := range projectIds {
+		if val, ok := projectsMap[id]; ok {
+			availableProjects = append(availableProjects, val)
+		}
+	}
 
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	resp.Projects = availableProjects
 
 	h.handleResponse(c, status_http.OK, resp)
 }

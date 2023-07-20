@@ -80,6 +80,26 @@ func (h *Handler) GetAuthInfo(c *gin.Context) (result *auth_service.V2HasAccessU
 	return accessResponse, nil
 }
 
+func (h *Handler) GetAuthAdminInfo(c *gin.Context) (result *auth_service.HasAccessSuperAdminRes, err error) {
+	data, ok := c.Get("Auth_Admin")
+	if !ok {
+		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
+		c.Abort()
+		return nil, errors.New("token error: wrong format")
+	}
+
+	accessResponse, ok := data.(*auth_service.HasAccessSuperAdminRes)
+	if !ok {
+		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")
+		c.Abort()
+		return nil, errors.New("token error: wrong format")
+	}
+
+	// fmt.Println(":::::accessResponse", accessResponse)
+
+	return accessResponse, nil
+}
+
 func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType string) (versionId, commitGuid string, err error) {
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
