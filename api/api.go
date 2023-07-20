@@ -312,7 +312,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	v1Admin.Use(h.AdminAuthMiddleware())
 	{
 		// company service
-		// v1.POST("/company", h.CreateCompany)
+		v1.POST("/company", h.CreateCompany)
 		v1Admin.GET("/company/:company_id", h.GetCompanyByID)
 		v1Admin.GET("/company", h.GetCompanyList)
 		v1Admin.PUT("company/:company_id", h.UpdateCompany)
