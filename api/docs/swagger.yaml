@@ -3404,6 +3404,13 @@ definitions:
           $ref: '#/definitions/object_builder_service.LayoutResponse'
         type: array
     type: object
+  object_builder_service.GetPermissionsByTableSlugResponse:
+    properties:
+      current_user_permission:
+        $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest'
+      selected_user_permission:
+        $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest'
+    type: object
   object_builder_service.GetTableHistoryResponse:
     properties:
       items:
@@ -18587,7 +18594,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/object_builder_service.GetAllTablesResponse'
+                  $ref: '#/definitions/object_builder_service.GetPermissionsByTableSlugResponse'
               type: object
         "400":
           description: Invalid Argument

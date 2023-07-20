@@ -22805,7 +22805,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/object_builder_service.GetAllTablesResponse"
+                                            "$ref": "#/definitions/object_builder_service.GetPermissionsByTableSlugResponse"
                                         }
                                     }
                                 }
@@ -37016,6 +37016,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.LayoutResponse"
                     }
+                }
+            }
+        },
+        "object_builder_service.GetPermissionsByTableSlugResponse": {
+            "type": "object",
+            "properties": {
+                "current_user_permission": {
+                    "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest"
+                },
+                "selected_user_permission": {
+                    "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest"
                 }
             }
         },

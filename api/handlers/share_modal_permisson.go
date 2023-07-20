@@ -22,7 +22,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param filters query obs.GetPermissionsByTableSlugRequest true "filters"
-// @Success 200 {object} status_http.Response{data=obs.GetAllTablesResponse} "TableBody"
+// @Success 200 {object} status_http.Response{data=obs.GetPermissionsByTableSlugResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetTablePermission(c *gin.Context) {
