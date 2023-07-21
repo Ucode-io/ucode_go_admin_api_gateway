@@ -154,10 +154,10 @@ ingress:
         - host: "temp-api-admin.ucode.run"
           path: /
           servicePort: 8080
-      # tls:
-      #   - secretName: ucode-star
-      #     hosts:
-      #       - "temp-api-admin.ucode.run"
+      tls:
+        - secretName: ucode-star
+          hosts:
+            - "temp-api-admin.ucode.run"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -175,10 +175,10 @@ ingress:
         - host: "temp-api-admin.ucode.run"
           path: /swagger
           servicePort: 8080
-      # tls:
-      #   - secretName: ucode-star
-      #     hosts:
-      #       - "temp-api-admin.ucode.run"
+      tls:
+        - secretName: ucode-star
+          hosts:
+            - "temp-api-admin.ucode.run"
 
 # resources:
 #    limits:
