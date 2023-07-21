@@ -1,0 +1,210 @@
+# Default values for microservice.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+global:
+  replicaCount: 1
+  environment: {}
+  # list of key: value
+  # GLOBAL1: value
+labels:
+  app: ucode-go-admin-api-gateway
+replicaCount: 1
+
+image:
+  registry: gitlab.udevs.io:5050
+  repository: /ucode/ucode_go_admin_api_gateway
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "temp"
+
+imagePullSecrets: "gitlab-registry"
+nameOverride: ""
+fullnameOverride: ""
+
+# command: ["/bin/sh","-c"]
+# args: ["echo 'consuming a message'; sleep 5"]
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "vault-auth"
+
+podAnnotations:
+  vault.hashicorp.com/agent-inject: "true"
+  vault.hashicorp.com/auth-path: "auth/kubernetes-ucode-hzn"
+  vault.hashicorp.com/agent-inject-secret-.env: "secret/data/k8s/ucode-temp/go-admin-api-gateway"
+  vault.hashicorp.com/secret-volume-path-.env: "/app"
+  vault.hashicorp.com/role: "ucode-temp"
+  vault.hashicorp.com/agent-inject-template-.env: |
+    {{- with secret "secret/data/k8s/ucode-temp/openfaas" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
+    {{- with secret "secret/data/k8s/ucode-temp/redis" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
+    {{- with secret "secret/data/k8s/ucode-temp/minio" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
+    {{- with secret "secret/data/k8s/ucode-temp/services" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
+    {{- with secret "secret/data/k8s/ucode-temp/postgres" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
+    {{- with secret "secret/data/k8s/ucode-temp/go-admin-api-gateway" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
+    {{- with secret "secret/data/k8s/ucode-temp/gitlab" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{ end -}}
+podLabels:
+  app: ucode-go-admin-api-gateway
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #     - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+vault:
+  enabled: false
+  secretName: vault-secrets
+  variables:
+    VAULT_TOKEN: vault_token
+    SECRETS_PATH: vault_path
+
+environment:
+  KUBECONFIG: /kubeconfig/config
+  GIT_SSH_COMMAND: "ssh -i /key/ssh-privatekey -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+volumes:
+  enabled: true
+  hostpath:
+    enabled: true
+    name: code-server
+    path: /functions
+    mountPath: /functions
+    type: Directory
+  pvc:
+    enabled: false
+    existing_claim:
+    name: pvc
+    mountPath: /functions
+    size: 1G
+    class:
+    accessModes:
+      - ReadWriteMany
+  configMaps:
+    - name: code-server-kubeconfig
+      mountPath: /kubeconfig
+  secrets:
+    - name: ssh-key-secret
+      mountPath: /key
+      defaultMode: 256
+
+
+service:
+  type: ClusterIP
+  annotations: {}
+  specs:
+    - port: 8080
+      targetPort: 8080
+      name: http
+
+ingress:
+  enabled: true
+  rules:
+    - annotations:
+        # enable cors
+        # nginx.ingress.kubernetes.io/enable-cors: "true"
+        # nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, Platform-Type, X-API-KEY, Project-Id"
+        # nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+        # nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+        # content settings
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+        nginx.ingress.kubernetes.io/ssl-redirect: "false"
+        kubernetes.io/ingress.class: nginx
+      type: web
+      hosts:
+        - host: "temp-api-admin.ucode.run"
+          path: /
+          servicePort: 8080
+      # tls:
+      #   - secretName: ucode-star
+      #     hosts:
+      #       - "temp-api-admin.ucode.run"
+    - annotations:
+        # type of authentication
+        nginx.ingress.kubernetes.io/auth-type: basic
+        # name of the secret that contains the user/password definitions
+        nginx.ingress.kubernetes.io/auth-secret: basic-auth
+        # message to display with an appropriate context why the authentication is required
+        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - u-code"
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+        nginx.ingress.kubernetes.io/ssl-redirect: "false"
+        kubernetes.io/ingress.class: nginx
+      type: auth
+      hosts:
+        - host: "temp-api-admin.ucode.run"
+          path: /swagger
+          servicePort: 8080
+      # tls:
+      #   - secretName: ucode-star
+      #     hosts:
+      #       - "temp-api-admin.ucode.run"
+
+# resources:
+#    limits:
+#      cpu: 150m
+#      memory: 256Mi
+#    requests:
+#      cpu: 100m
+#      memory: 200Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/ucode-temp
+              operator: In
+              values:
+                - "true"
