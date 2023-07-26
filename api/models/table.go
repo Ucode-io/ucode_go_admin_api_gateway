@@ -10,10 +10,11 @@ type InsertVersionsToCommitRequest struct {
 }
 
 type GetAllTablesRequest struct {
-	Offset    int64  `json:"offset"`
-	Limit     int64  `json:"limit"`
-	Search    string `json:"search"`
-	ProjectId string `json:"project-id"`
-	VersionId string `json:"version_id"`
-	FolderId  string `json:"folder_id"`
+	Offset       int64  `json:"offset"`
+	Limit        int64  `json:"limit"`
+	Search       string `json:"search"`
+	ProjectId    string `json:"project-id"`
+	VersionId    string `json:"version_id"`
+	FolderId     string `json:"folder_id"`
+	IsLoginTable bool   `json:"is_login_table"`
 }

@@ -220,25 +220,25 @@ func (h *Handler) UpsertViewRelations(c *gin.Context) {
 	var resp *emptypb.Empty
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Section().UpsertViewRelations(
-			context.Background(),
-			&viewRelation,
-		)
+		// resp, err = services.BuilderService().Section().UpsertViewRelations(
+		// 	context.Background(),
+		// 	&viewRelation,
+		// )
 
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// if err != nil {
+		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+		// 	return
+		// }
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Section().UpsertViewRelations(
-			context.Background(),
-			&viewRelation,
-		)
+		// resp, err = services.PostgresBuilderService().Section().UpsertViewRelations(
+		// 	context.Background(),
+		// 	&viewRelation,
+		// )
 
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+		// if err != nil {
+		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+		// 	return
+		// }
 	}
 
 	h.handleResponse(c, status_http.OK, resp)

@@ -382,17 +382,24 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
 	}
+	authInfo, _ := h.GetAuthInfo(c)
+	var isLoginTable bool
+	if c.Query("is_login_table") == "true" {
+		isLoginTable = true
+	}
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Table().GetAll(
 			context.Background(),
 			&obs.GetAllTablesRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				Search:    c.DefaultQuery("search", ""),
-				ProjectId: resourceEnvironmentId,
-				FolderId:  c.Query("folder_id"),
+				Limit:        int32(limit),
+				Offset:       int32(offset),
+				Search:       c.DefaultQuery("search", ""),
+				ProjectId:    resourceEnvironmentId,
+				FolderId:     c.Query("folder_id"),
+				RoleId:       authInfo.GetRoleId(),
+				IsLoginTable: isLoginTable,
 			},
 		)
 
@@ -404,10 +411,12 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		resp, err = services.PostgresBuilderService().Table().GetAll(
 			context.Background(),
 			&obs.GetAllTablesRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				Search:    c.DefaultQuery("search", ""),
-				ProjectId: resourceEnvironmentId,
+				Limit:        int32(limit),
+				Offset:       int32(offset),
+				Search:       c.DefaultQuery("search", ""),
+				ProjectId:    resourceEnvironmentId,
+				RoleId:       authInfo.GetRoleId(),
+				IsLoginTable: isLoginTable,
 			},
 		)
 
