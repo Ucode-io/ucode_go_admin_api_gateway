@@ -19,6 +19,8 @@ service PermissionService {
     rpc UpdateRoleAppTablePermissions(UpdateRoleAppTablePermissionsRequest) returns (google.protobuf.Empty) {}
     rpc GetAllMenuPermissions(GetAllMenuPermissionsRequest) returns (GetAllMenuPermissionsResponse) {}
     rpc UpdateMenuPermissions(UpdateMenuPermissionsRequest) returns (google.protobuf.Empty) {}
+    rpc UpdatePermissionsByTableSlug(UpdatePermissionsRequest) returns (google.protobuf.Empty) {}
+    rpc GetPermissionsByTableSlug(GetPermissionsByTableSlugRequest) returns (GetPermissionsByTableSlugResponse) {}
 }
 
 message GetAllPermissionRequest {
@@ -104,6 +106,21 @@ message RoleWithAppTablePermissions {
             repeated AutomaticFilter update = 3;
             repeated AutomaticFilter delete = 4;
         }
+        message TableViewPermission {
+            string guid = 1;
+            string name = 2;
+            bool view = 3;
+            bool edit = 4;
+            bool delete = 5;
+            string view_id = 6;
+        }
+        message CustomPermission {
+            string view_create = 1;
+            string share_modal = 2;
+            string settings = 3;
+            string automation = 4;
+            string language_btn = 5;
+        }
 
         string label = 1;
         string slug = 2;
@@ -120,6 +137,8 @@ message RoleWithAppTablePermissions {
         repeated ViewPermission view_permissions = 13;
         AutomaticFilterWithMethod automatic_filters = 14;
         repeated ActionPermission action_permissions = 15;
+        repeated TableViewPermission table_view_permissions = 16;
+        CustomPermission custom_permission = 17;
     }
     string name = 1;
     string guid = 2;
@@ -128,6 +147,21 @@ message RoleWithAppTablePermissions {
     string client_type_id = 5;
     bool grant_access = 6;
     repeated Table tables = 7;
+    GlobalPermission global_permission = 8;
+}
+
+message GlobalPermission {
+    string id = 1;
+    bool menu_button = 2;
+    bool chat = 3;
+    bool settings_button = 4;
+    bool project_settings_button = 5;
+    bool profile_settings_button = 6;
+    bool menu_setting_button = 7;
+    bool redirects_button = 8;
+    bool api_keys_button = 9;
+    bool environments_button = 10;
+    bool projects_button = 11;
 }
 
 message GetListWithRoleAppTablePermissionsResponse {
@@ -167,4 +201,66 @@ message UpdateMenuPermissionsRequest {
     string project_id = 1;
     string role_id = 2;
     repeated MenuPermission menus = 3;
+}
+
+message UpdatePermissionsRequest {
+    
+    message Table {
+        message RecordPermission {
+            string read = 1;
+            string write = 2;
+            string update = 3;
+            string delete = 4;
+            string guid = 5;
+            bool is_public = 6;
+        }
+        message FieldPermission {
+            string field_id = 1;
+            string guid = 2;
+            bool view_permission = 3;
+            bool edit_permission = 4;
+            string label = 5;
+            string table_slug = 6;
+        }
+        message ViewPermission {
+            string guid = 1;
+            string label = 2;
+            string relation_id = 3;
+            bool view_permission = 4;
+            bool edit_permission = 5;
+            bool create_permission = 6;
+            bool delete_permission = 7;
+            string table_slug = 8;
+        }
+        message ActionPermission {
+            string guid = 1;
+            string custom_event_id = 2;
+            bool permission = 3;
+            string label = 4;
+            string table_slug = 5;
+        }
+        string id = 1;
+        string slug = 2;
+        string label = 3;
+        RecordPermission record_permissions = 4;
+        repeated FieldPermission field_permissions = 5;
+        repeated ViewPermission view_permissions = 6;
+        repeated ActionPermission action_permissions = 7;
+    }
+    string project_id = 1;
+    string guid = 2;
+    bool grant_access = 3;
+    Table table = 4;
+}
+
+message GetPermissionsByTableSlugRequest {
+    string role_id = 1;
+    string current_role_id = 2;
+    string table_slug = 3;
+    string project_id = 4;
+}
+
+message GetPermissionsByTableSlugResponse {
+    UpdatePermissionsRequest current_user_permission = 1;
+    UpdatePermissionsRequest selected_user_permission = 2;
 }
