@@ -475,7 +475,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/redirect-url", h.GetListRedirectUrl)
 		v1Admin.GET("/redirect-url/:redirect-url-id", h.GetSingleRedirectUrl)
 		v1Admin.DELETE("/redirect-url/:redirect-url-id", h.DeleteRedirectUrl)
-		v1Admin.GET("/redirect-url/re-order", h.UpdateRedirectUrlOrder)
+		v1Admin.PUT("/redirect-url/re-order", h.UpdateRedirectUrlOrder)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())
