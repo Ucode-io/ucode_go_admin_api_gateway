@@ -240,6 +240,25 @@ message RecordPermission {
     string write = 6;
     string update = 7;
     string delete = 8;
+    string automation = 9;
+    string language_btn = 10;
+    string settings = 11;
+    string share_modal = 12;
+    string view_create = 13;
+}
+
+message GlobalPermission {
+    string id = 1;
+    bool menu_button = 2;
+    bool chat = 3;
+    bool settings_button = 4;
+    bool project_settings_button = 5;
+    bool profile_settings_button = 6;
+    bool menu_setting_button = 7;
+    bool redirects_button = 8;
+    bool api_keys_button = 9;
+    bool environments_button = 10;
+    bool projects_button = 11;
 }
 
 message V2LoginResponse {
@@ -258,6 +277,7 @@ message V2LoginResponse {
     User user = 13;
     repeated Object tables = 14;
     google.protobuf.Struct addational_table = 15;
+    GlobalPermission global_permission  = 16;
 }
 message V2LoginWithOptionsResponse {
     bool user_found = 1;

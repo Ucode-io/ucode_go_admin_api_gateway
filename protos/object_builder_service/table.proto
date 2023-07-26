@@ -181,6 +181,7 @@ message GetAllTablesRequest {
     string version_id = 5;
     string folder_id = 6;
     bool is_login_table = 7;
+    string role_id = 8;
 }
 
 message Permission {

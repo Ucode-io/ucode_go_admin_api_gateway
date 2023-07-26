@@ -5,6 +5,7 @@ package object_builder_service;
 option go_package="genproto/object_builder_service";
 
 import "google/protobuf/struct.proto";
+import "permission.proto";
 
 service LoginService {
     rpc Login (LoginRequest) returns (V2LoginResponse) {}
@@ -31,6 +32,7 @@ message LoginDataRes {
     repeated RecordPermission permissions = 6;
     string login_table_slug = 7;
     repeated RecordPermission app_permissions = 8;
+    GlobalPermission global_permission = 9;
 }
 
 enum ConfirmStrategies {
@@ -101,6 +103,11 @@ message RecordPermission {
     string write = 6;
     string update = 7;
     string delete = 8;
+    string automation = 9;
+    string language_btn = 10;
+    string settings = 11;
+    string share_modal = 12;
+    string view_create = 13;
 }
 
 message TableClientType {
@@ -140,4 +147,5 @@ message V2LoginResponse {
     string login_table_slug = 7;
     repeated RecordPermission app_permissions = 8;
     google.protobuf.Struct addational_table = 9;
+    GlobalPermission global_permission = 10;
 }

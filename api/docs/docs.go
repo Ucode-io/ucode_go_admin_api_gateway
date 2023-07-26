@@ -28800,6 +28800,11 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "search",
                         "in": "query"
                     },
@@ -32140,6 +32145,44 @@ const docTemplate = `{
                 }
             }
         },
+        "auth_service.GlobalPermission": {
+            "type": "object",
+            "properties": {
+                "api_keys_button": {
+                    "type": "boolean"
+                },
+                "chat": {
+                    "type": "boolean"
+                },
+                "environments_button": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menu_button": {
+                    "type": "boolean"
+                },
+                "menu_setting_button": {
+                    "type": "boolean"
+                },
+                "profile_settings_button": {
+                    "type": "boolean"
+                },
+                "project_settings_button": {
+                    "type": "boolean"
+                },
+                "projects_button": {
+                    "type": "boolean"
+                },
+                "redirects_button": {
+                    "type": "boolean"
+                },
+                "settings_button": {
+                    "type": "boolean"
+                }
+            }
+        },
         "auth_service.Integration": {
             "type": "object",
             "properties": {
@@ -32215,6 +32258,9 @@ const docTemplate = `{
         "auth_service.RecordPermission": {
             "type": "object",
             "properties": {
+                "automation": {
+                    "type": "string"
+                },
                 "client_type_id": {
                     "type": "string"
                 },
@@ -32224,16 +32270,28 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "language_btn": {
+                    "type": "string"
+                },
                 "read": {
                     "type": "string"
                 },
                 "role_id": {
                     "type": "string"
                 },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
                 "table_slug": {
                     "type": "string"
                 },
                 "update": {
+                    "type": "string"
+                },
+                "view_create": {
                     "type": "string"
                 },
                 "write": {
@@ -32441,6 +32499,9 @@ const docTemplate = `{
                 },
                 "environment_id": {
                     "type": "string"
+                },
+                "global_permission": {
+                    "$ref": "#/definitions/auth_service.GlobalPermission"
                 },
                 "login_table_slug": {
                     "type": "string"
@@ -37014,6 +37075,44 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.GlobalPermission": {
+            "type": "object",
+            "properties": {
+                "api_keys_button": {
+                    "type": "boolean"
+                },
+                "chat": {
+                    "type": "boolean"
+                },
+                "environments_button": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menu_button": {
+                    "type": "boolean"
+                },
+                "menu_setting_button": {
+                    "type": "boolean"
+                },
+                "profile_settings_button": {
+                    "type": "boolean"
+                },
+                "project_settings_button": {
+                    "type": "boolean"
+                },
+                "projects_button": {
+                    "type": "boolean"
+                },
+                "redirects_button": {
+                    "type": "boolean"
+                },
+                "settings_button": {
+                    "type": "boolean"
+                }
+            }
+        },
         "object_builder_service.HtmlTemplate": {
             "type": "object",
             "properties": {
@@ -37467,6 +37566,9 @@ const docTemplate = `{
         "object_builder_service.RecordPermission": {
             "type": "object",
             "properties": {
+                "automation": {
+                    "type": "string"
+                },
                 "client_type_id": {
                     "type": "string"
                 },
@@ -37476,16 +37578,28 @@ const docTemplate = `{
                 "guid": {
                     "type": "string"
                 },
+                "language_btn": {
+                    "type": "string"
+                },
                 "read": {
                     "type": "string"
                 },
                 "role_id": {
                     "type": "string"
                 },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
                 "table_slug": {
                     "type": "string"
                 },
                 "update": {
+                    "type": "string"
+                },
+                "view_create": {
                     "type": "string"
                 },
                 "write": {
@@ -38287,6 +38401,9 @@ const docTemplate = `{
                 },
                 "client_type": {
                     "$ref": "#/definitions/object_builder_service.ClientType"
+                },
+                "global_permission": {
+                    "$ref": "#/definitions/object_builder_service.GlobalPermission"
                 },
                 "login_table_slug": {
                     "type": "string"
