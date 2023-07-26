@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -67,7 +68,8 @@ func (h *Handler) CreateRedirectUrl(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-
+	fmt.Println("projectId::", projectId)
+	fmt.Println("environmentId::", environmentId)
 	data.ProjectId = projectId.(string)
 	data.EnvId = environmentId.(string)
 
@@ -373,6 +375,52 @@ func (h *Handler) GetListRedirectUrl(c *gin.Context) {
 			Offset:    int32(offset),
 			Limit:     int32(limit),
 		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, res)
+}
+
+
+// UpdateRedirectUrlOrder godoc
+// @Security ApiKeyAuth
+// @ID update_redirect_url_order
+// @Router /v1/redirect-url/re-order [PUT]
+// @Summary Update redirect url order
+// @Description Update redirect url order
+// @Tags RedirectUrl
+// @Accept json
+// @Produce json
+// @Param data body pb.UpdateOrderRedirectUrlReq true "UpdateRedirectUrlOrder"
+// @Success 200 {object} status_http.Response{data=string} "Update RedirectUrl Order response"
+// @Response 400 {object} status_http.Response{data=string} "Bad Request"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) UpdateRedirectUrlOrder(c *gin.Context) {
+	var (
+		data pb.UpdateOrderRedirectUrlReq
+	)
+
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	res, err := services.CompanyService().Redirect().UpdateOrder(
+		context.Background(),
+		&data,
 	)
 
 	if err != nil {
