@@ -22225,6 +22225,11 @@
                         "in": "query"
                     },
                     {
+                        "type": "boolean",
+                        "name": "is_login_table",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -22791,6 +22796,191 @@
                     },
                     "400": {
                         "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/table-permission": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all table permission",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TablePermission"
+                ],
+                "summary": "Get all table permission",
+                "operationId": "get_table_permission",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "current_role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "table_slug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "TableBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.GetPermissionsByTableSlugResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update table permission",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TablePermission"
+                ],
+                "summary": "Update table permisison",
+                "operationId": "update_table_permission",
+                "parameters": [
+                    {
+                        "description": "UpdateTablePermisisonRequestBody",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Table data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -37134,6 +37324,17 @@
                 }
             }
         },
+        "object_builder_service.GetPermissionsByTableSlugResponse": {
+            "type": "object",
+            "properties": {
+                "current_user_permission": {
+                    "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest"
+                },
+                "selected_user_permission": {
+                    "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest"
+                }
+            }
+        },
         "object_builder_service.GetTableHistoryResponse": {
             "type": "object",
             "properties": {
@@ -38191,6 +38392,153 @@
                 },
                 "project_id": {
                     "type": "string"
+                }
+            }
+        },
+        "object_builder_service.UpdatePermissionsRequest": {
+            "type": "object",
+            "properties": {
+                "grant_access": {
+                    "type": "boolean"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table": {
+                    "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest_Table"
+                }
+            }
+        },
+        "object_builder_service.UpdatePermissionsRequest_Table": {
+            "type": "object",
+            "properties": {
+                "action_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest_Table_ActionPermission"
+                    }
+                },
+                "field_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest_Table_FieldPermission"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "record_permissions": {
+                    "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest_Table_RecordPermission"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "view_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest_Table_ViewPermission"
+                    }
+                }
+            }
+        },
+        "object_builder_service.UpdatePermissionsRequest_Table_ActionPermission": {
+            "type": "object",
+            "properties": {
+                "custom_event_id": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "permission": {
+                    "type": "boolean"
+                },
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.UpdatePermissionsRequest_Table_FieldPermission": {
+            "type": "object",
+            "properties": {
+                "edit_permission": {
+                    "type": "boolean"
+                },
+                "field_id": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "view_permission": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "object_builder_service.UpdatePermissionsRequest_Table_RecordPermission": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "read": {
+                    "type": "string"
+                },
+                "update": {
+                    "type": "string"
+                },
+                "write": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.UpdatePermissionsRequest_Table_ViewPermission": {
+            "type": "object",
+            "properties": {
+                "create_permission": {
+                    "type": "boolean"
+                },
+                "delete_permission": {
+                    "type": "boolean"
+                },
+                "edit_permission": {
+                    "type": "boolean"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "relation_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "view_permission": {
+                    "type": "boolean"
                 }
             }
         },

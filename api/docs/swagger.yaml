@@ -3443,6 +3443,13 @@ definitions:
           $ref: '#/definitions/object_builder_service.LayoutResponse'
         type: array
     type: object
+  object_builder_service.GetPermissionsByTableSlugResponse:
+    properties:
+      current_user_permission:
+        $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest'
+      selected_user_permission:
+        $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest'
+    type: object
   object_builder_service.GetTableHistoryResponse:
     properties:
       items:
@@ -4135,6 +4142,102 @@ definitions:
         type: array
       project_id:
         type: string
+    type: object
+  object_builder_service.UpdatePermissionsRequest:
+    properties:
+      grant_access:
+        type: boolean
+      guid:
+        type: string
+      project_id:
+        type: string
+      table:
+        $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest_Table'
+    type: object
+  object_builder_service.UpdatePermissionsRequest_Table:
+    properties:
+      action_permissions:
+        items:
+          $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest_Table_ActionPermission'
+        type: array
+      field_permissions:
+        items:
+          $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest_Table_FieldPermission'
+        type: array
+      id:
+        type: string
+      label:
+        type: string
+      record_permissions:
+        $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest_Table_RecordPermission'
+      slug:
+        type: string
+      view_permissions:
+        items:
+          $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest_Table_ViewPermission'
+        type: array
+    type: object
+  object_builder_service.UpdatePermissionsRequest_Table_ActionPermission:
+    properties:
+      custom_event_id:
+        type: string
+      guid:
+        type: string
+      label:
+        type: string
+      permission:
+        type: boolean
+      table_slug:
+        type: string
+    type: object
+  object_builder_service.UpdatePermissionsRequest_Table_FieldPermission:
+    properties:
+      edit_permission:
+        type: boolean
+      field_id:
+        type: string
+      guid:
+        type: string
+      label:
+        type: string
+      table_slug:
+        type: string
+      view_permission:
+        type: boolean
+    type: object
+  object_builder_service.UpdatePermissionsRequest_Table_RecordPermission:
+    properties:
+      delete:
+        type: string
+      guid:
+        type: string
+      is_public:
+        type: boolean
+      read:
+        type: string
+      update:
+        type: string
+      write:
+        type: string
+    type: object
+  object_builder_service.UpdatePermissionsRequest_Table_ViewPermission:
+    properties:
+      create_permission:
+        type: boolean
+      delete_permission:
+        type: boolean
+      edit_permission:
+        type: boolean
+      guid:
+        type: string
+      label:
+        type: string
+      relation_id:
+        type: string
+      table_slug:
+        type: string
+      view_permission:
+        type: boolean
     type: object
   object_builder_service.UpdateRelationRequest:
     properties:
@@ -18265,6 +18368,9 @@ paths:
         name: folder_id
         type: string
       - in: query
+        name: is_login_table
+        type: boolean
+      - in: query
         name: limit
         type: integer
       - in: query
@@ -18598,6 +18704,107 @@ paths:
       summary: Get table history by id
       tags:
       - Table
+  /v1/table-permission:
+    get:
+      consumes:
+      - application/json
+      description: Get all table permission
+      operationId: get_table_permission
+      parameters:
+      - in: query
+        name: current_role_id
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: role_id
+        type: string
+      - in: query
+        name: table_slug
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetPermissionsByTableSlugResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all table permission
+      tags:
+      - TablePermission
+    put:
+      consumes:
+      - application/json
+      description: Update table permission
+      operationId: update_table_permission
+      parameters:
+      - description: UpdateTablePermisisonRequestBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Table data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update table permisison
+      tags:
+      - TablePermission
   /v1/table/{table_id}:
     delete:
       consumes:
