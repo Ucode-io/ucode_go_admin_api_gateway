@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // CreateField godoc
@@ -32,6 +33,7 @@ func (h *Handler) CreateField(c *gin.Context) {
 	var (
 		fieldRequest models.CreateFieldRequest
 		resp         *obs.Field
+		fields       []*obs.CreateFieldRequest
 	)
 
 	err := c.ShouldBindJSON(&fieldRequest)
@@ -44,23 +46,6 @@ func (h *Handler) CreateField(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
-	}
-
-	var field = obs.CreateFieldRequest{
-		Id:            fieldRequest.ID,
-		Default:       fieldRequest.Default,
-		Type:          fieldRequest.Type,
-		Index:         fieldRequest.Index,
-		Label:         fieldRequest.Label,
-		Slug:          fieldRequest.Slug,
-		TableId:       fieldRequest.TableID,
-		Attributes:    attributes,
-		IsVisible:     fieldRequest.IsVisible,
-		AutofillTable: fieldRequest.AutoFillTable,
-		AutofillField: fieldRequest.AutoFillField,
-		RelationField: fieldRequest.RelationField,
-		Automatic:     fieldRequest.Automatic,
-		Unique:        fieldRequest.Unique,
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
@@ -108,56 +93,102 @@ func (h *Handler) CreateField(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
-	field.ProjectId = resource.ResourceEnvironmentId
-	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_FIELD)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err))
-	// 	return
-	// }
-	// fmt.Println("create table -- commit_id ---->>", commitID)
-
-	// field.CommitId = commitID
-	// field.CommitGuid = commitGuid
-	// field.CommitId = commitGuid
-	// field.VersionId = versionGuid
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		resp, err = services.BuilderService().Field().Create(
-			context.Background(),
-			&field,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
+	if fieldRequest.EnableMultilanguage {
+		if fieldRequest.Type == "SINGLE_LINE" || fieldRequest.Type == "MULTI_LINE" {
+			languages, err := services.CompanyService().Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
+				ProjectId: resource.GetProjectId(),
+			})
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+			if len(languages.GetLanguage()) > 1 {
+				for _, value := range languages.GetLanguage() {
+					id, _ := uuid.NewRandom()
+					fieldRequest.ID = id.String()
+					fields = append(fields, SetTitlePrefix(fieldRequest, value.ShortName, resource.ResourceEnvironmentId, attributes, true, false))
+				}
+			} else {
+				fields = append(fields, SetTitlePrefix(fieldRequest, "", resource.ResourceEnvironmentId, attributes, true, false))
+			}
+		} else {
+			fields = append(fields, SetTitlePrefix(fieldRequest, "", resource.ResourceEnvironmentId, attributes, false, false))
 		}
-	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().Field().Create(
-			context.Background(),
-			&field,
-		)
-
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
+	} else {
+		fields = append(fields, SetTitlePrefix(fieldRequest, "", resource.ResourceEnvironmentId, attributes, false, false))
 	}
 
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		for _, field := range fields {
+			resp, err = services.BuilderService().Field().Create(
+				context.Background(),
+				field,
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		}
+	case pb.ResourceType_POSTGRESQL:
+		for _, field := range fields {
+			resp, err = services.PostgresBuilderService().Field().Create(
+				context.Background(),
+				field,
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		}
+	}
 	h.handleResponse(c, status_http.Created, resp)
+}
+
+func SetTitlePrefix(fieldRequest models.CreateFieldRequest, prefix, project_id string, attributes *structpb.Struct, enable, hide bool) *obs.CreateFieldRequest {
+	if prefix != "" {
+		return &obs.CreateFieldRequest{
+			Id:                  fieldRequest.ID,
+			Default:             fieldRequest.Default,
+			Type:                fieldRequest.Type,
+			Index:               fieldRequest.Index,
+			Label:               fieldRequest.Label,
+			Slug:                fieldRequest.Slug + "_" + prefix,
+			TableId:             fieldRequest.TableID,
+			Attributes:          attributes,
+			IsVisible:           fieldRequest.IsVisible,
+			AutofillTable:       fieldRequest.AutoFillTable,
+			AutofillField:       fieldRequest.AutoFillField,
+			RelationField:       fieldRequest.RelationField,
+			Automatic:           fieldRequest.Automatic,
+			ShowLabel:           fieldRequest.ShowLabel,
+			Unique:              fieldRequest.Unique,
+			ProjectId:           project_id,
+			EnableMultilanguage: enable,
+			HideMultilanguage:   hide,
+		}
+	} else {
+		return &obs.CreateFieldRequest{
+			Id:                  fieldRequest.ID,
+			Default:             fieldRequest.Default,
+			Type:                fieldRequest.Type,
+			Index:               fieldRequest.Index,
+			Label:               fieldRequest.Label,
+			Slug:                fieldRequest.Slug,
+			TableId:             fieldRequest.TableID,
+			Attributes:          attributes,
+			IsVisible:           fieldRequest.IsVisible,
+			AutofillTable:       fieldRequest.AutoFillTable,
+			AutofillField:       fieldRequest.AutoFillField,
+			RelationField:       fieldRequest.RelationField,
+			Automatic:           fieldRequest.Automatic,
+			ShowLabel:           fieldRequest.ShowLabel,
+			Unique:              fieldRequest.Unique,
+			ProjectId:           project_id,
+			EnableMultilanguage: enable,
+			HideMultilanguage:   hide,
+		}
+	}
 }
 
 // GetAllFields godoc
