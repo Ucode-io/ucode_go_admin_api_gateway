@@ -1040,7 +1040,7 @@ func (h *Handler) GetList(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		fmt.Println("begin:", time.Now())
+		start := time.Now()
 
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 		if err == nil {
@@ -1068,7 +1068,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		)
 
 		if err == nil {
-			if resp.IsCached == true {
+			if resp.IsCached {
 				jsonData, _ := resp.GetData().MarshalJSON()
 				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 60*time.Second)
 				if err != nil {
@@ -1076,7 +1076,7 @@ func (h *Handler) GetList(c *gin.Context) {
 				}
 			}
 		}
-		fmt.Println("end:", time.Now())
+		fmt.Printf("\n\n time spend of GetList -> %s, %v seconds.\n\n", c.Param("table_slug"), time.Since(start).Seconds())
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())

@@ -34586,6 +34586,9 @@ const docTemplate = `{
                 "default": {
                     "type": "string"
                 },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -34602,6 +34605,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
                     "type": "boolean"
                 },
                 "slug": {
@@ -35150,6 +35156,9 @@ const docTemplate = `{
                 "default": {
                     "type": "string"
                 },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -35169,6 +35178,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
                     "type": "boolean"
                 },
                 "slug": {
