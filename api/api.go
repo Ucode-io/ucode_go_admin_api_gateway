@@ -635,6 +635,7 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	if err != nil {
 		return c, errors.New("something went wrong")
 	}
+	c.Request.Header.Add("prev_path", path)
 
 	start := time.Now()
 
