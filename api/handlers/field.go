@@ -11,6 +11,7 @@ import (
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -348,6 +349,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		Automatic:     fieldRequest.Automatic,
 		Unique:        fieldRequest.Unique,
 		RelationField: fieldRequest.RelationField,
+		ShowLabel:     fieldRequest.ShowLabel,
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
@@ -396,18 +398,71 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
+	if !fieldRequest.EnableMultilanguage {
+		field.EnableMultilanguage = false
+		fields, err := services.BuilderService().Field().GetAll(context.Background(), &obs.GetAllFieldsRequest{
+			TableId:   fieldRequest.TableID,
+			ProjectId: resource.ResourceEnvironmentId,
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		for _, value := range fields.GetFields() {
+			if fieldRequest.Slug[:len(fieldRequest.Slug)-3] == value.GetSlug()[:len(value.GetSlug())-3] && fieldRequest.Slug != value.GetSlug() {
+				go func(arg *obs.Field) {
+					_, err := services.BuilderService().Field().Delete(context.Background(), &obs.FieldPrimaryKey{
+						Id:        arg.GetId(),
+						ProjectId: resource.GetResourceEnvironmentId(),
+					})
+					if err != nil {
+						h.handleResponse(c, status_http.GRPCError, err.Error())
+						return
+					}
+				}(value)
+			}
+		}
+	} else {
+		field.EnableMultilanguage = true
+		languaegs, err := services.CompanyService().Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
+			ProjectId: resource.GetProjectId(),
+		})
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		for _, value := range languaegs.GetLanguage() {
+			if fieldRequest.Slug != fieldRequest.Slug[:len(fieldRequest.Slug)-3]+"_"+value.GetShortName() {
+				go func(arg *pb.Language, project_id string) {
+					id, _ := uuid.NewRandom()
+					_, err := services.BuilderService().Field().Create(context.Background(), &obs.CreateFieldRequest{
+						Id:                  id.String(),
+						Default:             fieldRequest.Default,
+						Type:                fieldRequest.Type,
+						Index:               fieldRequest.Index,
+						Label:               fieldRequest.Label,
+						Slug:                fieldRequest.Slug[:len(fieldRequest.Slug)-3] + "_" + arg.ShortName,
+						TableId:             fieldRequest.TableID,
+						Attributes:          attributes,
+						IsVisible:           fieldRequest.IsVisible,
+						AutofillTable:       fieldRequest.AutoFillTable,
+						AutofillField:       fieldRequest.AutoFillField,
+						RelationField:       fieldRequest.RelationField,
+						Automatic:           fieldRequest.Automatic,
+						ShowLabel:           fieldRequest.ShowLabel,
+						Unique:              fieldRequest.Unique,
+						ProjectId:           project_id,
+						EnableMultilanguage: true,
+					})
+					if err != nil {
+						h.handleResponse(c, status_http.GRPCError, err.Error())
+						return
+					}
+				}(value, resource.ResourceEnvironmentId)
+			}
+		}
+	}
+
 	field.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
