@@ -37139,6 +37139,9 @@ const docTemplate = `{
                 "default": {
                     "type": "string"
                 },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },

@@ -163,6 +163,7 @@ message FieldResponse {
     google.protobuf.Struct attributes = 11;
     string relation_type = 12;
     bool show_label = 13;
+    bool enable_multilanguage = 14;
 } 
 
 message FieldForSection {
