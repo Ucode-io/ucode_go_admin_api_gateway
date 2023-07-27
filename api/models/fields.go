@@ -3,22 +3,24 @@ package models
 import "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 
 type Field struct {
-	ID            string                 `json:"id"`
-	Default       string                 `json:"default"`
-	Type          string                 `json:"type"`
-	Index         string                 `json:"index"`
-	Label         string                 `json:"label"`
-	Slug          string                 `json:"slug"`
-	TableID       string                 `json:"table_id"`
-	Required      bool                   `json:"required"`
-	Attributes    map[string]interface{} `json:"attributes"`
-	IsVisible     bool                   `json:"is_visible"`
-	AutoFillField string                 `json:"autofill_field"`
-	AutoFillTable string                 `json:"autofill_table"`
-	RelationId    string                 `json:"relation_id"`
-	Unique        bool                   `json:"unique"`
-	Automatic     bool                   `json:"automatic"`
-	RelationField string                 `json:"relation_field"`
+	ID                  string                 `json:"id"`
+	Default             string                 `json:"default"`
+	Type                string                 `json:"type"`
+	Index               string                 `json:"index"`
+	Label               string                 `json:"label"`
+	Slug                string                 `json:"slug"`
+	TableID             string                 `json:"table_id"`
+	Required            bool                   `json:"required"`
+	Attributes          map[string]interface{} `json:"attributes"`
+	IsVisible           bool                   `json:"is_visible"`
+	AutoFillField       string                 `json:"autofill_field"`
+	AutoFillTable       string                 `json:"autofill_table"`
+	RelationId          string                 `json:"relation_id"`
+	Unique              bool                   `json:"unique"`
+	Automatic           bool                   `json:"automatic"`
+	RelationField       string                 `json:"relation_field"`
+	ShowLabel           bool                   `json:"show_label"`
+	EnableMultilanguage bool                   `json:"enable_multilanguage"`
 }
 
 type CreateFieldsRequest struct {
