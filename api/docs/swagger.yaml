@@ -1138,6 +1138,13 @@ definitions:
       text:
         type: string
     type: object
+  company_service.UpdateOrderRedirectUrlReq:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    type: object
   company_service.UpdateResourceRequest:
     properties:
       credentials:
@@ -16789,6 +16796,54 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get single redirect url
+      tags:
+      - RedirectUrl
+  /v1/redirect-url/re-order:
+    put:
+      consumes:
+      - application/json
+      description: Update redirect url order
+      operationId: update_redirect_url_order
+      parameters:
+      - description: UpdateRedirectUrlOrder
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.UpdateOrderRedirectUrlReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update RedirectUrl Order response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update redirect url order
       tags:
       - RedirectUrl
   /v1/relation:
