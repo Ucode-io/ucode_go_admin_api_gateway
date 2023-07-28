@@ -1138,6 +1138,13 @@ definitions:
       text:
         type: string
     type: object
+  company_service.UpdateOrderRedirectUrlReq:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    type: object
   company_service.UpdateResourceRequest:
     properties:
       credentials:
@@ -13363,6 +13370,11 @@ paths:
         name: id
         required: true
         type: string
+      - description: TemplateId
+        in: query
+        name: template_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -16803,6 +16815,54 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get single redirect url
+      tags:
+      - RedirectUrl
+  /v1/redirect-url/re-order:
+    put:
+      consumes:
+      - application/json
+      description: Update redirect url order
+      operationId: update_redirect_url_order
+      parameters:
+      - description: UpdateRedirectUrlOrder
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.UpdateOrderRedirectUrlReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update RedirectUrl Order response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update redirect url order
       tags:
       - RedirectUrl
   /v1/relation:
@@ -22092,6 +22152,47 @@ paths:
       summary: Get Micro Frontend By Id
       tags:
       - Functions
+  /v2/language-json:
+    get:
+      consumes:
+      - application/json
+      description: Language json
+      operationId: language_json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Language json
+      tags:
+      - language
   /v2/table:
     get:
       consumes:

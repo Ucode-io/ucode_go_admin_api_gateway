@@ -306,6 +306,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2.GET("/custom-event", h.GetAllNewCustomEvents)
 		v2.PUT("/custom-event", h.UpdateNewCustomEvent)
 		v2.DELETE("/custom-event/:custom_event_id", h.DeleteNewCustomEvent)
+
+		v2.GET("/language-json", h.GetLanguageJson)
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
@@ -476,6 +478,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/redirect-url", h.GetListRedirectUrl)
 		v1Admin.GET("/redirect-url/:redirect-url-id", h.GetSingleRedirectUrl)
 		v1Admin.DELETE("/redirect-url/:redirect-url-id", h.DeleteRedirectUrl)
+		v1Admin.PUT("/redirect-url/re-order", h.UpdateRedirectUrlOrder)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())

@@ -58,7 +58,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			}
 			//}
 
-			// fmt.Println("/nresponse V2hasaccessuser", res)
+			fmt.Println("\n response V2hasaccessuser", res)
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
 			projectId := c.Query("Project-Id")
