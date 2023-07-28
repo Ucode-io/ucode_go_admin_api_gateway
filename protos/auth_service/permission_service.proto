@@ -230,6 +230,7 @@ message V2AddRoleRequest {
     string project_id = 5;
     string db_project_id = 6;
     int32 resource_type = 7;
+    bool grant_access = 8;
 }
 
 message V2UpdateRoleRequest {
@@ -240,4 +241,5 @@ message V2UpdateRoleRequest {
     string project_id = 5;
     string db_project_id = 6;
     int32 resource_type = 7;
+    bool grant_access = 8;
 }

@@ -28,6 +28,7 @@ type RedirectUrlServiceClient interface {
 	GetSingle(ctx context.Context, in *GetSingleRedirectUrlReq, opts ...grpc.CallOption) (*RedirectUrl, error)
 	GetList(ctx context.Context, in *GetListRedirectUrlReq, opts ...grpc.CallOption) (*GetListRedirectUrlRes, error)
 	Delete(ctx context.Context, in *DeleteRedirectUrlReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateOrder(ctx context.Context, in *UpdateOrderRedirectUrlReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type redirectUrlServiceClient struct {
@@ -83,6 +84,15 @@ func (c *redirectUrlServiceClient) Delete(ctx context.Context, in *DeleteRedirec
 	return out, nil
 }
 
+func (c *redirectUrlServiceClient) UpdateOrder(ctx context.Context, in *UpdateOrderRedirectUrlReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/company_service.RedirectUrlService/UpdateOrder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RedirectUrlServiceServer is the server API for RedirectUrlService service.
 // All implementations must embed UnimplementedRedirectUrlServiceServer
 // for forward compatibility
@@ -92,6 +102,7 @@ type RedirectUrlServiceServer interface {
 	GetSingle(context.Context, *GetSingleRedirectUrlReq) (*RedirectUrl, error)
 	GetList(context.Context, *GetListRedirectUrlReq) (*GetListRedirectUrlRes, error)
 	Delete(context.Context, *DeleteRedirectUrlReq) (*emptypb.Empty, error)
+	UpdateOrder(context.Context, *UpdateOrderRedirectUrlReq) (*emptypb.Empty, error)
 	mustEmbedUnimplementedRedirectUrlServiceServer()
 }
 
@@ -113,6 +124,9 @@ func (UnimplementedRedirectUrlServiceServer) GetList(context.Context, *GetListRe
 }
 func (UnimplementedRedirectUrlServiceServer) Delete(context.Context, *DeleteRedirectUrlReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedRedirectUrlServiceServer) UpdateOrder(context.Context, *UpdateOrderRedirectUrlReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateOrder not implemented")
 }
 func (UnimplementedRedirectUrlServiceServer) mustEmbedUnimplementedRedirectUrlServiceServer() {}
 
@@ -217,6 +231,24 @@ func _RedirectUrlService_Delete_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RedirectUrlService_UpdateOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateOrderRedirectUrlReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RedirectUrlServiceServer).UpdateOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.RedirectUrlService/UpdateOrder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RedirectUrlServiceServer).UpdateOrder(ctx, req.(*UpdateOrderRedirectUrlReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RedirectUrlService_ServiceDesc is the grpc.ServiceDesc for RedirectUrlService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -243,6 +275,10 @@ var RedirectUrlService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _RedirectUrlService_Delete_Handler,
+		},
+		{
+			MethodName: "UpdateOrder",
+			Handler:    _RedirectUrlService_UpdateOrder_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

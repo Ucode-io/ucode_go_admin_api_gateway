@@ -33476,6 +33476,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "order": {
+                    "type": "integer"
+                },
                 "project_id": {
                     "type": "string"
                 },

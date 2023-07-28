@@ -4,6 +4,7 @@ package auth_service;
 option go_package="genproto/auth_service";
  
 import "auth.proto";
+import "user_service.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
 
@@ -25,6 +26,24 @@ service SessionService {
     rpc V2MultiCompanyLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyLoginRes) {}
     rpc V2MultiCompanyOneLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyOneLoginRes) {}
     rpc V2LoginWithOption(V2LoginWithOptionRequest) returns (V2LoginWithOptionsResponse) {}
+    rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse) {}
+    rpc V2ResetPassword(V2ResetPasswordRequest) returns (User) {}
+}
+
+message V2ResetPasswordRequest {
+    string password = 1;
+    string user_id = 2;
+}
+
+message ForgotPasswordRequest {
+    string login = 1;
+}
+
+message ForgotPasswordResponse {
+    bool login_found = 1;
+    string sms_id = 2;
+    string user_id = 3;
+    string email = 4;
 }
 
 message ResourceEnvironmentV2MultiCompany {

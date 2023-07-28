@@ -36,6 +36,11 @@ service UserService {
     rpc RegisterWithGoogle(RegisterWithGoogleRequest) returns (User) {}
     rpc GetListSetting(GetListSettingReq) returns (Setting) {}
     rpc GetUserProjects(UserPrimaryKey) returns (GetUserProjectsRes) {}
+    rpc GetUserByUsername(GetUserByUsernameRequest) returns (User) {}
+}
+
+message GetUserByUsernameRequest {
+    string username = 1;
 }
 
 message UserCompany {
