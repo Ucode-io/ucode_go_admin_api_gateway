@@ -165,6 +165,8 @@ func (h *Handler) CreateProjectResource(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+	authInfo, _ := h.GetAuthAdminInfo(c)
+	fmt.Println("authInfo::: env:::", authInfo.GetEnvId())
 
 	resp, err := h.companyServices.CompanyService().Resource().CreateResource(
 		c.Request.Context(),
