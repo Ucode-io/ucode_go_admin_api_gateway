@@ -1040,7 +1040,7 @@ func (h *Handler) GetList(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		fmt.Println("begin:", time.Now())
+		start := time.Now()
 
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 		if err == nil {
@@ -1068,15 +1068,15 @@ func (h *Handler) GetList(c *gin.Context) {
 		)
 
 		if err == nil {
-			if resp.IsCached == true {
+			if resp.IsCached {
 				jsonData, _ := resp.GetData().MarshalJSON()
-				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 60*time.Second)
+				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
 				if err != nil {
 					h.log.Error("Error while setting redis", logger.Error(err))
 				}
 			}
 		}
-		fmt.Println("end:", time.Now())
+		fmt.Printf("\n\n time spend of GetList -> %s, %v seconds.\n\n", c.Param("table_slug"), time.Since(start).Seconds())
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -1273,6 +1273,21 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	//	h.log.Error("Error while getting redis", logger.Error(err))
 	//}
 
+	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
+	if err == nil {
+		resp := make(map[string]interface{})
+		m := make(map[string]interface{})
+		err = json.Unmarshal([]byte(redisResp), &m)
+		if err != nil {
+			h.log.Error("Error while unmarshal redis", logger.Error(err))
+		} else {
+			resp["data"] = m
+			h.handleResponse(c, status_http.OK, resp)
+			return
+		}
+	} else {
+		h.log.Error("Error while getting redis", logger.Error(err))
+	}
 	resp, err := services.BuilderService().ObjectBuilder().GetListSlim(
 		context.Background(),
 		&obs.CommonMessage{
@@ -1281,7 +1296,6 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
-
 	if err != nil {
 		statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 		stat, ok := status.FromError(err)
@@ -1293,10 +1307,14 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	jsonData, _ := resp.GetData().MarshalJSON()
-	err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
-	if err != nil {
-		h.log.Error("Error while setting redis", logger.Error(err))
+	if err == nil {
+		if resp.IsCached {
+			jsonData, _ := resp.GetData().MarshalJSON()
+			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
+			if err != nil {
+				h.log.Error("Error while setting redis", logger.Error(err))
+			}
+		}
 	}
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)

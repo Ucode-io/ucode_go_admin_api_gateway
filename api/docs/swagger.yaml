@@ -1648,6 +1648,8 @@ definitions:
         type: boolean
       default:
         type: string
+      enable_multilanguage:
+        type: boolean
       id:
         type: string
       index:
@@ -1659,6 +1661,8 @@ definitions:
       relation_field:
         type: string
       required:
+        type: boolean
+      show_label:
         type: boolean
       slug:
         type: string
@@ -2020,6 +2024,8 @@ definitions:
         type: boolean
       default:
         type: string
+      enable_multilanguage:
+        type: boolean
       id:
         type: string
       index:
@@ -2033,6 +2039,8 @@ definitions:
       relation_id:
         type: string
       required:
+        type: boolean
+      show_label:
         type: boolean
       slug:
         type: string

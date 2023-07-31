@@ -34678,6 +34678,9 @@
                 "default": {
                     "type": "string"
                 },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -34694,6 +34697,9 @@
                     "type": "string"
                 },
                 "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
                     "type": "boolean"
                 },
                 "slug": {
@@ -35242,6 +35248,9 @@
                 "default": {
                     "type": "string"
                 },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -35261,6 +35270,9 @@
                     "type": "string"
                 },
                 "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
                     "type": "boolean"
                 },
                 "slug": {
