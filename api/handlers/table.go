@@ -152,6 +152,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		AuthorId:   authInfo.GetUserId(),
 		Name:       fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123)),
 		CommitType: config.COMMIT_TYPE_TABLE,
+		OrderBy:    tableRequest.OrderBy,
 	}
 
 	table.ProjectId = resourceEnvironmentId

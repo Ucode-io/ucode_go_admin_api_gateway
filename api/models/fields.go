@@ -81,6 +81,7 @@ type CreateTableRequest struct {
 	AppID              string                                       `json:"app_id"`
 	IncrementID        IncrementId                                  `json:"increment_id"`
 	CustomErrorMessage []*object_builder_service.CustomErrorMessage `json:"custom_error_messages"`
+	OrderBy            bool                                         `json:"order_by"`
 }
 
 type IncrementId struct {
