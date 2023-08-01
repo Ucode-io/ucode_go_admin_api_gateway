@@ -1055,6 +1055,7 @@ func (h *Handler) GetList(c *gin.Context) {
 				return
 			}
 		} else {
+			h.log.Info("table slug::" + c.Param("table_slug") + "project:::" + resource.ResourceEnvironmentId)
 			h.log.Error("Error while getting redis while get list objects", logger.Error(err))
 		}
 
@@ -2107,7 +2108,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 			},
 		)
 
-
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
@@ -2127,7 +2127,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
