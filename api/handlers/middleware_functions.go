@@ -106,9 +106,6 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType str
 		return "", "", err
 	}
 
-	fmt.Println("auethInfo.GetUsrId()", authInfo.GetUserId())
-	fmt.Println("authInfo.GetProjectId()", authInfo.GetProjectId())
-	fmt.Println("environmentID", environmentID)
 
 	if !util.IsValidUUID(authInfo.GetUserId()) {
 		err := errors.New("invalid or missing user id")
@@ -147,15 +144,9 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType str
 
 func (h *Handler) CreateAutoCommitForAdminChange(c *gin.Context, environmentID, commitType string, project_id string) (versionId, commitGuid string, err error) {
 	authInfo, err := h.adminAuthInfo(c)
-	fmt.Println("Test tese test tes 00")
 	if err != nil {
 		return "", "", err
 	}
-	fmt.Println("Test tese test tes")
-
-	fmt.Println("auethInfo.GetUsrId()", authInfo.GetUserId())
-	fmt.Println("authInfo.GetProjectId()", project_id)
-	fmt.Println("environmentID", environmentID)
 
 	if !util.IsValidUUID(authInfo.GetUserId()) {
 		err := errors.New("invalid or missing user id")

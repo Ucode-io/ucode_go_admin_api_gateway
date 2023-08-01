@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -68,8 +67,6 @@ func (h *Handler) CreateRedirectUrl(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	fmt.Println("projectId::", projectId)
-	fmt.Println("environmentId::", environmentId)
 	data.ProjectId = projectId.(string)
 	data.EnvId = environmentId.(string)
 
@@ -385,7 +382,6 @@ func (h *Handler) GetListRedirectUrl(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, res)
 }
 
-
 // UpdateRedirectUrlOrder godoc
 // @Security ApiKeyAuth
 // @ID update_redirect_url_order
@@ -409,7 +405,6 @@ func (h *Handler) UpdateRedirectUrlOrder(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)

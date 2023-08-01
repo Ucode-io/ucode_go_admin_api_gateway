@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/config"
@@ -34,7 +33,6 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		var (
 			res    = &auth_service.V2HasAccessUserRes{}
 			ok     bool
-			origin = c.GetHeader("Origin")
 			//platformType = c.GetHeader("Platform-Type")
 		)
 
@@ -49,7 +47,6 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		switch strArr[0] {
 		case "Bearer":
 			//if platformType != cfg.PlatformType {
-			fmt.Println(origin)
 			res, ok = h.hasAccess(c)
 			if !ok {
 				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
@@ -57,8 +54,6 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 				return
 			}
 			//}
-
-			fmt.Println("\n response V2hasaccessuser", res)
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
 			projectId := c.Query("Project-Id")

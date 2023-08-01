@@ -2,13 +2,10 @@ package api
 
 import (
 	"errors"
-	"fmt"
-	"time"
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/helper"
-	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -599,21 +596,14 @@ func MaxAllowed(n int) gin.HandlerFunc {
 
 func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		start := time.Now()
 		var (
 			err error
 		)
-		fmt.Println("::::::::::::PROXY before:::::::::::::::::::", len(r.Routes()), c.Request.URL.Path, c.Request.URL)
 		c, err = RedirectUrl(c, h)
 		if err == nil {
-			//fmt.Println("here:::::::::::::1")
-			//fmt.Println("::::::::::::PROXY before:::::::::::::::::::", len(r.Routes()), c.Request.URL.Path)
 			r.HandleContext(c)
 		}
-		//fmt.Println("here:::::::::::::2")
-		fmt.Println("time in proxyMiddleware:::::", time.Since(start).Milliseconds())
 		c.Next()
-		fmt.Println("::::::::::::PROXY after:::::::::::::::::::", c.Request.URL.Path)
 	}
 }
 
@@ -625,8 +615,6 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 
 	envId, ok := c.Get("environment_id")
-	fmt.Println("project_id::::::PROXY::::::::", projectId)
-	fmt.Println("env_id::::::PROXY::::::::", envId)
 	if !ok {
 		return c, errors.New("something went wrong")
 	}
@@ -638,26 +626,20 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 	c.Request.Header.Add("prev_path", path)
 
-	start := time.Now()
-
 	pathM, err := helper.FindUrlTo(svcs, helper.MatchingData{
 		ProjectId: projectId.(string),
 		EnvId:     envId.(string),
 		Path:      path,
 	})
 	if err != nil {
-		fmt.Println("cant parse url", logger.Error(err))
 		return c, errors.New("cant change")
 	}
-
-	fmt.Println("time in RedirectUrl:::::::", time.Since(start).Milliseconds())
 
 	if path == pathM {
 		return c, errors.New("identical path")
 	}
 
 	c.Request.URL.Path = pathM
-	fmt.Println("path", c.Request.URL.Path)
 	return c, nil
 }
 

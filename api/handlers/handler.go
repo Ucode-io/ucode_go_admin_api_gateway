@@ -44,14 +44,14 @@ func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data
 	// 		// logger.Any("data", data),
 	// 	)
 	case code < 400:
-		h.log.Warn(
-			"response",
-			logger.Int("code", status.Code),
-			logger.String("status", status.Status),
-			logger.Any("description", status.Description),
-			logger.Any("data", data),
-			logger.Any("custom_message", status.CustomMessage),
-		)
+		// h.log.Warn(
+		// 	"response",
+		// 	logger.Int("code", status.Code),
+		// 	logger.String("status", status.Status),
+		// 	logger.Any("description", status.Description),
+		// 	logger.Any("data", data),
+		// 	logger.Any("custom_message", status.CustomMessage),
+		// )
 	default:
 		// fmt.Println(customMessage)
 		h.log.Error(

@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -636,7 +635,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 	}
 	authInfo, _ := h.GetAuthInfo(c)
 
-	fmt.Println(function.Path)
+	// fmt.Println(function.Path)
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.NewInvokeFunctionRequest{
 		Data: map[string]interface{}{
 			"object_ids": invokeFunction.ObjectIDs,
@@ -646,11 +645,11 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		},
 	})
 	if err != nil {
-		fmt.Println("error in do request", err)
+		// fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	} else if resp.Status == "error" {
-		fmt.Println("error in response status", err)
+		// fmt.Println("error in response status", err)
 		var errStr = resp.Status
 		if resp.Data != nil && resp.Data["message"] != nil {
 			errStr = resp.Data["message"].(string)

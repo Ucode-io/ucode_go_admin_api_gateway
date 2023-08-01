@@ -601,7 +601,6 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 		webpage tmp.CreateWebPageReq
 	)
 
-	log.Println("---CreateWebPageV2->1---")
 
 	err := c.ShouldBindJSON(&webpage)
 	if err != nil {
@@ -609,7 +608,6 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 		return
 	}
 
-	log.Println("---CreateWebPageV2->2---")
 	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
@@ -622,7 +620,6 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-	log.Println("---CreateWebPageV2->3---")
 
 	//resourceId, ok := c.Get("resource_id")
 	//if !ok {
@@ -631,7 +628,6 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	//	return
 	//}
 	//
-	log.Println("---CreateWebPageV2->4---")
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -686,7 +682,6 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 	webpage.ProjectId = projectId.(string)
 	webpage.ResourceId = resource.ResourceEnvironmentId
 
-	log.Println("---CreateWebPageV2->5---")
 	uuID, err := uuid.NewRandom()
 	if err != nil {
 		err = errors.New("error generating new id")
@@ -705,13 +700,11 @@ func (h *Handler) CreateWebPageV2(c *gin.Context) {
 		ProjectId:  webpage.GetProjectId(),
 	}
 
-	log.Println("---CreateWebPageV2->6---")
 	res, err := services.WebPageService().WebPage().CreateWebPage(
 		context.Background(),
 		&webpage,
 	)
 
-	log.Println("---CreateWebPageV2->7---")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -844,7 +837,6 @@ func (h *Handler) GetSingleWebPageV2(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println(versions.VersionInfos)
 	versionInfos := make([]*tmp.VersionInfo, 0, len(res.GetCommitInfo().GetVersionIds()))
 	for _, id := range res.CommitInfo.VersionIds {
 		versionInfo, ok := versions.VersionInfos[id]
@@ -1345,7 +1337,6 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 	for _, item := range resp.GetWebPages() {
 		versionIds = append(versionIds, item.GetCommitInfo().GetVersionIds()...)
 	}
-	fmt.Println("test")
 	multipleVersionResp, err := services.VersioningService().Release().GetMultipleVersionInfo(
 		c.Request.Context(),
 		&vcs.GetMultipleVersionInfoRequest{
@@ -1353,14 +1344,11 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 			ProjectId:  projectId.(string),
 		},
 	)
-	fmt.Println("", err)
-	fmt.Println("test 2 2")
 	if err != nil {
 		h.log.Error("error getting multiple version infos", logger.Error(err))
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("test 2 4")
 	for _, item := range resp.GetWebPages() {
 		for key := range item.GetVersionInfos() {
 
@@ -1377,7 +1365,6 @@ func (h *Handler) GetWebPageHistory(c *gin.Context) {
 			}
 		}
 	}
-	fmt.Println("Test test")
 	// reqAutherGuids, err := helper.ConvertMapToStruct(map[string]interface{}{
 	// 	"guid": []string{},
 	// })
@@ -1487,13 +1474,11 @@ func (h *Handler) RevertWebPage(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, errors.New("environment id is invalid uuid").Error())
 		return
 	}
-	fmt.Println("test 1")
 	versionGuid, commitGuid, err := h.CreateAutoCommitForAdminChange(c, body.GetEnvironmentId(), config.COMMIT_TYPE_FIELD, body.ProjectId)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error creating commit: %w", err).Error())
 		return
 	}
-	fmt.Println("test 2")
 	body.VersionId = versionGuid
 	body.NewCommitId = commitGuid
 
