@@ -71,7 +71,6 @@ func (h *Handler) Upload(c *gin.Context) {
 		Creds:  credentials.NewStaticV4(h.cfg.MinioAccessKeyID, h.cfg.MinioSecretAccessKey, ""),
 		Secure: h.cfg.MinioProtocol,
 	})
-	fmt.Println("access key::", h.cfg.MinioAccessKeyID)
 	h.log.Info("info", logger.String("MinioEndpoint: ", h.cfg.MinioEndpoint), logger.String("access_key: ",
 		h.cfg.MinioAccessKeyID), logger.String("access_secret: ", h.cfg.MinioSecretAccessKey))
 
@@ -95,7 +94,6 @@ func (h *Handler) Upload(c *gin.Context) {
 		defaultBucket = "telegram"
 	}
 
-	fmt.Println("content-type", splitedContentType)
 	_, err = minioClient.FPutObject(
 		context.Background(),
 		defaultBucket,

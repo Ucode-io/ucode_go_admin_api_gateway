@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -85,7 +84,6 @@ func (h *Handler) GetAllSections(c *gin.Context) {
 	//	return
 	//}
 
-	fmt.Println("\n\n >>>>>>  auth", authInfo)
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		// resp, err = services.BuilderService().Section().GetAll(
@@ -205,7 +203,6 @@ func (h *Handler) UpdateSection(c *gin.Context) {
 	//	return
 	//}
 	sections.ProjectId = resource.ResourceEnvironmentId
-	fmt.Println("project id::", resource.ResourceEnvironmentId)
 
 	// commitID, commitGuid, err := h.CreateAutoCommit(c, environmentId.(string), config.COMMIT_TYPE_SECTION)
 	// if err != nil {

@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -65,7 +64,6 @@ func (h *Handler) AddProjectResource(c *gin.Context) {
 	}
 
 	if company.ServiceType == company_service.ServiceType_NOT_SPECIFIED {
-		fmt.Println("[company.ServiceType] nil", company.ProjectId)
 		switch company.ResourceType {
 		case company_service.ResourceType_MONGODB:
 			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE
@@ -116,7 +114,6 @@ func (h *Handler) ConfigureProjectResource(c *gin.Context) {
 	}
 
 	if &company.ServiceType == nil || company.ServiceType == company_service.ServiceType_NOT_SPECIFIED {
-		fmt.Println("[company.ServiceType] nil", company.ProjectId)
 		switch company.ResourceType {
 		case company_service.ResourceType_MONGODB:
 			company.ServiceType = company_service.ServiceType_BUILDER_SERVICE
@@ -165,8 +162,6 @@ func (h *Handler) CreateProjectResource(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	authInfo, _ := h.GetAuthAdminInfo(c)
-	fmt.Println("authInfo::: env:::", authInfo.GetEnvId())
 
 	resp, err := h.companyServices.CompanyService().Resource().CreateResource(
 		c.Request.Context(),

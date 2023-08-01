@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/genproto/integration_service_v2"
@@ -29,7 +28,7 @@ import (
 func (h *Handler) GeneratePayzeLink(c *gin.Context) {
 	var payze integration_service_v2.PayzeLinkRequest
 
-	fmt.Println("GeneratePayzeLink")
+	// fmt.Println("GeneratePayzeLink")
 
 	err := c.ShouldBindJSON(&payze)
 	if err != nil {

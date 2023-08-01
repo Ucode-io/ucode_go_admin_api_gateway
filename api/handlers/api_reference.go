@@ -226,7 +226,6 @@ func (h *Handler) GetApiReferenceByID(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println(versions.VersionInfos)
 	versionInfos := make([]*ars.VersionInfo, 0, len(resp.GetCommitInfo().GetVersionIds()))
 	for _, id := range resp.CommitInfo.VersionIds {
 		versionInfo, ok := versions.VersionInfos[id]

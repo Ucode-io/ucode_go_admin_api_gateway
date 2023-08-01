@@ -2,9 +2,7 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -206,9 +204,6 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		if err != nil {
 			return customEvent.GetFunctions()[0].Name, err
 		}
-
-		fmt.Println("idsssss::", request.IDs)
-		fmt.Println("dataaa::", request.ObjectData)
 		data["object_ids"] = request.IDs
 		data["table_slug"] = request.TableSlug
 		data["object_data"] = request.ObjectData
@@ -217,8 +212,6 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		data["user_id"] = authInfo.GetUserId()
 		invokeFunction.Data = data
 
-		js, _ := json.Marshal(invokeFunction)
-		fmt.Println("function body ----", string(js))
 		// h.log.Info("function path: ", logger.Any("", customEvent.Functions[0].Path))
 
 		resp, err := util.DoRequest("https://ofs.u-code.io/function/"+customEvent.GetFunctions()[0].Path, "POST", invokeFunction)
