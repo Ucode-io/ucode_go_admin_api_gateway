@@ -1826,6 +1826,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.LayoutRequest'
         type: array
+      order_by:
+        type: boolean
       sections:
         items:
           $ref: '#/definitions/object_builder_service.Section'
@@ -4001,6 +4003,8 @@ definitions:
         type: boolean
       label:
         type: string
+      order_by:
+        type: boolean
       project_id:
         type: string
       record_permissions:
