@@ -1055,7 +1055,7 @@ func (h *Handler) GetList(c *gin.Context) {
 				return
 			}
 		} else {
-			h.log.Error("Error while getting redis", logger.Error(err))
+			h.log.Error("Error while getting redis while get list objects", logger.Error(err))
 		}
 
 		resp, err = services.BuilderService().ObjectBuilder().GetList(
@@ -1223,35 +1223,6 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
-	//redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
-	//if err == nil {
-	//	resp := make(map[string]interface{})
-	//	m := make(map[string]interface{})
-	//	err = json.Unmarshal([]byte(redisResp), &m)
-	//	if err != nil {
-	//		h.log.Error("Error while unmarshal redis", logger.Error(err))
-	//	} else {
-	//		resp["data"] = m
-	//		h.handleResponse(c, status_http.OK, resp)
-	//		return
-	//	}
-	//} else {
-	//	h.log.Error("Error while getting redis", logger.Error(err))
-	//}
-
 	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 	if err == nil {
 		resp := make(map[string]interface{})
@@ -1265,7 +1236,7 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 			return
 		}
 	} else {
-		h.log.Error("Error while getting redis", logger.Error(err))
+		h.log.Error("Error while getting redis while get list ", logger.Error(err))
 	}
 	resp, err := services.BuilderService().ObjectBuilder().GetListSlim(
 		context.Background(),
