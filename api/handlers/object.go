@@ -1054,9 +1054,6 @@ func (h *Handler) GetList(c *gin.Context) {
 				h.handleResponse(c, status_http.OK, resp)
 				return
 			}
-		} else {
-			h.log.Info("table slug::" + c.Param("table_slug") + "project:::" + resource.ResourceEnvironmentId)
-			h.log.Error("Error while getting redis while get list objects", logger.Error(err))
 		}
 
 		resp, err = services.BuilderService().ObjectBuilder().GetList(
