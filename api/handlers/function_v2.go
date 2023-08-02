@@ -1018,5 +1018,5 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, status_http.Created, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }
