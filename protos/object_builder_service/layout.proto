@@ -36,6 +36,7 @@ message LayoutResponse {
     string icon = 7;
     bool is_default = 8;
     repeated FieldResponse summary_fields = 9;
+    google.protobuf.Struct attributes = 10
 }
 
 message GetListLayoutResponse {
