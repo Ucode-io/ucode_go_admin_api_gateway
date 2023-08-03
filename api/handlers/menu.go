@@ -8,6 +8,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
 
@@ -44,6 +45,12 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	attributes, err := helper.ConvertMapToStruct(menu.Attributes)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
@@ -94,6 +101,7 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 				ProjectId:       resource.ResourceEnvironmentId,
 				MicrofrontendId: menu.MicrofrontendId,
 				WebpageId:       menu.WebpageId,
+				Attributes:      attributes,
 			},
 		)
 
@@ -114,6 +122,7 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 				ProjectId:       resource.ResourceEnvironmentId,
 				MicrofrontendId: menu.MicrofrontendId,
 				WebpageId:       menu.WebpageId,
+				Attributes:      attributes,
 			},
 		)
 
@@ -363,6 +372,12 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 		return
 	}
 
+	attributes, err := helper.ConvertMapToStruct(menu.Attributes)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
@@ -403,6 +418,7 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 				ProjectId:       resource.ResourceEnvironmentId,
 				MicrofrontendId: menu.MicrofrontendId,
 				WebpageId:       menu.WebpageId,
+				Attributes:      attributes,
 			},
 		)
 
@@ -424,6 +440,7 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 				ProjectId:       resource.ResourceEnvironmentId,
 				MicrofrontendId: menu.MicrofrontendId,
 				WebpageId:       menu.WebpageId,
+				Attributes:      attributes,
 			},
 		)
 	}

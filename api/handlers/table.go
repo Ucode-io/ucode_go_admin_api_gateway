@@ -45,6 +45,12 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		return
 	}
 
+	attributes, err := helper.ConvertMapToStruct(tableRequest.Attributes)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
@@ -131,7 +137,6 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		fields = append(fields, &tempField)
 	}
 
-
 	var table = obs.CreateTableRequest{
 		Label:             tableRequest.Label,
 		Description:       tableRequest.Description,
@@ -152,6 +157,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		Name:       fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123)),
 		CommitType: config.COMMIT_TYPE_TABLE,
 		OrderBy:    tableRequest.OrderBy,
+		Attributes: attributes,
 	}
 
 	table.ProjectId = resourceEnvironmentId

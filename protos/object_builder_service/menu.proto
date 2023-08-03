@@ -114,6 +114,7 @@ message CreateMenuRequest {
     string project_id = 7;
     string microfrontend_id = 8;
     string webpage_id = 9;
+    google.protobuf.Struct attributes = 10;
 }
 
 message Menu {
@@ -128,6 +129,7 @@ message Menu {
     string microfrontend_id = 9;
     int32 order = 10;
     string webpage_id = 11;
+    google.protobuf.Struct attributes = 12;
 }
 
 message MenuForGetAll {
@@ -142,6 +144,7 @@ message MenuForGetAll {
     google.protobuf.Struct data = 9;
     string microfrontend_id = 10;
     string webpage_id = 11;
+    google.protobuf.Struct attributes = 12;
 }
 
 message GetAllMenusResponse {
