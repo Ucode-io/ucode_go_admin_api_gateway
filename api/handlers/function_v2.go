@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -123,48 +122,23 @@ func (h *Handler) CreateNewFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	fmt.Println("test before clone")
+	// fmt.Println("test before clone")
 	var sshURL = resp.Message["ssh_url_to_repo"].(string)
 	err = gitlab.CloneForkToPath(sshURL, h.cfg)
-	fmt.Println("clone err::", err)
+	// fmt.Println("clone err::", err)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 	uuid, _ := uuid.NewRandom()
-	fmt.Println("test after clone")
-	fmt.Println("uuid::", uuid.String())
+	// fmt.Println("test after clone")
+	// fmt.Println("uuid::", uuid.String())
 	password, err := code_server.CreateCodeServer(projectName+"-"+function.Path, h.cfg, uuid.String())
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 	var url = "https://" + uuid.String() + ".u-code.io"
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     project.GetProjectId(),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
 
 	response, err := services.FunctionService().FunctionService().Create(
 		context.Background(),
@@ -295,8 +269,6 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 		return
 	}
 
-	log.Println("function::", function)
-
 	if function.Url == "" {
 		err = gitlab.CloneForkToPath(function.GetSshUrl(), h.cfg)
 		fmt.Println("clone err::", err)
@@ -305,14 +277,13 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 			return
 		}
 		uuid, _ := uuid.NewRandom()
-		fmt.Println("uuid::", uuid.String())
+		// fmt.Println("uuid::", uuid.String())
 		password, err := code_server.CreateCodeServer(function.Path, h.cfg, uuid.String())
 		if err != nil {
 			h.handleResponse(c, status_http.InvalidArgument, err.Error())
 			return
 		}
 		function.Url = "https://" + uuid.String() + ".u-code.io"
-		log.Println("url", function.Url)
 		function.Password = password
 	}
 	// var status int
@@ -905,11 +876,11 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 		Data: invokeFunction.Data,
 	})
 	if err != nil {
-		fmt.Println("error in do request", err)
+		// fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	} else if resp.Status == "error" {
-		fmt.Println("error in response status", err)
+		// fmt.Println("error in response status", err)
 		var errStr = resp.Status
 		if resp.Data != nil && resp.Data["message"] != nil {
 			errStr = resp.Data["message"].(string)
@@ -1023,7 +994,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
 
-	h.log.Info("\n\nFunction run request", logger.Any("auth", authInfo), logger.Any("request_data", requestData), logger.Any("req", c.Request))
+	// h.log.Info("\n\nFunction run request", logger.Any("auth", authInfo), logger.Any("request_data", requestData), logger.Any("req", c.Request))
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
 		Auth:        authInfo,
 		RequestData: requestData,
@@ -1034,11 +1005,11 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		},
 	})
 	if err != nil {
-		fmt.Println("error in do request", err)
+		// fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	} else if resp.Status == "error" {
-		fmt.Println("error in response status", err)
+		// fmt.Println("error in response status", err)
 		var errStr = resp.Status
 		if resp.Data != nil && resp.Data["message"] != nil {
 			errStr = resp.Data["message"].(string)
@@ -1047,5 +1018,5 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, status_http.Created, resp)
+	h.handleResponse(c, status_http.OK, resp)
 }

@@ -440,17 +440,19 @@ func (h *Handler) UpdateField(c *gin.Context) {
 			return
 		}
 		for _, value := range fields.GetFields() {
-			if fieldRequest.Slug[:len(fieldRequest.Slug)-3] == value.GetSlug()[:len(value.GetSlug())-3] && fieldRequest.Slug != value.GetSlug() {
-				go func(arg *obs.Field) {
-					_, err := services.BuilderService().Field().Delete(context.Background(), &obs.FieldPrimaryKey{
-						Id:        arg.GetId(),
-						ProjectId: resource.GetResourceEnvironmentId(),
-					})
-					if err != nil {
-						h.handleResponse(c, status_http.GRPCError, err.Error())
-						return
-					}
-				}(value)
+			if len(value.GetSlug()) > 3 && len(fieldRequest.Slug) > 3 {
+				if fieldRequest.Slug[:len(fieldRequest.Slug)-3] == value.GetSlug()[:len(value.GetSlug())-3] && fieldRequest.Slug != value.GetSlug() {
+					go func(arg *obs.Field) {
+						_, err := services.BuilderService().Field().Delete(context.Background(), &obs.FieldPrimaryKey{
+							Id:        arg.GetId(),
+							ProjectId: resource.GetResourceEnvironmentId(),
+						})
+						if err != nil {
+							h.handleResponse(c, status_http.GRPCError, err.Error())
+							return
+						}
+					}(value)
+				}
 			}
 		}
 	} else {

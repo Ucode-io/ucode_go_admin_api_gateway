@@ -34961,6 +34961,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/object_builder_service.LayoutRequest"
                     }
                 },
+                "order_by": {
+                    "type": "boolean"
+                },
                 "sections": {
                     "type": "array",
                     "items": {
@@ -37255,6 +37258,9 @@ const docTemplate = `{
                 "default": {
                     "type": "string"
                 },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -38318,6 +38324,9 @@ const docTemplate = `{
                 },
                 "label": {
                     "type": "string"
+                },
+                "order_by": {
+                    "type": "boolean"
                 },
                 "project_id": {
                     "type": "string"

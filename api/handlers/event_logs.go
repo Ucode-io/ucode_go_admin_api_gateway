@@ -109,7 +109,6 @@ func (h *Handler) GetEventLogs(c *gin.Context) {
 		fmt.Println("Error while get event logs, err: ", err)
 		return
 	}
-	fmt.Println("step 3 finish")
 	h.handleResponse(c, status_http.OK, res)
 }
 

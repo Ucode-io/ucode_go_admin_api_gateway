@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
@@ -225,8 +224,6 @@ func (h *Handler) GetCompanyListWithProjects(c *gin.Context) {
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateCompany(c *gin.Context) {
 	companyId := c.Param("company_id")
-
-	fmt.Println("company_id", companyId)
 
 	_, err := uuid.Parse(companyId)
 	if err != nil {

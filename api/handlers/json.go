@@ -40,7 +40,6 @@ func (h *Handler) GetLanguageJson(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err.Error())
 		return
 	}
-	fmt.Println("token info: ", tokenInfo)
 	if tokenInfo != nil {
 		if tokenInfo.Tables != nil {
 			object["tables"] = tokenInfo.GetTables()

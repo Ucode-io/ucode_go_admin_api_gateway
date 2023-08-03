@@ -131,7 +131,6 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		fields = append(fields, &tempField)
 	}
 
-	fmt.Println("User id  ", authInfo.GetUserId())
 
 	var table = obs.CreateTableRequest{
 		Label:             tableRequest.Label,
@@ -152,6 +151,7 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		AuthorId:   authInfo.GetUserId(),
 		Name:       fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123)),
 		CommitType: config.COMMIT_TYPE_TABLE,
+		OrderBy:    tableRequest.OrderBy,
 	}
 
 	table.ProjectId = resourceEnvironmentId
@@ -702,14 +702,12 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(c.Get("environment_id"))
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	fmt.Println("::::::::::::: test 2")
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{

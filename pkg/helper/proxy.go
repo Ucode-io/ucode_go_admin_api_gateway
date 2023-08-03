@@ -2,9 +2,7 @@ package helper
 
 import (
 	"context"
-	"fmt"
 	"strings"
-	"time"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	"ucode/ucode_go_api_gateway/services"
 )
@@ -26,7 +24,7 @@ func FindUrlTo(s services.ServiceManagerI, data MatchingData) (string, error) {
 		return "", err
 	}
 
-	start := time.Now()
+	// start := time.Now()
 	//fmt.Println("RES::::::::::::::::::::::", res)
 
 	for _, v := range res.GetRedirectUrls() {
@@ -55,12 +53,12 @@ func FindUrlTo(s services.ServiceManagerI, data MatchingData) (string, error) {
 			for i, el := range m {
 				to = strings.Replace(to, i, el, 1)
 			}
-			fmt.Println("to::::::::::::::::::", to)
+			// fmt.Println("to::::::::::::::::::", to)
 			return to, nil
 		}
 	}
 
-	fmt.Println("time in FindUrlTo::::::", time.Since(start).Milliseconds())
+	// fmt.Println("time in FindUrlTo::::::", time.Since(start).Milliseconds())
 	return data.Path, nil
 }
 

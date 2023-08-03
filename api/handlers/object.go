@@ -869,7 +869,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
+		// fmt.Println("err:", err)
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
@@ -1040,7 +1040,7 @@ func (h *Handler) GetList(c *gin.Context) {
 	//}
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
-		start := time.Now()
+		// start := time.Now()
 
 		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 		if err == nil {
@@ -1054,8 +1054,6 @@ func (h *Handler) GetList(c *gin.Context) {
 				h.handleResponse(c, status_http.OK, resp)
 				return
 			}
-		} else {
-			h.log.Error("Error while getting redis", logger.Error(err))
 		}
 
 		resp, err = services.BuilderService().ObjectBuilder().GetList(
@@ -1076,7 +1074,6 @@ func (h *Handler) GetList(c *gin.Context) {
 				}
 			}
 		}
-		fmt.Printf("\n\n time spend of GetList -> %s, %v seconds.\n\n", c.Param("table_slug"), time.Since(start).Seconds())
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -1129,8 +1126,6 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	// 	h.handleResponse(c, status_http.BadRequest, err.Error())
 	// 	return
 	// }
-	// fmt.Println("::::	objectRequest::", queryParams)
-	fmt.Println(":::test:::")
 
 	queryParams := c.Request.URL.Query()
 	if ok := queryParams.Has("data"); ok {
@@ -1170,7 +1165,6 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 	queryMap["limit"] = limit
 	queryMap["offset"] = offset
 
-	fmt.Println("query map:", queryMap)
 	objectRequest.Data = queryMap
 	tokenInfo, err := h.GetAuthInfo(c)
 	if err != nil {
@@ -1244,35 +1238,6 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 		return
 	}
 
-	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
-	//	context.Background(),
-	//	&company_service.GetResEnvByResIdEnvIdRequest{
-	//		EnvironmentId: environmentId.(string),
-	//		ResourceId:    resourceId.(string),
-	//	},
-	//)
-	//if err != nil {
-	//	err = errors.New("error getting resource environment id")
-	//	h.handleResponse(c, status_http.GRPCError, err.Error())
-	//	return
-	//}
-
-	//redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
-	//if err == nil {
-	//	resp := make(map[string]interface{})
-	//	m := make(map[string]interface{})
-	//	err = json.Unmarshal([]byte(redisResp), &m)
-	//	if err != nil {
-	//		h.log.Error("Error while unmarshal redis", logger.Error(err))
-	//	} else {
-	//		resp["data"] = m
-	//		h.handleResponse(c, status_http.OK, resp)
-	//		return
-	//	}
-	//} else {
-	//	h.log.Error("Error while getting redis", logger.Error(err))
-	//}
-
 	redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
 	if err == nil {
 		resp := make(map[string]interface{})
@@ -1286,7 +1251,7 @@ func (h *Handler) GetListSlim(c *gin.Context) {
 			return
 		}
 	} else {
-		h.log.Error("Error while getting redis", logger.Error(err))
+		h.log.Error("Error while getting redis while get list ", logger.Error(err))
 	}
 	resp, err := services.BuilderService().ObjectBuilder().GetListSlim(
 		context.Background(),
@@ -2157,8 +2122,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 			},
 		)
 
-		log.Println("----mulltiple_update ---->", resp.GetData().AsMap())
-
 		if err != nil {
 			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
 			stat, ok := status.FromError(err)
@@ -2178,8 +2141,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
-		log.Println("----mulltiple_update ---->", resp.GetData().AsMap())
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())

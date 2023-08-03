@@ -349,9 +349,6 @@ func (h *Handler) V2GetAllTables(c *gin.Context) {
 	//	}
 	//}
 
-	fmt.Println("resourceId:::::::::", resource.ResourceId)
-	fmt.Println("environmentId::::::", environmentId)
-	fmt.Println("resourceEnvironment", resource.ResourceEnvironmentId)
 
 	resp, err := services.PostgresBuilderService().Table().GetAll(
 		context.Background(),

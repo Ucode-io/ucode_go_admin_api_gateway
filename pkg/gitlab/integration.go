@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -31,7 +30,7 @@ func DoRequest(url, token string, method string, body interface{}) (responseMode
 	}
 
 	url += "?access_token=" + token
-	fmt.Println(url, string(data))
+	// fmt.Println(url, string(data))
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
 	if err != nil {
 		return

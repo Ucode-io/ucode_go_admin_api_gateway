@@ -14,6 +14,18 @@ service LoginService {
     rpc LoginWithEmailOtp (EmailOtpRequest) returns (V2LoginResponse) {}
     rpc GetUserUpdatedPermission (GetUserUpdatedPermissionRequest) returns(V2LoginResponse) {}
     rpc LoginDataByUserId (LoginDataReq) returns (LoginDataRes) {}
+    rpc GetConnetionOptions (GetConnetionOptionsRequest) returns (GetConnectionOptionsResponse) {}
+}
+
+message GetConnetionOptionsRequest {
+    string connection_id = 1;
+    string resource_environment_id = 2;
+    string user_id = 3;
+}
+
+message GetConnectionOptionsResponse {
+    string table_slug = 1;
+    google.protobuf.Struct data = 2;
 }
 
 message LoginDataReq {
