@@ -37651,6 +37651,9 @@ const docTemplate = `{
         "object_builder_service.LayoutResponse": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -38245,6 +38248,9 @@ const docTemplate = `{
         "object_builder_service.TabResponse": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },

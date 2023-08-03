@@ -37639,6 +37639,9 @@
         "object_builder_service.LayoutResponse": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -38233,6 +38236,9 @@
         "object_builder_service.TabResponse": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },

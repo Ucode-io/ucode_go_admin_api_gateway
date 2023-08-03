@@ -3592,6 +3592,8 @@ definitions:
     type: object
   object_builder_service.LayoutResponse:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
@@ -3981,6 +3983,8 @@ definitions:
     type: object
   object_builder_service.TabResponse:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
