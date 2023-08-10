@@ -82,6 +82,7 @@ message CreateTableRequest {
     bool default_editable = 20;
     bool soft_delete = 21;
     bool order_by = 22;
+    google.protobuf.Struct attributes = 23;
 }
 
 message IncrementID {
@@ -104,6 +105,7 @@ message CreateTableResponse {
     bool is_cached = 11;
     bool default_editable = 12;
     bool soft_delete = 13;
+    google.protobuf.Struct attributes = 14;
 }
 
 message UpdateTableRequest {

@@ -34812,6 +34812,10 @@ const docTemplate = `{
         "models.CreateMenuRequest": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -34930,6 +34934,10 @@ const docTemplate = `{
             "properties": {
                 "app_id": {
                     "type": "string"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "custom_error_messages": {
                     "type": "array",
@@ -35522,6 +35530,10 @@ const docTemplate = `{
         "models.Menu": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -36673,6 +36685,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/object_builder_service.ActionRelation"
                     }
                 },
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "auto_filters": {
                     "type": "array",
                     "items": {
@@ -37226,6 +37241,9 @@ const docTemplate = `{
         "object_builder_service.FieldForSection": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "column": {
                     "type": "integer"
                 },
@@ -37597,6 +37615,9 @@ const docTemplate = `{
         "object_builder_service.LayoutRequest": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -37635,6 +37656,9 @@ const docTemplate = `{
         "object_builder_service.LayoutResponse": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -37716,6 +37740,9 @@ const docTemplate = `{
         "object_builder_service.Menu": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -37754,6 +37781,9 @@ const docTemplate = `{
         "object_builder_service.MenuForGetAll": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "data": {
                     "$ref": "#/definitions/structpb.Struct"
                 },
@@ -38021,6 +38051,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/object_builder_service.ActionRelationForSection"
                     }
                 },
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "columns": {
                     "type": "array",
                     "items": {
@@ -38136,6 +38169,9 @@ const docTemplate = `{
         "object_builder_service.Section": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "column": {
                     "type": "string"
                 },
@@ -38165,6 +38201,9 @@ const docTemplate = `{
         "object_builder_service.SectionResponse": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "column": {
                     "type": "string"
                 },
@@ -38205,6 +38244,9 @@ const docTemplate = `{
         "object_builder_service.SummaryInSection": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "field_name": {
                     "type": "string"
                 },
@@ -38216,6 +38258,9 @@ const docTemplate = `{
         "object_builder_service.TabRequest": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -38248,6 +38293,9 @@ const docTemplate = `{
         "object_builder_service.TabResponse": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -38727,6 +38775,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.ActionRelation"
                     }
+                },
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "auto_filters": {
                     "type": "array",

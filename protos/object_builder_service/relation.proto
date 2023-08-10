@@ -8,6 +8,7 @@ import "field.proto";
 import "table.proto";
 import "view.proto";
 import "object_builder.proto";
+import "google/protobuf/struct.proto";
 
 service RelationService {
     rpc Create(CreateRelationRequest) returns (CreateRelationRequest) {}
@@ -51,7 +52,7 @@ message CreateRelationRequest {
     bool default_editable = 32;
     string function_path = 33;
     bool relation_buttons = 34;
-    
+    google.protobuf.Struct attributes = 35;
 }
 
 message AutoFilter {
@@ -100,6 +101,7 @@ message UpdateRelationRequest {
     bool default_editable = 33;
     string function_path = 34;
     bool relation_buttons = 35;
+    google.protobuf.Struct attributes = 36;
 }
 
 
@@ -139,6 +141,7 @@ message RelationForGetAll {
     string function_path = 33;
     bool relation_buttons = 34;
     bool creatable = 35;
+    google.protobuf.Struct attributes = 36;
 }
 
 message GetAllRelationsResponse {

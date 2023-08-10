@@ -1728,6 +1728,9 @@ definitions:
     type: object
   models.CreateMenuRequest:
     properties:
+      attributes:
+        additionalProperties: true
+        type: object
       icon:
         type: string
       label:
@@ -1806,6 +1809,9 @@ definitions:
     properties:
       app_id:
         type: string
+      attributes:
+        additionalProperties: true
+        type: object
       custom_error_messages:
         items:
           $ref: '#/definitions/object_builder_service.CustomErrorMessage'
@@ -2195,6 +2201,9 @@ definitions:
     type: object
   models.Menu:
     properties:
+      attributes:
+        additionalProperties: true
+        type: object
       icon:
         type: string
       id:
@@ -2948,6 +2957,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.ActionRelation'
         type: array
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       auto_filters:
         items:
           $ref: '#/definitions/object_builder_service.AutoFilter'
@@ -3312,6 +3323,8 @@ definitions:
     type: object
   object_builder_service.FieldForSection:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       column:
         type: integer
       field_name:
@@ -3552,6 +3565,8 @@ definitions:
     type: object
   object_builder_service.LayoutRequest:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
@@ -3577,6 +3592,8 @@ definitions:
     type: object
   object_builder_service.LayoutResponse:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
@@ -3630,6 +3647,8 @@ definitions:
     type: object
   object_builder_service.Menu:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
@@ -3655,6 +3674,8 @@ definitions:
     type: object
   object_builder_service.MenuForGetAll:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       data:
         $ref: '#/definitions/structpb.Struct'
       icon:
@@ -3829,6 +3850,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.ActionRelationForSection'
         type: array
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       columns:
         items:
           type: string
@@ -3905,6 +3928,8 @@ definitions:
     type: object
   object_builder_service.Section:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       column:
         type: string
       fields:
@@ -3924,6 +3949,8 @@ definitions:
     type: object
   object_builder_service.SectionResponse:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       column:
         type: string
       fields:
@@ -3950,6 +3977,8 @@ definitions:
     type: object
   object_builder_service.SummaryInSection:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       field_name:
         type: string
       formula_name:
@@ -3957,6 +3986,8 @@ definitions:
     type: object
   object_builder_service.TabRequest:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
@@ -3978,6 +4009,8 @@ definitions:
     type: object
   object_builder_service.TabResponse:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
@@ -4292,6 +4325,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.ActionRelation'
         type: array
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       auto_filters:
         items:
           $ref: '#/definitions/object_builder_service.AutoFilter'
