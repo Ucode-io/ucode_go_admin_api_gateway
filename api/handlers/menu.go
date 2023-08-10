@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -86,6 +87,8 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	fmt.Println("\n\n >>>>>>>> #attributes", attributes)
 
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
