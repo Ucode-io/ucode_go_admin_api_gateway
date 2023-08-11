@@ -1728,6 +1728,9 @@ definitions:
     type: object
   models.CreateMenuRequest:
     properties:
+      attributes:
+        additionalProperties: true
+        type: object
       icon:
         type: string
       label:
@@ -2195,6 +2198,9 @@ definitions:
     type: object
   models.Menu:
     properties:
+      attributes:
+        additionalProperties: true
+        type: object
       icon:
         type: string
       id:
@@ -3630,6 +3636,8 @@ definitions:
     type: object
   object_builder_service.Menu:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
@@ -3655,6 +3663,8 @@ definitions:
     type: object
   object_builder_service.MenuForGetAll:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       data:
         $ref: '#/definitions/structpb.Struct'
       icon:
