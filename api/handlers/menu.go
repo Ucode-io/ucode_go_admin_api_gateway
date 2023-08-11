@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -266,6 +267,7 @@ func (h *Handler) GetMenuByID(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetAllMenus(c *gin.Context) {
+	fmt.Println(">>>>> #1 ")
 	offset, err := h.getOffsetParam(c)
 	var (
 		resp *obs.GetAllMenusResponse
