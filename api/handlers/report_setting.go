@@ -10,32 +10,12 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
 )
-
-type GetListClientApiResponse struct {
-	Data          GetListClientApiData   `json:"data"`
-	MatchTables   map[string]interface{} `json:"match_tables"`
-	TableSlug     string                 `json:"table_slug"`
-	OrderNumber   int                    `json:"order_number"`
-	ReportSetting map[string]interface{} `json:"report_setting"`
-}
-
-type GetListClientApiData struct {
-	TableSlug string               `json:"table_slug"`
-	Data      GetListClientApiResp `json:"data"`
-}
-
-type GetListClientApiResp struct {
-	Count    int                      `json:"count"`
-	Rows     []map[string]interface{} `json:"rows"`
-	Columns  []map[string]interface{} `json:"columns"`
-	Values   []map[string]interface{} `json:"values"`
-	Defaults []interface{}            `json:"defaults"`
-}
 
 // DynamicReportFormula godoc
 // @Security ApiKeyAuth
@@ -156,25 +136,23 @@ func (h *Handler) DynamicReport(c *gin.Context) {
 		}
 	}
 
-	// objectRequest.Data["report_setting"] = reportSetting
-	// structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InvalidArgument, err.Error())
-	// 	return
-	// }
+	objectRequest.Data["report_setting"] = reportSetting
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
 
-	// objectRequest.Data["data"] = structData
-	// response, err := h.DoInvokeFuntionByGetList(DoInvokeFuntionStruct{
-	// 	TableSlug:  c.Param("table_slug"),
-	// 	ObjectData: objectRequest.Data,
-	// 	Method:     "GET_LIST",
-	// })
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+c.Param("table_slug"))
-	// 	return
-	// }
+	objectRequest.Data["data"] = structData
+	response, err := h.DynamicReportHelper(NewRequestBody{
+		Data: objectRequest.Data,
+	})
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+c.Param("table_slug"))
+		return
+	}
 
-	h.handleResponse(c, status_http.OK, reportSetting) // TODO response.Data["response"]
+	h.handleResponse(c, status_http.OK, response.Data["response"]) // TODO response.Data["response"]
 }
 
 // GetByIdReportSetting godoc
