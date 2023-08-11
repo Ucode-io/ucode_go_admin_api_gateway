@@ -146,9 +146,9 @@ func (h *Handler) DynamicReport(c *gin.Context) {
 	objectRequest.Data["data"] = structData
 	response, err := h.DynamicReportHelper(NewRequestBody{
 		Data: objectRequest.Data,
-	})
+	}, services)
 	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+c.Param("table_slug"))
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 

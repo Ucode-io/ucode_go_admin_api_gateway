@@ -1,13 +1,14 @@
 package handlers
 
 import (
-	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
-	"net/http"
 	"strings"
 	"time"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
+	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/spf13/cast"
 )
@@ -96,13 +97,7 @@ type NewRequestBody struct {
 	Data map[string]interface{} `json:"data,omitempty"`
 }
 
-const (
-	getSingleURL            = "https://test.api.client.parfumgallery.uz/v1/object/"
-	getListURL              = "https://test.api.client.parfumgallery.uz/v1/object/get-list/"
-	getGroupReportTablesURL = "https://test.api.client.parfumgallery.uz/v1/object/get-group-report-tables/"
-)
-
-func (h *Handler) DynamicReportHelper(req NewRequestBody) (Response, error) {
+func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.ServiceManagerI) (Response, error) {
 
 	var (
 		response       Response
@@ -752,32 +747,38 @@ func (h *Handler) DynamicReportHelper(req NewRequestBody) (Response, error) {
 			rowsRelationNestedQuery["project"] = rowRelationNestedProject
 		}
 	}
-
 	var (
-		fieldFilter = Request{
-			Data: map[string]interface{}{
-				"rows":                 rowsQuery,
-				"rows_relation":        rowsRelationQuery,
-				"rows_inside_relation": rowsInsideRelationQuery,
-				"rows_relation_nested": rowsRelationNestedQuery,
-				"columns":              columnsQuery,
-				"values":               valuesQuery,
-				"total_values":         totalValuesQuery,
-			},
-		}
-
-		tableGetGroupByFieldURL = getGroupReportTablesURL + mainTableSlug
-		tableGetFilterResp      GetListClientApiResponse
+		tableGetFilterResp GetListClientApiResponse
 	)
 
-	body, err := DoRequest(tableGetGroupByFieldURL, "POST", fieldFilter)
+	structData, err := helper.ConvertMapToStruct(map[string]interface{}{
+		"rows":                 rowsQuery,
+		"rows_relation":        rowsRelationQuery,
+		"rows_inside_relation": rowsInsideRelationQuery,
+		"rows_relation_nested": rowsRelationNestedQuery,
+		"columns":              columnsQuery,
+		"values":               valuesQuery,
+		"total_values":         totalValuesQuery,
+	})
 	if err != nil {
 		response.Status = "error"
-		errorMessage["message"] = "error on post request [tableGetGroupByFieldURL]: " + tableGetGroupByFieldURL
+		errorMessage["message"] = "error convert map to struct [tableGetGroupByFieldURL]: "
 		response.Data = errorMessage
 
 		return response, err
 	}
+
+	responseBuilderReport, err := services.BuilderService().ObjectBuilder().GetGroupReportTables(context.Background(), &obs.CommonMessage{
+		TableSlug: mainTableSlug,
+		Data:      structData,
+	})
+	if err != nil {
+		response.Status = "error"
+		errorMessage["message"] = "error get group report tables [tableGetGroupByFieldURL]: "
+		response.Data = errorMessage
+		return response, err
+	}
+	body, _ := json.Marshal(responseBuilderReport)
 
 	err = json.Unmarshal(body, &tableGetFilterResp)
 	if err != nil {
@@ -982,32 +983,4 @@ func MongoAggregation(valueAs string) string {
 	}
 
 	return "$sum"
-}
-
-func DoRequest(url string, method string, body interface{}) ([]byte, error) {
-	data, err := json.Marshal(&body)
-	if err != nil {
-		return nil, err
-	}
-	client := &http.Client{
-		// Timeout: time.Duration(5 * time.Second),
-	}
-
-	request, err := http.NewRequest(method, url, bytes.NewBuffer(data))
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := client.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	respByte, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return respByte, nil
 }
