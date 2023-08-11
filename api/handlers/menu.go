@@ -49,6 +49,10 @@ func (h *Handler) CreateMenu(c *gin.Context) {
 		return
 	}
 
+	if menu.Attributes == nil {
+		menu.Attributes = make(map[string]interface{})
+	}
+
 	attributes, err := helper.ConvertMapToStruct(menu.Attributes)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -373,6 +377,10 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
+	}
+
+	if menu.Attributes == nil {
+		menu.Attributes = make(map[string]interface{})
 	}
 
 	attributes, err := helper.ConvertMapToStruct(menu.Attributes)
