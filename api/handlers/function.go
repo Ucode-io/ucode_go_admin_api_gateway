@@ -657,18 +657,20 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
-	_, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
-		context.Background(),
-		&obs.UpdateByFunctionIdRequest{
-			FunctionId: invokeFunction.FunctionID,
-			ObjectIds:  invokeFunction.ObjectIDs,
-			FieldSlug:  function.Path + "_disable",
-			ProjectId:  resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if c.Query("form_input") != "true" {
+		_, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
+			context.Background(),
+			&obs.UpdateByFunctionIdRequest{
+				FunctionId: invokeFunction.FunctionID,
+				ObjectIds:  invokeFunction.ObjectIDs,
+				FieldSlug:  function.Path + "_disable",
+				ProjectId:  resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 	h.handleResponse(c, status_http.Created, resp)
 }
