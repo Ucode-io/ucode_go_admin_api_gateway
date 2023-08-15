@@ -38870,7 +38870,13 @@ const docTemplate = `{
                 "parent_id": {
                     "type": "string"
                 },
+                "pivot_template_id": {
+                    "type": "string"
+                },
                 "project_id": {
+                    "type": "string"
+                },
+                "report_setting_id": {
                     "type": "string"
                 },
                 "table_id": {
