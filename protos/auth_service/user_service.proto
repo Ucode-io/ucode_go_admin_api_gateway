@@ -29,6 +29,7 @@ service UserService {
     rpc V2GetUserList(GetUserListRequest) returns (GetUserListResponse) {}
     rpc V2UpdateUser(UpdateUserRequest) returns (User) {}
     rpc V2DeleteUser(UserPrimaryKey) returns (google.protobuf.Empty) {}
+    rpc V2ResetPassword(V2UserResetPasswordRequest) returns (User) {}
     rpc AddUserToProject(AddUserToProjectReq) returns (AddUserToProjectRes) {}
     rpc GetProjectsByUserId(GetProjectsByUserIdReq) returns (GetProjectsByUserIdRes) {}
     rpc V2GetUserByLoginTypes(GetUserByLoginTypesRequest) returns (GetUserByLoginTypesResponse) {}
@@ -214,4 +215,10 @@ message SendMessageToEmailRequest {
     string email = 1;
     string base_url = 2;
     string token = 3;
+}
+
+message V2UserResetPasswordRequest {
+    string old_password = 1;
+    string password = 2;
+    string user_id = 3;
 }

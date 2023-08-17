@@ -23,6 +23,7 @@ message Section {
     repeated FieldForSection fields = 5;
     string icon = 6;
     bool is_summary_section = 7;
+    google.protobuf.Struct attributes = 8;
 }
 
 message ViewRelationReq {
@@ -44,6 +45,7 @@ message RelationForTable {
 message SummaryInSection {
     string field_name = 1;
     string formula_name = 2;
+    google.protobuf.Struct attributes = 3;
 }
 
 message ViewRelation {
@@ -54,6 +56,7 @@ message ViewRelation {
     string icon = 5;
     bool is_editable = 6;
     string function_path = 7;
+    google.protobuf.Struct attributes = 8;
 }
 
 message RelationForSection {
@@ -82,6 +85,7 @@ message RelationForSection {
     bool default_editable = 23;
     string function_path = 24;
     bool relation_buttons = 25;
+    google.protobuf.Struct attributes = 26;
 }
 
 message ActionRelationForSection {
@@ -147,6 +151,7 @@ message SectionResponse {
     repeated FieldResponse fields = 5;
     string icon = 6;
     bool is_summary_section = 7;
+    google.protobuf.Struct attributes = 8;
 }
 
 message FieldResponse {
@@ -173,6 +178,7 @@ message FieldForSection {
     string field_name = 4;
     string relation_type = 5;
     bool show_label = 6;
+    google.protobuf.Struct attributes = 7;
 }
 
 message UpdateSectionsRequest {

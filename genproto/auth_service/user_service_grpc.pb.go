@@ -40,6 +40,7 @@ type UserServiceClient interface {
 	V2GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error)
 	V2UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 	V2DeleteUser(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	V2ResetPassword(ctx context.Context, in *V2UserResetPasswordRequest, opts ...grpc.CallOption) (*User, error)
 	AddUserToProject(ctx context.Context, in *AddUserToProjectReq, opts ...grpc.CallOption) (*AddUserToProjectRes, error)
 	GetProjectsByUserId(ctx context.Context, in *GetProjectsByUserIdReq, opts ...grpc.CallOption) (*GetProjectsByUserIdRes, error)
 	V2GetUserByLoginTypes(ctx context.Context, in *GetUserByLoginTypesRequest, opts ...grpc.CallOption) (*GetUserByLoginTypesResponse, error)
@@ -211,6 +212,15 @@ func (c *userServiceClient) V2DeleteUser(ctx context.Context, in *UserPrimaryKey
 	return out, nil
 }
 
+func (c *userServiceClient) V2ResetPassword(ctx context.Context, in *V2UserResetPasswordRequest, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/auth_service.UserService/V2ResetPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) AddUserToProject(ctx context.Context, in *AddUserToProjectReq, opts ...grpc.CallOption) (*AddUserToProjectRes, error) {
 	out := new(AddUserToProjectRes)
 	err := c.cc.Invoke(ctx, "/auth_service.UserService/AddUserToProject", in, out, opts...)
@@ -304,6 +314,7 @@ type UserServiceServer interface {
 	V2GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error)
 	V2UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
 	V2DeleteUser(context.Context, *UserPrimaryKey) (*emptypb.Empty, error)
+	V2ResetPassword(context.Context, *V2UserResetPasswordRequest) (*User, error)
 	AddUserToProject(context.Context, *AddUserToProjectReq) (*AddUserToProjectRes, error)
 	GetProjectsByUserId(context.Context, *GetProjectsByUserIdReq) (*GetProjectsByUserIdRes, error)
 	V2GetUserByLoginTypes(context.Context, *GetUserByLoginTypesRequest) (*GetUserByLoginTypesResponse, error)
@@ -369,6 +380,9 @@ func (UnimplementedUserServiceServer) V2UpdateUser(context.Context, *UpdateUserR
 }
 func (UnimplementedUserServiceServer) V2DeleteUser(context.Context, *UserPrimaryKey) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2DeleteUser not implemented")
+}
+func (UnimplementedUserServiceServer) V2ResetPassword(context.Context, *V2UserResetPasswordRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method V2ResetPassword not implemented")
 }
 func (UnimplementedUserServiceServer) AddUserToProject(context.Context, *AddUserToProjectReq) (*AddUserToProjectRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddUserToProject not implemented")
@@ -713,6 +727,24 @@ func _UserService_V2DeleteUser_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_V2ResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(V2UserResetPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).V2ResetPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.UserService/V2ResetPassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).V2ResetPassword(ctx, req.(*V2UserResetPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_AddUserToProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddUserToProjectReq)
 	if err := dec(in); err != nil {
@@ -931,6 +963,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "V2DeleteUser",
 			Handler:    _UserService_V2DeleteUser_Handler,
+		},
+		{
+			MethodName: "V2ResetPassword",
+			Handler:    _UserService_V2ResetPassword_Handler,
 		},
 		{
 			MethodName: "AddUserToProject",

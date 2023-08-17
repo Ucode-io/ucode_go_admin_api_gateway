@@ -13,3 +13,4 @@ import "project_service.proto";
 import "apple.proto";
 import "login_strategy.proto";
 import "sync_user.proto";
+import "sms_otp_settings.proto";
