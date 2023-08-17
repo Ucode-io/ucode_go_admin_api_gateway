@@ -1809,6 +1809,9 @@ definitions:
     properties:
       app_id:
         type: string
+      attributes:
+        additionalProperties: true
+        type: object
       custom_error_messages:
         items:
           $ref: '#/definitions/object_builder_service.CustomErrorMessage'

@@ -34930,6 +34930,10 @@ const docTemplate = `{
                 "app_id": {
                     "type": "string"
                 },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "custom_error_messages": {
                     "type": "array",
                     "items": {
