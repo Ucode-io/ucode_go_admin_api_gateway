@@ -456,44 +456,48 @@ func (h *Handler) UpdateField(c *gin.Context) {
 			}
 		}
 	} else {
-		field.EnableMultilanguage = true
-		languaegs, err := services.CompanyService().Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
-			ProjectId: resource.GetProjectId(),
-		})
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-		for _, value := range languaegs.GetLanguage() {
-			if fieldRequest.Slug != fieldRequest.Slug[:len(fieldRequest.Slug)-3]+"_"+value.GetShortName() {
-				go func(arg *pb.Language, project_id string) {
-					id, _ := uuid.NewRandom()
-					_, err := services.BuilderService().Field().Create(context.Background(), &obs.CreateFieldRequest{
-						Id:                  id.String(),
-						Default:             fieldRequest.Default,
-						Type:                fieldRequest.Type,
-						Index:               fieldRequest.Index,
-						Label:               fieldRequest.Label,
-						Slug:                fieldRequest.Slug[:len(fieldRequest.Slug)-3] + "_" + arg.ShortName,
-						TableId:             fieldRequest.TableID,
-						Attributes:          attributes,
-						IsVisible:           fieldRequest.IsVisible,
-						AutofillTable:       fieldRequest.AutoFillTable,
-						AutofillField:       fieldRequest.AutoFillField,
-						RelationField:       fieldRequest.RelationField,
-						Automatic:           fieldRequest.Automatic,
-						ShowLabel:           fieldRequest.ShowLabel,
-						Unique:              fieldRequest.Unique,
-						ProjectId:           project_id,
-						EnableMultilanguage: true,
-					})
-					if err != nil {
-						h.handleResponse(c, status_http.GRPCError, err.Error())
-						return
-					}
-				}(value, resource.ResourceEnvironmentId)
-			}
-		}
+		// do nothing
+
+		// field.EnableMultilanguage = true
+		// languaegs, err := services.CompanyService().Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
+		// 	ProjectId: resource.GetProjectId(),
+		// })
+		// if err != nil {
+		// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+		// 	return
+		// }
+		// for _, value := range languaegs.GetLanguage() {
+		// 	if fieldRequest.Slug != fieldRequest.Slug[:len(fieldRequest.Slug)-3]+"_"+value.GetShortName() {
+		// 		fmt.Println("field slug: ", fieldRequest.Slug)
+		// 		fmt.Println("get short name:::", value.GetShortName())
+		// 		fmt.Println("match field slug:",  fieldRequest.Slug[:len(fieldRequest.Slug)-3]+"_"+value.GetShortName())
+		// 		go func(arg *pb.Language, project_id string) {
+		// 			// id, _ := uuid.NewRandom()
+		// 			// _, err := services.BuilderService().Field().Create(context.Background(), &obs.CreateFieldRequest{
+		// 			// 	Id:                  id.String(),
+		// 			// 	Default:             fieldRequest.Default,
+		// 			// 	Type:                fieldRequest.Type,
+		// 			// 	Index:               fieldRequest.Index,
+		// 			// 	Label:               fieldRequest.Label,
+		// 			// 	Slug:                fieldRequest.Slug[:len(fieldRequest.Slug)-3] + "_" + arg.ShortName,
+		// 			// 	TableId:             fieldRequest.TableID,
+		// 			// 	Attributes:          attributes,
+		// 			// 	IsVisible:           fieldRequest.IsVisible,
+		// 			// 	AutofillTable:       fieldRequest.AutoFillTable,
+		// 			// 	AutofillField:       fieldRequest.AutoFillField,
+		// 			// 	RelationField:       fieldRequest.RelationField,
+		// 			// 	Automatic:           fieldRequest.Automatic,
+		// 			// 	ShowLabel:           fieldRequest.ShowLabel,
+		// 			// 	Unique:              fieldRequest.Unique,
+		// 			// 	ProjectId:           project_id,
+		// 			// 	EnableMultilanguage: true,
+		// 			// })
+		// 			// if err != nil {
+		// 			// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+		// 			// 	return
+		// 			// }
+		// 		}(value, resource.ResourceEnvironmentId)
+		// }
 	}
 
 	field.ProjectId = resource.ResourceEnvironmentId
