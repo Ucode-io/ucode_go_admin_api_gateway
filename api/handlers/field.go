@@ -457,7 +457,6 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		}
 	} else {
 		// do nothing
-
 		// field.EnableMultilanguage = true
 		// languaegs, err := services.CompanyService().Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
 		// 	ProjectId: resource.GetProjectId(),
