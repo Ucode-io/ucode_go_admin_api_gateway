@@ -16,7 +16,7 @@ const (
 	// ReleaseMode indicates service mode is release.
 	ReleaseMode = "release"
 )
-
+var DynamicReportFormula = []string{"SUM", "COUNT", "AVERAGE", "MAX", "MIN", "FIRST", "LAST", "END_FIRST", "END_LAST"}
 type Config struct {
 	ServiceName string
 	Environment string // debug, test, release
