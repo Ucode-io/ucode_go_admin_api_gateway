@@ -1029,8 +1029,9 @@ type MenuForGetAll struct {
 	Data            *structpb.Struct `protobuf:"bytes,9,opt,name=data,proto3" json:"data,omitempty"`
 	MicrofrontendId string           `protobuf:"bytes,10,opt,name=microfrontend_id,json=microfrontendId,proto3" json:"microfrontend_id,omitempty"`
 	WebpageId       string           `protobuf:"bytes,11,opt,name=webpage_id,json=webpageId,proto3" json:"webpage_id,omitempty"`
-	Permission      *MenuPermission  `protobuf:"bytes,12,opt,name=permission,proto3" json:"permission,omitempty"`
+	PivotTemplateId string           `protobuf:"bytes,12,opt,name=pivot_template_id,json=pivotTemplateId,proto3" json:"pivot_template_id,omitempty"`
 	Attributes      *structpb.Struct `protobuf:"bytes,13,opt,name=attributes,proto3" json:"attributes,omitempty"`
+	ReportSettingId string           `protobuf:"bytes,14,opt,name=report_setting_id,json=reportSettingId,proto3" json:"report_setting_id,omitempty"`
 }
 
 func (x *MenuForGetAll) Reset() {
@@ -1142,11 +1143,11 @@ func (x *MenuForGetAll) GetWebpageId() string {
 	return ""
 }
 
-func (x *MenuForGetAll) GetPermission() *MenuPermission {
+func (x *MenuForGetAll) GetPivotTemplateId() string {
 	if x != nil {
-		return x.Permission
+		return x.PivotTemplateId
 	}
-	return nil
+	return ""
 }
 
 func (x *MenuForGetAll) GetAttributes() *structpb.Struct {
@@ -1154,6 +1155,13 @@ func (x *MenuForGetAll) GetAttributes() *structpb.Struct {
 		return x.Attributes
 	}
 	return nil
+}
+
+func (x *MenuForGetAll) GetReportSettingId() string {
+	if x != nil {
+		return x.ReportSettingId
+	}
+	return ""
 }
 
 type GetAllMenusResponse struct {
@@ -1571,7 +1579,7 @@ var file_menu_proto_rawDesc = []byte{
 	0x61, 0x67, 0x65, 0x49, 0x64, 0x12, 0x37, 0x0a, 0x0a, 0x61, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75,
 	0x74, 0x65, 0x73, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
 	0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x53, 0x74, 0x72, 0x75,
-	0x63, 0x74, 0x52, 0x0a, 0x61, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x73, 0x22, 0xc9,
+	0x63, 0x74, 0x52, 0x0a, 0x61, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x73, 0x22, 0xd9,
 	0x03, 0x0a, 0x0d, 0x4d, 0x65, 0x6e, 0x75, 0x46, 0x6f, 0x72, 0x47, 0x65, 0x74, 0x41, 0x6c, 0x6c,
 	0x12, 0x14, 0x0a, 0x05, 0x6c, 0x61, 0x62, 0x65, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
 	0x05, 0x6c, 0x61, 0x62, 0x65, 0x6c, 0x12, 0x12, 0x0a, 0x04, 0x69, 0x63, 0x6f, 0x6e, 0x18, 0x02,
@@ -1592,15 +1600,16 @@ var file_menu_proto_rawDesc = []byte{
 	0x5f, 0x69, 0x64, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x6d, 0x69, 0x63, 0x72, 0x6f,
 	0x66, 0x72, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x64, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x77, 0x65,
 	0x62, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09,
-	0x77, 0x65, 0x62, 0x70, 0x61, 0x67, 0x65, 0x49, 0x64, 0x12, 0x46, 0x0a, 0x0a, 0x70, 0x65, 0x72,
-	0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x26, 0x2e,
-	0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x65, 0x72, 0x5f, 0x73,
-	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x4d, 0x65, 0x6e, 0x75, 0x50, 0x65, 0x72, 0x6d, 0x69,
-	0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x0a, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f,
-	0x6e, 0x12, 0x37, 0x0a, 0x0a, 0x61, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x73, 0x18,
-	0x0d, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x53, 0x74, 0x72, 0x75, 0x63, 0x74, 0x52, 0x0a,
-	0x61, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x73, 0x22, 0x68, 0x0a, 0x13, 0x47, 0x65,
+	0x77, 0x65, 0x62, 0x70, 0x61, 0x67, 0x65, 0x49, 0x64, 0x12, 0x2a, 0x0a, 0x11, 0x70, 0x69, 0x76,
+	0x6f, 0x74, 0x5f, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x0c,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x70, 0x69, 0x76, 0x6f, 0x74, 0x54, 0x65, 0x6d, 0x70, 0x6c,
+	0x61, 0x74, 0x65, 0x49, 0x64, 0x12, 0x37, 0x0a, 0x0a, 0x61, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75,
+	0x74, 0x65, 0x73, 0x18, 0x0d, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
+	0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x53, 0x74, 0x72, 0x75,
+	0x63, 0x74, 0x52, 0x0a, 0x61, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x73, 0x12, 0x2a,
+	0x0a, 0x11, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x5f, 0x73, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67,
+	0x5f, 0x69, 0x64, 0x18, 0x0e, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x72, 0x65, 0x70, 0x6f, 0x72,
+	0x74, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x64, 0x22, 0x68, 0x0a, 0x13, 0x47, 0x65,
 	0x74, 0x41, 0x6c, 0x6c, 0x4d, 0x65, 0x6e, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
 	0x65, 0x12, 0x3b, 0x0a, 0x05, 0x6d, 0x65, 0x6e, 0x75, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b,
 	0x32, 0x25, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x65,
@@ -1768,8 +1777,7 @@ var file_menu_proto_goTypes = []interface{}{
 	(*GetAllMenusRequest)(nil),         // 15: object_builder_service.GetAllMenusRequest
 	(*UpdateMenuOrderRequest)(nil),     // 16: object_builder_service.UpdateMenuOrderRequest
 	(*structpb.Struct)(nil),            // 17: google.protobuf.Struct
-	(*MenuPermission)(nil),             // 18: object_builder_service.MenuPermission
-	(*emptypb.Empty)(nil),              // 19: google.protobuf.Empty
+	(*emptypb.Empty)(nil),              // 18: google.protobuf.Empty
 }
 var file_menu_proto_depIdxs = []int32{
 	2,  // 0: object_builder_service.GatAllMenuTemplateResponse.menu_templates:type_name -> object_builder_service.MenuTemplate
@@ -1778,47 +1786,46 @@ var file_menu_proto_depIdxs = []int32{
 	17, // 3: object_builder_service.CreateMenuRequest.attributes:type_name -> google.protobuf.Struct
 	17, // 4: object_builder_service.Menu.attributes:type_name -> google.protobuf.Struct
 	17, // 5: object_builder_service.MenuForGetAll.data:type_name -> google.protobuf.Struct
-	18, // 6: object_builder_service.MenuForGetAll.permission:type_name -> object_builder_service.MenuPermission
-	17, // 7: object_builder_service.MenuForGetAll.attributes:type_name -> google.protobuf.Struct
-	12, // 8: object_builder_service.GetAllMenusResponse.menus:type_name -> object_builder_service.MenuForGetAll
-	11, // 9: object_builder_service.UpdateMenuOrderRequest.menus:type_name -> object_builder_service.Menu
-	10, // 10: object_builder_service.MenuService.Create:input_type -> object_builder_service.CreateMenuRequest
-	14, // 11: object_builder_service.MenuService.GetByID:input_type -> object_builder_service.MenuPrimaryKey
-	15, // 12: object_builder_service.MenuService.GetAll:input_type -> object_builder_service.GetAllMenusRequest
-	11, // 13: object_builder_service.MenuService.Update:input_type -> object_builder_service.Menu
-	14, // 14: object_builder_service.MenuService.Delete:input_type -> object_builder_service.MenuPrimaryKey
-	16, // 15: object_builder_service.MenuService.UpdateMenuOrder:input_type -> object_builder_service.UpdateMenuOrderRequest
-	8,  // 16: object_builder_service.MenuService.CreateMenuSettings:input_type -> object_builder_service.CreateMenuSettingsRequest
-	7,  // 17: object_builder_service.MenuService.GetAllMenuSettings:input_type -> object_builder_service.GetAllMenuSettingsRequest
-	6,  // 18: object_builder_service.MenuService.GetByIDMenuSettings:input_type -> object_builder_service.MenuSettingPrimaryKey
-	4,  // 19: object_builder_service.MenuService.UpdateMenuSettings:input_type -> object_builder_service.UpdateMenuSettingsRequest
-	6,  // 20: object_builder_service.MenuService.DeleteMenuSettings:input_type -> object_builder_service.MenuSettingPrimaryKey
-	0,  // 21: object_builder_service.MenuService.CreateMenuTemplate:input_type -> object_builder_service.CreateMenuTemplateRequest
-	7,  // 22: object_builder_service.MenuService.GetAllMenuTemplate:input_type -> object_builder_service.GetAllMenuSettingsRequest
-	6,  // 23: object_builder_service.MenuService.GetByIDMenuTemplate:input_type -> object_builder_service.MenuSettingPrimaryKey
-	3,  // 24: object_builder_service.MenuService.UpdateMenuTemplate:input_type -> object_builder_service.UpdateMenuTemplateRequest
-	6,  // 25: object_builder_service.MenuService.DeleteMenuTemplate:input_type -> object_builder_service.MenuSettingPrimaryKey
-	11, // 26: object_builder_service.MenuService.Create:output_type -> object_builder_service.Menu
-	11, // 27: object_builder_service.MenuService.GetByID:output_type -> object_builder_service.Menu
-	13, // 28: object_builder_service.MenuService.GetAll:output_type -> object_builder_service.GetAllMenusResponse
-	19, // 29: object_builder_service.MenuService.Update:output_type -> google.protobuf.Empty
-	19, // 30: object_builder_service.MenuService.Delete:output_type -> google.protobuf.Empty
-	19, // 31: object_builder_service.MenuService.UpdateMenuOrder:output_type -> google.protobuf.Empty
-	9,  // 32: object_builder_service.MenuService.CreateMenuSettings:output_type -> object_builder_service.MenuSettings
-	5,  // 33: object_builder_service.MenuService.GetAllMenuSettings:output_type -> object_builder_service.GetAllMenuSettingsResponse
-	9,  // 34: object_builder_service.MenuService.GetByIDMenuSettings:output_type -> object_builder_service.MenuSettings
-	19, // 35: object_builder_service.MenuService.UpdateMenuSettings:output_type -> google.protobuf.Empty
-	19, // 36: object_builder_service.MenuService.DeleteMenuSettings:output_type -> google.protobuf.Empty
-	2,  // 37: object_builder_service.MenuService.CreateMenuTemplate:output_type -> object_builder_service.MenuTemplate
-	1,  // 38: object_builder_service.MenuService.GetAllMenuTemplate:output_type -> object_builder_service.GatAllMenuTemplateResponse
-	2,  // 39: object_builder_service.MenuService.GetByIDMenuTemplate:output_type -> object_builder_service.MenuTemplate
-	19, // 40: object_builder_service.MenuService.UpdateMenuTemplate:output_type -> google.protobuf.Empty
-	19, // 41: object_builder_service.MenuService.DeleteMenuTemplate:output_type -> google.protobuf.Empty
-	26, // [26:42] is the sub-list for method output_type
-	10, // [10:26] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	17, // 6: object_builder_service.MenuForGetAll.attributes:type_name -> google.protobuf.Struct
+	12, // 7: object_builder_service.GetAllMenusResponse.menus:type_name -> object_builder_service.MenuForGetAll
+	11, // 8: object_builder_service.UpdateMenuOrderRequest.menus:type_name -> object_builder_service.Menu
+	10, // 9: object_builder_service.MenuService.Create:input_type -> object_builder_service.CreateMenuRequest
+	14, // 10: object_builder_service.MenuService.GetByID:input_type -> object_builder_service.MenuPrimaryKey
+	15, // 11: object_builder_service.MenuService.GetAll:input_type -> object_builder_service.GetAllMenusRequest
+	11, // 12: object_builder_service.MenuService.Update:input_type -> object_builder_service.Menu
+	14, // 13: object_builder_service.MenuService.Delete:input_type -> object_builder_service.MenuPrimaryKey
+	16, // 14: object_builder_service.MenuService.UpdateMenuOrder:input_type -> object_builder_service.UpdateMenuOrderRequest
+	8,  // 15: object_builder_service.MenuService.CreateMenuSettings:input_type -> object_builder_service.CreateMenuSettingsRequest
+	7,  // 16: object_builder_service.MenuService.GetAllMenuSettings:input_type -> object_builder_service.GetAllMenuSettingsRequest
+	6,  // 17: object_builder_service.MenuService.GetByIDMenuSettings:input_type -> object_builder_service.MenuSettingPrimaryKey
+	4,  // 18: object_builder_service.MenuService.UpdateMenuSettings:input_type -> object_builder_service.UpdateMenuSettingsRequest
+	6,  // 19: object_builder_service.MenuService.DeleteMenuSettings:input_type -> object_builder_service.MenuSettingPrimaryKey
+	0,  // 20: object_builder_service.MenuService.CreateMenuTemplate:input_type -> object_builder_service.CreateMenuTemplateRequest
+	7,  // 21: object_builder_service.MenuService.GetAllMenuTemplate:input_type -> object_builder_service.GetAllMenuSettingsRequest
+	6,  // 22: object_builder_service.MenuService.GetByIDMenuTemplate:input_type -> object_builder_service.MenuSettingPrimaryKey
+	3,  // 23: object_builder_service.MenuService.UpdateMenuTemplate:input_type -> object_builder_service.UpdateMenuTemplateRequest
+	6,  // 24: object_builder_service.MenuService.DeleteMenuTemplate:input_type -> object_builder_service.MenuSettingPrimaryKey
+	11, // 25: object_builder_service.MenuService.Create:output_type -> object_builder_service.Menu
+	11, // 26: object_builder_service.MenuService.GetByID:output_type -> object_builder_service.Menu
+	13, // 27: object_builder_service.MenuService.GetAll:output_type -> object_builder_service.GetAllMenusResponse
+	18, // 28: object_builder_service.MenuService.Update:output_type -> google.protobuf.Empty
+	18, // 29: object_builder_service.MenuService.Delete:output_type -> google.protobuf.Empty
+	18, // 30: object_builder_service.MenuService.UpdateMenuOrder:output_type -> google.protobuf.Empty
+	9,  // 31: object_builder_service.MenuService.CreateMenuSettings:output_type -> object_builder_service.MenuSettings
+	5,  // 32: object_builder_service.MenuService.GetAllMenuSettings:output_type -> object_builder_service.GetAllMenuSettingsResponse
+	9,  // 33: object_builder_service.MenuService.GetByIDMenuSettings:output_type -> object_builder_service.MenuSettings
+	18, // 34: object_builder_service.MenuService.UpdateMenuSettings:output_type -> google.protobuf.Empty
+	18, // 35: object_builder_service.MenuService.DeleteMenuSettings:output_type -> google.protobuf.Empty
+	2,  // 36: object_builder_service.MenuService.CreateMenuTemplate:output_type -> object_builder_service.MenuTemplate
+	1,  // 37: object_builder_service.MenuService.GetAllMenuTemplate:output_type -> object_builder_service.GatAllMenuTemplateResponse
+	2,  // 38: object_builder_service.MenuService.GetByIDMenuTemplate:output_type -> object_builder_service.MenuTemplate
+	18, // 39: object_builder_service.MenuService.UpdateMenuTemplate:output_type -> google.protobuf.Empty
+	18, // 40: object_builder_service.MenuService.DeleteMenuTemplate:output_type -> google.protobuf.Empty
+	25, // [25:41] is the sub-list for method output_type
+	9,  // [9:25] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_menu_proto_init() }

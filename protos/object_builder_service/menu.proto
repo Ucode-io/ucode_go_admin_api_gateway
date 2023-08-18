@@ -145,8 +145,9 @@ message MenuForGetAll {
     google.protobuf.Struct data = 9;
     string microfrontend_id = 10;
     string webpage_id = 11;
-    MenuPermission permission = 12;
+    string pivot_template_id = 12;
     google.protobuf.Struct attributes = 13;
+    string report_setting_id = 14;
 }
 
 message GetAllMenusResponse {

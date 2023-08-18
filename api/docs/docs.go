@@ -32516,6 +32516,9 @@ const docTemplate = `{
                 "chat": {
                     "type": "boolean"
                 },
+                "environment_button": {
+                    "type": "boolean"
+                },
                 "environments_button": {
                     "type": "boolean"
                 },
@@ -32531,6 +32534,9 @@ const docTemplate = `{
                 "profile_settings_button": {
                     "type": "boolean"
                 },
+                "project_button": {
+                    "type": "boolean"
+                },
                 "project_settings_button": {
                     "type": "boolean"
                 },
@@ -32541,6 +32547,12 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "settings_button": {
+                    "type": "boolean"
+                },
+                "sms_button": {
+                    "type": "boolean"
+                },
+                "version_button": {
                     "type": "boolean"
                 }
             }
@@ -37507,6 +37519,9 @@ const docTemplate = `{
                 "chat": {
                     "type": "boolean"
                 },
+                "environment_button": {
+                    "type": "boolean"
+                },
                 "environments_button": {
                     "type": "boolean"
                 },
@@ -37522,6 +37537,9 @@ const docTemplate = `{
                 "profile_settings_button": {
                     "type": "boolean"
                 },
+                "project_button": {
+                    "type": "boolean"
+                },
                 "project_settings_button": {
                     "type": "boolean"
                 },
@@ -37532,6 +37550,12 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "settings_button": {
+                    "type": "boolean"
+                },
+                "sms_button": {
+                    "type": "boolean"
+                },
+                "version_button": {
                     "type": "boolean"
                 }
             }
@@ -37805,10 +37829,13 @@ const docTemplate = `{
                 "parent_id": {
                     "type": "string"
                 },
-                "permission": {
-                    "$ref": "#/definitions/object_builder_service.MenuPermission"
+                "pivot_template_id": {
+                    "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "report_setting_id": {
                     "type": "string"
                 },
                 "table_id": {
@@ -37819,43 +37846,6 @@ const docTemplate = `{
                 },
                 "webpage_id": {
                     "type": "string"
-                }
-            }
-        },
-        "object_builder_service.MenuPermission": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "permission": {
-                    "$ref": "#/definitions/object_builder_service.MenuPermission_Permission"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "object_builder_service.MenuPermission_Permission": {
-            "type": "object",
-            "properties": {
-                "delete": {
-                    "type": "boolean"
-                },
-                "menu_settings": {
-                    "type": "boolean"
-                },
-                "read": {
-                    "type": "boolean"
-                },
-                "update": {
-                    "type": "boolean"
-                },
-                "write": {
-                    "type": "boolean"
                 }
             }
         },
