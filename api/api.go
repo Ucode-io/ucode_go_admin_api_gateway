@@ -293,6 +293,25 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// table-permission
 		v1.GET("/table-permission", h.GetTablePermission)
 		v1.PUT("/table-permission", h.UpdateTablePermission)
+
+		//report setting
+		v1.GET("/get-report-setting/:id", h.GetByIdReportSetting)
+		v1.GET("/get-report-setting", h.GetListReportSetting)
+		v1.PUT("/upsert-report-setting", h.UpsertReportSetting)
+		v1.DELETE("/delete-report-setting/:id", h.DeleteReportSetting)
+
+		//dynamic-report
+		v1.POST("/dynamic-report", h.DynamicReport)
+		// v1.GET("/export/dynamic-report/excel/:id", h.ExportDynamicReportExcel) //TODO: should copy from parfume
+
+		//dynamic-report template
+		v1.POST("/save-pivot-template", h.SavePivotTemplate)
+		v1.GET("/get-pivot-template-setting/:id", h.GetByIdPivotTemplate)
+		v1.GET("/get-pivot-template-setting", h.GetListPivotTemplate)
+		v1.PUT("/upsert-pivot-template", h.UpsertPivotTemplate)
+		v1.DELETE("/remove-pivot-template/:id", h.RemovePivotTemplate)
+
+		v1.GET("/dynamic-report-formula", h.DynamicReportFormula)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))
