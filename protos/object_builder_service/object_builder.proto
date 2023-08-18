@@ -23,6 +23,7 @@ service ObjectBuilderService {
     rpc MultipleUpdate (CommonMessage) returns (CommonMessage) {}
     rpc MultipleInsert (CommonMessage) returns (CommonMessage) {}
     rpc GetFinancialAnalytics(CommonMessage) returns (CommonMessage) {}
+    rpc GetGroupReportTables(CommonMessage) returns (CommonMessage) {}
 }
 
 message CommonMessage {

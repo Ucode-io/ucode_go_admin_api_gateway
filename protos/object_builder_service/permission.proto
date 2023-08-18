@@ -162,6 +162,10 @@ message GlobalPermission {
     bool api_keys_button = 9;
     bool environments_button = 10;
     bool projects_button = 11;
+    bool environment_button = 12;
+    bool version_button = 13;
+    bool project_button = 14;
+    bool sms_button = 15;
 }
 
 message GetListWithRoleAppTablePermissionsResponse {

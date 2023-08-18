@@ -32511,6 +32511,9 @@ const docTemplate = `{
                 "chat": {
                     "type": "boolean"
                 },
+                "environment_button": {
+                    "type": "boolean"
+                },
                 "environments_button": {
                     "type": "boolean"
                 },
@@ -32526,6 +32529,9 @@ const docTemplate = `{
                 "profile_settings_button": {
                     "type": "boolean"
                 },
+                "project_button": {
+                    "type": "boolean"
+                },
                 "project_settings_button": {
                     "type": "boolean"
                 },
@@ -32536,6 +32542,12 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "settings_button": {
+                    "type": "boolean"
+                },
+                "sms_button": {
+                    "type": "boolean"
+                },
+                "version_button": {
                     "type": "boolean"
                 }
             }
@@ -37502,6 +37514,9 @@ const docTemplate = `{
                 "chat": {
                     "type": "boolean"
                 },
+                "environment_button": {
+                    "type": "boolean"
+                },
                 "environments_button": {
                     "type": "boolean"
                 },
@@ -37517,6 +37532,9 @@ const docTemplate = `{
                 "profile_settings_button": {
                     "type": "boolean"
                 },
+                "project_button": {
+                    "type": "boolean"
+                },
                 "project_settings_button": {
                     "type": "boolean"
                 },
@@ -37527,6 +37545,12 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "settings_button": {
+                    "type": "boolean"
+                },
+                "sms_button": {
+                    "type": "boolean"
+                },
+                "version_button": {
                     "type": "boolean"
                 }
             }
@@ -37800,7 +37824,13 @@ const docTemplate = `{
                 "parent_id": {
                     "type": "string"
                 },
+                "pivot_template_id": {
+                    "type": "string"
+                },
                 "project_id": {
+                    "type": "string"
+                },
+                "report_setting_id": {
                     "type": "string"
                 },
                 "table_id": {
