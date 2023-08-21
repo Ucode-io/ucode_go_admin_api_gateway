@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"strings"
 	"time"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -97,24 +96,17 @@ type NewRequestBody struct {
 	Data map[string]interface{} `json:"data,omitempty"`
 }
 
-func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.ServiceManagerI) (Response, error) {
+func (h *Handler) DynamicReportHelper(requestData NewRequestBody, services services.ServiceManagerI, resourceEnvironmentId string) (Response, error) {
 
 	var (
-		response       Response
-		requestData    NewRequestBody
+		response Response
+		// requestData    NewRequestBody
 		request        GetListClientApiResponse
 		errorMessage   = make(map[string]interface{})
 		successMessage = make(map[string]interface{})
 	)
 
-	if _, ok := requestData.Data["object_data"]; !ok {
-		response.Status = "error"
-		errorMessage["message"] = "Дата не найден"
-		response.Data = errorMessage
-		return response, errors.New("Дата не найден")
-	}
-
-	object_data, err := json.Marshal(requestData.Data["object_data"])
+	object_data, err := json.Marshal(requestData.Data)
 	if err != nil {
 		response.Status = "error"
 		errorMessage["message"] = err.Error()
@@ -130,7 +122,6 @@ func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.Serv
 
 		return response, err
 	}
-
 	if len(cast.ToString(request.ReportSetting["main_table_slug"])) <= 0 {
 		successMessage["response"] = GetListClientApiResponse{
 			Data: GetListClientApiData{
@@ -208,7 +199,6 @@ func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.Serv
 		values        = cast.ToSlice(request.ReportSetting["values"])
 		defaults      = cast.ToSlice(request.ReportSetting["defaults"])
 	)
-
 	if request.OrderNumber == 0 {
 		rowFieldOrderNumber = 1
 	} else {
@@ -771,6 +761,7 @@ func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.Serv
 	responseBuilderReport, err := services.BuilderService().ObjectBuilder().GetGroupReportTables(context.Background(), &obs.CommonMessage{
 		TableSlug: mainTableSlug,
 		Data:      structData,
+		ProjectId: resourceEnvironmentId,
 	})
 	if err != nil {
 		response.Status = "error"
@@ -778,21 +769,40 @@ func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.Serv
 		response.Data = errorMessage
 		return response, err
 	}
-	body, _ := json.Marshal(responseBuilderReport)
-
-	err = json.Unmarshal(body, &tableGetFilterResp)
-	if err != nil {
-		response.Status = "error"
-		errorMessage["message"] = "error on unmarshalling [tableFilterResp]: " + err.Error()
-		response.Data = errorMessage
-
-		return response, err
-	}
 
 	var (
 		rowMatchParentValue string
 		rowMatchParentIds   = []string{}
 	)
+	tableGetFilterResp.Data = GetListClientApiData{
+		TableSlug: responseBuilderReport.TableSlug,
+		Data: GetListClientApiResp{
+			Count:       0,
+			Rows:        []map[string]interface{}{},
+			Columns:     []map[string]interface{}{},
+			Values:      []map[string]interface{}{},
+			Value:       map[string]interface{}{},
+			TotalValues: []map[string]interface{}{},
+		},
+	}
+	if count, ok := responseBuilderReport.Data.AsMap()["count"].(float64); ok {
+		tableGetFilterResp.Data.Data.Count = int(count)
+	}
+	if rows, ok := responseBuilderReport.Data.AsMap()["rows"].([]map[string]interface{}); ok {
+		tableGetFilterResp.Data.Data.Rows = rows
+	}
+	if columns, ok := responseBuilderReport.Data.AsMap()["columns"].([]map[string]interface{}); ok {
+		tableGetFilterResp.Data.Data.Columns = columns
+	}
+	if values, ok := responseBuilderReport.Data.AsMap()["values"].([]map[string]interface{}); ok {
+		tableGetFilterResp.Data.Data.Values = values
+	}
+	if value, ok := responseBuilderReport.Data.AsMap()["value"].(map[string]interface{}); ok {
+		tableGetFilterResp.Data.Data.Value = value
+	}
+	if totalValues, ok := responseBuilderReport.Data.AsMap()["total_values"].([]map[string]interface{}); ok {
+		tableGetFilterResp.Data.Data.TotalValues = totalValues
+	}
 
 	if len(rowMatchValues) > 0 {
 		for index, val := range rowMatchValues {
