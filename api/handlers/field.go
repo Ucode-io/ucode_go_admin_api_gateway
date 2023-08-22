@@ -364,23 +364,24 @@ func (h *Handler) UpdateField(c *gin.Context) {
 	}
 
 	var field = obs.Field{
-		Id:            fieldRequest.ID,
-		Default:       fieldRequest.Default,
-		Type:          fieldRequest.Type,
-		Index:         fieldRequest.Index,
-		Label:         fieldRequest.Label,
-		Slug:          fieldRequest.Slug,
-		TableId:       fieldRequest.TableID,
-		Required:      fieldRequest.Required,
-		Attributes:    attributes,
-		IsVisible:     fieldRequest.IsVisible,
-		AutofillField: fieldRequest.AutoFillField,
-		AutofillTable: fieldRequest.AutoFillTable,
-		RelationId:    fieldRequest.RelationId,
-		Automatic:     fieldRequest.Automatic,
-		Unique:        fieldRequest.Unique,
-		RelationField: fieldRequest.RelationField,
-		ShowLabel:     fieldRequest.ShowLabel,
+		Id:                  fieldRequest.ID,
+		Default:             fieldRequest.Default,
+		Type:                fieldRequest.Type,
+		Index:               fieldRequest.Index,
+		Label:               fieldRequest.Label,
+		Slug:                fieldRequest.Slug,
+		TableId:             fieldRequest.TableID,
+		Required:            fieldRequest.Required,
+		Attributes:          attributes,
+		IsVisible:           fieldRequest.IsVisible,
+		AutofillField:       fieldRequest.AutoFillField,
+		AutofillTable:       fieldRequest.AutoFillTable,
+		RelationId:          fieldRequest.RelationId,
+		Automatic:           fieldRequest.Automatic,
+		Unique:              fieldRequest.Unique,
+		RelationField:       fieldRequest.RelationField,
+		ShowLabel:           fieldRequest.ShowLabel,
+		EnableMultilanguage: fieldRequest.EnableMultilanguage,
 	}
 
 	//authInfo, err := h.GetAuthInfo(c)
@@ -457,7 +458,6 @@ func (h *Handler) UpdateField(c *gin.Context) {
 		}
 	} else {
 		// do nothing
-
 		// field.EnableMultilanguage = true
 		// languaegs, err := services.CompanyService().Project().GetById(context.Background(), &pb.GetProjectByIdRequest{
 		// 	ProjectId: resource.GetProjectId(),
