@@ -15,6 +15,14 @@ func PluralizeWord(word string) string {
 			return word + "es" // Add "es" to make it plural
 		}
 	}
+	if len(word) > 1 && strings.HasSuffix(word, "y") && !isVowel(word[len(word)-2]) {
+        return word[:len(word)-1] + "ies"
+    }
 
 	return word + "s" // Default to adding "s" if no special ending is found
+}
+
+func isVowel(char byte) bool {
+    vowels := "aeiouAEIOU"
+    return strings.ContainsRune(vowels, rune(char))
 }

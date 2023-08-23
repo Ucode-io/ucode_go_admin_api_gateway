@@ -2314,11 +2314,11 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 	relationSlug := c.Param("column_table_slug")
 	selectedGuid := cast.ToSlice(object.Data["additional_values"])
 	relationTableSlug := relationSlug
-
-	if relationSlug[len(relationSlug)-1] != 's' {
-		relationTableSlug = relationSlug + "s"
-		fmt.Println(relationTableSlug)
-	}
+	relationTableSlug = util.PluralizeWord(relationSlug)
+	// if relationSlug[len(relationSlug)-1] != 's' {
+	// 	relationTableSlug = relationSlug + "s"
+	// 	fmt.Println(relationTableSlug)
+	// }
 
 	object.Data = map[string]interface{}{
 		"match": map[string]interface{}{
@@ -2379,6 +2379,8 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 			},
 		}
 	}
+	fmt.Println("::::::::", object.Data["project"])
+	fmt.Println("::::::::", object.Data["lookups"])
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
