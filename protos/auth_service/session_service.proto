@@ -58,6 +58,7 @@ message ResourceEnvironmentV2MultiCompany {
     string name = 8;
     string display_color = 9;
     string description = 10;
+    google.protobuf.Struct client_types = 11;
 }
 
 message Project2 {

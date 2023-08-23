@@ -263,6 +263,7 @@ message CreateClientTypeRequestToObjService {
     bool self_recover = 5;
     string project_id = 6;
     repeated string client_platform_ids = 7;
+    string table_slug = 8;
 }
 
 message UpdateClientTypeRequestToObjService {
@@ -273,6 +274,7 @@ message UpdateClientTypeRequestToObjService {
     bool self_recover = 5;
     string project_id = 6;
     repeated string client_platform_ids = 7;
+    string table_slug = 8;
 }
 
 message V2CreateClientTypeRequest {
@@ -284,6 +286,7 @@ message V2CreateClientTypeRequest {
     string db_project_id = 7;
     repeated string client_platform_ids = 8;
     int32 resource_type = 9;
+    string table_slug = 10;
 }
 
 message V2GetClientTypeListRequest {
@@ -292,6 +295,7 @@ message V2GetClientTypeListRequest {
     string search = 3;
     string project_id = 4;
     int32 resource_type = 5;
+    repeated string guids = 6;
 }
 
 message V2UpdateClientTypeRequest {
@@ -304,6 +308,7 @@ message V2UpdateClientTypeRequest {
     string project_id = 8;
     string db_project_id = 9;
     int32 resource_type = 10;
+    string table_slug = 11;
 }
 
 message V2ClientTypePrimaryKey {

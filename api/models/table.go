@@ -18,3 +18,24 @@ type GetAllTablesRequest struct {
 	FolderId     string `json:"folder_id"`
 	IsLoginTable bool   `json:"is_login_table"`
 }
+
+type UpdateTableRequest struct {
+	Id                string                 `json:"id"`
+	Label             string                 `json:"label"`
+	Description       string                 `json:"description"`
+	Slug              string                 `json:"slug"`
+	ShowInMenu        bool                   `json:"show_in_menu"`
+	Icon              string                 `json:"icon"`
+	SubtitleFieldSlug string                 `json:"subtitle_field_slug"`
+	IsVisible         bool                   `json:"is_visible"`
+	IsOwnTable        bool                   `json:"is_own_table"`
+	IncrementId       IncrementId            `json:"increment_id"`
+	ProjectId         string                 `json:"project_id"`
+	FolderId          string                 `json:"folder_id"`
+	AuthorId          string                 `json:"author_id"`
+	CommitType        string                 `json:"commit_type"`
+	Name              string                 `json:"name"`
+	IsCached          bool                   `json:"is_cached"`
+	IsLoginTable      bool                   `json:"is_login_table"`
+	Attributes        map[string]interface{} `json:"attributes"`
+}
