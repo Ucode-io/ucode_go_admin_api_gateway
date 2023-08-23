@@ -785,24 +785,16 @@ func (h *Handler) DynamicReportHelper(requestData NewRequestBody, services servi
 			TotalValues: []map[string]interface{}{},
 		},
 	}
-	if count, ok := responseBuilderReport.Data.AsMap()["count"].(float64); ok {
-		tableGetFilterResp.Data.Data.Count = int(count)
+	body, _ := json.Marshal(responseBuilderReport.Data.AsMap())
+	filteredData := GetListClientApiResp{}
+	err = json.Unmarshal(body, &filteredData)
+	if err != nil {
+		response.Status = "error"
+		errorMessage["message"] = "error unmarshalling report data"
+		response.Data = errorMessage
+		return response, err
 	}
-	if rows, ok := responseBuilderReport.Data.AsMap()["rows"].([]map[string]interface{}); ok {
-		tableGetFilterResp.Data.Data.Rows = rows
-	}
-	if columns, ok := responseBuilderReport.Data.AsMap()["columns"].([]map[string]interface{}); ok {
-		tableGetFilterResp.Data.Data.Columns = columns
-	}
-	if values, ok := responseBuilderReport.Data.AsMap()["values"].([]map[string]interface{}); ok {
-		tableGetFilterResp.Data.Data.Values = values
-	}
-	if value, ok := responseBuilderReport.Data.AsMap()["value"].(map[string]interface{}); ok {
-		tableGetFilterResp.Data.Data.Value = value
-	}
-	if totalValues, ok := responseBuilderReport.Data.AsMap()["total_values"].([]map[string]interface{}); ok {
-		tableGetFilterResp.Data.Data.TotalValues = totalValues
-	}
+	tableGetFilterResp.Data.Data = filteredData
 
 	if len(rowMatchValues) > 0 {
 		for index, val := range rowMatchValues {
