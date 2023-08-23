@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
@@ -311,10 +312,13 @@ func (h *Handler) DynamicReportHelper(requestData NewRequestBody, services servi
 							concatString = append(concatString, " ")
 						}
 					}
-
+					var joinTableSlug = lookupTableSlug + "s"
+					if string(lookupTableSlug[len(lookupTableSlug)-1]) == "s" {
+						joinTableSlug = lookupTableSlug
+					}
 					rowLookupMapInterface = append(rowLookupMapInterface, map[string]interface{}{
 						"$lookup": map[string]interface{}{
-							"from": lookupTableSlug + "s",
+							"from": joinTableSlug,
 							"let":  map[string]interface{}{fieldSlug: "$" + fieldSlug},
 							"pipeline": []interface{}{
 								map[string]interface{}{"$match": map[string]interface{}{"$expr": map[string]interface{}{"$eq": []string{"$guid", "$$" + fieldSlug}}}},
@@ -402,10 +406,14 @@ func (h *Handler) DynamicReportHelper(requestData NewRequestBody, services servi
 							concatString = append(concatString, " ")
 						}
 					}
+					var joinTableSlug = lookupTableSlug + "s"
+					if string(lookupTableSlug[len(lookupTableSlug)-1]) == "s" {
+						joinTableSlug = lookupTableSlug
+					}
 
 					rowLookupMapInterface = append(rowLookupMapInterface, map[string]interface{}{
 						"$lookup": map[string]interface{}{
-							"from": lookupTableSlug + "s",
+							"from": joinTableSlug,
 							"let":  map[string]interface{}{fieldSlug: "$" + fieldSlug},
 							"pipeline": []interface{}{
 								map[string]interface{}{"$match": map[string]interface{}{"$expr": map[string]interface{}{"$eq": []string{"$guid", "$$" + fieldSlug}}}},
