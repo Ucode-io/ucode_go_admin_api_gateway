@@ -136,11 +136,12 @@ message RelationForGetAll {
     bool multiple_insert = 28;
     repeated string updated_fields = 29;
     string multiple_insert_field = 30;
-    bool creatable = 31;
+    bool is_system = 31;
     bool default_editable = 32;
     string function_path = 33;
     bool relation_buttons = 34;
-    google.protobuf.Struct attributes = 35;
+    bool creatable = 35;
+    google.protobuf.Struct attributes = 36;
 }
 
 message GetAllRelationsResponse {

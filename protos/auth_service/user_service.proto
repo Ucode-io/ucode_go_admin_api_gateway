@@ -109,12 +109,17 @@ message AddUserToProjectReq {
     int32 active = 4;
     string company_id = 5;
     int32 resource_type = 6;
+    string client_type_id = 7;
+    string table_slug = 8;
 }
 
 message AddUserToProjectRes {
     string user_id = 1;
     string company_id = 2;
     string project_id = 3;
+    string table_slug = 4;
+    string client_type_id = 5;
+    string role_id = 6;
 }
 
 message UpsertUserInfoRequest {
@@ -145,8 +150,11 @@ message CreateUserRequest {
 
 message UserPrimaryKey {
     string id = 1;
-    string project_id = 2;
+    string resource_environment_id = 2;
     int32 resource_type = 3;
+    string client_type_id = 4;
+    string company_id = 5;
+    string project_id = 6;
 }
 
 message UserPrimaryKeyList {
@@ -189,6 +197,7 @@ message UpdateUserRequest {
     string language_id = 14;
     string timezone_id = 15;
     int32 resource_type = 16;
+    string resource_environment_id = 17;
 }
 
 message AddUserRelationRequest {
