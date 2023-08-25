@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -10,7 +11,6 @@ import (
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
-	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -137,18 +137,14 @@ func (h *Handler) DynamicReport(c *gin.Context) {
 	}
 
 	objectRequest.Data["report_setting"] = reportSetting
-	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+	response, err := h.DynamicReportHelper(NewRequestBody{
+		Data: objectRequest.Data,
+	}, services, resource.ResourceEnvironmentId)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
-	}
-
-	objectRequest.Data["data"] = structData
-	response, err := h.DynamicReportHelper(NewRequestBody{
-		Data: objectRequest.Data,
-	}, services)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+	} else if response.Status == "error" {
+		h.handleResponse(c, status_http.GRPCError, response.Data["message"])
 		return
 	}
 
@@ -590,7 +586,7 @@ func (h *Handler) GetListPivotTemplate(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
+	fmt.Println("test 11")
 	resp, err := services.BuilderService().ReportSetting().GetListPivotTemplate(
 		context.Background(),
 		&obs.GetListPivotTemplateRequest{
@@ -603,6 +599,7 @@ func (h *Handler) GetListPivotTemplate(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("test 12")
 
 	h.handleResponse(c, status_http.OK, resp)
 }

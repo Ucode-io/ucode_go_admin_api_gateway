@@ -3,11 +3,11 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"strings"
 	"time"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
+	"ucode/ucode_go_api_gateway/pkg/util"
 	"ucode/ucode_go_api_gateway/services"
 
 	"github.com/spf13/cast"
@@ -97,24 +97,17 @@ type NewRequestBody struct {
 	Data map[string]interface{} `json:"data,omitempty"`
 }
 
-func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.ServiceManagerI) (Response, error) {
+func (h *Handler) DynamicReportHelper(requestData NewRequestBody, services services.ServiceManagerI, resourceEnvironmentId string) (Response, error) {
 
 	var (
-		response       Response
-		requestData    NewRequestBody
+		response Response
+		// requestData    NewRequestBody
 		request        GetListClientApiResponse
 		errorMessage   = make(map[string]interface{})
 		successMessage = make(map[string]interface{})
 	)
 
-	if _, ok := requestData.Data["object_data"]; !ok {
-		response.Status = "error"
-		errorMessage["message"] = "Дата не найден"
-		response.Data = errorMessage
-		return response, errors.New("Дата не найден")
-	}
-
-	object_data, err := json.Marshal(requestData.Data["object_data"])
+	object_data, err := json.Marshal(requestData.Data)
 	if err != nil {
 		response.Status = "error"
 		errorMessage["message"] = err.Error()
@@ -130,7 +123,6 @@ func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.Serv
 
 		return response, err
 	}
-
 	if len(cast.ToString(request.ReportSetting["main_table_slug"])) <= 0 {
 		successMessage["response"] = GetListClientApiResponse{
 			Data: GetListClientApiData{
@@ -208,7 +200,6 @@ func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.Serv
 		values        = cast.ToSlice(request.ReportSetting["values"])
 		defaults      = cast.ToSlice(request.ReportSetting["defaults"])
 	)
-
 	if request.OrderNumber == 0 {
 		rowFieldOrderNumber = 1
 	} else {
@@ -321,10 +312,10 @@ func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.Serv
 							concatString = append(concatString, " ")
 						}
 					}
-
+					joinTable := util.PluralizeWord(lookupTableSlug)
 					rowLookupMapInterface = append(rowLookupMapInterface, map[string]interface{}{
 						"$lookup": map[string]interface{}{
-							"from": lookupTableSlug + "s",
+							"from": joinTable,
 							"let":  map[string]interface{}{fieldSlug: "$" + fieldSlug},
 							"pipeline": []interface{}{
 								map[string]interface{}{"$match": map[string]interface{}{"$expr": map[string]interface{}{"$eq": []string{"$guid", "$$" + fieldSlug}}}},
@@ -412,10 +403,11 @@ func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.Serv
 							concatString = append(concatString, " ")
 						}
 					}
+					joinTable := util.PluralizeWord(lookupTableSlug)
 
 					rowLookupMapInterface = append(rowLookupMapInterface, map[string]interface{}{
 						"$lookup": map[string]interface{}{
-							"from": lookupTableSlug + "s",
+							"from": joinTable,
 							"let":  map[string]interface{}{fieldSlug: "$" + fieldSlug},
 							"pipeline": []interface{}{
 								map[string]interface{}{"$match": map[string]interface{}{"$expr": map[string]interface{}{"$eq": []string{"$guid", "$$" + fieldSlug}}}},
@@ -771,6 +763,7 @@ func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.Serv
 	responseBuilderReport, err := services.BuilderService().ObjectBuilder().GetGroupReportTables(context.Background(), &obs.CommonMessage{
 		TableSlug: mainTableSlug,
 		Data:      structData,
+		ProjectId: resourceEnvironmentId,
 	})
 	if err != nil {
 		response.Status = "error"
@@ -778,21 +771,32 @@ func (h *Handler) DynamicReportHelper(req NewRequestBody, services services.Serv
 		response.Data = errorMessage
 		return response, err
 	}
-	body, _ := json.Marshal(responseBuilderReport)
-
-	err = json.Unmarshal(body, &tableGetFilterResp)
-	if err != nil {
-		response.Status = "error"
-		errorMessage["message"] = "error on unmarshalling [tableFilterResp]: " + err.Error()
-		response.Data = errorMessage
-
-		return response, err
-	}
 
 	var (
 		rowMatchParentValue string
 		rowMatchParentIds   = []string{}
 	)
+	tableGetFilterResp.Data = GetListClientApiData{
+		TableSlug: responseBuilderReport.TableSlug,
+		Data: GetListClientApiResp{
+			Count:       0,
+			Rows:        []map[string]interface{}{},
+			Columns:     []map[string]interface{}{},
+			Values:      []map[string]interface{}{},
+			Value:       map[string]interface{}{},
+			TotalValues: []map[string]interface{}{},
+		},
+	}
+	body, _ := json.Marshal(responseBuilderReport.Data.AsMap())
+	filteredData := GetListClientApiResp{}
+	err = json.Unmarshal(body, &filteredData)
+	if err != nil {
+		response.Status = "error"
+		errorMessage["message"] = "error unmarshalling report data"
+		response.Data = errorMessage
+		return response, err
+	}
+	tableGetFilterResp.Data.Data = filteredData
 
 	if len(rowMatchValues) > 0 {
 		for index, val := range rowMatchValues {
