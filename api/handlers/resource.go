@@ -280,6 +280,7 @@ func (h *Handler) GetResourceList(c *gin.Context) {
 			Offset:    int32(offset),
 			Search:    c.DefaultQuery("search", ""),
 			ProjectId: c.DefaultQuery("project_id", ""),
+			EnvironmentId: c.DefaultQuery("environment_id", ""),
 		},
 	)
 
