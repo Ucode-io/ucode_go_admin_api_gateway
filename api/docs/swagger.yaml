@@ -15981,6 +15981,76 @@ paths:
       summary: Get financial analytics
       tags:
       - Object
+  /v1/object/get-list-group-by/{table_slug}/{column_table_slug}:
+    post:
+      consumes:
+      - application/json
+      description: Get List Group By Object
+      operationId: get_list_group_by_objects
+      parameters:
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: column_table_slug
+        in: path
+        name: column_table_slug
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: search
+        in: query
+        name: search
+        type: string
+      - description: project
+        in: query
+        name: project
+        type: string
+      - description: GetGroupByFieldObjectRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List Group By Object
+      tags:
+      - Object
   /v1/object/get-list/{table_slug}:
     post:
       consumes:

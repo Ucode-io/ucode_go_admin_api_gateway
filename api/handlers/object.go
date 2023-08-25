@@ -21,6 +21,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 
 	"google.golang.org/grpc/status"
 )
@@ -2271,4 +2272,239 @@ func (h *Handler) GetFinancialAnalytics(c *gin.Context) {
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, status_http.OK, resp)
+}
+
+// GetListGroupByObject godoc
+// @Security ApiKeyAuth
+// @ID get_list_group_by_objects
+// @Router /v1/object/get-list-group-by/{table_slug}/{column_table_slug} [POST]
+// @Summary Get List Group By Object
+// @Description Get List Group By Object
+// @Tags Object
+// @Accept json
+// @Produce json
+// @Param table_slug path string true "table_slug"
+// @Param column_table_slug path string true "column_table_slug"
+// @Param limit query string false "limit"
+// @Param search query string false "search"
+// @Param project query string false "project"
+// @Param object body models.CommonMessage true "GetGroupByFieldObjectRequestBody"
+// @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetListGroupBy(c *gin.Context) {
+
+	var object models.CommonMessage
+
+	err := c.ShouldBindJSON(&object)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	if c.Param("table_slug") == "" {
+		h.handleResponse(c, status_http.BadRequest, "table_slug required")
+		return
+	}
+
+	if c.Param("column_table_slug") == "" {
+		h.handleResponse(c, status_http.BadRequest, "table_slug required")
+		return
+	}
+
+	relationSlug := c.Param("column_table_slug")
+	selectedGuid := cast.ToSlice(object.Data["additional_values"])
+	relationTableSlug := relationSlug
+	relationTableSlug = util.PluralizeWord(relationSlug)
+	// if relationSlug[len(relationSlug)-1] != 's' {
+	// 	relationTableSlug = relationSlug + "s"
+	// 	fmt.Println(relationTableSlug)
+	// }
+
+	object.Data = map[string]interface{}{
+		"match": map[string]interface{}{
+			"$match": map[string]interface{}{},
+		},
+		"lookups": []interface{}{
+			map[string]interface{}{
+				"$lookup": map[string]interface{}{
+					"from":         relationTableSlug,
+					"localField":   relationSlug + "_id",
+					"foreignField": "guid",
+					"as":           relationSlug + "_details",
+				},
+			},
+		},
+		"query": map[string]interface{}{
+			"$group": map[string]interface{}{
+				"_id":                "$" + relationSlug + "_id",
+				"guid":               map[string]interface{}{"$first": "$" + relationSlug + "_id"},
+				relationSlug + "_id": map[string]interface{}{"$first": "$" + relationSlug + "_id"},
+			},
+		},
+		"sort": map[string]interface{}{
+			"$sort": map[string]interface{}{
+				"_id": 1,
+			},
+		},
+	}
+
+	if c.Query("limit") != "" {
+		object.Data["limit"] = cast.ToInt(c.Query("limit"))
+	}
+
+	if c.Query("project") != "" {
+		object.Data["project"] = map[string]interface{}{
+			"$project": map[string]interface{}{
+				"_id":              0,
+				"guid":             1,
+				c.Query("project"): map[string]interface{}{"$first": "$" + relationSlug + "_details." + c.Query("project")},
+			},
+		}
+	}
+
+	if c.Query("project") != "" && c.Query("search") != "" {
+		object.Data["second_match"] = map[string]interface{}{
+			relationSlug + "_details." + c.Query("project"): map[string]interface{}{
+				"$regex":   c.Query("search"),
+				"$options": "i",
+			},
+		}
+		object.Data["sort"] = map[string]interface{}{"$sort": map[string]interface{}{c.Query("project"): 1}}
+	}
+
+	if len(selectedGuid) > 0 {
+		object.Data["match"] = map[string]interface{}{
+			"$match": map[string]interface{}{
+				relationSlug + "_id": map[string]interface{}{"$nin": selectedGuid},
+			},
+		}
+	}
+	fmt.Println("::::::::", object.Data["project"])
+	fmt.Println("::::::::", object.Data["lookups"])
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	structData, err := helper.ConvertMapToStruct(object.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	fmt.Println("projectId: ", resource.ResourceEnvironmentId)
+	tableResp, err := services.BuilderService().ObjectBuilder().GetGroupByField(
+		context.Background(),
+		&obs.CommonMessage{
+			TableSlug: c.Param("table_slug"),
+			Data:      structData,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	var (
+		count    = cast.ToInt(tableResp.Data.AsMap()["count"])
+		response = cast.ToSlice(tableResp.Data.AsMap()["response"])
+	)
+
+	if len(selectedGuid) > 0 {
+		object.Data["match"] = map[string]interface{}{
+			"$match": map[string]interface{}{
+				relationSlug + "_id": map[string]interface{}{"$in": selectedGuid},
+			},
+		}
+
+		delete(object.Data, "second_match")
+		delete(object.Data, "limit")
+
+		response := cast.ToSlice(tableResp.Data.AsMap()["response"])
+		for _, selectObj := range selectedGuid {
+			response = append(response, selectObj)
+		}
+
+		structData, err = helper.ConvertMapToStruct(object.Data)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
+
+		fmt.Println("projectId 22: ", resource.ResourceEnvironmentId)
+		selectedTableResp, err := services.BuilderService().ObjectBuilder().GetGroupByField(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		response = []interface{}{}
+		response = cast.ToSlice(selectedTableResp.Data.AsMap()["response"])
+		count += cast.ToInt(selectedTableResp.Data.AsMap()["count"])
+
+		for _, obj := range cast.ToSlice(tableResp.Data.AsMap()["response"]) {
+			response = append(response, obj)
+		}
+
+		h.handleResponse(c, status_http.OK, struct {
+			TableSlug string                 `json:"table_slug"`
+			Data      map[string]interface{} `json:"data"`
+		}{
+			TableSlug: tableResp.TableSlug,
+			Data: map[string]interface{}{
+				"count":    count,
+				"response": response,
+			},
+		})
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, struct {
+		TableSlug string                 `json:"table_slug"`
+		Data      map[string]interface{} `json:"data"`
+	}{
+		TableSlug: tableResp.TableSlug,
+		Data: map[string]interface{}{
+			"count":    count,
+			"response": response,
+		},
+	})
 }

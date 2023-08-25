@@ -86,6 +86,7 @@ message Company2 {
 message V2MultiCompanyOneLoginRes {
     
     repeated Company2 companies = 1;
+    string user_id = 2;
 }
 
 message V2HasAccessUserReq {

@@ -34,6 +34,7 @@ type PermissionServiceClient interface {
 	UpdateMenuPermissions(ctx context.Context, in *UpdateMenuPermissionsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdatePermissionsByTableSlug(ctx context.Context, in *UpdatePermissionsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetPermissionsByTableSlug(ctx context.Context, in *GetPermissionsByTableSlugRequest, opts ...grpc.CallOption) (*GetPermissionsByTableSlugResponse, error)
+	GetTablePermission(ctx context.Context, in *GetTablePermissionRequest, opts ...grpc.CallOption) (*GetTablePermissionResponse, error)
 }
 
 type permissionServiceClient struct {
@@ -143,6 +144,15 @@ func (c *permissionServiceClient) GetPermissionsByTableSlug(ctx context.Context,
 	return out, nil
 }
 
+func (c *permissionServiceClient) GetTablePermission(ctx context.Context, in *GetTablePermissionRequest, opts ...grpc.CallOption) (*GetTablePermissionResponse, error) {
+	out := new(GetTablePermissionResponse)
+	err := c.cc.Invoke(ctx, "/object_builder_service.PermissionService/GetTablePermission", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PermissionServiceServer is the server API for PermissionService service.
 // All implementations must embed UnimplementedPermissionServiceServer
 // for forward compatibility
@@ -158,6 +168,7 @@ type PermissionServiceServer interface {
 	UpdateMenuPermissions(context.Context, *UpdateMenuPermissionsRequest) (*emptypb.Empty, error)
 	UpdatePermissionsByTableSlug(context.Context, *UpdatePermissionsRequest) (*emptypb.Empty, error)
 	GetPermissionsByTableSlug(context.Context, *GetPermissionsByTableSlugRequest) (*GetPermissionsByTableSlugResponse, error)
+	GetTablePermission(context.Context, *GetTablePermissionRequest) (*GetTablePermissionResponse, error)
 	mustEmbedUnimplementedPermissionServiceServer()
 }
 
@@ -197,6 +208,9 @@ func (UnimplementedPermissionServiceServer) UpdatePermissionsByTableSlug(context
 }
 func (UnimplementedPermissionServiceServer) GetPermissionsByTableSlug(context.Context, *GetPermissionsByTableSlugRequest) (*GetPermissionsByTableSlugResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPermissionsByTableSlug not implemented")
+}
+func (UnimplementedPermissionServiceServer) GetTablePermission(context.Context, *GetTablePermissionRequest) (*GetTablePermissionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTablePermission not implemented")
 }
 func (UnimplementedPermissionServiceServer) mustEmbedUnimplementedPermissionServiceServer() {}
 
@@ -409,6 +423,24 @@ func _PermissionService_GetPermissionsByTableSlug_Handler(srv interface{}, ctx c
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PermissionService_GetTablePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTablePermissionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PermissionServiceServer).GetTablePermission(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.PermissionService/GetTablePermission",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PermissionServiceServer).GetTablePermission(ctx, req.(*GetTablePermissionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PermissionService_ServiceDesc is the grpc.ServiceDesc for PermissionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -459,6 +491,10 @@ var PermissionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPermissionsByTableSlug",
 			Handler:    _PermissionService_GetPermissionsByTableSlug_Handler,
+		},
+		{
+			MethodName: "GetTablePermission",
+			Handler:    _PermissionService_GetTablePermission_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
