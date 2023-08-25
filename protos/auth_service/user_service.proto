@@ -197,6 +197,7 @@ message UpdateUserRequest {
     string language_id = 14;
     string timezone_id = 15;
     int32 resource_type = 16;
+    string resource_environment_id = 17;
 }
 
 message AddUserRelationRequest {

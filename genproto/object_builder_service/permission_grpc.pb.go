@@ -32,9 +32,9 @@ type PermissionServiceClient interface {
 	UpdateRoleAppTablePermissions(ctx context.Context, in *UpdateRoleAppTablePermissionsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetAllMenuPermissions(ctx context.Context, in *GetAllMenuPermissionsRequest, opts ...grpc.CallOption) (*GetAllMenuPermissionsResponse, error)
 	UpdateMenuPermissions(ctx context.Context, in *UpdateMenuPermissionsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetGlobalPermissionByRoleId(ctx context.Context, in *GetGlobalPermissionsByRoleIdRequest, opts ...grpc.CallOption) (*GlobalPermission, error)
 	UpdatePermissionsByTableSlug(ctx context.Context, in *UpdatePermissionsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetPermissionsByTableSlug(ctx context.Context, in *GetPermissionsByTableSlugRequest, opts ...grpc.CallOption) (*GetPermissionsByTableSlugResponse, error)
+	GetTablePermission(ctx context.Context, in *GetTablePermissionRequest, opts ...grpc.CallOption) (*GetTablePermissionResponse, error)
 }
 
 type permissionServiceClient struct {
@@ -126,15 +126,6 @@ func (c *permissionServiceClient) UpdateMenuPermissions(ctx context.Context, in 
 	return out, nil
 }
 
-func (c *permissionServiceClient) GetGlobalPermissionByRoleId(ctx context.Context, in *GetGlobalPermissionsByRoleIdRequest, opts ...grpc.CallOption) (*GlobalPermission, error) {
-	out := new(GlobalPermission)
-	err := c.cc.Invoke(ctx, "/object_builder_service.PermissionService/GetGlobalPermissionByRoleId", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *permissionServiceClient) UpdatePermissionsByTableSlug(ctx context.Context, in *UpdatePermissionsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/object_builder_service.PermissionService/UpdatePermissionsByTableSlug", in, out, opts...)
@@ -147,6 +138,15 @@ func (c *permissionServiceClient) UpdatePermissionsByTableSlug(ctx context.Conte
 func (c *permissionServiceClient) GetPermissionsByTableSlug(ctx context.Context, in *GetPermissionsByTableSlugRequest, opts ...grpc.CallOption) (*GetPermissionsByTableSlugResponse, error) {
 	out := new(GetPermissionsByTableSlugResponse)
 	err := c.cc.Invoke(ctx, "/object_builder_service.PermissionService/GetPermissionsByTableSlug", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *permissionServiceClient) GetTablePermission(ctx context.Context, in *GetTablePermissionRequest, opts ...grpc.CallOption) (*GetTablePermissionResponse, error) {
+	out := new(GetTablePermissionResponse)
+	err := c.cc.Invoke(ctx, "/object_builder_service.PermissionService/GetTablePermission", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -166,9 +166,9 @@ type PermissionServiceServer interface {
 	UpdateRoleAppTablePermissions(context.Context, *UpdateRoleAppTablePermissionsRequest) (*emptypb.Empty, error)
 	GetAllMenuPermissions(context.Context, *GetAllMenuPermissionsRequest) (*GetAllMenuPermissionsResponse, error)
 	UpdateMenuPermissions(context.Context, *UpdateMenuPermissionsRequest) (*emptypb.Empty, error)
-	GetGlobalPermissionByRoleId(context.Context, *GetGlobalPermissionsByRoleIdRequest) (*GlobalPermission, error)
 	UpdatePermissionsByTableSlug(context.Context, *UpdatePermissionsRequest) (*emptypb.Empty, error)
 	GetPermissionsByTableSlug(context.Context, *GetPermissionsByTableSlugRequest) (*GetPermissionsByTableSlugResponse, error)
+	GetTablePermission(context.Context, *GetTablePermissionRequest) (*GetTablePermissionResponse, error)
 	mustEmbedUnimplementedPermissionServiceServer()
 }
 
@@ -203,14 +203,14 @@ func (UnimplementedPermissionServiceServer) GetAllMenuPermissions(context.Contex
 func (UnimplementedPermissionServiceServer) UpdateMenuPermissions(context.Context, *UpdateMenuPermissionsRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateMenuPermissions not implemented")
 }
-func (UnimplementedPermissionServiceServer) GetGlobalPermissionByRoleId(context.Context, *GetGlobalPermissionsByRoleIdRequest) (*GlobalPermission, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetGlobalPermissionByRoleId not implemented")
-}
 func (UnimplementedPermissionServiceServer) UpdatePermissionsByTableSlug(context.Context, *UpdatePermissionsRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePermissionsByTableSlug not implemented")
 }
 func (UnimplementedPermissionServiceServer) GetPermissionsByTableSlug(context.Context, *GetPermissionsByTableSlugRequest) (*GetPermissionsByTableSlugResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPermissionsByTableSlug not implemented")
+}
+func (UnimplementedPermissionServiceServer) GetTablePermission(context.Context, *GetTablePermissionRequest) (*GetTablePermissionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTablePermission not implemented")
 }
 func (UnimplementedPermissionServiceServer) mustEmbedUnimplementedPermissionServiceServer() {}
 
@@ -387,24 +387,6 @@ func _PermissionService_UpdateMenuPermissions_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PermissionService_GetGlobalPermissionByRoleId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetGlobalPermissionsByRoleIdRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PermissionServiceServer).GetGlobalPermissionByRoleId(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/object_builder_service.PermissionService/GetGlobalPermissionByRoleId",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PermissionServiceServer).GetGlobalPermissionByRoleId(ctx, req.(*GetGlobalPermissionsByRoleIdRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _PermissionService_UpdatePermissionsByTableSlug_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdatePermissionsRequest)
 	if err := dec(in); err != nil {
@@ -437,6 +419,24 @@ func _PermissionService_GetPermissionsByTableSlug_Handler(srv interface{}, ctx c
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PermissionServiceServer).GetPermissionsByTableSlug(ctx, req.(*GetPermissionsByTableSlugRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PermissionService_GetTablePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTablePermissionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PermissionServiceServer).GetTablePermission(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.PermissionService/GetTablePermission",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PermissionServiceServer).GetTablePermission(ctx, req.(*GetTablePermissionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -485,16 +485,16 @@ var PermissionService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PermissionService_UpdateMenuPermissions_Handler,
 		},
 		{
-			MethodName: "GetGlobalPermissionByRoleId",
-			Handler:    _PermissionService_GetGlobalPermissionByRoleId_Handler,
-		},
-		{
 			MethodName: "UpdatePermissionsByTableSlug",
 			Handler:    _PermissionService_UpdatePermissionsByTableSlug_Handler,
 		},
 		{
 			MethodName: "GetPermissionsByTableSlug",
 			Handler:    _PermissionService_GetPermissionsByTableSlug_Handler,
+		},
+		{
+			MethodName: "GetTablePermission",
+			Handler:    _PermissionService_GetTablePermission_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
