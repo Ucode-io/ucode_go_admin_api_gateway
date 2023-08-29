@@ -559,6 +559,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 				IsCached:     table.IsCached,
 				IsLoginTable: table.IsLoginTable,
 				Attributes:   structData,
+				OrderBy:      table.OrderBy,
 			},
 		)
 
@@ -592,6 +593,7 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 				IsCached:     table.IsCached,
 				IsLoginTable: table.IsLoginTable,
 				Attributes:   structData,
+				OrderBy:      table.OrderBy,
 			},
 		)
 
