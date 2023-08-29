@@ -1988,31 +1988,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
-	objects := objectRequest.Data["objects"].([]interface{})
-	editedObjects := make([]map[string]interface{}, 0, len(objects))
-	var objectIds = make([]string, 0, len(objects))
-	for _, object := range objects {
-		newObjects := object.(map[string]interface{})
-		guid, ok := newObjects["guid"]
-		if ok {
-			if guid.(string) == "" {
-				guid, _ := uuid.NewRandom()
-				newObjects["guid"] = guid.String()
-				newObjects["is_new"] = true
-			}
-		}
-		objectIds = append(objectIds, newObjects["guid"].(string))
-		editedObjects = append(editedObjects, newObjects)
-	}
-	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
-
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-	objectRequest.Data["objects"] = editedObjects
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -2057,6 +2032,33 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	objects := objectRequest.Data["objects"].([]interface{})
+	editedObjects := make([]map[string]interface{}, 0, len(objects))
+	var objectIds = make([]string, 0, len(objects))
+	for _, object := range objects {
+		newObjects := object.(map[string]interface{})
+		guid, ok := newObjects["guid"]
+		if ok {
+			if guid.(string) == "" {
+				guid, _ := uuid.NewRandom()
+				newObjects["guid"] = guid.String()
+				newObjects["is_new"] = true
+			}
+		}
+		newObjects["company_service_project_id"] = resource.GetProjectId()
+		objectIds = append(objectIds, newObjects["guid"].(string))
+		editedObjects = append(editedObjects, newObjects)
+	}
+	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
+
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	objectRequest.Data["objects"] = editedObjects
+
+	
 
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
