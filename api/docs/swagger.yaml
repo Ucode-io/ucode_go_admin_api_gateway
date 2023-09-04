@@ -2201,6 +2201,13 @@ definitions:
       html:
         type: string
     type: object
+  models.Ids:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    type: object
   models.IncrementId:
     properties:
       digit_number:
@@ -15670,6 +15677,51 @@ paths:
       tags:
       - Object
   /v1/object/{table_slug}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete many objects
+      operationId: delete_object
+      parameters:
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: DeleteManyObjectRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.Ids'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete many objects
+      tags:
+      - Object
     put:
       consumes:
       - application/json
