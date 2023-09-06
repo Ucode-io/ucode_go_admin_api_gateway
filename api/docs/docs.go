@@ -38934,6 +38934,12 @@ const docTemplate = `{
                 "is_default": {
                     "type": "boolean"
                 },
+                "is_modal": {
+                    "type": "boolean"
+                },
+                "is_visible_section": {
+                    "type": "boolean"
+                },
                 "label": {
                     "type": "string"
                 },
@@ -38973,6 +38979,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "is_default": {
+                    "type": "boolean"
+                },
+                "is_modal": {
+                    "type": "boolean"
+                },
+                "is_visible_section": {
                     "type": "boolean"
                 },
                 "label": {

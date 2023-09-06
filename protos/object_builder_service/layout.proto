@@ -22,8 +22,10 @@ message LayoutRequest {
     repeated TabRequest tabs = 6;
     string icon = 7;
     bool is_default = 8;
-    repeated FieldForSection summary_fields = 9;
-    google.protobuf.Struct attributes = 10;
+    bool is_modal = 9;
+    bool is_visible_section = 10;
+    repeated FieldForSection summary_fields = 11;
+    google.protobuf.Struct attributes = 12;
 }
 
 message LayoutResponse {
@@ -35,8 +37,10 @@ message LayoutResponse {
     repeated TabResponse tabs = 6;
     string icon = 7;
     bool is_default = 8;
-    repeated FieldResponse summary_fields = 9;
-    google.protobuf.Struct attributes = 10;
+    bool is_modal = 9;
+    bool is_visible_section = 10;
+    repeated FieldResponse summary_fields = 11;
+    google.protobuf.Struct attributes = 12;
 }
 
 message GetListLayoutResponse {
