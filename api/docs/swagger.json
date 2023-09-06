@@ -38919,6 +38919,12 @@
                 "is_default": {
                     "type": "boolean"
                 },
+                "is_modal": {
+                    "type": "boolean"
+                },
+                "is_visible_section": {
+                    "type": "boolean"
+                },
                 "label": {
                     "type": "string"
                 },
@@ -38958,6 +38964,12 @@
                     "type": "string"
                 },
                 "is_default": {
+                    "type": "boolean"
+                },
+                "is_modal": {
+                    "type": "boolean"
+                },
+                "is_visible_section": {
                     "type": "boolean"
                 },
                 "label": {

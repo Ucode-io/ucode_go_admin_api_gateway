@@ -11,6 +11,7 @@ service SyncUserService {
     rpc CreateUser(CreateSyncUserRequest) returns (SyncUserResponse) {}
     rpc UpdateUser(UpdateSyncUserRequest) returns (SyncUserResponse) {}
     rpc DeleteUser(DeleteSyncUserRequest) returns (google.protobuf.Empty) {}
+    rpc DeleteManyUser(DeleteManyUserRequest) returns (google.protobuf.Empty) {}
 }
 
 message CreateSyncUserRequest {
@@ -49,4 +50,15 @@ message DeleteSyncUserRequest {
     string project_id = 3;
     string client_type_id = 4;
     string role_id = 5;
+}
+
+message DeleteManyUserRequest {
+    message User {
+        string user_id = 1;
+        string role_id = 3;
+        string client_type_id = 4;
+    }
+    repeated User users = 1;
+    string project_id = 2;
+    string company_id = 3;
 }

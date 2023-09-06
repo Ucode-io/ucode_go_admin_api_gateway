@@ -26,6 +26,7 @@ type SyncUserServiceClient interface {
 	CreateUser(ctx context.Context, in *CreateSyncUserRequest, opts ...grpc.CallOption) (*SyncUserResponse, error)
 	UpdateUser(ctx context.Context, in *UpdateSyncUserRequest, opts ...grpc.CallOption) (*SyncUserResponse, error)
 	DeleteUser(ctx context.Context, in *DeleteSyncUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteManyUser(ctx context.Context, in *DeleteManyUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type syncUserServiceClient struct {
@@ -63,6 +64,15 @@ func (c *syncUserServiceClient) DeleteUser(ctx context.Context, in *DeleteSyncUs
 	return out, nil
 }
 
+func (c *syncUserServiceClient) DeleteManyUser(ctx context.Context, in *DeleteManyUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/auth_service.SyncUserService/DeleteManyUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SyncUserServiceServer is the server API for SyncUserService service.
 // All implementations must embed UnimplementedSyncUserServiceServer
 // for forward compatibility
@@ -70,6 +80,7 @@ type SyncUserServiceServer interface {
 	CreateUser(context.Context, *CreateSyncUserRequest) (*SyncUserResponse, error)
 	UpdateUser(context.Context, *UpdateSyncUserRequest) (*SyncUserResponse, error)
 	DeleteUser(context.Context, *DeleteSyncUserRequest) (*emptypb.Empty, error)
+	DeleteManyUser(context.Context, *DeleteManyUserRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedSyncUserServiceServer()
 }
 
@@ -85,6 +96,9 @@ func (UnimplementedSyncUserServiceServer) UpdateUser(context.Context, *UpdateSyn
 }
 func (UnimplementedSyncUserServiceServer) DeleteUser(context.Context, *DeleteSyncUserRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
+}
+func (UnimplementedSyncUserServiceServer) DeleteManyUser(context.Context, *DeleteManyUserRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteManyUser not implemented")
 }
 func (UnimplementedSyncUserServiceServer) mustEmbedUnimplementedSyncUserServiceServer() {}
 
@@ -153,6 +167,24 @@ func _SyncUserService_DeleteUser_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SyncUserService_DeleteManyUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteManyUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SyncUserServiceServer).DeleteManyUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.SyncUserService/DeleteManyUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SyncUserServiceServer).DeleteManyUser(ctx, req.(*DeleteManyUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SyncUserService_ServiceDesc is the grpc.ServiceDesc for SyncUserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -171,6 +203,10 @@ var SyncUserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteUser",
 			Handler:    _SyncUserService_DeleteUser_Handler,
+		},
+		{
+			MethodName: "DeleteManyUser",
+			Handler:    _SyncUserService_DeleteManyUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

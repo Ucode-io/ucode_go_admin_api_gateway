@@ -25,6 +25,7 @@ service ObjectBuilderService {
     rpc GetFinancialAnalytics(CommonMessage) returns (CommonMessage) {}
     rpc GetGroupReportTables(CommonMessage) returns (CommonMessage) {}
     rpc GetGroupByField(CommonMessage) returns (CommonMessage) {}
+    rpc DeleteMany(CommonMessage) returns (CommonMessage) {}
 }
 
 message CommonMessage {
