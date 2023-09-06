@@ -38,4 +38,5 @@ type UpdateTableRequest struct {
 	IsCached          bool                   `json:"is_cached"`
 	IsLoginTable      bool                   `json:"is_login_table"`
 	Attributes        map[string]interface{} `json:"attributes"`
+	OrderBy           bool                   `json:"order_by"`
 }

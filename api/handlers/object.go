@@ -1027,6 +1027,9 @@ func (h *Handler) GetList(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	if resource.ResourceEnvironmentId == "4dbfb907-8b4b-460b-906b-cc81c58e656c" || resource.ResourceEnvironmentId == "706e26b0-c33f-4895-84a5-5de3600d5b82" {
+		h.handleResponse(c, status_http.OK, "ok")
+	}
 
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
