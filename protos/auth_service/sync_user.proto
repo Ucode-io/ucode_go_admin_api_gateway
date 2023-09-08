@@ -24,6 +24,8 @@ message CreateSyncUserRequest {
     string table_slug = 7;
     string password = 8;
     string project_id = 9;
+    bool invite = 10;
+    string environment_id = 11;
 }
 
 message UpdateSyncUserRequest {
