@@ -146,6 +146,8 @@ message CreateUserRequest {
     string base_url = 15;
     string year_of_birth = 16;
     int32 resource_type = 17;
+    bool invite = 18;
+    string environment_id = 19;
 }
 
 message UserPrimaryKey {
@@ -230,4 +232,7 @@ message V2UserResetPasswordRequest {
     string old_password = 1;
     string password = 2;
     string user_id = 3;
+    string client_type_id = 4;
+    string environment_id = 5;
+    string project_id = 6;
 }
