@@ -1061,7 +1061,7 @@ func (h *Handler) GetList(c *gin.Context) {
 			}
 		}
 
-		resp, err = services.BuilderService().ObjectBuilder().GetList(
+		resp, err = services.BuilderService().ObjectBuilder().GroupByColumns(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -1085,7 +1085,7 @@ func (h *Handler) GetList(c *gin.Context) {
 			return
 		}
 	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().GetList(
+		resp, err = services.PostgresBuilderService().ObjectBuilder().GroupByColumns(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
