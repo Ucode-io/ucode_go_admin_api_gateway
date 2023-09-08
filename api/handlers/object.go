@@ -101,6 +101,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 	objectRequest.Data["company_service_project_id"] = resource.GetProjectId()
+	objectRequest.Data["company_service_environment_id"] = resource.GetEnvironmentId()
 
 	//start = time.Now()
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
