@@ -239,7 +239,12 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	}
 
 	//fmt.Println("TIME_MANAGEMENT_LOGGING:::Create", time.Since(start))
-
+	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
+		objectRequest.Data = data
+		if _, ok = data["guid"].(string); ok {
+			id = data["guid"].(string)
+		}
+	}
 	//start = time.Now()
 	//fmt.Println("after action:::", afterActions)
 	if len(afterActions) > 0 {
@@ -2060,8 +2065,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 	objectRequest.Data["objects"] = editedObjects
-
-	
 
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
