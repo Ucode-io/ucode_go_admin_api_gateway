@@ -1027,9 +1027,6 @@ func (h *Handler) GetList(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	if resource.ResourceEnvironmentId == "4dbfb907-8b4b-460b-906b-cc81c58e656c" || resource.ResourceEnvironmentId == "706e26b0-c33f-4895-84a5-5de3600d5b82" {
-		h.handleResponse(c, status_http.OK, "ok")
-	}
 
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
@@ -1043,62 +1040,122 @@ func (h *Handler) GetList(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
-	switch resource.ResourceType {
-	case pb.ResourceType_MONGODB:
-		// start := time.Now()
+	if viewId, ok := objectRequest.Data["builder_service_view_id"].(string); ok {
+		if util.IsValidUUID(viewId) {
+			switch resource.ResourceType {
+			case pb.ResourceType_MONGODB:
+				redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
+				if err == nil {
+					resp := make(map[string]interface{})
+					m := make(map[string]interface{})
+					err = json.Unmarshal([]byte(redisResp), &m)
+					if err != nil {
+						h.log.Error("Error while unmarshal redis", logger.Error(err))
+					} else {
+						resp["data"] = m
+						h.handleResponse(c, status_http.OK, resp)
+						return
+					}
+				}
 
-		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
-		if err == nil {
-			resp := make(map[string]interface{})
-			m := make(map[string]interface{})
-			err = json.Unmarshal([]byte(redisResp), &m)
-			if err != nil {
-				h.log.Error("Error while unmarshal redis", logger.Error(err))
-			} else {
-				resp["data"] = m
-				h.handleResponse(c, status_http.OK, resp)
-				return
-			}
-		}
+				resp, err = services.BuilderService().ObjectBuilder().GroupByColumns(
+					context.Background(),
+					&obs.CommonMessage{
+						TableSlug: c.Param("table_slug"),
+						Data:      structData,
+						ProjectId: resource.ResourceEnvironmentId,
+					},
+				)
 
-		resp, err = services.BuilderService().ObjectBuilder().GroupByColumns(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
+				if err == nil {
+					if resp.IsCached {
+						jsonData, _ := resp.GetData().MarshalJSON()
+						err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
+						if err != nil {
+							h.log.Error("Error while setting redis", logger.Error(err))
+						}
+					}
+				}
 
-		if err == nil {
-			if resp.IsCached {
-				jsonData, _ := resp.GetData().MarshalJSON()
-				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
 				if err != nil {
-					h.log.Error("Error while setting redis", logger.Error(err))
+					h.handleResponse(c, status_http.GRPCError, err.Error())
+					return
+				}
+			case pb.ResourceType_POSTGRESQL:
+				resp, err = services.PostgresBuilderService().ObjectBuilder().GroupByColumns(
+					context.Background(),
+					&obs.CommonMessage{
+						TableSlug: c.Param("table_slug"),
+						Data:      structData,
+						ProjectId: resource.ResourceEnvironmentId,
+					},
+				)
+
+				if err != nil {
+					h.handleResponse(c, status_http.GRPCError, err.Error())
+					return
 				}
 			}
 		}
+	} else {
+		switch resource.ResourceType {
+		case pb.ResourceType_MONGODB:
+			// start := time.Now()
 
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	case pb.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderService().ObjectBuilder().GroupByColumns(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
+			redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
+			if err == nil {
+				resp := make(map[string]interface{})
+				m := make(map[string]interface{})
+				err = json.Unmarshal([]byte(redisResp), &m)
+				if err != nil {
+					h.log.Error("Error while unmarshal redis", logger.Error(err))
+				} else {
+					resp["data"] = m
+					h.handleResponse(c, status_http.OK, resp)
+					return
+				}
+			}
 
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
+			resp, err = services.BuilderService().ObjectBuilder().GetList(
+				context.Background(),
+				&obs.CommonMessage{
+					TableSlug: c.Param("table_slug"),
+					Data:      structData,
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
+
+			if err == nil {
+				if resp.IsCached {
+					jsonData, _ := resp.GetData().MarshalJSON()
+					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
+					if err != nil {
+						h.log.Error("Error while setting redis", logger.Error(err))
+					}
+				}
+			}
+
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+		case pb.ResourceType_POSTGRESQL:
+			resp, err = services.PostgresBuilderService().ObjectBuilder().GetList(
+				context.Background(),
+				&obs.CommonMessage{
+					TableSlug: c.Param("table_slug"),
+					Data:      structData,
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
+
+			if err != nil {
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
 		}
 	}
+
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }
@@ -2060,8 +2117,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 	objectRequest.Data["objects"] = editedObjects
-
-	
 
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
