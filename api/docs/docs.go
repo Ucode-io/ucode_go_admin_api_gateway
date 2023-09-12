@@ -33982,6 +33982,9 @@ const docTemplate = `{
                 "user": {
                     "$ref": "#/definitions/auth_service.User"
                 },
+                "user_data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "user_found": {
                     "type": "boolean"
                 },
@@ -38529,6 +38532,9 @@ const docTemplate = `{
                 "index": {
                     "type": "string"
                 },
+                "is_editable": {
+                    "type": "boolean"
+                },
                 "label": {
                     "type": "string"
                 },
@@ -40619,6 +40625,9 @@ const docTemplate = `{
                 },
                 "role": {
                     "$ref": "#/definitions/object_builder_service.Role"
+                },
+                "user_data": {
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "user_found": {
                     "type": "boolean"

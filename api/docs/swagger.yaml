@@ -477,6 +477,8 @@ definitions:
         $ref: '#/definitions/auth_service.Token'
       user:
         $ref: '#/definitions/auth_service.User'
+      user_data:
+        $ref: '#/definitions/structpb.Struct'
       user_found:
         type: boolean
       user_id:
@@ -3465,6 +3467,8 @@ definitions:
         type: string
       index:
         type: string
+      is_editable:
+        type: boolean
       label:
         type: string
       order:
@@ -4833,6 +4837,8 @@ definitions:
         type: array
       role:
         $ref: '#/definitions/object_builder_service.Role'
+      user_data:
+        $ref: '#/definitions/structpb.Struct'
       user_found:
         type: boolean
       user_id:

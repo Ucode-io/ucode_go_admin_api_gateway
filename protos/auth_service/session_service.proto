@@ -304,6 +304,7 @@ message V2LoginResponse {
     repeated Object tables = 14;
     google.protobuf.Struct addational_table = 15;
     GlobalPermission global_permission  = 16;
+    google.protobuf.Struct user_data = 17;
 }
 message V2LoginWithOptionsResponse {
     bool user_found = 1;
@@ -322,6 +323,7 @@ message V2LoginWithOptionsResponse {
     repeated Object tables = 14;
     google.protobuf.Struct addational_table = 15;
     repeated Company companies = 16;
+    google.protobuf.Struct user_data = 17;
 }
 message V2LoginRequest {
     string username = 1;
@@ -347,6 +349,7 @@ message V2LoginSuperAdminRes {
     Token token = 3;
     repeated Session sessions = 4;
     repeated Company companies = 5;
+    google.protobuf.Struct user_data = 6;
 }
 
 message V2LoginSuperAdminReq {

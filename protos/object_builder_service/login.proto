@@ -47,6 +47,7 @@ message LoginDataRes {
     string login_table_slug = 7;
     repeated RecordPermission app_permissions = 8;
     GlobalPermission global_permission = 9;
+    google.protobuf.Struct user_data = 10;
 }
 
 enum ConfirmStrategies {
@@ -162,6 +163,7 @@ message V2LoginResponse {
     repeated RecordPermission app_permissions = 8;
     google.protobuf.Struct addational_table = 9;
     GlobalPermission global_permission = 10;
+    google.protobuf.Struct user_data = 11;
 }
 
 message UpdateUserPasswordRequest {
