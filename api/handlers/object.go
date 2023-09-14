@@ -101,6 +101,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 	objectRequest.Data["company_service_project_id"] = resource.GetProjectId()
+	objectRequest.Data["company_service_environment_id"] = resource.GetEnvironmentId()
 
 	//start = time.Now()
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
@@ -239,7 +240,12 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	}
 
 	//fmt.Println("TIME_MANAGEMENT_LOGGING:::Create", time.Since(start))
-
+	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
+		objectRequest.Data = data
+		if _, ok = data["guid"].(string); ok {
+			id = data["guid"].(string)
+		}
+	}
 	//start = time.Now()
 	//fmt.Println("after action:::", afterActions)
 	if len(afterActions) > 0 {
@@ -2058,13 +2064,13 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 	var objectIds = make([]string, 0, len(objects))
 	for _, object := range objects {
 		newObjects := object.(map[string]interface{})
-		guid, ok := newObjects["guid"]
-		if ok {
-			if guid.(string) == "" {
-				guid, _ := uuid.NewRandom()
-				newObjects["guid"] = guid.String()
-				newObjects["is_new"] = true
-			}
+		_, ok := newObjects["guid"].(string)
+		if !ok {
+
+			id, _ := uuid.NewRandom()
+			newObjects["guid"] = id.String()
+			newObjects["is_new"] = true
+
 		}
 		newObjects["company_service_project_id"] = resource.GetProjectId()
 		objectIds = append(objectIds, newObjects["guid"].(string))
@@ -2077,8 +2083,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 	objectRequest.Data["objects"] = editedObjects
-
-	
 
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
