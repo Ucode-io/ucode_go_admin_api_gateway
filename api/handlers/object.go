@@ -2047,13 +2047,13 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 	var objectIds = make([]string, 0, len(objects))
 	for _, object := range objects {
 		newObjects := object.(map[string]interface{})
-		guid, ok := newObjects["guid"]
-		if ok {
-			if guid.(string) == "" {
-				guid, _ := uuid.NewRandom()
-				newObjects["guid"] = guid.String()
-				newObjects["is_new"] = true
-			}
+		_, ok := newObjects["guid"].(string)
+		if !ok {
+
+			id, _ := uuid.NewRandom()
+			newObjects["guid"] = id.String()
+			newObjects["is_new"] = true
+
 		}
 		newObjects["company_service_project_id"] = resource.GetProjectId()
 		objectIds = append(objectIds, newObjects["guid"].(string))
