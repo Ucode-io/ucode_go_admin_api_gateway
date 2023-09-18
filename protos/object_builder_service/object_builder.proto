@@ -26,6 +26,7 @@ service ObjectBuilderService {
     rpc GetGroupReportTables(CommonMessage) returns (CommonMessage) {}
     rpc GetGroupByField(CommonMessage) returns (CommonMessage) {}
     rpc DeleteMany(CommonMessage) returns (CommonMessage) {}
+    rpc GroupByColumns(CommonMessage) returns (CommonMessage) {}
 }
 
 message CommonMessage {
