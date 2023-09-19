@@ -28724,6 +28724,94 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/copy-project": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "CopyProjectTemplate",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectTemplate"
+                ],
+                "summary": "CopyProjectTemplate",
+                "operationId": "create_event",
+                "parameters": [
+                    {
+                        "description": "CopyFromProjectRequestMessage",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CopyProjectTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Event data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/custom-event": {
             "get": {
                 "security": [
@@ -35747,6 +35835,29 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CopyProjectTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "from_env_id": {
+                    "type": "string"
+                },
+                "from_project_id": {
+                    "type": "string"
+                },
+                "menus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.MenuRequest"
+                    }
+                },
+                "to_env_id": {
+                    "type": "string"
+                },
+                "to_project_id": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CreateApiReferenceModel": {
             "type": "object",
             "properties": {
@@ -37686,6 +37797,29 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.CommonMessage": {
+            "type": "object",
+            "properties": {
+                "custom_message": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "is_cached": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.Condition": {
             "type": "object",
             "properties": {
@@ -39193,6 +39327,53 @@ const docTemplate = `{
             }
         },
         "object_builder_service.MenuForGetAll": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "layout_id": {
+                    "type": "string"
+                },
+                "microfrontend_id": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "pivot_template_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "report_setting_id": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "webpage_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.MenuRequest": {
             "type": "object",
             "properties": {
                 "attributes": {

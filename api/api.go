@@ -519,6 +519,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
 
+		v2Admin.POST("/copy-project", h.CopyProjectTemplate)
+
 		functions := v2Admin.Group("functions")
 		{
 			functions.POST("/micro-frontend", h.CreateMicroFrontEnd)
