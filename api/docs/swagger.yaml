@@ -924,6 +924,19 @@ definitions:
       title:
         type: string
     type: object
+  company_service.ProjectLoginMicroFrontend:
+    properties:
+      environment_id:
+        type: string
+      id:
+        type: string
+      microfront_id:
+        type: string
+      project_id:
+        type: string
+      subdomain:
+        type: string
+    type: object
   company_service.ProjectWithoutResource:
     properties:
       company_id:
@@ -13684,6 +13697,148 @@ paths:
       summary: Update layouts
       tags:
       - Layout
+  /v1/login-microfront:
+    post:
+      consumes:
+      - application/json
+      description: Bind login microfrotn to project
+      operationId: bind_login_micro_front_to_project
+      parameters:
+      - description: ProjectLoginMicroFrontend
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.ProjectLoginMicroFrontend'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ProjectLoginMicroFrontend
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ProjectLoginMicroFrontend'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Bind login microfrotn to project
+      tags:
+      - Project login microfront
+    put:
+      consumes:
+      - application/json
+      description: Update Login MicroFront Project
+      operationId: update_login_microfront
+      parameters:
+      - description: ProjectLoginMicroFrontend
+        in: body
+        name: Company
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.ProjectLoginMicroFrontend'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ProjectLoginMicroFrontend'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Login MicroFront Project
+      tags:
+      - Project login microfront
+  /v1/login-microfront/{subdomain}:
+    get:
+      consumes:
+      - application/json
+      description: Get Project By Id
+      operationId: get_login_microfront_by_subdomain
+      parameters:
+      - description: subdomain
+        in: path
+        name: subdomain
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Project'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Project By Id
+      tags:
+      - Project login microfront
   /v1/many-to-many:
     delete:
       consumes:

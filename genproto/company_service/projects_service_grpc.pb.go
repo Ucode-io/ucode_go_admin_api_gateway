@@ -31,6 +31,9 @@ type ProjectServiceClient interface {
 	GetProjectsByCompanyId(ctx context.Context, in *GetProjectsByCompanyIdReq, opts ...grpc.CallOption) (*GetProjectsByCompanyIdRes, error)
 	UpdateProjectUserData(ctx context.Context, in *UpdateProjectUserDataReq, opts ...grpc.CallOption) (*UpdateProjectUserDataRes, error)
 	GetListSetting(ctx context.Context, in *GetListSettingReq, opts ...grpc.CallOption) (*Setting, error)
+	CreateProjectLoginMicroFront(ctx context.Context, in *ProjectLoginMicroFrontend, opts ...grpc.CallOption) (*ProjectLoginMicroFrontend, error)
+	GetProjectLoginMicroFront(ctx context.Context, in *GetProjectLoginMicroFrontRequest, opts ...grpc.CallOption) (*ProjectLoginMicroFrontend, error)
+	UpdateProjectLoginMicroFront(ctx context.Context, in *ProjectLoginMicroFrontend, opts ...grpc.CallOption) (*ProjectLoginMicroFrontend, error)
 }
 
 type projectServiceClient struct {
@@ -122,6 +125,33 @@ func (c *projectServiceClient) GetListSetting(ctx context.Context, in *GetListSe
 	return out, nil
 }
 
+func (c *projectServiceClient) CreateProjectLoginMicroFront(ctx context.Context, in *ProjectLoginMicroFrontend, opts ...grpc.CallOption) (*ProjectLoginMicroFrontend, error) {
+	out := new(ProjectLoginMicroFrontend)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/CreateProjectLoginMicroFront", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) GetProjectLoginMicroFront(ctx context.Context, in *GetProjectLoginMicroFrontRequest, opts ...grpc.CallOption) (*ProjectLoginMicroFrontend, error) {
+	out := new(ProjectLoginMicroFrontend)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/GetProjectLoginMicroFront", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) UpdateProjectLoginMicroFront(ctx context.Context, in *ProjectLoginMicroFrontend, opts ...grpc.CallOption) (*ProjectLoginMicroFrontend, error) {
+	out := new(ProjectLoginMicroFrontend)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/UpdateProjectLoginMicroFront", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProjectServiceServer is the server API for ProjectService service.
 // All implementations must embed UnimplementedProjectServiceServer
 // for forward compatibility
@@ -135,6 +165,9 @@ type ProjectServiceServer interface {
 	GetProjectsByCompanyId(context.Context, *GetProjectsByCompanyIdReq) (*GetProjectsByCompanyIdRes, error)
 	UpdateProjectUserData(context.Context, *UpdateProjectUserDataReq) (*UpdateProjectUserDataRes, error)
 	GetListSetting(context.Context, *GetListSettingReq) (*Setting, error)
+	CreateProjectLoginMicroFront(context.Context, *ProjectLoginMicroFrontend) (*ProjectLoginMicroFrontend, error)
+	GetProjectLoginMicroFront(context.Context, *GetProjectLoginMicroFrontRequest) (*ProjectLoginMicroFrontend, error)
+	UpdateProjectLoginMicroFront(context.Context, *ProjectLoginMicroFrontend) (*ProjectLoginMicroFrontend, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -168,6 +201,15 @@ func (UnimplementedProjectServiceServer) UpdateProjectUserData(context.Context, 
 }
 func (UnimplementedProjectServiceServer) GetListSetting(context.Context, *GetListSettingReq) (*Setting, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListSetting not implemented")
+}
+func (UnimplementedProjectServiceServer) CreateProjectLoginMicroFront(context.Context, *ProjectLoginMicroFrontend) (*ProjectLoginMicroFrontend, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateProjectLoginMicroFront not implemented")
+}
+func (UnimplementedProjectServiceServer) GetProjectLoginMicroFront(context.Context, *GetProjectLoginMicroFrontRequest) (*ProjectLoginMicroFrontend, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProjectLoginMicroFront not implemented")
+}
+func (UnimplementedProjectServiceServer) UpdateProjectLoginMicroFront(context.Context, *ProjectLoginMicroFrontend) (*ProjectLoginMicroFrontend, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateProjectLoginMicroFront not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
 
@@ -344,6 +386,60 @@ func _ProjectService_GetListSetting_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_CreateProjectLoginMicroFront_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProjectLoginMicroFrontend)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).CreateProjectLoginMicroFront(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/CreateProjectLoginMicroFront",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).CreateProjectLoginMicroFront(ctx, req.(*ProjectLoginMicroFrontend))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_GetProjectLoginMicroFront_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProjectLoginMicroFrontRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).GetProjectLoginMicroFront(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/GetProjectLoginMicroFront",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).GetProjectLoginMicroFront(ctx, req.(*GetProjectLoginMicroFrontRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_UpdateProjectLoginMicroFront_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProjectLoginMicroFrontend)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).UpdateProjectLoginMicroFront(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/UpdateProjectLoginMicroFront",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).UpdateProjectLoginMicroFront(ctx, req.(*ProjectLoginMicroFrontend))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProjectService_ServiceDesc is the grpc.ServiceDesc for ProjectService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -386,6 +482,18 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetListSetting",
 			Handler:    _ProjectService_GetListSetting_Handler,
+		},
+		{
+			MethodName: "CreateProjectLoginMicroFront",
+			Handler:    _ProjectService_CreateProjectLoginMicroFront_Handler,
+		},
+		{
+			MethodName: "GetProjectLoginMicroFront",
+			Handler:    _ProjectService_GetProjectLoginMicroFront_Handler,
+		},
+		{
+			MethodName: "UpdateProjectLoginMicroFront",
+			Handler:    _ProjectService_UpdateProjectLoginMicroFront_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

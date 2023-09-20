@@ -33,6 +33,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.POST("/send-message", h.SendMessageToEmail)
 	r.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
 	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
+	r.GET("/v1/login-microfront/:subdomain", h.GetLoginMicroFrontBySubdomain)
 
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
@@ -332,6 +333,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	v1Admin := r.Group("/v1")
 	v1Admin.Use(h.AdminAuthMiddleware())
 	{
+
+		// login microfront
+		v1Admin.POST("/login-microfront", h.BindLoginMicroFrontToProject)
+		v1Admin.PUT("/login-microfront", h.UpdateLoginMicroFrontProject)
+
 		// company service
 		v1.POST("/company", h.CreateCompany)
 		v1Admin.GET("/company/:company_id", h.GetCompanyByID)
