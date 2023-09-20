@@ -34,6 +34,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
 	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 
+	global := r.Group("/v1/global")
+	global.Use(h.GlobalAuthMiddleware(cfg))
+	{
+		global.GET("/projects", h.GetGlobalCompanyProjectList)
+		global.GET("/environment", h.GetGlobalProjectEnvironments)
+		global.GET("/template", h.GetGlobalProjectTemplate)
+	}
+
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
@@ -338,7 +346,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/company", h.GetCompanyList)
 		v1Admin.PUT("company/:company_id", h.UpdateCompany)
 		v1Admin.DELETE("/company/:company_id", h.DeleteCompany)
-
 		// project service
 		v1Admin.POST("/company-project", h.CreateCompanyProject)
 		v1Admin.GET("/company-project", h.GetCompanyProjectList)
