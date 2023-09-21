@@ -936,6 +936,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
+// @Param language_setting query string false "language_setting"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -965,6 +966,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
+	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {

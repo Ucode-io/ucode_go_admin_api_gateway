@@ -12757,6 +12757,12 @@
                         "description": "table-slug",
                         "name": "table-slug",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "language_setting",
+                        "name": "language_setting",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -16874,6 +16880,12 @@
                         "name": "table_slug",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "language_setting",
+                        "name": "language_setting",
+                        "in": "query"
                     },
                     {
                         "description": "GetListObjectRequestBody",
