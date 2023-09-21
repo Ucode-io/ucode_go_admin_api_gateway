@@ -13602,6 +13602,10 @@ paths:
         in: query
         name: table-slug
         type: string
+      - description: language_setting
+        in: query
+        name: language_setting
+        type: string
       produces:
       - application/json
       responses:
@@ -15695,7 +15699,7 @@ paths:
       consumes:
       - application/json
       description: Delete many objects
-      operationId: delete_object
+      operationId: delete_many_object
       parameters:
       - description: table_slug
         in: path
@@ -16130,6 +16134,10 @@ paths:
         in: path
         name: table_slug
         required: true
+        type: string
+      - description: language_setting
+        in: query
+        name: language_setting
         type: string
       - description: GetListObjectRequestBody
         in: body

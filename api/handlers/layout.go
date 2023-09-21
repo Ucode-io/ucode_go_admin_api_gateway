@@ -23,6 +23,7 @@ import (
 // @Produce json
 // @Param table-id query string false "table-id"
 // @Param table-slug query string false "table-slug"
+// @Param language_setting query string false "language_setting"
 // @Success 200 {object} status_http.Response{data=object_builder_service.GetListLayoutResponse} "TableBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -88,8 +89,12 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 		resourceEnvironmentId = resourceEnvironment.GetId()
 	}
 	var isDefault = false
+	var languageSettings = ""
 	if c.Query("is_defualt") == "true" {
 		isDefault = true
+	}
+	if c.Query("language_setting") != "" {
+		languageSettings = c.Query("language_setting")
 	}
 	authInfo, _ := h.GetAuthInfo(c)
 
@@ -101,6 +106,7 @@ func (h *Handler) GetListLayouts(c *gin.Context) {
 			ProjectId: resourceEnvironmentId,
 			IsDefualt: isDefault,
 			RoleId:    authInfo.GetRoleId(),
+			LanguageSetting: languageSettings,
 		},
 	)
 	if err != nil {

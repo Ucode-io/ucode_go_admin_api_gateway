@@ -12769,6 +12769,12 @@ const docTemplate = `{
                         "description": "table-slug",
                         "name": "table-slug",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "language_setting",
+                        "name": "language_setting",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -16888,6 +16894,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "language_setting",
+                        "name": "language_setting",
+                        "in": "query"
+                    },
+                    {
                         "description": "GetListObjectRequestBody",
                         "name": "object",
                         "in": "body",
@@ -17161,7 +17173,7 @@ const docTemplate = `{
                     "Object"
                 ],
                 "summary": "Delete many objects",
-                "operationId": "delete_object",
+                "operationId": "delete_many_object",
                 "parameters": [
                     {
                         "type": "string",
