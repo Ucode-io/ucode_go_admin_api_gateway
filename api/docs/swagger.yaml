@@ -13602,6 +13602,10 @@ paths:
         in: query
         name: table-slug
         type: string
+      - description: language_setting
+        in: query
+        name: language_setting
+        type: string
       produces:
       - application/json
       responses:
@@ -16130,6 +16134,10 @@ paths:
         in: path
         name: table_slug
         required: true
+        type: string
+      - description: language_setting
+        in: query
+        name: language_setting
         type: string
       - description: GetListObjectRequestBody
         in: body

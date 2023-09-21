@@ -12769,6 +12769,12 @@ const docTemplate = `{
                         "description": "table-slug",
                         "name": "table-slug",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "language_setting",
+                        "name": "language_setting",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -16886,6 +16892,12 @@ const docTemplate = `{
                         "name": "table_slug",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "language_setting",
+                        "name": "language_setting",
+                        "in": "query"
                     },
                     {
                         "description": "GetListObjectRequestBody",
