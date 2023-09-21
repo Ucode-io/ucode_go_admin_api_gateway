@@ -15,11 +15,12 @@ import (
 )
 
 type DoInvokeFuntionStruct struct {
-	CustomEvents []*obs.CustomEvent
-	IDs          []string
-	TableSlug    string
-	ObjectData   map[string]interface{}
-	Method       string
+	CustomEvents          []*obs.CustomEvent
+	IDs                   []string
+	TableSlug             string
+	ObjectData            map[string]interface{}
+	Method                string
+	ObjectDataAfterUpdate map[string]interface{}
 }
 
 func GetListCustomEvents(tableSlug, roleId, method string, c *gin.Context, h *Handler) (beforeEvents, afterEvents []*obs.CustomEvent, err error) {
@@ -207,6 +208,7 @@ func DoInvokeFuntion(request DoInvokeFuntionStruct, c *gin.Context, h *Handler) 
 		data["object_ids"] = request.IDs
 		data["table_slug"] = request.TableSlug
 		data["object_data"] = request.ObjectData
+		data["object_data_after_update"] = request.ObjectDataAfterUpdate
 		data["method"] = request.Method
 		data["app_id"] = appId
 		data["user_id"] = authInfo.GetUserId()

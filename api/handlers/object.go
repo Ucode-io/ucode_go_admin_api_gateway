@@ -723,11 +723,12 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          []string{id},
-				TableSlug:    c.Param("table_slug"),
-				ObjectData:   objectRequest.Data,
-				Method:       "UPDATE",
+				CustomEvents:          afterActions,
+				IDs:                   []string{id},
+				TableSlug:             c.Param("table_slug"),
+				ObjectData:            objectRequest.Data,
+				Method:                "UPDATE",
+				ObjectDataAfterUpdate: resp.Data.AsMap(),
 			},
 			c, // gin context,
 			h, // handler
