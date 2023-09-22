@@ -37106,11 +37106,23 @@ const docTemplate = `{
         "models.MicrofrontForLoginPage": {
             "type": "object",
             "properties": {
-                "data": {
-                    "$ref": "#/definitions/company_service.ProjectLoginMicroFrontend"
+                "environment_id": {
+                    "type": "string"
                 },
                 "function": {
                     "$ref": "#/definitions/new_function_service.Function"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "microfront_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "subdomain": {
+                    "type": "string"
                 }
             }
         },
