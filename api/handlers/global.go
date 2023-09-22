@@ -159,12 +159,13 @@ func (h *Handler) GetGlobalProjectTemplate(c *gin.Context) {
 		resp, err = services.BuilderService().Menu().GetAll(
 			context.Background(),
 			&obs.GetAllMenusRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				Search:    c.DefaultQuery("search", ""),
-				ProjectId: resource.ResourceEnvironmentId,
-				ParentId:  c.DefaultQuery("parent_id", ""),
-				RoleId:    authInfo.GetRoleId(),
+				Limit:       int32(limit),
+				Offset:      int32(offset),
+				Search:      c.DefaultQuery("search", ""),
+				ProjectId:   resource.ResourceEnvironmentId,
+				ParentId:    c.DefaultQuery("parent_id", ""),
+				RoleId:      authInfo.GetRoleId(),
+				ForTemplate: true,
 			},
 		)
 	case pb.ResourceType_POSTGRESQL:

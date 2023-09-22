@@ -9,6 +9,7 @@ import "google/protobuf/struct.proto";
 
 service SyncUserService {
     rpc CreateUser(CreateSyncUserRequest) returns (SyncUserResponse) {}
+    rpc CreateUsers(CreateSyncUsersRequest) returns (SyncUsersResponse) {}
     rpc UpdateUser(UpdateSyncUserRequest) returns (SyncUserResponse) {}
     rpc DeleteUser(DeleteSyncUserRequest) returns (google.protobuf.Empty) {}
     rpc DeleteManyUser(DeleteManyUserRequest) returns (google.protobuf.Empty) {}
@@ -28,6 +29,10 @@ message CreateSyncUserRequest {
     string environment_id = 11;
 }
 
+message CreateSyncUsersRequest {
+    repeated CreateSyncUserRequest users = 1;
+}
+
 message UpdateSyncUserRequest {
     string client_type_id = 1;
     string role_id = 2;
@@ -44,6 +49,9 @@ message UpdateSyncUserRequest {
 message SyncUserResponse {
     bool is_user_exists = 1;
     string user_id = 2;
+}
+message SyncUsersResponse {
+    repeated string user_ids = 1;
 }
 
 message DeleteSyncUserRequest {
