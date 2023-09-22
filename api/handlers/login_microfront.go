@@ -149,6 +149,12 @@ func (h *Handler) GetLoginMicroFrontBySubdomain(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	if resp.ProjectId == "" || resp.EnvironmentId == "" {
+		h.handleResponse(c, status_http.OK, models.MicrofrontForLoginPage{})
+		return
+	}
+
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
