@@ -3,6 +3,7 @@ package models
 import (
 	"net/http"
 	"net/url"
+	"ucode/ucode_go_api_gateway/genproto/new_function_service"
 )
 
 type Function struct {
@@ -70,4 +71,13 @@ type GetByIdFunctionResponse struct {
 	Name             string `json:"name"`
 	Description      string `json:"description"`
 	FuncitonFolderId string `json:"function_folder_id"`
+}
+
+type MicrofrontForLoginPage struct {
+	Function      *new_function_service.Function `json:"function"`
+	Id            string                         `json:"id"`
+	ProjectId     string                         `json:"project_id"`
+	EnvironmentId string                         `json:"environment_id"`
+	MicrofrontId  string                         `json:"microfront_id"`
+	Subdomain     string                         `json:"subdomain"`
 }
