@@ -12966,7 +12966,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Project"
+                                            "$ref": "#/definitions/models.MicrofrontForLoginPage"
                                         }
                                     }
                                 }
@@ -37100,6 +37100,17 @@ const docTemplate = `{
                 },
                 "webpage_id": {
                     "type": "string"
+                }
+            }
+        },
+        "models.MicrofrontForLoginPage": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/company_service.ProjectLoginMicroFrontend"
+                },
+                "function": {
+                    "$ref": "#/definitions/new_function_service.Function"
                 }
             }
         },
