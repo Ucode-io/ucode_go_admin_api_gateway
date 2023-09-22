@@ -33,7 +33,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.POST("/send-message", h.SendMessageToEmail)
 	r.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
 	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
-	r.GET("/v1/login-microfront/:subdomain", h.GetLoginMicroFrontBySubdomain)
+	r.GET("/v1/login-microfront", h.GetLoginMicroFrontBySubdomain)
 
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth

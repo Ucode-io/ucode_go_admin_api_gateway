@@ -110,23 +110,31 @@ func (h *Handler) UpdateLoginMicroFrontProject(c *gin.Context) {
 // GetLoginMicroFrontBySubdomain godoc
 // @Security ApiKeyAuth
 // @ID get_login_microfront_by_subdomain
-// @Router /v1/login-microfront/{subdomain} [GET]
+// @Router /v1/login-microfront [GET]
 // @Summary Get Project By Id
 // @Description Get Project By Id
 // @Tags Project login microfront
 // @Accept json
 // @Produce json
-// @Param subdomain path string true "subdomain"
+// @Param subdomain query string false "subdomain"
+// @Param project-id query string false "project-id"
 // @Success 200 {object} status_http.Response{data=company_service.Project} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetLoginMicroFrontBySubdomain(c *gin.Context) {
-	subdomain := c.Param("subdomain")
+	subdomain := c.DefaultQuery("subdomain", "")
+	projectId := c.DefaultQuery("project-id", "")
+
+	if subdomain == "" && projectId == "" {
+		h.handleResponse(c, status_http.InvalidArgument, "subdomain or project-id is required")
+		return
+	}
 
 	resp, err := h.companyServices.CompanyService().Project().GetProjectLoginMicroFront(
 		context.Background(),
 		&company_service.GetProjectLoginMicroFrontRequest{
 			Subdomain: subdomain,
+			ProjectId: projectId,
 		},
 	)
 
