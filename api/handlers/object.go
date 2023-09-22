@@ -976,6 +976,11 @@ func (h *Handler) GetList(c *gin.Context) {
 		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
 
+	if c.Param("table_slug") == "orders" {
+		fmt.Println("\n\n role_id ~~~>>> ", objectRequest.Data["role_id_from_token"])
+		fmt.Println("\n\n")
+	}
+
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
@@ -988,7 +993,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
+	fmt.Println("\n\n>>>>>>>>> test #1")
 	//authInfo, err := h.GetAuthInfo(c)
 	//if err != nil {
 	//	h.handleResponse(c, status_http.Forbidden, err.Error())
@@ -1023,6 +1028,7 @@ func (h *Handler) GetList(c *gin.Context) {
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
+	fmt.Println("\n\n>>>>>>>>> test #2")
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
@@ -1030,6 +1036,8 @@ func (h *Handler) GetList(c *gin.Context) {
 	if resource.ResourceEnvironmentId == "4dbfb907-8b4b-460b-906b-cc81c58e656c" || resource.ResourceEnvironmentId == "706e26b0-c33f-4895-84a5-5de3600d5b82" {
 		h.handleResponse(c, status_http.OK, "ok")
 	}
+
+	fmt.Println("\n\n>>>>>>>>> test #3")
 
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
@@ -1046,21 +1054,20 @@ func (h *Handler) GetList(c *gin.Context) {
 	switch resource.ResourceType {
 	case pb.ResourceType_MONGODB:
 		// start := time.Now()
-
-		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
-		if err == nil {
-			resp := make(map[string]interface{})
-			m := make(map[string]interface{})
-			err = json.Unmarshal([]byte(redisResp), &m)
-			if err != nil {
-				h.log.Error("Error while unmarshal redis", logger.Error(err))
-			} else {
-				resp["data"] = m
-				h.handleResponse(c, status_http.OK, resp)
-				return
-			}
-		}
-
+		fmt.Println("\n\n>>>>>>>>> test #4")
+		// redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
+		// if err == nil {
+		// 	resp := make(map[string]interface{})
+		// 	m := make(map[string]interface{})
+		// 	err = json.Unmarshal([]byte(redisResp), &m)
+		// 	if err != nil {
+		// 		h.log.Error("Error while unmarshal redis", logger.Error(err))
+		// 	} else {
+		// 		resp["data"] = m
+		// 		h.handleResponse(c, status_http.OK, resp)
+		// 		return
+		// 	}
+		// }
 		resp, err = services.BuilderService().ObjectBuilder().GetList(
 			context.Background(),
 			&obs.CommonMessage{
@@ -1069,16 +1076,16 @@ func (h *Handler) GetList(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
-		if err == nil {
-			if resp.IsCached {
-				jsonData, _ := resp.GetData().MarshalJSON()
-				err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
-				if err != nil {
-					h.log.Error("Error while setting redis", logger.Error(err))
-				}
-			}
-		}
+		fmt.Println("\n\n>>>>>>>>> test #6")
+		// if err == nil {
+		// 	if resp.IsCached {
+		// 		jsonData, _ := resp.GetData().MarshalJSON()
+		// 		err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
+		// 		if err != nil {
+		// 			h.log.Error("Error while setting redis", logger.Error(err))
+		// 		}
+		// 	}
+		// }
 
 		if err != nil {
 			h.handleResponse(c, status_http.GRPCError, err.Error())
@@ -2077,8 +2084,6 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		return
 	}
 	objectRequest.Data["objects"] = editedObjects
-
-	
 
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
