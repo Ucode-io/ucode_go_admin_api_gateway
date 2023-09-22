@@ -20,3 +20,7 @@ type UpsertCommonMessage struct {
 	Data map[string]interface{} `json:"data"`
 	UpdatedFields []string `json:"updated_fields"`
 }
+
+type Ids struct {
+	Ids []string `json:"ids"`
+}

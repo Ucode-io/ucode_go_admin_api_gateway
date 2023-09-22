@@ -5,6 +5,7 @@ package object_builder_service;
 option go_package="genproto/object_builder_service";
 
 import "google/protobuf/struct.proto";
+import "google/protobuf/empty.proto";
 import "permission.proto";
 
 service LoginService {
@@ -15,6 +16,7 @@ service LoginService {
     rpc GetUserUpdatedPermission (GetUserUpdatedPermissionRequest) returns(V2LoginResponse) {}
     rpc LoginDataByUserId (LoginDataReq) returns (LoginDataRes) {}
     rpc GetConnetionOptions (GetConnetionOptionsRequest) returns (GetConnectionOptionsResponse) {}
+    rpc UpdateUserPassword (UpdateUserPasswordRequest) returns (google.protobuf.Empty) {}
 }
 
 message GetConnetionOptionsRequest {
@@ -45,6 +47,7 @@ message LoginDataRes {
     string login_table_slug = 7;
     repeated RecordPermission app_permissions = 8;
     GlobalPermission global_permission = 9;
+    google.protobuf.Struct user_data = 10;
 }
 
 enum ConfirmStrategies {
@@ -160,4 +163,12 @@ message V2LoginResponse {
     repeated RecordPermission app_permissions = 8;
     google.protobuf.Struct addational_table = 9;
     GlobalPermission global_permission = 10;
+    google.protobuf.Struct user_data = 11;
+}
+
+message UpdateUserPasswordRequest {
+    string client_type_id = 1;
+    string guid = 2;
+    string resource_environment_id = 3;
+    string password = 4;
 }

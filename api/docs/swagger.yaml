@@ -477,6 +477,8 @@ definitions:
         $ref: '#/definitions/auth_service.Token'
       user:
         $ref: '#/definitions/auth_service.User'
+      user_data:
+        $ref: '#/definitions/structpb.Struct'
       user_found:
         type: boolean
       user_id:
@@ -920,6 +922,19 @@ definitions:
       timezone:
         $ref: '#/definitions/company_service.Timezone'
       title:
+        type: string
+    type: object
+  company_service.ProjectLoginMicroFrontend:
+    properties:
+      environment_id:
+        type: string
+      id:
+        type: string
+      microfront_id:
+        type: string
+      project_id:
+        type: string
+      subdomain:
         type: string
     type: object
   company_service.ProjectWithoutResource:
@@ -2201,6 +2216,13 @@ definitions:
       html:
         type: string
     type: object
+  models.Ids:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    type: object
   models.IncrementId:
     properties:
       digit_number:
@@ -3465,6 +3487,8 @@ definitions:
         type: string
       index:
         type: string
+      is_editable:
+        type: boolean
       label:
         type: string
       order:
@@ -4833,6 +4857,8 @@ definitions:
         type: array
       role:
         $ref: '#/definitions/object_builder_service.Role'
+      user_data:
+        $ref: '#/definitions/structpb.Struct'
       user_found:
         type: boolean
       user_id:
@@ -13589,6 +13615,10 @@ paths:
         in: query
         name: table-slug
         type: string
+      - description: language_setting
+        in: query
+        name: language_setting
+        type: string
       produces:
       - application/json
       responses:
@@ -13671,6 +13701,150 @@ paths:
       summary: Update layouts
       tags:
       - Layout
+  /v1/login-microfront:
+    get:
+      consumes:
+      - application/json
+      description: Get Project By Id
+      operationId: get_login_microfront_by_subdomain
+      parameters:
+      - description: subdomain
+        in: query
+        name: subdomain
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Project'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Project By Id
+      tags:
+      - Project login microfront
+    post:
+      consumes:
+      - application/json
+      description: Bind login microfrotn to project
+      operationId: bind_login_micro_front_to_project
+      parameters:
+      - description: ProjectLoginMicroFrontend
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.ProjectLoginMicroFrontend'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ProjectLoginMicroFrontend
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ProjectLoginMicroFrontend'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Bind login microfrotn to project
+      tags:
+      - Project login microfront
+    put:
+      consumes:
+      - application/json
+      description: Update Login MicroFront Project
+      operationId: update_login_microfront
+      parameters:
+      - description: ProjectLoginMicroFrontend
+        in: body
+        name: Company
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.ProjectLoginMicroFrontend'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ProjectLoginMicroFrontend'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Login MicroFront Project
+      tags:
+      - Project login microfront
   /v1/many-to-many:
     delete:
       consumes:
@@ -15678,6 +15852,51 @@ paths:
       tags:
       - Object
   /v1/object/{table_slug}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete many objects
+      operationId: delete_many_object
+      parameters:
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: DeleteManyObjectRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.Ids'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete many objects
+      tags:
+      - Object
     put:
       consumes:
       - application/json
@@ -16072,6 +16291,10 @@ paths:
         in: path
         name: table_slug
         required: true
+        type: string
+      - description: language_setting
+        in: query
+        name: language_setting
         type: string
       - description: GetListObjectRequestBody
         in: body

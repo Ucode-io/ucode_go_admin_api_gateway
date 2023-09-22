@@ -33,6 +33,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.POST("/send-message", h.SendMessageToEmail)
 	r.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
 	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
+	r.GET("/v1/login-microfront", h.GetLoginMicroFrontBySubdomain)
 
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
@@ -94,6 +95,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/object-slim/get-list/:table_slug", h.GetListSlim)
 		v1.PUT("/object/:table_slug", h.UpdateObject)
 		v1.DELETE("/object/:table_slug/:object_id", h.DeleteObject)
+		v1.DELETE("/object/:table_slug", h.DeleteManyObject)
 		v1.POST("/object/excel/:table_slug", h.GetListInExcel)
 		v1.POST("/object-upsert/:table_slug", h.UpsertObject)
 		v1.PUT("/object/multiple-update/:table_slug", h.MultipleUpdateObject)
@@ -331,6 +333,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	v1Admin := r.Group("/v1")
 	v1Admin.Use(h.AdminAuthMiddleware())
 	{
+
+		// login microfront
+		v1Admin.POST("/login-microfront", h.BindLoginMicroFrontToProject)
+		v1Admin.PUT("/login-microfront", h.UpdateLoginMicroFrontProject)
+
 		// company service
 		v1.POST("/company", h.CreateCompany)
 		v1Admin.GET("/company/:company_id", h.GetCompanyByID)

@@ -16,6 +16,24 @@ service ProjectService {
     rpc GetProjectsByCompanyId(GetProjectsByCompanyIdReq) returns (GetProjectsByCompanyIdRes) {}
     rpc UpdateProjectUserData (UpdateProjectUserDataReq) returns (UpdateProjectUserDataRes) {}
     rpc GetListSetting(GetListSettingReq) returns (Setting) {};
+
+    rpc CreateProjectLoginMicroFront(ProjectLoginMicroFrontend) returns (ProjectLoginMicroFrontend) {};
+    rpc GetProjectLoginMicroFront(GetProjectLoginMicroFrontRequest) returns (ProjectLoginMicroFrontend) {};
+    rpc UpdateProjectLoginMicroFront(ProjectLoginMicroFrontend) returns (ProjectLoginMicroFrontend) {};
+}
+
+message ProjectLoginMicroFrontend {
+    string id = 1;
+    string project_id = 2;
+    string environment_id = 3;
+    string microfront_id = 4;
+    string subdomain = 5;
+}
+
+message GetProjectLoginMicroFrontRequest {
+    string id = 1;
+    string project_id = 2;
+    string subdomain = 3;
 }
 
 message Setting {

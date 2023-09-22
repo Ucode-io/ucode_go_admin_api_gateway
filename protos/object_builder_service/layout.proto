@@ -212,4 +212,5 @@ message GetListLayoutRequest {
     bool is_defualt = 3;
     string table_id = 4;
     string role_id = 5;
+    string language_setting = 6;
 }

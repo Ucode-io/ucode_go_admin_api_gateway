@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -101,6 +100,7 @@ func (h *Handler) CreateObject(c *gin.Context) {
 		return
 	}
 	objectRequest.Data["company_service_project_id"] = resource.GetProjectId()
+	objectRequest.Data["company_service_environment_id"] = resource.GetEnvironmentId()
 
 	//start = time.Now()
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
@@ -239,7 +239,12 @@ func (h *Handler) CreateObject(c *gin.Context) {
 	}
 
 	//fmt.Println("TIME_MANAGEMENT_LOGGING:::Create", time.Since(start))
-
+	if data, ok := resp.Data.AsMap()["data"].(map[string]interface{}); ok {
+		objectRequest.Data = data
+		if _, ok = data["guid"].(string); ok {
+			id = data["guid"].(string)
+		}
+	}
 	//start = time.Now()
 	//fmt.Println("after action:::", afterActions)
 	if len(afterActions) > 0 {
@@ -917,21 +922,6 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 		}
 	}
 
-	if c.Param("table_slug") == "user" {
-		log.Printf("\n\ndelete user -> userId: %s, projectId: %s\n\n", objectID, resource.ProjectId)
-		_, err = services.AuthService().User().DeleteUser(
-			c.Request.Context(),
-			&authPb.UserPrimaryKey{
-				Id:        objectID,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, status_http.GRPCError, err.Error())
-			return
-		}
-	}
-
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.handleResponse(c, statusHttp, resp)
 }
@@ -946,6 +936,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param table_slug path string true "table_slug"
+// @Param language_setting query string false "language_setting"
 // @Param object body models.CommonMessage true "GetListObjectRequestBody"
 // @Success 200 {object} status_http.Response{data=models.CommonMessage} "ObjectBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
@@ -975,6 +966,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		objectRequest.Data["role_id_from_token"] = tokenInfo.GetRoleId()
 		objectRequest.Data["client_type_id_from_token"] = tokenInfo.GetClientTypeId()
 	}
+	objectRequest.Data["language_setting"] = c.DefaultQuery("language_setting", "")
 
 	if c.Param("table_slug") == "orders" {
 		fmt.Println("\n\n role_id ~~~>>> ", objectRequest.Data["role_id_from_token"])
@@ -2065,13 +2057,13 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 	var objectIds = make([]string, 0, len(objects))
 	for _, object := range objects {
 		newObjects := object.(map[string]interface{})
-		guid, ok := newObjects["guid"]
-		if ok {
-			if guid.(string) == "" {
-				guid, _ := uuid.NewRandom()
-				newObjects["guid"] = guid.String()
-				newObjects["is_new"] = true
-			}
+		_, ok := newObjects["guid"].(string)
+		if !ok {
+
+			id, _ := uuid.NewRandom()
+			newObjects["guid"] = id.String()
+			newObjects["is_new"] = true
+
 		}
 		newObjects["company_service_project_id"] = resource.GetProjectId()
 		objectIds = append(objectIds, newObjects["guid"].(string))
@@ -2534,4 +2526,156 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 			"response": response,
 		},
 	})
+}
+
+// DeleteManyObject godoc
+// @Security ApiKeyAuth
+// @ID delete_many_object
+// @Router /v1/object/{table_slug} [DELETE]
+// @Summary Delete many objects
+// @Description Delete many objects
+// @Tags Object
+// @Accept json
+// @Produce json
+// @Param table_slug path string true "table_slug"
+// @Param object body models.Ids true "DeleteManyObjectRequestBody"
+// @Success 204
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) DeleteManyObject(c *gin.Context) {
+	var (
+		objectRequest               models.Ids
+		resp                        *obs.CommonMessage
+		beforeActions, afterActions []*obs.CustomEvent
+		statusHttp                  = status_http.GrpcStatusToHTTP["NoContent"]
+		data                        = make(map[string]interface{})
+	)
+
+	err := c.ShouldBindJSON(&objectRequest)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	if len(objectRequest.Ids) < 0 {
+		h.handleResponse(c, status_http.BadRequest, "ids is required and must be an array of strings")
+		return
+	}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	data["company_service_project_id"] = projectId.(string)
+	data["ids"] = objectRequest.Ids
+
+	structData, err := helper.ConvertMapToStruct(data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	fromOfs := c.Query("from-ofs")
+	if fromOfs != "true" {
+		beforeActions, afterActions, err = GetListCustomEvents(c.Param("table_slug"), "", "DELETE_MANY", c, h)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error())
+			return
+		}
+	}
+	if len(beforeActions) > 0 {
+		functionName, err := DoInvokeFuntion(DoInvokeFuntionStruct{
+			CustomEvents: beforeActions,
+			IDs:          objectRequest.Ids,
+			TableSlug:    c.Param("table_slug"),
+			ObjectData:   data,
+			Method:       "DELETE_MANY",
+		},
+			c,
+			h,
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+	}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().ObjectBuilder().DeleteMany(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		// fmt.Println("err:", err)
+		if err != nil {
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().ObjectBuilder().DeleteMany(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+	}
+
+	if len(afterActions) > 0 {
+		functionName, err := DoInvokeFuntion(
+			DoInvokeFuntionStruct{
+				CustomEvents: afterActions,
+				IDs:          objectRequest.Ids,
+				TableSlug:    c.Param("table_slug"),
+				ObjectData:   data,
+				Method:       "DELETE_MANY",
+			},
+			c, // gin context,
+			h, // handler
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.InvalidArgument, err.Error()+" in "+functionName)
+			return
+		}
+	}
+
+	statusHttp.CustomMessage = resp.GetCustomMessage()
+	h.handleResponse(c, statusHttp, resp)
 }
