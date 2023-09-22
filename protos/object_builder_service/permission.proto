@@ -93,6 +93,7 @@ message RoleWithAppTablePermissions {
             string object_field = 2;
             string custom_field = 3;
             string table_slug = 4;
+            bool not_use_in_tab = 5;
         }
         message ActionPermission {
             string guid = 1;
