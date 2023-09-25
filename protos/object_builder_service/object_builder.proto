@@ -27,6 +27,7 @@ service ObjectBuilderService {
     rpc GetGroupByField(CommonMessage) returns (CommonMessage) {}
     rpc DeleteMany(CommonMessage) returns (CommonMessage) {}
     rpc GroupByColumns(CommonMessage) returns (CommonMessage) {}
+    rpc CopyFromProject(CopyFromProjectRequestMessage) returns (CommonMessage) {}
 }
 
 message CommonMessage {
@@ -51,4 +52,27 @@ message BatchRequest {
     google.protobuf.Struct data = 2;
     repeated string updated_fields = 3;
     string project_id = 4;
+}
+
+message MenuRequest {
+    string label = 1;
+    string icon = 2;
+    string table_id = 3;
+    string layout_id = 4;
+    string parent_id = 5;
+    string type = 6;
+    string id = 7;
+    string project_id = 8;
+    google.protobuf.Struct data = 9;
+    string microfrontend_id = 10;
+    string webpage_id = 11;
+    google.protobuf.Struct attributes = 12;
+    string report_setting_id = 13;
+    string pivot_template_id = 15;
+}
+
+message CopyFromProjectRequestMessage {
+    string project_id = 1;
+    string from_project_id = 2;
+    repeated MenuRequest menus = 3;
 }
