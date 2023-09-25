@@ -143,12 +143,6 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 		return
 	}
 
-	data, err := helper.ConvertMapToStruct(excelRequest.Data)
-	if err != nil {
-		h.handleResponse(c, status_http.InvalidArgument, err.Error())
-		return
-	}
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
@@ -192,6 +186,14 @@ func (h *Handler) ExcelToDb(c *gin.Context) {
 	)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	excelRequest.Data["company_service_project_id"] = resource.GetProjectId()
+	excelRequest.Data["company_service_environment_id"] = resource.GetEnvironmentId()
+
+	data, err := helper.ConvertMapToStruct(excelRequest.Data)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
 
