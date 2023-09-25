@@ -1600,6 +1600,21 @@ definitions:
       company_id:
         type: string
     type: object
+  models.CopyProjectTemplateRequest:
+    properties:
+      from_env_id:
+        type: string
+      from_project_id:
+        type: string
+      menus:
+        items:
+          $ref: '#/definitions/object_builder_service.MenuRequest'
+        type: array
+      to_env_id:
+        type: string
+      to_project_id:
+        type: string
+    type: object
   models.CreateApiReferenceModel:
     properties:
       additional_url:
@@ -2871,6 +2886,21 @@ definitions:
           type: string
         type: array
     type: object
+  object_builder_service.CommonMessage:
+    properties:
+      custom_message:
+        type: string
+      data:
+        $ref: '#/definitions/structpb.Struct'
+      is_cached:
+        type: boolean
+      project_id:
+        type: string
+      table_slug:
+        type: string
+      version_id:
+        type: string
+    type: object
   object_builder_service.Condition:
     properties:
       match_fields:
@@ -3859,6 +3889,37 @@ definitions:
         type: string
     type: object
   object_builder_service.MenuForGetAll:
+    properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      data:
+        $ref: '#/definitions/structpb.Struct'
+      icon:
+        type: string
+      id:
+        type: string
+      label:
+        type: string
+      layout_id:
+        type: string
+      microfrontend_id:
+        type: string
+      parent_id:
+        type: string
+      pivot_template_id:
+        type: string
+      project_id:
+        type: string
+      report_setting_id:
+        type: string
+      table_id:
+        type: string
+      type:
+        type: string
+      webpage_id:
+        type: string
+    type: object
+  object_builder_service.MenuRequest:
     properties:
       attributes:
         $ref: '#/definitions/structpb.Struct'
@@ -13127,6 +13188,190 @@ paths:
       summary: Get Report Setting
       tags:
       - Report-Setting
+  /v1/global/environment:
+    get:
+      consumes:
+      - application/json
+      description: Get global project environment list
+      operationId: get_global_project_environment_list
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: EnvironmentBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetEnvironmentListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get global project environment list
+      tags:
+      - Global Project
+  /v1/global/projects:
+    get:
+      consumes:
+      - application/json
+      description: Get all global projects
+      operationId: get_global_project_list
+      parameters:
+      - in: query
+        name: company_id
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetProjectListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all global projects
+      tags:
+      - Global Project
+  /v1/global/template:
+    get:
+      consumes:
+      - application/json
+      description: Get global project template
+      operationId: get_global_project_template
+      parameters:
+      - description: environment-id
+        in: query
+        name: environment-id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - in: query
+        name: for_template
+        type: boolean
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: parent_id
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: role_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllMenusResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get global project template
+      tags:
+      - Global Project
   /v1/html-template:
     get:
       consumes:
@@ -13944,6 +14189,9 @@ paths:
         in: header
         name: X-API-KEY
         type: string
+      - in: query
+        name: for_template
+        type: boolean
       - in: query
         name: limit
         type: integer
@@ -22579,6 +22827,54 @@ paths:
       summary: Insert Many webpageV2
       tags:
       - WebPage
+  /v2/copy-project:
+    post:
+      consumes:
+      - application/json
+      description: CopyProjectTemplate
+      operationId: create_event
+      parameters:
+      - description: CopyFromProjectRequestMessage
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.CopyProjectTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Event data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: CopyProjectTemplate
+      tags:
+      - ProjectTemplate
   /v2/custom-event:
     get:
       consumes:
