@@ -361,6 +361,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// project settings
 		v1Admin.GET("/project/setting", h.GetAllSettings)
 		// project resource
+		
 		v1Admin.POST("/company/project/resource", h.AddProjectResource)
 		v1Admin.POST("/company/project/create-resource", h.CreateProjectResource)
 		v1Admin.DELETE("/company/project/resource", h.RemoveProjectResource)
