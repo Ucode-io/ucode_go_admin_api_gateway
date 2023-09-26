@@ -48,7 +48,7 @@ func (h *Handler) CopyProjectTemplate(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, "Error getting from resuorce")
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *Handler) CopyProjectTemplate(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, "Error getting to resource")
 		return
 	}
 
