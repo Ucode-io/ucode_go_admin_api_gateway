@@ -32,9 +32,8 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
-			res    = &auth_service.V2HasAccessUserRes{}
-			ok     bool
-			origin = c.GetHeader("Origin")
+			res = &auth_service.V2HasAccessUserRes{}
+			ok  bool
 			//platformType = c.GetHeader("Platform-Type")
 		)
 
@@ -49,7 +48,6 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 		switch strArr[0] {
 		case "Bearer":
 			//if platformType != cfg.PlatformType {
-			fmt.Println(origin)
 			res, ok = h.hasAccess(c)
 			if !ok {
 				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
@@ -57,8 +55,6 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 				return
 			}
 			//}
-
-			// fmt.Println("/nresponse V2hasaccessuser", res)
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
 			projectId := c.Query("Project-Id")
@@ -103,7 +99,6 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			// fmt.Println("\n\n >>>> api key ", apikeys, "\n\n")
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
-			fmt.Println("apikeys.GetProjectId()::::", apikeys.GetProjectId())
 			c.Set("project_id", apikeys.GetProjectId())
 			c.Set("client_type_id", apikeys.GetClientTypeId())
 			c.Set("role_id", apikeys.GetRoleId())
@@ -188,5 +183,64 @@ func (h *Handler) ResEnvMiddleware() gin.HandlerFunc {
 		c.Set("resource_environment_id", resourceEnvironment.GetId())
 
 		c.Next()
+	}
+}
+
+func (h *Handler) GlobalAuthMiddleware(cfg config.Config) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		var (
+			res = &auth_service.V2HasAccessUserRes{}
+			ok  bool
+		)
+
+		bearerToken := c.GetHeader("Authorization")
+		strArr := strings.Split(bearerToken, " ")
+
+		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
+			h.log.Error("---ERR->Unexpected token format")
+			_ = c.AbortWithError(http.StatusForbidden, errors.New("token error: wrong format"))
+			return
+		}
+		switch strArr[0] {
+		case "Bearer":
+			//if platformType != cfg.PlatformType {
+			res, ok = h.hasAccess(c)
+			if !ok {
+				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
+				c.Abort()
+				return
+			}
+
+		case "API-KEY":
+			app_id := c.GetHeader("X-API-KEY")
+			_, err := h.authService.ApiKey().GetEnvID(
+				c.Request.Context(),
+				&auth_service.GetReq{
+					Id: app_id,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				c.Abort()
+				return
+			}
+
+		default:
+			err := errors.New("error invalid authorization method")
+			h.log.Error("--AuthMiddleware--", logger.Error(err))
+			h.handleResponse(c, status_http.BadRequest, err.Error())
+			c.Abort()
+		}
+		fmt.Println("\n\nquery", c.Request.URL.Query(), c.Query("environment-id"), c.Query("project-id"))
+		c.Set("resource_id", c.Query("resource-id"))
+		c.Set("environment_id", c.Query("environment-id"))
+		c.Set("project_id", c.Query("project-id"))
+
+		c.Set("Auth", res)
+		c.Set("namespace", h.cfg.UcodeNamespace)
+
+		c.Next()
+
 	}
 }

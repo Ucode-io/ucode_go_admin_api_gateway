@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -28,6 +29,8 @@ type LoginServiceClient interface {
 	LoginWithEmailOtp(ctx context.Context, in *EmailOtpRequest, opts ...grpc.CallOption) (*V2LoginResponse, error)
 	GetUserUpdatedPermission(ctx context.Context, in *GetUserUpdatedPermissionRequest, opts ...grpc.CallOption) (*V2LoginResponse, error)
 	LoginDataByUserId(ctx context.Context, in *LoginDataReq, opts ...grpc.CallOption) (*LoginDataRes, error)
+	GetConnetionOptions(ctx context.Context, in *GetConnetionOptionsRequest, opts ...grpc.CallOption) (*GetConnectionOptionsResponse, error)
+	UpdateUserPassword(ctx context.Context, in *UpdateUserPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type loginServiceClient struct {
@@ -92,6 +95,24 @@ func (c *loginServiceClient) LoginDataByUserId(ctx context.Context, in *LoginDat
 	return out, nil
 }
 
+func (c *loginServiceClient) GetConnetionOptions(ctx context.Context, in *GetConnetionOptionsRequest, opts ...grpc.CallOption) (*GetConnectionOptionsResponse, error) {
+	out := new(GetConnectionOptionsResponse)
+	err := c.cc.Invoke(ctx, "/object_builder_service.LoginService/GetConnetionOptions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loginServiceClient) UpdateUserPassword(ctx context.Context, in *UpdateUserPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/object_builder_service.LoginService/UpdateUserPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoginServiceServer is the server API for LoginService service.
 // All implementations must embed UnimplementedLoginServiceServer
 // for forward compatibility
@@ -102,6 +123,8 @@ type LoginServiceServer interface {
 	LoginWithEmailOtp(context.Context, *EmailOtpRequest) (*V2LoginResponse, error)
 	GetUserUpdatedPermission(context.Context, *GetUserUpdatedPermissionRequest) (*V2LoginResponse, error)
 	LoginDataByUserId(context.Context, *LoginDataReq) (*LoginDataRes, error)
+	GetConnetionOptions(context.Context, *GetConnetionOptionsRequest) (*GetConnectionOptionsResponse, error)
+	UpdateUserPassword(context.Context, *UpdateUserPasswordRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedLoginServiceServer()
 }
 
@@ -126,6 +149,12 @@ func (UnimplementedLoginServiceServer) GetUserUpdatedPermission(context.Context,
 }
 func (UnimplementedLoginServiceServer) LoginDataByUserId(context.Context, *LoginDataReq) (*LoginDataRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LoginDataByUserId not implemented")
+}
+func (UnimplementedLoginServiceServer) GetConnetionOptions(context.Context, *GetConnetionOptionsRequest) (*GetConnectionOptionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetConnetionOptions not implemented")
+}
+func (UnimplementedLoginServiceServer) UpdateUserPassword(context.Context, *UpdateUserPasswordRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserPassword not implemented")
 }
 func (UnimplementedLoginServiceServer) mustEmbedUnimplementedLoginServiceServer() {}
 
@@ -248,6 +277,42 @@ func _LoginService_LoginDataByUserId_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LoginService_GetConnetionOptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetConnetionOptionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoginServiceServer).GetConnetionOptions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.LoginService/GetConnetionOptions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoginServiceServer).GetConnetionOptions(ctx, req.(*GetConnetionOptionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LoginService_UpdateUserPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoginServiceServer).UpdateUserPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.LoginService/UpdateUserPassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoginServiceServer).UpdateUserPassword(ctx, req.(*UpdateUserPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LoginService_ServiceDesc is the grpc.ServiceDesc for LoginService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -278,6 +343,14 @@ var LoginService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "LoginDataByUserId",
 			Handler:    _LoginService_LoginDataByUserId_Handler,
+		},
+		{
+			MethodName: "GetConnetionOptions",
+			Handler:    _LoginService_GetConnetionOptions_Handler,
+		},
+		{
+			MethodName: "UpdateUserPassword",
+			Handler:    _LoginService_UpdateUserPassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

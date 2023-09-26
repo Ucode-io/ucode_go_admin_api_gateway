@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
@@ -39,7 +38,6 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 		switch strArr[0] {
 		case "Bearer":
 			res, ok = h.adminHasAccess(c)
-			fmt.Println(res)
 			if !ok {
 				_ = c.AbortWithError(401, errors.New("unauthorized"))
 				return
@@ -47,9 +45,7 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 
 			resourceId := c.GetHeader("Resource-Id")
 			environmentId := c.GetHeader("Environment-Id")
-			fmt.Println(">>>>>>>>>>>>>>. adminhasaccess ", res)
 			if res.ProjectId != "" {
-				fmt.Println(">>>>>>>>>>>>>>>>>>>. res project id")
 				c.Set("project_id", res.ProjectId)
 			}
 			if res.EnvId != "" {
@@ -78,7 +74,6 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			c.Set("environment_id", environmentId)
 			c.Set("resource_id", resourceId)
 		case "API-KEY":
-			fmt.Println("TEST::::::::::::::::::2")
 			appId := c.GetHeader("X-API-KEY")
 			apiKey, err := h.authService.ApiKey().GetEnvID(
 				c.Request.Context(),
@@ -91,21 +86,18 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			fmt.Println("TEST::::::::::::::::::3", apiKey)
 			apiJson, err := json.Marshal(apiKey)
 			if err != nil {
 				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 				c.Abort()
 				return
 			}
-			fmt.Println("TEST::::::::::::::::::4")
 			err = json.Unmarshal(apiJson, &data)
 			if err != nil {
 				h.handleResponse(c, status_http.BadRequest, "cant get auth info")
 				c.Abort()
 				return
 			}
-			fmt.Println("TEST::::::::::::::::::5")
 			c.Set("auth", models.AuthData{
 				Type: "API-KEY",
 				Data: data,
@@ -118,7 +110,6 @@ func (h *Handler) AdminAuthMiddleware() gin.HandlerFunc {
 			h.handleResponse(c, status_http.BadRequest, err.Error())
 			c.Abort()
 		}
-		fmt.Println("TEST::::::::::::::::::6")
 		c.Set("Auth_Admin", res)
 		c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
@@ -162,7 +153,6 @@ func (h *Handler) adminHasAccess(c *gin.Context) (*auth_service.HasAccessSuperAd
 
 func (h *Handler) adminAuthInfo(c *gin.Context) (result *auth_service.HasAccessSuperAdminRes, err error) {
 	data, ok := c.Get("Auth_Admin")
-	fmt.Println("Data:::", data)
 
 	if !ok {
 		h.handleResponse(c, status_http.Forbidden, "token error: wrong format")

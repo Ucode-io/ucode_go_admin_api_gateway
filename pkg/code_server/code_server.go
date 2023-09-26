@@ -30,7 +30,7 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
-	log.Println("----exec command-----", cmd.String())
+	// log.Println("----exec command-----", cmd.String())
 	err := cmd.Run()
 	if err != nil {
 		log.Println("err 0::", err)
@@ -38,10 +38,9 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	}
 
 	cmd = exec.Command("helm", "repo", "update")
-	log.Println("----exec command-----", cmd.String())
+	// log.Println("----exec command-----", cmd.String())
 	err = cmd.Run()
 	if err != nil {
-		fmt.Println("err 1::", err)
 		log.Println("error exec command:", cmd.String())
 		return "", errors.New("error while repo update helm::" + stderr.String())
 	}
@@ -54,13 +53,12 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	path := "--set=ingress.hosts[0].paths[0]=/"
 
 	cmd = exec.Command("helm", "install", functionName, "code-server/code-server", "-n", "test", hostName, hostNameTls, secretName, path)
-	log.Println("----exec command-----", cmd.String())
+	// log.Println("----exec command-----", cmd.String())
 
 	// helm install newnewnew-sdfsdfsdf-doupdate code-server/code-server -n test --set=ingress.hosts[0].host=7a759e6b-d8d5-4a3a-8427-9da68b0983f5.u-code.io --set=ingress.tls[0].hosts[0]=7a759e6b-d8d5-4a3a-8427-9da68b0983f5.u-code.io --set=ingress.tls[0].secretName=ucode-wildcard --set=ingress.hosts[0].paths[0]=/
 	err = cmd.Run()
 	isErr := !strings.HasPrefix(stderr.String(), "WARNING:")
 	if err != nil && isErr {
-		fmt.Println("err 2::", err)
 		log.Println("error exec command:", cmd.String())
 		return "", errors.New("error while install code server::" + stderr.String())
 	}
@@ -85,7 +83,7 @@ func CreateCodeServer(functionName string, cfg config.Config, id string) (string
 	// }
 	// pass := string(str)
 
-	fmt.Println("finish")
+	// fmt.Println("finish")
 
 	return "", nil
 }
@@ -107,7 +105,7 @@ func CreateCodeServerV2(data CodeServer) error {
 	cmd.Stderr = &stderr
 	cmd.Stdout = &stdout
 
-	log.Println("----exec command----- [helmRepoAdd]", cmd.String())
+	// log.Println("----exec command----- [helmRepoAdd]", cmd.String())
 
 	err := cmd.Run()
 	if err != nil {
@@ -117,11 +115,11 @@ func CreateCodeServerV2(data CodeServer) error {
 
 	cmd = exec.Command(helmRepoUpdate[0], helmRepoUpdate[1:]...)
 
-	log.Println("----exec command----- [helmRepoUpdate]", cmd.String())
+	// log.Println("----exec command----- [helmRepoUpdate]", cmd.String())
 
 	err = cmd.Run()
 	if err != nil {
-		log.Println("error [helmRepoUpdate]", err)
+		// log.Println("error [helmRepoUpdate]", err)
 		return errors.New("error while update repo:" + stderr.String())
 	}
 
@@ -132,7 +130,7 @@ func CreateCodeServerV2(data CodeServer) error {
 
 	cmd = exec.Command(helmInstall[0], helmInstall[1:]...)
 
-	log.Println("----exec command----- [helmInstall]", cmd.String())
+	// log.Println("----exec command----- [helmInstall]", cmd.String())
 
 	err = cmd.Run()
 	isErr := !strings.HasPrefix(stderr.String(), "WARNING:")
@@ -141,7 +139,7 @@ func CreateCodeServerV2(data CodeServer) error {
 		return errors.New("error while install code server:" + stderr.String())
 	}
 
-	log.Println("finish [code-server]")
+	// log.Println("finish [code-server]")
 
 	return nil
 }
@@ -159,7 +157,6 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 		log.Println("error while getting resource environments")
 		return err
 	}
-	fmt.Println("length resource environments", len(resEnvsIds.GetData()))
 
 	if len(resEnvsIds.GetData()) == 0 {
 		log.Println("no resource environments")
@@ -183,7 +180,6 @@ func DeleteCodeServer(ctx context.Context, srvs services.ServiceManagerI, cfg co
 	if err != nil {
 		return err
 	}
-	fmt.Println("len function::::", len(allFunctions))
 	for _, function := range allFunctions {
 		log.Println("uninstalling func " + function.GetPath())
 		var stdout bytes.Buffer

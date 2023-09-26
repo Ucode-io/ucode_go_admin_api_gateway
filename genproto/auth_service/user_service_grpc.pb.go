@@ -40,6 +40,7 @@ type UserServiceClient interface {
 	V2GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error)
 	V2UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 	V2DeleteUser(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	V2ResetPassword(ctx context.Context, in *V2UserResetPasswordRequest, opts ...grpc.CallOption) (*User, error)
 	AddUserToProject(ctx context.Context, in *AddUserToProjectReq, opts ...grpc.CallOption) (*AddUserToProjectRes, error)
 	GetProjectsByUserId(ctx context.Context, in *GetProjectsByUserIdReq, opts ...grpc.CallOption) (*GetProjectsByUserIdRes, error)
 	V2GetUserByLoginTypes(ctx context.Context, in *GetUserByLoginTypesRequest, opts ...grpc.CallOption) (*GetUserByLoginTypesResponse, error)
@@ -47,6 +48,7 @@ type UserServiceClient interface {
 	RegisterWithGoogle(ctx context.Context, in *RegisterWithGoogleRequest, opts ...grpc.CallOption) (*User, error)
 	GetListSetting(ctx context.Context, in *GetListSettingReq, opts ...grpc.CallOption) (*Setting, error)
 	GetUserProjects(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*GetUserProjectsRes, error)
+	GetUserByUsername(ctx context.Context, in *GetUserByUsernameRequest, opts ...grpc.CallOption) (*User, error)
 }
 
 type userServiceClient struct {
@@ -210,6 +212,15 @@ func (c *userServiceClient) V2DeleteUser(ctx context.Context, in *UserPrimaryKey
 	return out, nil
 }
 
+func (c *userServiceClient) V2ResetPassword(ctx context.Context, in *V2UserResetPasswordRequest, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/auth_service.UserService/V2ResetPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) AddUserToProject(ctx context.Context, in *AddUserToProjectReq, opts ...grpc.CallOption) (*AddUserToProjectRes, error) {
 	out := new(AddUserToProjectRes)
 	err := c.cc.Invoke(ctx, "/auth_service.UserService/AddUserToProject", in, out, opts...)
@@ -273,6 +284,15 @@ func (c *userServiceClient) GetUserProjects(ctx context.Context, in *UserPrimary
 	return out, nil
 }
 
+func (c *userServiceClient) GetUserByUsername(ctx context.Context, in *GetUserByUsernameRequest, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/auth_service.UserService/GetUserByUsername", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -294,6 +314,7 @@ type UserServiceServer interface {
 	V2GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error)
 	V2UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
 	V2DeleteUser(context.Context, *UserPrimaryKey) (*emptypb.Empty, error)
+	V2ResetPassword(context.Context, *V2UserResetPasswordRequest) (*User, error)
 	AddUserToProject(context.Context, *AddUserToProjectReq) (*AddUserToProjectRes, error)
 	GetProjectsByUserId(context.Context, *GetProjectsByUserIdReq) (*GetProjectsByUserIdRes, error)
 	V2GetUserByLoginTypes(context.Context, *GetUserByLoginTypesRequest) (*GetUserByLoginTypesResponse, error)
@@ -301,6 +322,7 @@ type UserServiceServer interface {
 	RegisterWithGoogle(context.Context, *RegisterWithGoogleRequest) (*User, error)
 	GetListSetting(context.Context, *GetListSettingReq) (*Setting, error)
 	GetUserProjects(context.Context, *UserPrimaryKey) (*GetUserProjectsRes, error)
+	GetUserByUsername(context.Context, *GetUserByUsernameRequest) (*User, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -359,6 +381,9 @@ func (UnimplementedUserServiceServer) V2UpdateUser(context.Context, *UpdateUserR
 func (UnimplementedUserServiceServer) V2DeleteUser(context.Context, *UserPrimaryKey) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2DeleteUser not implemented")
 }
+func (UnimplementedUserServiceServer) V2ResetPassword(context.Context, *V2UserResetPasswordRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method V2ResetPassword not implemented")
+}
 func (UnimplementedUserServiceServer) AddUserToProject(context.Context, *AddUserToProjectReq) (*AddUserToProjectRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddUserToProject not implemented")
 }
@@ -379,6 +404,9 @@ func (UnimplementedUserServiceServer) GetListSetting(context.Context, *GetListSe
 }
 func (UnimplementedUserServiceServer) GetUserProjects(context.Context, *UserPrimaryKey) (*GetUserProjectsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserProjects not implemented")
+}
+func (UnimplementedUserServiceServer) GetUserByUsername(context.Context, *GetUserByUsernameRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserByUsername not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -699,6 +727,24 @@ func _UserService_V2DeleteUser_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_V2ResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(V2UserResetPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).V2ResetPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.UserService/V2ResetPassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).V2ResetPassword(ctx, req.(*V2UserResetPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_AddUserToProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddUserToProjectReq)
 	if err := dec(in); err != nil {
@@ -825,6 +871,24 @@ func _UserService_GetUserProjects_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetUserByUsername_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserByUsernameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUserByUsername(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.UserService/GetUserByUsername",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUserByUsername(ctx, req.(*GetUserByUsernameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -901,6 +965,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_V2DeleteUser_Handler,
 		},
 		{
+			MethodName: "V2ResetPassword",
+			Handler:    _UserService_V2ResetPassword_Handler,
+		},
+		{
 			MethodName: "AddUserToProject",
 			Handler:    _UserService_AddUserToProject_Handler,
 		},
@@ -927,6 +995,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserProjects",
 			Handler:    _UserService_GetUserProjects_Handler,
+		},
+		{
+			MethodName: "GetUserByUsername",
+			Handler:    _UserService_GetUserByUsername_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

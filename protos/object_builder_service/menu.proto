@@ -115,6 +115,7 @@ message CreateMenuRequest {
     string project_id = 7;
     string microfrontend_id = 8;
     string webpage_id = 9;
+    google.protobuf.Struct attributes = 10;
 }
 
 message Menu {
@@ -129,6 +130,7 @@ message Menu {
     string microfrontend_id = 9;
     int32 order = 10;
     string webpage_id = 11;
+    google.protobuf.Struct attributes = 12;
 }
 
 message MenuForGetAll {
@@ -143,7 +145,9 @@ message MenuForGetAll {
     google.protobuf.Struct data = 9;
     string microfrontend_id = 10;
     string webpage_id = 11;
-    MenuPermission permission = 12;
+    google.protobuf.Struct attributes = 12;
+    string report_setting_id = 13;
+    string pivot_template_id = 15;
 }
 
 message GetAllMenusResponse {
@@ -164,6 +168,7 @@ message GetAllMenusRequest {
     string role_id = 5;
     string parent_id = 6;
     string type = 7;
+    bool for_template = 8;
 }
 
 message UpdateMenuOrderRequest {

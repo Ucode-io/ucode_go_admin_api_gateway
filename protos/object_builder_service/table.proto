@@ -81,6 +81,8 @@ message CreateTableRequest {
     repeated LayoutRequest layouts = 19;
     bool default_editable = 20;
     bool soft_delete = 21;
+    bool order_by = 22;
+    google.protobuf.Struct attributes = 23;
 }
 
 message IncrementID {
@@ -103,6 +105,7 @@ message CreateTableResponse {
     bool is_cached = 11;
     bool default_editable = 12;
     bool soft_delete = 13;
+    google.protobuf.Struct attributes = 14;
 }
 
 message UpdateTableRequest {
@@ -126,6 +129,7 @@ message UpdateTableRequest {
     bool soft_delete = 18;
     bool is_login_table = 19;
     google.protobuf.Struct attributes = 20;
+    bool order_by = 21;
 }
 
 message Table {
@@ -149,6 +153,7 @@ message Table {
     bool soft_delete = 18;
     bool is_login_table = 19;
     google.protobuf.Struct attributes = 20;
+    bool order_by = 21;
 }
 
 message CommitInfo {
@@ -181,6 +186,7 @@ message GetAllTablesRequest {
     string version_id = 5;
     string folder_id = 6;
     bool is_login_table = 7;
+    string role_id = 8;
 }
 
 message Permission {

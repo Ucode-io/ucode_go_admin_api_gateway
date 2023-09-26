@@ -212,6 +212,39 @@ definitions:
           $ref: '#/definitions/auth_service.Session'
         type: array
     type: object
+  auth_service.GlobalPermission:
+    properties:
+      api_keys_button:
+        type: boolean
+      chat:
+        type: boolean
+      environment_button:
+        type: boolean
+      environments_button:
+        type: boolean
+      id:
+        type: string
+      menu_button:
+        type: boolean
+      menu_setting_button:
+        type: boolean
+      profile_settings_button:
+        type: boolean
+      project_button:
+        type: boolean
+      project_settings_button:
+        type: boolean
+      projects_button:
+        type: boolean
+      redirects_button:
+        type: boolean
+      settings_button:
+        type: boolean
+      sms_button:
+        type: boolean
+      version_button:
+        type: boolean
+    type: object
   auth_service.Integration:
     properties:
       active:
@@ -261,19 +294,29 @@ definitions:
     type: object
   auth_service.RecordPermission:
     properties:
+      automation:
+        type: string
       client_type_id:
         type: string
       delete:
         type: string
       id:
         type: string
+      language_btn:
+        type: string
       read:
         type: string
       role_id:
         type: string
+      settings:
+        type: string
+      share_modal:
+        type: string
       table_slug:
         type: string
       update:
+        type: string
+      view_create:
         type: string
       write:
         type: string
@@ -410,6 +453,8 @@ definitions:
         $ref: '#/definitions/auth_service.ClientType'
       environment_id:
         type: string
+      global_permission:
+        $ref: '#/definitions/auth_service.GlobalPermission'
       login_table_slug:
         type: string
       permissions:
@@ -432,6 +477,8 @@ definitions:
         $ref: '#/definitions/auth_service.Token'
       user:
         $ref: '#/definitions/auth_service.User'
+      user_data:
+        $ref: '#/definitions/structpb.Struct'
       user_found:
         type: boolean
       user_id:
@@ -877,6 +924,19 @@ definitions:
       title:
         type: string
     type: object
+  company_service.ProjectLoginMicroFrontend:
+    properties:
+      environment_id:
+        type: string
+      id:
+        type: string
+      microfront_id:
+        type: string
+      project_id:
+        type: string
+      subdomain:
+        type: string
+    type: object
   company_service.ProjectWithoutResource:
     properties:
       company_id:
@@ -919,6 +979,8 @@ definitions:
         type: string
       id:
         type: string
+      order:
+        type: integer
       project_id:
         type: string
       to:
@@ -1098,6 +1160,13 @@ definitions:
         type: string
       text:
         type: string
+    type: object
+  company_service.UpdateOrderRedirectUrlReq:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
     type: object
   company_service.UpdateResourceRequest:
     properties:
@@ -1444,6 +1513,31 @@ definitions:
       title:
         type: string
     type: object
+  models.AppReportSetting:
+    properties:
+      columns:
+        items:
+          $ref: '#/definitions/models.TableSetting'
+        type: array
+      filters:
+        items:
+          $ref: '#/definitions/models.FilterSetting'
+        type: array
+      id:
+        type: string
+      main_table_label:
+        type: string
+      main_table_slug:
+        type: string
+      rows:
+        items:
+          $ref: '#/definitions/models.TableSetting'
+        type: array
+      values:
+        items:
+          $ref: '#/definitions/models.ValueSetting'
+        type: array
+    type: object
   models.Category:
     properties:
       attributes:
@@ -1504,6 +1598,21 @@ definitions:
   models.CompanyProjectCreateResponse:
     properties:
       company_id:
+        type: string
+    type: object
+  models.CopyProjectTemplateRequest:
+    properties:
+      from_env_id:
+        type: string
+      from_project_id:
+        type: string
+      menus:
+        items:
+          $ref: '#/definitions/object_builder_service.MenuRequest'
+        type: array
+      to_env_id:
+        type: string
+      to_project_id:
         type: string
     type: object
   models.CreateApiReferenceModel:
@@ -1602,6 +1711,8 @@ definitions:
         type: boolean
       default:
         type: string
+      enable_multilanguage:
+        type: boolean
       id:
         type: string
       index:
@@ -1613,6 +1724,8 @@ definitions:
       relation_field:
         type: string
       required:
+        type: boolean
+      show_label:
         type: boolean
       slug:
         type: string
@@ -1678,6 +1791,9 @@ definitions:
     type: object
   models.CreateMenuRequest:
     properties:
+      attributes:
+        additionalProperties: true
+        type: object
       icon:
         type: string
       label:
@@ -1756,6 +1872,9 @@ definitions:
     properties:
       app_id:
         type: string
+      attributes:
+        additionalProperties: true
+        type: object
       custom_error_messages:
         items:
           $ref: '#/definitions/object_builder_service.CustomErrorMessage'
@@ -1776,6 +1895,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.LayoutRequest'
         type: array
+      order_by:
+        type: boolean
       sections:
         items:
           $ref: '#/definitions/object_builder_service.Section'
@@ -1932,6 +2053,19 @@ definitions:
       email:
         type: string
     type: object
+  models.Empty:
+    type: object
+  models.Entity:
+    properties:
+      field_slug:
+        type: string
+      field_type:
+        type: string
+      label:
+        type: string
+      table_slug:
+        type: string
+    type: object
   models.Environment:
     properties:
       data:
@@ -1974,6 +2108,8 @@ definitions:
         type: boolean
       default:
         type: string
+      enable_multilanguage:
+        type: boolean
       id:
         type: string
       index:
@@ -1988,6 +2124,8 @@ definitions:
         type: string
       required:
         type: boolean
+      show_label:
+        type: boolean
       slug:
         type: string
       table_id:
@@ -1996,6 +2134,13 @@ definitions:
         type: string
       unique:
         type: boolean
+    type: object
+  models.FilterSetting:
+    properties:
+      label:
+        type: string
+      slug:
+        type: string
     type: object
   models.Function:
     properties:
@@ -2086,6 +2231,13 @@ definitions:
       html:
         type: string
     type: object
+  models.Ids:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    type: object
   models.IncrementId:
     properties:
       digit_number:
@@ -2139,6 +2291,9 @@ definitions:
     type: object
   models.Menu:
     properties:
+      attributes:
+        additionalProperties: true
+        type: object
       icon:
         type: string
       id:
@@ -2262,6 +2417,15 @@ definitions:
       text:
         type: string
     type: object
+  models.TableSetting:
+    properties:
+      id:
+        type: string
+      label:
+        type: string
+      slug:
+        type: string
+    type: object
   models.UpdateAppReqModel:
     properties:
       id:
@@ -2302,6 +2466,48 @@ definitions:
       title:
         type: string
     type: object
+  models.UpdateTableRequest:
+    properties:
+      attributes:
+        additionalProperties: true
+        type: object
+      author_id:
+        type: string
+      commit_type:
+        type: string
+      description:
+        type: string
+      folder_id:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      increment_id:
+        $ref: '#/definitions/models.IncrementId'
+      is_cached:
+        type: boolean
+      is_login_table:
+        type: boolean
+      is_own_table:
+        type: boolean
+      is_visible:
+        type: boolean
+      label:
+        type: string
+      name:
+        type: string
+      order_by:
+        type: boolean
+      project_id:
+        type: string
+      show_in_menu:
+        type: boolean
+      slug:
+        type: string
+      subtitle_field_slug:
+        type: string
+    type: object
   models.UpdateWebPageReqModel:
     properties:
       app_id:
@@ -2328,6 +2534,15 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  models.ValueSetting:
+    properties:
+      entity:
+        items:
+          $ref: '#/definitions/models.Entity'
+        type: array
+      label:
+        type: string
     type: object
   models.Verify:
     properties:
@@ -2671,6 +2886,21 @@ definitions:
           type: string
         type: array
     type: object
+  object_builder_service.CommonMessage:
+    properties:
+      custom_message:
+        type: string
+      data:
+        $ref: '#/definitions/structpb.Struct'
+      is_cached:
+        type: boolean
+      project_id:
+        type: string
+      table_slug:
+        type: string
+      version_id:
+        type: string
+    type: object
   object_builder_service.Condition:
     properties:
       match_fields:
@@ -2892,6 +3122,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.ActionRelation'
         type: array
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       auto_filters:
         items:
           $ref: '#/definitions/object_builder_service.AutoFilter'
@@ -3256,6 +3488,8 @@ definitions:
     type: object
   object_builder_service.FieldForSection:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       column:
         type: integer
       field_name:
@@ -3277,10 +3511,14 @@ definitions:
         type: integer
       default:
         type: string
+      enable_multilanguage:
+        type: boolean
       id:
         type: string
       index:
         type: string
+      is_editable:
+        type: boolean
       label:
         type: string
       order:
@@ -3296,6 +3534,30 @@ definitions:
       table_id:
         type: string
       type:
+        type: string
+    type: object
+  object_builder_service.FilterPivotTemplateSetting:
+    properties:
+      field_id:
+        type: string
+      label:
+        type: string
+      slug:
+        type: string
+      table_guids:
+        items:
+          type: string
+        type: array
+    type: object
+  object_builder_service.FilterSetting:
+    properties:
+      field:
+        $ref: '#/definitions/object_builder_service.TableFieldSetting'
+      field_id:
+        type: string
+      label:
+        type: string
+      slug:
         type: string
     type: object
   object_builder_service.GatAllMenuTemplateResponse:
@@ -3404,12 +3666,61 @@ definitions:
           $ref: '#/definitions/object_builder_service.LayoutResponse'
         type: array
     type: object
+  object_builder_service.GetListPivotTemplateResponse:
+    properties:
+      count:
+        type: integer
+      pivot_templates:
+        items:
+          $ref: '#/definitions/object_builder_service.PivotTemplateSetting'
+        type: array
+    type: object
+  object_builder_service.GetPermissionsByTableSlugResponse:
+    properties:
+      current_user_permission:
+        $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest'
+      selected_user_permission:
+        $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest'
+    type: object
   object_builder_service.GetTableHistoryResponse:
     properties:
       items:
         items:
           $ref: '#/definitions/object_builder_service.TableHistory'
         type: array
+    type: object
+  object_builder_service.GlobalPermission:
+    properties:
+      api_keys_button:
+        type: boolean
+      chat:
+        type: boolean
+      environment_button:
+        type: boolean
+      environments_button:
+        type: boolean
+      id:
+        type: string
+      menu_button:
+        type: boolean
+      menu_setting_button:
+        type: boolean
+      profile_settings_button:
+        type: boolean
+      project_button:
+        type: boolean
+      project_settings_button:
+        type: boolean
+      projects_button:
+        type: boolean
+      redirects_button:
+        type: boolean
+      settings_button:
+        type: boolean
+      sms_button:
+        type: boolean
+      version_button:
+        type: boolean
     type: object
   object_builder_service.HtmlTemplate:
     properties:
@@ -3462,11 +3773,17 @@ definitions:
     type: object
   object_builder_service.LayoutRequest:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
         type: string
       is_default:
+        type: boolean
+      is_modal:
+        type: boolean
+      is_visible_section:
         type: boolean
       label:
         type: string
@@ -3487,11 +3804,17 @@ definitions:
     type: object
   object_builder_service.LayoutResponse:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
         type: string
       is_default:
+        type: boolean
+      is_modal:
+        type: boolean
+      is_visible_section:
         type: boolean
       label:
         type: string
@@ -3540,6 +3863,8 @@ definitions:
     type: object
   object_builder_service.Menu:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
@@ -3565,6 +3890,8 @@ definitions:
     type: object
   object_builder_service.MenuForGetAll:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       data:
         $ref: '#/definitions/structpb.Struct'
       icon:
@@ -3579,9 +3906,11 @@ definitions:
         type: string
       parent_id:
         type: string
-      permission:
-        $ref: '#/definitions/object_builder_service.MenuPermission'
+      pivot_template_id:
+        type: string
       project_id:
+        type: string
+      report_setting_id:
         type: string
       table_id:
         type: string
@@ -3590,29 +3919,36 @@ definitions:
       webpage_id:
         type: string
     type: object
-  object_builder_service.MenuPermission:
+  object_builder_service.MenuRequest:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      data:
+        $ref: '#/definitions/structpb.Struct'
+      icon:
+        type: string
       id:
         type: string
       label:
         type: string
-      permission:
-        $ref: '#/definitions/object_builder_service.MenuPermission_Permission'
+      layout_id:
+        type: string
+      microfrontend_id:
+        type: string
+      parent_id:
+        type: string
+      pivot_template_id:
+        type: string
+      project_id:
+        type: string
+      report_setting_id:
+        type: string
+      table_id:
+        type: string
       type:
         type: string
-    type: object
-  object_builder_service.MenuPermission_Permission:
-    properties:
-      delete:
-        type: boolean
-      menu_settings:
-        type: boolean
-      read:
-        type: boolean
-      update:
-        type: boolean
-      write:
-        type: boolean
+      webpage_id:
+        type: string
     type: object
   object_builder_service.MenuSettings:
     properties:
@@ -3690,6 +4026,85 @@ definitions:
       write:
         type: string
     type: object
+  object_builder_service.PivotTemplateRowRelation:
+    properties:
+      label:
+        type: string
+      objects:
+        items:
+          $ref: '#/definitions/object_builder_service.PivotTemplateTableSetting'
+        type: array
+      order_number:
+        type: integer
+    type: object
+  object_builder_service.PivotTemplateSetting:
+    properties:
+      columns:
+        items:
+          $ref: '#/definitions/object_builder_service.PivotTemplateTableSetting'
+        type: array
+      defaults:
+        items:
+          $ref: '#/definitions/object_builder_service.PivotTemplateTableSetting'
+        type: array
+      filters:
+        items:
+          $ref: '#/definitions/object_builder_service.FilterPivotTemplateSetting'
+        type: array
+      from_date:
+        type: string
+      id:
+        type: string
+      instance_id:
+        type: string
+      main_table_label:
+        type: string
+      main_table_slug:
+        type: string
+      pivot_table_slug:
+        type: string
+      report_setting_id:
+        type: string
+      resource_environment_id:
+        type: string
+      rows:
+        items:
+          $ref: '#/definitions/object_builder_service.PivotTemplateTableSetting'
+        type: array
+      rows_relation:
+        items:
+          $ref: '#/definitions/object_builder_service.PivotTemplateRowRelation'
+        type: array
+      status:
+        type: string
+      to_date:
+        type: string
+      values:
+        items:
+          $ref: '#/definitions/object_builder_service.ValuePivotTemplateSetting'
+        type: array
+    type: object
+  object_builder_service.PivotTemplateTableSetting:
+    properties:
+      checked:
+        type: boolean
+      id:
+        type: string
+      inside_relation_table_slug:
+        type: string
+      join:
+        type: boolean
+      label:
+        type: string
+      order_number:
+        type: integer
+      slug:
+        type: string
+      table_field_settings:
+        items:
+          $ref: '#/definitions/object_builder_service.TableFieldSetting'
+        type: array
+    type: object
   object_builder_service.QuickFilter:
     properties:
       default_value:
@@ -3706,19 +4121,29 @@ definitions:
     type: object
   object_builder_service.RecordPermission:
     properties:
+      automation:
+        type: string
       client_type_id:
         type: string
       delete:
         type: string
       guid:
         type: string
+      language_btn:
+        type: string
       read:
         type: string
       role_id:
         type: string
+      settings:
+        type: string
+      share_modal:
+        type: string
       table_slug:
         type: string
       update:
+        type: string
+      view_create:
         type: string
       write:
         type: string
@@ -3729,6 +4154,8 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.ActionRelationForSection'
         type: array
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       columns:
         items:
           type: string
@@ -3803,8 +4230,36 @@ definitions:
       project_id:
         type: string
     type: object
+  object_builder_service.RowRelation:
+    properties:
+      label:
+        type: string
+      objects:
+        items:
+          $ref: '#/definitions/object_builder_service.TableSetting'
+        type: array
+    type: object
+  object_builder_service.SavePivotTemplateRequest:
+    properties:
+      clone_id:
+        type: string
+      from_date:
+        type: string
+      pivot_table_slug:
+        type: string
+      report_setting_id:
+        type: string
+      resource_environment_id:
+        type: string
+      status:
+        type: string
+      to_date:
+        type: string
+    type: object
   object_builder_service.Section:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       column:
         type: string
       fields:
@@ -3824,6 +4279,8 @@ definitions:
     type: object
   object_builder_service.SectionResponse:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       column:
         type: string
       fields:
@@ -3850,6 +4307,8 @@ definitions:
     type: object
   object_builder_service.SummaryInSection:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       field_name:
         type: string
       formula_name:
@@ -3857,6 +4316,8 @@ definitions:
     type: object
   object_builder_service.TabRequest:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
@@ -3878,6 +4339,8 @@ definitions:
     type: object
   object_builder_service.TabResponse:
     properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       icon:
         type: string
       id:
@@ -3929,6 +4392,8 @@ definitions:
         type: boolean
       label:
         type: string
+      order_by:
+        type: boolean
       project_id:
         type: string
       record_permissions:
@@ -3956,6 +4421,46 @@ definitions:
         type: string
       view_slug:
         type: string
+    type: object
+  object_builder_service.TableDataMessage:
+    properties:
+      id:
+        type: string
+      label:
+        type: string
+      slug:
+        type: string
+    type: object
+  object_builder_service.TableFieldSetting:
+    properties:
+      aggregate_formula:
+        type: string
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      checked:
+        type: boolean
+      field_id:
+        type: string
+      field_index:
+        type: integer
+      field_slug:
+        type: string
+      field_type:
+        type: string
+      label:
+        type: string
+      order_number:
+        type: integer
+      table_from:
+        $ref: '#/definitions/object_builder_service.TableDataMessage'
+      table_slug:
+        type: string
+      table_to:
+        $ref: '#/definitions/object_builder_service.TableDataMessage'
+      view_fields:
+        items:
+          $ref: '#/definitions/object_builder_service.ViewField'
+        type: array
     type: object
   object_builder_service.TableFolder:
     properties:
@@ -4008,6 +4513,31 @@ definitions:
       name:
         type: string
       version_ids:
+        items:
+          type: string
+        type: array
+    type: object
+  object_builder_service.TableSetting:
+    properties:
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
+      date_field_slug:
+        type: string
+      fields_length:
+        type: integer
+      id:
+        type: string
+      inside_relation_table_slug:
+        type: string
+      label:
+        type: string
+      slug:
+        type: string
+      table_field_settings:
+        items:
+          $ref: '#/definitions/object_builder_service.TableFieldSetting'
+        type: array
+      table_field_settings_ids:
         items:
           type: string
         type: array
@@ -4088,12 +4618,110 @@ definitions:
       project_id:
         type: string
     type: object
+  object_builder_service.UpdatePermissionsRequest:
+    properties:
+      grant_access:
+        type: boolean
+      guid:
+        type: string
+      project_id:
+        type: string
+      table:
+        $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest_Table'
+    type: object
+  object_builder_service.UpdatePermissionsRequest_Table:
+    properties:
+      action_permissions:
+        items:
+          $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest_Table_ActionPermission'
+        type: array
+      field_permissions:
+        items:
+          $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest_Table_FieldPermission'
+        type: array
+      id:
+        type: string
+      label:
+        type: string
+      record_permissions:
+        $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest_Table_RecordPermission'
+      slug:
+        type: string
+      view_permissions:
+        items:
+          $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest_Table_ViewPermission'
+        type: array
+    type: object
+  object_builder_service.UpdatePermissionsRequest_Table_ActionPermission:
+    properties:
+      custom_event_id:
+        type: string
+      guid:
+        type: string
+      label:
+        type: string
+      permission:
+        type: boolean
+      table_slug:
+        type: string
+    type: object
+  object_builder_service.UpdatePermissionsRequest_Table_FieldPermission:
+    properties:
+      edit_permission:
+        type: boolean
+      field_id:
+        type: string
+      guid:
+        type: string
+      label:
+        type: string
+      table_slug:
+        type: string
+      view_permission:
+        type: boolean
+    type: object
+  object_builder_service.UpdatePermissionsRequest_Table_RecordPermission:
+    properties:
+      delete:
+        type: string
+      guid:
+        type: string
+      is_public:
+        type: boolean
+      read:
+        type: string
+      update:
+        type: string
+      write:
+        type: string
+    type: object
+  object_builder_service.UpdatePermissionsRequest_Table_ViewPermission:
+    properties:
+      create_permission:
+        type: boolean
+      delete_permission:
+        type: boolean
+      edit_permission:
+        type: boolean
+      guid:
+        type: string
+      label:
+        type: string
+      relation_id:
+        type: string
+      table_slug:
+        type: string
+      view_permission:
+        type: boolean
+    type: object
   object_builder_service.UpdateRelationRequest:
     properties:
       action_relations:
         items:
           $ref: '#/definitions/object_builder_service.ActionRelation'
         type: array
+      attributes:
+        $ref: '#/definitions/structpb.Struct'
       auto_filters:
         items:
           $ref: '#/definitions/object_builder_service.AutoFilter'
@@ -4218,6 +4846,41 @@ definitions:
       table_slug:
         type: string
     type: object
+  object_builder_service.UpsertAppReportSettingRequest:
+    properties:
+      columns:
+        items:
+          $ref: '#/definitions/object_builder_service.TableSetting'
+        type: array
+      defaults:
+        items:
+          $ref: '#/definitions/object_builder_service.TableSetting'
+        type: array
+      filters:
+        items:
+          $ref: '#/definitions/object_builder_service.FilterSetting'
+        type: array
+      id:
+        type: string
+      main_table_label:
+        type: string
+      main_table_slug:
+        type: string
+      resource_environment_id:
+        type: string
+      rows:
+        items:
+          $ref: '#/definitions/object_builder_service.TableSetting'
+        type: array
+      rows_relation:
+        items:
+          $ref: '#/definitions/object_builder_service.RowRelation'
+        type: array
+      values:
+        items:
+          $ref: '#/definitions/object_builder_service.ValueSetting'
+        type: array
+    type: object
   object_builder_service.UpsertViewRelationsBody:
     properties:
       commit_guid:
@@ -4245,6 +4908,8 @@ definitions:
         $ref: '#/definitions/object_builder_service.ClientPlatform'
       client_type:
         $ref: '#/definitions/object_builder_service.ClientType'
+      global_permission:
+        $ref: '#/definitions/object_builder_service.GlobalPermission'
       login_table_slug:
         type: string
       permissions:
@@ -4253,10 +4918,32 @@ definitions:
         type: array
       role:
         $ref: '#/definitions/object_builder_service.Role'
+      user_data:
+        $ref: '#/definitions/structpb.Struct'
       user_found:
         type: boolean
       user_id:
         type: string
+    type: object
+  object_builder_service.ValuePivotTemplateSetting:
+    properties:
+      label:
+        type: string
+      objects:
+        items:
+          $ref: '#/definitions/object_builder_service.TableSetting'
+        type: array
+      order_number:
+        type: integer
+    type: object
+  object_builder_service.ValueSetting:
+    properties:
+      label:
+        type: string
+      objects:
+        items:
+          $ref: '#/definitions/object_builder_service.TableSetting'
+        type: array
     type: object
   object_builder_service.Variable:
     properties:
@@ -4357,6 +5044,13 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  object_builder_service.ViewField:
+    properties:
+      slug:
+        type: string
+      type:
+        type: string
     type: object
   object_builder_service.ViewRelationReq:
     properties:
@@ -10347,6 +11041,53 @@ paths:
       summary: Get CustomEvent by id
       tags:
       - CustomEvent
+  /v1/delete-report-setting/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Report Setting
+      operationId: delete_report_setting
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: AppReportSetting data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.AppReportSetting'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Report Setting
+      tags:
+      - Report-Setting
   /v1/document:
     get:
       consumes:
@@ -10584,6 +11325,104 @@ paths:
       summary: Get single document
       tags:
       - Document
+  /v1/dynamic-report:
+    post:
+      consumes:
+      - application/json
+      description: Dynamic Report
+      operationId: dynamicreport
+      parameters:
+      - description: id
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: click_action
+        in: query
+        name: click_action
+        type: boolean
+      - description: GetListObjectRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Dynamic Report
+      tags:
+      - Dynamic-Report
+  /v1/dynamic-report-formula:
+    get:
+      consumes:
+      - application/json
+      description: Dynamic Report Formula
+      operationId: dynamicreportformula
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Dynamic Report Formula
+      tags:
+      - Dynamic-Report
   /v1/environment:
     get:
       consumes:
@@ -12117,6 +12956,102 @@ paths:
       summary: Generate IntegrationPayze
       tags:
       - IntegrationPayze
+  /v1/get-pivot-template-setting:
+    get:
+      consumes:
+      - application/json
+      description: Get List Pivot Template Setting
+      operationId: get_list_pivot_template_setting
+      parameters:
+      - description: status
+        enum:
+        - SAVED
+        - HISTORY
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetListPivotTemplateResponse data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetListPivotTemplateResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List Pivot Template Setting
+      tags:
+      - Dynamic-Report
+  /v1/get-pivot-template-setting/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Pivot Template Setting
+      operationId: get_by_id_pivot_template_setting
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: PivotTemplateSetting data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.PivotTemplateSetting'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Pivot Template Setting
+      tags:
+      - Dynamic-Report
   /v1/get-relation-cascading/{table_slug}:
     get:
       consumes:
@@ -12165,6 +13100,278 @@ paths:
       summary: Get all relations
       tags:
       - Relation
+  /v1/get-report-setting:
+    get:
+      consumes:
+      - application/json
+      description: Get List Report Setting
+      operationId: get_list_report_setting
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: AppReportSetting data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.AppReportSetting'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List Report Setting
+      tags:
+      - Report-Setting
+  /v1/get-report-setting/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Report Setting
+      operationId: get_by_id_report_setting
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: AppReportSetting data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.AppReportSetting'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Report Setting
+      tags:
+      - Report-Setting
+  /v1/global/environment:
+    get:
+      consumes:
+      - application/json
+      description: Get global project environment list
+      operationId: get_global_project_environment_list
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: EnvironmentBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetEnvironmentListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get global project environment list
+      tags:
+      - Global Project
+  /v1/global/projects:
+    get:
+      consumes:
+      - application/json
+      description: Get all global projects
+      operationId: get_global_project_list
+      parameters:
+      - in: query
+        name: company_id
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetProjectListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all global projects
+      tags:
+      - Global Project
+  /v1/global/template:
+    get:
+      consumes:
+      - application/json
+      description: Get global project template
+      operationId: get_global_project_template
+      parameters:
+      - description: environment-id
+        in: query
+        name: environment-id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - in: query
+        name: for_template
+        type: boolean
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: parent_id
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: role_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MenuBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllMenusResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get global project template
+      tags:
+      - Global Project
   /v1/html-template:
     get:
       consumes:
@@ -12653,6 +13860,10 @@ paths:
         in: query
         name: table-slug
         type: string
+      - description: language_setting
+        in: query
+        name: language_setting
+        type: string
       produces:
       - application/json
       responses:
@@ -12735,6 +13946,150 @@ paths:
       summary: Update layouts
       tags:
       - Layout
+  /v1/login-microfront:
+    get:
+      consumes:
+      - application/json
+      description: Get Project By Id
+      operationId: get_login_microfront_by_subdomain
+      parameters:
+      - description: subdomain
+        in: query
+        name: subdomain
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Project'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Project By Id
+      tags:
+      - Project login microfront
+    post:
+      consumes:
+      - application/json
+      description: Bind login microfrotn to project
+      operationId: bind_login_micro_front_to_project
+      parameters:
+      - description: ProjectLoginMicroFrontend
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.ProjectLoginMicroFrontend'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ProjectLoginMicroFrontend
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ProjectLoginMicroFrontend'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Bind login microfrotn to project
+      tags:
+      - Project login microfront
+    put:
+      consumes:
+      - application/json
+      description: Update Login MicroFront Project
+      operationId: update_login_microfront
+      parameters:
+      - description: ProjectLoginMicroFrontend
+        in: body
+        name: Company
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.ProjectLoginMicroFrontend'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ProjectLoginMicroFrontend'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Login MicroFront Project
+      tags:
+      - Project login microfront
   /v1/many-to-many:
     delete:
       consumes:
@@ -12834,6 +14189,9 @@ paths:
         in: header
         name: X-API-KEY
         type: string
+      - in: query
+        name: for_template
+        type: boolean
       - in: query
         name: limit
         type: integer
@@ -13182,6 +14540,11 @@ paths:
       - description: id
         in: path
         name: id
+        required: true
+        type: string
+      - description: TemplateId
+        in: query
+        name: template_id
         required: true
         type: string
       produces:
@@ -14737,6 +16100,51 @@ paths:
       tags:
       - Object
   /v1/object/{table_slug}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete many objects
+      operationId: delete_many_object
+      parameters:
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: DeleteManyObjectRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.Ids'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete many objects
+      tags:
+      - Object
     put:
       consumes:
       - application/json
@@ -15050,6 +16458,76 @@ paths:
       summary: Get financial analytics
       tags:
       - Object
+  /v1/object/get-list-group-by/{table_slug}/{column_table_slug}:
+    post:
+      consumes:
+      - application/json
+      description: Get List Group By Object
+      operationId: get_list_group_by_objects
+      parameters:
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: column_table_slug
+        in: path
+        name: column_table_slug
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: search
+        in: query
+        name: search
+        type: string
+      - description: project
+        in: query
+        name: project
+        type: string
+      - description: GetGroupByFieldObjectRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get List Group By Object
+      tags:
+      - Object
   /v1/object/get-list/{table_slug}:
     post:
       consumes:
@@ -15061,6 +16539,10 @@ paths:
         in: path
         name: table_slug
         required: true
+        type: string
+      - description: language_setting
+        in: query
+        name: language_setting
         type: string
       - description: GetListObjectRequestBody
         in: body
@@ -16626,6 +18108,54 @@ paths:
       summary: Get single redirect url
       tags:
       - RedirectUrl
+  /v1/redirect-url/re-order:
+    put:
+      consumes:
+      - application/json
+      description: Update redirect url order
+      operationId: update_redirect_url_order
+      parameters:
+      - description: UpdateRedirectUrlOrder
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.UpdateOrderRedirectUrlReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update RedirectUrl Order response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update redirect url order
+      tags:
+      - RedirectUrl
   /v1/relation:
     get:
       consumes:
@@ -17174,6 +18704,101 @@ paths:
       summary: Get release by id
       tags:
       - GetRelease
+  /v1/remove-pivot-template/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove Pivot Template
+      operationId: remove_pivot_template
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Empty data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Empty'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Remove Pivot Template
+      tags:
+      - Dynamic-Report
+  /v1/save-pivot-template:
+    post:
+      consumes:
+      - application/json
+      description: Save Pivot Template
+      operationId: save_pivot_template
+      parameters:
+      - description: SavePivotTemplateRequestBody
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.SavePivotTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Field data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.PivotTemplateSetting'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Save Pivot Template
+      tags:
+      - Dynamic-Report
   /v1/scenario:
     post:
       consumes:
@@ -18213,6 +19838,9 @@ paths:
         name: folder_id
         type: string
       - in: query
+        name: is_login_table
+        type: boolean
+      - in: query
         name: limit
         type: integer
       - in: query
@@ -18320,7 +19948,7 @@ paths:
         name: table
         required: true
         schema:
-          $ref: '#/definitions/object_builder_service.Table'
+          $ref: '#/definitions/models.UpdateTableRequest'
       produces:
       - application/json
       responses:
@@ -18546,6 +20174,107 @@ paths:
       summary: Get table history by id
       tags:
       - Table
+  /v1/table-permission:
+    get:
+      consumes:
+      - application/json
+      description: Get all table permission
+      operationId: get_table_permission
+      parameters:
+      - in: query
+        name: current_role_id
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: role_id
+        type: string
+      - in: query
+        name: table_slug
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TableBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetPermissionsByTableSlugResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all table permission
+      tags:
+      - TablePermission
+    put:
+      consumes:
+      - application/json
+      description: Update table permission
+      operationId: update_table_permission
+      parameters:
+      - description: UpdateTablePermisisonRequestBody
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpdatePermissionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Table data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update table permisison
+      tags:
+      - TablePermission
   /v1/table/{table_id}:
     delete:
       consumes:
@@ -19760,6 +21489,102 @@ paths:
       summary: Upload file
       tags:
       - file
+  /v1/upsert-pivot-template:
+    put:
+      consumes:
+      - application/json
+      description: Upsert Pivot Template
+      operationId: upsert_pivot_template
+      parameters:
+      - description: UpsertPivotTemplateRequestBody
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.PivotTemplateSetting'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Field data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.PivotTemplateSetting'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upsert Pivot Template
+      tags:
+      - Dynamic-Report
+  /v1/upsert-report-setting:
+    put:
+      consumes:
+      - application/json
+      description: Upsert Report Setting
+      operationId: upsert_report_setting
+      parameters:
+      - description: UpsertAppReportSettingRequestBody
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.UpsertAppReportSettingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: AppReportSetting data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.AppReportSetting'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upsert Report Setting
+      tags:
+      - Report-Setting
   /v1/view:
     get:
       consumes:
@@ -21002,6 +22827,54 @@ paths:
       summary: Insert Many webpageV2
       tags:
       - WebPage
+  /v2/copy-project:
+    post:
+      consumes:
+      - application/json
+      description: CopyProjectTemplate
+      operationId: create_event
+      parameters:
+      - description: CopyFromProjectRequestMessage
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.CopyProjectTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Event data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: CopyProjectTemplate
+      tags:
+      - ProjectTemplate
   /v2/custom-event:
     get:
       consumes:
@@ -21809,6 +23682,47 @@ paths:
       summary: Get Micro Frontend By Id
       tags:
       - Functions
+  /v2/language-json:
+    get:
+      consumes:
+      - application/json
+      description: Language json
+      operationId: language_json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Language json
+      tags:
+      - language
   /v2/table:
     get:
       consumes:
@@ -21830,6 +23744,9 @@ paths:
         type: integer
       - in: query
         name: project_id
+        type: string
+      - in: query
+        name: role_id
         type: string
       - in: query
         name: search

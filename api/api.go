@@ -2,13 +2,10 @@ package api
 
 import (
 	"errors"
-	"fmt"
-	"time"
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/helper"
-	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -36,6 +33,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.POST("/send-message", h.SendMessageToEmail)
 	r.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
 	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
+	r.GET("/v1/login-microfront", h.GetLoginMicroFrontBySubdomain)
+
+	global := r.Group("/v1/global")
+	global.Use(h.GlobalAuthMiddleware(cfg))
+	{
+		global.GET("/projects", h.GetGlobalCompanyProjectList)
+		global.GET("/environment", h.GetGlobalProjectEnvironments)
+		global.GET("/template", h.GetGlobalProjectTemplate)
+	}
 
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
@@ -97,10 +103,12 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/object-slim/get-list/:table_slug", h.GetListSlim)
 		v1.PUT("/object/:table_slug", h.UpdateObject)
 		v1.DELETE("/object/:table_slug/:object_id", h.DeleteObject)
+		v1.DELETE("/object/:table_slug", h.DeleteManyObject)
 		v1.POST("/object/excel/:table_slug", h.GetListInExcel)
 		v1.POST("/object-upsert/:table_slug", h.UpsertObject)
 		v1.PUT("/object/multiple-update/:table_slug", h.MultipleUpdateObject)
 		v1.POST("/object/get-financial-analytics/:table_slug", h.GetFinancialAnalytics)
+		v1.POST("/object/get-list-group-by/:table_slug/:column_table_slug", h.GetListGroupBy)
 
 		// permission
 		v1.POST("/permission-upsert/:app_id", h.UpsertPermissionsByAppId)
@@ -293,6 +301,28 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.PUT("/custom-error-message", h.UpdateCustomErrorMessage)
 		v1.POST("/custom-error-message", h.CreateCustomErrorMessage)
 		v1.DELETE("/custom-error-message/:id", h.DeleteCustomErrorMessage)
+		// table-permission
+		v1.GET("/table-permission", h.GetTablePermission)
+		v1.PUT("/table-permission", h.UpdateTablePermission)
+
+		//report setting
+		v1.GET("/get-report-setting/:id", h.GetByIdReportSetting)
+		v1.GET("/get-report-setting", h.GetListReportSetting)
+		v1.PUT("/upsert-report-setting", h.UpsertReportSetting)
+		v1.DELETE("/delete-report-setting/:id", h.DeleteReportSetting)
+
+		//dynamic-report
+		v1.POST("/dynamic-report", h.DynamicReport)
+		// v1.GET("/export/dynamic-report/excel/:id", h.ExportDynamicReportExcel) //TODO: should copy from parfume
+
+		//dynamic-report template
+		v1.POST("/save-pivot-template", h.SavePivotTemplate)
+		v1.GET("/get-pivot-template-setting/:id", h.GetByIdPivotTemplate)
+		v1.GET("/get-pivot-template-setting", h.GetListPivotTemplate)
+		v1.PUT("/upsert-pivot-template", h.UpsertPivotTemplate)
+		v1.DELETE("/remove-pivot-template/:id", h.RemovePivotTemplate)
+
+		v1.GET("/dynamic-report-formula", h.DynamicReportFormula)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))
@@ -303,19 +333,25 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2.GET("/custom-event", h.GetAllNewCustomEvents)
 		v2.PUT("/custom-event", h.UpdateNewCustomEvent)
 		v2.DELETE("/custom-event/:custom_event_id", h.DeleteNewCustomEvent)
+
+		v2.GET("/language-json", h.GetLanguageJson)
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
 	v1Admin := r.Group("/v1")
 	v1Admin.Use(h.AdminAuthMiddleware())
 	{
+
+		// login microfront
+		v1Admin.POST("/login-microfront", h.BindLoginMicroFrontToProject)
+		v1Admin.PUT("/login-microfront", h.UpdateLoginMicroFrontProject)
+
 		// company service
 		v1.POST("/company", h.CreateCompany)
 		v1Admin.GET("/company/:company_id", h.GetCompanyByID)
 		v1Admin.GET("/company", h.GetCompanyList)
 		v1Admin.PUT("company/:company_id", h.UpdateCompany)
 		v1Admin.DELETE("/company/:company_id", h.DeleteCompany)
-
 		// project service
 		v1Admin.POST("/company-project", h.CreateCompanyProject)
 		v1Admin.GET("/company-project", h.GetCompanyProjectList)
@@ -473,6 +509,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/redirect-url", h.GetListRedirectUrl)
 		v1Admin.GET("/redirect-url/:redirect-url-id", h.GetSingleRedirectUrl)
 		v1Admin.DELETE("/redirect-url/:redirect-url-id", h.DeleteRedirectUrl)
+		v1Admin.PUT("/redirect-url/re-order", h.UpdateRedirectUrlOrder)
 	}
 	v2Admin := r.Group("/v2")
 	v2Admin.Use(h.AdminAuthMiddleware())
@@ -494,6 +531,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2Admin.GET("/function", h.GetAllNewFunctions)
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
+
+		v2Admin.POST("/copy-project", h.CopyProjectTemplate)
 
 		functions := v2Admin.Group("functions")
 		{
@@ -593,21 +632,14 @@ func MaxAllowed(n int) gin.HandlerFunc {
 
 func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		start := time.Now()
 		var (
 			err error
 		)
-		fmt.Println("::::::::::::PROXY before:::::::::::::::::::", len(r.Routes()), c.Request.URL.Path, c.Request.URL)
 		c, err = RedirectUrl(c, h)
 		if err == nil {
-			//fmt.Println("here:::::::::::::1")
-			//fmt.Println("::::::::::::PROXY before:::::::::::::::::::", len(r.Routes()), c.Request.URL.Path)
 			r.HandleContext(c)
 		}
-		//fmt.Println("here:::::::::::::2")
-		fmt.Println("time in proxyMiddleware:::::", time.Since(start).Milliseconds())
 		c.Next()
-		fmt.Println("::::::::::::PROXY after:::::::::::::::::::", c.Request.URL.Path)
 	}
 }
 
@@ -619,8 +651,6 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 
 	envId, ok := c.Get("environment_id")
-	fmt.Println("project_id::::::PROXY::::::::", projectId)
-	fmt.Println("env_id::::::PROXY::::::::", envId)
 	if !ok {
 		return c, errors.New("something went wrong")
 	}
@@ -630,8 +660,7 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	if err != nil {
 		return c, errors.New("something went wrong")
 	}
-
-	start := time.Now()
+	c.Request.Header.Add("prev_path", path)
 
 	pathM, err := helper.FindUrlTo(svcs, helper.MatchingData{
 		ProjectId: projectId.(string),
@@ -639,18 +668,14 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 		Path:      path,
 	})
 	if err != nil {
-		fmt.Println("cant parse url", logger.Error(err))
 		return c, errors.New("cant change")
 	}
-
-	fmt.Println("time in RedirectUrl:::::::", time.Since(start).Milliseconds())
 
 	if path == pathM {
 		return c, errors.New("identical path")
 	}
 
 	c.Request.URL.Path = pathM
-	fmt.Println("path", c.Request.URL.Path)
 	return c, nil
 }
 

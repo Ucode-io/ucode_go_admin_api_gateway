@@ -22,7 +22,10 @@ message LayoutRequest {
     repeated TabRequest tabs = 6;
     string icon = 7;
     bool is_default = 8;
-    repeated FieldForSection summary_fields = 9;
+    bool is_modal = 9;
+    bool is_visible_section = 10;
+    repeated FieldForSection summary_fields = 11;
+    google.protobuf.Struct attributes = 12;
 }
 
 message LayoutResponse {
@@ -34,7 +37,10 @@ message LayoutResponse {
     repeated TabResponse tabs = 6;
     string icon = 7;
     bool is_default = 8;
-    repeated FieldResponse summary_fields = 9;
+    bool is_modal = 9;
+    bool is_visible_section = 10;
+    repeated FieldResponse summary_fields = 11;
+    google.protobuf.Struct attributes = 12;
 }
 
 message GetListLayoutResponse {
@@ -50,6 +56,7 @@ message TabRequest {
     repeated Section sections = 6;
     int32 order = 7;
     string icon = 8;
+    google.protobuf.Struct attributes = 9;
 }
 
 message TabResponse {
@@ -62,7 +69,7 @@ message TabResponse {
     int32 order = 7;
     string icon = 8;
     RelationForSection relation = 9;
-    
+    google.protobuf.Struct attributes = 10;
 }
 
 message IncrementID2 {
@@ -205,4 +212,5 @@ message GetListLayoutRequest {
     bool is_defualt = 3;
     string table_id = 4;
     string role_id = 5;
+    string language_setting = 6;
 }

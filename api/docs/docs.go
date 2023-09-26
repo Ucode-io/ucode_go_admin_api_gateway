@@ -7967,6 +7967,92 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/delete-report-setting/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete Report Setting",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report-Setting"
+                ],
+                "summary": "Delete Report Setting",
+                "operationId": "delete_report_setting",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AppReportSetting data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.AppReportSetting"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/document": {
             "get": {
                 "security": [
@@ -8361,6 +8447,184 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/dynamic-report": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Dynamic Report",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dynamic-Report"
+                ],
+                "summary": "Dynamic Report",
+                "operationId": "dynamicreport",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "click_action",
+                        "name": "click_action",
+                        "in": "query"
+                    },
+                    {
+                        "description": "GetListObjectRequestBody",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CommonMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ObjectBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/dynamic-report-formula": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Dynamic Report Formula",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dynamic-Report"
+                ],
+                "summary": "Dynamic Report Formula",
+                "operationId": "dynamicreportformula",
+                "responses": {
+                    "200": {
+                        "description": "ObjectBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -11184,6 +11448,181 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/get-pivot-template-setting": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get List Pivot Template Setting",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dynamic-Report"
+                ],
+                "summary": "Get List Pivot Template Setting",
+                "operationId": "get_list_pivot_template_setting",
+                "parameters": [
+                    {
+                        "enum": [
+                            "SAVED",
+                            "HISTORY"
+                        ],
+                        "type": "string",
+                        "description": "status",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetListPivotTemplateResponse data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.GetListPivotTemplateResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get-pivot-template-setting/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Pivot Template Setting",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dynamic-Report"
+                ],
+                "summary": "Get Pivot Template Setting",
+                "operationId": "get_by_id_pivot_template_setting",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PivotTemplateSetting data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.PivotTemplateSetting"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/get-relation-cascading/{table_slug}": {
             "get": {
                 "security": [
@@ -11228,6 +11667,500 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get-report-setting": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get List Report Setting",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report-Setting"
+                ],
+                "summary": "Get List Report Setting",
+                "operationId": "get_list_report_setting",
+                "responses": {
+                    "200": {
+                        "description": "AppReportSetting data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.AppReportSetting"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get-report-setting/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Report Setting",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report-Setting"
+                ],
+                "summary": "Get Report Setting",
+                "operationId": "get_by_id_report_setting",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AppReportSetting data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.AppReportSetting"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/global/environment": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get global project environment list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Global Project"
+                ],
+                "summary": "Get global project environment list",
+                "operationId": "get_global_project_environment_list",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "EnvironmentBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.GetEnvironmentListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/global/projects": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all global projects",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Global Project"
+                ],
+                "summary": "Get all global projects",
+                "operationId": "get_global_project_list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "company_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Company data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.GetProjectListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/global/template": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get global project template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Global Project"
+                ],
+                "summary": "Get global project template",
+                "operationId": "get_global_project_template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "environment-id",
+                        "name": "environment-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "for_template",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "parent_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MenuBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.GetAllMenusResponse"
                                         }
                                     }
                                 }
@@ -12167,6 +13100,12 @@ const docTemplate = `{
                         "description": "table-slug",
                         "name": "table-slug",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "language_setting",
+                        "name": "language_setting",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -12276,6 +13215,269 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/login-microfront": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Project By Id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project login microfront"
+                ],
+                "summary": "Get Project By Id",
+                "operationId": "get_login_microfront_by_subdomain",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "subdomain",
+                        "name": "subdomain",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Company data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.Project"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update Login MicroFront Project",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project login microfront"
+                ],
+                "summary": "Update Login MicroFront Project",
+                "operationId": "update_login_microfront",
+                "parameters": [
+                    {
+                        "description": "ProjectLoginMicroFrontend",
+                        "name": "Company",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.ProjectLoginMicroFrontend"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Company data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.ProjectLoginMicroFrontend"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Bind login microfrotn to project",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project login microfront"
+                ],
+                "summary": "Bind login microfrotn to project",
+                "operationId": "bind_login_micro_front_to_project",
+                "parameters": [
+                    {
+                        "description": "ProjectLoginMicroFrontend",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.ProjectLoginMicroFrontend"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ProjectLoginMicroFrontend",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/company_service.ProjectLoginMicroFrontend"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -12497,6 +13699,11 @@ const docTemplate = `{
                         "description": "API key for the endpoint",
                         "name": "X-API-KEY",
                         "in": "header"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "for_template",
+                        "in": "query"
                     },
                     {
                         "type": "integer",
@@ -13061,6 +14268,13 @@ const docTemplate = `{
                         "description": "id",
                         "name": "id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "TemplateId",
+                        "name": "template_id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -16131,6 +17345,126 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/object/get-list-group-by/{table_slug}/{column_table_slug}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get List Group By Object",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Object"
+                ],
+                "summary": "Get List Group By Object",
+                "operationId": "get_list_group_by_objects",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "table_slug",
+                        "name": "table_slug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "column_table_slug",
+                        "name": "column_table_slug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "search",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project",
+                        "name": "project",
+                        "in": "query"
+                    },
+                    {
+                        "description": "GetGroupByFieldObjectRequestBody",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CommonMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ObjectBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/object/get-list/{table_slug}": {
             "post": {
                 "security": [
@@ -16157,6 +17491,12 @@ const docTemplate = `{
                         "name": "table_slug",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "language_setting",
+                        "name": "language_setting",
+                        "in": "query"
                     },
                     {
                         "description": "GetListObjectRequestBody",
@@ -16379,6 +17719,84 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete many objects",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Object"
+                ],
+                "summary": "Delete many objects",
+                "operationId": "delete_many_object",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "table_slug",
+                        "name": "table_slug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "DeleteManyObjectRequestBody",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Ids"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
@@ -19194,6 +20612,94 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/redirect-url/re-order": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update redirect url order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RedirectUrl"
+                ],
+                "summary": "Update redirect url order",
+                "operationId": "update_redirect_url_order",
+                "parameters": [
+                    {
+                        "description": "UpdateRedirectUrlOrder",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company_service.UpdateOrderRedirectUrlReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Update RedirectUrl Order response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/redirect-url/{redirect-url-id}": {
             "get": {
                 "security": [
@@ -20304,6 +21810,180 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/remove-pivot-template/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Remove Pivot Template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dynamic-Report"
+                ],
+                "summary": "Remove Pivot Template",
+                "operationId": "remove_pivot_template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Empty data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Empty"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/save-pivot-template": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Save Pivot Template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dynamic-Report"
+                ],
+                "summary": "Save Pivot Template",
+                "operationId": "save_pivot_template",
+                "parameters": [
+                    {
+                        "description": "SavePivotTemplateRequestBody",
+                        "name": "relation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.SavePivotTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Field data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.PivotTemplateSetting"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -22235,6 +23915,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "boolean",
+                        "name": "is_login_table",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -22342,7 +24027,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.Table"
+                            "$ref": "#/definitions/models.UpdateTableRequest"
                         }
                     }
                 ],
@@ -22801,6 +24486,191 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/table-permission": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all table permission",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TablePermission"
+                ],
+                "summary": "Get all table permission",
+                "operationId": "get_table_permission",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "current_role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "table_slug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "TableBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.GetPermissionsByTableSlugResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update table permission",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TablePermission"
+                ],
+                "summary": "Update table permisison",
+                "operationId": "update_table_permission",
+                "parameters": [
+                    {
+                        "description": "UpdateTablePermisisonRequestBody",
+                        "name": "table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Table data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -24998,6 +26868,182 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/handlers.Path"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/upsert-pivot-template": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Upsert Pivot Template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dynamic-Report"
+                ],
+                "summary": "Upsert Pivot Template",
+                "operationId": "upsert_pivot_template",
+                "parameters": [
+                    {
+                        "description": "UpsertPivotTemplateRequestBody",
+                        "name": "relation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.PivotTemplateSetting"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Field data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.PivotTemplateSetting"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/upsert-report-setting": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Upsert Report Setting",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report-Setting"
+                ],
+                "summary": "Upsert Report Setting",
+                "operationId": "upsert_report_setting",
+                "parameters": [
+                    {
+                        "description": "UpsertAppReportSettingRequestBody",
+                        "name": "relation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.UpsertAppReportSettingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AppReportSetting data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.AppReportSetting"
                                         }
                                     }
                                 }
@@ -27289,6 +29335,94 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/copy-project": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "CopyProjectTemplate",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectTemplate"
+                ],
+                "summary": "CopyProjectTemplate",
+                "operationId": "create_event",
+                "parameters": [
+                    {
+                        "description": "CopyFromProjectRequestMessage",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CopyProjectTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Event data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/custom-event": {
             "get": {
                 "security": [
@@ -28753,6 +30887,83 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/language-json": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Language json",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "language"
+                ],
+                "summary": "Language json",
+                "operationId": "language_json",
+                "responses": {
+                    "200": {
+                        "description": "Response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/table": {
             "get": {
                 "security": [
@@ -28796,6 +31007,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "role_id",
                         "in": "query"
                     },
                     {
@@ -32140,6 +34356,56 @@ const docTemplate = `{
                 }
             }
         },
+        "auth_service.GlobalPermission": {
+            "type": "object",
+            "properties": {
+                "api_keys_button": {
+                    "type": "boolean"
+                },
+                "chat": {
+                    "type": "boolean"
+                },
+                "environment_button": {
+                    "type": "boolean"
+                },
+                "environments_button": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menu_button": {
+                    "type": "boolean"
+                },
+                "menu_setting_button": {
+                    "type": "boolean"
+                },
+                "profile_settings_button": {
+                    "type": "boolean"
+                },
+                "project_button": {
+                    "type": "boolean"
+                },
+                "project_settings_button": {
+                    "type": "boolean"
+                },
+                "projects_button": {
+                    "type": "boolean"
+                },
+                "redirects_button": {
+                    "type": "boolean"
+                },
+                "settings_button": {
+                    "type": "boolean"
+                },
+                "sms_button": {
+                    "type": "boolean"
+                },
+                "version_button": {
+                    "type": "boolean"
+                }
+            }
+        },
         "auth_service.Integration": {
             "type": "object",
             "properties": {
@@ -32215,6 +34481,9 @@ const docTemplate = `{
         "auth_service.RecordPermission": {
             "type": "object",
             "properties": {
+                "automation": {
+                    "type": "string"
+                },
                 "client_type_id": {
                     "type": "string"
                 },
@@ -32224,16 +34493,28 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "language_btn": {
+                    "type": "string"
+                },
                 "read": {
                     "type": "string"
                 },
                 "role_id": {
                     "type": "string"
                 },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
                 "table_slug": {
                     "type": "string"
                 },
                 "update": {
+                    "type": "string"
+                },
+                "view_create": {
                     "type": "string"
                 },
                 "write": {
@@ -32442,6 +34723,9 @@ const docTemplate = `{
                 "environment_id": {
                     "type": "string"
                 },
+                "global_permission": {
+                    "$ref": "#/definitions/auth_service.GlobalPermission"
+                },
                 "login_table_slug": {
                     "type": "string"
                 },
@@ -32474,6 +34758,9 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/auth_service.User"
+                },
+                "user_data": {
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "user_found": {
                     "type": "boolean"
@@ -33160,6 +35447,26 @@ const docTemplate = `{
                 }
             }
         },
+        "company_service.ProjectLoginMicroFrontend": {
+            "type": "object",
+            "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "microfront_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "subdomain": {
+                    "type": "string"
+                }
+            }
+        },
         "company_service.ProjectWithoutResource": {
             "type": "object",
             "properties": {
@@ -33224,6 +35531,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "order": {
+                    "type": "integer"
                 },
                 "project_id": {
                     "type": "string"
@@ -33487,6 +35797,17 @@ const docTemplate = `{
                 },
                 "text": {
                     "type": "string"
+                }
+            }
+        },
+        "company_service.UpdateOrderRedirectUrlReq": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -34012,6 +36333,44 @@ const docTemplate = `{
                 }
             }
         },
+        "models.AppReportSetting": {
+            "type": "object",
+            "properties": {
+                "columns": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TableSetting"
+                    }
+                },
+                "filters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.FilterSetting"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "main_table_label": {
+                    "type": "string"
+                },
+                "main_table_slug": {
+                    "type": "string"
+                },
+                "rows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TableSetting"
+                    }
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ValueSetting"
+                    }
+                }
+            }
+        },
         "models.Category": {
             "type": "object",
             "properties": {
@@ -34103,6 +36462,29 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "company_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CopyProjectTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "from_env_id": {
+                    "type": "string"
+                },
+                "from_project_id": {
+                    "type": "string"
+                },
+                "menus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.MenuRequest"
+                    }
+                },
+                "to_env_id": {
+                    "type": "string"
+                },
+                "to_project_id": {
                     "type": "string"
                 }
             }
@@ -34253,6 +36635,9 @@ const docTemplate = `{
                 "default": {
                     "type": "string"
                 },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -34269,6 +36654,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "required": {
+                    "type": "boolean"
+                },
+                "show_label": {
                     "type": "boolean"
                 },
                 "slug": {
@@ -34369,6 +36757,10 @@ const docTemplate = `{
         "models.CreateMenuRequest": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -34488,6 +36880,10 @@ const docTemplate = `{
                 "app_id": {
                     "type": "string"
                 },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "custom_error_messages": {
                     "type": "array",
                     "items": {
@@ -34517,6 +36913,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.LayoutRequest"
                     }
+                },
+                "order_by": {
+                    "type": "boolean"
                 },
                 "sections": {
                     "type": "array",
@@ -34754,6 +37153,26 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Empty": {
+            "type": "object"
+        },
+        "models.Entity": {
+            "type": "object",
+            "properties": {
+                "field_slug": {
+                    "type": "string"
+                },
+                "field_type": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Environment": {
             "type": "object",
             "properties": {
@@ -34817,6 +37236,9 @@ const docTemplate = `{
                 "default": {
                     "type": "string"
                 },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -34838,6 +37260,9 @@ const docTemplate = `{
                 "required": {
                     "type": "boolean"
                 },
+                "show_label": {
+                    "type": "boolean"
+                },
                 "slug": {
                     "type": "string"
                 },
@@ -34849,6 +37274,17 @@ const docTemplate = `{
                 },
                 "unique": {
                     "type": "boolean"
+                }
+            }
+        },
+        "models.FilterSetting": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
                 }
             }
         },
@@ -34989,6 +37425,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Ids": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "models.IncrementId": {
             "type": "object",
             "properties": {
@@ -35070,6 +37517,10 @@ const docTemplate = `{
         "models.Menu": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -35258,6 +37709,20 @@ const docTemplate = `{
                 }
             }
         },
+        "models.TableSetting": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UpdateAppReqModel": {
             "type": "object",
             "properties": {
@@ -35320,6 +37785,69 @@ const docTemplate = `{
                 }
             }
         },
+        "models.UpdateTableRequest": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "author_id": {
+                    "type": "string"
+                },
+                "commit_type": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "folder_id": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "increment_id": {
+                    "$ref": "#/definitions/models.IncrementId"
+                },
+                "is_cached": {
+                    "type": "boolean"
+                },
+                "is_login_table": {
+                    "type": "boolean"
+                },
+                "is_own_table": {
+                    "type": "boolean"
+                },
+                "is_visible": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "order_by": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "show_in_menu": {
+                    "type": "boolean"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "subtitle_field_slug": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UpdateWebPageReqModel": {
             "type": "object",
             "properties": {
@@ -35358,6 +37886,20 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "models.ValueSetting": {
+            "type": "object",
+            "properties": {
+                "entity": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Entity"
+                    }
+                },
+                "label": {
+                    "type": "string"
                 }
             }
         },
@@ -35886,6 +38428,29 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.CommonMessage": {
+            "type": "object",
+            "properties": {
+                "custom_message": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "is_cached": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.Condition": {
             "type": "object",
             "properties": {
@@ -36220,6 +38785,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.ActionRelation"
                     }
+                },
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "auto_filters": {
                     "type": "array",
@@ -36774,6 +39342,9 @@ const docTemplate = `{
         "object_builder_service.FieldForSection": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "column": {
                     "type": "integer"
                 },
@@ -36806,11 +39377,17 @@ const docTemplate = `{
                 "default": {
                     "type": "string"
                 },
+                "enable_multilanguage": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
                 "index": {
                     "type": "string"
+                },
+                "is_editable": {
+                    "type": "boolean"
                 },
                 "label": {
                     "type": "string"
@@ -36834,6 +39411,43 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.FilterPivotTemplateSetting": {
+            "type": "object",
+            "properties": {
+                "field_id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "table_guids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "object_builder_service.FilterSetting": {
+            "type": "object",
+            "properties": {
+                "field": {
+                    "$ref": "#/definitions/object_builder_service.TableFieldSetting"
+                },
+                "field_id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "slug": {
                     "type": "string"
                 }
             }
@@ -37003,6 +39617,31 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.GetListPivotTemplateResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "pivot_templates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.PivotTemplateSetting"
+                    }
+                }
+            }
+        },
+        "object_builder_service.GetPermissionsByTableSlugResponse": {
+            "type": "object",
+            "properties": {
+                "current_user_permission": {
+                    "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest"
+                },
+                "selected_user_permission": {
+                    "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest"
+                }
+            }
+        },
         "object_builder_service.GetTableHistoryResponse": {
             "type": "object",
             "properties": {
@@ -37011,6 +39650,56 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.TableHistory"
                     }
+                }
+            }
+        },
+        "object_builder_service.GlobalPermission": {
+            "type": "object",
+            "properties": {
+                "api_keys_button": {
+                    "type": "boolean"
+                },
+                "chat": {
+                    "type": "boolean"
+                },
+                "environment_button": {
+                    "type": "boolean"
+                },
+                "environments_button": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menu_button": {
+                    "type": "boolean"
+                },
+                "menu_setting_button": {
+                    "type": "boolean"
+                },
+                "profile_settings_button": {
+                    "type": "boolean"
+                },
+                "project_button": {
+                    "type": "boolean"
+                },
+                "project_settings_button": {
+                    "type": "boolean"
+                },
+                "projects_button": {
+                    "type": "boolean"
+                },
+                "redirects_button": {
+                    "type": "boolean"
+                },
+                "settings_button": {
+                    "type": "boolean"
+                },
+                "sms_button": {
+                    "type": "boolean"
+                },
+                "version_button": {
+                    "type": "boolean"
                 }
             }
         },
@@ -37093,6 +39782,9 @@ const docTemplate = `{
         "object_builder_service.LayoutRequest": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -37100,6 +39792,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "is_default": {
+                    "type": "boolean"
+                },
+                "is_modal": {
+                    "type": "boolean"
+                },
+                "is_visible_section": {
                     "type": "boolean"
                 },
                 "label": {
@@ -37131,6 +39829,9 @@ const docTemplate = `{
         "object_builder_service.LayoutResponse": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -37138,6 +39839,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "is_default": {
+                    "type": "boolean"
+                },
+                "is_modal": {
+                    "type": "boolean"
+                },
+                "is_visible_section": {
                     "type": "boolean"
                 },
                 "label": {
@@ -37212,6 +39919,9 @@ const docTemplate = `{
         "object_builder_service.Menu": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -37250,6 +39960,9 @@ const docTemplate = `{
         "object_builder_service.MenuForGetAll": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "data": {
                     "$ref": "#/definitions/structpb.Struct"
                 },
@@ -37271,10 +39984,13 @@ const docTemplate = `{
                 "parent_id": {
                     "type": "string"
                 },
-                "permission": {
-                    "$ref": "#/definitions/object_builder_service.MenuPermission"
+                "pivot_template_id": {
+                    "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "report_setting_id": {
                     "type": "string"
                 },
                 "table_id": {
@@ -37288,40 +40004,50 @@ const docTemplate = `{
                 }
             }
         },
-        "object_builder_service.MenuPermission": {
+        "object_builder_service.MenuRequest": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "icon": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
                 "label": {
                     "type": "string"
                 },
-                "permission": {
-                    "$ref": "#/definitions/object_builder_service.MenuPermission_Permission"
+                "layout_id": {
+                    "type": "string"
+                },
+                "microfrontend_id": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "pivot_template_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "report_setting_id": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"
-                }
-            }
-        },
-        "object_builder_service.MenuPermission_Permission": {
-            "type": "object",
-            "properties": {
-                "delete": {
-                    "type": "boolean"
                 },
-                "menu_settings": {
-                    "type": "boolean"
-                },
-                "read": {
-                    "type": "boolean"
-                },
-                "update": {
-                    "type": "boolean"
-                },
-                "write": {
-                    "type": "boolean"
+                "webpage_id": {
+                    "type": "string"
                 }
             }
         },
@@ -37442,6 +40168,126 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.PivotTemplateRowRelation": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "objects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.PivotTemplateTableSetting"
+                    }
+                },
+                "order_number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "object_builder_service.PivotTemplateSetting": {
+            "type": "object",
+            "properties": {
+                "columns": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.PivotTemplateTableSetting"
+                    }
+                },
+                "defaults": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.PivotTemplateTableSetting"
+                    }
+                },
+                "filters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.FilterPivotTemplateSetting"
+                    }
+                },
+                "from_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "main_table_label": {
+                    "type": "string"
+                },
+                "main_table_slug": {
+                    "type": "string"
+                },
+                "pivot_table_slug": {
+                    "type": "string"
+                },
+                "report_setting_id": {
+                    "type": "string"
+                },
+                "resource_environment_id": {
+                    "type": "string"
+                },
+                "rows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.PivotTemplateTableSetting"
+                    }
+                },
+                "rows_relation": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.PivotTemplateRowRelation"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "to_date": {
+                    "type": "string"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.ValuePivotTemplateSetting"
+                    }
+                }
+            }
+        },
+        "object_builder_service.PivotTemplateTableSetting": {
+            "type": "object",
+            "properties": {
+                "checked": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "inside_relation_table_slug": {
+                    "type": "string"
+                },
+                "join": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "order_number": {
+                    "type": "integer"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "table_field_settings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.TableFieldSetting"
+                    }
+                }
+            }
+        },
         "object_builder_service.QuickFilter": {
             "type": "object",
             "properties": {
@@ -37467,6 +40313,9 @@ const docTemplate = `{
         "object_builder_service.RecordPermission": {
             "type": "object",
             "properties": {
+                "automation": {
+                    "type": "string"
+                },
                 "client_type_id": {
                     "type": "string"
                 },
@@ -37476,16 +40325,28 @@ const docTemplate = `{
                 "guid": {
                     "type": "string"
                 },
+                "language_btn": {
+                    "type": "string"
+                },
                 "read": {
                     "type": "string"
                 },
                 "role_id": {
                     "type": "string"
                 },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
                 "table_slug": {
                     "type": "string"
                 },
                 "update": {
+                    "type": "string"
+                },
+                "view_create": {
                     "type": "string"
                 },
                 "write": {
@@ -37501,6 +40362,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.ActionRelationForSection"
                     }
+                },
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "columns": {
                     "type": "array",
@@ -37614,9 +40478,52 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.RowRelation": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "objects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.TableSetting"
+                    }
+                }
+            }
+        },
+        "object_builder_service.SavePivotTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "clone_id": {
+                    "type": "string"
+                },
+                "from_date": {
+                    "type": "string"
+                },
+                "pivot_table_slug": {
+                    "type": "string"
+                },
+                "report_setting_id": {
+                    "type": "string"
+                },
+                "resource_environment_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "to_date": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.Section": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "column": {
                     "type": "string"
                 },
@@ -37646,6 +40553,9 @@ const docTemplate = `{
         "object_builder_service.SectionResponse": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "column": {
                     "type": "string"
                 },
@@ -37686,6 +40596,9 @@ const docTemplate = `{
         "object_builder_service.SummaryInSection": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "field_name": {
                     "type": "string"
                 },
@@ -37697,6 +40610,9 @@ const docTemplate = `{
         "object_builder_service.TabRequest": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -37729,6 +40645,9 @@ const docTemplate = `{
         "object_builder_service.TabResponse": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "icon": {
                     "type": "string"
                 },
@@ -37806,6 +40725,9 @@ const docTemplate = `{
                 "label": {
                     "type": "string"
                 },
+                "order_by": {
+                    "type": "boolean"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -37846,6 +40768,67 @@ const docTemplate = `{
                 },
                 "view_slug": {
                     "type": "string"
+                }
+            }
+        },
+        "object_builder_service.TableDataMessage": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.TableFieldSetting": {
+            "type": "object",
+            "properties": {
+                "aggregate_formula": {
+                    "type": "string"
+                },
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "checked": {
+                    "type": "boolean"
+                },
+                "field_id": {
+                    "type": "string"
+                },
+                "field_index": {
+                    "type": "integer"
+                },
+                "field_slug": {
+                    "type": "string"
+                },
+                "field_type": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "order_number": {
+                    "type": "integer"
+                },
+                "table_from": {
+                    "$ref": "#/definitions/object_builder_service.TableDataMessage"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "table_to": {
+                    "$ref": "#/definitions/object_builder_service.TableDataMessage"
+                },
+                "view_fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.ViewField"
+                    }
                 }
             }
         },
@@ -37926,6 +40909,44 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "object_builder_service.TableSetting": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "date_field_slug": {
+                    "type": "string"
+                },
+                "fields_length": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "inside_relation_table_slug": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "table_field_settings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.TableFieldSetting"
+                    }
+                },
+                "table_field_settings_ids": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -38050,6 +41071,153 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.UpdatePermissionsRequest": {
+            "type": "object",
+            "properties": {
+                "grant_access": {
+                    "type": "boolean"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table": {
+                    "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest_Table"
+                }
+            }
+        },
+        "object_builder_service.UpdatePermissionsRequest_Table": {
+            "type": "object",
+            "properties": {
+                "action_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest_Table_ActionPermission"
+                    }
+                },
+                "field_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest_Table_FieldPermission"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "record_permissions": {
+                    "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest_Table_RecordPermission"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "view_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.UpdatePermissionsRequest_Table_ViewPermission"
+                    }
+                }
+            }
+        },
+        "object_builder_service.UpdatePermissionsRequest_Table_ActionPermission": {
+            "type": "object",
+            "properties": {
+                "custom_event_id": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "permission": {
+                    "type": "boolean"
+                },
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.UpdatePermissionsRequest_Table_FieldPermission": {
+            "type": "object",
+            "properties": {
+                "edit_permission": {
+                    "type": "boolean"
+                },
+                "field_id": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "view_permission": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "object_builder_service.UpdatePermissionsRequest_Table_RecordPermission": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "read": {
+                    "type": "string"
+                },
+                "update": {
+                    "type": "string"
+                },
+                "write": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.UpdatePermissionsRequest_Table_ViewPermission": {
+            "type": "object",
+            "properties": {
+                "create_permission": {
+                    "type": "boolean"
+                },
+                "delete_permission": {
+                    "type": "boolean"
+                },
+                "edit_permission": {
+                    "type": "boolean"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "relation_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "view_permission": {
+                    "type": "boolean"
+                }
+            }
+        },
         "object_builder_service.UpdateRelationRequest": {
             "type": "object",
             "properties": {
@@ -38058,6 +41226,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.ActionRelation"
                     }
+                },
+                "attributes": {
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "auto_filters": {
                     "type": "array",
@@ -38247,6 +41418,59 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.UpsertAppReportSettingRequest": {
+            "type": "object",
+            "properties": {
+                "columns": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.TableSetting"
+                    }
+                },
+                "defaults": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.TableSetting"
+                    }
+                },
+                "filters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.FilterSetting"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "main_table_label": {
+                    "type": "string"
+                },
+                "main_table_slug": {
+                    "type": "string"
+                },
+                "resource_environment_id": {
+                    "type": "string"
+                },
+                "rows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.TableSetting"
+                    }
+                },
+                "rows_relation": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.RowRelation"
+                    }
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.ValueSetting"
+                    }
+                }
+            }
+        },
         "object_builder_service.UpsertViewRelationsBody": {
             "type": "object",
             "properties": {
@@ -38288,6 +41512,9 @@ const docTemplate = `{
                 "client_type": {
                     "$ref": "#/definitions/object_builder_service.ClientType"
                 },
+                "global_permission": {
+                    "$ref": "#/definitions/object_builder_service.GlobalPermission"
+                },
                 "login_table_slug": {
                     "type": "string"
                 },
@@ -38300,11 +41527,45 @@ const docTemplate = `{
                 "role": {
                     "$ref": "#/definitions/object_builder_service.Role"
                 },
+                "user_data": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
                 "user_found": {
                     "type": "boolean"
                 },
                 "user_id": {
                     "type": "string"
+                }
+            }
+        },
+        "object_builder_service.ValuePivotTemplateSetting": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "objects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.TableSetting"
+                    }
+                },
+                "order_number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "object_builder_service.ValueSetting": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "objects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.TableSetting"
+                    }
                 }
             }
         },
@@ -38456,6 +41717,17 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "object_builder_service.ViewField": {
+            "type": "object",
+            "properties": {
+                "slug": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"time"
 	"ucode/ucode_go_api_gateway/api"
 	"ucode/ucode_go_api_gateway/api/handlers"
@@ -63,7 +62,7 @@ func main() {
 
 	r := gin.New()
 
-	r.Use(gin.Recovery())
+	r.Use(gin.Logger(), gin.Recovery())
 
 	h := handlers.NewHandler(cfg, log, serviceNodes, grpcSvcs, authSrvc, newRedis)
 
@@ -77,11 +76,8 @@ func main() {
 				case <-time.After(cronjob.Interval):
 					err := cronjob.Function(ctx, grpcSvcs, cfg)
 					if err != nil {
-						fmt.Println("test ::   " + time.Now().Format(time.RFC3339))
-						fmt.Println("err  :: ", err.Error())
 					}
 				case <-ctx.Done():
-					fmt.Println("ctx done ::   " + time.Now().Format(time.RFC3339))
 					return
 				}
 			}

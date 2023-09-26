@@ -12,6 +12,10 @@ service RedirectUrlService {
   rpc GetSingle(GetSingleRedirectUrlReq) returns (RedirectUrl) {}
   rpc GetList(GetListRedirectUrlReq) returns (GetListRedirectUrlRes) {}
   rpc Delete(DeleteRedirectUrlReq) returns (google.protobuf.Empty) {}
+  rpc UpdateOrder(UpdateOrderRedirectUrlReq) returns (google.protobuf.Empty) {}
+}
+message UpdateOrderRedirectUrlReq {
+  repeated string ids = 1;
 }
 
 message RedirectUrl {
@@ -22,6 +26,7 @@ message RedirectUrl {
   string to = 5;
   string created_at = 6;
   string updated_at = 7;
+  int32 order = 8;
 }
 
 message GetSingleRedirectUrlReq {

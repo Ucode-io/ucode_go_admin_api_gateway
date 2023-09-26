@@ -18,7 +18,7 @@ func CreateProjectFork(projectName string, data IntegrationData) (response model
 
 	projectId := data.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
-	fmt.Println("config::::::", data.GitlabIntegrationUrl, data.GitlabIntegrationToken)
+	// fmt.Println("config::::::", data.GitlabIntegrationUrl, data.GitlabIntegrationToken)
 
 	resp, err := DoRequest(data.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/fork", data.GitlabIntegrationToken, "POST", models.CreateProject{
 		NamespaceID:          data.GitlabGroupId,
@@ -29,7 +29,7 @@ func CreateProjectFork(projectName string, data IntegrationData) (response model
 		Visibility:           "private",
 	})
 
-	fmt.Println("res:::::::::::", resp)
+	// fmt.Println("res:::::::::::", resp)
 
 	if resp.Code >= 400 {
 		return models.GitlabIntegrationResponse{}, errors.New(status_http.BadRequest.Description)
@@ -59,7 +59,7 @@ func UpdateProject(cfg IntegrationData, data map[string]interface{}) (response m
 
 	projectId := cfg.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
-	fmt.Println("config::::::", cfg.GitlabIntegrationUrl, cfg.GitlabIntegrationToken)
+	// fmt.Println("config::::::", cfg.GitlabIntegrationUrl, cfg.GitlabIntegrationToken)
 
 	resp, err := DoRequest(cfg.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId, cfg.GitlabIntegrationToken, "PUT", data)
 
@@ -77,7 +77,7 @@ func CreateProjectVariable(cfg IntegrationData, data map[string]interface{}) (re
 
 	projectId := cfg.GitlabProjectId
 	strProjectId := strconv.Itoa(projectId)
-	fmt.Println("config::::::", cfg.GitlabIntegrationUrl, cfg.GitlabIntegrationToken)
+	// fmt.Println("config::::::", cfg.GitlabIntegrationUrl, cfg.GitlabIntegrationToken)
 
 	resp, err := DoRequest(cfg.GitlabIntegrationUrl+"/api/v4/projects/"+strProjectId+"/variables", cfg.GitlabIntegrationToken, "POST", data)
 

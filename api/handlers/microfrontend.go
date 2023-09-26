@@ -120,7 +120,7 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("response", respCreateFork.Message["id"])
+	// fmt.Println("response", respCreateFork.Message["id"])
 	//projectId := respCreateFork.Message["id"].(float64)
 
 	_, err = gitlab.UpdateProject(gitlab.IntegrationData{
@@ -160,7 +160,7 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 		return
 	}
 
-	resPipeline, err := gitlab.CreatePipeline(gitlab.IntegrationData{
+	_, err = gitlab.CreatePipeline(gitlab.IntegrationData{
 		GitlabIntegrationUrl:   h.cfg.GitlabIntegrationURL,
 		GitlabIntegrationToken: h.cfg.GitlabIntegrationToken,
 		GitlabProjectId:        int(respCreateFork.Message["id"].(float64)),
@@ -172,7 +172,7 @@ func (h *Handler) CreateMicroFrontEnd(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	fmt.Println("response [resPipeline]", resPipeline)
+	// fmt.Println("response [resPipeline]", resPipeline)
 
 	//h.handleResponse(c, status_http.OK, resPipeline)
 	//return

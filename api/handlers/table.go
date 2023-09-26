@@ -45,6 +45,16 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		return
 	}
 
+	if tableRequest.Attributes == nil {
+		tableRequest.Attributes = make(map[string]interface{})
+	}
+
+	attributes, err := helper.ConvertMapToStruct(tableRequest.Attributes)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
 	authInfo, err := h.GetAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
@@ -131,8 +141,6 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		fields = append(fields, &tempField)
 	}
 
-	fmt.Println("User id  ", authInfo.GetUserId())
-
 	var table = obs.CreateTableRequest{
 		Label:             tableRequest.Label,
 		Description:       tableRequest.Description,
@@ -152,6 +160,8 @@ func (h *Handler) CreateTable(c *gin.Context) {
 		AuthorId:   authInfo.GetUserId(),
 		Name:       fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123)),
 		CommitType: config.COMMIT_TYPE_TABLE,
+		OrderBy:    tableRequest.OrderBy,
+		Attributes: attributes,
 	}
 
 	table.ProjectId = resourceEnvironmentId
@@ -382,17 +392,23 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
 	}
+	var isLoginTable bool
+	var isLoginTableStr = c.Query("is_login_table")
+	if isLoginTableStr == "true" {
+		isLoginTable = true
+	}
 
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Table().GetAll(
 			context.Background(),
 			&obs.GetAllTablesRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				Search:    c.DefaultQuery("search", ""),
-				ProjectId: resourceEnvironmentId,
-				FolderId:  c.Query("folder_id"),
+				Limit:        int32(limit),
+				Offset:       int32(offset),
+				Search:       c.DefaultQuery("search", ""),
+				ProjectId:    resourceEnvironmentId,
+				FolderId:     c.Query("folder_id"),
+				IsLoginTable: isLoginTable,
 			},
 		)
 
@@ -404,10 +420,11 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 		resp, err = services.PostgresBuilderService().Table().GetAll(
 			context.Background(),
 			&obs.GetAllTablesRequest{
-				Limit:     int32(limit),
-				Offset:    int32(offset),
-				Search:    c.DefaultQuery("search", ""),
-				ProjectId: resourceEnvironmentId,
+				Limit:        int32(limit),
+				Offset:       int32(offset),
+				Search:       c.DefaultQuery("search", ""),
+				ProjectId:    resourceEnvironmentId,
+				IsLoginTable: isLoginTable,
 			},
 		)
 
@@ -429,13 +446,13 @@ func (h *Handler) GetAllTables(c *gin.Context) {
 // @Tags Table
 // @Accept json
 // @Produce json
-// @Param table body obs.Table  true "UpdateTableRequestBody"
+// @Param table body models.UpdateTableRequest  true "UpdateTableRequestBody"
 // @Success 200 {object} status_http.Response{data=obs.Table} "Table data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateTable(c *gin.Context) {
 	var (
-		table obs.UpdateTableRequest
+		table models.UpdateTableRequest
 		//resourceEnvironment *company_service.ResourceEnvironment
 		resp                  *emptypb.Empty
 		resourceEnvironmentId string
@@ -512,13 +529,42 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 		resourceEnvironmentId = resourceEnvironment.GetId()
 		resourceType = pb.ResourceType(resourceEnvironment.ResourceType)
 	}
+	structData, err := helper.ConvertMapToStruct(table.Attributes)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err)
+		return
+	}
 
 	table.ProjectId = resourceEnvironmentId
 	switch resourceType {
 	case pb.ResourceType_MONGODB:
 		resp, err = services.BuilderService().Table().Update(
 			context.Background(),
-			&table,
+			&obs.UpdateTableRequest{
+				Id:                table.Id,
+				Description:       table.Description,
+				Label:             table.Label,
+				Slug:              table.Slug,
+				ShowInMenu:        table.ShowInMenu,
+				Icon:              table.Icon,
+				SubtitleFieldSlug: table.SubtitleFieldSlug,
+				IsVisible:         table.IsVisible,
+				IsOwnTable:        table.IsOwnTable,
+				IncrementId: &obs.IncrementID{
+					WithIncrementId: table.IncrementId.WithIncrementID,
+					DigitNumber:     table.IncrementId.DigitNumber,
+					Prefix:          table.IncrementId.Prefix,
+				},
+				ProjectId:    table.ProjectId,
+				FolderId:     table.FolderId,
+				AuthorId:     table.AuthorId,
+				CommitType:   table.CommitType,
+				Name:         table.Name,
+				IsCached:     table.IsCached,
+				IsLoginTable: table.IsLoginTable,
+				Attributes:   structData,
+				OrderBy:      table.OrderBy,
+			},
 		)
 
 		if err != nil {
@@ -529,7 +575,30 @@ func (h *Handler) UpdateTable(c *gin.Context) {
 	case pb.ResourceType_POSTGRESQL:
 		resp, err = services.PostgresBuilderService().Table().Update(
 			context.Background(),
-			&table,
+			&obs.UpdateTableRequest{
+				Id:                table.Id,
+				Description:       table.Description,
+				Slug:              table.Slug,
+				ShowInMenu:        table.ShowInMenu,
+				Icon:              table.Icon,
+				SubtitleFieldSlug: table.SubtitleFieldSlug,
+				IsVisible:         table.IsVisible,
+				IsOwnTable:        table.IsOwnTable,
+				IncrementId: &obs.IncrementID{
+					WithIncrementId: table.IncrementId.WithIncrementID,
+					DigitNumber:     table.IncrementId.DigitNumber,
+					Prefix:          table.IncrementId.Prefix,
+				},
+				ProjectId:    table.ProjectId,
+				FolderId:     table.FolderId,
+				AuthorId:     table.AuthorId,
+				CommitType:   table.CommitType,
+				Name:         table.Name,
+				IsCached:     table.IsCached,
+				IsLoginTable: table.IsLoginTable,
+				Attributes:   structData,
+				OrderBy:      table.OrderBy,
+			},
 		)
 
 		if err != nil {
@@ -693,14 +762,12 @@ func (h *Handler) GetListTableHistory(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(c.Get("environment_id"))
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	fmt.Println("::::::::::::: test 2")
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
