@@ -111,6 +111,7 @@ message AddUserToProjectReq {
     int32 resource_type = 6;
     string client_type_id = 7;
     string table_slug = 8;
+    string env_id = 9;
 }
 
 message AddUserToProjectRes {
@@ -120,6 +121,7 @@ message AddUserToProjectRes {
     string table_slug = 4;
     string client_type_id = 5;
     string role_id = 6;
+    string env_id = 7;
 }
 
 message UpsertUserInfoRequest {

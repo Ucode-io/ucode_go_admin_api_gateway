@@ -11431,6 +11431,11 @@ paths:
       operationId: get_environment_list
       parameters:
       - in: query
+        items:
+          type: string
+        name: ids
+        type: array
+      - in: query
         name: limit
         type: integer
       - in: query
@@ -13195,6 +13200,11 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
+      - in: query
+        items:
+          type: string
+        name: ids
+        type: array
       - in: query
         name: limit
         type: integer

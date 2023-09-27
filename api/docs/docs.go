@@ -8683,6 +8683,14 @@ const docTemplate = `{
                 "operationId": "get_environment_list",
                 "parameters": [
                     {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "name": "ids",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
@@ -11895,6 +11903,14 @@ const docTemplate = `{
                 "summary": "Get global project environment list",
                 "operationId": "get_global_project_environment_list",
                 "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "name": "ids",
+                        "in": "query"
+                    },
                     {
                         "type": "integer",
                         "name": "limit",
