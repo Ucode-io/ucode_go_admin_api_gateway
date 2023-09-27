@@ -849,6 +849,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 	)
 	objectRequest.Data["id"] = objectID
 	objectRequest.Data["company_service_project_id"] = projectId.(string)
+	objectRequest.Data["company_service_environment_id"] = environmentId.(string)
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
@@ -2666,6 +2667,7 @@ func (h *Handler) DeleteManyObject(c *gin.Context) {
 		},
 	)
 	data["company_service_project_id"] = projectId.(string)
+	data["company_service_environment_id"] = environmentId.(string)
 	data["ids"] = objectRequest.Ids
 
 	structData, err := helper.ConvertMapToStruct(data)
