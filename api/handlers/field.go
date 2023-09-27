@@ -441,7 +441,7 @@ func (h *Handler) UpdateField(c *gin.Context) {
 			return
 		}
 		for _, value := range fields.GetFields() {
-			if len(value.GetSlug()) > 3 && len(fieldRequest.Slug) > 3 {
+			if len(value.GetSlug()) > 3 && len(fieldRequest.Slug) > 3 && (value.GetType() == "SINGLE_LINE" || value.GetType() == "MULTI_LINE") {
 				if fieldRequest.Slug[:len(fieldRequest.Slug)-3] == value.GetSlug()[:len(value.GetSlug())-3] && fieldRequest.Slug != value.GetSlug() {
 					go func(arg *obs.Field) {
 						_, err := services.BuilderService().Field().Delete(context.Background(), &obs.FieldPrimaryKey{
