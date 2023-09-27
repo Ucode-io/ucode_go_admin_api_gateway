@@ -13313,7 +13313,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Project"
+                                            "$ref": "#/definitions/models.MicrofrontForLoginPage"
                                         }
                                     }
                                 }
@@ -37562,6 +37562,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "webpage_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MicrofrontForLoginPage": {
+            "type": "object",
+            "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
+                "function": {
+                    "$ref": "#/definitions/new_function_service.Function"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "microfront_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "subdomain": {
                     "type": "string"
                 }
             }

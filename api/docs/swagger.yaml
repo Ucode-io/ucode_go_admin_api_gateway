@@ -2313,6 +2313,21 @@ definitions:
       webpage_id:
         type: string
     type: object
+  models.MicrofrontForLoginPage:
+    properties:
+      environment_id:
+        type: string
+      function:
+        $ref: '#/definitions/new_function_service.Function'
+      id:
+        type: string
+      microfront_id:
+        type: string
+      project_id:
+        type: string
+      subdomain:
+        type: string
+    type: object
   models.Panel:
     properties:
       attributes:
@@ -13981,7 +13996,7 @@ paths:
             - $ref: '#/definitions/status_http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.Project'
+                  $ref: '#/definitions/models.MicrofrontForLoginPage'
               type: object
         "400":
           description: Invalid Argument

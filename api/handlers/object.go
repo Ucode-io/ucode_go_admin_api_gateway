@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/cast"
 
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // CreateObject godoc
@@ -556,7 +557,7 @@ func (h *Handler) GetSingleSlim(c *gin.Context) {
 func (h *Handler) UpdateObject(c *gin.Context) {
 	var (
 		objectRequest               models.CommonMessage
-		resp                        *obs.CommonMessage
+		resp, singleObject          *obs.CommonMessage
 		beforeActions, afterActions []*obs.CustomEvent
 		statusHttp                  = status_http.GrpcStatusToHTTP["Ok"]
 	)
@@ -639,6 +640,49 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 	//	h.handleResponse(c, status_http.GRPCError, err.Error())
 	//	return
 	//}
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		singleObject, err = services.BuilderService().ObjectBuilder().GetSingle(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data: &structpb.Struct{
+					Fields: map[string]*structpb.Value{
+						"id": structpb.NewStringValue(id),
+					},
+				},
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			statusHttp = status_http.GrpcStatusToHTTP["Internal"]
+			stat, ok := status.FromError(err)
+			if ok {
+				statusHttp = status_http.GrpcStatusToHTTP[stat.Code().String()]
+				statusHttp.CustomMessage = stat.Message()
+			}
+			h.handleResponse(c, statusHttp, err.Error())
+			return
+		}
+	case pb.ResourceType_POSTGRESQL:
+		singleObject, err = services.PostgresBuilderService().ObjectBuilder().GetSingle(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data: &structpb.Struct{
+					Fields: map[string]*structpb.Value{
+						"id": structpb.NewStringValue(id),
+					},
+				},
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+	}
 
 	fromOfs := c.Query("from-ofs")
 	// fmt.Println("from-ofs::", fromOfs)
@@ -723,11 +767,12 @@ func (h *Handler) UpdateObject(c *gin.Context) {
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
-				CustomEvents: afterActions,
-				IDs:          []string{id},
-				TableSlug:    c.Param("table_slug"),
-				ObjectData:   objectRequest.Data,
-				Method:       "UPDATE",
+				CustomEvents:           afterActions,
+				IDs:                    []string{id},
+				TableSlug:              c.Param("table_slug"),
+				ObjectData:             objectRequest.Data,
+				Method:                 "UPDATE",
+				ObjectDataBeforeUpdate: singleObject.Data.AsMap(),
 			},
 			c, // gin context,
 			h, // handler
@@ -804,6 +849,7 @@ func (h *Handler) DeleteObject(c *gin.Context) {
 	)
 	objectRequest.Data["id"] = objectID
 	objectRequest.Data["company_service_project_id"] = projectId.(string)
+	objectRequest.Data["company_service_environment_id"] = environmentId.(string)
 
 	structData, err := helper.ConvertMapToStruct(objectRequest.Data)
 	if err != nil {
@@ -2646,6 +2692,7 @@ func (h *Handler) DeleteManyObject(c *gin.Context) {
 		},
 	)
 	data["company_service_project_id"] = projectId.(string)
+	data["company_service_environment_id"] = environmentId.(string)
 	data["ids"] = objectRequest.Ids
 
 	structData, err := helper.ConvertMapToStruct(data)
