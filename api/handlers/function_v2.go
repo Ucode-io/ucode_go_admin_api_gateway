@@ -1007,12 +1007,14 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 			"app_id":     "P-l1IH2vLegRKc17sHqf4mnZ2sTd6QrHha",
 		},
 	})
-	fmt.Println("\n Run func test 51", "\n")
+	fmt.Println("\n Run func test 5", "\n")
 	if err != nil {
+		fmt.Println("\n Run func test 6", "\n")
 		// fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	} else if resp.Status == "error" {
+		fmt.Println("\n Run func test 7", "\n")
 		// fmt.Println("error in response status", err)
 		var errStr = resp.Status
 		if resp.Data != nil && resp.Data["message"] != nil {
@@ -1022,10 +1024,12 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		return
 	}
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
+		fmt.Println("\n Run func test 8", "\n")
 		if isOwnData {
 			c.JSON(200, resp.Data)
 			return
 		}
 	}
+	fmt.Println("\n Run func test 9", "\n")
 	h.handleResponse(c, status_http.OK, resp)
 }
