@@ -30830,7 +30830,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "Function data",
                         "schema": {
                             "allOf": [
