@@ -970,10 +970,11 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		return
 	}
 	fmt.Println("\n Run func test #3", resource.ResourceEnvironmentId, "\n")
+	fmt.Println("\n Run func test #3.1", c.Param("function-id"), "\n")
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
 		&fc.FunctionPrimaryKey{
-			Id:        c.Param("function_id"),
+			Id:        c.Param("function-id"),
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
