@@ -930,58 +930,58 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	if err != nil {
 		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
 	}
-	fmt.Println(string(bodyReq))
 
 	_ = json.Unmarshal(bodyReq, &invokeFunction)
 	if err != nil {
 		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
 	}
 
-	// namespace := c.GetString("namespace")
-	// services, err := h.GetService(namespace)
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.Forbidden, err)
-	// 	return
-	// }
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
 
-	// projectId, ok := c.Get("project_id")
-	// if !ok || !util.IsValidUUID(projectId.(string)) {
-	// 	h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-	// 	return
-	// }
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+	fmt.Println("\n Run func test #1", projectId, "\n")
 
-	// environmentId, ok := c.Get("environment_id")
-	// if !ok || !util.IsValidUUID(environmentId.(string)) {
-	// 	err = errors.New("error getting environment id | not valid")
-	// 	h.handleResponse(c, status_http.BadRequest, err)
-	// 	return
-	// }
-
-	// resource, err := services.CompanyService().ServiceResource().GetSingle(
-	// 	c.Request.Context(),
-	// 	&pb.GetSingleServiceResourceReq{
-	// 		ProjectId:     projectId.(string),
-	// 		EnvironmentId: environmentId.(string),
-	// 		ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
-
-	// function, err := services.FunctionService().FunctionService().GetSingle(
-	// 	context.Background(),
-	// 	&fc.FunctionPrimaryKey{
-	// 		Id:        functionId,
-	// 		ProjectId: resource.ResourceEnvironmentId,
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
-	// 	return
-	// }
-
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+	fmt.Println("\n Run func test #1", environmentId, "\n")
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	fmt.Println("\n Run func test #3", resource.ResourceEnvironmentId, "\n")
+	function, err := services.FunctionService().FunctionService().GetSingle(
+		context.Background(),
+		&fc.FunctionPrimaryKey{
+			Id:        c.Param("function_id"),
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	fmt.Println("\n Run func test #4", function, "\n")
 	// authInfoAny, ok := c.Get("auth")
 	// if !ok {
 	// 	h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
@@ -997,7 +997,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	requestData.Body = bodyReq
 
 	// h.log.Info("\n\nFunction run request", logger.Any("auth", authInfo), logger.Any("request_data", requestData), logger.Any("req", c.Request))
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+"easy-to-travel-activate-order-item", "POST", models.FunctionRunV2{
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
 		Auth:        models.AuthData{},
 		RequestData: requestData,
 		Data: map[string]interface{}{
@@ -1006,6 +1006,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 			"app_id":     "P-l1IH2vLegRKc17sHqf4mnZ2sTd6QrHha",
 		},
 	})
+	fmt.Println("\n Run func test 51", "\n")
 	if err != nil {
 		// fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
