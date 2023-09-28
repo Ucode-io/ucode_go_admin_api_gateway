@@ -983,13 +983,14 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		return
 	}
 	fmt.Println("\n Run func test #4", function, "\n")
-	// authInfoAny, ok := c.Get("auth")
-	// if !ok {
-	// 	h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
-	// 	return
-	// }
 
-	// authInfo := authInfoAny.(models.AuthData)
+	authInfoAny, ok := c.Get("auth")
+	if !ok {
+		h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
+		return
+	}
+
+	authInfo := authInfoAny.(models.AuthData)
 
 	requestData.Method = c.Request.Method
 	requestData.Headers = c.Request.Header
@@ -1004,7 +1005,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		Data: map[string]interface{}{
 			"object_ids": invokeFunction.ObjectIDs,
 			"attributes": invokeFunction.Attributes,
-			"app_id":     "P-l1IH2vLegRKc17sHqf4mnZ2sTd6QrHha",
+			"app_id":     authInfo.Data["app_id"],
 		},
 	})
 	fmt.Println("\n Run func test 5", "\n")
