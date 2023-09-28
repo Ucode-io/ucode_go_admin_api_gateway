@@ -23434,7 +23434,7 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
+        "200":
           description: Function data
           schema:
             allOf:

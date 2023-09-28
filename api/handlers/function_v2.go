@@ -914,7 +914,7 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param InvokeFunctionRequest body models.InvokeFunctionRequest true "InvokeFunctionRequest"
-// @Success 201 {object} status_http.Response{data=models.InvokeFunctionResponse} "Function data"
+// @Success 200 {object} status_http.Response{data=models.InvokeFunctionResponse} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) FunctionRun(c *gin.Context) {
@@ -923,70 +923,71 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		invokeFunction models.InvokeFunctionRequest
 	)
 
-	functionId := c.Param("function-id")
+	// functionId := c.Param("function-id")
 
 	bodyReq, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
 	}
+	fmt.Println(string(bodyReq))
 
 	_ = json.Unmarshal(bodyReq, &invokeFunction)
 	if err != nil {
 		h.log.Error("cant parse body or an empty body received", logger.Any("req", c.Request))
 	}
 
-	namespace := c.GetString("namespace")
-	services, err := h.GetService(namespace)
-	if err != nil {
-		h.handleResponse(c, status_http.Forbidden, err)
-		return
-	}
+	// namespace := c.GetString("namespace")
+	// services, err := h.GetService(namespace)
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.Forbidden, err)
+	// 	return
+	// }
 
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
+	// projectId, ok := c.Get("project_id")
+	// if !ok || !util.IsValidUUID(projectId.(string)) {
+	// 	h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+	// 	return
+	// }
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
+	// environmentId, ok := c.Get("environment_id")
+	// if !ok || !util.IsValidUUID(environmentId.(string)) {
+	// 	err = errors.New("error getting environment id | not valid")
+	// 	h.handleResponse(c, status_http.BadRequest, err)
+	// 	return
+	// }
 
-	resource, err := services.CompanyService().ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// resource, err := services.CompanyService().ServiceResource().GetSingle(
+	// 	c.Request.Context(),
+	// 	&pb.GetSingleServiceResourceReq{
+	// 		ProjectId:     projectId.(string),
+	// 		EnvironmentId: environmentId.(string),
+	// 		ServiceType:   pb.ServiceType_FUNCTION_SERVICE,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	function, err := services.FunctionService().FunctionService().GetSingle(
-		context.Background(),
-		&fc.FunctionPrimaryKey{
-			Id:        functionId,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
+	// function, err := services.FunctionService().FunctionService().GetSingle(
+	// 	context.Background(),
+	// 	&fc.FunctionPrimaryKey{
+	// 		Id:        functionId,
+	// 		ProjectId: resource.ResourceEnvironmentId,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, status_http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	authInfoAny, ok := c.Get("auth")
-	if !ok {
-		h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
-		return
-	}
+	// authInfoAny, ok := c.Get("auth")
+	// if !ok {
+	// 	h.handleResponse(c, status_http.InvalidArgument, "cant get auth info")
+	// 	return
+	// }
 
-	authInfo := authInfoAny.(models.AuthData)
+	// authInfo := authInfoAny.(models.AuthData)
 
 	requestData.Method = c.Request.Method
 	requestData.Headers = c.Request.Header
@@ -995,13 +996,13 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	requestData.Body = bodyReq
 
 	// h.log.Info("\n\nFunction run request", logger.Any("auth", authInfo), logger.Any("request_data", requestData), logger.Any("req", c.Request))
-	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
-		Auth:        authInfo,
+	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+"easy-to-travel-activate-order-item", "POST", models.FunctionRunV2{
+		Auth:        models.AuthData{},
 		RequestData: requestData,
 		Data: map[string]interface{}{
 			"object_ids": invokeFunction.ObjectIDs,
 			"attributes": invokeFunction.Attributes,
-			"app_id":     authInfo.Data["app_id"],
+			"app_id":     "P-l1IH2vLegRKc17sHqf4mnZ2sTd6QrHha",
 		},
 	})
 	if err != nil {
@@ -1017,7 +1018,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
-	if isOwnData, ok := resp.Attributes["in_own_data"].(bool); ok {
+	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		if isOwnData {
 			c.JSON(200, resp.Data)
 			return
