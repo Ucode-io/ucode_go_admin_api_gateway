@@ -257,6 +257,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 	//		return
 	//	}
 	//}
+	fmt.Println("\n URL function by id path >>", functionID, "\n")
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
 		&fc.FunctionPrimaryKey{
