@@ -37485,6 +37485,10 @@ const docTemplate = `{
         "models.InvokeFunctionResponse": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "data": {
                     "type": "object",
                     "additionalProperties": true

@@ -31,8 +31,9 @@ type InvokeFunctionRequest struct {
 }
 
 type InvokeFunctionResponse struct {
-	Status string                 `json:"status"`
-	Data   map[string]interface{} `json:"data"`
+	Status     string                 `json:"status"`
+	Data       map[string]interface{} `json:"data"`
+	Attributes map[string]interface{} `json:"attributes"`
 }
 
 type NewInvokeFunctionRequest struct {
