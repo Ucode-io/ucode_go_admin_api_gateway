@@ -1017,9 +1017,11 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
-	if _, ok := resp.Attributes["in_own_data"].(bool); ok {
-		c.JSON(200, resp.Data)
-		return
+	if isOwnData, ok := resp.Attributes["in_own_data"].(bool); ok {
+		if isOwnData {
+			c.JSON(200, resp.Data)
+			return
+		}
 	}
 	h.handleResponse(c, status_http.OK, resp)
 }
