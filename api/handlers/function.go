@@ -657,7 +657,7 @@ func (h *Handler) InvokeFunction(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
-	if c.Query("form_input") != "true" {
+	if c.Query("form_input") != "true" && c.Query("use_no_limit") != "true" {
 		_, err = services.BuilderService().CustomEvent().UpdateByFunctionId(
 			context.Background(),
 			&obs.UpdateByFunctionIdRequest{
