@@ -101,10 +101,22 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			c.Set("project_id", apikeys.GetProjectId())
 		default:
-			err := errors.New("error invalid authorization method")
-			h.log.Error("--AuthMiddleware--", logger.Error(err))
-			h.handleResponse(c, status_http.BadRequest, err.Error())
-			c.Abort()
+			if !strings.Contains(c.Request.URL.Path, "api") {
+				err := errors.New("error invalid authorization method")
+				h.log.Error("--AuthMiddleware--", logger.Error(err))
+				h.handleResponse(c, status_http.BadRequest, err.Error())
+				c.Abort()
+			} else {
+				err := errors.New("error invalid authorization method")
+				h.log.Error("--AuthMiddleware--", logger.Error(err))
+				c.JSON(401, struct {
+					Message string `json:"message"`
+				}{
+					Message: "The request requires an user authentication",
+				})
+				c.Abort()
+			}
+
 		}
 		c.Set("Auth", res)
 		c.Set("namespace", h.cfg.UcodeNamespace)
