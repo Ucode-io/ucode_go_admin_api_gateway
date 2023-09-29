@@ -26,6 +26,7 @@ message GetEnvironmentListRequest {
     int32 limit = 2;
     string search = 3;
     string project_id = 4;
+    repeated string ids = 5;
 }
 
 message GetEnvironmentListResponse {
