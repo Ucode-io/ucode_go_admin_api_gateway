@@ -30846,7 +30846,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "Function data",
                         "schema": {
                             "allOf": [
@@ -37501,6 +37501,10 @@ const docTemplate = `{
         "models.InvokeFunctionResponse": {
             "type": "object",
             "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "data": {
                     "type": "object",
                     "additionalProperties": true

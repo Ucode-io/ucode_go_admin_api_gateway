@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"ucode/ucode_go_api_gateway/api/docs"
 	"ucode/ucode_go_api_gateway/api/handlers"
 	"ucode/ucode_go_api_gateway/config"
@@ -636,6 +637,7 @@ func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 			err error
 		)
 		c, err = RedirectUrl(c, h)
+
 		if err == nil {
 			r.HandleContext(c)
 		}
@@ -644,6 +646,7 @@ func proxyMiddleware(r *gin.Engine, h *handlers.Handler) gin.HandlerFunc {
 }
 
 func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
+	fmt.Println("\n URL first path >>", c.Request.URL.Path, "\n")
 	path := c.Request.URL.Path
 	projectId, ok := c.Get("project_id")
 	if !ok {
@@ -676,6 +679,7 @@ func RedirectUrl(c *gin.Context, h *handlers.Handler) (*gin.Context, error) {
 	}
 
 	c.Request.URL.Path = pathM
+	fmt.Println("\n URL second path >>", c.Request.URL.Path, "\n")
 	return c, nil
 }
 

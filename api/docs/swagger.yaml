@@ -2270,6 +2270,9 @@ definitions:
     type: object
   models.InvokeFunctionResponse:
     properties:
+      attributes:
+        additionalProperties: true
+        type: object
       data:
         additionalProperties: true
         type: object
@@ -23441,7 +23444,7 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
+        "200":
           description: Function data
           schema:
             allOf:

@@ -257,6 +257,7 @@ func (h *Handler) GetNewFunctionByID(c *gin.Context) {
 	//		return
 	//	}
 	//}
+	fmt.Println("\n URL function by id path >>", functionID, "\n")
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
 		&fc.FunctionPrimaryKey{
@@ -914,7 +915,7 @@ func (h *Handler) InvokeFunctionByPath(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param InvokeFunctionRequest body models.InvokeFunctionRequest true "InvokeFunctionRequest"
-// @Success 201 {object} status_http.Response{data=models.InvokeFunctionResponse} "Function data"
+// @Success 200 {object} status_http.Response{data=models.InvokeFunctionResponse} "Function data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) FunctionRun(c *gin.Context) {
@@ -923,7 +924,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		invokeFunction models.InvokeFunctionRequest
 	)
 
-	functionId := c.Param("function-id")
+	// functionId := c.Param("function-id")
 
 	bodyReq, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -947,6 +948,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
+	fmt.Println("\n Run func test #1", projectId, "\n")
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
@@ -954,7 +956,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-
+	fmt.Println("\n Run func test #1", environmentId, "\n")
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -967,11 +969,12 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
+	fmt.Println("\n Run func test #3", resource.ResourceEnvironmentId, "\n")
+	fmt.Println("\n Run func test #3.1", c.Param("function-id"), "\n")
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
 		&fc.FunctionPrimaryKey{
-			Id:        functionId,
+			Id:        c.Param("function-id"),
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
@@ -979,6 +982,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("\n Run func test #4", function, "\n")
 
 	authInfoAny, ok := c.Get("auth")
 	if !ok {
@@ -996,7 +1000,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 
 	// h.log.Info("\n\nFunction run request", logger.Any("auth", authInfo), logger.Any("request_data", requestData), logger.Any("req", c.Request))
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
-		Auth:        authInfo,
+		Auth:        models.AuthData{},
 		RequestData: requestData,
 		Data: map[string]interface{}{
 			"object_ids": invokeFunction.ObjectIDs,
@@ -1004,11 +1008,14 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 			"app_id":     authInfo.Data["app_id"],
 		},
 	})
+	fmt.Println("\n Run func test 5", "\n")
 	if err != nil {
+		fmt.Println("\n Run func test 6", "\n")
 		// fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	} else if resp.Status == "error" {
+		fmt.Println("\n Run func test 7", "\n")
 		// fmt.Println("error in response status", err)
 		var errStr = resp.Status
 		if resp.Data != nil && resp.Data["message"] != nil {
@@ -1017,6 +1024,13 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, errStr)
 		return
 	}
-
+	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
+		fmt.Println("\n Run func test 8", "\n")
+		if isOwnData {
+			c.JSON(200, resp.Data)
+			return
+		}
+	}
+	fmt.Println("\n Run func test 9", "\n")
 	h.handleResponse(c, status_http.OK, resp)
 }
