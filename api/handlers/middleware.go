@@ -110,9 +110,11 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 				err := errors.New("error invalid authorization method")
 				h.log.Error("--AuthMiddleware--", logger.Error(err))
 				c.JSON(401, struct {
+					Code    int    `json:"code"`
 					Message string `json:"message"`
 				}{
-					Message: "The request requires an user authentication",
+					Code: 401,
+					Message: "The request requires an user authentication.",
 				})
 				c.Abort()
 			}
