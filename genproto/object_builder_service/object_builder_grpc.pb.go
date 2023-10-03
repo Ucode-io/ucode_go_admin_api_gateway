@@ -25,6 +25,7 @@ type ObjectBuilderServiceClient interface {
 	Create(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetSingle(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetList(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
+	GetList2(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetSingleSlim(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetListSlim(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetRecursiveList(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
@@ -32,7 +33,7 @@ type ObjectBuilderServiceClient interface {
 	Delete(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	ManyToManyAppend(ctx context.Context, in *ManyToManyMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	ManyToManyDelete(ctx context.Context, in *ManyToManyMessage, opts ...grpc.CallOption) (*CommonMessage, error)
-	GetObjectDetails(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
+	GetTableDetails(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetListInExcel(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	Batch(ctx context.Context, in *BatchRequest, opts ...grpc.CallOption) (*CommonMessage, error)
 	MultipleUpdate(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
@@ -74,6 +75,15 @@ func (c *objectBuilderServiceClient) GetSingle(ctx context.Context, in *CommonMe
 func (c *objectBuilderServiceClient) GetList(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
 	out := new(CommonMessage)
 	err := c.cc.Invoke(ctx, "/object_builder_service.ObjectBuilderService/GetList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *objectBuilderServiceClient) GetList2(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
+	out := new(CommonMessage)
+	err := c.cc.Invoke(ctx, "/object_builder_service.ObjectBuilderService/GetList2", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -143,9 +153,9 @@ func (c *objectBuilderServiceClient) ManyToManyDelete(ctx context.Context, in *M
 	return out, nil
 }
 
-func (c *objectBuilderServiceClient) GetObjectDetails(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
+func (c *objectBuilderServiceClient) GetTableDetails(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
 	out := new(CommonMessage)
-	err := c.cc.Invoke(ctx, "/object_builder_service.ObjectBuilderService/GetObjectDetails", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/object_builder_service.ObjectBuilderService/GetTableDetails", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -249,6 +259,7 @@ type ObjectBuilderServiceServer interface {
 	Create(context.Context, *CommonMessage) (*CommonMessage, error)
 	GetSingle(context.Context, *CommonMessage) (*CommonMessage, error)
 	GetList(context.Context, *CommonMessage) (*CommonMessage, error)
+	GetList2(context.Context, *CommonMessage) (*CommonMessage, error)
 	GetSingleSlim(context.Context, *CommonMessage) (*CommonMessage, error)
 	GetListSlim(context.Context, *CommonMessage) (*CommonMessage, error)
 	GetRecursiveList(context.Context, *CommonMessage) (*CommonMessage, error)
@@ -256,7 +267,7 @@ type ObjectBuilderServiceServer interface {
 	Delete(context.Context, *CommonMessage) (*CommonMessage, error)
 	ManyToManyAppend(context.Context, *ManyToManyMessage) (*CommonMessage, error)
 	ManyToManyDelete(context.Context, *ManyToManyMessage) (*CommonMessage, error)
-	GetObjectDetails(context.Context, *CommonMessage) (*CommonMessage, error)
+	GetTableDetails(context.Context, *CommonMessage) (*CommonMessage, error)
 	GetListInExcel(context.Context, *CommonMessage) (*CommonMessage, error)
 	Batch(context.Context, *BatchRequest) (*CommonMessage, error)
 	MultipleUpdate(context.Context, *CommonMessage) (*CommonMessage, error)
@@ -283,6 +294,9 @@ func (UnimplementedObjectBuilderServiceServer) GetSingle(context.Context, *Commo
 func (UnimplementedObjectBuilderServiceServer) GetList(context.Context, *CommonMessage) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetList not implemented")
 }
+func (UnimplementedObjectBuilderServiceServer) GetList2(context.Context, *CommonMessage) (*CommonMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetList2 not implemented")
+}
 func (UnimplementedObjectBuilderServiceServer) GetSingleSlim(context.Context, *CommonMessage) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSingleSlim not implemented")
 }
@@ -304,8 +318,8 @@ func (UnimplementedObjectBuilderServiceServer) ManyToManyAppend(context.Context,
 func (UnimplementedObjectBuilderServiceServer) ManyToManyDelete(context.Context, *ManyToManyMessage) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ManyToManyDelete not implemented")
 }
-func (UnimplementedObjectBuilderServiceServer) GetObjectDetails(context.Context, *CommonMessage) (*CommonMessage, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetObjectDetails not implemented")
+func (UnimplementedObjectBuilderServiceServer) GetTableDetails(context.Context, *CommonMessage) (*CommonMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTableDetails not implemented")
 }
 func (UnimplementedObjectBuilderServiceServer) GetListInExcel(context.Context, *CommonMessage) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListInExcel not implemented")
@@ -400,6 +414,24 @@ func _ObjectBuilderService_GetList_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ObjectBuilderServiceServer).GetList(ctx, req.(*CommonMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ObjectBuilderService_GetList2_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommonMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ObjectBuilderServiceServer).GetList2(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.ObjectBuilderService/GetList2",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ObjectBuilderServiceServer).GetList2(ctx, req.(*CommonMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -530,20 +562,20 @@ func _ObjectBuilderService_ManyToManyDelete_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ObjectBuilderService_GetObjectDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ObjectBuilderService_GetTableDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CommonMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ObjectBuilderServiceServer).GetObjectDetails(ctx, in)
+		return srv.(ObjectBuilderServiceServer).GetTableDetails(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/object_builder_service.ObjectBuilderService/GetObjectDetails",
+		FullMethod: "/object_builder_service.ObjectBuilderService/GetTableDetails",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ObjectBuilderServiceServer).GetObjectDetails(ctx, req.(*CommonMessage))
+		return srv.(ObjectBuilderServiceServer).GetTableDetails(ctx, req.(*CommonMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -748,6 +780,10 @@ var ObjectBuilderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ObjectBuilderService_GetList_Handler,
 		},
 		{
+			MethodName: "GetList2",
+			Handler:    _ObjectBuilderService_GetList2_Handler,
+		},
+		{
 			MethodName: "GetSingleSlim",
 			Handler:    _ObjectBuilderService_GetSingleSlim_Handler,
 		},
@@ -776,8 +812,8 @@ var ObjectBuilderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ObjectBuilderService_ManyToManyDelete_Handler,
 		},
 		{
-			MethodName: "GetObjectDetails",
-			Handler:    _ObjectBuilderService_GetObjectDetails_Handler,
+			MethodName: "GetTableDetails",
+			Handler:    _ObjectBuilderService_GetTableDetails_Handler,
 		},
 		{
 			MethodName: "GetListInExcel",
