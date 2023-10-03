@@ -1018,10 +1018,10 @@ func (h *Handler) InsetrVersionsIdsToTableHistory(c *gin.Context) {
 
 // GetTableDetails godoc
 // @Security ApiKeyAuth
-// @ID get_list_objects_v2
-// @Router /v2/object/get-list/{table_slug} [POST]
-// @Summary Get all objects version 2
-// @Description Get all objects version 2
+// @ID get_table_details
+// @Router /v1/table-details/{table_slug} [POST]
+// @Summary Get table details
+// @Description Get table details
 // @Tags Object
 // @Accept json
 // @Produce json
