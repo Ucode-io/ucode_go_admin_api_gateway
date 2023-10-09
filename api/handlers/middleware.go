@@ -84,6 +84,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 					Message: "The request requires an user authentication.",
 				})
 				c.Abort()
+				return
 			}
 
 			apikeys, err := h.authService.ApiKey().GetEnvID(
