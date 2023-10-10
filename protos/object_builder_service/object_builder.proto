@@ -10,6 +10,7 @@ service ObjectBuilderService {
     rpc Create(CommonMessage) returns (CommonMessage) {}
     rpc GetSingle(CommonMessage) returns (CommonMessage) {}
     rpc GetList(CommonMessage) returns (CommonMessage) {}
+    rpc GetList2(CommonMessage) returns (CommonMessage) {}
     rpc GetSingleSlim(CommonMessage) returns (CommonMessage) {}
     rpc GetListSlim(CommonMessage) returns (CommonMessage) {}
     rpc GetRecursiveList(CommonMessage) returns (CommonMessage) {}
@@ -17,7 +18,7 @@ service ObjectBuilderService {
     rpc Delete(CommonMessage) returns (CommonMessage) {}
     rpc ManyToManyAppend(ManyToManyMessage) returns (CommonMessage) {}
     rpc ManyToManyDelete(ManyToManyMessage) returns (CommonMessage) {}
-    rpc GetObjectDetails(CommonMessage) returns (CommonMessage) {}
+    rpc GetTableDetails(CommonMessage) returns (CommonMessage) {}
     rpc GetListInExcel(CommonMessage) returns (CommonMessage) {}
     rpc Batch(BatchRequest) returns (CommonMessage) {}
     rpc MultipleUpdate (CommonMessage) returns (CommonMessage) {}
