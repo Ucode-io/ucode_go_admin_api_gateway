@@ -71,6 +71,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.POST("/table", h.CreateTable)
 		v1.GET("/table", h.GetAllTables)
 		v1.GET("/table/:table_id", h.GetTableByID)
+		v1.POST("/table-details/:table_slug", h.GetTableDetails)
 
 		v1.PUT("/table", h.UpdateTable)
 		v1.DELETE("/table/:table_id", h.DeleteTable)
@@ -336,6 +337,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2.DELETE("/custom-event/:custom_event_id", h.DeleteNewCustomEvent)
 
 		v2.GET("/language-json", h.GetLanguageJson)
+
+		v2.POST("/object/get-list/:table_slug", h.GetListV2)
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
 
