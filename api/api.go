@@ -63,6 +63,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.DELETE("/menu-template/:id", h.DeleteMenuTemplate)
 
 		v1.POST("/upload", h.Upload)
+		v1.POST("/upload-template/:template_name", h.UploadTemplate)
 		v1.POST("/upload-file/:table_slug/:object_id", h.UploadFile)
 
 		// OBJECT_BUILDER_SERVICE

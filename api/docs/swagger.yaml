@@ -1235,6 +1235,10 @@ definitions:
         type: string
       companyServicePort:
         type: string
+      convertTemplateServiceGrpcHost:
+        type: string
+      convertTemplateServiceGrpcPort:
+        type: string
       corporateGRPCPort:
         type: string
       corporateServiceHost:
@@ -11448,7 +11452,8 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
@@ -13218,7 +13223,8 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
@@ -21572,6 +21578,57 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Upload file
+      tags:
+      - file
+  /v1/upload-template/{template_name}:
+    post:
+      description: Upload Template
+      operationId: upload_template
+      parameters:
+      - description: template_name
+        in: path
+        name: template_name
+        required: true
+        type: string
+      - description: UploadTemplateBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Path
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.Path'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upload Template
       tags:
       - file
   /v1/upsert-pivot-template:
