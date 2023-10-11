@@ -16,7 +16,9 @@ const (
 	// ReleaseMode indicates service mode is release.
 	ReleaseMode = "release"
 )
+
 var DynamicReportFormula = []string{"SUM", "COUNT", "AVERAGE", "MAX", "MIN", "FIRST", "LAST", "END_FIRST", "END_LAST"}
+
 type Config struct {
 	ServiceName string
 	Environment string // debug, test, release
@@ -72,6 +74,9 @@ type Config struct {
 
 	ChatServiceGrpcHost string
 	ChatServiceGrpcPort string
+
+	ConvertTemplateServiceGrpcHost string
+	ConvertTemplateServiceGrpcPort string
 
 	FunctionServiceHost string
 	FunctionServicePort string
@@ -198,6 +203,9 @@ func Load() Config {
 
 	config.ApiReferenceServiceHost = cast.ToString(GetOrReturnDefaultValue("API_REF_SERVICE_HOST", "localhost"))
 	config.ApiReferenceServicePort = cast.ToString(GetOrReturnDefaultValue("API_REF_GRPC_PORT", ":8099"))
+
+	config.ConvertTemplateServiceGrpcHost = cast.ToString(GetOrReturnDefaultValue("CONVERT_TEMPLATE_SERVICE_HOST", "localhost"))
+	config.ConvertTemplateServiceGrpcPort = cast.ToString(GetOrReturnDefaultValue("CONVERT_TEMPLATE_GRPC_PORT", ":9118"))
 
 	config.FunctionServiceHost = cast.ToString(GetOrReturnDefaultValue("FUNCTION_SERVICE_HOST", "localhost"))
 	config.FunctionServicePort = cast.ToString(GetOrReturnDefaultValue("FUNCTION_GRPC_PORT", ":8100"))
