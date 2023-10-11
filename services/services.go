@@ -23,6 +23,7 @@ type ServiceManagerI interface {
 	ChatService() ChatServiceI
 	NotificationService() NotificationServiceI
 	PostgresBuilderService() PostgresBuilderServiceI
+	ConvertTemplateService() ConvertTemplateServiceI
 }
 
 type grpcClients struct {
@@ -43,6 +44,7 @@ type grpcClients struct {
 	chatService              ChatServiceI
 	notificationService      NotificationServiceI
 	postgresBuilderService   PostgresBuilderServiceI
+	convertTemplateService   ConvertTemplateServiceI
 }
 
 func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, error) {
@@ -127,6 +129,11 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		return nil, err
 	}
 
+	convertTemplateServiceClient, err := NewConvertTemplateServiceClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return grpcClients{
 		apiReferenceService:      apiReferenceClient,
 		analyticsService:         analyticsServiceClient,
@@ -145,6 +152,7 @@ func NewGrpcClients(ctx context.Context, cfg config.Config) (ServiceManagerI, er
 		chatService:              chatServiceClient,
 		notificationService:      notificationServiceClient,
 		postgresBuilderService:   postgresBuilderServiceClient,
+		convertTemplateService:   convertTemplateServiceClient,
 	}, nil
 }
 
@@ -212,4 +220,8 @@ func (g grpcClients) NotificationService() NotificationServiceI {
 
 func (g grpcClients) PostgresBuilderService() PostgresBuilderServiceI {
 	return g.postgresBuilderService
+}
+
+func (g grpcClients) ConvertTemplateService() ConvertTemplateServiceI {
+	return g.convertTemplateService
 }
