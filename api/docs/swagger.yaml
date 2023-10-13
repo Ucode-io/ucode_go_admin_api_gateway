@@ -723,6 +723,17 @@ definitions:
       service_type:
         $ref: '#/definitions/company_service.ServiceType'
     type: object
+  company_service.CreateVariableResourceRequest:
+    properties:
+      environment_id:
+        type: string
+      key:
+        type: string
+      project_id:
+        type: string
+      value:
+        type: string
+    type: object
   company_service.Currency:
     properties:
       code:
@@ -741,6 +752,8 @@ definitions:
         type: string
       symbol_native:
         type: string
+    type: object
+  company_service.Empty:
     type: object
   company_service.EmptyProto:
     type: object
@@ -887,6 +900,13 @@ definitions:
         $ref: '#/definitions/company_service.ResourceType'
       title:
         type: string
+    type: object
+  company_service.GetVariableResourceListResponse:
+    properties:
+      variables:
+        items:
+          $ref: '#/definitions/company_service.VariableResource'
+        type: array
     type: object
   company_service.Language:
     properties:
@@ -1202,6 +1222,19 @@ definitions:
     properties:
       rows_affected:
         type: integer
+    type: object
+  company_service.VariableResource:
+    properties:
+      environment_id:
+        type: string
+      id:
+        type: string
+      key:
+        type: string
+      project_id:
+        type: string
+      value:
+        type: string
     type: object
   config.Config:
     properties:
@@ -10365,6 +10398,238 @@ paths:
       summary: Get Resource Environment by id
       tags:
       - Company Resource
+  /v1/company/project/resource-variable:
+    get:
+      consumes:
+      - application/json
+      description: Get list variable resource
+      operationId: get_list_variable_resource
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetVariableResourceListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get list variable resource
+      tags:
+      - Variable resource
+    post:
+      consumes:
+      - application/json
+      description: Add data to variable resource
+      operationId: add_data_to_variable_resource
+      parameters:
+      - description: CreateVariableResourceRequest
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.CreateVariableResourceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.VariableResource'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add data to variable resource
+      tags:
+      - Variable resource
+    put:
+      consumes:
+      - application/json
+      description: update variable resource
+      operationId: update_variable_resource
+      parameters:
+      - description: VariableResource
+        in: body
+        name: Company
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.VariableResource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Empty'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update variable resource
+      tags:
+      - Variable resource
+  /v1/company/project/resource-variable/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete variable resource
+      operationId: delete_variable_resource
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: VariableResource
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Empty'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete variable resource
+      tags:
+      - Variable resource
+  /v1/company/project/resource-variable/single:
+    get:
+      consumes:
+      - application/json
+      description: Get single variable resource
+      operationId: get_single_variable_resource
+      parameters:
+      - description: id
+        in: query
+        name: id
+        type: string
+      - description: key
+        in: query
+        name: key
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: VariableResource
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.VariableResource'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single variable resource
+      tags:
+      - Variable resource
   /v1/company/project/resource/{resource_id}:
     get:
       consumes:
@@ -11452,8 +11717,7 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: ids
@@ -13223,8 +13487,7 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: ids
