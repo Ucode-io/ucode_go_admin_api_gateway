@@ -15,6 +15,7 @@ message Sms {
   int64 send_count = 8;
   string dev_email = 9;
   string dev_email_password = 10;
+  string originator = 11;
 }
 
 message GenerateOtp {

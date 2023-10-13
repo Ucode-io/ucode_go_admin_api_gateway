@@ -27,6 +27,7 @@ message CreateSyncUserRequest {
     string project_id = 9;
     bool invite = 10;
     string environment_id = 11;
+    repeated string login_strategy = 12;
 }
 
 message CreateSyncUsersRequest {

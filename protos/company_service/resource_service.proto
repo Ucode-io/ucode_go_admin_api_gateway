@@ -32,6 +32,43 @@ service ResourceService {
     rpc GetResourceByEnvID(GetResourceByEnvIDRequest) returns (GetResourceByEnvIDResponse) {}
     rpc GetServiceResources(GetServiceResourcesReq) returns (GetServiceResourcesRes) {}
     rpc SetDefaultResource(SetDefaultResourceReq) returns(SetDefaultResourceRes) {}
+
+    rpc CreateVariableResource(CreateVariableResourceRequest) returns(VariableResource) {}
+    rpc GetVariableResourceList(GetVariableResourceListRequest) returns (GetVariableResourceListResponse) {}
+    rpc GetSingleVariableResource(PrimaryKeyVariableResource) returns (VariableResource) {}
+    rpc UpdateVariableResource(VariableResource) returns (Empty) {}
+    rpc DeleteVariableResource(PrimaryKeyVariableResource) returns (Empty) {}
+}
+
+message PrimaryKeyVariableResource {
+    string id = 1;
+    string key = 2;
+    string project_id = 3;
+    string environment_id = 4;
+}
+
+message GetVariableResourceListResponse {
+    repeated VariableResource variables = 1;
+}
+
+message GetVariableResourceListRequest {
+    string project_id = 1;
+    string environment_id = 2;
+}
+
+message CreateVariableResourceRequest {
+    string project_id = 1;
+    string environment_id = 2;
+    string key = 3;
+    string value = 4;
+}
+
+message VariableResource {
+    string id = 1;
+    string project_id = 2;
+    string environment_id = 3;
+    string key = 4;
+    string value = 5;
 }
 
 message GetResourceListRequest {

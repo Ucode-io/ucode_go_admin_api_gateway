@@ -379,6 +379,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1Admin.GET("/company/project/resource-default", h.GetServiceResources)
 		v1Admin.PUT("/company/project/resource-default", h.SetDefaultResource)
 
+		// variable
+		v1Admin.POST("/company/project/resource-variable", h.AddDataToVariableResource)
+		v1Admin.PUT("/company/project/resource-variable", h.UpdateVariableResource)
+		v1Admin.GET("/company/project/resource-variable", h.GetListVariableResource)
+		v1Admin.GET("/company/project/resource-variable/single", h.GetSingleVariableResource)
+		v1Admin.DELETE("/company/project/resource-variable/:id", h.DeleteVariableResource)
+
 		// environment service
 		v1Admin.POST("/environment", h.CreateEnvironment)
 		v1Admin.GET("/environment/:environment_id", h.GetSingleEnvironment)
