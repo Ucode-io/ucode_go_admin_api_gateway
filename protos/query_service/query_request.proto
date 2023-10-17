@@ -36,6 +36,7 @@ message Query {
   string commit_id = 12;
   string version_id = 13;
   CommitInfo commit_info = 14;
+  string project_resource_id = 15;
 }
 
 message Variable {

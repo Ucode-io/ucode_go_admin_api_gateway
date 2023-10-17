@@ -10,22 +10,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AddDataToVariableResource godoc
+// AddResourceToProject godoc
 // @Security ApiKeyAuth
-// @ID add_data_to_variable_resource
-// @Router /v1/company/project/resource-variable [POST]
-// @Summary Add data to variable resource
-// @Description Add data to variable resource
-// @Tags Variable resource
+// @ID add_resource_to_project
+// @Router /v2/company/project/resource [POST]
+// @Summary Add rosource to project
+// @Description Add rosource to project
+// @Tags Project resource
 // @Accept json
 // @Produce json
-// @Param data body pb.CreateVariableResourceRequest true "CreateVariableResourceRequest"
-// @Success 200 {object} status_http.Response{data=company_service.VariableResource} "Company data"
+// @Param data body pb.AddResourceToProjectRequest true "AddResourceToProjectRequest"
+// @Success 200 {object} status_http.Response{data=company_service.ProjectResource} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) AddDataToVariableResource(c *gin.Context) {
+func (h *Handler) AddResourceToProject(c *gin.Context) {
 
-	var request = &pb.CreateVariableResourceRequest{}
+	var request = &pb.AddResourceToProjectRequest{}
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
@@ -49,7 +49,7 @@ func (h *Handler) AddDataToVariableResource(c *gin.Context) {
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
 
-	resp, err := h.companyServices.CompanyService().Resource().CreateVariableResource(
+	resp, err := h.companyServices.CompanyService().Resource().AddResourceToProject(
 		context.Background(),
 		request,
 	)
@@ -61,21 +61,21 @@ func (h *Handler) AddDataToVariableResource(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// UpdateVariableResource godoc
+// UpdateProjectResource godoc
 // @Security ApiKeyAuth
-// @ID update_variable_resource
-// @Router /v1/company/project/resource-variable [PUT]
-// @Summary Update variable resource
-// @Description update variable resource
-// @Tags Variable resource
+// @ID update_project_resource
+// @Router /v2/company/project/resource [PUT]
+// @Summary Update Project resource
+// @Description update Project resource
+// @Tags Project resource
 // @Accept json
 // @Produce json
-// @Param Company body company_service.VariableResource  true "VariableResource"
+// @Param Company body company_service.ProjectResource  true "ProjectResource"
 // @Success 200 {object} status_http.Response{data=company_service.Empty} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) UpdateVariableResource(c *gin.Context) {
-	var request = &pb.VariableResource{}
+func (h *Handler) UpdateProjectResource(c *gin.Context) {
+	var request = &pb.ProjectResource{}
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
@@ -99,7 +99,7 @@ func (h *Handler) UpdateVariableResource(c *gin.Context) {
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
 
-	resp, err := h.companyServices.CompanyService().Resource().UpdateVariableResource(
+	resp, err := h.companyServices.CompanyService().Resource().UpdateProjectResource(
 		context.Background(),
 		request,
 	)
@@ -112,22 +112,21 @@ func (h *Handler) UpdateVariableResource(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// GetListVariableResource godoc
+// GetListProjectResource godoc
 // @Security ApiKeyAuth
-// @ID get_list_variable_resource
-// @Router /v1/company/project/resource-variable/{project-resource-id} [GET]
-// @Summary Get list variable resource
-// @Description Get list variable resource
-// @Tags Variable resource
+// @ID get_list_project_resource
+// @Router /v2/company/project/resource [GET]
+// @Summary Get list project resource
+// @Description Get list project resource
+// @Tags Project resource
 // @Accept json
 // @Produce json
-// @Param project-resource-id path string true "project-resource-id"
-// @Success 200 {object} status_http.Response{data=company_service.GetVariableResourceListResponse} "Company data"
+// @Success 200 {object} status_http.Response{data=company_service.ListProjectResource} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) GetListVariableResource(c *gin.Context) {
+func (h *Handler) GetListProjectResourceList(c *gin.Context) {
 
-	request := &pb.GetVariableResourceListRequest{}
+	request := &pb.GetProjectResourceListRequest{}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -144,9 +143,8 @@ func (h *Handler) GetListVariableResource(c *gin.Context) {
 
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
-	request.ProjectResourceId = c.Param("project-resource-id")
 
-	resp, err := h.companyServices.CompanyService().Resource().GetVariableResourceList(
+	resp, err := h.companyServices.CompanyService().Resource().GetProjectResourceList(
 		context.Background(),
 		request,
 	)
@@ -159,71 +157,22 @@ func (h *Handler) GetListVariableResource(c *gin.Context) {
 	h.handleResponse(c, status_http.OK, resp)
 }
 
-// GetVariableByIdOrKey godoc
+// GetProjectResourceByID godoc
 // @Security ApiKeyAuth
-// @ID get_single_variable_resource
-// @Router /v1/company/project/resource-variable/single [GET]
+// @ID get_single_project_resource
+// @Router /v2/company/project/resource/{id} [GET]
 // @Summary Get single variable resource
 // @Description Get single variable resource
-// @Tags Variable resource
-// @Accept json
-// @Produce json
-// @Param id query string false "id"
-// @Param key query string false "key"
-// @Success 200 {object} status_http.Response{data=pb.VariableResource} "VariableResource"
-// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) GetSingleVariableResource(c *gin.Context) {
-
-	request := &pb.PrimaryKeyVariableResource{}
-
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err := errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status_http.BadRequest, err)
-		return
-	}
-
-	request.ProjectId = projectId.(string)
-	request.EnvironmentId = environmentId.(string)
-	request.Key = c.DefaultQuery("key", "")
-	request.Id = c.DefaultQuery("id", "")
-
-	resp, err := h.companyServices.CompanyService().Resource().GetSingleVariableResource(
-		context.Background(),
-		request,
-	)
-
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
-	}
-
-	h.handleResponse(c, status_http.OK, resp)
-}
-
-// DeletevariableResource godoc
-// @Security ApiKeyAuth
-// @ID delete_variable_resource
-// @Router /v1/company/project/resource-variable/{id} [DELETE]
-// @Summary Delete variable resource
-// @Description Delete variable resource
-// @Tags Variable resource
+// @Tags Project resource
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Success 200 {object} status_http.Response{data=pb.Empty} "VariableResource"
+// @Success 200 {object} status_http.Response{data=pb.ProjectResource} "ProjectResource"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
-func (h *Handler) DeleteVariableResource(c *gin.Context) {
+func (h *Handler) GetSingleProjectResource(c *gin.Context) {
 
-	request := &pb.PrimaryKeyVariableResource{}
+	request := &pb.PrimaryKeyProjectResource{}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -242,7 +191,54 @@ func (h *Handler) DeleteVariableResource(c *gin.Context) {
 	request.EnvironmentId = environmentId.(string)
 	request.Id = c.Param("id")
 
-	resp, err := h.companyServices.CompanyService().Resource().DeleteVariableResource(
+	resp, err := h.companyServices.CompanyService().Resource().GetSingleProjectResouece(
+		context.Background(),
+		request,
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, resp)
+}
+
+// DeletevariableResource godoc
+// @Security ApiKeyAuth
+// @ID delete_variable_resource
+// @Router /v2/company/project/resource/{id} [DELETE]
+// @Summary Delete variable resource
+// @Description Delete variable resource
+// @Tags Project resource
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 200 {object} status_http.Response{data=pb.Empty} "VariableResource"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) DeleteProjectResource(c *gin.Context) {
+
+	request := &pb.PrimaryKeyProjectResource{}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err := errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	request.ProjectId = projectId.(string)
+	request.EnvironmentId = environmentId.(string)
+	request.Id = c.Param("id")
+
+	resp, err := h.companyServices.CompanyService().Resource().DeleteProjectResource(
 		c.Request.Context(),
 		request,
 	)

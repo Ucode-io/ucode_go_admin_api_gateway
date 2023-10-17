@@ -615,6 +615,17 @@ definitions:
       id:
         type: string
     type: object
+  company_service.AddResourceToProjectRequest:
+    properties:
+      environment_id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      type:
+        $ref: '#/definitions/company_service.ResourceType'
+    type: object
   company_service.Company:
     properties:
       description:
@@ -730,6 +741,8 @@ definitions:
       key:
         type: string
       project_id:
+        type: string
+      project_resource_id:
         type: string
       value:
         type: string
@@ -919,6 +932,13 @@ definitions:
       short_name:
         type: string
     type: object
+  company_service.ListProjectResource:
+    properties:
+      resources:
+        items:
+          $ref: '#/definitions/company_service.ProjectResource'
+        type: array
+    type: object
   company_service.Project:
     properties:
       company_id:
@@ -955,6 +975,19 @@ definitions:
       project_id:
         type: string
       subdomain:
+        type: string
+    type: object
+  company_service.ProjectResource:
+    properties:
+      environment_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      type:
         type: string
     type: object
   company_service.ProjectWithoutResource:
@@ -1049,12 +1082,14 @@ definitions:
     - 1
     - 2
     - 3
+    - 4
     type: integer
     x-enum-varnames:
     - ResourceType_NOT_DECIDED
     - ResourceType_MONGODB
     - ResourceType_CLICKHOUSE
     - ResourceType_POSTGRESQL
+    - ResourceType_REST
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -1232,6 +1267,8 @@ definitions:
       key:
         type: string
       project_id:
+        type: string
+      project_resource_id:
         type: string
       value:
         type: string
@@ -5488,6 +5525,8 @@ definitions:
       id:
         type: string
       project_id:
+        type: string
+      project_resource_id:
         type: string
       query_type:
         type: string
@@ -10399,46 +10438,6 @@ paths:
       tags:
       - Company Resource
   /v1/company/project/resource-variable:
-    get:
-      consumes:
-      - application/json
-      description: Get list variable resource
-      operationId: get_list_variable_resource
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Company data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.GetVariableResourceListResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get list variable resource
-      tags:
-      - Variable resource
     post:
       consumes:
       - application/json
@@ -10578,6 +10577,53 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Delete variable resource
+      tags:
+      - Variable resource
+  /v1/company/project/resource-variable/{project-resource-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get list variable resource
+      operationId: get_list_variable_resource
+      parameters:
+      - description: project-resource-id
+        in: path
+        name: project-resource-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetVariableResourceListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get list variable resource
       tags:
       - Variable resource
   /v1/company/project/resource-variable/single:
@@ -23232,6 +23278,234 @@ paths:
       summary: Insert Many webpageV2
       tags:
       - WebPage
+  /v2/company/project/resource:
+    get:
+      consumes:
+      - application/json
+      description: Get list project resource
+      operationId: get_list_project_resource
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ListProjectResource'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get list project resource
+      tags:
+      - Project resource
+    post:
+      consumes:
+      - application/json
+      description: Add rosource to project
+      operationId: add_resource_to_project
+      parameters:
+      - description: AddResourceToProjectRequest
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.AddResourceToProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ProjectResource'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add rosource to project
+      tags:
+      - Project resource
+    put:
+      consumes:
+      - application/json
+      description: update Project resource
+      operationId: update_project_resource
+      parameters:
+      - description: ProjectResource
+        in: body
+        name: Company
+        required: true
+        schema:
+          $ref: '#/definitions/company_service.ProjectResource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Empty'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Project resource
+      tags:
+      - Project resource
+  /v2/company/project/resource/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete variable resource
+      operationId: delete_variable_resource
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: VariableResource
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.Empty'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete variable resource
+      tags:
+      - Project resource
+    get:
+      consumes:
+      - application/json
+      description: Get single variable resource
+      operationId: get_single_project_resource
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ProjectResource
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.ProjectResource'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single variable resource
+      tags:
+      - Project resource
   /v2/copy-project:
     post:
       consumes:

@@ -383,7 +383,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// variable
 		v1Admin.POST("/company/project/resource-variable", h.AddDataToVariableResource)
 		v1Admin.PUT("/company/project/resource-variable", h.UpdateVariableResource)
-		v1Admin.GET("/company/project/resource-variable", h.GetListVariableResource)
+		v1Admin.GET("/company/project/resource-variable/:project-resource-id", h.GetListVariableResource)
 		v1Admin.GET("/company/project/resource-variable/single", h.GetSingleVariableResource)
 		v1Admin.DELETE("/company/project/resource-variable/:id", h.DeleteVariableResource)
 
@@ -543,6 +543,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2Admin.GET("/function", h.GetAllNewFunctions)
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
+
+		// project resource /rest
+		v2Admin.POST("/company/project/resource", h.AddResourceToProject)
+		v2Admin.PUT("/company/project/resource", h.UpdateProjectResource)
+		v2Admin.GET("/company/project/resource", h.GetListProjectResourceList)
+		v2Admin.GET("/company/project/resource/:id", h.GetSingleProjectResource)
+		v2Admin.DELETE("/company/project/resource/:id", h.DeleteProjectResource)
 
 		v2Admin.POST("/copy-project", h.CopyProjectTemplate)
 
