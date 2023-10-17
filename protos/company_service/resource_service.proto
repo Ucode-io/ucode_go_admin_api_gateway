@@ -63,6 +63,7 @@ message AddResourceToProjectRequest {
 message GetProjectResourceListRequest {
     string project_id = 1;
     string environment_id = 2;
+    ResourceType type = 3;
 }
 
 message ProjectResource {

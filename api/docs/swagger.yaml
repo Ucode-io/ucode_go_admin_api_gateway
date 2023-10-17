@@ -23284,6 +23284,11 @@ paths:
       - application/json
       description: Get list project resource
       operationId: get_list_project_resource
+      parameters:
+      - description: type
+        in: query
+        name: type
+        type: string
       produces:
       - application/json
       responses:

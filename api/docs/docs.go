@@ -30000,6 +30000,14 @@ const docTemplate = `{
                 ],
                 "summary": "Get list project resource",
                 "operationId": "get_list_project_resource",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "type",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Company data",

@@ -121,6 +121,7 @@ func (h *Handler) UpdateProjectResource(c *gin.Context) {
 // @Tags Project resource
 // @Accept json
 // @Produce json
+// @Param type query string false "type"
 // @Success 200 {object} status_http.Response{data=company_service.ListProjectResource} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -143,6 +144,10 @@ func (h *Handler) GetListProjectResourceList(c *gin.Context) {
 
 	request.ProjectId = projectId.(string)
 	request.EnvironmentId = environmentId.(string)
+
+	if c.DefaultQuery("type", "") != "" && pb.ResourceType(pb.ResourceType_value[c.DefaultQuery("type", "")]) != 0 {
+		request.Type = pb.ResourceType(pb.ResourceType_value[c.DefaultQuery("type", "")])
+	}
 
 	resp, err := h.companyServices.CompanyService().Resource().GetProjectResourceList(
 		context.Background(),
