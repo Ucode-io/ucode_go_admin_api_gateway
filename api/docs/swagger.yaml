@@ -5491,6 +5491,8 @@ definitions:
     properties:
       created_at:
         type: string
+      duration:
+        type: number
       environment_id:
         type: string
       id:
@@ -5535,6 +5537,8 @@ definitions:
       timeout:
         type: string
       title:
+        type: string
+      user_id:
         type: string
       variables:
         items:

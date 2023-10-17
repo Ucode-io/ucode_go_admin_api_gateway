@@ -695,11 +695,12 @@ func (h *Handler) QueryRun(c *gin.Context) {
 		return
 	}
 
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
+	tokenInfo, err := h.GetAuthAdminInfo(c)
+	fmt.Println(":::::::", tokenInfo, err)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err.Error())
+		return
+	}
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -780,6 +781,7 @@ func (h *Handler) QueryRun(c *gin.Context) {
 	query.CommitId = uuID.String()
 	query.VersionId = "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88"
 	query.EnvironmentId = environmentId.(string)
+	query.UserId = tokenInfo.GetUserId()
 
 	res, err := services.QueryService().Query().RunQuery(
 		context.Background(),

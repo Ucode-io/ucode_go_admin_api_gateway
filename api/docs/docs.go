@@ -43579,6 +43579,9 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "duration": {
+                    "type": "number"
+                },
                 "environment_id": {
                     "type": "string"
                 },
@@ -43645,6 +43648,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 },
                 "variables": {
