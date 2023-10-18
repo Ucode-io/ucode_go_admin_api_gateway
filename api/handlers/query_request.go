@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/query_service"
 	vcs "ucode/ucode_go_api_gateway/genproto/versioning_service"
@@ -1417,13 +1418,6 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
@@ -1444,32 +1438,6 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 		return
 	}
 
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ProjectId:     projectId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
-
 	resp, err := services.QueryService().Log().GetListLog(
 		context.Background(),
 		&tmp.GetListLogReq{
@@ -1484,6 +1452,72 @@ func (h *Handler) GetListQueryLog(c *gin.Context) {
 	if err != nil {
 		h.log.Error("error reverting query", logger.Error(err))
 		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if len(resp.Log) > 0 {
+
+		clientTypes, err := services.AuthService().Client().V2GetClientTypeList(
+			c.Request.Context(),
+			&auth_service.V2GetClientTypeListRequest{
+				ProjectId:    resource.ResourceEnvironmentId,
+				ResourceType: int32(resource.ResourceType),
+			},
+		)
+		if err != nil {
+			h.log.Error("error getting client type", logger.Error(err))
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+
+		projectUsers := make(map[string]map[string]interface{})
+
+		for _, clientType := range clientTypes.Data.AsMap()["response"].([]interface{}) {
+
+			users, err := services.AuthService().User().V2GetUserList(
+				c.Request.Context(),
+				&auth_service.GetUserListRequest{
+					ProjectId:             projectId.(string),
+					ClientTypeId:          clientType.(map[string]interface{})["guid"].(string),
+					ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+					ResourceType:          int32(resource.GetResourceType()),
+				},
+			)
+			if err != nil {
+				h.log.Error("error getting client type", logger.Error(err))
+				h.handleResponse(c, status_http.GRPCError, err.Error())
+				return
+			}
+
+			for _, user := range users.Users {
+				projectUsers[user.Id] = map[string]interface{}{
+					"login": user.Login,
+					"phone": user.Phone,
+					"email": user.Email,
+					"name":  user.Name,
+				}
+			}
+		}
+
+		queryLogs := models.QueryLogList{}
+
+		for _, log := range resp.Log {
+			queryLog := models.QueryLog{
+				Id:            log.GetId(),
+				QueryId:       log.GetQueryId(),
+				UserId:        log.GetUserId(),
+				ProjectId:     log.GetProjectId(),
+				EnvironmentId: log.GetEnvironmentId(),
+				Request:       log.GetRequest().AsMap(),
+				Response:      log.GetResponse(),
+				Duration:      log.GetDuration(),
+				UserData:      projectUsers[log.GetUserId()],
+			}
+
+			queryLogs.Logs = append(queryLogs.Logs, queryLog)
+		}
+
+		h.handleResponse(c, status_http.OK, queryLogs)
 		return
 	}
 

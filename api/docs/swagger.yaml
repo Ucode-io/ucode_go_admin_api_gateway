@@ -11767,7 +11767,8 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
@@ -13537,7 +13538,8 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
@@ -16803,6 +16805,59 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get financial analytics
+      tags:
+      - Object
+  /v1/object/get-group-by-field/{table_slug}:
+    post:
+      consumes:
+      - application/json
+      description: Get Group By Field Object
+      operationId: get_group_by_field_objects
+      parameters:
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: GetGroupByFieldObjectRequestBody
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Group By Field Object
       tags:
       - Object
   /v1/object/get-list-group-by/{table_slug}/{column_table_slug}:

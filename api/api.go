@@ -112,6 +112,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.PUT("/object/multiple-update/:table_slug", h.MultipleUpdateObject)
 		v1.POST("/object/get-financial-analytics/:table_slug", h.GetFinancialAnalytics)
 		v1.POST("/object/get-list-group-by/:table_slug/:column_table_slug", h.GetListGroupBy)
+		v1.POST("/object/get-group-by-field/:table_slug", h.GetGroupByField)
 
 		// permission
 		v1.POST("/permission-upsert/:app_id", h.UpsertPermissionsByAppId)
