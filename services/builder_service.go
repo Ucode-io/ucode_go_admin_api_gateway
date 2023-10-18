@@ -43,6 +43,7 @@ type BuilderServiceI interface {
 	Menu() object_builder_service.MenuServiceClient
 	CustomErrorMessage() object_builder_service.CustomErrorMessageServiceClient
 	ReportSetting() object_builder_service.ReportSettingServiceClient
+	File() object_builder_service.FileServiceClient
 }
 
 func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderServiceI, error) {
@@ -91,6 +92,7 @@ func NewBuilderServiceClient(ctx context.Context, cfg config.Config) (BuilderSer
 		menuService:               object_builder_service.NewMenuServiceClient(connObjectBuilderService),
 		customErrorMessageService: object_builder_service.NewCustomErrorMessageServiceClient(connObjectBuilderService),
 		reportSettingService:      object_builder_service.NewReportSettingServiceClient(connObjectBuilderService),
+		fileService:               object_builder_service.NewFileServiceClient(connObjectBuilderService),
 	}, nil
 }
 
@@ -128,6 +130,7 @@ type builderServiceClient struct {
 	menuService               object_builder_service.MenuServiceClient
 	customErrorMessageService object_builder_service.CustomErrorMessageServiceClient
 	reportSettingService      object_builder_service.ReportSettingServiceClient
+	fileService               object_builder_service.FileServiceClient
 }
 
 func (g *builderServiceClient) Table() object_builder_service.TableServiceClient {
@@ -258,4 +261,8 @@ func (g *builderServiceClient) CustomErrorMessage() object_builder_service.Custo
 
 func (g *builderServiceClient) ReportSetting() object_builder_service.ReportSettingServiceClient {
 	return g.reportSettingService
+}
+
+func (g *builderServiceClient) File() object_builder_service.FileServiceClient {
+	return g.fileService
 }
