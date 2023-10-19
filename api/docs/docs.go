@@ -30607,6 +30607,16 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "name": "folder_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "project_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "search",
                         "in": "query"
                     },
@@ -40831,6 +40841,9 @@ const docTemplate = `{
                 "link": {
                     "type": "string"
                 },
+                "project_id": {
+                    "type": "string"
+                },
                 "storage": {
                     "type": "string"
                 },
@@ -40927,6 +40940,12 @@ const docTemplate = `{
         "object_builder_service.GetAllFilesRequest": {
             "type": "object",
             "properties": {
+                "folder_name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
                 "search": {
                     "type": "string"
                 },

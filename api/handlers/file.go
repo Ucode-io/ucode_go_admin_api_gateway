@@ -494,9 +494,10 @@ func (h *Handler) GetAllFiles(c *gin.Context) {
 	resp, err := services.BuilderService().File().GetList(
 		context.Background(),
 		&obs.GetAllFilesRequest{
-			Search:    c.DefaultQuery("search", ""),
-			Sort:      c.DefaultQuery("sort", ""),
-			ProjectId: resource.ResourceEnvironmentId,
+			Search:     c.DefaultQuery("search", ""),
+			Sort:       c.DefaultQuery("sort", ""),
+			ProjectId:  resource.ResourceEnvironmentId,
+			FolderName: c.DefaultQuery("folder_name", ""),
 		},
 	)
 

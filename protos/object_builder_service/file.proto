@@ -51,6 +51,7 @@ message GetAllFilesRequest {
     string search = 1;
     string sort = 2;
     string project_id = 3;
+    string folder_name = 4;
 }
 
 message FilePrimaryKey {

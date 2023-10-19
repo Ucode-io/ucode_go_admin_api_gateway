@@ -3634,6 +3634,8 @@ definitions:
         type: string
       link:
         type: string
+      project_id:
+        type: string
       storage:
         type: string
       tags:
@@ -3696,6 +3698,10 @@ definitions:
     type: object
   object_builder_service.GetAllFilesRequest:
     properties:
+      folder_name:
+        type: string
+      project_id:
+        type: string
       search:
         type: string
       sort:
@@ -23638,6 +23644,12 @@ paths:
       description: Get file list
       operationId: get_file_list
       parameters:
+      - in: query
+        name: folder_name
+        type: string
+      - in: query
+        name: project_id
+        type: string
       - in: query
         name: search
         type: string
