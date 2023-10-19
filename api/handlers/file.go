@@ -150,18 +150,18 @@ func (h *Handler) UploadToFolder(c *gin.Context) {
 // GetSingleFile godoc
 // @Security ApiKeyAuth
 // @ID get_file_by_id
-// @Router /v1/files/{file_id} [GET]
+// @Router /v1/files/{id} [GET]
 // @Summary Get single variable
 // @Description Get single variable
 // @Tags Files
 // @Accept json
 // @Produce json
-// @Param file_id path string true "file_id"
+// @Param id path string true "id"
 // @Success 200 {object} status_http.Response{data=obs.File} "FileBody"
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetSingleFile(c *gin.Context) {
-	fileID := c.Param("file_id")
+	fileID := c.Param("id")
 
 	if !util.IsValidUUID(fileID) {
 		h.handleResponse(c, status_http.InvalidArgument, "variable id is an invalid uuid")
@@ -333,19 +333,19 @@ func (h *Handler) UpdateFile(c *gin.Context) {
 // DeleteFile godoc
 // @Security ApiKeyAuth
 // @ID delete_file
-// @Router /v1/files/{file_id} [DELETE]
+// @Router /v1/files/{id} [DELETE]
 // @Summary Delete file
 // @Description Delete file
 // @Tags Files
 // @Accept json
 // @Produce json
-// @Param file_id path string true "file_id"
+// @Param id path string true "id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteFile(c *gin.Context) {
 
-	file_id := c.Param("file_id")
+	id := c.Param("id")
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -383,7 +383,7 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 	res, err := services.BuilderService().File().GetSingle(
 		context.Background(),
 		&obs.FilePrimaryKey{
-			Id:        file_id,
+			Id:        id,
 			ProjectId: resource.ResourceEnvironmentId,
 		},
 	)
@@ -404,7 +404,7 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 
 	var delete_request []string
 
-	delete_request = append(delete_request, file_id)
+	delete_request = append(delete_request, id)
 	err = minioClient.RemoveObject(ctx, resource.ResourceEnvironmentId, res.Storage+"/"+res.FileNameDisk, minio.RemoveObjectOptions{})
 	if err != nil {
 		log.Println(err)

@@ -12937,16 +12937,16 @@ paths:
       summary: Update file
       tags:
       - Files
-  /v1/files/{file_id}:
+  /v1/files/{id}:
     delete:
       consumes:
       - application/json
       description: Delete file
       operationId: delete_file
       parameters:
-      - description: file_id
+      - description: id
         in: path
-        name: file_id
+        name: id
         required: true
         type: string
       produces:
@@ -12983,9 +12983,9 @@ paths:
       description: Get single variable
       operationId: get_file_by_id
       parameters:
-      - description: file_id
+      - description: id
         in: path
-        name: file_id
+        name: id
         required: true
         type: string
       produces:

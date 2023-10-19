@@ -329,10 +329,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.GET("/dynamic-report-formula", h.DynamicReportFormula)
 
 		v1.POST("/files/folder_upload/:folder_name", h.UploadToFolder)
-		v1.GET("/files/:file_id", h.GetSingleFile)
+		v1.GET("/files/:id", h.GetSingleFile)
 		v1.PUT("/files", h.UpdateFile)
 		v1.DELETE("/files", h.DeleteFiles)
-		v1.DELETE("/files/:file_id", h.DeleteFile)
+		v1.DELETE("/files/:id", h.DeleteFile)
 		v1.GET("/files", h.GetAllFiles)
 	}
 	v2 := r.Group("/v2")

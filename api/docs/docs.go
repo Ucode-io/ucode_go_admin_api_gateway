@@ -11291,7 +11291,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/files/{file_id}": {
+        "/v1/files/{id}": {
             "get": {
                 "security": [
                     {
@@ -11313,8 +11313,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "file_id",
-                        "name": "file_id",
+                        "description": "id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -11397,8 +11397,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "file_id",
-                        "name": "file_id",
+                        "description": "id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }

@@ -11280,7 +11280,7 @@
                 }
             }
         },
-        "/v1/files/{file_id}": {
+        "/v1/files/{id}": {
             "get": {
                 "security": [
                     {
@@ -11302,8 +11302,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "file_id",
-                        "name": "file_id",
+                        "description": "id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -11386,8 +11386,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "file_id",
-                        "name": "file_id",
+                        "description": "id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
