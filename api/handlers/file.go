@@ -22,10 +22,10 @@ import (
 // Upload godoc
 // @ID create_file
 // @Security ApiKeyAuth
-// @Router /v2/folder_upload/{folder_name} [POST]
+// @Router /v1/files/folder_upload/{folder_name} [POST]
 // @Summary Upload Folder
 // @Description Upload Folder
-// @Tags File
+// @Tags Files
 // @Accept multipart/form-data
 // @Produce json
 // @Param file formData file true "file"
@@ -150,10 +150,10 @@ func (h *Handler) UploadToFolder(c *gin.Context) {
 // GetSingleFile godoc
 // @Security ApiKeyAuth
 // @ID get_file_by_id
-// @Router /v2/file/{file_id} [GET]
+// @Router /v1/files/{file_id} [GET]
 // @Summary Get single variable
 // @Description Get single variable
-// @Tags File
+// @Tags Files
 // @Accept json
 // @Produce json
 // @Param file_id path string true "file_id"
@@ -232,10 +232,10 @@ func (h *Handler) GetSingleFile(c *gin.Context) {
 // UpdateFile godoc
 // @Security ApiKeyAuth
 // @ID update_file
-// @Router /v2/file [PUT]
+// @Router /v1/files [PUT]
 // @Summary Update file
 // @Description Update file
-// @Tags File
+// @Tags Files
 // @Accept json
 // @Produce json
 // @Param variable body models.UpdateFileRequest true "UpdateFileRequestBody"
@@ -333,28 +333,19 @@ func (h *Handler) UpdateFile(c *gin.Context) {
 // DeleteFile godoc
 // @Security ApiKeyAuth
 // @ID delete_file
-// @Router /v2/file/{folder_name} [DELETE]
+// @Router /v1/files/{file_id} [DELETE]
 // @Summary Delete file
 // @Description Delete file
-// @Tags File
+// @Tags Files
 // @Accept json
 // @Produce json
-// @Param folder_name path string true "folder_name"
-// @Param file body models.FileDeleteRequest true "DeleteFileRequestBody"
+// @Param file_id path string true "file_id"
 // @Success 204
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) DeleteFile(c *gin.Context) {
 
-	var file models.FileDeleteRequest
-
-	err := c.ShouldBindJSON(&file)
-	if err != nil {
-		h.handleResponse(c, status_http.BadRequest, err.Error())
-		return
-	}
-
-	folder_name := c.Param("folder_name")
+	file_id := c.Param("file_id")
 
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
@@ -362,15 +353,6 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -398,6 +380,120 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 		return
 	}
 
+	res, err := services.BuilderService().File().GetSingle(
+		context.Background(),
+		&obs.FilePrimaryKey{
+			Id:        file_id,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	minioClient, err := minio.New(h.cfg.MinioEndpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(h.cfg.MinioAccessKeyID, h.cfg.MinioSecretAccessKey, ""),
+		Secure: true,
+	})
+	if err != nil {
+		log.Println(err)
+	}
+
+	ctx := context.Background()
+
+	var delete_request []string
+
+	delete_request = append(delete_request, file_id)
+	err = minioClient.RemoveObject(ctx, resource.ResourceEnvironmentId, res.Storage+"/"+res.FileNameDisk, minio.RemoveObjectOptions{})
+	if err != nil {
+		log.Println(err)
+	}
+
+	resp, err := services.BuilderService().File().Delete(
+		context.Background(),
+		&obs.FileDeleteRequest{
+			Ids:       delete_request,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, status_http.NoContent, resp)
+}
+
+// DeleteFiles godoc
+// @Security ApiKeyAuth
+// @ID delete_files
+// @Router /v1/files [DELETE]
+// @Summary Delete files
+// @Description Delete files
+// @Tags Files
+// @Accept json
+// @Produce json
+// @Param file body models.FileDeleteRequest true "DeleteFilesRequestBody"
+// @Success 204
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) DeleteFiles(c *gin.Context) {
+
+	var file models.FileDeleteRequest
+
+	err := c.ShouldBindJSON(&file)
+	if err != nil {
+		h.handleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, status_http.BadRequest, err)
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	res, err := services.BuilderService().File().GetSingle(
+		context.Background(),
+		&obs.FilePrimaryKey{
+			Id:        file.Objects[0].ObjectId,
+			ProjectId: resource.ResourceEnvironmentId,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
 	minioClient, err := minio.New(h.cfg.MinioEndpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(h.cfg.MinioAccessKeyID, h.cfg.MinioSecretAccessKey, ""),
 		Secure: true,
@@ -412,7 +508,7 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 
 	for _, val := range file.Objects {
 		delete_request = append(delete_request, val.ObjectId)
-		err = minioClient.RemoveObject(ctx, resource.ResourceEnvironmentId, folder_name+"/"+val.ObjectName, minio.RemoveObjectOptions{})
+		err = minioClient.RemoveObject(ctx, resource.ResourceEnvironmentId, res.Storage+"/"+val.ObjectName, minio.RemoveObjectOptions{})
 		if err != nil {
 			log.Println(err)
 		}
@@ -437,10 +533,10 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 // GetAllFiles godoc
 // @Security ApiKeyAuth
 // @ID get_file_list
-// @Router /v2/file [GET]
+// @Router /v1/files [GET]
 // @Summary Get file list
 // @Description Get file list
-// @Tags File
+// @Tags Files
 // @Accept json
 // @Produce json
 // @Param filters query obs.GetAllFilesRequest true "filters"

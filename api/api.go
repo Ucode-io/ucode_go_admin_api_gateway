@@ -327,6 +327,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.DELETE("/remove-pivot-template/:id", h.RemovePivotTemplate)
 
 		v1.GET("/dynamic-report-formula", h.DynamicReportFormula)
+
+		v1.POST("/files/folder_upload/:folder_name", h.UploadToFolder)
+		v1.GET("/file/:file_id", h.GetSingleFile)
+		v1.PUT("/files", h.UpdateFile)
+		v1.DELETE("/files", h.DeleteFiles)
+		v1.DELETE("/files/:file_id", h.DeleteFile)
+		v1.GET("/files", h.GetAllFiles)
 	}
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware(cfg))
@@ -342,11 +349,6 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 
 		v2.POST("/object/get-list/:table_slug", h.GetListV2)
 
-		v2.POST("/folder_upload/:folder_name", h.UploadToFolder)
-		v2.GET("/file/:file_id", h.GetSingleFile)
-		v2.PUT("/file", h.UpdateFile)
-		v2.DELETE("/file/:folder_name", h.DeleteFile)
-		v2.GET("/file/", h.GetAllFiles)
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
 

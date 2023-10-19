@@ -12796,6 +12796,285 @@ paths:
       summary: Create field
       tags:
       - Field
+  /v1/files:
+    delete:
+      consumes:
+      - application/json
+      description: Delete files
+      operationId: delete_files
+      parameters:
+      - description: DeleteFilesRequestBody
+        in: body
+        name: file
+        required: true
+        schema:
+          $ref: '#/definitions/models.FileDeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete files
+      tags:
+      - Files
+    get:
+      consumes:
+      - application/json
+      description: Get file list
+      operationId: get_file_list
+      parameters:
+      - in: query
+        name: folder_name
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FileBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllFilesRequest'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get file list
+      tags:
+      - Files
+    put:
+      consumes:
+      - application/json
+      description: Update file
+      operationId: update_file
+      parameters:
+      - description: UpdateFileRequestBody
+        in: body
+        name: variable
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.File'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update file
+      tags:
+      - Files
+  /v1/files/{file_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete file
+      operationId: delete_file
+      parameters:
+      - description: file_id
+        in: path
+        name: file_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete file
+      tags:
+      - Files
+    get:
+      consumes:
+      - application/json
+      description: Get single variable
+      operationId: get_file_by_id
+      parameters:
+      - description: file_id
+        in: path
+        name: file_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FileBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.File'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single variable
+      tags:
+      - Files
+  /v1/files/folder_upload/{folder_name}:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload Folder
+      operationId: create_file
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: folder_name
+        in: path
+        name: folder_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Path
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.Path'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upload Folder
+      tags:
+      - Files
   /v1/function:
     get:
       consumes:
@@ -23637,252 +23916,6 @@ paths:
       summary: Get CustomEvent by id
       tags:
       - NewCustomEvent
-  /v2/file:
-    get:
-      consumes:
-      - application/json
-      description: Get file list
-      operationId: get_file_list
-      parameters:
-      - in: query
-        name: folder_name
-        type: string
-      - in: query
-        name: project_id
-        type: string
-      - in: query
-        name: search
-        type: string
-      - in: query
-        name: sort
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: FileBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/object_builder_service.GetAllFilesRequest'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get file list
-      tags:
-      - File
-    put:
-      consumes:
-      - application/json
-      description: Update file
-      operationId: update_file
-      parameters:
-      - description: UpdateFileRequestBody
-        in: body
-        name: variable
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdateFileRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: File data
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/object_builder_service.File'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Update file
-      tags:
-      - File
-  /v2/file/{file_id}:
-    get:
-      consumes:
-      - application/json
-      description: Get single variable
-      operationId: get_file_by_id
-      parameters:
-      - description: file_id
-        in: path
-        name: file_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: FileBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/object_builder_service.File'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get single variable
-      tags:
-      - File
-  /v2/file/{folder_name}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete file
-      operationId: delete_file
-      parameters:
-      - description: folder_name
-        in: path
-        name: folder_name
-        required: true
-        type: string
-      - description: DeleteFileRequestBody
-        in: body
-        name: file
-        required: true
-        schema:
-          $ref: '#/definitions/models.FileDeleteRequest'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete file
-      tags:
-      - File
-  /v2/folder_upload/{folder_name}:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload Folder
-      operationId: create_file
-      parameters:
-      - description: file
-        in: formData
-        name: file
-        required: true
-        type: file
-      - description: folder_name
-        in: path
-        name: folder_name
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Path
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/handlers.Path'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/status_http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Upload Folder
-      tags:
-      - File
   /v2/function:
     get:
       consumes:
