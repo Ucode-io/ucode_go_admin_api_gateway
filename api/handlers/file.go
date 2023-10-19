@@ -22,14 +22,14 @@ import (
 // Upload godoc
 // @ID create_file
 // @Security ApiKeyAuth
-// @Router /v1/files/folder_upload/{folder_name} [POST]
+// @Router /v1/files/folder_upload [POST]
 // @Summary Upload Folder
 // @Description Upload Folder
 // @Tags Files
 // @Accept multipart/form-data
 // @Produce json
 // @Param file formData file true "file"
-// @Param folder_name path string true "folder_name"
+// @Param folder_name query string true "folder_name"
 // @Success 200 {object} status_http.Response{data=Path} "Path"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
@@ -43,7 +43,7 @@ func (h *Handler) UploadToFolder(c *gin.Context) {
 		return
 	}
 
-	folder_name := c.Param("folder_name")
+	folder_name := c.DefaultQuery("folder_name", "")
 
 	err := c.ShouldBind(&file)
 	if err != nil {

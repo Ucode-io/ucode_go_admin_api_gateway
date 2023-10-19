@@ -11198,7 +11198,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/files/folder_upload/{folder_name}": {
+        "/v1/files/folder_upload": {
             "post": {
                 "security": [
                     {
@@ -11229,7 +11229,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "folder_name",
                         "name": "folder_name",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],

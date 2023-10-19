@@ -13023,7 +13023,7 @@ paths:
       summary: Get single variable
       tags:
       - Files
-  /v1/files/folder_upload/{folder_name}:
+  /v1/files/folder_upload:
     post:
       consumes:
       - multipart/form-data
@@ -13036,7 +13036,7 @@ paths:
         required: true
         type: file
       - description: folder_name
-        in: path
+        in: query
         name: folder_name
         required: true
         type: string
