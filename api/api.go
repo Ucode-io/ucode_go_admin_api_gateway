@@ -63,6 +63,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.DELETE("/menu-template/:id", h.DeleteMenuTemplate)
 
 		v1.POST("/upload", h.Upload)
+		v1.POST("/upload-template/:template_name", h.UploadTemplate)
 		v1.POST("/upload-file/:table_slug/:object_id", h.UploadFile)
 
 		// OBJECT_BUILDER_SERVICE
@@ -111,6 +112,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v1.PUT("/object/multiple-update/:table_slug", h.MultipleUpdateObject)
 		v1.POST("/object/get-financial-analytics/:table_slug", h.GetFinancialAnalytics)
 		v1.POST("/object/get-list-group-by/:table_slug/:column_table_slug", h.GetListGroupBy)
+		v1.POST("/object/get-group-by-field/:table_slug", h.GetGroupByField)
 
 		// permission
 		v1.POST("/permission-upsert/:app_id", h.UpsertPermissionsByAppId)
@@ -382,7 +384,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		// variable
 		v1Admin.POST("/company/project/resource-variable", h.AddDataToVariableResource)
 		v1Admin.PUT("/company/project/resource-variable", h.UpdateVariableResource)
-		v1Admin.GET("/company/project/resource-variable", h.GetListVariableResource)
+		v1Admin.GET("/company/project/resource-variable/:project-resource-id", h.GetListVariableResource)
 		v1Admin.GET("/company/project/resource-variable/single", h.GetSingleVariableResource)
 		v1Admin.DELETE("/company/project/resource-variable/:id", h.DeleteVariableResource)
 
@@ -542,6 +544,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2Admin.GET("/function", h.GetAllNewFunctions)
 		v2Admin.PUT("/function", h.UpdateNewFunction)
 		v2Admin.DELETE("/function/:function_id", h.DeleteNewFunction)
+
+		// project resource /rest
+		v2Admin.POST("/company/project/resource", h.AddResourceToProject)
+		v2Admin.PUT("/company/project/resource", h.UpdateProjectResource)
+		v2Admin.GET("/company/project/resource", h.GetListProjectResourceList)
+		v2Admin.GET("/company/project/resource/:id", h.GetSingleProjectResource)
+		v2Admin.DELETE("/company/project/resource/:id", h.DeleteProjectResource)
 
 		v2Admin.POST("/copy-project", h.CopyProjectTemplate)
 

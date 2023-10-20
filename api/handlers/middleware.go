@@ -72,6 +72,21 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 
 		case "API-KEY":
 			app_id := c.GetHeader("X-API-KEY")
+
+			if app_id == "" {
+				err := errors.New("error invalid api-key method")
+				h.log.Error("--AuthMiddleware--", logger.Error(err))
+				c.JSON(401, struct {
+					Code    int    `json:"code"`
+					Message string `json:"message"`
+				}{
+					Code:    401,
+					Message: "The request requires an user authentication.",
+				})
+				c.Abort()
+				return
+			}
+
 			apikeys, err := h.authService.ApiKey().GetEnvID(
 				c.Request.Context(),
 				&auth_service.GetReq{
@@ -115,7 +130,7 @@ func (h *Handler) AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 					Code    int    `json:"code"`
 					Message string `json:"message"`
 				}{
-					Code: 401,
+					Code:    401,
 					Message: "The request requires an user authentication.",
 				})
 				c.Abort()
