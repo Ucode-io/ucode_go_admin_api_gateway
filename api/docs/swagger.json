@@ -9112,7 +9112,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -12334,7 +12333,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -36244,6 +36242,12 @@
                 },
                 "type": {
                     "$ref": "#/definitions/company_service.ResourceType"
+                },
+                "variables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.VariableResource"
+                    }
                 }
             }
         },
