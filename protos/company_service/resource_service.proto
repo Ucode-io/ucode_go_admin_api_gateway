@@ -38,6 +38,45 @@ service ResourceService {
     rpc GetSingleVariableResource(PrimaryKeyVariableResource) returns (VariableResource) {}
     rpc UpdateVariableResource(VariableResource) returns (Empty) {}
     rpc DeleteVariableResource(PrimaryKeyVariableResource) returns (Empty) {}
+
+    rpc AddResourceToProject(AddResourceToProjectRequest) returns(ProjectResource) {}
+    rpc GetProjectResourceList(GetProjectResourceListRequest) returns (ListProjectResource) {}
+    rpc GetSingleProjectResouece(PrimaryKeyProjectResource) returns (ProjectResource) {}
+    rpc UpdateProjectResource(ProjectResource) returns (Empty) {}
+    rpc DeleteProjectResource(PrimaryKeyProjectResource) returns (Empty) {}
+}
+
+message PrimaryKeyProjectResource {
+    string id = 1;
+    string environment_id = 2;
+    string project_id = 3;
+}
+
+message AddResourceToProjectRequest {
+    string name = 1;
+    string project_id = 2;
+    string environment_id = 3;
+    ResourceType type = 4;
+    repeated VariableResource variables = 5;
+}
+
+message GetProjectResourceListRequest {
+    string project_id = 1;
+    string environment_id = 2;
+    ResourceType type = 3;
+}
+
+message ProjectResource {
+    string name = 1;
+    string project_id = 2;
+    string environment_id = 3;
+    string type = 4;
+    string id = 5;
+
+}
+
+message ListProjectResource {
+    repeated ProjectResource resources = 1;
 }
 
 message PrimaryKeyVariableResource {
@@ -45,6 +84,7 @@ message PrimaryKeyVariableResource {
     string key = 2;
     string project_id = 3;
     string environment_id = 4;
+    string project_resource_id = 5;
 }
 
 message GetVariableResourceListResponse {
@@ -54,6 +94,7 @@ message GetVariableResourceListResponse {
 message GetVariableResourceListRequest {
     string project_id = 1;
     string environment_id = 2;
+    string project_resource_id = 3;
 }
 
 message CreateVariableResourceRequest {
@@ -61,6 +102,7 @@ message CreateVariableResourceRequest {
     string environment_id = 2;
     string key = 3;
     string value = 4;
+    string project_resource_id = 5;
 }
 
 message VariableResource {
@@ -69,6 +111,7 @@ message VariableResource {
     string environment_id = 3;
     string key = 4;
     string value = 5;
+    string project_resource_id = 6;
 }
 
 message GetResourceListRequest {

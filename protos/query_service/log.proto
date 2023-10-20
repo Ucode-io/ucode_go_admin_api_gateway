@@ -22,6 +22,7 @@ message Log {
   string response = 7;
   string created_at = 8;
   string resource_id = 9;
+  float duration = 10;
 }
 
 message GetSingleLogReq {
