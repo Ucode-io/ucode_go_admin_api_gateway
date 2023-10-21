@@ -2213,6 +2213,20 @@ definitions:
       unique:
         type: boolean
     type: object
+  models.FileDelete:
+    properties:
+      object_id:
+        type: string
+      object_name:
+        type: string
+    type: object
+  models.FileDeleteRequest:
+    properties:
+      objects:
+        items:
+          $ref: '#/definitions/models.FileDelete'
+        type: array
+    type: object
   models.FilterSetting:
     properties:
       label:
@@ -2551,6 +2565,21 @@ definitions:
       id:
         type: string
       name:
+        type: string
+    type: object
+  models.UpdateFileRequest:
+    properties:
+      description:
+        type: string
+      file_name_download:
+        type: string
+      id:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
         type: string
     type: object
   models.UpdateFolderReqModel:
@@ -3632,6 +3661,31 @@ definitions:
       type:
         type: string
     type: object
+  object_builder_service.File:
+    properties:
+      description:
+        type: string
+      file_name_disk:
+        type: string
+      file_name_download:
+        type: string
+      file_size:
+        type: integer
+      id:
+        type: string
+      link:
+        type: string
+      project_id:
+        type: string
+      storage:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
   object_builder_service.FilterPivotTemplateSetting:
     properties:
       field_id:
@@ -3682,6 +3736,17 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.Document'
         type: array
+    type: object
+  object_builder_service.GetAllFilesRequest:
+    properties:
+      folder_name:
+        type: string
+      project_id:
+        type: string
+      search:
+        type: string
+      sort:
+        type: string
     type: object
   object_builder_service.GetAllHtmlTemplateResponse:
     properties:
@@ -11771,7 +11836,8 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
@@ -12784,6 +12850,285 @@ paths:
       summary: Create field
       tags:
       - Field
+  /v1/files:
+    delete:
+      consumes:
+      - application/json
+      description: Delete files
+      operationId: delete_files
+      parameters:
+      - description: DeleteFilesRequestBody
+        in: body
+        name: file
+        required: true
+        schema:
+          $ref: '#/definitions/models.FileDeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete files
+      tags:
+      - Files
+    get:
+      consumes:
+      - application/json
+      description: Get file list
+      operationId: get_file_list
+      parameters:
+      - in: query
+        name: folder_name
+        type: string
+      - in: query
+        name: project_id
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FileBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GetAllFilesRequest'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get file list
+      tags:
+      - Files
+    put:
+      consumes:
+      - application/json
+      description: Update file
+      operationId: update_file
+      parameters:
+      - description: UpdateFileRequestBody
+        in: body
+        name: variable
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File data
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.File'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update file
+      tags:
+      - Files
+  /v1/files/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete file
+      operationId: delete_file
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete file
+      tags:
+      - Files
+    get:
+      consumes:
+      - application/json
+      description: Get single variable
+      operationId: get_file_by_id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: FileBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.File'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get single variable
+      tags:
+      - Files
+  /v1/files/folder_upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload Folder
+      operationId: create_file
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: folder_name
+        in: query
+        name: folder_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Path
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.Path'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upload Folder
+      tags:
+      - Files
   /v1/function:
     get:
       consumes:
@@ -13541,7 +13886,8 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
