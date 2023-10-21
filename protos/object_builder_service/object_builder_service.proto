@@ -37,3 +37,4 @@ import "layout.proto";
 import "menu.proto";
 import "custom_error_message.proto";
 import "report_setting_service.proto";
+import "file.proto";
