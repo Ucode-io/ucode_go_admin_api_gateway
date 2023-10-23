@@ -993,6 +993,10 @@ definitions:
         type: string
       type:
         type: string
+      variables:
+        items:
+          $ref: '#/definitions/company_service.VariableResource'
+        type: array
     type: object
   company_service.ProjectWithoutResource:
     properties:

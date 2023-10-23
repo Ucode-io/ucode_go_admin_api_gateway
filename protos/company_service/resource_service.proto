@@ -72,7 +72,7 @@ message ProjectResource {
     string environment_id = 3;
     string type = 4;
     string id = 5;
-
+    repeated VariableResource variables = 6;
 }
 
 message ListProjectResource {

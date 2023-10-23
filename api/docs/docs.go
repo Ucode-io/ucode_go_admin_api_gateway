@@ -36821,6 +36821,12 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                },
+                "variables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.VariableResource"
+                    }
                 }
             }
         },
