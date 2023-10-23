@@ -993,6 +993,10 @@ definitions:
         type: string
       type:
         type: string
+      variables:
+        items:
+          $ref: '#/definitions/company_service.VariableResource'
+        type: array
     type: object
   company_service.ProjectWithoutResource:
     properties:
@@ -11836,8 +11840,7 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: ids
@@ -13886,8 +13889,7 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: ids
