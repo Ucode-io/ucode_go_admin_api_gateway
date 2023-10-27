@@ -137,6 +137,7 @@ func (h *Handler) GetListV2(c *gin.Context) {
 						h.log.Error("Error while unmarshal redis", logger.Error(err))
 					} else {
 						resp["data"] = m
+						fmt.Println(":~>>>> response handled from redis")
 						h.handleResponse(c, status_http.OK, resp)
 						return
 					}
