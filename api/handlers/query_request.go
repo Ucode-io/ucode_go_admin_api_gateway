@@ -423,6 +423,7 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		ProjectId:  query.GetProjectId(),
 	}
 
+	fmt.Println("\n\n:~~~> update query ", query)
 	res, err := services.QueryService().Query().UpdateQuery(
 		context.Background(),
 		&query,
