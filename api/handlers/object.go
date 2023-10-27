@@ -1066,7 +1066,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("\n Resource env id", resource.ResourceEnvironmentId)
+	// fmt.Println("\n Resource env id", resource.ResourceEnvironmentId)
 
 	//resourceEnvironment, err := services.CompanyService().Resource().GetResEnvByResIdEnvId(
 	//	context.Background(),
