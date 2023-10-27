@@ -287,6 +287,7 @@ message V2CreateClientTypeRequest {
     repeated string client_platform_ids = 8;
     int32 resource_type = 9;
     string table_slug = 10;
+    string default_page = 11;
 }
 
 message V2GetClientTypeListRequest {
@@ -309,6 +310,7 @@ message V2UpdateClientTypeRequest {
     string db_project_id = 9;
     int32 resource_type = 10;
     string table_slug = 11;
+    string default_page = 12;
 }
 
 message V2ClientTypePrimaryKey {

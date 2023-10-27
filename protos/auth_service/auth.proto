@@ -40,6 +40,7 @@ message ClientType {
     bool self_recover = 5;
     string project_id = 6;
     repeated Table tables = 7;
+    string default_page = 8;
 }
 
 message Relation {

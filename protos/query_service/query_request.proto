@@ -63,6 +63,7 @@ message CreateQueryReq {
   string commit_id = 11;
   string version_id = 12;
   CommitInfo commit_info = 13;
+  string project_resource_id = 14;
 }
 
 message GetListQueryReq {
@@ -103,6 +104,7 @@ message UpdateQueryReq {
   string commit_id = 12;
   string version_id = 13;
   CommitInfo commit_info = 14;
+  string project_resource_id = 15;
 }
 
 message DeleteQueryReq {

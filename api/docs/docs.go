@@ -36036,6 +36036,9 @@ const docTemplate = `{
                 "confirm_by": {
                     "$ref": "#/definitions/auth_service.ConfirmStrategies"
                 },
+                "default_page": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -40364,6 +40367,9 @@ const docTemplate = `{
                 "confirm_by": {
                     "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
                 },
+                "default_page": {
+                    "type": "string"
+                },
                 "guid": {
                     "type": "string"
                 },
@@ -44162,6 +44168,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "project_resource_id": {
+                    "type": "string"
+                },
                 "query_type": {
                     "type": "string"
                 },
@@ -44480,6 +44489,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "project_resource_id": {
                     "type": "string"
                 },
                 "query_type": {

@@ -36024,6 +36024,9 @@
                 "confirm_by": {
                     "$ref": "#/definitions/auth_service.ConfirmStrategies"
                 },
+                "default_page": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -40352,6 +40355,9 @@
                 "confirm_by": {
                     "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
                 },
+                "default_page": {
+                    "type": "string"
+                },
                 "guid": {
                     "type": "string"
                 },
@@ -44150,6 +44156,9 @@
                 "project_id": {
                     "type": "string"
                 },
+                "project_resource_id": {
+                    "type": "string"
+                },
                 "query_type": {
                     "type": "string"
                 },
@@ -44468,6 +44477,9 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "project_resource_id": {
                     "type": "string"
                 },
                 "query_type": {
