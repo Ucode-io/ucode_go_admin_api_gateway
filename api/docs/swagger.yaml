@@ -150,6 +150,8 @@ definitions:
     properties:
       confirm_by:
         $ref: '#/definitions/auth_service.ConfirmStrategies'
+      default_page:
+        type: string
       id:
         type: string
       name:
@@ -1265,6 +1267,19 @@ definitions:
     properties:
       rows_affected:
         type: integer
+    type: object
+  company_service.UpdateVariableResourceRequest:
+    properties:
+      environment_id:
+        type: string
+      project_id:
+        type: string
+      project_resource_id:
+        type: string
+      variables:
+        items:
+          $ref: '#/definitions/company_service.VariableResource'
+        type: array
     type: object
   company_service.VariableResource:
     properties:
@@ -2980,6 +2995,8 @@ definitions:
     properties:
       confirm_by:
         $ref: '#/definitions/object_builder_service.ConfirmStrategies'
+      default_page:
+        type: string
       guid:
         type: string
       name:
@@ -5468,6 +5485,8 @@ definitions:
         type: string
       project_id:
         type: string
+      project_resource_id:
+        type: string
       query_type:
         type: string
       resource_id:
@@ -5676,6 +5695,8 @@ definitions:
       id:
         type: string
       project_id:
+        type: string
+      project_resource_id:
         type: string
       query_type:
         type: string
@@ -10573,7 +10594,7 @@ paths:
         name: Company
         required: true
         schema:
-          $ref: '#/definitions/company_service.VariableResource'
+          $ref: '#/definitions/company_service.UpdateVariableResourceRequest'
       produces:
       - application/json
       responses:

@@ -6470,7 +6470,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.VariableResource"
+                            "$ref": "#/definitions/company_service.UpdateVariableResourceRequest"
                         }
                     }
                 ],
@@ -36036,6 +36036,9 @@ const docTemplate = `{
                 "confirm_by": {
                     "$ref": "#/definitions/auth_service.ConfirmStrategies"
                 },
+                "default_page": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -37731,6 +37734,26 @@ const docTemplate = `{
             "properties": {
                 "rows_affected": {
                     "type": "integer"
+                }
+            }
+        },
+        "company_service.UpdateVariableResourceRequest": {
+            "type": "object",
+            "properties": {
+                "environment_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "project_resource_id": {
+                    "type": "string"
+                },
+                "variables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.VariableResource"
+                    }
                 }
             }
         },
@@ -40343,6 +40366,9 @@ const docTemplate = `{
             "properties": {
                 "confirm_by": {
                     "$ref": "#/definitions/object_builder_service.ConfirmStrategies"
+                },
+                "default_page": {
+                    "type": "string"
                 },
                 "guid": {
                     "type": "string"
@@ -44142,6 +44168,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "project_resource_id": {
+                    "type": "string"
+                },
                 "query_type": {
                     "type": "string"
                 },
@@ -44460,6 +44489,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "project_resource_id": {
                     "type": "string"
                 },
                 "query_type": {

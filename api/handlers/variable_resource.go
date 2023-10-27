@@ -70,12 +70,12 @@ func (h *Handler) AddDataToVariableResource(c *gin.Context) {
 // @Tags Variable resource
 // @Accept json
 // @Produce json
-// @Param Company body company_service.VariableResource  true "VariableResource"
+// @Param Company body company_service.UpdateVariableResourceRequest  true "VariableResource"
 // @Success 200 {object} status_http.Response{data=company_service.Empty} "Company data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateVariableResource(c *gin.Context) {
-	var request = &pb.VariableResource{}
+	var request = &pb.UpdateVariableResourceRequest{}
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
