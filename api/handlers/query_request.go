@@ -307,6 +307,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateQueryRequest(c *gin.Context) {
+	fmt.Println(":123 update request")
 	var (
 		//resourceEnvironment *obs.ResourceEnvironment
 		query tmp.UpdateQueryReq
