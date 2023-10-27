@@ -318,6 +318,8 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~>", query)
+
 	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
 		h.handleResponse(c, status_http.GRPCError, fmt.Errorf("error getting auth info: %w", err).Error())
