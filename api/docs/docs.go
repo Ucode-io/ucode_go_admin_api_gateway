@@ -30939,7 +30939,7 @@ const docTemplate = `{
                     "Project resource"
                 ],
                 "summary": "Delete variable resource",
-                "operationId": "delete_variable_resource",
+                "operationId": "delete_project_resource",
                 "parameters": [
                     {
                         "type": "string",

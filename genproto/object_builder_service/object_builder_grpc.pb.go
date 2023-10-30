@@ -44,6 +44,7 @@ type ObjectBuilderServiceClient interface {
 	DeleteMany(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	GroupByColumns(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	CopyFromProject(ctx context.Context, in *CopyFromProjectRequestMessage, opts ...grpc.CallOption) (*CommonMessage, error)
+	GetListWithOutRelations(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 }
 
 type objectBuilderServiceClient struct {
@@ -252,6 +253,15 @@ func (c *objectBuilderServiceClient) CopyFromProject(ctx context.Context, in *Co
 	return out, nil
 }
 
+func (c *objectBuilderServiceClient) GetListWithOutRelations(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
+	out := new(CommonMessage)
+	err := c.cc.Invoke(ctx, "/object_builder_service.ObjectBuilderService/GetListWithOutRelations", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ObjectBuilderServiceServer is the server API for ObjectBuilderService service.
 // All implementations must embed UnimplementedObjectBuilderServiceServer
 // for forward compatibility
@@ -278,6 +288,7 @@ type ObjectBuilderServiceServer interface {
 	DeleteMany(context.Context, *CommonMessage) (*CommonMessage, error)
 	GroupByColumns(context.Context, *CommonMessage) (*CommonMessage, error)
 	CopyFromProject(context.Context, *CopyFromProjectRequestMessage) (*CommonMessage, error)
+	GetListWithOutRelations(context.Context, *CommonMessage) (*CommonMessage, error)
 	mustEmbedUnimplementedObjectBuilderServiceServer()
 }
 
@@ -350,6 +361,9 @@ func (UnimplementedObjectBuilderServiceServer) GroupByColumns(context.Context, *
 }
 func (UnimplementedObjectBuilderServiceServer) CopyFromProject(context.Context, *CopyFromProjectRequestMessage) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CopyFromProject not implemented")
+}
+func (UnimplementedObjectBuilderServiceServer) GetListWithOutRelations(context.Context, *CommonMessage) (*CommonMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetListWithOutRelations not implemented")
 }
 func (UnimplementedObjectBuilderServiceServer) mustEmbedUnimplementedObjectBuilderServiceServer() {}
 
@@ -760,6 +774,24 @@ func _ObjectBuilderService_CopyFromProject_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ObjectBuilderService_GetListWithOutRelations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommonMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ObjectBuilderServiceServer).GetListWithOutRelations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/object_builder_service.ObjectBuilderService/GetListWithOutRelations",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ObjectBuilderServiceServer).GetListWithOutRelations(ctx, req.(*CommonMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ObjectBuilderService_ServiceDesc is the grpc.ServiceDesc for ObjectBuilderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -854,6 +886,10 @@ var ObjectBuilderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CopyFromProject",
 			Handler:    _ObjectBuilderService_CopyFromProject_Handler,
+		},
+		{
+			MethodName: "GetListWithOutRelations",
+			Handler:    _ObjectBuilderService_GetListWithOutRelations_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
