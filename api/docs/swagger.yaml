@@ -23853,7 +23853,7 @@ paths:
       consumes:
       - application/json
       description: Delete variable resource
-      operationId: delete_variable_resource
+      operationId: delete_project_resource
       parameters:
       - description: id
         in: path
@@ -23946,7 +23946,7 @@ paths:
       consumes:
       - application/json
       description: CopyProjectTemplate
-      operationId: create_event
+      operationId: copy_project
       parameters:
       - description: CopyFromProjectRequestMessage
         in: body

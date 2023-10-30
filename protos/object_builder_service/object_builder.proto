@@ -29,6 +29,7 @@ service ObjectBuilderService {
     rpc DeleteMany(CommonMessage) returns (CommonMessage) {}
     rpc GroupByColumns(CommonMessage) returns (CommonMessage) {}
     rpc CopyFromProject(CopyFromProjectRequestMessage) returns (CommonMessage) {}
+    rpc GetListWithOutRelations(CommonMessage) returns (CommonMessage) {}
 }
 
 message CommonMessage {

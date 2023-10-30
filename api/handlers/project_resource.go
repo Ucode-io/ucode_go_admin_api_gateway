@@ -211,7 +211,7 @@ func (h *Handler) GetSingleProjectResource(c *gin.Context) {
 
 // DeletevariableResource godoc
 // @Security ApiKeyAuth
-// @ID delete_variable_resource
+// @ID delete_project_resource
 // @Router /v2/company/project/resource/{id} [DELETE]
 // @Summary Delete variable resource
 // @Description Delete variable resource

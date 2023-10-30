@@ -30939,7 +30939,7 @@ const docTemplate = `{
                     "Project resource"
                 ],
                 "summary": "Delete variable resource",
-                "operationId": "delete_variable_resource",
+                "operationId": "delete_project_resource",
                 "parameters": [
                     {
                         "type": "string",
@@ -31025,7 +31025,7 @@ const docTemplate = `{
                     "ProjectTemplate"
                 ],
                 "summary": "CopyProjectTemplate",
-                "operationId": "create_event",
+                "operationId": "copy_project",
                 "parameters": [
                     {
                         "description": "CopyFromProjectRequestMessage",
