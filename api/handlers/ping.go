@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"ucode/ucode_go_api_gateway/config"
 
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Ping godoc
@@ -17,6 +19,7 @@ import (
 // @Success 200 {object} status_http.Response{data=string} "Response data"
 // @Failure 500 {object} status_http.Response{}
 func (h *Handler) Ping(c *gin.Context) {
+	fmt.Println("config.CountReq: ", config.CountReq)
 	h.handleResponse(c, status_http.OK, "pong")
 }
 
