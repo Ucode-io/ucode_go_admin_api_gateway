@@ -194,6 +194,7 @@ func (h *Handler) GetListV2(c *gin.Context) {
 					h.log.Error("Error while unmarshal redis", logger.Error(err))
 				} else {
 					resp["data"] = m
+					resp["from_cache"] = true
 					h.handleResponse(c, status_http.OK, resp)
 					return
 				}
