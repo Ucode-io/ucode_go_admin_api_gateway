@@ -106,7 +106,6 @@ func (h *Handler) CreateAutoCommit(c *gin.Context, environmentID, commitType str
 		return "", "", err
 	}
 
-
 	if !util.IsValidUUID(authInfo.GetUserId()) {
 		err := errors.New("invalid or missing user id")
 		h.log.Error("--CreateAutoCommit--", logger.Error(err))

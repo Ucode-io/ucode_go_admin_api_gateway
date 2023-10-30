@@ -21,6 +21,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 )
 
 const (
@@ -1027,6 +1028,10 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
 		fmt.Println("\n Run func test 8", "\n")
 		if isOwnData {
+			if _, ok := resp.Data["code"]; ok {
+				c.JSON(cast.ToInt(resp.Data["code"]), resp.Data)
+				return
+			}
 			c.JSON(200, resp.Data)
 			return
 		}
