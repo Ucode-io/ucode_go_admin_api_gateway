@@ -195,7 +195,9 @@ func (h *Handler) GetListV2(c *gin.Context) {
 					h.log.Error("Error while unmarshal redis", logger.Error(err))
 				} else {
 					resp["data"] = m
-					config.CountReq += 1
+					if _, ok := objectRequest.Data["load_test"].(bool); ok {
+						config.CountReq += 1
+					}
 					h.handleResponse(c, status_http.OK, resp)
 					return
 				}
