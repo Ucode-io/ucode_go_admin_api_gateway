@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	tmp "ucode/ucode_go_api_gateway/genproto/template_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
@@ -706,40 +707,31 @@ func (h *Handler) GetNoteFolderCommits(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param Note body tmp.CreateNoteReq true "CreateNoteReq"
+// @Param parent-id query true "filters"
 // @Success 201 {object} status_http.Response{data=tmp.Note} "Note data"
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) CreateNote(c *gin.Context) {
 	var (
-		// resourceEnvironment *obs.ResourceEnvironment
 		note tmp.CreateNoteReq
 	)
+
+	parentId := c.DefaultQuery("parent-id", "")
+	if parentId == "" {
+		parentId = "744d63e6-0ab7-4f16-a588-d9129cf959d1"
+	}
 
 	err := c.ShouldBindJSON(&note)
 	if err != nil {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-
-	//authInfo, err := h.GetAuthInfo(c)
-	//if err != nil {
-	//	h.handleResponse(c, status_http.Forbidden, err.Error())
-	//	return
-	//}
-
 	namespace := c.GetString("namespace")
 	services, err := h.GetService(namespace)
 	if err != nil {
 		h.handleResponse(c, status_http.Forbidden, err)
 		return
 	}
-
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err = errors.New("error getting resource id")
-	//	h.handleResponse(c, status_http.BadRequest, err.Error())
-	//	return
-	//}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
@@ -767,31 +759,6 @@ func (h *Handler) CreateNote(c *gin.Context) {
 		return
 	}
 
-	//if util.IsValidUUID(environmentId.(string)) {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = services.CompanyService().Resource().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId.(string)
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, status_http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
 	note.ProjectId = projectId.(string)
 	note.ResourceId = resource.ResourceEnvironmentId
 
@@ -811,6 +778,32 @@ func (h *Handler) CreateNote(c *gin.Context) {
 	)
 
 	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	_, err = services.BuilderService().Menu().Create(
+		context.Background(),
+		&obs.CreateMenuRequest{
+			Label:     note.Title,
+			Icon:      "folder.svg",
+			ParentId:  parentId,
+			Type:      "WIKI",
+			ProjectId: resource.ResourceEnvironmentId,
+			WikiId:    res.Id,
+		},
+	)
+	if err != nil {
+		_, err = services.TemplateService().Note().DeleteNote(
+			context.Background(),
+			&tmp.DeleteNoteReq{
+				Id:         res.Id,
+				ProjectId:  projectId.(string),
+				ResourceId: resource.ResourceEnvironmentId,
+				VersionId:  "0bc85bb1-9b72-4614-8e5f-6f5fa92aaa88",
+			},
+		)
+
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
