@@ -2233,6 +2233,7 @@ func (h *Handler) MultipleUpdateObject(c *gin.Context) {
 		}
 	}
 
+	fmt.Println("After functions:", afterActions)
 	if len(afterActions) > 0 {
 		functionName, err := DoInvokeFuntion(
 			DoInvokeFuntionStruct{
