@@ -36,6 +36,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 	r.GET("/v1/login-microfront", h.GetLoginMicroFrontBySubdomain)
 
+	r.GET("/menu/wiki_folder", h.GetWikiFolder)
+
 	global := r.Group("/v1/global")
 	global.Use(h.GlobalAuthMiddleware(cfg))
 	{
