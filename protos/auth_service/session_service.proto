@@ -335,6 +335,11 @@ message V2LoginRequest {
     string resource_environment_id = 7;
     int32 resource_type = 8;
     string environment_id = 9;
+    string phone = 10;
+    string email = 11;
+    string otp = 12;
+    string sms_id = 13;
+    string type = 14;
 }
 
 message V2LoginWithOptionRequest {
@@ -396,6 +401,12 @@ message MultiCompanyLoginRequest {
 message V2MultiCompanyLoginReq {
     string username = 1;
     string password = 2;
+    string type = 3;
+    string sms_id = 4;
+    string otp = 5;
+    string phone = 6;
+    string email = 7;
+
 }
 
 message V2MultiCompanyLoginRes {

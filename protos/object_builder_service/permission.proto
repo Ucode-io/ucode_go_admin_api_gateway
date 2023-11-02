@@ -21,7 +21,13 @@ service PermissionService {
     rpc UpdateMenuPermissions(UpdateMenuPermissionsRequest) returns (google.protobuf.Empty) {}
     rpc UpdatePermissionsByTableSlug(UpdatePermissionsRequest) returns (google.protobuf.Empty) {}
     rpc GetPermissionsByTableSlug(GetPermissionsByTableSlugRequest) returns (GetPermissionsByTableSlugResponse) {}
+    rpc GetGlobalPermissionByRoleId(GetGlobalPermissionsByRoleIdRequest) returns (GlobalPermission) {}
     rpc GetTablePermission(GetTablePermissionRequest) returns (GetTablePermissionResponse) {}
+}
+
+message GetGlobalPermissionsByRoleIdRequest {
+    string project_id = 1;
+    string role_id = 2;
 }
 
 message GetAllPermissionRequest {
@@ -77,6 +83,7 @@ message RoleWithAppTablePermissions {
             bool edit_permission = 4;
             string label = 5;
             string table_slug = 6;
+            google.protobuf.Struct attributes = 7;
         }
         message ViewPermission {
             string guid = 1;
@@ -87,6 +94,7 @@ message RoleWithAppTablePermissions {
             bool create_permission = 6;
             bool delete_permission = 7;
             string table_slug = 8;
+            google.protobuf.Struct attributes = 9;
         }
         message AutomaticFilter {
             string guid = 1;
@@ -101,6 +109,7 @@ message RoleWithAppTablePermissions {
             bool permission = 3;
             string label = 4;
             string table_slug = 5;
+            google.protobuf.Struct attributes = 6;
         }
         message AutomaticFilterWithMethod {
             repeated AutomaticFilter read = 1;
@@ -115,6 +124,7 @@ message RoleWithAppTablePermissions {
             bool edit = 4;
             bool delete = 5;
             string view_id = 6;
+            google.protobuf.Struct attributes = 7;
         }
         message CustomPermission {
             string view_create = 1;
@@ -141,6 +151,7 @@ message RoleWithAppTablePermissions {
         repeated ActionPermission action_permissions = 15;
         repeated TableViewPermission table_view_permissions = 16;
         CustomPermission custom_permission = 17;
+        google.protobuf.Struct attributes = 18;
     }
     string name = 1;
     string guid = 2;
@@ -192,6 +203,7 @@ message MenuPermission {
     string label = 2;
     string type = 3;
     Permission permission = 4;
+    google.protobuf.Struct attributes = 5;
 }
 
 message GetAllMenuPermissionsRequest {

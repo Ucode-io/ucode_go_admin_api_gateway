@@ -7,6 +7,7 @@ option go_package="genproto/object_builder_service";
 service BarcodeService {
     rpc Generate(BarcodeGenerateReq) returns (BarcodeGenerateRes) {}
     rpc GenerateCodeWithPrefix(CodeGenerateReq) returns (CodeGenerateRes) {}
+    rpc GenerateDynamic(GenerateDynamicBarcodeRequest) returns (GenerateDynamicBarcodeResponse) {}
 }
 
 message BarcodeGenerateReq {
@@ -25,4 +26,15 @@ message CodeGenerateReq {
 
 message CodeGenerateRes {
     string code = 1;
+}
+
+message GenerateDynamicBarcodeRequest {
+    string table_slug = 1;
+    string project_id = 2;
+    string field_id = 3;
+    string type = 4;
+}
+
+message GenerateDynamicBarcodeResponse {
+    string barcode = 1;
 }
