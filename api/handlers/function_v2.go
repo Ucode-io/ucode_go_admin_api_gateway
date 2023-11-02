@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"strings"
+	"time"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/genproto/auth_service"
 	"ucode/ucode_go_api_gateway/genproto/company_service"
@@ -999,6 +1001,22 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 	requestData.Params = c.Request.URL.Query()
 	requestData.Body = bodyReq
 
+	if c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", requestData.Path, requestData.Params.Encode(), resource.ResourceEnvironmentId))))
+		if err == nil {
+			resp := make(map[string]interface{})
+			m := make(map[string]interface{})
+			err = json.Unmarshal([]byte(redisResp), &m)
+			if err != nil {
+				h.log.Error("Error while unmarshal redis", logger.Error(err))
+			} else {
+				resp["data"] = m
+				c.JSON(cast.ToInt(m["code"]), m)
+				return
+			}
+		}
+	}
+
 	// h.log.Info("\n\nFunction run request", logger.Any("auth", authInfo), logger.Any("request_data", requestData), logger.Any("req", c.Request))
 	resp, err := util.DoRequest("https://ofs.u-code.io/function/"+function.Path, "POST", models.FunctionRunV2{
 		Auth:        models.AuthData{},
@@ -1009,6 +1027,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 			"app_id":     authInfo.Data["app_id"],
 		},
 	})
+
 	fmt.Println("\n Run func test 5", "\n")
 	if err != nil {
 		fmt.Println("\n Run func test 6", "\n")
@@ -1029,6 +1048,15 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		fmt.Println("\n Run func test 8", "\n")
 		if isOwnData {
 			if _, ok := resp.Data["code"]; ok {
+
+				if err == nil && c.Request.Method == "GET" && resource.ProjectId == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+					jsonData, _ := json.Marshal(resp.Data)
+					err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("ett-%s-%s-%s", requestData.Path, requestData.Params.Encode(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
+					if err != nil {
+						h.log.Error("Error while setting redis", logger.Error(err))
+					}
+				}
+
 				c.JSON(cast.ToInt(resp.Data["code"]), resp.Data)
 				return
 			}
