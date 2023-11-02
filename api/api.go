@@ -351,6 +351,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.Config) {
 		v2.GET("/language-json", h.GetLanguageJson)
 
 		v2.POST("/object/get-list/:table_slug", h.GetListV2)
+		v2.GET("/object-slim/get-list/:table_slug", h.GetListSlimV2)
 
 	}
 	r.POST("/template-note/share-get", h.GetObjectToken)
