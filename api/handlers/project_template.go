@@ -14,7 +14,7 @@ import (
 
 // CopyProjectTemplate godoc
 // @Security ApiKeyAuth
-// @ID create_event
+// @ID copy_project
 // @Router /v2/copy-project [POST]
 // @Summary CopyProjectTemplate
 // @Description CopyProjectTemplate

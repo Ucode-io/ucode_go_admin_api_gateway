@@ -307,6 +307,7 @@ func (h *Handler) GetSingleQueryRequest(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Bad Request"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) UpdateQueryRequest(c *gin.Context) {
+	fmt.Println(":123 update request")
 	var (
 		//resourceEnvironment *obs.ResourceEnvironment
 		query tmp.UpdateQueryReq
@@ -317,6 +318,8 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
+
+	fmt.Println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~>", query)
 
 	authInfo, err := h.adminAuthInfo(c)
 	if err != nil {
@@ -423,6 +426,7 @@ func (h *Handler) UpdateQueryRequest(c *gin.Context) {
 		ProjectId:  query.GetProjectId(),
 	}
 
+	fmt.Println("\n\n:~~~> update query ", query)
 	res, err := services.QueryService().Query().UpdateQuery(
 		context.Background(),
 		&query,

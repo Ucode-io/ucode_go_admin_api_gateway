@@ -1559,3 +1559,90 @@ func (h *Handler) DeleteMenuTemplate(c *gin.Context) {
 
 	h.handleResponse(c, status_http.NoContent, resp)
 }
+
+// GetAllMenus godoc
+// @ID get_wiki_folder
+// @Router /menu/wiki_folder [GET]
+// @Summary Get wiki folder
+// @Description Get wiki folder
+// @Tags Menu
+// @Accept json
+// @Produce json
+// @Param filters query obs.GetWikiFolderRequest true "filters"
+// @Success 200 {object} status_http.Response{data=obs.GetAllMenusResponse} "MenuBody"
+// @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status_http.Response{data=string} "Server Error"
+func (h *Handler) GetWikiFolder(c *gin.Context) {
+
+	offset, err := h.getOffsetParam(c)
+	var (
+		resp *obs.GetAllMenusResponse
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	namespace := c.GetString("namespace")
+	services, err := h.GetService(namespace)
+	if err != nil {
+		h.handleResponse(c, status_http.Forbidden, err)
+		return
+	}
+
+	projectId := c.DefaultQuery("project_id", "")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId := c.DefaultQuery("environment_id", "")
+	if !util.IsValidUUID(environmentId) {
+		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	resource, err := services.CompanyService().ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	// authInfo, _ := h.GetAuthInfo(c)
+	limit = 100
+
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		resp, err = services.BuilderService().Menu().GetWikiFolder(
+			context.Background(),
+			&obs.GetWikiFolderRequest{
+				ProjectId: resource.ResourceEnvironmentId,
+				ParentId:  c.DefaultQuery("parent_id", ""),
+				IsVisible: true,
+			},
+		)
+	case pb.ResourceType_POSTGRESQL:
+		resp, err = services.PostgresBuilderService().Menu().GetAll(
+			context.Background(),
+			&obs.GetAllMenusRequest{
+				Limit:     int32(limit),
+				Offset:    int32(offset),
+				Search:    c.DefaultQuery("search", ""),
+				ProjectId: resource.ResourceEnvironmentId,
+				ParentId:  c.DefaultQuery("parent_id", ""),
+			},
+		)
+	}
+	h.handleResponse(c, status_http.OK, resp)
+}
