@@ -2645,7 +2645,10 @@ func (h *Handler) GetListGroupBy(c *gin.Context) {
 // @Response 400 {object} status_http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} status_http.Response{data=string} "Server Error"
 func (h *Handler) GetGroupByField(c *gin.Context) {
-	var objectRequest models.CommonMessage
+	var (
+		objectRequest models.CommonMessage
+		resp          *obs.CommonMessage
+	)
 
 	err := c.ShouldBindJSON(&objectRequest)
 	if err != nil {
@@ -2693,18 +2696,45 @@ func (h *Handler) GetGroupByField(c *gin.Context) {
 		return
 	}
 
-	resp, err := services.BuilderService().ObjectBuilder().GetGroupByField(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+	switch resource.ResourceType {
+	case pb.ResourceType_MONGODB:
+		// start := time.Now()
 
-	if err != nil {
-		h.handleResponse(c, status_http.GRPCError, err.Error())
-		return
+		redisResp, err := h.redis.Get(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("group-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))))
+		if err == nil {
+			resp := make(map[string]interface{})
+			m := make(map[string]interface{})
+			err = json.Unmarshal([]byte(redisResp), &m)
+			if err != nil {
+				h.log.Error("Error while unmarshal redis", logger.Error(err))
+			} else {
+				resp["data"] = m
+				h.handleResponse(c, status_http.OK, resp)
+				return
+			}
+		}
+
+		resp, err = services.BuilderService().ObjectBuilder().GetGroupByField(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err == nil {
+			jsonData, _ := resp.GetData().MarshalJSON()
+			err = h.redis.SetX(context.Background(), base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("group-%s-%s-%s", c.Param("table_slug"), structData.String(), resource.ResourceEnvironmentId))), string(jsonData), 15*time.Second)
+			if err != nil {
+				h.log.Error("Error while setting redis", logger.Error(err))
+			}
+		}
+
+		if err != nil {
+			h.handleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, status_http.OK, resp)

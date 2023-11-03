@@ -9236,7 +9236,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -12962,7 +12961,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -28575,6 +28573,11 @@
                     },
                     {
                         "type": "string",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "table_slug",
                         "in": "query"
                     }
@@ -32808,6 +32811,110 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/object-slim/get-list/{table_slug}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all objects slim v2",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Object"
+                ],
+                "summary": "Get all objects slim v2",
+                "operationId": "get_list_objects_slim_v2",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "table_slug",
+                        "name": "table_slug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "data",
+                        "name": "data",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ObjectBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/status_http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
@@ -40861,6 +40968,9 @@
                 "label": {
                     "type": "string"
                 },
+                "minio_folder": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -40955,6 +41065,9 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -41223,6 +41336,12 @@
                 "name": {
                     "type": "string"
                 },
+                "name_en": {
+                    "type": "string"
+                },
+                "name_uz": {
+                    "type": "string"
+                },
                 "order": {
                     "type": "integer"
                 },
@@ -41445,6 +41564,9 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
@@ -41510,6 +41632,9 @@
                     "type": "boolean"
                 },
                 "label": {
+                    "type": "string"
+                },
+                "minio_folder": {
                     "type": "string"
                 },
                 "project_id": {
@@ -42217,6 +42342,9 @@
                 },
                 "webpage_id": {
                     "type": "string"
+                },
+                "wiki_id": {
+                    "type": "string"
                 }
             }
         },
@@ -42263,6 +42391,9 @@
                     "type": "string"
                 },
                 "webpage_id": {
+                    "type": "string"
+                },
+                "wiki_id": {
                     "type": "string"
                 }
             }
@@ -42330,6 +42461,9 @@
                     "$ref": "#/definitions/object_builder_service.MenuTemplate"
                 },
                 "menu_template_id": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -43291,6 +43425,9 @@
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },
@@ -43925,6 +44062,12 @@
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "name_en": {
+                    "type": "string"
+                },
+                "name_uz": {
                     "type": "string"
                 },
                 "navigate": {

@@ -12,6 +12,7 @@ service ExcelService {
 message ExcelReadRequest {
     string id = 1;
     string project_id = 2;
+    string type = 3;
 }
 
 message ExcelToDbRequest {
@@ -19,6 +20,7 @@ message ExcelToDbRequest {
     string table_slug = 2;
     google.protobuf.Struct data = 3;
     string project_id = 4;
+    string type = 5;
 }
 
 message ExcelToDbResponse {
@@ -27,6 +29,7 @@ message ExcelToDbResponse {
 
 message ExcelReadResponse {
     repeated string rows = 1;
+    string type = 2;
 }
 message Row {
     repeated string column = 1;

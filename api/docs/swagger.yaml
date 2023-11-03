@@ -3183,6 +3183,8 @@ definitions:
         type: boolean
       label:
         type: string
+      minio_folder:
+        type: string
       project_id:
         type: string
       relation_field:
@@ -3245,6 +3247,8 @@ definitions:
       menu_template_id:
         type: string
       project_id:
+        type: string
+      user_id:
         type: string
     type: object
   object_builder_service.CreateMenuTemplateRequest:
@@ -3422,6 +3426,10 @@ definitions:
         type: string
       name:
         type: string
+      name_en:
+        type: string
+      name_uz:
+        type: string
       order:
         type: integer
       project_id:
@@ -3568,6 +3576,8 @@ definitions:
         items:
           type: string
         type: array
+      type:
+        type: string
     type: object
   object_builder_service.ExportToJSONReponse:
     properties:
@@ -3610,6 +3620,8 @@ definitions:
       is_visible:
         type: boolean
       label:
+        type: string
+      minio_folder:
         type: string
       project_id:
         type: string
@@ -4071,6 +4083,8 @@ definitions:
         type: string
       webpage_id:
         type: string
+      wiki_id:
+        type: string
     type: object
   object_builder_service.MenuForGetAll:
     properties:
@@ -4101,6 +4115,8 @@ definitions:
       type:
         type: string
       webpage_id:
+        type: string
+      wiki_id:
         type: string
     type: object
   object_builder_service.MenuRequest:
@@ -4145,6 +4161,8 @@ definitions:
       menu_template:
         $ref: '#/definitions/object_builder_service.MenuTemplate'
       menu_template_id:
+        type: string
+      user_id:
         type: string
     type: object
   object_builder_service.MenuTemplate:
@@ -4775,6 +4793,8 @@ definitions:
         type: string
       project_id:
         type: string
+      user_id:
+        type: string
     type: object
   object_builder_service.UpdateMenuTemplateRequest:
     properties:
@@ -5191,6 +5211,10 @@ definitions:
       multiple_insert_field:
         type: string
       name:
+        type: string
+      name_en:
+        type: string
+      name_uz:
         type: string
       navigate:
         $ref: '#/definitions/object_builder_service.Navigate'
@@ -11933,8 +11957,7 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: ids
@@ -13983,8 +14006,7 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - collectionFormat: csv
-        in: query
+      - in: query
         items:
           type: string
         name: ids
@@ -22607,6 +22629,9 @@ paths:
         name: project_id
         type: string
       - in: query
+        name: role_id
+        type: string
+      - in: query
         name: table_slug
         type: string
       produces:
@@ -24964,6 +24989,65 @@ paths:
       summary: Language json
       tags:
       - language
+  /v2/object-slim/get-list/{table_slug}:
+    get:
+      consumes:
+      - application/json
+      description: Get all objects slim v2
+      operationId: get_list_objects_slim_v2
+      parameters:
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: number
+      - description: offset
+        in: query
+        name: offset
+        type: number
+      - description: data
+        in: query
+        name: data
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ObjectBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/status_http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all objects slim v2
+      tags:
+      - Object
   /v2/object/get-list/{table_slug}:
     post:
       consumes:
