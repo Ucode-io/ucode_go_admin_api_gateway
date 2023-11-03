@@ -9236,6 +9236,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -12961,6 +12962,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },

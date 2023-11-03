@@ -11957,7 +11957,8 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
@@ -14006,7 +14007,8 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
