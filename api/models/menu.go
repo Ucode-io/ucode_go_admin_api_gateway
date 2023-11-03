@@ -23,4 +23,5 @@ type Menu struct {
 	MicrofrontendId string                 `json:"microfrontend_id"`
 	WebpageId       string                 `json:"webpage_id"`
 	Attributes      map[string]interface{} `json:"attributes"`
+	IsVisible       bool                 `json:"is_visible"`
 }

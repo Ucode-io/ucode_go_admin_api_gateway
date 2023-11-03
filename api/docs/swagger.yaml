@@ -2412,6 +2412,8 @@ definitions:
         type: string
       id:
         type: string
+      is_visible:
+        type: boolean
       label:
         type: string
       layout_id:
@@ -11957,7 +11959,8 @@ paths:
       description: Get environment list
       operationId: get_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids
@@ -14006,7 +14009,8 @@ paths:
       description: Get global project environment list
       operationId: get_global_project_environment_list
       parameters:
-      - in: query
+      - collectionFormat: csv
+        in: query
         items:
           type: string
         name: ids

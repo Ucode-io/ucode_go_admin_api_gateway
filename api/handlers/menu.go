@@ -430,6 +430,7 @@ func (h *Handler) UpdateMenu(c *gin.Context) {
 				MicrofrontendId: menu.MicrofrontendId,
 				WebpageId:       menu.WebpageId,
 				Attributes:      attributes,
+				IsVisible:       menu.IsVisible,
 			},
 		)
 
