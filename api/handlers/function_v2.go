@@ -951,7 +951,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-	fmt.Println("\n Run func test #1", projectId, "\n")
+	// fmt.Println("\n Run func test #1", projectId, "\n")
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
@@ -959,7 +959,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.BadRequest, err)
 		return
 	}
-	fmt.Println("\n Run func test #1", environmentId, "\n")
+	// fmt.Println("\n Run func test #1", environmentId, "\n")
 	resource, err := services.CompanyService().ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pb.GetSingleServiceResourceReq{
@@ -972,8 +972,8 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("\n Run func test #3", resource.ResourceEnvironmentId, "\n")
-	fmt.Println("\n Run func test #3.1", c.Param("function-id"), "\n")
+	// fmt.Println("\n Run func test #3", resource.ResourceEnvironmentId, "\n")
+	// fmt.Println("\n Run func test #3.1", c.Param("function-id"), "\n")
 	function, err := services.FunctionService().FunctionService().GetSingle(
 		context.Background(),
 		&fc.FunctionPrimaryKey{
@@ -985,7 +985,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("\n Run func test #4", function, "\n")
+	// fmt.Println("\n Run func test #4", function, "\n")
 
 	authInfoAny, ok := c.Get("auth")
 	if !ok {
@@ -1012,6 +1012,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 			} else {
 				resp["data"] = m
 				c.JSON(cast.ToInt(m["code"]), m)
+				fmt.Println("\n\n ~~>> ett redis return response \n\n")
 				return
 			}
 		}
@@ -1028,14 +1029,14 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		},
 	})
 
-	fmt.Println("\n Run func test 5", "\n")
+	// fmt.Println("\n Run func test 5", "\n")
 	if err != nil {
-		fmt.Println("\n Run func test 6", "\n")
+		// fmt.Println("\n Run func test 6", "\n")
 		// fmt.Println("error in do request", err)
 		h.handleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	} else if resp.Status == "error" {
-		fmt.Println("\n Run func test 7", "\n")
+		// fmt.Println("\n Run func test 7", "\n")
 		// fmt.Println("error in response status", err)
 		var errStr = resp.Status
 		if resp.Data != nil && resp.Data["message"] != nil {
@@ -1045,7 +1046,7 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 		return
 	}
 	if isOwnData, ok := resp.Attributes["is_own_data"].(bool); ok {
-		fmt.Println("\n Run func test 8", "\n")
+		// fmt.Println("\n Run func test 8", "\n")
 		if isOwnData {
 			if _, ok := resp.Data["code"]; ok {
 
@@ -1064,6 +1065,6 @@ func (h *Handler) FunctionRun(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Println("\n Run func test 9", "\n")
+	// fmt.Println("\n Run func test 9", "\n")
 	h.handleResponse(c, status_http.OK, resp)
 }
