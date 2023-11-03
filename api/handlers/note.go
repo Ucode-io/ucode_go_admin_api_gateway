@@ -781,6 +781,8 @@ func (h *Handler) CreateNote(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("\n\n ~~~~~~~~~~~~> projectId11", resource.ResourceEnvironmentId)
+
 	_, err = services.BuilderService().Menu().Create(
 		context.Background(),
 		&obs.CreateMenuRequest{
