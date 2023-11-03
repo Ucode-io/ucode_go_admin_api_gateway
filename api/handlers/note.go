@@ -759,6 +759,8 @@ func (h *Handler) CreateNote(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("\n\n ~~~~~~~~~~~~> projectId10", resource.ResourceEnvironmentId)
+
 	note.ProjectId = projectId.(string)
 	note.ResourceId = resource.ResourceEnvironmentId
 
