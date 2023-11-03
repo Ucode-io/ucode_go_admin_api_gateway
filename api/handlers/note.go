@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -758,6 +759,8 @@ func (h *Handler) CreateNote(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("\n\n ~~~~~~~~~~~~> projectId10", resource.ResourceEnvironmentId)
+
 	note.ProjectId = projectId.(string)
 	note.ResourceId = resource.ResourceEnvironmentId
 
@@ -780,6 +783,8 @@ func (h *Handler) CreateNote(c *gin.Context) {
 		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+
+	fmt.Println("\n\n ~~~~~~~~~~~~> projectId11", resource.ResourceEnvironmentId)
 
 	_, err = services.BuilderService().Menu().Create(
 		context.Background(),
